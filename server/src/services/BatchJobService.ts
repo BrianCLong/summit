@@ -53,6 +53,19 @@ class BatchJobService {
       // Register revenue jobs
       await registerRevenueJobs(this.boss);
 
+      // Register retention scan worker
+      await this.boss.work('retention-scan', async (job) => {
+        console.log('[PG-BOSS] Starting retention scan');
+        try {
+          const { RetentionManager } = await import('../lifecycle/retention-manager.js');
+          const results = await RetentionManager.getInstance().scanExpired();
+          console.log('[PG-BOSS] Retention scan completed', results);
+        } catch (error) {
+          console.error('[PG-BOSS] Retention scan failed', error);
+          throw error;
+        }
+      });
+
       // Register worker for report generation
       await this.boss.work(JOB_QUEUE_GENERATE_REPORT, async (job) => {
           console.log(`[PG-BOSS] Processing report job ${job.id} (${job.name})`);
@@ -81,12 +94,18 @@ class BatchJobService {
   private async scheduleJobs() {
     // Unschedule existing jobs to prevent duplicates during restarts
     await this.boss.unschedule('generate-soc2-evidence');
+    await this.boss.unschedule('retention-scan');
 
     // Schedule the SOC2 evidence generation job to run on the 1st of every month
     // cron: <minutes> <hours> <days of month> <months> <days of week>
     const cron = '0 3 1 * *'; // At 03:00 on day-of-month 1
     await this.boss.schedule('generate-soc2-evidence', cron);
     console.log(`[PG-BOSS] Scheduled job 'generate-soc2-evidence' with cron: ${cron}`);
+
+    // Schedule daily retention scan at 2 AM
+    const retentionCron = '0 2 * * *';
+    await this.boss.schedule('retention-scan', retentionCron);
+    console.log(`[PG-BOSS] Scheduled job 'retention-scan' with cron: ${retentionCron}`);
   }
 
   /**
