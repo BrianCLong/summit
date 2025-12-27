@@ -536,6 +536,8 @@ input SemanticSearchFilter {
     updateSupportTicket(id: ID!, input: UpdateSupportTicketInput!): SupportTicket
     deleteSupportTicket(id: ID!): Boolean!
     addSupportTicketComment(ticketId: ID!, content: String!, isInternal: Boolean): SupportTicketComment!
+    registerPersistedQuery(id: ID!, sha256: String!, sdl: String!): Boolean!
+    exportBundle(tenantId: ID!): String!
   }
   
   type Subscription {

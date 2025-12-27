@@ -15,6 +15,8 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { s3Ingest } from './ingest/s3.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -78,6 +80,9 @@ const startServer = async () => {
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
+
+    // Start S3 Ingest (Day-0)
+    s3Ingest.start();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();

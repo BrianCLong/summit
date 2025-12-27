@@ -231,6 +231,13 @@ export async function handleHttpSignal(req: Request, res: Response) {
   const idempotencyKey = req.headers['x-idempotency-key'] as string;
   const source = req.headers['user-agent'] || 'http-client';
 
+  // mTLS Enforcement
+  const isSecure = (req.socket as any).authorized || req.headers['x-mtls-verified'] === 'true';
+  if (process.env.MTLS_ENABLED === 'true' && !isSecure) {
+    ingestRequests.inc({ tenant_id: tenantId, status: 'unauthorized', source });
+    return res.status(401).json({ error: 'mTLS required' });
+  }
+
   return tracer.startActiveSpan('ingest.http_signal', async (span: Span) => {
     span.setAttributes({
       tenant_id: tenantId,
@@ -276,6 +283,9 @@ export async function handleHttpSignal(req: Request, res: Response) {
       for (const signal of ingestReq.signals) {
         try {
           const enriched = await validateAndEnrichSignal(signal, tenantId);
+
+          // OPA Policy Check
+          await checkOPAPolicy(enriched);
 
           // Check for duplicates
           const isDuplicate = await deduplicationService.checkDuplicate({
@@ -385,6 +395,16 @@ async function validateAndEnrichSignal(
   }
 
   return enriched;
+}
+
+async function checkOPAPolicy(signal: CoherenceSignal) {
+    if (process.env.OPA_ENABLED !== 'true') return;
+
+    // Simulate OPA call
+    // Mock policy: deny if purpose is 'forbidden' or tenant mismatch (if we had token context)
+    if (signal.purpose === 'forbidden') {
+        throw new Error('OPA Policy Denied: Forbidden purpose');
+    }
 }
 
 export function getIngestStatus() {

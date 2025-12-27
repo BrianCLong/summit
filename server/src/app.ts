@@ -13,6 +13,7 @@ import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { backpressureMiddleware } from './middleware/graphql-backpressure.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
@@ -298,6 +299,7 @@ export const createApp = async () => {
     '/graphql',
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    backpressureMiddleware,
     rateLimitMiddleware, // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, { context: getContext }),
   );

@@ -324,7 +324,7 @@ const graphqlResolverDurationSeconds = new client.Histogram({
   name: 'graphql_resolver_duration_seconds',
   help: 'Duration of GraphQL resolver execution in seconds',
   labelNames: ['resolver_name', 'field_name', 'type_name', 'status'],
-  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+  buckets: [0.001, 0.01, 0.05, 0.1, 0.2, 0.35, 0.5, 0.7, 1, 1.5, 2, 5],
 });
 
 const graphqlResolverErrorsTotal = new client.Counter({

@@ -1,4 +1,6 @@
 import { Server, Socket } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { getRedisClient } from '../db/redis.js';
 import { verifyToken as verifyTokenBase } from '../lib/auth.js';
 import pino from 'pino';
 import {
@@ -97,6 +99,10 @@ export function initSocket(httpServer: any): Server {
       credentials: true,
     },
   });
+
+  const pubClient = getRedisClient();
+  const subClient = pubClient.duplicate();
+  io.adapter(createAdapter(pubClient, subClient));
 
   const ns = io.of('/realtime');
 
