@@ -1,30 +1,70 @@
 {
-  "last_updated": "2025-12-27T00:00:00Z",
+  "last_updated": "2025-12-27T05:34:21Z",
   "initiatives": [
     {
       "id": "A",
       "name": "Secure LLM Copilot & Retrieval",
       "epics": [
-        { "id": "A1", "name": "Local Vector Store", "status": "pending", "owner": "Jules" },
-        { "id": "A2", "name": "RAG Ingestion Pipeline", "status": "pending", "owner": "Jules" },
-        { "id": "A3", "name": "Copilot Query Service", "status": "pending", "owner": "Jules" }
+        {
+          "id": "A1",
+          "name": "Local Vector Store",
+          "status": "pending",
+          "owner": "Jules"
+        },
+        {
+          "id": "A2",
+          "name": "RAG Ingestion Pipeline",
+          "status": "pending",
+          "owner": "Jules"
+        },
+        {
+          "id": "A3",
+          "name": "Copilot Query Service",
+          "status": "pending",
+          "owner": "Jules"
+        }
       ]
     },
     {
       "id": "B",
       "name": "Federation + Ingestion Mesh",
       "epics": [
-        { "id": "B1", "name": "Connector SDK & Registry", "status": "pending", "owner": "Jules" },
-        { "id": "B2", "name": "RSS/Atom Connector", "status": "pending", "owner": "Jules" },
-        { "id": "B3", "name": "STIX/TAXII Connector", "status": "pending", "owner": "Jules" }
+        {
+          "id": "B1",
+          "name": "Connector SDK & Registry",
+          "status": "pending",
+          "owner": "Jules"
+        },
+        {
+          "id": "B2",
+          "name": "RSS/Atom Connector",
+          "status": "pending",
+          "owner": "Jules"
+        },
+        {
+          "id": "B3",
+          "name": "STIX/TAXII Connector",
+          "status": "pending",
+          "owner": "Jules"
+        }
       ]
     },
     {
       "id": "C",
       "name": "Platform Governance",
       "epics": [
-        { "id": "C1", "name": "Policy-as-Code Engine", "status": "pending", "owner": "Jules" },
-        { "id": "C2", "name": "Immutable Audit Log", "status": "pending", "owner": "Jules" }
+        {
+          "id": "C1",
+          "name": "Policy-as-Code Engine",
+          "status": "pending",
+          "owner": "Jules"
+        },
+        {
+          "id": "C2",
+          "name": "Immutable Audit Log",
+          "status": "pending",
+          "owner": "Jules"
+        }
       ]
     }
   ]
