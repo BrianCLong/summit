@@ -1,0 +1,50 @@
+version: "3.9"
+services:
+  neo4j:
+    image: neo4j:5.25
+    environment:
+      - NEO4J_AUTH=neo4j/neo4jpassword
+      - NEO4JLABS_PLUGINS=["apoc"]
+    ports: ["7474:7474", "7687:7687"]
+    volumes:
+      - neo4j_data:/data
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: intelgraph
+    ports: ["5432:5432"]
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  opa:
+    image: openpolicyagent/opa:0.66.0
+    command: ["run", "--server", "/policies/abac.rego", "/policies/data.json"]
+    volumes:
+      - ./policies:/policies
+    ports: ["8181:8181"]
+  api:
+    build: ./api
+    command: ["npm", "run", "start:dev"]
+    environment:
+      - NODE_ENV=development
+    env_file: [.env.example]
+    depends_on: [neo4j, postgres, opa]
+    ports: ["4000:4000"]
+    volumes:
+      - ./api:/app
+  ingest:
+    build: ./ingest
+    command: ["npm", "run", "start:dev"]
+    env_file: [.env.example]
+    depends_on: [neo4j, postgres]
+    volumes:
+      - ./ingest:/app
+  otel-collector:
+    image: otel/opentelemetry-collector:0.108.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./ops/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports: ["4317:4317"]
+volumes:
+  neo4j_data: {}
+  pg_data: {}

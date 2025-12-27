@@ -1,0 +1,12 @@
+replicaCount: 3
+resources:
+  requests: { cpu: "500m", memory: "1Gi" }
+  limits: { cpu: "1000m", memory: "2Gi" }
+SLOs:
+  api_p95_ms: 350
+  write_p95_ms: 700
+Budgets:
+  prod_monthly_cap_usd: 18000
+  llm_cap_usd: 5000
+alerts:
+  burn_threshold_pct: 80
