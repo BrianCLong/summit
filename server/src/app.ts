@@ -114,6 +114,7 @@ import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
+import auditEventsRouter from './routes/audit-events.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 
 export const createApp = async () => {
@@ -412,6 +413,7 @@ export const createApp = async () => {
   app.use('/api/feature-flags', featureFlagsRouter);
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
+  app.use('/api', auditEventsRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes

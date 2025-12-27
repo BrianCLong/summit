@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Server, Socket } from 'socket.io';
 import { verifyToken as verifyTokenBase } from '../lib/auth.js';
 import pino from 'pino';
@@ -30,6 +31,7 @@ import {
   type UserIdentity,
 } from './investigationAccess.js';
 import { registerDashboardHandlers } from './dashboard.js';
+import { emitAuditEvent } from '../audit/emit.js';
 
 const logger = (pino as any)();
 
@@ -133,6 +135,48 @@ export function initSocket(httpServer: any): Server {
     const displayName = () =>
       socket.user?.username || socket.user?.email || socket.user?.id || 'user';
 
+    const emitRealtimeAudit = async (
+      actionType: string,
+      target: { type: string; id?: string; path?: string; name?: string } | undefined,
+      metadata: Record<string, unknown>,
+    ) => {
+      if (!socket.user?.id || !socket.tenantId) return;
+      try {
+        await emitAuditEvent(
+          {
+            eventId: randomUUID(),
+            occurredAt: new Date().toISOString(),
+            actor: {
+              type: 'user',
+              id: socket.user.id,
+              name: displayName(),
+              ipAddress: socket.handshake.address,
+            },
+            action: {
+              type: actionType,
+              outcome: 'success',
+            },
+            tenantId: socket.tenantId,
+            target,
+            metadata: {
+              ...metadata,
+              userAgent: socket.handshake.headers['user-agent'],
+              socketId: socket.id,
+            },
+          },
+          {
+            correlationId: socket.id,
+            serviceId: 'realtime',
+          },
+        );
+      } catch (err) {
+        logger.warn(
+          { err: (err as Error).message, actionType },
+          'Failed to emit realtime audit event',
+        );
+      }
+    };
+
     const roomFor = (investigationId: string) =>
       `tenant:${socket.tenantId}:investigation:${investigationId}`;
 
@@ -214,6 +258,20 @@ export function initSocket(httpServer: any): Server {
             details: { status: 'online' },
           });
           ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
+
+          await emitRealtimeAudit(
+            'presence.join',
+            {
+              type: 'presence',
+              id: socket.user.id,
+              path: `investigations/${investigationId}`,
+            },
+            {
+              investigationId,
+              status: 'online',
+              presenceCount: presence.length,
+            },
+          );
         } catch (err) {
           logger.warn(
             { err: (err as Error).message, investigationId },
@@ -251,6 +309,19 @@ export function initSocket(httpServer: any): Server {
             details: { status: 'offline' },
           });
           ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
+          await emitRealtimeAudit(
+            'presence.leave',
+            {
+              type: 'presence',
+              id: socket.user!.id,
+              path: `investigations/${investigationId}`,
+            },
+            {
+              investigationId,
+              status: 'offline',
+              presenceCount: presence.length,
+            },
+          );
         } catch (err) {
           logger.warn(
             { err: (err as Error).message, investigationId },
@@ -303,6 +374,19 @@ export function initSocket(httpServer: any): Server {
             details: { status },
           });
           ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
+          await emitRealtimeAudit(
+            'presence.status',
+            {
+              type: 'presence',
+              id: socket.user!.id,
+              path: `investigations/${investigationId}`,
+            },
+            {
+              investigationId,
+              status,
+              presenceCount: presence.length,
+            },
+          );
         } catch (err) {
           logger.warn(
             { err: (err as Error).message, investigationId },
@@ -447,6 +531,20 @@ export function initSocket(httpServer: any): Server {
           details: { commentId: comment.id, threadId: comment.threadId },
         });
         ns.to(roomFor(payload.investigationId)).emit('activity:event', activityEntry);
+        await emitRealtimeAudit(
+          'comment.added',
+          {
+            type: 'comment',
+            id: comment.id,
+            path: `investigations/${payload.investigationId}`,
+          },
+          {
+            investigationId: payload.investigationId,
+            targetId: payload.targetId,
+            threadId: payload.threadId,
+            messageLength: payload.message?.length ?? 0,
+          },
+        );
       } catch (err) {
         logger.warn(
           { err: (err as Error).message, investigationId: payload.investigationId },
@@ -482,6 +580,18 @@ export function initSocket(httpServer: any): Server {
           details: { commentId: payload.commentId },
         });
         ns.to(roomFor(payload.investigationId)).emit('activity:event', activityEntry);
+        await emitRealtimeAudit(
+          'comment.updated',
+          {
+            type: 'comment',
+            id: payload.commentId,
+            path: `investigations/${payload.investigationId}`,
+          },
+          {
+            investigationId: payload.investigationId,
+            messageLength: payload.message?.length ?? 0,
+          },
+        );
       } catch (err) {
         logger.warn(
           { err: (err as Error).message, investigationId: payload.investigationId },
@@ -500,23 +610,34 @@ export function initSocket(httpServer: any): Server {
         if (!auth.allowed) return;
         try {
           await deleteComment(investigationId, commentId);
-          ns.to(roomFor(investigationId)).emit('comment:deleted', {
-            investigationId,
-            commentId,
-          });
-          const activityEntry = await recordActivity(investigationId, {
+        ns.to(roomFor(investigationId)).emit('comment:deleted', {
+          investigationId,
+          commentId,
+        });
+        const activityEntry = await recordActivity(investigationId, {
+          type: 'comment',
+          action: 'deleted',
+          actorId: socket.user!.id,
+          actorName: displayName(),
+          details: { commentId },
+        });
+        ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
+        await emitRealtimeAudit(
+          'comment.deleted',
+          {
             type: 'comment',
-            action: 'deleted',
-            actorId: socket.user!.id,
-            actorName: displayName(),
-            details: { commentId },
-          });
-          ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
-        } catch (err) {
-          logger.warn(
-            { err: (err as Error).message, investigationId },
-            'Failed to delete comment',
-          );
+            id: commentId,
+            path: `investigations/${investigationId}`,
+          },
+          {
+            investigationId,
+          },
+        );
+      } catch (err) {
+        logger.warn(
+          { err: (err as Error).message, investigationId },
+          'Failed to delete comment',
+        );
         }
       },
     );
@@ -623,6 +744,19 @@ export function initSocket(httpServer: any): Server {
             details: { status: 'offline' },
           });
           ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
+          await emitRealtimeAudit(
+            'presence.disconnect',
+            {
+              type: 'presence',
+              id: socket.user!.id,
+              path: `investigations/${investigationId}`,
+            },
+            {
+              investigationId,
+              status: 'offline',
+              presenceCount: presence.length,
+            },
+          );
         } catch (err) {
           logger.warn(
             { err: (err as Error).message, investigationId },
