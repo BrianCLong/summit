@@ -1,6 +1,22 @@
 import { EntityResolutionV2Service, EntityV2 } from '../../services/er/EntityResolutionV2Service.js';
 import { soundex } from '../../services/er/soundex.js';
 
+const mockPool = {
+  query: jest.fn(),
+};
+
+const mockDlq = {
+  enqueue: jest.fn(),
+};
+
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: jest.fn(() => mockPool),
+}));
+
+jest.mock('../../lib/dlq/index.js', () => ({
+  dlqFactory: jest.fn(() => mockDlq),
+}));
+
 // Mock Neo4j session
 const mockSession = {
   run: jest.fn(),
@@ -18,6 +34,8 @@ describe('EntityResolutionV2Service', () => {
   beforeEach(() => {
     service = new EntityResolutionV2Service();
     jest.clearAllMocks();
+    mockPool.query.mockResolvedValue({ rows: [] });
+    mockDlq.enqueue.mockResolvedValue('dlq-1');
   });
 
   describe('soundex', () => {
@@ -86,6 +104,88 @@ describe('EntityResolutionV2Service', () => {
       });
 
       await expect(service.merge(mockSession as any, req)).rejects.toThrow('Policy violation');
+    });
+
+    it('should short-circuit on idempotency key', async () => {
+      const tx = {
+        run: jest.fn(async (query: string) => {
+          if (query.includes('MATCH (d:ERDecision {idempotencyKey')) {
+            return {
+              records: [
+                {
+                  get: (key: string) => (key === 'decisionId' ? 'dec-1' : 'merge-1'),
+                },
+              ],
+            };
+          }
+          return { records: [] };
+        }),
+        commit: jest.fn(),
+        rollback: jest.fn(),
+      };
+
+      mockSession.beginTransaction.mockReturnValueOnce(tx);
+      mockSession.run.mockResolvedValueOnce({
+        records: [
+          { get: () => ({ properties: { id: 'm1', lac_labels: [] }, labels: [] }) },
+          { get: () => ({ properties: { id: 'd1', lac_labels: [] }, labels: [] }) },
+        ],
+      });
+
+      const result = await service.merge(mockSession as any, {
+        masterId: 'm1',
+        mergeIds: ['d1'],
+        userContext: { userId: 'user-1', clearances: [] },
+        rationale: 'test',
+        mergeId: 'merge-1',
+      });
+
+      expect(result.idempotent).toBe(true);
+      expect(tx.commit).toHaveBeenCalled();
+    });
+
+    it('should send guardrail conflicts to DLQ', async () => {
+      const largeMergeIds = Array.from({ length: 25 }, (_, i) => `d${i}`);
+
+      await expect(
+        service.merge(mockSession as any, {
+          masterId: 'm1',
+          mergeIds: largeMergeIds,
+          userContext: { userId: 'user-1', clearances: [] },
+          rationale: 'test',
+        })
+      ).rejects.toThrow('Merge cardinality exceeds guardrail limits');
+
+      expect(mockDlq.enqueue).toHaveBeenCalled();
+    });
+
+    it('should rollback using snapshot metadata', async () => {
+      jest.spyOn(service, 'split').mockResolvedValue();
+      mockPool.query
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'snap-1',
+              merge_id: 'merge-1',
+              decision_id: 'dec-1',
+              restored_at: null,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const result = await service.rollbackMergeSnapshot(mockSession as any, {
+        mergeId: 'merge-1',
+        reason: 'oops',
+        userContext: { userId: 'user-1' },
+      });
+
+      expect(service.split).toHaveBeenCalledWith(
+        mockSession,
+        'dec-1',
+        expect.any(Object),
+      );
+      expect(result.success).toBe(true);
     });
   });
 });

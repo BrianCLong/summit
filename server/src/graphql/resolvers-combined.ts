@@ -10,6 +10,7 @@ import { geoIntResolvers } from './resolvers/geoint.js';
 import { documentResolvers } from './resolvers.document.js';
 import { ingestionResolvers } from './resolvers/ingestionResolvers.js';
 import { randomUUID } from 'node:crypto';
+import { erResolvers } from './resolvers.er.js';
 
 interface User {
   id: string;
@@ -67,6 +68,7 @@ export const resolvers = {
     ...(activityResolvers.Query || {}),
     ...(geoIntResolvers.Query || {}),
     ...(documentResolvers.Query || {}),
+    ...(erResolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -85,6 +87,7 @@ export const resolvers = {
     ...(annotationsResolvers.Mutation || {}),
     ...(v040Resolvers.Mutation || {}),
     ...(documentResolvers.Mutation || {}),
+    ...(erResolvers.Mutation || {}),
     login: async (
       _: any,
       { input }: { input: LoginInput },
