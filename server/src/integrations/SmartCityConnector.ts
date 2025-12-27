@@ -12,6 +12,7 @@ import {
   AssetType,
   GeoJSONGeometry,
 } from '../types/digitalTwin';
+import { warnDeprecation } from '../utils/deprecation';
 
 /**
  * IoT sensor data format
@@ -96,9 +97,18 @@ interface EstoniaAssetFormat {
 
 /**
  * Connector for smart city integrations
+ * @deprecated Use generic IngestionService instead.
  */
 export class SmartCityConnector {
   private endpoints: Map<string, CitySystemEndpoint> = new Map();
+
+  constructor() {
+    warnDeprecation({
+      name: 'SmartCityConnector',
+      replacement: 'IngestionService',
+      removalTarget: 'Sprint N+57'
+    });
+  }
   private federations: Map<string, FederationExport> = new Map();
   private alerts: Alert[] = [];
   private sensorCache: Map<string, SensorReading[]> = new Map();
