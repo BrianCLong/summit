@@ -10,7 +10,8 @@
  * with clear contracts for future teams to integrate real data sources.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
+import $ from 'jquery'
 import {
   Layers,
   Network,
@@ -33,11 +34,13 @@ import AnnotationPanel from '@/features/annotations/AnnotationPanel'
 import { useCollaboration } from '@/lib/yjs/useCollaboration'
 import { useGraphSync } from '@/lib/yjs/useGraphSync'
 import { CollaborationPanel } from '@/components/CollaborationPanel'
+import { CollaborativeCursors } from '@/components/collaboration/CollaborativeCursors'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 import { useSnapshotHandler } from '@/features/snapshots'
 import { isFeatureEnabled } from '@/config'
+import { usePresenceChannel } from './usePresenceChannel'
 
 /**
  * Main TriPaneShell component
@@ -86,6 +89,7 @@ export function TriPaneShell({
     timelineEvent?: TimelineEvent
     locationId?: string
   }>({})
+  const triPaneRef = useRef<HTMLDivElement | null>(null)
 
   // Snapshot integration
   useSnapshotHandler(
@@ -116,6 +120,14 @@ export function TriPaneShell({
     user ? { id: user.id, name: user.name || user.email } : { id: 'anon', name: 'Anonymous' },
     token
   )
+
+  const { cursors: presenceCursors, emitPresenceUpdate } = usePresenceChannel({
+    workspaceId: 'tri-pane',
+    channel: 'tri-pane',
+    userId: user?.id || 'anon',
+    userName: user?.name || user?.email || 'Anonymous',
+    token,
+  })
 
   // Sync graph data
   const {
@@ -189,6 +201,135 @@ export function TriPaneShell({
     timelineEvents,
     geospatialEvents,
     syncState.globalTimeWindow,
+  ])
+
+  useEffect(() => {
+    if (!triPaneRef.current) return
+
+    const selectionDetails = [
+      {
+        pane: 'graph',
+        id: syncState.graph.selectedEntityId,
+        label:
+          filteredData.entities.find((entity) => entity.id === syncState.graph.selectedEntityId)?.name ||
+          syncState.graph.selectedEntityId,
+      },
+      {
+        pane: 'timeline',
+        id: syncState.timeline.selectedEventId,
+        label:
+          filteredData.timelineEvents.find((event) => event.id === syncState.timeline.selectedEventId)?.title ||
+          syncState.timeline.selectedEventId,
+      },
+      {
+        pane: 'map',
+        id: syncState.map.selectedLocationId,
+        label: syncState.map.selectedLocationId,
+      },
+    ]
+
+    const $root = $(triPaneRef.current)
+    selectionDetails.forEach(({ pane, id, label }) => {
+      const $pane = $root.find(`[data-pane="${pane}"]`)
+      if ($pane.length === 0) return
+
+      let $overlay = $pane.find('.tri-pane-selection-overlay')
+      if ($overlay.length === 0) {
+        $overlay = $('<div/>', { class: 'tri-pane-selection-overlay' })
+          .css({
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(59, 130, 246, 0.12)',
+            border: '2px solid rgba(59, 130, 246, 0.45)',
+            borderRadius: '0.5rem',
+            pointerEvents: 'none',
+            display: 'none',
+            zIndex: 10,
+          })
+        const $label = $('<div/>', {
+          class: 'tri-pane-selection-overlay__label',
+        }).css({
+          position: 'absolute',
+          top: '0.5rem',
+          right: '0.5rem',
+          background: 'rgba(37, 99, 235, 0.9)',
+          color: '#fff',
+          padding: '0.25rem 0.5rem',
+          borderRadius: '9999px',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          maxWidth: '70%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        })
+        $overlay.append($label)
+        $pane.append($overlay)
+      }
+
+      const $label = $overlay.find('.tri-pane-selection-overlay__label')
+      if (id) {
+        $label.text(label || id)
+        $overlay.show()
+      } else {
+        $overlay.hide()
+      }
+    })
+  }, [
+    filteredData.entities,
+    filteredData.timelineEvents,
+    syncState.graph.selectedEntityId,
+    syncState.timeline.selectedEventId,
+    syncState.map.selectedLocationId,
+  ])
+
+  useEffect(() => {
+    if (!triPaneRef.current) return
+    const container = triPaneRef.current
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = container.getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      emitPresenceUpdate({ cursor: { x, y } })
+    }
+
+    container.addEventListener('mousemove', handleMouseMove)
+    return () => container.removeEventListener('mousemove', handleMouseMove)
+  }, [emitPresenceUpdate])
+
+  useEffect(() => {
+    const selection = syncState.graph.selectedEntityId
+      ? {
+          pane: 'graph',
+          id: syncState.graph.selectedEntityId,
+          label:
+            filteredData.entities.find((entity) => entity.id === syncState.graph.selectedEntityId)?.name ||
+            syncState.graph.selectedEntityId,
+        }
+      : syncState.timeline.selectedEventId
+        ? {
+            pane: 'timeline',
+            id: syncState.timeline.selectedEventId,
+            label:
+              filteredData.timelineEvents.find((event) => event.id === syncState.timeline.selectedEventId)?.title ||
+              syncState.timeline.selectedEventId,
+          }
+        : syncState.map.selectedLocationId
+          ? {
+              pane: 'map',
+              id: syncState.map.selectedLocationId,
+            }
+          : undefined
+
+    emitPresenceUpdate({ selection })
+  }, [
+    emitPresenceUpdate,
+    filteredData.entities,
+    filteredData.timelineEvents,
+    syncState.graph.selectedEntityId,
+    syncState.timeline.selectedEventId,
+    syncState.map.selectedLocationId,
   ])
 
   // Handle entity selection from graph
@@ -428,10 +569,17 @@ export function TriPaneShell({
       </div>
 
       {/* Three-pane layout */}
-      <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
+      <div
+        className="flex-1 grid grid-cols-12 gap-4 min-h-0 relative"
+        ref={triPaneRef}
+      >
+        <CollaborativeCursors cursors={presenceCursors} />
         {/* Timeline Pane */}
         <div className="col-span-3 flex flex-col min-h-0">
-          <Card className="flex-1 flex flex-col min-h-0">
+          <Card
+            className="flex-1 flex flex-col min-h-0 relative overflow-hidden"
+            data-pane="timeline"
+          >
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm" role="heading" aria-level={2}>
                 <Clock className="h-4 w-4" aria-hidden="true" />
@@ -463,7 +611,10 @@ export function TriPaneShell({
 
         {/* Graph Pane */}
         <div className="col-span-6 flex flex-col min-h-0">
-          <Card className="flex-1 flex flex-col min-h-0">
+          <Card
+            className="flex-1 flex flex-col min-h-0 relative overflow-hidden"
+            data-pane="graph"
+          >
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Network className="h-4 w-4" />
@@ -499,7 +650,10 @@ export function TriPaneShell({
 
         {/* Map Pane */}
         <div className="col-span-3 flex flex-col min-h-0">
-          <Card className="flex-1 flex flex-col min-h-0">
+          <Card
+            className="flex-1 flex flex-col min-h-0 relative overflow-hidden"
+            data-pane="map"
+          >
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4" />

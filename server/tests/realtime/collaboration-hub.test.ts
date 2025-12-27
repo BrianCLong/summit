@@ -196,4 +196,56 @@ describe('CollaborationHub realtime flows', () => {
     await disconnectClient(clientA);
     await disconnectClient(clientB);
   });
+
+  it('manages presence channels with cursor updates', async () => {
+    const workspaceId = 'ws-presence';
+    const channel = 'tri-pane';
+    const clientA = await connectClient();
+    const clientB = await connectClient();
+
+    const snapshot = waitForEvent<{
+      workspaceId: string;
+      channel: string;
+      members: any[];
+    }>(clientA, 'presence:channel:snapshot');
+
+    clientA.emit('presence:channel:join', {
+      workspaceId,
+      channel,
+      userId: 'user-a',
+      userName: 'Analyst A',
+    });
+
+    const initialSnapshot = await snapshot;
+    expect(initialSnapshot.members).toHaveLength(1);
+
+    const joined = waitForEvent<{ userId: string }>(
+      clientA,
+      'presence:channel:joined',
+    );
+    clientB.emit('presence:channel:join', {
+      workspaceId,
+      channel,
+      userId: 'user-b',
+      userName: 'Analyst B',
+    });
+    const joinedPayload = await joined;
+    expect(joinedPayload.userId).toBe('user-b');
+
+    const update = waitForEvent<{ cursor: { x: number; y: number } }>(
+      clientA,
+      'presence:channel:update',
+    );
+    clientB.emit('presence:channel:update', {
+      workspaceId,
+      channel,
+      cursor: { x: 42, y: 84 },
+      selection: JSON.stringify({ pane: 'graph', id: 'entity-7' }),
+    });
+    const updatePayload = await update;
+    expect(updatePayload.cursor).toEqual({ x: 42, y: 84 });
+
+    await disconnectClient(clientA);
+    await disconnectClient(clientB);
+  });
 });

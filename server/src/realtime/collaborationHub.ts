@@ -16,6 +16,10 @@ type PresenceState = {
   selection?: string;
 };
 
+type PresenceChannelState = PresenceState & {
+  channel: string;
+};
+
 type CollaborationEdit = {
   workspaceId: string;
   entityId: string;
@@ -81,6 +85,7 @@ type WorkspaceState = {
 
 export type CollaborationHubOptions = {
   activityLimit?: number;
+  presenceThrottleMs?: number;
 };
 
 export class CollaborationHub {
@@ -88,10 +93,21 @@ export class CollaborationHub {
   private readonly socketWorkspace = new Map<string, string>();
   private readonly workspaceState = new Map<string, WorkspaceState>();
   private readonly activityLimit: number;
+  private readonly presenceThrottleMs: number;
+  private readonly presenceChannels = new Map<
+    string,
+    Map<string, Map<string, PresenceChannelState>>
+  >();
+  private readonly socketPresenceChannel = new Map<
+    string,
+    { workspaceId: string; channel: string; userId: string }
+  >();
+  private readonly lastPresenceUpdate = new Map<string, number>();
 
   constructor(io: Server, options: CollaborationHubOptions = {}) {
     this.namespace = io.of('/collaboration');
     this.activityLimit = options.activityLimit ?? 200;
+    this.presenceThrottleMs = options.presenceThrottleMs ?? 75;
     this.namespace.on('connection', (socket) => this.handleConnection(socket));
   }
 
@@ -100,6 +116,15 @@ export class CollaborationHub {
     socket.on('workspace:leave', () => this.handleLeave(socket));
     socket.on('presence:update', (payload) =>
       this.handlePresenceUpdate(socket, payload),
+    );
+    socket.on('presence:channel:join', (payload) =>
+      this.handlePresenceChannelJoin(socket, payload),
+    );
+    socket.on('presence:channel:leave', () =>
+      this.handlePresenceChannelLeave(socket),
+    );
+    socket.on('presence:channel:update', (payload) =>
+      this.handlePresenceChannelUpdate(socket, payload),
     );
     socket.on('chat:message', (payload) => this.handleChat(socket, payload));
     socket.on('annotation:add', (payload) =>
@@ -112,7 +137,10 @@ export class CollaborationHub {
       this.handleAnnotation(socket, 'delete', payload),
     );
     socket.on('edit:submit', (payload) => this.handleEdit(socket, payload));
-    socket.on('disconnect', () => this.handleLeave(socket));
+    socket.on('disconnect', () => {
+      this.handlePresenceChannelLeave(socket);
+      this.handleLeave(socket);
+    });
   }
 
   private handleJoin(
@@ -187,6 +215,107 @@ export class CollaborationHub {
     }
 
     this.socketWorkspace.delete(socket.id);
+  }
+
+  private handlePresenceChannelJoin(
+    socket: Socket,
+    payload: { workspaceId: string; channel: string; userId: string; userName: string },
+  ): void {
+    const { workspaceId, channel, userId, userName } = payload;
+    if (!workspaceId || !channel || !userId) return;
+
+    this.handlePresenceChannelLeave(socket);
+
+    const channelMembers = this.getOrCreatePresenceChannel(
+      workspaceId,
+      channel,
+    );
+    const presence: PresenceChannelState = {
+      userId,
+      userName,
+      workspaceId,
+      channel,
+      status: 'online',
+      lastActive: Date.now(),
+    };
+
+    channelMembers.set(userId, presence);
+    this.socketPresenceChannel.set(socket.id, { workspaceId, channel, userId });
+    socket.join(this.presenceRoomName(workspaceId, channel));
+
+    socket.emit('presence:channel:snapshot', {
+      workspaceId,
+      channel,
+      members: [...channelMembers.values()],
+    });
+    socket
+      .to(this.presenceRoomName(workspaceId, channel))
+      .emit('presence:channel:joined', { ...presence });
+  }
+
+  private handlePresenceChannelLeave(socket: Socket): void {
+    const presenceInfo = this.socketPresenceChannel.get(socket.id);
+    if (!presenceInfo) return;
+
+    const { workspaceId, channel, userId } = presenceInfo;
+    const channelMembers = this.getPresenceChannel(workspaceId, channel);
+    if (!channelMembers) return;
+
+    channelMembers.delete(userId);
+    if (channelMembers.size === 0) {
+      const workspaceChannels = this.presenceChannels.get(workspaceId);
+      workspaceChannels?.delete(channel);
+      if (workspaceChannels?.size === 0) {
+        this.presenceChannels.delete(workspaceId);
+      }
+    }
+
+    socket
+      .to(this.presenceRoomName(workspaceId, channel))
+      .emit('presence:channel:left', { userId, workspaceId, channel });
+
+    this.socketPresenceChannel.delete(socket.id);
+    this.lastPresenceUpdate.delete(socket.id);
+  }
+
+  private handlePresenceChannelUpdate(
+    socket: Socket,
+    payload: {
+      workspaceId: string;
+      channel: string;
+      cursor?: CursorPosition;
+      selection?: string;
+      status?: 'online' | 'away';
+    },
+  ): void {
+    const presenceInfo = this.socketPresenceChannel.get(socket.id);
+    if (!presenceInfo) return;
+
+    const { workspaceId, channel, userId } = presenceInfo;
+    if (workspaceId !== payload.workspaceId || channel !== payload.channel) return;
+
+    const lastUpdate = this.lastPresenceUpdate.get(socket.id) ?? 0;
+    if (Date.now() - lastUpdate < this.presenceThrottleMs) return;
+    this.lastPresenceUpdate.set(socket.id, Date.now());
+
+    const channelMembers = this.getPresenceChannel(workspaceId, channel);
+    if (!channelMembers) return;
+
+    const presence = channelMembers.get(userId);
+    if (!presence) return;
+
+    const updated: PresenceChannelState = {
+      ...presence,
+      cursor: payload.cursor ?? presence.cursor,
+      selection: payload.selection ?? presence.selection,
+      status: payload.status ?? presence.status,
+      lastActive: Date.now(),
+    };
+
+    channelMembers.set(userId, updated);
+    this.namespace
+      .to(this.presenceRoomName(workspaceId, channel))
+      .emit('presence:channel:update', { ...updated });
   }
 
   private handlePresenceUpdate(
@@ -442,6 +571,35 @@ export class CollaborationHub {
 
   private roomName(workspaceId: string): string {
     return `workspace:${workspaceId}`;
+  }
+
+  private presenceRoomName(workspaceId: string, channel: string): string {
+    return `presence:${workspaceId}:${channel}`;
+  }
+
+  private getOrCreatePresenceChannel(
+    workspaceId: string,
+    channel: string,
+  ): Map<string, PresenceChannelState> {
+    const workspaceChannels =
+      this.presenceChannels.get(workspaceId) ?? new Map();
+    if (!this.presenceChannels.has(workspaceId)) {
+      this.presenceChannels.set(workspaceId, workspaceChannels);
+    }
+
+    const channelMembers = workspaceChannels.get(channel) ?? new Map();
+    if (!workspaceChannels.has(channel)) {
+      workspaceChannels.set(channel, channelMembers);
+    }
+
+    return channelMembers;
+  }
+
+  private getPresenceChannel(
+    workspaceId: string,
+    channel: string,
+  ): Map<string, PresenceChannelState> | undefined {
+    return this.presenceChannels.get(workspaceId)?.get(channel);
   }
 
   private recordActivity(workspaceId: string, event: ActivityEvent): void {
