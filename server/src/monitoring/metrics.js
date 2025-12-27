@@ -164,6 +164,20 @@ const investigationOperations = new client.Counter({
   labelNames: ['operation', 'user_id'],
 });
 
+// Entity resolution merge outcomes
+const erMergeOutcomesTotal = new client.Counter({
+  name: 'er_merge_outcomes_total',
+  help: 'Total number of ER merge outcomes recorded',
+  labelNames: ['decision', 'entity_type', 'method'],
+});
+
+// Deployment rollbacks
+const deploymentRollbacksTotal = new client.Counter({
+  name: 'deployment_rollbacks_total',
+  help: 'Total number of deployment rollbacks',
+  labelNames: ['service', 'reason', 'success'],
+});
+
 // Error tracking
 const applicationErrors = new client.Counter({
   name: 'application_errors_total',
@@ -227,6 +241,8 @@ register.registerMetric(websocketConnections);
 register.registerMetric(websocketMessages);
 register.registerMetric(investigationsActive);
 register.registerMetric(investigationOperations);
+register.registerMetric(erMergeOutcomesTotal);
+register.registerMetric(deploymentRollbacksTotal);
 register.registerMetric(applicationErrors);
 register.registerMetric(memoryUsage);
 register.registerMetric(pipelineUptimeRatio);
@@ -582,6 +598,8 @@ module.exports = {
   websocketMessages,
   investigationsActive,
   investigationOperations,
+  erMergeOutcomesTotal,
+  deploymentRollbacksTotal,
   applicationErrors,
   tenantScopeViolationsTotal,
   memoryUsage,

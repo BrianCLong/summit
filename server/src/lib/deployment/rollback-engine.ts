@@ -1,4 +1,7 @@
 
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { deploymentRollbacksTotal } from '../../monitoring/metrics.js';
+
 // Mock external services for demonstration
 const mockKubernetesClient = {
   rollbackDeployment: async (deploymentName: string): Promise<void> => {
@@ -29,23 +32,43 @@ interface RollbackRecord {
 
 export class RollbackEngine {
   private rollbackHistory: RollbackRecord[] = [];
+  private tracer = trace.getTracer('deployment-rollback', '1.0.0');
 
   public async performRollback(options: RollbackOptions): Promise<boolean> {
-    console.log(`Starting rollback for service ${options.serviceName} due to: ${options.reason}`);
-    let success = false;
-    try {
-      if (options.migrationSteps && options.migrationSteps > 0) {
-        await this.coordinateDatabaseRollback(options.migrationSteps);
-      }
-      await this.performServiceRollback(options.serviceName);
-      success = true;
-      console.log('Rollback completed successfully.');
-    } catch (error) {
-      console.error('Rollback failed:', error);
-    } finally {
-      this.logRollback(options, success);
-    }
-    return success;
+    return this.tracer.startActiveSpan(
+      'deployment.rollback',
+      async (span) => {
+        span.setAttributes({
+          'deployment.service': options.serviceName,
+          'deployment.rollback_reason': options.reason,
+          'deployment.migration_steps': options.migrationSteps || 0,
+        });
+        console.log(
+          `Starting rollback for service ${options.serviceName} due to: ${options.reason}`,
+        );
+        let success = false;
+        try {
+          if (options.migrationSteps && options.migrationSteps > 0) {
+            await this.coordinateDatabaseRollback(options.migrationSteps);
+          }
+          await this.performServiceRollback(options.serviceName);
+          success = true;
+          span.setStatus({ code: SpanStatusCode.OK });
+          console.log('Rollback completed successfully.');
+        } catch (error) {
+          span.recordException(error);
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error instanceof Error ? error.message : 'Rollback failed',
+          });
+          console.error('Rollback failed:', error);
+        } finally {
+          this.logRollback(options, success);
+          span.end();
+        }
+        return success;
+      },
+    );
   }
 
   private async coordinateDatabaseRollback(steps: number): Promise<void> {
@@ -67,6 +90,12 @@ export class RollbackEngine {
     };
     this.rollbackHistory.push(record);
     console.log("Rollback audit record created:", record);
+
+    deploymentRollbacksTotal.inc({
+      service: options.serviceName,
+      reason: options.reason,
+      success: success ? 'true' : 'false',
+    });
   }
 
   public getRollbackHistory(): RollbackRecord[] {

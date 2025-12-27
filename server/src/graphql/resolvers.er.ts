@@ -4,8 +4,11 @@ import { getPostgresPool } from '../config/database.js';
 import { getNeo4jDriver } from '../config/database.js';
 import { resolveEntities } from '../services/HybridEntityResolutionService.js';
 import logger from '../config/logger.js';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { erMergeOutcomesTotal } from '../monitoring/metrics.js';
 
 const log = logger.child({ name: 'ERResolvers' });
+const tracer = trace.getTracer('er-resolvers', '1.0.0');
 
 // GA Core precision thresholds
 const GA_PRECISION_THRESHOLDS = {
@@ -252,163 +255,216 @@ export const erResolvers: IResolvers = {
       _,
       { entityA, entityB, entityType = 'PERSON' },
       context,
-    ) => {
-      try {
-        const result = await resolveEntities(
-          JSON.stringify(entityA),
-          JSON.stringify(entityB),
-        );
+    ) =>
+      tracer.startActiveSpan('er.resolve_entities', async (span) => {
+        span.setAttributes({
+          'er.entity_type': entityType,
+          'er.operation': 'resolve_entities',
+        });
 
-        // Store the decision for audit and metrics
-        const pool = getPostgresPool();
-        const insertResult = await pool.query(
-          `
-          INSERT INTO merge_decisions (
-            entity_a_id, entity_b_id, decision, score, confidence, explanation,
-            feature_scores, model_version, method, risk_score, review_required,
-            entity_type, created_by
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-          RETURNING id
-        `,
-          [
+        try {
+          const result = await resolveEntities(
             JSON.stringify(entityA),
             JSON.stringify(entityB),
-            result.match ? 'MERGE' : 'NO_MERGE',
-            result.score,
-            result.confidence || result.score,
-            result.explanation,
-            result.explanation, // feature_scores (same as explanation for now)
-            result.version || 'hybrid-v2.0',
-            result.method || 'hybrid',
-            result.riskScore || 1.0 - (result.confidence || result.score),
-            (result.riskScore || 0) > 0.3,
-            entityType,
-            context.user?.id || 'system',
-          ],
-        );
+          );
 
-        return {
-          id: insertResult.rows[0].id,
-          entityA: JSON.stringify(entityA),
-          entityB: JSON.stringify(entityB),
-          decision: result.match ? 'MERGE' : 'NO_MERGE',
-          score: result.score,
-          confidence: result.confidence || result.score,
-          explanation: result.explanation,
-          featureScores: result.explanation,
-          modelVersion: result.version || 'hybrid-v2.0',
-          method: (result.method || 'hybrid').toUpperCase(),
-          riskScore:
-            result.riskScore || 1.0 - (result.confidence || result.score),
-          reviewRequired: (result.riskScore || 0) > 0.3,
-          entityType,
-          createdAt: new Date(),
-          updatedAt: null,
-          createdBy: context.user?.id || 'system',
-        };
-      } catch (error) {
-        log.error(
-          { error: error.message, entityA, entityB },
-          'Failed to resolve entities',
-        );
-        throw new Error('Failed to resolve entities: ' + error.message);
-      }
-    },
+          const decision = result.match ? 'MERGE' : 'NO_MERGE';
+
+          // Store the decision for audit and metrics
+          const pool = getPostgresPool();
+          const insertResult = await pool.query(
+            `
+            INSERT INTO merge_decisions (
+              entity_a_id, entity_b_id, decision, score, confidence, explanation,
+              feature_scores, model_version, method, risk_score, review_required,
+              entity_type, created_by
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            RETURNING id
+          `,
+            [
+              JSON.stringify(entityA),
+              JSON.stringify(entityB),
+              decision,
+              result.score,
+              result.confidence || result.score,
+              result.explanation,
+              result.explanation, // feature_scores (same as explanation for now)
+              result.version || 'hybrid-v2.0',
+              result.method || 'hybrid',
+              result.riskScore || 1.0 - (result.confidence || result.score),
+              (result.riskScore || 0) > 0.3,
+              entityType,
+              context.user?.id || 'system',
+            ],
+          );
+
+          erMergeOutcomesTotal.inc({
+            decision,
+            entity_type: entityType,
+            method: result.method || 'hybrid',
+          });
+
+          span.setAttributes({
+            'er.decision': decision,
+            'er.score': result.score,
+            'er.model_version': result.version || 'hybrid-v2.0',
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+
+          return {
+            id: insertResult.rows[0].id,
+            entityA: JSON.stringify(entityA),
+            entityB: JSON.stringify(entityB),
+            decision,
+            score: result.score,
+            confidence: result.confidence || result.score,
+            explanation: result.explanation,
+            featureScores: result.explanation,
+            modelVersion: result.version || 'hybrid-v2.0',
+            method: (result.method || 'hybrid').toUpperCase(),
+            riskScore:
+              result.riskScore || 1.0 - (result.confidence || result.score),
+            reviewRequired: (result.riskScore || 0) > 0.3,
+            entityType,
+            createdAt: new Date(),
+            updatedAt: null,
+            createdBy: context.user?.id || 'system',
+          };
+        } catch (error) {
+          span.recordException(error);
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+          });
+          log.error(
+            { error: error.message, entityA, entityB },
+            'Failed to resolve entities',
+          );
+          throw new Error('Failed to resolve entities: ' + error.message);
+        } finally {
+          span.end();
+        }
+      }),
   },
 
   Mutation: {
-    decideMerge: async (_, { input }, context) => {
-      const session = getNeo4jDriver().session();
+    decideMerge: async (_, { input }, context) =>
+      tracer.startActiveSpan('er.decide_merge', async (span) => {
+        span.setAttributes({
+          'er.entity_type': input.entityType,
+          'er.operation': 'decide_merge',
+        });
+        const session = getNeo4jDriver().session();
 
-      try {
-        // Get actual entities from Neo4j
-        const entityResult = await session.run(
-          `
-          MATCH (a:Entity) WHERE a.id = $entityA OR a.uuid = $entityA
-          MATCH (b:Entity) WHERE b.id = $entityB OR b.uuid = $entityB  
-          RETURN a, b
-        `,
-          { entityA: input.entityA, entityB: input.entityB },
-        );
+        try {
+          // Get actual entities from Neo4j
+          const entityResult = await session.run(
+            `
+            MATCH (a:Entity) WHERE a.id = $entityA OR a.uuid = $entityA
+            MATCH (b:Entity) WHERE b.id = $entityB OR b.uuid = $entityB  
+            RETURN a, b
+          `,
+            { entityA: input.entityA, entityB: input.entityB },
+          );
 
-        if (entityResult.records.length === 0) {
-          throw new Error('One or both entities not found');
-        }
+          if (entityResult.records.length === 0) {
+            throw new Error('One or both entities not found');
+          }
 
-        const entityAProps = entityResult.records[0].get('a').properties;
-        const entityBProps = entityResult.records[0].get('b').properties;
+          const entityAProps = entityResult.records[0].get('a').properties;
+          const entityBProps = entityResult.records[0].get('b').properties;
 
-        // Process merge decision using hybrid service
-        const result = await resolveEntities(
-          JSON.stringify(entityAProps),
-          JSON.stringify(entityBProps),
-        );
+          // Process merge decision using hybrid service
+          const result = await resolveEntities(
+            JSON.stringify(entityAProps),
+            JSON.stringify(entityBProps),
+          );
 
-        const pool = getPostgresPool();
-        const riskScore = 1.0 - result.score;
-        const reviewRequired = riskScore > 0.3 || input.forceReview;
+          const pool = getPostgresPool();
+          const riskScore = 1.0 - result.score;
+          const reviewRequired = riskScore > 0.3 || input.forceReview;
+          const decision = result.match ? 'MERGE' : 'NO_MERGE';
 
-        // Store the decision
-        const insertResult = await pool.query(
-          `
-          INSERT INTO merge_decisions (
-            entity_a_id, entity_b_id, decision, score, confidence, explanation,
-            feature_scores, model_version, method, risk_score, review_required,
-            entity_type, created_by
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-          RETURNING id, created_at
-        `,
-          [
-            input.entityA,
-            input.entityB,
-            result.match ? 'MERGE' : 'NO_MERGE',
-            result.score,
-            result.score,
-            JSON.stringify(result.explanation),
-            JSON.stringify(result.explanation),
-            result.version,
-            'hybrid',
+          // Store the decision
+          const insertResult = await pool.query(
+            `
+            INSERT INTO merge_decisions (
+              entity_a_id, entity_b_id, decision, score, confidence, explanation,
+              feature_scores, model_version, method, risk_score, review_required,
+              entity_type, created_by
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            RETURNING id, created_at
+          `,
+            [
+              input.entityA,
+              input.entityB,
+              decision,
+              result.score,
+              result.score,
+              JSON.stringify(result.explanation),
+              JSON.stringify(result.explanation),
+              result.version,
+              'hybrid',
+              riskScore,
+              reviewRequired,
+              input.entityType,
+              context.user?.id || 'system',
+            ],
+          );
+
+          erMergeOutcomesTotal.inc({
+            decision,
+            entity_type: input.entityType,
+            method: 'hybrid',
+          });
+
+          const decisionId = insertResult.rows[0].id;
+          const createdAt = insertResult.rows[0].created_at;
+
+          span.setAttributes({
+            'er.decision': decision,
+            'er.score': result.score,
+            'er.review_required': reviewRequired,
+          });
+          span.setStatus({ code: SpanStatusCode.OK });
+
+          // If decision is to merge and not forced for review, execute the merge
+          if (result.match && !reviewRequired) {
+            // TODO: Implement merge logic
+            log.info({ decisionId }, 'Entities should be merged');
+          }
+
+          return {
+            id: decisionId,
+            entityA: input.entityA,
+            entityB: input.entityB,
+            decision,
+            score: result.score,
+            confidence: result.score,
+            explanation: JSON.stringify(result.explanation),
+            featureScores: JSON.stringify(result.explanation),
+            modelVersion: result.version,
+            method: 'HYBRID',
             riskScore,
             reviewRequired,
-            input.entityType,
-            context.user?.id || 'system',
-          ],
-        );
-
-        const decisionId = insertResult.rows[0].id;
-        const createdAt = insertResult.rows[0].created_at;
-
-        // If decision is to merge and not forced for review, execute the merge
-        if (result.match && !reviewRequired) {
-          // TODO: Implement merge logic
-          log.info({ decisionId }, 'Entities should be merged');
+            entityType: input.entityType,
+            createdAt,
+            updatedAt: null,
+            createdBy: context.user?.id || 'system',
+          };
+        } catch (error) {
+          span.recordException(error);
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+          });
+          log.error({ error: error.message, input }, 'Failed to decide merge');
+          throw new Error('Failed to decide merge: ' + error.message);
+        } finally {
+          span.end();
+          await session.close();
         }
-
-        return {
-          id: decisionId,
-          entityA: input.entityA,
-          entityB: input.entityB,
-          decision: result.match ? 'MERGE' : 'NO_MERGE',
-          score: result.score,
-          confidence: result.score,
-          explanation: JSON.stringify(result.explanation),
-          featureScores: JSON.stringify(result.explanation),
-          modelVersion: result.version,
-          method: 'HYBRID',
-          riskScore,
-          reviewRequired,
-          entityType: input.entityType,
-          createdAt,
-          updatedAt: null,
-          createdBy: context.user?.id || 'system',
-        };
-      } catch (error) {
-        log.error({ error: error.message, input }, 'Failed to decide merge');
-        throw new Error('Failed to decide merge: ' + error.message);
-      } finally {
-        await session.close();
-      }
-    },
+      }),
 
     recordERCIMetric: async (
       _,
