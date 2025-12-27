@@ -72,6 +72,7 @@ import maestroRouter from './routes/maestro.js';
 import caseRouter from './routes/cases.js';
 import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
+import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
 import edgeOpsRouter from './routes/edge-ops.js';
 import swaggerUi from 'swagger-ui-express';
@@ -107,6 +108,7 @@ import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
 import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
+import mlReviewRouter from './routes/ml_review.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -397,6 +399,7 @@ export const createApp = async () => {
   app.use('/api/demo', demoRouter);
   app.use('/api/claims', claimsRouter);
   app.use('/api/feature-flags', featureFlagsRouter);
+  app.use('/api/ml-reviews', mlReviewRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
@@ -550,6 +553,10 @@ export const createApp = async () => {
     startTrustWorker();
     // Start retention worker if enabled
     startRetentionWorker();
+    // Start streaming ingestion (Epic B)
+    streamIngest.start(['ingest-events']).catch(err => {
+      appLogger.error({ err }, 'Failed to start streaming ingestion');
+    });
   } else {
     appLogger.warn(
       { safetyState },
