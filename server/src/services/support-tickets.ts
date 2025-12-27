@@ -31,6 +31,9 @@ export interface TicketComment {
   is_internal: boolean;
   created_at: Date;
   updated_at: Date;
+  deleted_at?: Date | null;
+  deleted_by?: string | null;
+  delete_reason?: string | null;
 }
 
 export interface CreateTicketInput {
@@ -69,6 +72,51 @@ const safeRows = <T = unknown>(result: unknown): T[] =>
   Array.isArray((result as { rows?: unknown[] })?.rows)
     ? ((result as { rows: T[] }).rows as T[])
     : [];
+
+const isSafeDeleteEnabled = () => process.env.SAFE_DELETE !== 'false';
+
+let commentSchemaEnsured = false;
+
+async function ensureCommentSoftDeleteSchema() {
+  if (commentSchemaEnsured) return;
+  const pool = getPostgresPool();
+  await pool.query(`
+    ALTER TABLE support_ticket_comments
+      ADD COLUMN IF NOT EXISTS deleted_at timestamptz,
+      ADD COLUMN IF NOT EXISTS deleted_by text,
+      ADD COLUMN IF NOT EXISTS delete_reason text;
+
+    CREATE TABLE IF NOT EXISTS support_ticket_comment_audits (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      comment_id uuid NOT NULL REFERENCES support_ticket_comments(id) ON DELETE CASCADE,
+      action text NOT NULL,
+      actor_id text,
+      reason text,
+      metadata jsonb DEFAULT '{}',
+      created_at timestamptz DEFAULT now()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_support_ticket_comments_deleted ON support_ticket_comments(deleted_at);
+    CREATE INDEX IF NOT EXISTS idx_support_ticket_comment_audits_comment ON support_ticket_comment_audits(comment_id);
+  `);
+
+  commentSchemaEnsured = true;
+}
+
+async function recordCommentAudit(
+  commentId: string,
+  action: string,
+  actorId: string,
+  reason?: string,
+  metadata?: Record<string, unknown>,
+) {
+  const pool = getPostgresPool();
+  await pool.query(
+    `INSERT INTO support_ticket_comment_audits (comment_id, action, actor_id, reason, metadata)
+     VALUES ($1, $2, $3, $4, $5)`,
+    [commentId, action, actorId, reason || null, JSON.stringify(metadata || {})],
+  );
+}
 
 export async function createTicket(input: CreateTicketInput): Promise<SupportTicket> {
   const pool = getPostgresPool();
@@ -204,6 +252,7 @@ export async function addComment(
   content: string,
   options?: { authorEmail?: string; isInternal?: boolean },
 ): Promise<TicketComment> {
+  await ensureCommentSoftDeleteSchema();
   const pool = getPostgresPool();
   const result = await pool.query(
     `INSERT INTO support_ticket_comments (ticket_id, author_id, author_email, content, is_internal)
@@ -213,13 +262,81 @@ export async function addComment(
   return safeRows<TicketComment>(result)[0];
 }
 
-export async function getComments(ticketId: string): Promise<TicketComment[]> {
+export async function getComments(
+  ticketId: string,
+  options: { includeDeleted?: boolean } = {},
+): Promise<TicketComment[]> {
+  await ensureCommentSoftDeleteSchema();
   const pool = getPostgresPool();
+  const conditions = ['ticket_id = $1'];
+  if (isSafeDeleteEnabled() && !options.includeDeleted) {
+    conditions.push('deleted_at IS NULL');
+  }
+
   const result = await pool.query(
-    'SELECT * FROM support_ticket_comments WHERE ticket_id = $1 ORDER BY created_at ASC',
+    `SELECT * FROM support_ticket_comments WHERE ${conditions.join(' AND ')} ORDER BY created_at ASC`,
     [ticketId],
   );
   return safeRows<TicketComment>(result);
+}
+
+export async function getCommentById(commentId: string): Promise<TicketComment | null> {
+  await ensureCommentSoftDeleteSchema();
+  const pool = getPostgresPool();
+  const result = await pool.query('SELECT * FROM support_ticket_comments WHERE id = $1', [commentId]);
+  const rows = safeRows<TicketComment>(result);
+  return rows[0] || null;
+}
+
+export async function softDeleteComment(
+  commentId: string,
+  actorId: string,
+  reason?: string,
+): Promise<TicketComment | null> {
+  await ensureCommentSoftDeleteSchema();
+  const pool = getPostgresPool();
+  const retentionDays = Number(process.env.SUPPORT_COMMENT_RETENTION_DAYS || '30');
+  const purgeAfter = Number.isFinite(retentionDays)
+    ? new Date(Date.now() + retentionDays * 24 * 60 * 60 * 1000)
+    : null;
+
+  const result = await pool.query(
+    `UPDATE support_ticket_comments
+     SET deleted_at = NOW(), deleted_by = $2, delete_reason = $3
+     WHERE id = $1
+     RETURNING *`,
+    [commentId, actorId, reason || null],
+  );
+  const rows = safeRows<TicketComment>(result);
+  const comment = rows[0] || null;
+
+  if (comment) {
+    await recordCommentAudit(commentId, 'delete', actorId, reason, {
+      purgeAfter: purgeAfter?.toISOString?.(),
+    });
+  }
+
+  return comment;
+}
+
+export async function restoreComment(commentId: string, actorId: string): Promise<TicketComment | null> {
+  await ensureCommentSoftDeleteSchema();
+  const pool = getPostgresPool();
+  const result = await pool.query(
+    `UPDATE support_ticket_comments
+     SET deleted_at = NULL, deleted_by = NULL, delete_reason = NULL, updated_at = NOW()
+     WHERE id = $1
+     RETURNING *`,
+    [commentId],
+  );
+  const rows = safeRows<TicketComment>(result);
+  const comment = rows[0] || null;
+
+  if (comment) {
+    await recordCommentAudit(commentId, 'restore', actorId);
+  }
+
+  return comment;
 }
 
 export async function getTicketCount(options: Omit<ListTicketsOptions, 'limit' | 'offset'> = {}): Promise<number> {
