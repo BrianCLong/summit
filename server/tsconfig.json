@@ -18,7 +18,8 @@
     "lib": ["ES2022", "DOM"],
     "types": ["node", "jest"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "composite": true
   },
   "ts-node": {
     "esm": true
@@ -54,8 +55,7 @@
     "src/services/reporting/**",
     "src/services/SOARConnectorV1Service.ts",
     "src/services/SOARPlaybookService.ts",
-    "src/telemetry/**",
-    "**/lib/telemetry/**",
+    "src/services/RARE/**",
     "src/workers/embeddingUpsertWorker.ts",
     "src/observability/**",
     "src/maestro/mcp/**",
@@ -70,7 +70,6 @@
     "src/governance/analytics/**",
     "src/routes/assistant.ts",
     "src/server_entry.ts",
-    "src/lib/**",
     "src/qam/**",
     "src/advisor.ts",
     "src/conductor/backfill.ts",

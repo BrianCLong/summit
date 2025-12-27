@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { metrics } from '../observability/metrics.js';
 import { Meter } from '@opentelemetry/api';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
@@ -13,21 +12,21 @@ class ComprehensiveTelemetry {
   // Performance counters
   public readonly subsystems: {
     database: {
-      queries: { add: () => void };
-      errors: { add: () => void };
-      latency: { record: () => void };
+      queries: { add: (value?: number) => void };
+      errors: { add: (value?: number) => void };
+      latency: { record: (value: number) => void };
     };
     cache: {
-      hits: { add: () => void };
-      misses: { add: () => void };
-      sets: { add: () => void };
-      dels: { add: () => void };
+      hits: { add: (value?: number) => void };
+      misses: { add: (value?: number) => void };
+      sets: { add: (value?: number) => void };
+      dels: { add: (value?: number) => void };
     };
-    api: { requests: { add: () => void }; errors: { add: () => void } };
+    api: { requests: { add: (value?: number) => void }; errors: { add: (value?: number) => void } };
   };
 
   // Request/response timing
-  public readonly requestDuration: { record: () => void };
+  public readonly requestDuration: { record: (value: number) => void };
   private activeConnections: { add: (value: number) => void };
   private activeConnectionsCount = 0;
 
