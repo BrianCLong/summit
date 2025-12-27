@@ -30,18 +30,34 @@
    - Queue depth: check Grafana panel `Maestro queue depth`
 5. **Decide**: If the regression started immediately after a deploy or config change, proceed to rollback; otherwise continue investigation (logs, dashboards, traces).
 
+## Rollback decision logic (fast path)
+
+Proceed to rollback when **any** of the following are true:
+
+- Canary error rate >2% sustained for 5 minutes **after** a release.
+- p95 latency >2x baseline for 10 minutes **and** aligns with a deploy.
+- Regression tied to a specific config/feature flag rollout and no mitigation exists.
+- Health checks fail (two consecutive failures) after deployment.
+
+Prefer **feature flag disable** if the impact is scoped to a single feature and the platform remains healthy; otherwise use rollback.
+
 ## Rollback execution
 
 ### Option A: GitHub Action (preferred for prod) — `.github/workflows/cd-rollback.yml`
 
-1. Identify the last known good image tag (from `helm history` or release notes).
-2. Trigger the workflow with the target environment and tag:
+1. Identify the last known good revision (from `helm history`) and the log URL.
+2. Trigger the workflow with the target environment, reason, and evidence URL:
    ```bash
    gh workflow run cd-rollback.yml \
+     -f service=maestro-control-plane \
      -f environment=staging \
-     -f image_tag=<good_tag>
+     -f revision=<good_revision> \
+     -f reason="SLO regression after release" \
+     -f actor="$USER" \
+     -f evidence_url="https://grafana.example.com/d/maestro?from=...&to=..."
    ```
-   - The workflow logs into GHCR, pulls the requested tag, recreates `server`/`client` via Compose, and prunes unused images.
+
+   - The workflow records audit and evidence entries in `runs/audit/` and `evidence/rollbacks/`.
 3. Monitor the workflow logs and proceed to post-rollback validation below.
 
 ### Option B: Helm rollback (cluster-admin)
@@ -75,6 +91,14 @@ kubectl -n maestro rollout status deploy/maestro-control-plane --watch
 3. **SLOs recover**: confirm alert clears and Grafana panels for availability/error rate return to baseline.
 4. **Events/logs clean**: `kubectl -n maestro get events --sort-by=.metadata.creationTimestamp | tail -n 20`; check fresh logs for errors.
 5. **Communicate**: update the incident channel and create a post-incident note referencing the image tag and revision rolled back.
+
+## Staging rollback validation (controlled canary failure)
+
+1. Deploy a canary with a known bad image tag in **staging** (isolated test window).
+2. Confirm canary monitors detect the failure (error rate/latency).
+3. Trigger rollback via `cd-rollback.yml` with `--reason "staging canary failure"` and `--evidence-url` pointing to the staging logs.
+4. Verify rollback success and store the evidence record path from `evidence/rollbacks/<rollback_id>/rollback-evidence.json`.
+5. Document the run in the release log with the rollback ID and log URL.
 
 ## Escalation
 

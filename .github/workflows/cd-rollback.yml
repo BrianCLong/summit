@@ -1,0 +1,68 @@
+name: CD Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Service name (e.g. api, web)"
+        required: true
+        type: string
+      environment:
+        description: "Environment name (e.g. staging, prod)"
+        required: true
+        type: string
+      revision:
+        description: "Helm revision to rollback to (optional)"
+        required: false
+        type: string
+      reason:
+        description: "Rollback reason"
+        required: true
+        type: string
+      actor:
+        description: "Operator or automation identity"
+        required: true
+        type: string
+      evidence_url:
+        description: "Link to deployment logs or evidence record"
+        required: false
+        type: string
+      dry_run:
+        description: "Run rollback in dry-run mode"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies (jq)
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Run canary rollback playbook
+        env:
+          ACTOR: ${{ inputs.actor }}
+        run: |
+          args=(
+            --service "${{ inputs.service }}"
+            --environment "${{ inputs.environment }}"
+            --reason "${{ inputs.reason }}"
+            --actor "${{ inputs.actor }}"
+          )
+
+          if [ -n "${{ inputs.revision }}" ]; then
+            args+=(--revision "${{ inputs.revision }}")
+          fi
+
+          if [ -n "${{ inputs.evidence_url }}" ]; then
+            args+=(--evidence-url "${{ inputs.evidence_url }}")
+          fi
+
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            args+=(--dry-run)
+          fi
+
+          ./scripts/release/canary-rollback-playbook.sh "${args[@]}"
