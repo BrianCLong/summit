@@ -70,6 +70,7 @@
     "react-hook-form": "7.68.0",
     "react-hotkeys-hook": "5.2.1",
     "react-leaflet": "5.0.0",
+    "react-monaco-editor": "0.56.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "7.10.1",
     "recharts": "3.6.0",

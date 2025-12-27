@@ -39,6 +39,7 @@ function initSocket(httpServer) {
   ns.on('connection', (socket) => {
     logger.info(`Realtime connected ${socket.id}`);
     connections += 1;
+    socket.tenantId = socket.user?.defaultTenantId || 'default';
     if (connections > maxConnections && !presenceDisabled) {
       presenceDisabled = true;
       ns.emit('presence_disabled', { reason: 'load_shed', maxConnections });
@@ -60,6 +61,15 @@ function initSocket(httpServer) {
       if (!entityId) return;
       socket.leave(`ai:entity:${entityId}`);
     });
+    import('./maestro.js')
+      .then((mod) => {
+        if (typeof mod.registerMaestroHandlers === 'function') {
+          mod.registerMaestroHandlers(io, socket);
+        }
+      })
+      .catch((error) => {
+        logger.warn({ error }, 'Failed to register Maestro realtime handlers');
+      });
     socket.on('disconnect', () => {
       connections = Math.max(0, connections - 1);
       if (presenceDisabled && connections < Math.floor(maxConnections * 0.9)) {
