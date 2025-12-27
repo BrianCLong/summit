@@ -1,5 +1,6 @@
 import { promptRegistry } from '../prompts/registry';
 import { logger } from '../utils/logger';
+import { safetyBoundary } from './SafetyBoundary';
 
 export interface GeopoliticalAnalysisResult {
   promptId: string;
@@ -24,25 +25,42 @@ export class GeopoliticalOracleService {
    */
   private async executePrompt(promptId: string, inputs: Record<string, any>): Promise<any> {
     try {
-      // In a real implementation, this would call the LLM service
-      // For now, we simulate the rendering and expect the caller to handle LLM interaction
-      // or we mock the LLM response based on the prompt for this exercise if needed.
+      // Safety Translation Step:
+      // Artifact B: Indirect Prompt Injection Defense.
+      // We explicitly sanitize any "context_data" input before it reaches the prompt template.
+      if (inputs.context_data && typeof inputs.context_data === 'string') {
+        const preCheck = safetyBoundary.scanInputForInjection(inputs.context_data);
+        if (!preCheck.safe) {
+          logger.warn(`Prompt execution blocked by SafetyBoundary: ${preCheck.reason}`);
+          throw new Error(`Safety Violation: ${preCheck.reason}`);
+        }
 
-      // However, strictly speaking, the PromptRegistry only renders the string.
-      // To "Execute", we need an LLM Service.
-      // Assuming we have one or this is a conceptual implementation.
+        // Mutate inputs to use sanitized version
+        // This ensures the prompt template receives the wrapped content
+        inputs.context_data = safetyBoundary.sanitizeInput(inputs.context_data);
+      }
 
       const renderedPrompt = promptRegistry.render(promptId, inputs);
       logger.info(`Executed prompt ${promptId}`, { inputs });
 
-      // Placeholder: In a real system, send `renderedPrompt` to GPT-4
-      // and parse the JSON response.
-      // For this MVP, we return the rendered prompt to indicate success of the "prompt system".
-      return {
+      // Placeholder execution
+      // In a real system, we would also verify the *output* using safetyBoundary.verifyOutput(response)
+      const mockResponse = {
         executed: true,
         prompt_id: promptId,
-        rendered_content: renderedPrompt
+        rendered_content: renderedPrompt,
+        // Simulating a safe response for the mock
+        generated_text: "Analysis complete. No anomalies detected."
       };
+
+      // Artifact A: Constitution Check (Output)
+      // Verify the generated response is safe
+      const outputCheck = safetyBoundary.verifyOutput(mockResponse.generated_text);
+      if (!outputCheck.safe) {
+         throw new Error(`Output Safety Violation: ${outputCheck.reason}`);
+      }
+
+      return mockResponse;
     } catch (error: any) {
       logger.error(`Failed to execute prompt ${promptId}`, { error: error.message });
       throw error;
