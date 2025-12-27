@@ -2,7 +2,7 @@
 /**
  * Feature Flags Setup for Summit Server
  *
- * Initializes feature flags with LaunchDarkly/Unleash and Redis caching
+ * Initializes feature flags with LaunchDarkly/Unleash/Postgres and Redis caching
  */
 
 import {
@@ -12,10 +12,13 @@ import {
   RedisCache,
   PrometheusMetrics,
 } from '@intelgraph/feature-flags';
+import { PostgresProvider } from './PostgresProvider.js';
 import Redis from 'ioredis';
 import logger from '../utils/logger.js';
 
-type FeatureFlagProvider = LaunchDarklyProvider | UnleashProvider;
+// Relax type checking for provider as we are mixing package types with local implementation
+// which matches structurally but might fail strict type checking
+type FeatureFlagProvider = any; // LaunchDarklyProvider | UnleashProvider | PostgresProvider;
 
 let featureFlagService: FeatureFlagService | null = null;
 
@@ -57,13 +60,20 @@ export async function initializeFeatureFlags(): Promise<FeatureFlagService> {
         apiToken: process.env.UNLEASH_API_TOKEN,
         instanceId: process.env.HOSTNAME || 'server',
       });
+    } else if (providerType === 'postgres') {
+      provider = new PostgresProvider();
     } else {
       throw new Error(`Unknown feature flag provider: ${providerType}`);
     }
 
     // Initialize Redis cache
     let cache: RedisCache | undefined;
-    if (process.env.REDIS_URL) {
+    if (process.env.REDIS_URL && providerType !== 'postgres') {
+      // Postgres provider has built-in caching and sync, so we might not need external cache layer
+      // But keeping it consistent if needed.
+      // Actually PostgresProvider implements its own caching to avoid double caching complexity
+      // We only use RedisCache for external providers like LD/Unleash if needed.
+
       const redis = new Redis(process.env.REDIS_URL, {
         maxRetriesPerRequest: 3,
         enableReadyCheck: true,

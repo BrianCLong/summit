@@ -33,6 +33,7 @@ const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
+const FeatureFlagsPage = React.lazy(() => import('@/pages/admin/FeatureFlags'))
 const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
@@ -174,6 +175,7 @@ function App() {
                       {/* Admin */}
                       <Route path="admin/*" element={<AdminPage />} />
                       <Route path="admin/consistency" element={<ConsistencyDashboard />} />
+                      <Route path="admin/feature-flags" element={<FeatureFlagsPage />} />
 
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
