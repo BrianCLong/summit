@@ -6,6 +6,7 @@ import {
   MergeRequestSchema,
   SplitRequestSchema,
   EntityRecordSchema,
+  ExplainPairRequestSchema,
 } from '../types.js';
 import pino from 'pino';
 
@@ -134,6 +135,38 @@ export function createRoutes(engine: EREngine): Router {
         const { mergeId } = req.params;
         const explanation = engine.explain(mergeId);
         res.json(explanation);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  /**
+   * POST /explain - Explain a pairwise entity comparison
+   */
+  router.post(
+    '/explain',
+    validate(ExplainPairRequestSchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const explanation = engine.explainPair(req.body);
+        res.json(explanation);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  /**
+   * GET /merge/:mergeId/export - Export merge bundle with explanation
+   */
+  router.get(
+    '/merge/:mergeId/export',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const { mergeId } = req.params;
+        const bundle = engine.exportMergeBundle(mergeId);
+        res.json(bundle);
       } catch (error) {
         next(error);
       }

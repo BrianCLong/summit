@@ -9,6 +9,7 @@ import type {
   ERFeatures,
   EntityRecord,
 } from '../types.js';
+import { buildFeatureContributions } from '../scoring/scorer.js';
 
 /**
  * In-memory storage for ER operations with full audit trail
@@ -70,11 +71,13 @@ export class ERStorage {
     });
 
     // Store explanation
+    const featureContributions = buildFeatureContributions(features, featureWeights);
     this.storeExplanation({
       mergeId,
       features,
       rationale: this.buildRationale(features, featureWeights),
       featureWeights,
+      featureContributions,
       threshold,
       policyTags: request.policyTags || [],
       method,

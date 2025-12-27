@@ -7,12 +7,15 @@ import type {
   SplitRequest,
   SplitRecord,
   ExplainResponse,
+  ExplainPairRequest,
+  ExplainPairResponse,
   AuditEntry,
   EntityRecord,
   ScoringConfig,
+  MergeExportBundle,
 } from '../types.js';
 import { DEFAULT_SCORING_CONFIG } from '../types.js';
-import { createScorer } from '../scoring/scorer.js';
+import { buildFeatureContributions, createScorer } from '../scoring/scorer.js';
 import { ERStorage } from '../storage/storage.js';
 
 /**
@@ -180,6 +183,47 @@ export class EREngine {
       throw new Error(`Explanation for merge ${mergeId} not found`);
     }
     return explanation;
+  }
+
+  /**
+   * Explain a comparison between two entities
+   */
+  explainPair(request: ExplainPairRequest): ExplainPairResponse {
+    const scoringConfig: ScoringConfig = {
+      ...this.config,
+      method: request.method || this.config.method,
+      threshold: request.threshold || this.config.threshold,
+    };
+    const scorer = createScorer(scoringConfig);
+    const result = scorer.score(request.entityA, request.entityB);
+    const featureContributions = buildFeatureContributions(
+      result.features,
+      scoringConfig.weights,
+    );
+
+    return {
+      score: result.score,
+      confidence: result.confidence,
+      method: scorer.getMethod(),
+      threshold: scoringConfig.threshold,
+      features: result.features,
+      rationale: result.rationale,
+      featureWeights: scoringConfig.weights,
+      featureContributions,
+    };
+  }
+
+  /**
+   * Export a merge bundle with explanation metadata
+   */
+  exportMergeBundle(mergeId: string): MergeExportBundle {
+    const merge = this.getMerge(mergeId);
+    if (!merge) {
+      throw new Error(`Merge ${mergeId} not found`);
+    }
+
+    const explanation = this.explain(mergeId);
+    return { merge, explanation };
   }
 
   /**
