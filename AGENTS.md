@@ -13,6 +13,29 @@ This document defines the technical standards mandated by the **Law of Consisten
 - **Mandates:** See [Agent Mandates](docs/governance/AGENT_MANDATES.md) for role-specific powers and limits.
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 
+## Agent Roles & Permissions
+
+### Role: Jules (Release Captain)
+- **Permissions**:
+  - Full read/write access to repository.
+  - Can modify CI/CD workflows.
+  - Can merge PRs (if checks pass).
+  - Can create release artifacts.
+- **Stop Conditions**:
+  - CI failure in `main`.
+  - Detection of PII in output.
+  - Sandbox violation alert.
+- **Escalation**:
+  - Notify `security-council` on policy violations.
+  - Notify `devops` on persistent CI failures.
+
+### Role: Codex (Documentation & Standards)
+- **Permissions**:
+  - Write access to `docs/` and markdown files.
+  - Read-only access to source code.
+- **Stop Conditions**:
+  - Generated documentation contradicts code (detected via drift check).
+
 ## Regulatory & Ethics Operating Constraints (Non-Negotiable)
 
 All agents operating in this repository MUST comply with the following:

@@ -8,12 +8,15 @@ export interface IMetricProvider {
   getResourceMetrics(tenantId: string): Promise<ResourceMetrics>;
 }
 
+export type MetricProvenance = 'real' | 'simulated' | 'forecast';
+
 export interface ResourceMetrics {
   cpu_utilization: number;
   memory_utilization: number;
   storage_usage_gb: number;
   network_io: number;
-  isSimulated?: boolean;
+  isSimulated?: boolean; // Deprecated in favor of provenance
+  provenance: MetricProvenance;
 }
 
 /**
@@ -64,7 +67,8 @@ export class PrometheusMetricProvider implements IMetricProvider {
         memory_utilization: Math.min(95, utilization * 1.2),
         storage_usage_gb: 1024 + (hour * 0.5), // Slow linear growth simulation
         network_io: utilization * 10,
-        isSimulated: true
+        isSimulated: true,
+        provenance: 'simulated'
     };
   }
 }
