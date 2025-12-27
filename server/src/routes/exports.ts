@@ -1,8 +1,10 @@
 import express from 'express';
 import crypto from 'crypto';
 import { exportData } from '../analytics/exports/ExportController.js';
+import { WatermarkVerificationService } from '../exports/WatermarkVerificationService.js';
 
 const router = express.Router();
+const watermarkVerificationService = new WatermarkVerificationService();
 
 router.post('/sign-manifest', async (req, res) => {
   try {
@@ -30,5 +32,26 @@ router.post('/sign-manifest', async (req, res) => {
 });
 
 router.post('/analytics/export', exportData);
+
+router.post('/exports/:id/verify-watermark', async (req, res) => {
+  if (process.env.WATERMARK_VERIFY !== 'true') {
+    return res.status(404).json({ error: 'Watermark verification not enabled' });
+  }
+
+  const { id } = req.params;
+  const { artifactId, watermark } = req.body || {};
+
+  try {
+    const result = await watermarkVerificationService.verify({
+      exportId: id,
+      artifactId,
+      watermark,
+    });
+
+    return res.json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
 
 export default router;
