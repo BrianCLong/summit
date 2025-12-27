@@ -26,6 +26,13 @@ npm test
 npm run test:fuzz
 ```
 
+## Multi-tenant policy resolution
+
+- The gateway can prefer per-tenant OPA bundles while retaining a global fallback.
+- Set `OPA_TENANT_POLICY_TEMPLATE` to a data path template (e.g. `tenants/{tenantId}/abac/decision`).
+- Configure `OPA_POLICY_PATH` for the fleet-wide policy (defaults to `summit/abac/decision`) and `OPA_BASE_URL` for your OPA endpoint (defaults to `http://localhost:8181`).
+- The resolver tries the tenant path first and falls back to the global path if the tenant package is absent (HTTP 404). The legacy `OPA_URL` override remains supported for compatibility.
+
 ## Key Endpoints
 
 - `POST /v1/companyos/decisions:check` – external governance endpoint secured by API
