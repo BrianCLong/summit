@@ -46,6 +46,10 @@ import {
   GuardrailsService,
   createGuardrailsService,
 } from './guardrails.service.js';
+import {
+  CopilotGovernanceService,
+  getCopilotGovernance,
+} from './governance.service.js';
 
 const logger = (pino as any)({ name: 'copilot-service' });
 
@@ -97,6 +101,7 @@ export class CopilotService {
   private readonly graphRAGService: GraphRAGProvenanceService;
   private readonly redactionService: RedactionService;
   private readonly guardrailsService: GuardrailsService;
+  private readonly governanceService: CopilotGovernanceService;
   private readonly config: CopilotConfig;
 
   constructor(config: CopilotConfig) {
@@ -114,8 +119,9 @@ export class CopilotService {
       userClearance: config.defaultClearance || 'UNCLASSIFIED',
     });
     this.guardrailsService = createGuardrailsService();
+    this.governanceService = getCopilotGovernance();
 
-    logger.info('Copilot service initialized');
+    logger.info('Copilot service initialized with governance');
   }
 
   /**
@@ -161,11 +167,19 @@ export class CopilotService {
           'Prompt blocked by guardrails',
         );
 
+        const refusal = this.guardrailsService.createPolicyRefusal(
+          promptValidation.reason || 'Prompt validation failed',
+        );
+
+        // Generate governance verdict for refusal
+        const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+
         return {
           type: 'refusal',
-          data: this.guardrailsService.createPolicyRefusal(
-            promptValidation.reason || 'Prompt validation failed',
-          ),
+          data: {
+            ...refusal,
+            governanceVerdict,
+          },
         };
       }
 
@@ -232,20 +246,28 @@ export class CopilotService {
       const executionResult = await this.executeQuery(preview, context);
 
       if (!executionResult.success) {
+        const refusal = {
+          refusalId: randomUUID(),
+          reason:
+            executionResult.error || 'Query execution failed due to sandbox restrictions',
+          category: 'internal_error' as const,
+          suggestions: [
+            'Try simplifying your question',
+            'Adjust filters to reduce query cost',
+            'Contact support if the problem persists',
+          ],
+          timestamp: new Date().toISOString(),
+          auditId: randomUUID(),
+        };
+
+        // Generate governance verdict for refusal
+        const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+
         return {
           type: 'refusal',
           data: {
-            refusalId: randomUUID(),
-            reason:
-              executionResult.error || 'Query execution failed due to sandbox restrictions',
-            category: 'internal_error',
-            suggestions: [
-              'Try simplifying your question',
-              'Adjust filters to reduce query cost',
-              'Contact support if the problem persists',
-            ],
-            timestamp: new Date().toISOString(),
-            auditId: randomUUID(),
+            ...refusal,
+            governanceVerdict,
           },
         };
       }
@@ -282,14 +304,34 @@ export class CopilotService {
         );
 
         if (validation.refusal) {
+          // Generate governance verdict for refusal
+          const governanceVerdict = this.governanceService.generateRefusalVerdict(validation.refusal);
+
           return {
             type: 'refusal',
-            data: validation.refusal,
+            data: {
+              ...validation.refusal,
+              governanceVerdict,
+            },
           };
         }
       }
 
       const executionTime = Date.now() - startTime;
+
+      // Build answer without governance verdict first
+      const answerWithoutVerdict = {
+        ...redactedResult.content,
+        warnings,
+        executedQuery: executionResult.cypher,
+      };
+
+      // Generate governance verdict for approved answer
+      const governanceVerdict = this.governanceService.generateApprovedVerdict(
+        answerWithoutVerdict,
+        validation.checks
+      );
+
       logger.info(
         {
           requestId,
@@ -297,6 +339,7 @@ export class CopilotService {
           citationCount: redactedResult.content.citations.length,
           confidence: redactedResult.content.confidence,
           wasRedacted: redactedResult.wasRedacted,
+          governanceVerdict: governanceVerdict.verdict,
         },
         'Copilot query completed',
       );
@@ -304,9 +347,8 @@ export class CopilotService {
       return {
         type: 'answer',
         data: {
-          ...redactedResult.content,
-          warnings,
-          executedQuery: executionResult.cypher,
+          ...answerWithoutVerdict,
+          governanceVerdict,
         },
       };
     } catch (error) {
@@ -320,22 +362,30 @@ export class CopilotService {
         'Copilot query failed',
       );
 
+      const refusal = {
+        refusalId: randomUUID(),
+        reason:
+          error instanceof Error
+            ? `Processing error: ${error.message}`
+            : 'An unexpected error occurred',
+        category: 'internal_error' as const,
+        suggestions: [
+          'Try simplifying your question',
+          'Check if the investigation has the data you need',
+          'Contact support if the problem persists',
+        ],
+        timestamp: new Date().toISOString(),
+        auditId: randomUUID(),
+      };
+
+      // Generate governance verdict for refusal
+      const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+
       return {
         type: 'refusal',
         data: {
-          refusalId: randomUUID(),
-          reason:
-            error instanceof Error
-              ? `Processing error: ${error.message}`
-              : 'An unexpected error occurred',
-          category: 'internal_error',
-          suggestions: [
-            'Try simplifying your question',
-            'Check if the investigation has the data you need',
-            'Contact support if the problem persists',
-          ],
-          timestamp: new Date().toISOString(),
-          auditId: randomUUID(),
+          ...refusal,
+          governanceVerdict,
         },
       };
     }
@@ -369,11 +419,17 @@ export class CopilotService {
       );
 
       if (!promptValidation.allowed) {
+        const refusal = this.guardrailsService.createPolicyRefusal(
+          promptValidation.reason || 'Question validation failed',
+        );
+        const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+
         return {
           type: 'refusal',
-          data: this.guardrailsService.createPolicyRefusal(
-            promptValidation.reason || 'Question validation failed',
-          ),
+          data: {
+            ...refusal,
+            governanceVerdict,
+          },
         };
       }
 
@@ -399,26 +455,42 @@ export class CopilotService {
       );
 
       if (validation.refusal) {
+        const governanceVerdict = this.governanceService.generateRefusalVerdict(validation.refusal);
+
         return {
           type: 'refusal',
-          data: validation.refusal,
+          data: {
+            ...validation.refusal,
+            governanceVerdict,
+          },
         };
       }
 
       const executionTime = Date.now() - startTime;
+
+      // Generate governance verdict for approved answer
+      const governanceVerdict = this.governanceService.generateApprovedVerdict(
+        redactedResult.content,
+        validation.checks
+      );
+
       logger.info(
         {
           requestId,
           executionTimeMs: executionTime,
           citationCount: redactedResult.content.citations.length,
           confidence: redactedResult.content.confidence,
+          governanceVerdict: governanceVerdict.verdict,
         },
         'GraphRAG question answered',
       );
 
       return {
         type: 'answer',
-        data: redactedResult.content,
+        data: {
+          ...redactedResult.content,
+          governanceVerdict,
+        },
       };
     } catch (error) {
       logger.error(
@@ -429,18 +501,25 @@ export class CopilotService {
         'GraphRAG question failed',
       );
 
+      const refusal = {
+        refusalId: randomUUID(),
+        reason:
+          error instanceof Error
+            ? error.message
+            : 'Failed to answer question',
+        category: 'internal_error' as const,
+        suggestions: ['Try a simpler question', 'Check your access permissions'],
+        timestamp: new Date().toISOString(),
+        auditId: randomUUID(),
+      };
+
+      const governanceVerdict = this.governanceService.generateRefusalVerdict(refusal);
+
       return {
         type: 'refusal',
         data: {
-          refusalId: randomUUID(),
-          reason:
-            error instanceof Error
-              ? error.message
-              : 'Failed to answer question',
-          category: 'internal_error',
-          suggestions: ['Try a simpler question', 'Check your access permissions'],
-          timestamp: new Date().toISOString(),
-          auditId: randomUUID(),
+          ...refusal,
+          governanceVerdict,
         },
       };
     }

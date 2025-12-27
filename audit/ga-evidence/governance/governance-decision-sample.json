@@ -1,0 +1,70 @@
+{
+  "eventType": "GOVERNANCE_DECISION",
+  "decisionId": "dec-2025-12-27-001234",
+  "timestamp": "2025-12-27T14:32:15.123456Z",
+  "verdict": "ESCALATE_HUMAN",
+  "policy": "summit.agent",
+  "input": {
+    "actor": {
+      "type": "agent",
+      "id": "agent-anomaly-detection-042",
+      "fleetId": "anomaly-detection",
+      "roles": ["ai-analyst"],
+      "attributes": {
+        "clearanceLevel": "CONFIDENTIAL",
+        "mfaVerified": false,
+        "organizationId": "org-defense-001",
+        "tenantId": "tenant-DoD-001"
+      },
+      "agentMetadata": {
+        "fleetId": "anomaly-detection",
+        "policyCompliance": 96.8,
+        "violationHistory": 0
+      }
+    },
+    "action": {
+      "type": "BULK_DELETE",
+      "resource": "entity",
+      "scope": ["ent-001", "ent-002", "...75 more"],
+      "sensitivity": "CONFIDENTIAL",
+      "impactScore": 82
+    },
+    "resource": {
+      "type": "entity-collection",
+      "id": "batch-cleanup-20251227",
+      "classification": "CONFIDENTIAL",
+      "owner": "system-admin",
+      "tags": ["auto-generated", "duplicate-detection"]
+    },
+    "context": {
+      "timestamp": "2025-12-27T14:32:15.000Z",
+      "ipAddress": "10.0.42.15",
+      "userAgent": "MaestroOrchestrator/1.0",
+      "sessionId": "ses-abc123def456",
+      "requestId": "req-xyz789",
+      "environment": "production"
+    }
+  },
+  "reason": "Agent action requires approval: impact score 82 >= 70. Bulk operation count 75 > 50 threshold.",
+  "metadata": {
+    "policyVersion": "abc123def456789",
+    "evaluationTimeMs": 12,
+    "triggeredRules": [
+      "summit.agent.escalate_human[\"high_impact_score\"]",
+      "summit.agent.escalate_human[\"bulk_operation_threshold\"]"
+    ]
+  },
+  "escalation": {
+    "escalationId": "esc-2025-12-27-001234",
+    "assignedTo": "analyst-team",
+    "priority": "elevated",
+    "slaDeadline": "2025-12-27T15:32:15.000Z",
+    "status": "pending",
+    "contextSummary": "Agent detected 75 potential duplicate entities and requests permission to bulk delete. Requires human verification of duplicate detection accuracy."
+  },
+  "audit": {
+    "ledgerEntryId": "led-2025-12-27-999888",
+    "previousEventHash": "sha256:abcd1234...",
+    "signature": "sha256-hmac:xyz789..."
+  }
+}
