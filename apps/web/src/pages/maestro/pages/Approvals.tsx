@@ -2,16 +2,15 @@
 // Maestro Approvals Management
 // =============================================
 import React from 'react'
+import GatedSurfaceNotice from '@/components/maestro/GatedSurfaceNotice'
 
 export default function Approvals() {
   return (
     <div className="p-6">
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900">Approvals & Gates</h1>
-        <p className="mt-2 text-gray-600">
-          Approval workflow management - Coming soon
-        </p>
-      </div>
+      <GatedSurfaceNotice
+        title="Approvals & Gates"
+        summary="Approval workflow management is gated for MVP-3-GA to align with release governance."
+      />
     </div>
   )
 }

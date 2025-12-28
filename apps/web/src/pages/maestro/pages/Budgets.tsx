@@ -2,16 +2,15 @@
 // Maestro Budgets Management
 // =============================================
 import React from 'react'
+import GatedSurfaceNotice from '@/components/maestro/GatedSurfaceNotice'
 
 export default function Budgets() {
   return (
     <div className="p-6">
-      <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900">Budgets</h1>
-        <p className="mt-2 text-gray-600">
-          Budget and cost management - Coming soon
-        </p>
-      </div>
+      <GatedSurfaceNotice
+        title="Budgets"
+        summary="Budget and cost management is gated for MVP-3-GA pending finance validation."
+      />
     </div>
   )
 }

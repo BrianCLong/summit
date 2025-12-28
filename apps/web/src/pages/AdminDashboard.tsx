@@ -30,13 +30,6 @@ import { gql } from '@apollo/client';
 
 import DashboardOverview from '../components/admin/DashboardOverview';
 import UserManagement from '../components/admin/UserManagement';
-// TODO: Implement missing admin components
-// import ModerationQueue from '../components/admin/ModerationQueue';
-// import FeatureFlagsPanel from '../components/admin/FeatureFlagsPanel';
-// import AuditLogViewer from '../components/admin/AuditLogViewer';
-// import DataExportTools from '../components/admin/DataExportTools';
-// import SystemConfigPanel from '../components/admin/SystemConfigPanel';
-// import AlertsPanel from '../components/admin/AlertsPanel';
 
 // ============================================================================
 // GRAPHQL QUERIES
