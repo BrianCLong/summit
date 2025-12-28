@@ -41,6 +41,8 @@ input UserInput {
   username: String
 }
 
+directive @scope(requires: [String]) on FIELD_DEFINITION
+
 # Authentication Types
 """
 Input for user registration
@@ -573,10 +575,10 @@ input SemanticSearchFilter {
     verifyResetToken(token: String!): ResetTokenVerification!
 
     # Entity & User Queries
-    entity(id: ID!): Entity
-    entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]!
-    relationship(id: ID!): Relationship
-    relationships(from: ID, to: ID, type: String, limit: Int = 25, offset: Int = 0): [Relationship!]!
+    entity(id: ID!): Entity @scope(requires: "read:graph")
+    entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]! @scope(requires: "read:graph")
+    relationship(id: ID!): Relationship @scope(requires: "read:graph")
+    relationships(from: ID, to: ID, type: String, limit: Int = 25, offset: Int = 0): [Relationship!]! @scope(requires: "read:graph")
     user(id: ID!): User
     users(limit: Int = 25, offset: Int = 0): [User!]!
     investigation(id: ID!): Investigation
@@ -703,9 +705,9 @@ input SemanticSearchFilter {
     updateUser(id: ID!, input: UserInput!): User!
     updateUserPreferences(userId: ID!, preferences: JSON!): User!
     deleteUser(id: ID!): Boolean!
-    createInvestigation(input: InvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: InvestigationInput!): Investigation!
-    deleteInvestigation(id: ID!): Boolean!
+    createInvestigation(input: InvestigationInput!): Investigation! @scope(requires: "write:case")
+    updateInvestigation(id: ID!, input: InvestigationInput!): Investigation! @scope(requires: "write:case")
+    deleteInvestigation(id: ID!): Boolean! @scope(requires: "write:case")
     linkEntities(text: String!): [LinkedEntity!]!
     extractRelationships(text: String!, entities: [LinkedEntityInput!]!): [ExtractedRelationship!]!
     generateEntitiesFromText(investigationId: ID!, text: String!): GeneratedEntitiesResult!

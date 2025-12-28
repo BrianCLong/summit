@@ -1,34 +1,15 @@
 {
-  "name": "@intelgraph/maestro-sdk",
-  "version": "2.0.0",
-  "description": "TypeScript SDK for Summit Maestro tasks, connectors, and policy-aware execution",
-  "repository": "https://github.com/your-org/maestro",
-  "license": "UNLICENSED",
-  "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "name": "@intelgraph/sdk-ts",
+  "version": "1.0.0",
+  "description": "IntelGraph TypeScript SDK",
+  "main": "dist/client.js",
+  "types": "dist/client.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "clean": "rimraf dist",
-    "lint": "eslint .",
-    "test": "vitest run",
-    "prepublishOnly": "npm run clean && npm run build && npm test"
+    "build": "tsc"
   },
+  "dependencies": {},
   "devDependencies": {
-    "eslint": "^9.39.1",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.3",
-    "@types/node": "20.19.27"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
   }
 }

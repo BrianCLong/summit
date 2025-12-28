@@ -20,7 +20,7 @@ import type { PoolClient } from 'pg';
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
 import resolvers from './resolvers-combined.js';
-import { authDirectiveTransformer } from './authDirective.js';
+import { authDirectiveTransformer, scopeDirectiveTransformer } from './authDirective.js';
 
 // Import DataLoaders
 import { createDataLoaders, type DataLoaders } from './dataloaders/index.js';
@@ -87,6 +87,9 @@ function createSecureSchema() {
 
   // Apply Auth Directive
   schema = authDirectiveTransformer(schema);
+
+  // Apply Scope Directive
+  schema = scopeDirectiveTransformer(schema);
 
   // Apply security middleware
   return applyMiddleware(schema, permissions);
