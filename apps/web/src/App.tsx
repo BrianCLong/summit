@@ -47,8 +47,13 @@ const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => 
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
-const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
+// const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
+const SwitchboardLayout = React.lazy(() => import('@/components/switchboard/SwitchboardLayout'))
+const SwitchboardOnboarding = React.lazy(() => import('@/pages/switchboard/OnboardingWizard'))
+const SwitchboardPlans = React.lazy(() => import('@/pages/switchboard/PlanLimits'))
+const SwitchboardNetworking = React.lazy(() => import('@/pages/switchboard/Networking'))
+const SwitchboardFundability = React.lazy(() => import('@/pages/switchboard/Fundability'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -119,6 +124,15 @@ function App() {
                     />
                     <Route path="/maestro/*" element={<MaestroDashboard />} />
 
+                    {/* Switchboard Console */}
+                    <Route path="/switchboard" element={<SwitchboardLayout />}>
+                       <Route index element={<Navigate to="onboarding" replace />} />
+                       <Route path="onboarding" element={<SwitchboardOnboarding />} />
+                       <Route path="plans" element={<SwitchboardPlans />} />
+                       <Route path="networking" element={<SwitchboardNetworking />} />
+                       <Route path="fundability" element={<SwitchboardFundability />} />
+                    </Route>
+
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
                       <Route index element={<HomePage />} />
@@ -185,7 +199,7 @@ function App() {
                       <Route path="changelog" element={<ChangelogPage />} />
 
                       <Route path="demo" element={<DemoControlPage />} />
-                      <Route path="onboarding" element={<OnboardingWizard />} />
+                      {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
 
                       {/* Catch all */}
                       <Route path="*" element={<NotFound />} />
