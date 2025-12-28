@@ -1,0 +1,19 @@
+name: Frontend Lane Gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lane-gate:
+    name: Validate frontend feature lane
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate frontend lane declaration
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node scripts/ci/check-frontend-lane.mjs

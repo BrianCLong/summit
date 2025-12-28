@@ -2,6 +2,17 @@
 
 [What/why]
 
+## Frontend Feature Lane (required)
+
+- [ ] Lane A — GA-Safe Enhancements
+- [ ] Lane B — GA-Adjacent Extensions
+- [ ] Lane C — Experimental / Preview
+- [ ] Lane D — Governance / Compliance Evolution
+
+**Lane Justification:** [Why this lane is the right risk fit]
+
+**Requested Reviewers (per lane rules):** [@frontend-lead @product @governance]
+
 ## M&A / Integration Readiness (DD Signal)
 
 _If this PR involves integrating an external system or library:_
