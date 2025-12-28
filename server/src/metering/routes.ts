@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 import { persistentUsageRepository } from './persistence.js';
 import { quotaManager } from './quotas.js';

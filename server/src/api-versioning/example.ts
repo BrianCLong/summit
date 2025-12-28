@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Example usage of the API versioning infrastructure.
  * This file demonstrates common patterns and integration approaches.

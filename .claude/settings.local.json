@@ -240,7 +240,14 @@
       "Bash(gh pr view:*)",
       "Bash(gh pr merge:*)",
       "Bash(git merge:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(pnpm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npm run install:*)",
+      "Bash(pnpm test:quick:*)"
     ],
     "deny": [],
     "ask": []

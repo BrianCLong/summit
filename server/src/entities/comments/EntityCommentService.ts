@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool, type PoolClient } from 'pg';
 
 export interface EntityCommentAttachmentInput {

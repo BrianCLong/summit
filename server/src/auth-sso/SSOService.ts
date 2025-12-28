@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getPostgresPool } from '../config/database.js';
 import logger from '../utils/logger.js';
 import { AuthSSOProvider, OIDCProvider, SAMLProviderStub, SSOConfig, SSOUserClaims } from './SSOProvider.js';

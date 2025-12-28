@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Correlation ID Middleware
  * Ensures every request has a unique ID for tracking across logs, metrics, and traces

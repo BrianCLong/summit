@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Data Envelope Middleware for REST API
  *

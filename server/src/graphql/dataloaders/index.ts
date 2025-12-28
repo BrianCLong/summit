@@ -2,6 +2,8 @@
 /**
  * DataLoader Infrastructure for GraphQL Resolvers
  * Implements batch loading to prevent N+1 queries
+ *
+ * SOC 2 Controls: CC7.1 (System Operations)
  */
 
 import DataLoader from 'dataloader';
@@ -9,16 +11,50 @@ import { createEntityLoader, type Entity } from './entityLoader.js';
 import { createRelationshipLoader, type Relationship } from './relationshipLoader.js';
 import { createInvestigationLoader, type Investigation } from './investigationLoader.js';
 import { createUserLoader, type User } from './userLoader.js';
+import {
+  createComplianceAssessmentLoader,
+  createAssessmentsByControlLoader,
+  createAssessmentsByFrameworkLoader,
+  type ComplianceAssessmentWithVerdict,
+} from './complianceAssessmentLoader.js';
+import {
+  createPluginConfigLoader,
+  createAllPluginsForTenantLoader,
+  createEnabledPluginsLoader,
+  type PluginConfigWithVerdict,
+} from './pluginConfigLoader.js';
+import {
+  createPolicyVerdictLoader,
+  createVerdictByKeyLoader,
+  createVerdictsBySubjectLoader,
+  createDeniedVerdictsLoader,
+  type PolicyVerdictWithGovernance,
+  type VerdictLookupKey,
+} from './policyVerdictLoader.js';
 import type { Driver as Neo4jDriver } from 'neo4j-driver';
 import type { Pool as PgPool, PoolClient } from 'pg';
 import type { Redis } from 'ioredis';
 
 export interface DataLoaders {
+  // Entity loaders
   entityLoader: DataLoader<string, Entity, string>;
   relationshipLoader: DataLoader<string, Relationship, string>;
   investigationLoader: DataLoader<string, Investigation, string>;
   userLoader: DataLoader<string, User, string>;
   entitiesByTypeLoader: DataLoader<string, Entity[], string>;
+  // Compliance loaders
+  complianceAssessmentLoader: DataLoader<string, ComplianceAssessmentWithVerdict, string>;
+  assessmentsByControlLoader: DataLoader<string, ComplianceAssessmentWithVerdict[], string>;
+  assessmentsByFrameworkLoader: DataLoader<string, ComplianceAssessmentWithVerdict[], string>;
+  // Plugin loaders
+  pluginConfigLoader: DataLoader<string, PluginConfigWithVerdict | null, string>;
+  allPluginsForTenantLoader: DataLoader<string, PluginConfigWithVerdict[], string>;
+  enabledPluginsLoader: DataLoader<string, PluginConfigWithVerdict[], string>;
+  // Policy verdict loaders
+  policyVerdictLoader: DataLoader<string, PolicyVerdictWithGovernance, string>;
+  verdictByKeyLoader: DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null, string>;
+  verdictsBySubjectLoader: DataLoader<string, PolicyVerdictWithGovernance[], string>;
+  deniedVerdictsLoader: DataLoader<string, PolicyVerdictWithGovernance[], string>;
 }
 
 export interface DataLoaderContext {
@@ -35,6 +71,7 @@ export interface DataLoaderContext {
  */
 export function createDataLoaders(context: DataLoaderContext): DataLoaders {
   return {
+    // Entity loaders
     entityLoader: createEntityLoader(context),
     relationshipLoader: createRelationshipLoader(context),
     investigationLoader: createInvestigationLoader(context),
@@ -71,6 +108,19 @@ export function createDataLoaders(context: DataLoaderContext): DataLoaders {
         await session.close();
       }
     }),
+    // Compliance loaders
+    complianceAssessmentLoader: createComplianceAssessmentLoader(context),
+    assessmentsByControlLoader: createAssessmentsByControlLoader(context),
+    assessmentsByFrameworkLoader: createAssessmentsByFrameworkLoader(context),
+    // Plugin loaders
+    pluginConfigLoader: createPluginConfigLoader(context),
+    allPluginsForTenantLoader: createAllPluginsForTenantLoader(context),
+    enabledPluginsLoader: createEnabledPluginsLoader(context),
+    // Policy verdict loaders
+    policyVerdictLoader: createPolicyVerdictLoader(context),
+    verdictByKeyLoader: createVerdictByKeyLoader(context),
+    verdictsBySubjectLoader: createVerdictsBySubjectLoader(context),
+    deniedVerdictsLoader: createDeniedVerdictsLoader(context),
   };
 }
 

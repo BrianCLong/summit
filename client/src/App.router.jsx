@@ -97,8 +97,23 @@ const PartnerConsolePage = React.lazy(() =>
 const AlertingPage = React.lazy(() =>
   import('./pages/AlertingPage')
 );
+const InstalledPlugins = React.lazy(() =>
+  import('./pages/Plugins/InstalledPlugins')
+);
+const IntegrationCatalog = React.lazy(() =>
+  import('./pages/Integrations/IntegrationCatalog')
+);
+const SecurityDashboard = React.lazy(() =>
+  import('./pages/Security/SecurityDashboard')
+);
+const ComplianceCenter = React.lazy(() =>
+  import('./pages/Compliance/ComplianceCenter')
+);
+const SandboxDashboard = React.lazy(() =>
+  import('./pages/Sandbox/SandboxDashboard')
+);
 
-import { MilitaryTech, Notifications } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 
 // Demo mode components
@@ -142,6 +157,11 @@ const navigationItems = [
     roles: [ADMIN],
   },
   { path: '/alerting', label: 'Alerting', icon: <Notifications />, roles: [ADMIN] },
+  { path: '/plugins', label: 'Plugins', icon: <Extension />, roles: [ADMIN] },
+  { path: '/integrations', label: 'Integrations', icon: <Cable />, roles: [ADMIN] },
+  { path: '/security', label: 'Security', icon: <Key />, roles: [ADMIN] },
+  { path: '/compliance', label: 'Compliance', icon: <VerifiedUser />, roles: [ADMIN] },
+  { path: '/sandbox', label: 'Sandbox', icon: <Science />, roles: [ADMIN] },
 ];
 
 // Connection Status Component
@@ -761,6 +781,11 @@ function MainLayout() {
                   element={<ExecutiveDashboard />}
                 />
                 <Route path="/alerting" element={<AlertingPage />} />
+                <Route path="/plugins" element={<InstalledPlugins />} />
+                <Route path="/integrations" element={<IntegrationCatalog />} />
+                <Route path="/security" element={<SecurityDashboard />} />
+                <Route path="/compliance" element={<ComplianceCenter />} />
+                <Route path="/sandbox" element={<SandboxDashboard />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>

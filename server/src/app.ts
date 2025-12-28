@@ -116,6 +116,11 @@ import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
+import pluginAdminRouter from './routes/plugins/plugin-admin.js';
+import integrationAdminRouter from './routes/integrations/integration-admin.js';
+import securityAdminRouter from './routes/security/security-admin.js';
+import complianceAdminRouter from './routes/compliance/compliance-admin.js';
+import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -414,6 +419,11 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
+  app.use('/api/plugins', pluginAdminRouter);
+  app.use('/api/integrations', integrationAdminRouter);
+  app.use('/api/security', securityAdminRouter);
+  app.use('/api/compliance', complianceAdminRouter);
+  app.use('/api/sandbox', sandboxAdminRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
