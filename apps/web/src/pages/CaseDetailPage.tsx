@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 /**
  * CaseDetailPage - Comprehensive Case Workspace
  *
@@ -11,7 +9,7 @@
  * - Integrated tri-pane explorer
  */
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -40,12 +38,19 @@ import {
 import { TriPaneShell } from '@/features/triPane'
 import { useMockTriPaneData } from '@/features/triPane/mockData'
 import { CaseExportModal } from '@/components/case/CaseExportModal'
+import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
+import { useDemoMode } from '@/components/common/DemoIndicator'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type {
   Case,
   CaseTask,
   Watchlist,
   CaseComment,
   Priority,
+  Entity,
+  Relationship,
+  TimelineEvent,
+  GeospatialEvent,
 } from '@/types'
 
 // Mock data generators
@@ -187,24 +192,57 @@ const PRIORITY_COLORS: Record<Priority, string> = {
 export default function CaseDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const isDemoMode = useDemoMode()
 
-  const [caseData] = useState<Case>(generateMockCase(id || 'case-1'))
-  const [tasks, setTasks] = useState<CaseTask[]>(
-    generateMockTasks(id || 'case-1')
-  )
-  const [watchlists] = useState<Watchlist[]>(
-    generateMockWatchlists(id || 'case-1')
-  )
-  const [comments, setComments] = useState<CaseComment[]>(
-    generateMockComments(id || 'case-1')
-  )
+  const [caseData, setCaseData] = useState<Case | null>(null)
+  const [tasks, setTasks] = useState<CaseTask[]>([])
+  const [watchlists, setWatchlists] = useState<Watchlist[]>([])
+  const [comments, setComments] = useState<CaseComment[]>([])
   const [newComment, setNewComment] = useState('')
   const [activeTab, setActiveTab] = useState('overview')
   const [exportOpen, setExportOpen] = useState(false)
-  const tenantId = 'tenant-demo'
+  const tenantId = isDemoMode ? 'tenant-demo' : 'tenant-unavailable'
 
-  // Load tri-pane data
-  const triPaneData = useMockTriPaneData()
+  const [triPaneData, setTriPaneData] = useState<{
+    entities: Entity[]
+    relationships: Relationship[]
+    timelineEvents: TimelineEvent[]
+    geospatialEvents: GeospatialEvent[]
+  }>({
+    entities: [],
+    relationships: [],
+    timelineEvents: [],
+    geospatialEvents: [],
+  })
+
+  useEffect(() => {
+    if (!isDemoMode) {
+      setCaseData(null)
+      setTasks([])
+      setWatchlists([])
+      setComments([])
+      setTriPaneData({
+        entities: [],
+        relationships: [],
+        timelineEvents: [],
+        geospatialEvents: [],
+      })
+      return
+    }
+
+    const caseId = id || 'case-1'
+    setCaseData(generateMockCase(caseId))
+    setTasks(generateMockTasks(caseId))
+    setWatchlists(generateMockWatchlists(caseId))
+    setComments(generateMockComments(caseId))
+
+    const loadTriPaneData = async () => {
+      const data = await useMockTriPaneData()
+      setTriPaneData(data)
+    }
+
+    loadTriPaneData()
+  }, [id, isDemoMode])
 
   // Task management
   const handleToggleTaskStatus = useCallback((taskId: string) => {
@@ -224,6 +262,9 @@ export default function CaseDetailPage() {
     )
   }, [])
 
+  const safeCaseId = caseData?.id ?? id ?? 'case-unavailable'
+  const safeCaseTitle = caseData?.title ?? 'Case'
+
   // Comment submission
   const handleSubmitComment = useCallback(() => {
     if (!newComment.trim()) return
@@ -231,17 +272,17 @@ export default function CaseDetailPage() {
     const mentions = extractMentions(newComment)
     const newCommentObj: CaseComment = {
       id: `comment-${Date.now()}`,
-      caseId: caseData.id,
+      caseId: safeCaseId,
       content: newComment,
       author: 'Current User',
       createdAt: new Date().toISOString(),
       mentions,
-      auditMarker: `AUDIT-${new Date().getFullYear()}-${caseData.id.split('-')[1]}-${String(comments.length + 1).padStart(3, '0')}`,
+      auditMarker: `AUDIT-${new Date().getFullYear()}-${safeCaseId.split('-')[1] ?? 'case'}-${String(comments.length + 1).padStart(3, '0')}`,
     }
 
     setComments(prev => [...prev, newCommentObj])
     setNewComment('')
-  }, [newComment, caseData.id, comments.length])
+  }, [newComment, safeCaseId, comments.length])
 
   const extractMentions = (text: string): string[] => {
     const mentionRegex = /@([a-z-]+)/g
@@ -278,15 +319,46 @@ export default function CaseDetailPage() {
     }
   }, [tasks])
 
+  if (!isDemoMode && !caseData) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <EmptyState
+          icon="alert"
+          title="Case data unavailable"
+          description="Connect the backend case service to load live case data."
+          action={{ label: 'Go back', onClick: () => navigate('/cases') }}
+        />
+      </div>
+    )
+  }
+
+  if (!caseData) {
+    return (
+      <div className="h-full flex items-center justify-center p-6">
+        <EmptyState
+          icon="alert"
+          title="Loading case data"
+          description="Preparing case workspace..."
+        />
+      </div>
+    )
+  }
+
   return (
     <div className="h-screen flex flex-col">
       <CaseExportModal
         tenantId={tenantId}
-        caseId={caseData.id}
-        caseTitle={caseData.title}
+        caseId={safeCaseId}
+        caseTitle={safeCaseTitle}
         open={exportOpen}
         onOpenChange={setExportOpen}
       />
+      <div className="px-6 pt-6">
+        <DataIntegrityNotice
+          mode={isDemoMode ? 'demo' : 'unavailable'}
+          context="Case workspace"
+        />
+      </div>
       {/* Header */}
       <div className="flex-shrink-0 border-b bg-background p-6">
         <div className="flex items-start justify-between mb-4">

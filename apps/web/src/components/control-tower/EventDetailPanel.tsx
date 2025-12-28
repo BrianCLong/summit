@@ -30,6 +30,7 @@ import {
   Security as GovernanceIcon,
   History as HistoryIcon,
 } from '@mui/icons-material';
+import { useDemoMode } from '../common/DemoIndicator';
 
 export interface EventDetailPanelProps {
   eventId: string | null;
@@ -112,9 +113,10 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
   onClose,
 }) => {
   const theme = useTheme();
+  const isDemoMode = useDemoMode();
 
   // In real implementation, fetch event data based on eventId
-  const event = eventId ? mockEventData : null;
+  const event = eventId && isDemoMode ? mockEventData : null;
   const isLoading = false;
 
   const getSeverityColor = (severity: string): string => {
@@ -435,6 +437,15 @@ export const EventDetailPanel: React.FC<EventDetailPanelProps> = ({
       ) : (
         <Box display="flex" alignItems="center" justifyContent="center" height="100%">
           <Typography color="textSecondary">Select an event to view details</Typography>
+        </Box>
+      ) : (
+        <Box p={3}>
+          <Typography variant="h6" gutterBottom>
+            Event details unavailable
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            Connect the production data source to view live event details.
+          </Typography>
         </Box>
       )}
     </Drawer>
