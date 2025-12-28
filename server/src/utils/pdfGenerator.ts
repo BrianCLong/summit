@@ -131,3 +131,38 @@ export async function generatePdfFromPacket(packet: SOC2Packet): Promise<Buffer>
   await browser.close();
   return pdfBuffer;
 }
+
+/**
+ * Generates a PDF buffer from an HTML string.
+ * @param html The HTML content.
+ * @returns A promise that resolves to a PDF buffer.
+ */
+export async function generatePDF(html: string): Promise<Buffer> {
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for Docker environments
+  });
+  const page = await browser.newPage();
+
+  await page.setContent(html, { waitUntil: 'networkidle0' });
+
+  const pdfBuffer = await page.pdf({
+    format: 'A4',
+    printBackground: true,
+    margin: {
+      top: '60px',
+      bottom: '60px',
+      left: '40px',
+      right: '40px',
+    },
+    displayHeaderFooter: true,
+    headerTemplate: '<div></div>', // Handled by CSS
+    footerTemplate: `<div style="font-size: 8px; text-align: center; width: 100%;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>`,
+  });
+
+  await browser.close();
+  return pdfBuffer;
+}
+
+const defaultExport = { generatePdfFromPacket, generatePDF };
+export default defaultExport;

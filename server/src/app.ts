@@ -101,6 +101,7 @@ import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
+import trustPortalRouter from './routes/trust-portal.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -381,6 +382,7 @@ export const createApp = async () => {
   app.use('/api/crypto-intelligence', cryptoIntelligenceRouter);
   app.use('/api/demo', demoRouter);
   app.use('/api/claims', claimsRouter);
+  app.use('/api/trust', trustPortalRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes

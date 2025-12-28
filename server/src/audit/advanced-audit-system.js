@@ -1,0 +1,1 @@
+exports.advancedAuditSystem = { logEvent: () => {} };
