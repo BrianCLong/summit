@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-27T15:34:27Z",
+  "last_updated": "2025-12-28T02:21:27Z",
   "initiatives": [
     {
       "id": "A",
@@ -64,6 +64,24 @@
           "name": "Immutable Audit Log",
           "status": "pending",
           "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "FR",
+      "name": "Frontend Reliability Contract",
+      "epics": [
+        {
+          "id": "FR1",
+          "name": "Define frontend SLOs and error budgets",
+          "status": "in_progress",
+          "owner": "Frontend Reliability Owner"
+        },
+        {
+          "id": "FR2",
+          "name": "Instrument frontend reliability signals",
+          "status": "pending",
+          "owner": "Frontend Reliability Owner"
         }
       ]
     }
