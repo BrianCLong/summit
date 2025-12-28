@@ -5,16 +5,14 @@
  */
 
 import React from 'react';
-
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === '1' ||
-                  import.meta.env.VITE_DEMO_MODE === 'true';
+import { exposureConfig } from '@/exposure/exposureConfig';
 
 /**
  * Demo mode indicator component
  * Only renders when DEMO_MODE is enabled
  */
 export function DemoIndicator(): React.ReactElement | null {
-  if (!DEMO_MODE) {
+  if (!exposureConfig.isDemo) {
     return null;
   }
 
@@ -37,7 +35,7 @@ export function DemoIndicator(): React.ReactElement | null {
       }}
     >
       <span role="img" aria-label="warning">⚠️</span>
-      {' '}DEMO MODE - Data shown is for demonstration purposes only{' '}
+      {' '}{exposureConfig.demoDataLabel || 'DEMO MODE - Data shown is for demonstration purposes only'}{' '}
       <span role="img" aria-label="warning">⚠️</span>
     </div>
   );
@@ -47,7 +45,7 @@ export function DemoIndicator(): React.ReactElement | null {
  * Hook to check if demo mode is enabled
  */
 export function useDemoMode(): boolean {
-  return DEMO_MODE;
+  return exposureConfig.isDemo;
 }
 
 /**
@@ -55,7 +53,7 @@ export function useDemoMode(): boolean {
  * Can be placed anywhere in the UI
  */
 export function DemoBadge({ className = '' }: { className?: string }): React.ReactElement | null {
-  if (!DEMO_MODE) {
+  if (!exposureConfig.isDemo) {
     return null;
   }
 

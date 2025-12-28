@@ -26,6 +26,8 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
 import type { User } from '@/types'
 import { cn } from '@/lib/utils'
+import { ExposureBadge } from '@/components/common/ExposureIndicator'
+import { isSurfaceAllowed, type ExposureSurfaceId } from '@/exposure/exposureConfig'
 
 interface NavigationProps {
   user: User | null
@@ -38,6 +40,7 @@ interface NavItem {
   badge?: string | number
   resource?: string
   action?: string
+  surface: ExposureSurfaceId
 }
 
 const navItems: NavItem[] = [
@@ -47,6 +50,7 @@ const navItems: NavItem[] = [
     icon: Search as React.ComponentType<{ className?: string }>,
     resource: 'investigations',
     action: 'read',
+    surface: 'explore',
   },
   {
     name: 'Alerts',
@@ -55,6 +59,7 @@ const navItems: NavItem[] = [
     badge: 3,
     resource: 'alerts',
     action: 'read',
+    surface: 'alerts',
   },
   {
     name: 'Cases',
@@ -62,6 +67,7 @@ const navItems: NavItem[] = [
     icon: FileText as React.ComponentType<{ className?: string }>,
     resource: 'cases',
     action: 'read',
+    surface: 'cases',
   },
   {
     name: 'Command Center',
@@ -69,6 +75,7 @@ const navItems: NavItem[] = [
     icon: BarChart3 as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
+    surface: 'dashboards.command_center',
   },
   {
     name: 'Supply Chain',
@@ -76,6 +83,7 @@ const navItems: NavItem[] = [
     icon: BarChart3 as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
+    surface: 'dashboards.supply_chain',
   },
   {
     name: 'Internal Command',
@@ -83,6 +91,7 @@ const navItems: NavItem[] = [
     icon: Command as React.ComponentType<{ className?: string }>,
     resource: 'dashboards',
     action: 'read',
+    surface: 'internal.command',
   },
   {
     name: 'Data Sources',
@@ -90,6 +99,7 @@ const navItems: NavItem[] = [
     icon: Database as React.ComponentType<{ className?: string }>,
     resource: 'data',
     action: 'read',
+    surface: 'data.sources',
   },
   {
     name: 'Models',
@@ -97,6 +107,7 @@ const navItems: NavItem[] = [
     icon: Brain as React.ComponentType<{ className?: string }>,
     resource: 'models',
     action: 'read',
+    surface: 'models',
   },
   {
     name: 'Reports',
@@ -104,6 +115,7 @@ const navItems: NavItem[] = [
     icon: FileBarChart as React.ComponentType<{ className?: string }>,
     resource: 'reports',
     action: 'read',
+    surface: 'reports',
   },
   {
     name: 'Admin',
@@ -111,12 +123,23 @@ const navItems: NavItem[] = [
     icon: Settings as React.ComponentType<{ className?: string }>,
     resource: 'admin',
     action: 'read',
+    surface: 'admin',
   },
 ]
 
 const supportItems: NavItem[] = [
-  { name: 'Help', href: '/help', icon: HelpCircle as React.ComponentType<{ className?: string }> },
-  { name: 'Changelog', href: '/changelog', icon: History as React.ComponentType<{ className?: string }> },
+  {
+    name: 'Help',
+    href: '/help',
+    icon: HelpCircle as React.ComponentType<{ className?: string }>,
+    surface: 'help',
+  },
+  {
+    name: 'Changelog',
+    href: '/changelog',
+    icon: History as React.ComponentType<{ className?: string }>,
+    surface: 'changelog',
+  },
 ]
 
 export function Navigation({ user }: NavigationProps) {
@@ -129,6 +152,10 @@ export function Navigation({ user }: NavigationProps) {
       user,
       fallback: !item.resource,
     })
+
+    if (!isSurfaceAllowed(item.surface)) {
+      return null
+    }
 
     if (item.resource && !hasPermission) {
       return null
@@ -174,7 +201,10 @@ export function Navigation({ user }: NavigationProps) {
               IG
             </span>
           </div>
-          <div className="font-semibold text-lg">IntelGraph</div>
+          <div className="font-semibold text-lg flex items-center gap-2">
+            IntelGraph
+            <ExposureBadge />
+          </div>
         </NavLink>
       </div>
 

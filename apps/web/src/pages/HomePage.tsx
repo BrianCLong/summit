@@ -21,6 +21,12 @@ import { useAuth } from '@/contexts/AuthContext'
 import { ActivationProgressTile } from '@/components/activation/ActivationProgressTile'
 import mockData from '@/mock/data.json'
 import type { KPIMetric, Investigation, Alert, Case } from '@/types'
+import {
+  exposureConfig,
+  getExposureCopyOverrides,
+  isSurfaceAllowed,
+  type ExposureSurfaceId,
+} from '@/exposure/exposureConfig'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -57,6 +63,7 @@ export default function HomePage() {
     loadDashboardData()
   }, [])
 
+  const copyOverrides = getExposureCopyOverrides()
   const quickActions = [
     {
       title: 'Start Investigation',
@@ -64,6 +71,7 @@ export default function HomePage() {
       icon: Search,
       href: '/explore',
       color: 'bg-blue-500',
+      surface: 'explore' as ExposureSurfaceId,
     },
     {
       title: 'Review Alerts',
@@ -72,6 +80,7 @@ export default function HomePage() {
       href: '/alerts',
       color: 'bg-red-500',
       badge: '3',
+      surface: 'alerts' as ExposureSurfaceId,
     },
     {
       title: 'View Cases',
@@ -79,15 +88,19 @@ export default function HomePage() {
       icon: FileText,
       href: '/cases',
       color: 'bg-green-500',
+      surface: 'cases' as ExposureSurfaceId,
     },
     {
       title: 'Command Center',
-      description: 'Real-time operations dashboard',
+      description:
+        copyOverrides?.commandCenterDescription ||
+        'Real-time operations dashboard',
       icon: BarChart3,
       href: '/dashboards/command-center',
       color: 'bg-purple-500',
+      surface: 'dashboards.command_center' as ExposureSurfaceId,
     },
-  ]
+  ].filter(action => isSurfaceAllowed(action.surface))
 
   const getSeverityBadgeVariant = (severity: string) => {
     switch (severity) {
@@ -128,7 +141,8 @@ export default function HomePage() {
             Welcome back, {user?.name?.split(' ')[0] || 'User'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Here's what's happening with your intelligence operations
+            {copyOverrides?.subheading ||
+              "Here's what's happening with your intelligence operations"}
           </p>
         </div>
         <div className="text-sm text-muted-foreground">
@@ -141,7 +155,13 @@ export default function HomePage() {
         </div>
       </div>
 
-      <ActivationProgressTile />
+      {exposureConfig.isDemo && exposureConfig.demoDataLabel && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {exposureConfig.demoDataLabel}
+        </div>
+      )}
+
+      {!exposureConfig.isDemo && <ActivationProgressTile />}
 
       {/* KPI Metrics */}
       <div>

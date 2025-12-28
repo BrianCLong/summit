@@ -4,6 +4,7 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string
   readonly VITE_GRAPHQL_URL?: string
   readonly VITE_WS_URL?: string
+  readonly VITE_EXPOSURE_MODE?: 'production' | 'sales_demo' | 'exec_demo' | 'internal'
   readonly MODE: string
   readonly DEV: boolean
   readonly PROD: boolean

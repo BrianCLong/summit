@@ -56,11 +56,16 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
-import { DemoIndicator } from '@/components/common/DemoIndicator'
+import { ExposureIndicator } from '@/components/common/ExposureIndicator'
+import { ExposureGuard } from '@/components/common/ExposureGuard'
+import type { ExposureSurfaceId } from '@/exposure/exposureConfig'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
   const [showExplain, setShowExplain] = React.useState(false);
+  const withExposure = (surface: ExposureSurfaceId, element: React.ReactElement) => (
+    <ExposureGuard surface={surface}>{element}</ExposureGuard>
+  )
 
   React.useEffect(()=>{
     const onKey=(e:KeyboardEvent)=>{
@@ -75,7 +80,7 @@ function App() {
 
   return (
     <ApolloProvider client={apolloClient}>
-      <DemoIndicator />
+      <ExposureIndicator />
       <SocketProvider>
         <TooltipProvider>
           <AuthProvider>
@@ -110,82 +115,82 @@ function App() {
 
                     <Routes>
                       {/* Auth routes */}
-                    <Route path="/signin" element={<SignInPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
-                    <Route path="/verify-email" element={<VerifyEmailPage />} />
+                    <Route path="/signin" element={withExposure('auth.signin', <SignInPage />)} />
+                    <Route path="/signup" element={withExposure('auth.signup', <SignupPage />)} />
+                    <Route path="/verify-email" element={withExposure('auth.verify', <VerifyEmailPage />)} />
                     <Route
                       path="/access-denied"
-                      element={<AccessDeniedPage />}
+                      element={withExposure('access_denied', <AccessDeniedPage />)}
                     />
-                    <Route path="/maestro/*" element={<MaestroDashboard />} />
+                    <Route path="/maestro/*" element={withExposure('maestro', <MaestroDashboard />)} />
 
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
-                      <Route index element={<HomePage />} />
-                      <Route path="explore" element={<ExplorePage />} />
+                      <Route index element={withExposure('home', <HomePage />)} />
+                      <Route path="explore" element={withExposure('explore', <ExplorePage />)} />
 
                       {/* Tri-Pane Analysis */}
                       <Route
                         path="analysis/tri-pane"
-                        element={<TriPanePage />}
+                        element={withExposure('analysis.tri_pane', <TriPanePage />)}
                       />
                       <Route
                         path="geoint"
-                        element={<GeoIntPane />}
+                        element={withExposure('analysis.geoint', <GeoIntPane />)}
                       />
 
                       {/* Narrative Intelligence */}
                       <Route
                         path="analysis/narrative"
-                        element={<NarrativeIntelligencePage />}
+                        element={withExposure('analysis.narrative', <NarrativeIntelligencePage />)}
                       />
 
                       {/* Alerts */}
-                      <Route path="alerts" element={<AlertsPage />} />
-                      <Route path="alerts/:id" element={<AlertDetailPage />} />
+                      <Route path="alerts" element={withExposure('alerts', <AlertsPage />)} />
+                      <Route path="alerts/:id" element={withExposure('alert_detail', <AlertDetailPage />)} />
 
                       {/* Cases */}
-                      <Route path="cases" element={<CasesPage />} />
-                      <Route path="cases/:id" element={<CaseDetailPage />} />
+                      <Route path="cases" element={withExposure('cases', <CasesPage />)} />
+                      <Route path="cases/:id" element={withExposure('case_detail', <CaseDetailPage />)} />
 
                       {/* Dashboards */}
                       <Route
                         path="dashboards/command-center"
-                        element={<CommandCenterDashboard />}
+                        element={withExposure('dashboards.command_center', <CommandCenterDashboard />)}
                       />
                       <Route
                         path="dashboards/supply-chain"
-                        element={<SupplyChainDashboard />}
+                        element={withExposure('dashboards.supply_chain', <SupplyChainDashboard />)}
                       />
                       <Route
                         path="dashboards/advanced"
-                        element={<AdvancedDashboardPage />}
+                        element={withExposure('dashboards.advanced', <AdvancedDashboardPage />)}
                       />
                       <Route
                         path="internal/command"
-                        element={<InternalCommandDashboard />}
+                        element={withExposure('internal.command', <InternalCommandDashboard />)}
                       />
-                      <Route path="mission-control" element={<MissionControlPage />} />
+                      <Route path="mission-control" element={withExposure('mission_control', <MissionControlPage />)} />
 
                       {/* Data & Models */}
                       <Route
                         path="data/sources"
-                        element={<DataSourcesPage />}
+                        element={withExposure('data.sources', <DataSourcesPage />)}
                       />
-                      <Route path="models" element={<ModelsPage />} />
-                      <Route path="reports" element={<ReportsPage />} />
+                      <Route path="models" element={withExposure('models', <ModelsPage />)} />
+                      <Route path="reports" element={withExposure('reports', <ReportsPage />)} />
 
                       {/* Admin */}
-                      <Route path="admin/*" element={<AdminPage />} />
-                      <Route path="admin/consistency" element={<ConsistencyDashboard />} />
-                      <Route path="admin/feature-flags" element={<FeatureFlagsPage />} />
+                      <Route path="admin/*" element={withExposure('admin', <AdminPage />)} />
+                      <Route path="admin/consistency" element={withExposure('admin.consistency', <ConsistencyDashboard />)} />
+                      <Route path="admin/feature-flags" element={withExposure('admin.feature_flags', <FeatureFlagsPage />)} />
 
                       {/* Support */}
-                      <Route path="help" element={<HelpPage />} />
-                      <Route path="changelog" element={<ChangelogPage />} />
+                      <Route path="help" element={withExposure('help', <HelpPage />)} />
+                      <Route path="changelog" element={withExposure('changelog', <ChangelogPage />)} />
 
-                      <Route path="demo" element={<DemoControlPage />} />
-                      <Route path="onboarding" element={<OnboardingWizard />} />
+                      <Route path="demo" element={withExposure('demo_control', <DemoControlPage />)} />
+                      <Route path="onboarding" element={withExposure('onboarding', <OnboardingWizard />)} />
 
                       {/* Catch all */}
                       <Route path="*" element={<NotFound />} />

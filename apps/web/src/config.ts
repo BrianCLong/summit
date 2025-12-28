@@ -1,3 +1,5 @@
+import { isExperimentalFeatureAllowed } from '@/exposure/exposureConfig'
+
 export type FeatureKey =
   | 'maestro.newRunConsole'
   | 'dashboard.realtime'
@@ -71,7 +73,11 @@ const config: WebConfig = {
 };
 
 export function isFeatureEnabled(key: FeatureKey): boolean {
-  return config.features[key] ?? false;
+  const enabled = config.features[key] ?? false;
+  if (!enabled) {
+    return false;
+  }
+  return isExperimentalFeatureAllowed(key);
 }
 
 export default config;
