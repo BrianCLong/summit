@@ -1,16 +1,37 @@
-import { ExperimentManager } from './index.js';
+/**
+ * Experimentation Example
+ *
+ * Demonstrates how to use the ExperimentationService for A/B testing.
+ */
 
-const manager = new ExperimentManager();
+import { experimentationService } from './index.js';
 
-const userId = 'user-123';
-const experimentId = 'sample-experiment';
-const variant = manager.getVariant(experimentId, userId);
+async function runExample() {
+  const tenantId = 'tenant-123';
+  const userId = 'user-123';
+  const experimentId = 'sample-experiment';
 
-if (variant) {
-  // pretend we measured metrics
-  const metrics = { latency_ms: 120, error_rate: 0, click_through_rate: 0.3 };
-  manager.logExposure(experimentId, userId, variant, metrics);
-  console.log(`User ${userId} in ${variant}`);
-} else {
-  console.log('Experiment not found');
+  // Get experiment assignment for user
+  const assignment = await experimentationService.getAssignment(experimentId, {
+    userId,
+    tenantId,
+    attributes: { plan: 'pro', region: 'us-east' },
+    consent: true,
+  });
+
+  if (assignment.data) {
+    console.log(`User ${userId} assigned to variant: ${assignment.data.variantId}`);
+
+    // Track a conversion metric
+    await experimentationService.trackMetric(
+      experimentId,
+      userId,
+      'conversion',
+      1
+    );
+  } else {
+    console.log('User not eligible for experiment or experiment not running');
+  }
 }
+
+runExample().catch(console.error);

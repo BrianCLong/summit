@@ -1,0 +1,402 @@
+# Summit MVP-3 Production Alerting Configuration
+# Compatible with Prometheus AlertManager / Grafana Alerting
+#
+# SOC 2 Controls: CC7.1 (Monitoring), CC7.2 (Incident Detection)
+
+groups:
+  # =============================================================================
+  # Infrastructure Alerts
+  # =============================================================================
+  - name: infrastructure
+    rules:
+      - alert: HighCPUUsage
+        expr: avg(rate(process_cpu_seconds_total[5m])) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 80%)"
+          runbook: "ops/runbooks/high-cpu.md"
+
+      - alert: CriticalCPUUsage
+        expr: avg(rate(process_cpu_seconds_total[5m])) * 100 > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          page: "true"
+        annotations:
+          summary: "Critical CPU usage - immediate action required"
+          description: "CPU usage is {{ $value | printf \"%.1f\" }}% (threshold: 95%)"
+          runbook: "ops/runbooks/high-cpu.md"
+
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / node_memory_MemTotal_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | printf \"%.1f\" }}%"
+          runbook: "ops/runbooks/high-memory.md"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 15
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Low disk space"
+          description: "Available disk space is {{ $value | printf \"%.1f\" }}%"
+
+  # =============================================================================
+  # Application Health Alerts
+  # =============================================================================
+  - name: application
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m])) * 100 > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Elevated error rate detected"
+          description: "Error rate is {{ $value | printf \"%.2f\" }}% (threshold: 1%)"
+          runbook: "ops/runbooks/high-error-rate.md"
+
+      - alert: CriticalErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m])) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+          page: "true"
+        annotations:
+          summary: "Critical error rate - service degradation"
+          description: "Error rate is {{ $value | printf \"%.2f\" }}% (threshold: 5%)"
+          runbook: "ops/runbooks/high-error-rate.md"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "High API latency detected"
+          description: "P95 latency is {{ $value | printf \"%.2f\" }}s (threshold: 2s)"
+          runbook: "ops/runbooks/high-latency.md"
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          page: "true"
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.instance }} has been down for more than 1 minute"
+          runbook: "ops/runbooks/service-down.md"
+
+  # =============================================================================
+  # Governance & Compliance Alerts
+  # =============================================================================
+  - name: governance
+    rules:
+      - alert: HighGovernanceDenialRate
+        expr: |
+          sum(rate(governance_verdicts_total{verdict="REJECTED"}[15m])) /
+          sum(rate(governance_verdicts_total[15m])) * 100 > 20
+        for: 10m
+        labels:
+          severity: warning
+          team: governance
+        annotations:
+          summary: "High governance denial rate"
+          description: "{{ $value | printf \"%.1f\" }}% of requests being denied"
+          runbook: "ops/runbooks/governance-denials.md"
+
+      - alert: GovernanceServiceDegraded
+        expr: governance_service_healthy == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: governance
+          page: "true"
+        annotations:
+          summary: "Governance service degraded"
+          description: "Governance evaluation service is not healthy"
+          runbook: "ops/runbooks/governance-service.md"
+
+      - alert: ProvenanceChainBroken
+        expr: provenance_chain_verification_failures_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: governance
+          page: "true"
+        annotations:
+          summary: "Provenance chain verification failed"
+          description: "Provenance chain integrity has been compromised"
+          runbook: "ops/runbooks/provenance-failure.md"
+
+      - alert: AuditLogGap
+        expr: time() - audit_last_write_timestamp_seconds > 300
+        for: 2m
+        labels:
+          severity: warning
+          team: compliance
+        annotations:
+          summary: "Audit log gap detected"
+          description: "No audit events written in {{ $value | printf \"%.0f\" }}s"
+          runbook: "ops/runbooks/audit-gap.md"
+
+  # =============================================================================
+  # Database Alerts
+  # =============================================================================
+  - name: database
+    rules:
+      - alert: PostgresConnectionPoolExhausted
+        expr: pg_pool_available_connections < 5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "PostgreSQL connection pool nearly exhausted"
+          description: "Only {{ $value }} connections available"
+
+      - alert: Neo4jHighQueryLatency
+        expr: neo4j_query_duration_seconds_p99 > 5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Neo4j query latency elevated"
+          description: "P99 query latency is {{ $value | printf \"%.2f\" }}s"
+
+      - alert: RedisConnectionFailed
+        expr: redis_connected_clients == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+          page: "true"
+        annotations:
+          summary: "Redis connection lost"
+          description: "No clients connected to Redis"
+
+  # =============================================================================
+  # Security Alerts
+  # =============================================================================
+  - name: security
+    rules:
+      - alert: UnauthorizedAccessAttempts
+        expr: rate(auth_failures_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High rate of unauthorized access attempts"
+          description: "{{ $value | printf \"%.1f\" }} auth failures per second"
+          runbook: "ops/runbooks/auth-failures.md"
+
+      - alert: TenantIsolationViolation
+        expr: tenant_isolation_violations_total > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: security
+          page: "true"
+        annotations:
+          summary: "CRITICAL: Tenant isolation violation detected"
+          description: "Cross-tenant data access attempted"
+          runbook: "ops/runbooks/tenant-violation.md"
+
+      - alert: PIIExposureRisk
+        expr: pii_detection_unredacted_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: security
+          page: "true"
+        annotations:
+          summary: "Potential PII exposure detected"
+          description: "Unredacted PII detected in output"
+          runbook: "ops/runbooks/pii-exposure.md"
+
+  # =============================================================================
+  # SLO Alerts
+  # =============================================================================
+  - name: slo
+    rules:
+      - alert: SLOAvailabilityBreach
+        expr: |
+          1 - (
+            sum(rate(http_requests_total{status!~"5.."}[24h])) /
+            sum(rate(http_requests_total[24h]))
+          ) > 0.001
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "SLO availability breach risk"
+          description: "24h availability is {{ $value | printf \"%.4f\" }} below target"
+
+      - alert: SLOLatencyBreach
+        expr: |
+          histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[24h])) by (le)) > 3
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "SLO latency breach risk"
+          description: "P99 latency over 24h is {{ $value | printf \"%.2f\" }}s"
+
+  # =============================================================================
+  # Post-GA Evolution Services (v3.1.0+)
+  # =============================================================================
+  - name: post-ga-evolution
+    rules:
+      # Onboarding Alerts
+      - alert: OnboardingCompletionRateLow
+        expr: |
+          sum(rate(onboarding_completed_total[24h])) /
+          sum(rate(onboarding_started_total[24h])) * 100 < 50
+        for: 1h
+        labels:
+          severity: warning
+          team: product
+        annotations:
+          summary: "Low onboarding completion rate"
+          description: "Only {{ $value | printf \"%.1f\" }}% of users completing onboarding (target: >80%)"
+          runbook: "ops/runbooks/onboarding-issues.md"
+
+      - alert: OnboardingStepFailures
+        expr: rate(onboarding_step_failures_total[15m]) > 5
+        for: 10m
+        labels:
+          severity: warning
+          team: product
+        annotations:
+          summary: "High onboarding step failure rate"
+          description: "{{ $value | printf \"%.1f\" }} failures per second in onboarding steps"
+
+      # Experimentation Alerts
+      - alert: ExperimentAssignmentErrors
+        expr: rate(experiment_assignment_errors_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Experiment assignment errors occurring"
+          description: "{{ $value | printf \"%.2f\" }} assignment errors per second"
+
+      - alert: ExperimentStatisticalPowerLow
+        expr: experiment_statistical_power < 0.8
+        for: 24h
+        labels:
+          severity: info
+          team: product
+        annotations:
+          summary: "Experiment has low statistical power"
+          description: "Experiment {{ $labels.experiment_id }} has power {{ $value | printf \"%.2f\" }}"
+
+      # i18n Alerts
+      - alert: TranslationMissing
+        expr: i18n_missing_translations_total > 100
+        for: 1h
+        labels:
+          severity: warning
+          team: product
+        annotations:
+          summary: "Many missing translations detected"
+          description: "{{ $value }} missing translation keys"
+
+      - alert: LocaleDetectionFailures
+        expr: rate(i18n_locale_detection_failures_total[15m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High locale detection failure rate"
+          description: "{{ $value | printf \"%.1f\" }} locale detection failures per second"
+
+      # Support Center Alerts
+      - alert: SupportTicketBacklogHigh
+        expr: support_tickets_open_count > 100
+        for: 2h
+        labels:
+          severity: warning
+          team: support
+        annotations:
+          summary: "High support ticket backlog"
+          description: "{{ $value }} open support tickets"
+
+      - alert: SupportEscalationsHigh
+        expr: rate(support_escalations_total[1h]) > 5
+        for: 1h
+        labels:
+          severity: warning
+          team: support
+        annotations:
+          summary: "High support escalation rate"
+          description: "{{ $value | printf \"%.1f\" }} escalations per hour"
+
+      - alert: KnowledgeBaseSearchFailing
+        expr: rate(support_kb_search_errors_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Knowledge base search errors"
+          description: "{{ $value | printf \"%.2f\" }} search errors per second"
+
+      # Adoption Analytics Alerts
+      - alert: AnalyticsEventDropped
+        expr: rate(adoption_events_dropped_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Analytics events being dropped"
+          description: "{{ $value | printf \"%.1f\" }} events dropped per second"
+
+      - alert: AnalyticsIngestionLatencyHigh
+        expr: histogram_quantile(0.95, rate(adoption_event_ingestion_seconds_bucket[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Analytics ingestion latency high"
+          description: "P95 ingestion latency is {{ $value | printf \"%.2f\" }}s"
+
+      - alert: DAUDropSignificant
+        expr: |
+          (adoption_dau_count - adoption_dau_count offset 7d) / adoption_dau_count offset 7d * 100 < -20
+        for: 1d
+        labels:
+          severity: warning
+          team: product
+        annotations:
+          summary: "Significant DAU drop week-over-week"
+          description: "DAU dropped {{ $value | printf \"%.1f\" }}% compared to last week"

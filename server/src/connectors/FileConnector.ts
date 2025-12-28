@@ -21,7 +21,7 @@ export class FileConnector extends BaseConnector implements SourceConnector {
     records: any[];
     nextCursor?: string | null;
   }> {
-    return this.withResilience(async () => {
+    const envelope = await this.withResilience(async () => {
       // Simple implementation: Read full file if cursor is null/start, else return empty
       // In a real impl, this would support reading large files in chunks or listing directory
 
@@ -60,5 +60,6 @@ export class FileConnector extends BaseConnector implements SourceConnector {
         throw err;
       }
     }, ctx);
+    return envelope.data;
   }
 }

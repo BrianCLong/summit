@@ -13,6 +13,7 @@ import type {
   EvidenceSource,
   ControlTest,
   FrameworkMapping,
+  ComplianceFramework,
 } from './assurance-artifacts.js';
 
 // =============================================================================

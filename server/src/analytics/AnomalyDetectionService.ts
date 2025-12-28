@@ -269,19 +269,19 @@ class IsolationForestDetector {
 // User Behavior Analyzer
 // ============================================================================
 
+interface UserProfile {
+  userId: string;
+  tenantId: string;
+  actionCounts: Map<string, number>;
+  timePatterns: Map<number, number>;
+  locationHistory: Set<string>;
+  averageSessionDuration: number;
+  lastActivity: number;
+}
+
 class UserBehaviorAnalyzer {
   private profiles: Map<string, UserProfile> = new Map();
   private readonly decayFactor = 0.95;
-
-  interface UserProfile {
-    userId: string;
-    tenantId: string;
-    actionCounts: Map<string, number>;
-    timePatterns: Map<number, number>;
-    locationHistory: Set<string>;
-    averageSessionDuration: number;
-    lastActivity: number;
-  }
 
   /**
    * Update user profile with new activity

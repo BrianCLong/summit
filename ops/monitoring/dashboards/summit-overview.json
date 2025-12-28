@@ -1,0 +1,287 @@
+{
+  "dashboard": {
+    "title": "Summit MVP-3 Production Overview",
+    "uid": "summit-prod-overview",
+    "tags": ["summit", "production", "overview"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "up{job=\"summit-api\"}",
+            "legendFormat": "API Health"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "type": "value", "options": { "1": { "text": "UP", "color": "green" } } },
+              { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } }
+            ]
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Request Rate",
+        "type": "timeseries",
+        "gridPos": { "x": 6, "y": 0, "w": 9, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[5m]))",
+            "legendFormat": "Requests/s"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "gauge",
+        "gridPos": { "x": 15, "y": 0, "w": 5, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100"
+          }
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 10,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 5, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "P95 Latency",
+        "type": "gauge",
+        "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0,
+            "max": 5,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 2, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Governance Verdicts",
+        "type": "piechart",
+        "gridPos": { "x": 0, "y": 4, "w": 6, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum by (verdict) (increase(governance_verdicts_total[1h]))",
+            "legendFormat": "{{verdict}}"
+          }
+        ],
+        "options": {
+          "legend": { "displayMode": "table", "placement": "right" }
+        },
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "APPROVED" },
+              "properties": [{ "id": "color", "value": { "fixedColor": "green" } }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "REJECTED" },
+              "properties": [{ "id": "color", "value": { "fixedColor": "red" } }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "REQUIRES_REVIEW" },
+              "properties": [{ "id": "color", "value": { "fixedColor": "yellow" } }]
+            }
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "title": "Governance Verdict Rate",
+        "type": "timeseries",
+        "gridPos": { "x": 6, "y": 8, "w": 9, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum by (verdict) (rate(governance_verdicts_total[5m]))",
+            "legendFormat": "{{verdict}}"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Provenance Chain Status",
+        "type": "stat",
+        "gridPos": { "x": 15, "y": 4, "w": 4, "h": 4 },
+        "targets": [
+          {
+            "expr": "provenance_chain_verification_failures_total",
+            "legendFormat": "Chain Failures"
+          }
+        ],
+        "options": {
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Audit Events",
+        "type": "stat",
+        "gridPos": { "x": 19, "y": 4, "w": 5, "h": 4 },
+        "targets": [
+          {
+            "expr": "increase(audit_events_total[1h])",
+            "legendFormat": "Events/hr"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Active Tenants",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 12, "w": 4, "h": 4 },
+        "targets": [
+          {
+            "expr": "count(count by (tenant_id) (http_requests_total))",
+            "legendFormat": "Active Tenants"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Database Connections",
+        "type": "timeseries",
+        "gridPos": { "x": 4, "y": 12, "w": 8, "h": 8 },
+        "targets": [
+          {
+            "expr": "pg_pool_active_connections",
+            "legendFormat": "PostgreSQL Active"
+          },
+          {
+            "expr": "pg_pool_available_connections",
+            "legendFormat": "PostgreSQL Available"
+          },
+          {
+            "expr": "neo4j_pool_in_use",
+            "legendFormat": "Neo4j In Use"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Memory Usage",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 12, "w": 6, "h": 8 },
+        "targets": [
+          {
+            "expr": "process_resident_memory_bytes / 1024 / 1024",
+            "legendFormat": "RSS (MB)"
+          },
+          {
+            "expr": "process_heap_bytes / 1024 / 1024",
+            "legendFormat": "Heap (MB)"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "CPU Usage",
+        "type": "timeseries",
+        "gridPos": { "x": 18, "y": 12, "w": 6, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total[5m]) * 100",
+            "legendFormat": "CPU %"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Compliance Framework Status",
+        "type": "table",
+        "gridPos": { "x": 0, "y": 20, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "expr": "compliance_framework_score",
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": { "renameByName": { "framework": "Framework", "Value": "Score" } }
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Security Events",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 20, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "expr": "rate(auth_failures_total[5m])",
+            "legendFormat": "Auth Failures"
+          },
+          {
+            "expr": "rate(pii_detections_total[5m])",
+            "legendFormat": "PII Detections"
+          },
+          {
+            "expr": "rate(rbac_denials_total[5m])",
+            "legendFormat": "RBAC Denials"
+          }
+        ]
+      }
+    ]
+  }
+}

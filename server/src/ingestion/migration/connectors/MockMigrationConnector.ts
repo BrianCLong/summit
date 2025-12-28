@@ -22,7 +22,7 @@ export class MockMigrationConnector extends BaseConnector implements SourceConne
     const batchSize = this.config.batchSize || 10;
     const maxRecords = this.config.recordCount || 20;
 
-    return this.withResilience(async () => {
+    const envelope = await this.withResilience(async () => {
        this.logger.info({ cursor }, 'Fetching Mock batch');
 
        // Mock data for prototype
@@ -54,5 +54,6 @@ export class MockMigrationConnector extends BaseConnector implements SourceConne
          nextCursor
        };
     }, ctx);
+    return envelope.data;
   }
 }

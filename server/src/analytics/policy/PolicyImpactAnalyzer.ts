@@ -433,10 +433,11 @@ class SecurityPostureAssessor {
     }
 
     // Determine trend
-    const trend = score > this.previousScore + 5 ? 'improving' :
-                  score < this.previousScore - 5 ? 'declining' : 'stable';
+    const trend: 'improving' | 'stable' | 'declining' =
+      score > this.previousScore + 5 ? 'improving' :
+      score < this.previousScore - 5 ? 'declining' : 'stable';
 
-    const result = {
+    const result: SecurityPostureAssessment = {
       overallScore: Math.max(0, Math.min(100, score)),
       previousScore: this.previousScore,
       trend,

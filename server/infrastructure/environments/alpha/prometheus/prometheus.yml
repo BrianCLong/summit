@@ -1,0 +1,75 @@
+# Prometheus Configuration for Summit v4.0.0 Alpha
+# ==============================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'alpha'
+    version: 'v4.0.0-alpha'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - alertmanager:9093
+
+# Rule files
+rule_files:
+  - /etc/prometheus/alerts/*.yml
+
+# Scrape configurations
+scrape_configs:
+  # ===========================================
+  # Summit API Metrics
+  # ===========================================
+  - job_name: 'summit-api'
+    static_configs:
+      - targets: ['summit-api:9090']
+    metrics_path: /metrics
+    scrape_interval: 10s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'summit-api-alpha'
+
+  # ===========================================
+  # Node Exporter (Host Metrics)
+  # ===========================================
+  - job_name: 'node'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'alpha-host'
+
+  # ===========================================
+  # PostgreSQL Metrics
+  # ===========================================
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:9187']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'postgres-alpha'
+
+  # ===========================================
+  # Redis Metrics
+  # ===========================================
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:9121']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'redis-alpha'
+
+  # ===========================================
+  # Prometheus Self-Monitoring
+  # ===========================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

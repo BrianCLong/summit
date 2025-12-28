@@ -2,7 +2,7 @@
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 
-const jsdomWindow = new JSDOM('').window as unknown as Window;
+const jsdomWindow = new JSDOM('').window as unknown as typeof globalThis;
 const DOMPurify = createDOMPurify(jsdomWindow);
 
 /**

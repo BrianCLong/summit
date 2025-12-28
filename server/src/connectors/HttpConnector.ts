@@ -35,7 +35,7 @@ export class HttpConnector extends BaseConnector implements SourceConnector {
     records: any[];
     nextCursor?: string | null;
   }> {
-    return this.withResilience(async () => {
+    const envelope = await this.withResilience(async () => {
       const params: any = {};
 
       if (this.config.pagination) {
@@ -80,6 +80,7 @@ export class HttpConnector extends BaseConnector implements SourceConnector {
 
       return { records, nextCursor };
     }, ctx);
+    return envelope.data;
   }
 
   private resolvePath(obj: any, path: string): any[] {

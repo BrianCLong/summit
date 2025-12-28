@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: summit-config
+  namespace: summit
+  labels:
+    app: summit
+data:
+  # ===========================================
+  # Server Configuration
+  # ===========================================
+  PORT: "3000"
+  HOST: "0.0.0.0"
+  API_VERSION: "4.0"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+
+  # ===========================================
+  # v4 Feature Flags
+  # ===========================================
+  ENABLE_V4_FEATURES: "true"
+  ENABLE_V3_COMPATIBILITY: "true"
+
+  # ===========================================
+  # AI Governance (v4.0)
+  # ===========================================
+  AI_GOVERNANCE_ENABLED: "true"
+  AI_SUGGESTIONS_ENABLED: "true"
+  AI_SUGGESTIONS_DAILY_LIMIT: "100"
+  AI_SUGGESTIONS_REQUIRE_APPROVAL: "true"
+  AI_EXPLANATIONS_ENABLED: "true"
+  AI_EXPLANATIONS_CACHE_TTL: "3600"
+  AI_EXPLANATIONS_DEFAULT_AUDIENCE: "end_user"
+  AI_ANOMALY_DETECTION_ENABLED: "true"
+  AI_ANOMALY_MIN_SEVERITY: "medium"
+  AI_ANOMALY_AUTO_BLOCK_THRESHOLD: "95"
+
+  # ===========================================
+  # Compliance (v4.1)
+  # ===========================================
+  HIPAA_MODULE_ENABLED: "true"
+  HIPAA_AUTO_ASSESS: "true"
+  HIPAA_ASSESSMENT_FREQUENCY: "weekly"
+  SOX_MODULE_ENABLED: "true"
+  SOX_AUTO_ASSESS: "true"
+  SOX_ITGC_ONLY: "false"
+  COMPLIANCE_CROSS_MAPPING_ENABLED: "true"
+  COMPLIANCE_DASHBOARD_ENABLED: "true"
+
+  # ===========================================
+  # Zero-Trust Security (v4.2)
+  # ===========================================
+  AUDIT_LEDGER_ENABLED: "true"
+  AUDIT_MERKLE_ENABLED: "true"
+  AUDIT_BLOCKCHAIN_ANCHOR: "true"
+
+  # ===========================================
+  # Observability
+  # ===========================================
+  METRICS_ENABLED: "true"
+  METRICS_PORT: "9090"
+  METRICS_PATH: "/metrics"
+  TRACING_ENABLED: "true"
+  TRACE_SAMPLE_RATE: "0.1"
+
+  # ===========================================
+  # Rate Limiting
+  # ===========================================
+  RATE_LIMIT_ENABLED: "true"
+  RATE_LIMIT_WINDOW_MS: "60000"
+  RATE_LIMIT_MAX: "1000"
+  RATE_LIMIT_AI_MAX: "100"
+
+  # ===========================================
+  # Cache
+  # ===========================================
+  CACHE_TTL_DEFAULT: "300"
+  CACHE_TTL_EXPLANATIONS: "3600"
+  CACHE_TTL_SUGGESTIONS: "1800"
+
+  # ===========================================
+  # Database
+  # ===========================================
+  DATABASE_POOL_MIN: "5"
+  DATABASE_POOL_MAX: "20"
+  DATABASE_SSL: "true"
+  DATABASE_SSL_REJECT_UNAUTHORIZED: "true"
+
+  # ===========================================
+  # Redis
+  # ===========================================
+  REDIS_PREFIX: "summit:prod:"
+  REDIS_TLS: "true"

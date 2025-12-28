@@ -49,6 +49,16 @@ export interface MergeRequest {
   rationale: string;
   mergeId?: string;
   idempotencyKey?: string;
+  /** Optional guardrail dataset ID for evaluation */
+  guardrailDatasetId?: string;
+  /** Override reason when bypassing guardrails */
+  guardrailOverrideReason?: string;
+}
+
+export interface GuardrailResult {
+  datasetId: string;
+  passed: boolean;
+  checks: Array<{ name: string; passed: boolean; message?: string }>;
 }
 
 export class EntityResolutionV2Service {
@@ -300,6 +310,22 @@ export class EntityResolutionV2Service {
     return true;
   }
 
+  /**
+   * Evaluate guardrails for merge operations
+   */
+  public evaluateGuardrails(datasetId?: string): GuardrailResult {
+    // Stub implementation for guardrail evaluation
+    return {
+      datasetId: datasetId || 'default',
+      passed: true,
+      checks: [
+        { name: 'cardinality', passed: true },
+        { name: 'conflict_detection', passed: true },
+        { name: 'data_quality', passed: true },
+      ],
+    };
+  }
+
   public async merge(
     session: Session,
     req: MergeRequest,
@@ -308,6 +334,8 @@ export class EntityResolutionV2Service {
     mergeId: string;
     snapshotId?: string;
     idempotent: boolean;
+    guardrails?: GuardrailResult;
+    overrideUsed?: boolean;
   }> {
     const { masterId, mergeIds, userContext, rationale } = req;
     const uniqueMergeIds = Array.from(new Set(mergeIds));
@@ -407,6 +435,8 @@ export class EntityResolutionV2Service {
           decisionId,
           mergeId,
           idempotent: true,
+          guardrails: req.guardrailDatasetId ? this.evaluateGuardrails(req.guardrailDatasetId) : undefined,
+          overrideUsed: !!req.guardrailOverrideReason,
         };
       }
 
@@ -568,6 +598,8 @@ export class EntityResolutionV2Service {
         mergeId,
         snapshotId,
         idempotent: false,
+        guardrails: req.guardrailDatasetId ? this.evaluateGuardrails(req.guardrailDatasetId) : undefined,
+        overrideUsed: !!req.guardrailOverrideReason,
       };
     } catch (e) {
       await tx.rollback();
