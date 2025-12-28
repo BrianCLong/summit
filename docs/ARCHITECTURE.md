@@ -1,4 +1,44 @@
+---
+title: IntelGraph Architecture
+summary: Contract-grade architecture overview for MVP-3 GA.
+version: 2025.12
+lastUpdated: 2025-12-27
+owner: Architecture
+status: public
+---
+
 # IntelGraph Architecture
+
+## Documentation Contract Summary
+
+**Guarantees**
+
+- Describes the MVP-3 GA architecture contract and system boundaries used for audit and planning.
+- Defines the golden path flow and core data stores used by the platform.
+
+**Not Guaranteed**
+
+- Exact implementation details of every service or the presence of future components.
+- Vendor-specific SLAs, sizing guidance, or environment-specific optimizations.
+
+**Conditional**
+
+- Component availability depends on deployment profile and feature flags.
+- Third-party service behavior is governed by vendor terms, not this document.
+
+**Out of Scope**
+
+- Roadmap commitments and experimental modules not in MVP-3 GA.
+
+**Failure Modes**
+
+- Architectural deviations must be recorded in governance decision logs before release.
+
+**Evidence Links**
+
+- [REPO_BOUNDARIES.md](REPO_BOUNDARIES.md)
+- [GOLDEN_PATH.md](GOLDEN_PATH.md)
+- [Public Documentation Registry](contracts/public-docs-registry.md)
 
 Summit (IntelGraph) is an enterprise-grade intelligence platform designed for high-stakes environments. It combines graph analytics, real-time collaboration, and AI-driven insights into a unified operating picture.
 

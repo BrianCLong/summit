@@ -1,4 +1,45 @@
+---
+title: Deployment Guide
+summary: Contract-grade production deployment guidance for Summit.
+version: 2025.12
+lastUpdated: 2025-12-27
+owner: Platform Ops
+status: semi-public
+---
+
 # Deployment Guide
+
+## Documentation Contract Summary
+
+**Guarantees**
+
+- Describes the supported production deployment path for Summit using Kubernetes + Helm.
+- Configuration guidance aligns with documented environment variables and deployment manifests.
+
+**Not Guaranteed**
+
+- Support for alternative orchestrators or bespoke infrastructure stacks.
+- Successful deployment without adhering to prerequisites and security controls.
+
+**Conditional**
+
+- Requires a compliant Kubernetes cluster, secrets management, and network policies.
+- Production readiness depends on running the golden path and CI gates for the release.
+
+**Out of Scope**
+
+- Legacy v0.x migration steps, custom vendor-specific runbooks, or managed service SLAs.
+
+**Failure Modes**
+
+- Deployments will fail if required secrets or environment variables are missing.
+- Health checks will fail if dependent databases or services are unavailable.
+
+**Evidence Links**
+
+- [DEPLOYMENT.md](DEPLOYMENT.md)
+- [ENV_VARS.md](ENV_VARS.md)
+- [CI_STANDARDS.md](CI_STANDARDS.md)
 
 This guide covers the deployment process for Summit to production environments.
 
@@ -21,6 +62,7 @@ We deploy using **Kubernetes** (K8s) and **Helm**.
 ## Build Process
 
 1.  **Build Docker Images**
+
     ```bash
     docker build -t registry.example.com/summit-server:latest -f server/Dockerfile .
     docker build -t registry.example.com/summit-web:latest -f client/Dockerfile .
@@ -65,6 +107,7 @@ docker compose -f docker-compose.prod.yaml up -d
 Configuration is managed via Environment Variables. See `ENV_VARS.md` for a complete list.
 
 **Critical Production Variables:**
+
 - `NODE_ENV=production`
 - `JWT_SECRET`: High entropy secret.
 - `DB_PASSWORD`: Strong passwords.

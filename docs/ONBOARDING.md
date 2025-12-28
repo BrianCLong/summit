@@ -1,4 +1,45 @@
+---
+title: Summit Developer Onboarding
+summary: Contract-grade onboarding steps for local Summit development.
+version: 2025.12
+lastUpdated: 2025-12-27
+owner: DevEx
+status: public
+---
+
 # 🚀 Summit: 10-Minute Developer Onboarding
+
+## Documentation Contract Summary
+
+**Guarantees**
+
+- This guide reflects the supported local development onboarding path for MVP-3 GA.
+- The golden path workflow described here matches the `make smoke` validation flow.
+
+**Not Guaranteed**
+
+- Success on unsupported operating systems, missing prerequisites, or custom infrastructure.
+- Production deployment outcomes (see the deployment guide for production scope).
+
+**Conditional**
+
+- Requires Docker Desktop ≥ 4.x, Node 18+, pnpm 9, and Python 3.11+.
+- Optional AI/streaming steps require the documented Docker Compose overlays.
+
+**Out of Scope**
+
+- Security hardening, production tenancy, and regulated deployment requirements.
+
+**Failure Modes**
+
+- `./scripts/validate-env.sh` will fail if dependencies or required ports are missing.
+- `make smoke` will fail if the demo dataset cannot be seeded.
+
+**Evidence Links**
+
+- [GOLDEN_PATH.md](GOLDEN_PATH.md)
+- [ONBOARDING_WALKTHROUGH.md](ONBOARDING_WALKTHROUGH.md)
+- [Public Documentation Contract Matrix](contracts/public-documentation-contract-matrix.md)
 
 Welcome to the Summit Platform! This guide will get you from a fresh `git clone` to a running, validated local environment in under 10 minutes.
 
@@ -27,6 +68,7 @@ Before you begin, run the environment validator to ensure your machine has the r
 ```
 
 If the script reports any failures, resolve them before proceeding. Common issues include:
+
 - **Docker not running**: Start Docker Desktop.
 - **Missing dependencies**: Install the required versions (Node 18+, pnpm 9+, Python 3.11+).
 - **Port conflicts**: Shut down services using ports 3000, 4000, 5432, 6379, 7474, 7687, or 8080.
@@ -40,7 +82,9 @@ The `start.sh` script is your golden path to a running environment. It automates
 ```bash
 ./start.sh
 ```
+
 This single command will:
+
 1.  **Run Validator**: Execute the environment check from Step 1.
 2.  **Install Dependencies**: Run `pnpm install` for all workspace packages.
 3.  **Create `.env`**: Copy `.env.example` to `.env` if it doesn't exist.
@@ -52,8 +96,8 @@ When the script finishes, you will have a fully functional development environme
 
 - **Optional AI + Streaming Stack**: Use `./start.sh --ai` (or `make up-ai` if you prefer Make targets) to layer in the AI/ML services from `deploy/compose/docker-compose.ai.yml`. This also wires the stack to the optional Kafka broker in `deploy/compose/docker-compose.full.yml` when you need event-driven or streaming flows.
 - **Manual Mode (complex workflows)**: For fine-grained control, run the steps individually and add overlays as needed:
-  1) `make bootstrap` (dependencies) → 2) `make up` (core stack) → 3) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.ai.yml up -d intelgraph-ai` (add AI service) → 4) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.full.yml up -d kafka` (start Kafka when testing ingestion/streaming) → 5) `make smoke` (golden path validation).
-  This manual path is safer for troubleshooting specific layers (e.g., isolating database vs. AI service health) and for high-RAM flows such as bulk ingestion + AI enrichment.
+  1. `make bootstrap` (dependencies) → 2) `make up` (core stack) → 3) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.ai.yml up -d intelgraph-ai` (add AI service) → 4) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.full.yml up -d kafka` (start Kafka when testing ingestion/streaming) → 5) `make smoke` (golden path validation).
+     This manual path is safer for troubleshooting specific layers (e.g., isolating database vs. AI service health) and for high-RAM flows such as bulk ingestion + AI enrichment.
 
 ---
 

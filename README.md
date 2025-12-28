@@ -8,6 +8,9 @@
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 
+> **Contract Metadata**
+> Version: 2025.12 · Owner: Platform Docs · Status: Public · Last Updated: 2025-12-27
+
 ## 🎉 **NEW in v2.0.0** (December 2025)
 
 **Summit v2.0.0 is a major release** consolidating 12,000+ PRs into an enterprise-grade intelligence platform:
@@ -24,6 +27,39 @@
 # Summit (IntelGraph)
 
 > **Enterprise Intelligence Platform** - Graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
+
+## Documentation Contract Summary
+
+**Guarantees**
+
+- The quickstart commands in this README describe the supported local development path for MVP-3 GA.
+- `make smoke` validates the golden path workflow when prerequisites are satisfied.
+
+**Not Guaranteed**
+
+- Production uptime, performance, or regulatory certification based solely on this README.
+- Availability of optional AI services without the documented overlays.
+
+**Conditional**
+
+- Requires Docker Desktop ≥ 4.x, Node 18+, pnpm 9, and Python 3.11+.
+- Feature availability depends on deployment profile and feature flags.
+
+**Out of Scope**
+
+- Customer-specific hosting, SLOs, or procurement commitments.
+- Roadmap commitments beyond published release notes.
+
+**Failure Modes**
+
+- Missing dependencies or port conflicts will block the quickstart; resolve via `docs/ONBOARDING.md`.
+- `make smoke` may fail if the demo dataset cannot be seeded.
+
+**Evidence Links**
+
+- [GOLDEN_PATH.md](docs/GOLDEN_PATH.md)
+- [CI_STANDARDS.md](docs/CI_STANDARDS.md)
+- [Public Documentation Registry](docs/contracts/public-docs-registry.md)
 
 ## 🚀 Quickstart (< 60 Seconds)
 
