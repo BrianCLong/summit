@@ -127,23 +127,33 @@ describe('Configuration System', () => {
   });
 
   describe('ConfigWatcher', () => {
-    it('should detect a config change', (done) => {
+    it('should detect a config change', async () => {
       const CONFIG_FILE = path.join(TEST_CONFIG_DIR, 'watch_config.yaml');
       const initialConfig = { version: 1, foo: 'bar' };
       fs.writeFileSync(CONFIG_FILE, yaml.dump(initialConfig));
       const validator = new SchemaValidator();
+      let watcher: ConfigWatcher | undefined;
 
-      const watcher = new ConfigWatcher(CONFIG_FILE, 'test', validator, (newConfig) => {
-        expect(newConfig.foo).toBe('baz');
-        watcher.stop();
-        done();
-      });
+      try {
+        await new Promise<void>((resolve, reject) => {
+          watcher = new ConfigWatcher(CONFIG_FILE, 'test', validator, (newConfig) => {
+            try {
+              expect(newConfig.foo).toBe('baz');
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          });
 
-      // Simulate a change
-      setTimeout(() => {
-        const updatedConfig = { version: 1, foo: 'baz' };
-        fs.writeFileSync(CONFIG_FILE, yaml.dump(updatedConfig));
-      }, 100);
-    });
+          // Simulate a change with a shorter delay
+          setTimeout(() => {
+            const updatedConfig = { version: 1, foo: 'baz' };
+            fs.writeFileSync(CONFIG_FILE, yaml.dump(updatedConfig));
+          }, 50);
+        });
+      } finally {
+        watcher?.stop();
+      }
+    }, 1000); // Added a reasonable timeout for the async test
   });
 });
