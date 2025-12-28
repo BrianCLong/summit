@@ -4,6 +4,7 @@
  */
 
 import { Router } from 'express';
+import { z } from 'zod';
 import { getPostgresPool } from '../db/postgres.js';
 import { CaseService } from '../cases/CaseService.js';
 import { CaseInput, CaseUpdateInput } from '../repos/CaseRepo.js';
@@ -16,6 +17,7 @@ import { AccessControlService } from '../reporting/access-control.js';
 import { INVESTIGATION_SUMMARY_TEMPLATE } from '../cases/reporting/templates.js';
 import { goldenPathStepTotal } from '../monitoring/metrics.js';
 import logger from '../config/logger.js';
+import { validateRequest } from '../middleware/validation.js';
 
 const routeLogger = logger.child({ name: 'CaseRoutes' });
 const overviewService = new CaseOverviewService(getPostgresPool(), {
@@ -30,6 +32,152 @@ const overviewService = new CaseOverviewService(getPostgresPool(), {
 });
 
 export const caseRouter = Router();
+
+// Zod Schemas
+const caseIdSchema = z.object({
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+});
+
+const legalBasisSchema = z.enum(['consent', 'contract', 'legal_obligation', 'vital_interest', 'public_task', 'legitimate_interest', 'investigation']);
+
+const createCaseSchema = z.object({
+  body: z.object({
+    title: z.string().min(1),
+    description: z.string().optional(),
+    status: z.enum(['open', 'closed', 'archived']),
+    compartment: z.string().optional(),
+    policyLabels: z.array(z.string()).optional(),
+    metadata: z.record(z.any()).optional(),
+    reason: z.string().min(1),
+    legalBasis: legalBasisSchema,
+  }),
+});
+
+const updateCaseSchema = z.object({
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  body: z.object({
+    title: z.string().min(1).optional(),
+    description: z.string().optional(),
+    status: z.enum(['open', 'closed', 'archived']).optional(),
+    compartment: z.string().optional(),
+    policyLabels: z.array(z.string()).optional(),
+    metadata: z.record(z.any()).optional(),
+    reason: z.string().min(1),
+    legalBasis: legalBasisSchema,
+  }),
+});
+
+const listCasesSchema = z.object({
+  query: z.object({
+    status: z.enum(['open', 'closed', 'archived']).optional(),
+    compartment: z.string().optional(),
+    policyLabels: z.string().optional(),
+    limit: z.coerce.number().int().positive().optional(),
+    offset: z.coerce.number().int().min(0).optional(),
+  }),
+});
+
+const archiveCaseSchema = z.object({
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  body: z.object({
+    reason: z.string().min(1),
+    legalBasis: legalBasisSchema,
+  }),
+});
+
+const exportCaseSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+    }),
+    body: z.object({
+        reason: z.string().min(1),
+        legalBasis: legalBasisSchema,
+    }),
+});
+
+const getCaseSchema = z.object({
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  query: z.object({
+    reason: z.string().min(1),
+    legalBasis: legalBasisSchema,
+    warrantId: z.string().optional(),
+  }),
+});
+
+const getOverviewSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+    }),
+    query: z.object({
+        reason: z.string().min(1),
+        legalBasis: legalBasisSchema,
+    }),
+});
+
+const releaseCriteriaSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+    }),
+    body: z.record(z.any()), // Assuming the config is a flexible object
+});
+
+const addCommentSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+    }),
+    body: z.object({
+        content: z.string().min(1),
+        metadata: z.record(z.any()).optional(),
+    }),
+});
+
+const listCommentsSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+    }),
+    query: z.object({
+        limit: z.coerce.number().int().positive().optional(),
+        offset: z.coerce.number().int().min(0).optional(),
+    }),
+});
+
+const custodyEventSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+    }),
+    body: z.object({
+        evidenceId: z.string().min(1),
+        action: z.string().min(1),
+        location: z.string().optional(),
+        notes: z.string().optional(),
+        verificationHash: z.string().optional(),
+    }),
+});
+
+const getChainSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+        evidenceId: z.string().min(1),
+    }),
+});
+
+const generateReportSchema = z.object({
+    params: z.object({
+        id: z.string().uuid(),
+    }),
+    body: z.object({
+        watermark: z.string().optional(),
+    }),
+});
+
 
 /**
  * Helper to extract tenant and user from request
@@ -72,7 +220,7 @@ function getAuditContext(
 /**
  * GET /api/cases/:id/overview - Cached overview metrics served from materialized cache
  */
-caseRouter.get('/:id/overview', async (req, res) => {
+caseRouter.get('/:id/overview', validateRequest(getOverviewSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -85,23 +233,7 @@ caseRouter.get('/:id/overview', async (req, res) => {
     }
 
     const { id } = req.params;
-
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
-
-    if (!reason) {
-      return res.status(400).json({
-        error: 'reason_required',
-        message: 'You must provide a reason for accessing this case overview',
-      });
-    }
-
-    if (!legalBasis) {
-      return res.status(400).json({
-        error: 'legal_basis_required',
-        message: 'You must provide a legal basis for accessing this case overview',
-      });
-    }
+    const { reason, legalBasis } = req.query;
 
     const pg = getPostgresPool();
     const caseExists = await pg.query(
@@ -141,7 +273,7 @@ caseRouter.get('/:id/overview', async (req, res) => {
 /**
  * POST /api/cases - Create a new case
  */
-caseRouter.post('/', async (req, res) => {
+caseRouter.post('/', validateRequest(createCaseSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -190,7 +322,7 @@ caseRouter.post('/', async (req, res) => {
 /**
  * GET /api/cases/:id - Get a case by ID
  */
-caseRouter.get('/:id', async (req, res) => {
+caseRouter.get('/:id', validateRequest(getCaseSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -203,24 +335,7 @@ caseRouter.get('/:id', async (req, res) => {
     }
 
     const { id } = req.params;
-
-    // Require reason and legal basis for viewing
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
-
-    if (!reason) {
-      return res.status(400).json({
-        error: 'reason_required',
-        message: 'You must provide a reason for accessing this case',
-      });
-    }
-
-    if (!legalBasis) {
-      return res.status(400).json({
-        error: 'legal_basis_required',
-        message: 'You must provide a legal basis for accessing this case',
-      });
-    }
+    const { reason, legalBasis, warrantId } = req.query;
 
     const pg = getPostgresPool();
     const service = new CaseService(pg);
@@ -228,7 +343,7 @@ caseRouter.get('/:id', async (req, res) => {
     const auditContext = {
       reason,
       legalBasis,
-      warrantId: req.query.warrantId as string,
+      warrantId,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     };
@@ -249,7 +364,7 @@ caseRouter.get('/:id', async (req, res) => {
 /**
  * PUT /api/cases/:id - Update a case
  */
-caseRouter.put('/:id', async (req, res) => {
+caseRouter.put('/:id', validateRequest(updateCaseSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -262,21 +377,6 @@ caseRouter.put('/:id', async (req, res) => {
     }
 
     const { id } = req.params;
-
-    // Require reason and legal basis for modification
-    if (!req.body.reason) {
-      return res.status(400).json({
-        error: 'reason_required',
-        message: 'You must provide a reason for modifying this case',
-      });
-    }
-
-    if (!req.body.legalBasis) {
-      return res.status(400).json({
-        error: 'legal_basis_required',
-        message: 'You must provide a legal basis for modifying this case',
-      });
-    }
 
     const input: CaseUpdateInput = {
       id,
@@ -316,7 +416,7 @@ caseRouter.put('/:id', async (req, res) => {
 /**
  * GET /api/cases - List cases
  */
-caseRouter.get('/', async (req, res) => {
+caseRouter.get('/', validateRequest(listCasesSchema), async (req, res) => {
   try {
     const { tenantId } = getRequestContext(req);
 
@@ -327,17 +427,15 @@ caseRouter.get('/', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CaseService(pg);
 
+    const { status, compartment, policyLabels, limit, offset } = req.query;
+
     const cases = await service.listCases({
       tenantId,
-      status: req.query.status as any,
-      compartment: req.query.compartment as string,
-      policyLabels: req.query.policyLabels
-        ? (req.query.policyLabels as string).split(',')
-        : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-      offset: req.query.offset
-        ? parseInt(req.query.offset as string)
-        : undefined,
+      status: status as any,
+      compartment: compartment as string,
+      policyLabels: policyLabels ? (policyLabels as string).split(',') : undefined,
+      limit: limit ? Number(limit) : undefined,
+      offset: offset ? Number(offset) : undefined,
     });
 
     res.json(cases);
@@ -350,7 +448,7 @@ caseRouter.get('/', async (req, res) => {
 /**
  * POST /api/cases/:id/archive - Archive a case
  */
-caseRouter.post('/:id/archive', async (req, res) => {
+caseRouter.post('/:id/archive', validateRequest(archiveCaseSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -363,21 +461,6 @@ caseRouter.post('/:id/archive', async (req, res) => {
     }
 
     const { id } = req.params;
-
-    // Require reason and legal basis for archiving
-    if (!req.body.reason) {
-      return res.status(400).json({
-        error: 'reason_required',
-        message: 'You must provide a reason for archiving this case',
-      });
-    }
-
-    if (!req.body.legalBasis) {
-      return res.status(400).json({
-        error: 'legal_basis_required',
-        message: 'You must provide a legal basis for archiving this case',
-      });
-    }
 
     const pg = getPostgresPool();
     const service = new CaseService(pg);
@@ -407,7 +490,7 @@ caseRouter.post('/:id/archive', async (req, res) => {
 /**
  * POST /api/cases/:id/export - Export case data
  */
-caseRouter.post('/:id/export', async (req, res) => {
+caseRouter.post('/:id/export', validateRequest(exportCaseSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -420,21 +503,6 @@ caseRouter.post('/:id/export', async (req, res) => {
     }
 
     const { id } = req.params;
-
-    // Require reason and legal basis for export
-    if (!req.body.reason) {
-      return res.status(400).json({
-        error: 'reason_required',
-        message: 'You must provide a reason for exporting this case',
-      });
-    }
-
-    if (!req.body.legalBasis) {
-      return res.status(400).json({
-        error: 'legal_basis_required',
-        message: 'You must provide a legal basis for exporting this case',
-      });
-    }
 
     const pg = getPostgresPool();
     const service = new CaseService(pg);
@@ -468,7 +536,7 @@ caseRouter.post('/:id/export', async (req, res) => {
 /**
  * POST /api/cases/:id/release-criteria - Configure release criteria
  */
-caseRouter.post('/:id/release-criteria', async (req, res) => {
+caseRouter.post('/:id/release-criteria', validateRequest(releaseCriteriaSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -484,10 +552,6 @@ caseRouter.post('/:id/release-criteria', async (req, res) => {
     const config = req.body; // ReleaseCriteriaConfig
 
     const pg = getPostgresPool();
-    // We need to instantiate the ReleaseCriteriaService.
-    // Since CaseService initializes it privately, we should probably access it differently
-    // or instantiate it directly here.
-    // For now, let's instantiate it directly as we didn't expose it in CaseService.
     const { ReleaseCriteriaService } = await import('../cases/ReleaseCriteriaService.js');
     const service = new ReleaseCriteriaService(pg);
 
@@ -503,7 +567,7 @@ caseRouter.post('/:id/release-criteria', async (req, res) => {
 /**
  * GET /api/cases/:id/release-criteria/status - Get release criteria status
  */
-caseRouter.get('/:id/release-criteria/status', async (req, res) => {
+caseRouter.get('/:id/release-criteria/status', validateRequest(caseIdSchema), async (req, res) => {
   try {
     const { tenantId } = getRequestContext(req);
 
@@ -531,7 +595,7 @@ caseRouter.get('/:id/release-criteria/status', async (req, res) => {
 /**
  * POST /api/cases/:id/comments - Add a comment
  */
-caseRouter.post('/:id/comments', async (req, res) => {
+caseRouter.post('/:id/comments', validateRequest(addCommentSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -545,10 +609,6 @@ caseRouter.post('/:id/comments', async (req, res) => {
 
     const { id } = req.params;
     const { content, metadata } = req.body;
-
-    if (!content) {
-      return res.status(400).json({ error: 'content_required' });
-    }
 
     const pg = getPostgresPool();
     const service = new CommentService(pg);
@@ -577,7 +637,7 @@ caseRouter.post('/:id/comments', async (req, res) => {
 /**
  * GET /api/cases/:id/comments - List comments
  */
-caseRouter.get('/:id/comments', async (req, res) => {
+caseRouter.get('/:id/comments', validateRequest(listCommentsSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -586,13 +646,12 @@ caseRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-    const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+    const { limit, offset } = req.query;
 
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comments = await service.listComments(id, tenantId, limit, offset);
+    const comments = await service.listComments(id, tenantId, limit as any, offset as any);
 
     res.json(comments);
   } catch (error) {
@@ -609,7 +668,7 @@ caseRouter.get('/:id/comments', async (req, res) => {
 /**
  * POST /api/cases/:id/evidence/event - Record chain of custody event
  */
-caseRouter.post('/:id/evidence/event', async (req, res) => {
+caseRouter.post('/:id/evidence/event', validateRequest(custodyEventSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -619,10 +678,6 @@ caseRouter.post('/:id/evidence/event', async (req, res) => {
 
     const { id: caseId } = req.params;
     const { evidenceId, action, location, notes, verificationHash } = req.body;
-
-    if (!evidenceId || !action) {
-      return res.status(400).json({ error: 'evidenceId and action are required' });
-    }
 
     const pg = getPostgresPool();
     const service = new ChainOfCustodyService(pg);
@@ -647,7 +702,7 @@ caseRouter.post('/:id/evidence/event', async (req, res) => {
 /**
  * GET /api/cases/:id/evidence/:evidenceId/chain - Get chain of custody
  */
-caseRouter.get('/:id/evidence/:evidenceId/chain', async (req, res) => {
+caseRouter.get('/:id/evidence/:evidenceId/chain', validateRequest(getChainSchema), async (req, res) => {
   try {
     const { evidenceId } = req.params;
 
@@ -668,7 +723,7 @@ caseRouter.get('/:id/evidence/:evidenceId/chain', async (req, res) => {
 /**
  * POST /api/cases/:id/report - Generate case report
  */
-caseRouter.post('/:id/report', async (req, res) => {
+caseRouter.post('/:id/report', validateRequest(generateReportSchema), async (req, res) => {
   try {
     const { tenantId, userId } = getRequestContext(req);
 
@@ -686,7 +741,6 @@ caseRouter.post('/:id/report', async (req, res) => {
     const caseService = new CaseService(pg);
 
     // Fetch case data to populate template
-    // We pass minimal audit context since this is an internal fetch for reporting
     const caseData = await caseService.getCase(id, tenantId, userId, { reason: 'Report Generation', legalBasis: 'investigation' });
 
     if (!caseData) {
@@ -727,7 +781,6 @@ caseRouter.post('/:id/report', async (req, res) => {
       }
     ];
 
-    // Initialize with proper rules
     const accessControl = new AccessControlService(rules as any);
     const reportingService = createReportingService(accessControl);
 

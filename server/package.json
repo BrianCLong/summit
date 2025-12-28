@@ -113,7 +113,7 @@
     "uuid": "9.0.1",
     "winston": "3.19.0",
     "ws": "8.18.3",
-    "zod": "3.25.76"
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
