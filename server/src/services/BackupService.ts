@@ -9,6 +9,28 @@ const logger = (pino as any)({ name: 'BackupService' });
 
 const BACKUP_DIR = process.env.BACKUP_DIR || '/tmp/backups';
 
+/**
+ * @class BackupService
+ * @description Provides functionality to perform backups of the application's data stores: PostgreSQL, Neo4j, and Redis.
+ * Backups are stored in a local directory defined by the `BACKUP_DIR` environment variable.
+ * This service is implemented as a singleton.
+ *
+ * @example
+ * ```typescript
+ * const backupService = BackupService.getInstance();
+ *
+ * async function runBackup() {
+ *   try {
+ *     const results = await backupService.performFullBackup();
+ *     console.log('Backup completed:', results);
+ *   } catch (error) {
+ *     console.error('Backup failed:', error);
+ *   }
+ * }
+ *
+ * runBackup();
+ * ```
+ */
 export class BackupService {
   private static instance: BackupService;
 
@@ -18,6 +40,12 @@ export class BackupService {
     }
   }
 
+  /**
+   * @method getInstance
+   * @description Gets the singleton instance of the BackupService.
+   * @static
+   * @returns {BackupService} The singleton instance.
+   */
   public static getInstance(): BackupService {
     if (!BackupService.instance) {
       BackupService.instance = new BackupService();
@@ -25,6 +53,12 @@ export class BackupService {
     return BackupService.instance;
   }
 
+  /**
+   * @method performFullBackup
+   * @description Orchestrates a full backup of all data stores.
+   * It individually backs up PostgreSQL, Neo4j, and Redis, logging the outcome of each.
+   * @returns {Promise<{ postgres: boolean; neo4j: boolean; redis: boolean; timestamp: string }>} An object indicating the success status of each backup and the timestamp for the backup set.
+   */
   async performFullBackup(): Promise<{
     postgres: boolean;
     neo4j: boolean;

@@ -2,6 +2,15 @@
 import { runCypher } from '../graph/neo4j.js';
 import { logger } from '../config/logger.js';
 
+/**
+ * @interface XAIPayload
+ * @description Defines the structure for Explainable AI (XAI) data that accompanies analytic results.
+ * It provides context about how an analytic result was generated.
+ * @property {Record<string, any>} features - The input features or parameters used for the analysis (e.g., algorithm, node IDs).
+ * @property {Record<string, number>} metrics - Key performance or summary metrics of the result (e.g., number of paths found).
+ * @property {string} explanation - A human-readable explanation of the analytic method and its result.
+ * @property {string[]} contributingFactors - A list of factors that most influenced the outcome (e.g., 'Graph topology').
+ */
 export interface XAIPayload {
   features: Record<string, any>;
   metrics: Record<string, number>;
@@ -9,16 +18,45 @@ export interface XAIPayload {
   contributingFactors: string[];
 }
 
+/**
+ * @interface AnalyticResult
+ * @description A generic wrapper for results from the AnalyticsService.
+ * It pairs the raw data with an XAI payload that explains the result.
+ * @template T - The type of the data being returned.
+ * @property {T} data - The primary data payload of the analytic result.
+ * @property {XAIPayload} xai - The accompanying explanation for the result.
+ */
 export interface AnalyticResult<T> {
   data: T;
   xai: XAIPayload;
 }
 
+/**
+ * @class AnalyticsService
+ * @description Provides a suite of graph analytics functions, such as pathfinding, community detection,
+ * centrality calculation, and pattern mining. Each method returns its result wrapped in an
+ * `AnalyticResult` object that includes an "Explainable AI" (XAI) payload.
+ * This service is implemented as a singleton.
+ *
+ * @example
+ * ```typescript
+ * const analyticsService = AnalyticsService.getInstance();
+ * const paths = await analyticsService.findPaths('user:123', 'user:456');
+ * console.log(paths.data);
+ * console.log(paths.xai.explanation);
+ * ```
+ */
 export class AnalyticsService {
   private static instance: AnalyticsService;
 
   private constructor() {}
 
+  /**
+   * @method getInstance
+   * @description Gets the singleton instance of the AnalyticsService.
+   * @static
+   * @returns {AnalyticsService} The singleton instance.
+   */
   public static getInstance(): AnalyticsService {
     if (!AnalyticsService.instance) {
       AnalyticsService.instance = new AnalyticsService();
@@ -28,6 +66,21 @@ export class AnalyticsService {
 
   // --- Link/Path/Community/Centrality ---
 
+  /**
+   * @method findPaths
+   * @description Finds paths between two nodes in the graph using specified algorithms.
+   * @param {string} sourceId - The ID of the source node.
+   * @param {string} targetId - The ID of the target node.
+   * @param {'shortest' | 'k-paths'} [algorithm='shortest'] - The pathfinding algorithm to use.
+   * @param {object} [params={}] - Additional parameters, such as `k` for k-paths or `maxDepth`.
+   * @returns {Promise<AnalyticResult<any>>} The paths found and an explanation of the method.
+   *
+   * @example
+   * ```typescript
+   * const shortestPath = await analyticsService.findPaths('node-a', 'node-z', 'shortest', { maxDepth: 5 });
+   * const top3Paths = await analyticsService.findPaths('node-a', 'node-z', 'k-paths', { k: 3, maxDepth: 4 });
+   * ```
+   */
   async findPaths(
     sourceId: string,
     targetId: string,
@@ -82,6 +135,21 @@ export class AnalyticsService {
     };
   }
 
+  /**
+   * @method detectCommunities
+   * @description Detects communities or clusters of nodes within the graph.
+   * This implementation uses a client-side Weakly Connected Components (WCC) algorithm as a stand-in for more advanced methods like Louvain or LPA,
+   * as it does not require a graph analytics library like GDS.
+   * @param {'louvain' | 'leiden' | 'lpa'} [algorithm='lpa'] - The desired algorithm (currently defaults to a WCC implementation).
+   * @param {object} [params={}] - Additional parameters for the algorithm (currently unused).
+   * @returns {Promise<AnalyticResult<any>>} The detected communities and an explanation.
+   *
+   * @example
+   * ```typescript
+   * const communities = await analyticsService.detectCommunities('lpa');
+   * console.log(`Found ${communities.xai.metrics.communityCount} communities.`);
+   * ```
+   */
   async detectCommunities(
     algorithm: 'louvain' | 'leiden' | 'lpa' = 'lpa',
     params: any = {}
@@ -164,6 +232,20 @@ export class AnalyticsService {
     };
   }
 
+  /**
+   * @method calculateCentrality
+   * @description Calculates the centrality of nodes to identify the most influential or important nodes in the graph.
+   * Provides approximations for Betweenness and Eigenvector centrality using simpler, more performant Cypher queries.
+   * @param {'betweenness' | 'eigenvector'} algorithm - The centrality algorithm to use.
+   * @param {object} [params={}] - Additional parameters, such as `limit` to control the number of results.
+   * @returns {Promise<AnalyticResult<any>>} A list of nodes and their centrality scores.
+   *
+   * @example
+   * ```typescript
+   * const topConnectors = await analyticsService.calculateCentrality('betweenness', { limit: 10 });
+   * const influentialNodes = await analyticsService.calculateCentrality('eigenvector', { limit: 10 });
+   * ```
+   */
   async calculateCentrality(
     algorithm: 'betweenness' | 'eigenvector',
     params: any = {}
@@ -216,6 +298,20 @@ export class AnalyticsService {
 
   // --- Pattern Miner ---
 
+  /**
+   * @method minePatterns
+   * @description Mines the graph for specific, predefined patterns of behavior or structure.
+   * This includes temporal motifs (like bursts of activity), co-travel patterns, and financial structuring (like layering).
+   * @param {'temporal-motifs' | 'co-travel' | 'financial-structuring'} patternType - The type of pattern to search for.
+   * @param {object} [params={}] - Additional parameters for the mining query.
+   * @returns {Promise<AnalyticResult<any>>} The patterns discovered in the graph.
+   *
+   * @example
+   * ```typescript
+   * const temporalPatterns = await analyticsService.minePatterns('temporal-motifs');
+   * const financialPatterns = await analyticsService.minePatterns('financial-structuring');
+   * ```
+   */
   async minePatterns(
     patternType: 'temporal-motifs' | 'co-travel' | 'financial-structuring',
     params: any = {}
@@ -283,6 +379,20 @@ export class AnalyticsService {
 
   // --- Anomaly/Risk Scoring ---
 
+  /**
+   * @method detectAnomalies
+   * @description Detects anomalous or high-risk entities based on several checks.
+   * This includes nodes with an unusually high degree, a sudden spike in activity, or shared selectors (e.g., a phone number used by multiple people).
+   * @param {'degree' | 'temporal-spike' | 'selector-misuse'} checkType - The type of anomaly to check for.
+   * @param {object} [params={}] - Additional parameters for the anomaly detection query.
+   * @returns {Promise<AnalyticResult<any>>} A list of anomalies found in the graph.
+   *
+   * @example
+   * ```typescript
+   * const highDegreeNodes = await analyticsService.detectAnomalies('degree');
+   * const sharedPhones = await analyticsService.detectAnomalies('selector-misuse');
+   * ```
+   */
   async detectAnomalies(
     checkType: 'degree' | 'temporal-spike' | 'selector-misuse',
     params: any = {}
