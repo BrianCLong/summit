@@ -2,6 +2,14 @@
 
 [What/why]
 
+## Cross-Stack Graduation (Required)
+
+- Frontend lifecycle: Experimental | GA-Adjacent | GA
+- Backend lifecycle: Experimental | GA-Adjacent | GA
+- Promotion intent: None | Experimental → GA-Adjacent | GA-Adjacent → GA
+- Evidence bundle: [link or path]
+- Joint approval: Pending | Approved (include approvers / ticket)
+
 ## M&A / Integration Readiness (DD Signal)
 
 _If this PR involves integrating an external system or library:_

@@ -1,0 +1,40 @@
+name: Cross-Stack Graduation Gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  graduation-gate:
+    name: Cross-Stack Graduation Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Build graduation input
+        run: node .github/scripts/graduation-metadata.js /tmp/graduation-input.json
+
+      - name: Evaluate graduation policy
+        run: |
+          opa eval --format json -d governance/policies -i /tmp/graduation-input.json 'data.summit.graduation.decision' > /tmp/graduation-decision.json
+          cat /tmp/graduation-decision.json
+          ALLOWED=$(jq -r '.result[0].expressions[0].value.allowed' /tmp/graduation-decision.json)
+          if [ "$ALLOWED" != "true" ]; then
+            echo "::error::Cross-stack graduation gate failed"
+            jq -r '.result[0].expressions[0].value.violations[]?' /tmp/graduation-decision.json | sed 's/^/ - /'
+            exit 1
+          fi
