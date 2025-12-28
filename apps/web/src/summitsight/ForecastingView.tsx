@@ -47,6 +47,10 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({ kpiId }) => {
                 <CardTitle className="text-sm font-medium">7-Day Forecast</CardTitle>
             </CardHeader>
             <CardContent>
+                <p className="mb-2 text-xs text-gray-500">
+                    Forecast window: next 7 days (local time). Upper/lower lines show the model
+                    confidence interval. Source: SummitSight forecast API.
+                </p>
                 <div className="h-[200px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={chartData}>

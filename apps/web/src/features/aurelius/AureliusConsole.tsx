@@ -147,11 +147,12 @@ const ForesightPane = () => {
             <CardHeader><CardTitle>Simulation Engine</CardTitle></CardHeader>
             <CardContent>
                 <div className="text-muted-foreground text-sm">
-                    Zephyrus Simulation Engine active. Run scenarios to forecast technology trajectories.
+                    Zephyrus simulation sandbox (preview). Scenario outputs are exploratory
+                    estimates and do not execute actions.
                 </div>
                 {/* Placeholder for complex chart UI */}
                 <div className="h-64 bg-muted/20 rounded mt-4 flex items-center justify-center border border-dashed">
-                    Forecast Visualization Area
+                    Forecast visualization placeholder (no live data)
                 </div>
             </CardContent>
         </Card>

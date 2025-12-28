@@ -68,14 +68,14 @@ export function AIAssistant({ context }: AIAssistantProps) {
 
   const generateContextualGreeting = (ctx: typeof context): string => {
     if (ctx?.recentErrors?.length) {
-      return `👋 I noticed some recent errors in your Maestro runs. I can help troubleshoot issues, explain error messages, or suggest optimizations. What would you like to know?`
+      return `👋 I noticed some recent errors in your Maestro runs. I can help troubleshoot issues, explain error messages, or suggest options to review. What would you like to know?`
     }
 
     if (ctx?.runId) {
-      return `👋 I'm here to help with your Maestro run ${ctx.runId.slice(0, 8)}... I can explain what's happening, help with approvals, or suggest improvements. How can I assist?`
+      return `👋 I'm here to help with your Maestro run ${ctx.runId.slice(0, 8)}... I can explain what's happening, surface approval status, or suggest improvements. How can I assist?`
     }
 
-    return `👋 I'm your Maestro AI Assistant! I can help with:\n\n• Troubleshooting runs and errors\n• Explaining router decisions\n• Optimizing pipeline performance\n• Managing approvals and policies\n• Best practices and recommendations\n\nWhat would you like to know?`
+    return `👋 I'm your Maestro AI Assistant! I can help with:\n\n• Troubleshooting runs and errors\n• Explaining router decisions\n• Reviewing pipeline performance\n• Reviewing approvals and policy status\n• Best practices and recommendations\n\nWhat would you like to know?`
   }
 
   const sendMessage = async () => {
@@ -204,7 +204,12 @@ export function AIAssistant({ context }: AIAssistantProps) {
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-blue-50 rounded-t-lg">
         <div className="flex items-center space-x-2">
           <SparklesIcon className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Maestro AI Assistant</h3>
+          <div>
+            <h3 className="font-semibold text-gray-900">Maestro AI Assistant</h3>
+            <p className="text-xs text-gray-500">
+              Advisory only. No actions execute without explicit user confirmation.
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setIsOpen(false)}

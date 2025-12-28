@@ -144,9 +144,12 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
           justifyContent: 'space-between',
         }}
       >
-        <Box display="flex" alignItems="center" gap={2}>
+        <Box display="flex" flexDirection="column" gap={0.5}>
           <Typography variant="h5" fontWeight={600}>
             🎯 Control Tower
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Demo data • Source: local fixtures • Time window: snapshot (not live)
           </Typography>
         </Box>
 
