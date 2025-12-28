@@ -1,23 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
-import { featureFlagClient } from '../feature-flags/opaFeatureFlagClient.js';
-import { buildContextFromRequest } from '../feature-flags/context.js';
+import { KillSwitchService } from '../services/KillSwitchService.js';
+import { logger } from '../config/logger.js';
 
 export function killSwitchGuard(moduleName: string) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const context = buildContextFromRequest(req);
-    const { decision } = await featureFlagClient.isKillSwitchActive(
-      moduleName,
-      context,
-    );
+    try {
+      const service = KillSwitchService.getInstance();
+      const isActive = await service.isActive(moduleName);
 
-    if (decision.active) {
-      return res.status(503).json({
-        message: `Module ${moduleName} is temporarily disabled via kill switch`,
-        reason: decision.reason,
-        evaluationId: decision.evaluationId,
-      });
+      if (isActive) {
+        logger.warn({ module: moduleName, action: 'BLOCKED' }, 'Request blocked by kill switch');
+        return res.status(503).json({
+          message: `Module ${moduleName} is temporarily disabled via kill switch`,
+          reason: 'Administrative Lock',
+        });
+      }
+
+      return next();
+    } catch (error) {
+      logger.error({ error, module: moduleName }, 'Error checking kill switch');
+      // Fail open or closed? "Make unsafe releases impossible" -> Fail Closed.
+      return res.status(500).json({ error: 'Internal Security Error' });
     }
-
-    return next();
   };
 }

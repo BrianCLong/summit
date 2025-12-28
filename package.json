@@ -152,11 +152,15 @@
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
     "dotenv": "^17.2.1",
+    "express": "^5.2.1",
     "jest-extended": "^4.0.2",
+    "jest-junit": "16.0.0",
     "neo4j-driver": "^5.28.1",
     "pg": "^8.16.3",
+    "pino": "^10.1.0",
     "redis": "^5.8.1",
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "zod": "^4.2.1"
   },
   "private": true,
   "workspaces": [

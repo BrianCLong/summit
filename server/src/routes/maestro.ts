@@ -2,8 +2,12 @@ import express from 'express';
 import pipelinesRouter from '../maestro/pipelines/pipelines-api.js';
 import runsRouter from '../maestro/runs/runs-api.js';
 import executorsRouter from '../maestro/executors/executors-api.js';
+import { killSwitchGuard } from '../middleware/kill-switch.js';
 
 const router = express.Router();
+
+// Apply Kill Switch for Maestro
+router.use(killSwitchGuard('maestro'));
 
 // Mount sub-routers
 // Note: These routers define their own paths (e.g. /pipelines, /runs),
@@ -38,6 +42,9 @@ import { recordEndpointResult } from '../observability/reliability-metrics.js';
 
 export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
   const router = Router();
+
+  // Apply Kill Switch for Maestro factory routes
+  router.use(killSwitchGuard('maestro'));
 
   // --- Runs ---
 
