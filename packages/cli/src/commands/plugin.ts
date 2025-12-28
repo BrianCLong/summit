@@ -91,10 +91,10 @@ const create = new Command('create')
       },
       keywords: ['summit', 'plugin'],
       peerDependencies: {
-        '@summit/plugin-sdk': '^1.0.0',
+        '@intelgraph/plugin-sdk': '^2.0.0',
       },
       devDependencies: {
-        '@summit/plugin-sdk': '^1.0.0',
+        '@intelgraph/plugin-sdk': '^2.0.0',
         '@types/jest': '^29.0.0',
         '@types/node': '^20.0.0',
         jest: '^29.0.0',
@@ -135,47 +135,60 @@ const create = new Command('create')
     );
 
     // Create main plugin file
+    const className = name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
     const mainFile = `/**
  * ${manifest.name}
  *
  * ${manifest.description}
  */
 
-import { PluginBuilder } from '@summit/plugin-sdk';
-import type { PluginContext } from '@summit/plugin-sdk';
+import { PluginBuilder } from '@intelgraph/plugin-sdk';
+import type { PluginContext } from '@intelgraph/plugin-sdk';
 
 /**
  * Plugin configuration interface
  */
-export interface ${name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')}Config {
+export interface ${className}Config {
   enabled: boolean;
   // Add your config options here
 }
 
+// Store context for use in lifecycle handlers
+let pluginContext: PluginContext | null = null;
+
 /**
  * Create the plugin instance
  */
-export function create${name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')}Plugin() {
-  return new PluginBuilder('${name}')
-    .withVersion('1.0.0')
-    .withDescription('${manifest.description}')
+export function create${className}Plugin() {
+  return new PluginBuilder()
+    .withMetadata({
+      id: '${name}',
+      name: '${manifest.name}',
+      version: '1.0.0',
+      description: '${manifest.description}',
+      author: { name: 'Your Name' },
+      license: 'MIT',
+      category: 'utility',
+    })
     .onInitialize(async (ctx: PluginContext) => {
+      pluginContext = ctx;
       ctx.logger.info('Plugin initialized');
     })
-    .onStart(async (ctx: PluginContext) => {
-      ctx.logger.info('Plugin started');
-
-      // Subscribe to events
-      ctx.events.on('entity:created', async (payload) => {
-        ctx.logger.debug('Entity created', { payload });
-        // Handle event
-      });
+    .onStart(async () => {
+      if (pluginContext) {
+        pluginContext.logger.info('Plugin started');
+      }
     })
-    .onStop(async (ctx: PluginContext) => {
-      ctx.logger.info('Plugin stopped');
+    .onStop(async () => {
+      if (pluginContext) {
+        pluginContext.logger.info('Plugin stopped');
+      }
     })
-    .onDestroy(async (ctx: PluginContext) => {
-      ctx.logger.info('Plugin destroyed');
+    .onDestroy(async () => {
+      if (pluginContext) {
+        pluginContext.logger.info('Plugin destroyed');
+      }
+      pluginContext = null;
     })
     .onHealthCheck(async () => {
       return { healthy: true };
@@ -184,7 +197,7 @@ export function create${name.split('-').map(w => w.charAt(0).toUpperCase() + w.s
 }
 
 // Export default plugin instance
-export default create${name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')}Plugin();
+export default create${className}Plugin();
 `;
 
     writeFileSync(join(pluginDir, 'src', 'index.ts'), mainFile);
@@ -194,7 +207,7 @@ export default create${name.split('-').map(w => w.charAt(0).toUpperCase() + w.sl
  * Plugin Tests
  */
 
-import { createTestHarness } from '@summit/plugin-sdk';
+import { createTestHarness } from '@intelgraph/plugin-sdk';
 import plugin from '../src/index';
 
 describe('${manifest.name}', () => {

@@ -1,0 +1,30 @@
+{
+  "name": "@summit-plugins/hello-world",
+  "version": "1.0.0",
+  "description": "A minimal example plugin demonstrating Summit plugin architecture",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "summit",
+    "plugin",
+    "example"
+  ],
+  "peerDependencies": {
+    "@intelgraph/plugin-sdk": "^2.0.0"
+  },
+  "devDependencies": {
+    "@intelgraph/plugin-sdk": "^2.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  }
+}
