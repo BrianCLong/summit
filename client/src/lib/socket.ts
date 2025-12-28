@@ -23,7 +23,7 @@ export class RobustSocket {
 
     private setupListeners() {
         this.socket.on('connect', () => {
-            console.log('Connected to WebSocket');
+            console.warn('Connected to WebSocket');
             this.retryCount = 0;
         });
 
