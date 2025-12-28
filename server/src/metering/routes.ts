@@ -8,7 +8,7 @@ export const meteringRouter = express.Router();
 
 // Middleware to ensure admin access
 const ensureAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const user = (req as any).user;
+  const user = req.user;
   if (!user) {
      res.status(401).json({ error: 'Unauthorized' });
      return;
@@ -28,7 +28,7 @@ meteringRouter.get('/summary', ensureAuthenticated, async (req, res) => {
   try {
     const { tenantId, from, to } = req.query;
 
-    const targetTenantId = (tenantId as string) || (req as any).user?.tenantId;
+    const targetTenantId = (tenantId as string) || req.user?.tenantId;
 
     if (!targetTenantId) {
        res.status(400).json({ error: 'Tenant ID required' });
@@ -36,9 +36,9 @@ meteringRouter.get('/summary', ensureAuthenticated, async (req, res) => {
     }
 
     // Tenant Isolation
-    if ((req as any).user?.tenantId && (req as any).user.tenantId !== targetTenantId) {
+    if (req.user?.tenantId && req.user.tenantId !== targetTenantId) {
          // Unless admin
-         if ((req as any).user.role !== 'admin') {
+         if (req.user.role !== 'admin') {
              res.status(403).json({ error: 'Forbidden' });
              return;
          }
