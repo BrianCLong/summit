@@ -443,8 +443,8 @@ const validate = new Command('validate')
     } else {
       try {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-        if (!packageJson.peerDependencies?.['@summit/plugin-sdk']) {
-          warnings.push('@summit/plugin-sdk should be a peer dependency');
+        if (!packageJson.peerDependencies?.['@intelgraph/plugin-sdk']) {
+          warnings.push('@intelgraph/plugin-sdk should be a peer dependency');
         }
         console.log(chalk.green('✓ package.json valid'));
       } catch {
