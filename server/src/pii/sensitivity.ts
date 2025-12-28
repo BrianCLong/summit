@@ -5,7 +5,7 @@
  * providing a governance layer for data access control and redaction.
  */
 
-import { PIIType, SeverityLevel } from './types.js';
+import { PIIType, SeverityLevel, DataClass, Region } from './types.js';
 // Added for Privacy Engine visibility
 
 /**
@@ -108,11 +108,38 @@ export interface AccessControlPolicy {
 }
 
 /**
+ * Mapping from SensitivityClass to DataClass
+ */
+export const SENSITIVITY_TO_DATA_CLASS: Record<SensitivityClass, DataClass> = {
+  [SensitivityClass.PUBLIC]: DataClass.PUBLIC,
+  [SensitivityClass.INTERNAL]: DataClass.INTERNAL,
+  [SensitivityClass.CONFIDENTIAL]: DataClass.CONFIDENTIAL,
+  [SensitivityClass.HIGHLY_SENSITIVE]: DataClass.RESTRICTED,
+  [SensitivityClass.TOP_SECRET]: DataClass.RESTRICTED,
+};
+
+/**
+ * Default allowed regions by data class
+ */
+export const DEFAULT_ALLOWED_REGIONS: Record<DataClass, Region[]> = {
+  [DataClass.PUBLIC]: [Region.GLOBAL],
+  [DataClass.INTERNAL]: [Region.GLOBAL],
+  [DataClass.CONFIDENTIAL]: [Region.US, Region.EU, Region.UK, Region.CA, Region.AU],
+  [DataClass.RESTRICTED]: [Region.US],
+};
+
+/**
  * Comprehensive sensitivity metadata for data classification
  */
 export interface SensitivityMetadata {
   /** Primary sensitivity classification */
   sensitivityClass: SensitivityClass;
+
+  /** Data Class (simplified taxonomy) */
+  dataClass: DataClass;
+
+  /** Allowed regions for residency */
+  allowedRegions: Region[];
 
   /** PII types detected in this data */
   piiTypes: PIIType[];
@@ -314,6 +341,10 @@ export class SensitivityClassifier {
     // Determine primary sensitivity class from severity
     const sensitivityClass = SEVERITY_TO_SENSITIVITY[severity];
 
+    // Determine Data Class and Allowed Regions
+    const dataClass = SENSITIVITY_TO_DATA_CLASS[sensitivityClass];
+    const allowedRegions = DEFAULT_ALLOWED_REGIONS[dataClass];
+
     // Aggregate regulatory tags from all PII types
     const regulatoryTags = new Set<RegulatoryTag>();
     for (const piiType of piiTypes) {
@@ -333,6 +364,8 @@ export class SensitivityClassifier {
 
     return {
       sensitivityClass,
+      dataClass,
+      allowedRegions,
       piiTypes,
       severity,
       regulatoryTags: Array.from(regulatoryTags),

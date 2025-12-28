@@ -8,16 +8,17 @@
 
 import { HybridEntityRecognizer } from './recognizer.js';
 import { TaxonomyManager } from './taxonomy.js';
-import { SensitivityClassifier } from './sensitivity.js';
+import { SensitivityClassifier, SensitivityMetadata } from './sensitivity.js';
 // Added for Privacy Engine visibility
 import {
   ClassifiedEntity,
   RecognitionOptions,
   SchemaMetadata,
   SchemaFieldMetadata,
+  Region,
 } from './types.js';
 import { DataCatalogService } from '../data-governance/catalog/DataCatalogService.js';
-import { DataAssetType } from '../data-governance/types.js';
+import { DataAssetType, SensitivityLevel } from '../data-governance/types.js';
 
 /**
  * Configuration for ingestion hooks
@@ -44,8 +45,14 @@ export interface IngestionHookConfig {
   /** Fail ingestion on high-severity PII without approval */
   strictMode?: boolean;
 
+  /** Target region for data residency checks */
+  targetRegion?: Region;
+
   /** Callback for high-severity PII detection */
   onHighSeverityDetected?: (entities: ClassifiedEntity[]) => Promise<void>;
+
+  /** Logger for policy decisions (Audit) */
+  policyLogger?: (decision: 'ALLOW' | 'DENY', rule: string, resourceId: string, details: any) => void;
 }
 
 /**
@@ -65,7 +72,7 @@ export interface IngestionDetectionResult {
   blockReason?: string;
 
   /** Sensitivity metadata assigned */
-  sensitivityMetadata?: any;
+  sensitivityMetadata?: SensitivityMetadata;
 
   /** Catalog ID if tagged */
   catalogId?: string;
@@ -183,7 +190,7 @@ export class IngestionHook {
     }
 
     // Generate sensitivity metadata
-    let sensitivityMetadata;
+    let sensitivityMetadata: SensitivityMetadata | undefined;
     if (allEntities.length > 0) {
       const piiTypes = [...new Set(allEntities.map(e => e.type))];
       const maxSeverity = this.getMaxSeverity(allEntities);
@@ -194,6 +201,34 @@ export class IngestionHook {
         maxSeverity,
         policyTags,
       );
+    }
+
+    // Residency Guard (E11.S2)
+    if (sensitivityMetadata && this.config.targetRegion) {
+        const allowedRegions = sensitivityMetadata.allowedRegions;
+        const currentRegion = this.config.targetRegion;
+
+        // Check if current region is allowed
+        // If GLOBAL is in allowedRegions, then any region is allowed.
+        const isGlobal = allowedRegions.includes(Region.GLOBAL);
+        const isAllowed = isGlobal || allowedRegions.includes(currentRegion);
+
+        const decision = isAllowed ? 'ALLOW' : 'DENY';
+        const ruleId = 'RESIDENCY_CHECK';
+
+        if (this.config.policyLogger) {
+            this.config.policyLogger(decision, ruleId, record.id, {
+                dataClass: sensitivityMetadata.dataClass,
+                targetRegion: currentRegion,
+                allowedRegions,
+                actor: record.metadata?.actor || 'system',
+            });
+        }
+
+        if (!isAllowed) {
+            blocked = true;
+            blockReason = `Residency violation: Data class ${sensitivityMetadata.dataClass} is restricted to [${allowedRegions.join(', ')}], but target is ${currentRegion}.`;
+        }
     }
 
     // Auto-tag catalog
@@ -225,7 +260,9 @@ export class IngestionHook {
                          schema: { fields: [] }, // Populate if we have schema metadata
                          owners: [],
                          tags: [],
-                         sensitivity: sensitivityMetadata?.level || 'internal',
+                              sensitivity: sensitivityMetadata
+                                ? this.mapSeverityToLevel(sensitivityMetadata.severity)
+                                : 'internal',
                          metadata: {},
                          tenantId: record.metadata.tenantId
                      });
@@ -245,15 +282,18 @@ export class IngestionHook {
                      const newTags = [...currentTags];
                      let changed = false;
                      if (!newTags.includes('PII')) { newTags.push('PII'); changed = true; }
-                     if (!newTags.includes(sensitivityMetadata.level)) { newTags.push(sensitivityMetadata.level); changed = true; }
+                     if (!newTags.includes(sensitivityMetadata.sensitivityClass)) { newTags.push(sensitivityMetadata.sensitivityClass); changed = true; }
 
                      if (changed) {
                          const catalog = DataCatalogService.getInstance();
                          // Avoid duplicates
                          const uniqueTags = [...new Set(newTags)];
+
+                         // Map sensitivityClass to catalog sensitivity (which is lowercase)
+
                          await catalog.updateAsset(assetId, {
                              tags: uniqueTags,
-                             sensitivity: sensitivityMetadata.level as any
+                             sensitivity: this.mapSeverityToLevel(sensitivityMetadata.severity)
                          });
                          // Update cache
                          this.catalogCache.set(urn, { id: assetId, tags: uniqueTags });
@@ -349,6 +389,21 @@ export class IngestionHook {
       return index > max ? index : max;
     }, 0);
     return severityOrder[maxIndex] as 'low' | 'medium' | 'high' | 'critical';
+  }
+
+  private mapSeverityToLevel(severity: 'low' | 'medium' | 'high' | 'critical'): SensitivityLevel {
+    switch (severity) {
+      case 'low':
+        return 'internal';
+      case 'medium':
+        return 'confidential';
+      case 'high':
+        return 'restricted';
+      case 'critical':
+        return 'critical';
+      default:
+        return 'internal';
+    }
   }
 }
 

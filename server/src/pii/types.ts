@@ -100,6 +100,23 @@ export interface EntityMatch {
 
 export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 
+export enum DataClass {
+  PUBLIC = 'PUBLIC',
+  INTERNAL = 'INTERNAL',
+  CONFIDENTIAL = 'CONFIDENTIAL',
+  RESTRICTED = 'RESTRICTED',
+}
+
+export enum Region {
+  US = 'US',
+  EU = 'EU',
+  UK = 'UK',
+  CA = 'CA',
+  AU = 'AU',
+  ASIA = 'ASIA',
+  GLOBAL = 'GLOBAL',
+}
+
 export interface ClassifiedEntity extends EntityMatch {
   severity: SeverityLevel;
   taxonomy: string;
@@ -122,6 +139,8 @@ export interface SchemaMetadata {
   fields: SchemaFieldMetadata[];
   tags?: string[];
   sourceType?: string;
+  dataClass?: DataClass;
+  allowedRegions?: Region[];
 }
 
 export interface TaxonomyNode {
