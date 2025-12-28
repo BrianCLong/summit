@@ -1,7 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Forecast } from './types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface ForecastingViewProps {
     kpiId: string;
@@ -10,6 +25,7 @@ interface ForecastingViewProps {
 export const ForecastingView: React.FC<ForecastingViewProps> = ({ kpiId }) => {
     const [forecasts, setForecasts] = useState<Forecast[]>([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchForecast = async () => {
@@ -17,12 +33,17 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({ kpiId }) => {
             try {
                 const token = localStorage.getItem('auth_token');
                 const res = await fetch(`/summitsight/forecast/${kpiId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token}` },
                 });
+                if (!res.ok) {
+                    throw new Error(`Forecast request failed (${res.status})`);
+                }
                 const data = await res.json();
                 setForecasts(data);
+                setError(null);
             } catch (e) {
                 console.error(e);
+                setError('Forecast data is temporarily unavailable.');
             } finally {
                 setLoading(false);
             }
@@ -32,6 +53,7 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({ kpiId }) => {
     }, [kpiId]);
 
     if (loading) return <div className="text-sm text-gray-400">Computing projection...</div>;
+    if (error) return <div className="text-sm text-amber-700">{error}</div>;
     if (!forecasts.length) return <div className="text-sm text-gray-400">No sufficient data for forecast.</div>;
 
     const chartData = forecasts.map(f => ({
@@ -43,8 +65,14 @@ export const ForecastingView: React.FC<ForecastingViewProps> = ({ kpiId }) => {
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle className="text-sm font-medium">7-Day Forecast</CardTitle>
+            <CardHeader className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-medium">7-Day Forecast</CardTitle>
+                    <Badge variant="outline">Modeled forecast</Badge>
+                </div>
+                <CardDescription>
+                    Forecast values are modeled estimates, not observed metrics.
+                </CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="h-[200px] w-full">

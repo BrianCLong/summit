@@ -88,6 +88,8 @@ function useInterval(callback: () => void, delay: number | null) {
 
 function useSSE(paths: string[]) {
   const [lines, setLines] = useState<string[]>([])
+  const [status, setStatus] = useState<'idle' | 'connected' | 'error'>('idle')
+  const [error, setError] = useState<string | null>(null)
   useEffect(() => {
     let es: EventSource | null = null
     let closed = false
@@ -96,12 +98,20 @@ function useSSE(paths: string[]) {
       if (idx >= paths.length) {return}
       try {
         es = new EventSource(`${base}${paths[idx]}`)
-        es.onmessage = ev => setLines(l => [...l.slice(-999), ev.data])
+        es.onmessage = ev => {
+          setStatus('connected')
+          setError(null)
+          setLines(l => [...l.slice(-999), ev.data])
+        }
         es.onerror = () => {
+          setStatus('error')
+          setError('Live event stream unavailable. Data may be delayed.')
           es?.close()
           if (!closed) {setTimeout(() => connect(idx + 1), 500)}
         }
       } catch {
+        setStatus('error')
+        setError('Live event stream unavailable. Data may be delayed.')
         if (!closed) {setTimeout(() => connect(idx + 1), 500)}
       }
     }
@@ -111,7 +121,7 @@ function useSSE(paths: string[]) {
       es?.close()
     }
   }, [paths.join(',')])
-  return lines
+  return { lines, status, error }
 }
 
 // ---------- Types (lightweight) ----------
@@ -160,17 +170,21 @@ function Stat({
 function KPIBar() {
   const [bd, setBd] = useState<Burndown | null>(null)
   const [hl, setHl] = useState<Health | null>(null)
+  const [burndownError, setBurndownError] = useState<string | null>(null)
+  const [healthError, setHealthError] = useState<string | null>(null)
 
   const refresh = async () => {
     try {
       setBd(await getJSON<Burndown>('/status/burndown.json'))
+      setBurndownError(null)
     } catch {
-      // Silently ignore burndown fetch errors
+      setBurndownError('Burndown metrics unavailable. Values may be stale.')
     }
     try {
       setHl(await getJSON<Health>('/status/health.json'))
+      setHealthError(null)
     } catch {
-      // Silently ignore health fetch errors
+      setHealthError('Health checks unavailable. Values may be stale.')
     }
   }
 
@@ -219,6 +233,11 @@ function KPIBar() {
             proxy: {getProxyBase()}
           </span>
         </div>
+        {(burndownError || healthError) && (
+          <div className="col-span-2 md:col-span-4 text-xs text-amber-700">
+            {[burndownError, healthError].filter(Boolean).join(' ')}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
@@ -244,6 +263,7 @@ interface PromptHistory {
 export function PromptActivityMonitor({ active }: { active: boolean }) {
   const [prompts, setPrompts] = useState<PromptHistory[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const pollerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -254,8 +274,10 @@ export function PromptActivityMonitor({ active }: { active: boolean }) {
       if (data && data.history) {
         setPrompts(data.history)
       }
+      setError(null)
     } catch (e) {
       console.error('Failed to fetch prompt history', e)
+      setError('Prompt activity unavailable. Check proxy connectivity.')
     } finally {
       setLoading(false)
     }
@@ -296,6 +318,11 @@ export function PromptActivityMonitor({ active }: { active: boolean }) {
                 Refresh
             </Button>
           </div>
+          {error && (
+            <div className="text-xs text-amber-700">
+              {error}
+            </div>
+          )}
           <div className="space-y-2">
             {prompts.length === 0 ? (
                 <div className="text-sm text-muted-foreground text-center py-8">
@@ -360,6 +387,7 @@ function useBurndownSeries() {
   const [series, setSeries] = useState<
     Array<{ time: number; p95: number; errors: number; count: number }>
   >([])
+  const [error, setError] = useState<string | null>(null)
   const tick = async () => {
     try {
       const bd = await getJSON<Burndown>('/status/burndown.json')
@@ -371,19 +399,20 @@ function useBurndownSeries() {
         ...s.slice(-120),
         { time: Date.now(), p95, errors, count },
       ])
+      setError(null)
     } catch {
-      // Silently ignore telemetry fetch errors
+      setError('Telemetry stream unavailable. Charts may be incomplete.')
     }
   }
   useEffect(() => {
     tick()
   }, [])
   useInterval(tick, 5000)
-  return series
+  return { series, error }
 }
 
 function LatencyChart() {
-  const data = useBurndownSeries()
+  const { series, error } = useBurndownSeries()
   return (
     <Card className="col-span-12 lg:col-span-8">
       <CardHeader>
@@ -393,9 +422,12 @@ function LatencyChart() {
         </CardTitle>
       </CardHeader>
       <CardContent className="h-56">
+        {error && (
+          <div className="text-xs text-amber-700 mb-2">{error}</div>
+        )}
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data}
+            data={series}
             margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
           >
             <XAxis
@@ -418,7 +450,7 @@ function LatencyChart() {
 }
 
 function ErrorChart() {
-  const data = useBurndownSeries()
+  const { series, error } = useBurndownSeries()
   return (
     <Card className="col-span-12 lg:col-span-4">
       <CardHeader>
@@ -428,9 +460,12 @@ function ErrorChart() {
         </CardTitle>
       </CardHeader>
       <CardContent className="h-56">
+        {error && (
+          <div className="text-xs text-amber-700 mb-2">{error}</div>
+        )}
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={data}
+            data={series}
             margin={{ left: 8, right: 8, top: 8, bottom: 8 }}
           >
             <XAxis
@@ -462,6 +497,7 @@ interface RoutePolicyModel {
 function RoutingMatrix() {
   const [models, setModels] = useState<RoutePolicyModel[]>([])
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const load = async () => {
     try {
@@ -480,11 +516,13 @@ function RoutingMatrix() {
           b => pol.models.find(p => p.name === b.name) || b
         )
         setModels(merged)
+        setError(null)
       } catch {
         setModels(base)
+        setError('Routing policy unavailable. Showing defaults.')
       }
     } catch {
-      // Silently ignore model config fetch errors
+      setError('Model inventory unavailable. Check proxy connectivity.')
     }
   }
   useEffect(() => {
@@ -498,8 +536,9 @@ function RoutingMatrix() {
         method: 'PUT',
         body: JSON.stringify({ models }),
       })
+      setError(null)
     } catch {
-      // Silently ignore policy save errors
+      setError('Unable to save routing policy. Please retry.')
     }
     setSaving(false)
   }
@@ -513,6 +552,7 @@ function RoutingMatrix() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        {error && <div className="text-xs text-amber-700">{error}</div>}
         {models.map((m, i) => (
           <div key={m.name} className="grid grid-cols-12 items-center gap-3">
             <div className="col-span-12 md:col-span-3 truncate">
@@ -599,14 +639,17 @@ function UsageWindows() {
     Array<{ name: string; window: string; overflow_to?: string }>
   >([])
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const load = async () => {
     try {
       const pol = await getJSON<{
         windows: Array<{ name: string; window: string; overflow_to?: string }>
       }>('/route/schedule')
       setRows(pol.windows)
+      setError(null)
     } catch {
       setRows([])
+      setError('Schedule unavailable. Configure when backend is online.')
     }
   }
   useEffect(() => {
@@ -619,8 +662,9 @@ function UsageWindows() {
         method: 'PUT',
         body: JSON.stringify({ windows: rows }),
       })
+      setError(null)
     } catch {
-      // Silently ignore schedule save errors
+      setError('Unable to save schedule. Please retry.')
     }
     setSaving(false)
   }
@@ -633,6 +677,7 @@ function UsageWindows() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        {error && <div className="text-xs text-amber-700">{error}</div>}
         <p className="text-sm text-muted-foreground">
           Define daily/weekly time windows (CRON or iCal syntax) when costly
           models are eligible. Outside windows, requests overflow to
@@ -775,7 +820,7 @@ function RequestComposer() {
 
 // ---------- Live Logs (SSE) ----------
 function LiveLogs() {
-  const lines = useSSE(['/logs/stream', '/status/events'])
+  const { lines, error } = useSSE(['/logs/stream', '/status/events'])
   return (
     <Card className="col-span-12">
       <CardHeader>
@@ -785,6 +830,7 @@ function LiveLogs() {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {error && <div className="text-xs text-amber-700 mb-2">{error}</div>}
         <div className="h-48 overflow-auto rounded bg-muted p-2 text-xs font-mono">
           {lines.slice(-500).map((l, i) => (
             <div key={i} className="whitespace-pre-wrap">
