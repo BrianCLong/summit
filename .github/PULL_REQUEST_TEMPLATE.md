@@ -2,6 +2,15 @@
 
 [What/why]
 
+## Frontend Governance Intake (required if touching frontend paths)
+
+- **Change class (0-4)**:
+- **Risk level (low/medium/high)**:
+- **Affected surfaces**:
+- **GA-locked files touched? (yes/no)**:
+- **Feature flag or safe-staging plan**:
+- **Approvals/labels applied**: frontend/governance-approved, compliance/claims-approved, compliance/ethics-approved, frontend/emergency-exception
+
 ## M&A / Integration Readiness (DD Signal)
 
 _If this PR involves integrating an external system or library:_

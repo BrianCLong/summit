@@ -87,5 +87,25 @@
     "name": "migration-gate",
     "color": "e11d48",
     "description": "Schema-impacting change that must pass migration gate review"
+  },
+  {
+    "name": "frontend/governance-approved",
+    "color": "5319e7",
+    "description": "Governance approval for GA-locked frontend surfaces"
+  },
+  {
+    "name": "compliance/claims-approved",
+    "color": "e11d48",
+    "description": "Compliance approval for claim or semantic changes"
+  },
+  {
+    "name": "compliance/ethics-approved",
+    "color": "8b5cf6",
+    "description": "Ethics approval for governance/compliance-relevant UI"
+  },
+  {
+    "name": "frontend/emergency-exception",
+    "color": "ff4500",
+    "description": "Emergency exception for frozen frontend surfaces"
   }
 ]

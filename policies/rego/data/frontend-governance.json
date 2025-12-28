@@ -1,0 +1,36 @@
+{
+  "frontend_governance": {
+    "frontend_roots": ["apps/web/", "client/", "conductor-ui/", "web/", "webapp/"],
+    "ga_locked_patterns": [
+      "^apps/web/src/pages/",
+      "^apps/web/src/features/",
+      "^apps/web/src/components/",
+      "^apps/web/src/panes/",
+      "^apps/web/src/graphs/",
+      "^apps/web/src/hud/",
+      "^apps/web/src/summitsight/",
+      "^apps/web/src/securiteyes/",
+      "^client/src/"
+    ],
+    "elevated_review_patterns": [
+      "^apps/web/src/governance/",
+      "^apps/web/src/telemetry/",
+      "^apps/web/src/config\\.ts$",
+      "^apps/web/src/theme/",
+      "^apps/web/src/theme\\.ts$",
+      "^apps/web/src/contexts/"
+    ],
+    "frozen_patterns": [
+      "^apps/web/ingest-wizard/",
+      "^apps/web/report-studio/",
+      "^apps/web/src/pages/GovernanceDashboard\\.tsx$",
+      "^apps/web/src/pages/ReportsPage\\.tsx$"
+    ],
+    "labels": {
+      "frontend_governance": "frontend/governance-approved",
+      "claims_review": "compliance/claims-approved",
+      "ethics_review": "compliance/ethics-approved",
+      "emergency_exception": "frontend/emergency-exception"
+    }
+  }
+}

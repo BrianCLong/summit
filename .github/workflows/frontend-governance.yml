@@ -1,0 +1,42 @@
+name: frontend-governance
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  frontend-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: open-policy-agent/setup-opa@v2
+
+      - name: Build governance input
+        run: node .github/scripts/frontend-governance-input.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Evaluate frontend governance policy
+        run: |
+          opa eval --format=json \
+            -d policies/rego/frontend-governance.rego \
+            -d policies/rego/data/frontend-governance.json \
+            -i frontend-governance-input.json \
+            'data.summit.frontend_governance.deny' \
+            > frontend-governance-result.json
+
+          violations=$(jq -r '.result[0].expressions[0].value[]?' frontend-governance-result.json)
+          if [ -n "$violations" ]; then
+            echo "$violations" | while read -r line; do
+              echo "::error::${line}"
+            done
+            exit 1
+          fi
+
+          echo "Frontend governance policy passed."
