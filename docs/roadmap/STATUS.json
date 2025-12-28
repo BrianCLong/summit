@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-27T15:34:27Z",
+  "last_updated": "2025-12-27T17:12:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -64,6 +64,18 @@
           "name": "Immutable Audit Log",
           "status": "pending",
           "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Experimental Preview Lane",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "Frontend Experimental Lane Activation",
+          "status": "in_progress",
+          "owner": "Experimental Lane Owner"
         }
       ]
     }

@@ -49,14 +49,19 @@ const MissionControlPage = React.lazy(() => import('@/features/mission-control/M
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
+const ExperimentalPreviewPage = React.lazy(
+  () => import('@/experimental/ExperimentalPreviewPage')
+)
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { FeatureFlagProvider } from '@/contexts/FeatureFlagContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
+import { ExperimentalRouteGuard } from '@/experimental/ExperimentalRouteGuard'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -79,11 +84,12 @@ function App() {
       <SocketProvider>
         <TooltipProvider>
           <AuthProvider>
-            <SearchProvider>
-              <CommandStatusProvider>
-                <Router>
-                  <ErrorBoundary>
-                  <React.Suspense
+            <FeatureFlagProvider>
+              <SearchProvider>
+                <CommandStatusProvider>
+                  <Router>
+                    <ErrorBoundary>
+                    <React.Suspense
                     fallback={
                       <div className="flex h-screen items-center justify-center">
                         <div className="text-center">
@@ -180,6 +186,15 @@ function App() {
                       <Route path="admin/consistency" element={<ConsistencyDashboard />} />
                       <Route path="admin/feature-flags" element={<FeatureFlagsPage />} />
 
+                      <Route
+                        path="experimental/preview"
+                        element={(
+                          <ExperimentalRouteGuard>
+                            <ExperimentalPreviewPage />
+                          </ExperimentalRouteGuard>
+                        )}
+                      />
+
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
                       <Route path="changelog" element={<ChangelogPage />} />
@@ -196,6 +211,7 @@ function App() {
               </Router>
               </CommandStatusProvider>
             </SearchProvider>
+            </FeatureFlagProvider>
           </AuthProvider>
         </TooltipProvider>
       </SocketProvider>
