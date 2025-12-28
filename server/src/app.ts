@@ -27,6 +27,7 @@ import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
+import { standardTelemetry } from './observability/standard-telemetry.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
@@ -271,7 +272,9 @@ export const createApp = async () => {
     res.on('finish', () => {
       snapshotter.untrackRequest(req);
       const diff = process.hrtime(start);
-      const duration = diff[0] * 1e3 + diff[1] * 1e-6;
+      const duration = diff[0] * 1e3 + diff[1] * 1e-6; // ms
+
+      // Legacy telemetry
       telemetry.recordRequest(duration, {
         method: req.method,
         route: req.route?.path ?? req.path,
@@ -279,8 +282,17 @@ export const createApp = async () => {
       });
       telemetry.decrementActiveConnections();
 
+      // Standard Telemetry (Epic 3)
+      standardTelemetry.recordRequest(
+        req.method,
+        req.route?.path ?? req.path ?? 'unknown',
+        res.statusCode,
+        duration / 1000 // Convert to seconds for Prometheus
+      );
+
       if (res.statusCode >= 500) {
         telemetry.subsystems.api.errors.add();
+        standardTelemetry.recordError('http_5xx', 'server');
       }
     });
 

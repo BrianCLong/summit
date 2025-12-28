@@ -8,6 +8,7 @@ import { SubagentCoordinator, agentGovernance } from './subagent-coordinator.js'
 import { killSwitchService } from '../services/KillSwitchService.js';
 import { telemetryService } from '../services/TelemetryService.js';
 import { driftDetectionService } from '../services/DriftDetectionService.js';
+import { provenanceLedger } from '../provenance/ledger.js';
 // Import from the same file where the types are defined
 import type {
   CoordinationTask,
@@ -292,9 +293,13 @@ export class MaestroService {
 
   async logAudit(actor: string, action: string, resource: string, details: string) {
     const db = await this.getDB();
+    const entryId = Math.random().toString(36).substring(7);
+    const timestamp = new Date().toISOString();
+
+    // 1. Log to local JSON DB (Legacy/UI)
     db.auditLog.push({
-      id: Math.random().toString(36).substring(7),
-      timestamp: new Date().toISOString(),
+      id: entryId,
+      timestamp,
       actor,
       action,
       resource,
@@ -304,6 +309,30 @@ export class MaestroService {
     // Keep log size manageable
     if (db.auditLog.length > 1000) db.auditLog.shift();
     await this.saveDB();
+
+    // 2. Log to Provenance Ledger (Immutable Audit Chain - E4.S2)
+    try {
+      await provenanceLedger.appendEntry({
+        tenantId: 'system', // Default to system for now, should be passed in
+        actionType: action,
+        resourceType: 'maestro_resource',
+        resourceId: resource,
+        actorId: actor,
+        actorType: 'system',
+        timestamp: new Date(),
+        payload: {
+          details,
+          legacyId: entryId
+        },
+        metadata: {
+          source: 'MaestroService',
+          audit_version: 'v2'
+        }
+      });
+    } catch (err) {
+      console.error('Failed to append to provenance ledger:', err);
+      // Fail open for now to avoid breaking legacy flow, but log error
+    }
   }
 
   // --- Subagent Coordination Methods ---
