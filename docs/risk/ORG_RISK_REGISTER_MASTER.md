@@ -1,0 +1,52 @@
+# Summit Organization-Wide Risk Register (Master)
+
+**Version:** 2025.01
+**Last updated:** 2025-12-27
+**Owner (role):** Organization-Wide Risk Systems Owner
+**Scope:** Enterprise risks spanning product, technical, governance, security,
+execution, and strategic capital.
+
+## Scoring rubric
+
+**Likelihood:** Low / Medium / High
+**Impact:** Low / Medium / High
+**Current Risk Level (derived):**
+
+| Impact \ Likelihood | Low    | Medium | High   |
+| ------------------- | ------ | ------ | ------ |
+| **Low**             | Low    | Low    | Medium |
+| **Medium**          | Low    | Medium | High   |
+| **High**            | Medium | High   | Severe |
+
+**Horizon:** Near (0-3 mo) / Mid (3-9 mo) / Long (9-18 mo)
+**Lane:** EXP / GA-Adjacent / GA
+
+## Risk register
+
+| Risk ID   | Risk Description                                                                             | Category                | Horizon | Lane        | Likelihood | Impact | Current Risk Level | Owner (role)               | Detection Mechanism                                        | Mitigations in Place                                                   | Residual Risk | Review Cadence | Trigger Conditions                                                         |
+| --------- | -------------------------------------------------------------------------------------------- | ----------------------- | ------- | ----------- | ---------- | ------ | ------------------ | -------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------- | ------------- | -------------- | -------------------------------------------------------------------------- |
+| R-PUX-01  | Product narrative or demo claims exceed verifiable capability, leading to misrepresentation. | Product & UX            | Near    | GA          | Medium     | High   | High               | Product Narrative Lead     | Claims audit vs. evidence bundle; launch checklist deltas. | Claims guardrails checklist; evidence bundle gating; marketing review. | Medium        | Weekly         | Any claim without linked evidence ID; demo-only features referenced as GA. |
+| R-PUX-02  | UX implies automated authority (e.g., confidence badges) without explaining limits.          | Product & UX            | Near    | GA-Adjacent | Medium     | Medium | Medium             | UX Governance Lead         | UX copy review; user testing feedback tagged “authority”.  | Required uncertainty copy; tooltip policy; design review checklist.    | Low           | Biweekly       | New badges without uncertainty copy; user test flags.                      |
+| R-PUX-03  | Silent partial states (stale data, partial ingest) look complete to users.                   | Product & UX            | Near    | GA          | High       | Medium | High               | Product Reliability Lead   | Data freshness monitors; partial-state UI telemetry.       | Staleness banners; ingest completeness indicator; SLO alerts.          | Medium        | Weekly         | Freshness below SLA; “complete” shown with <90% ingest.                    |
+| R-TECH-01 | Performance regressions reduce analyst throughput or violate SLOs.                           | Technical & Reliability | Near    | GA          | Medium     | High   | High               | SRE Lead                   | SLO error budget burn; latency heatmaps.                   | Perf budgets; canary deploys; regression tests.                        | Medium        | Weekly         | p95 latency > SLO for 2 periods; error budget <50%.                        |
+| R-TECH-02 | CI blind spots allow regressions to ship (missing tests, skipped checks).                    | Technical & Reliability | Mid     | GA-Adjacent | Medium     | High   | High               | Release Engineering Lead   | CI coverage reports; flaky test monitoring.                | Required checks; coverage heatmap; release gates.                      | Medium        | Biweekly       | Coverage drop >5%; skipped checks on release branch.                       |
+| R-TECH-03 | Dependency fragility (supply chain or breaking changes) disrupts delivery.                   | Technical & Reliability | Mid     | GA          | Medium     | Medium | Medium             | Platform Engineering Lead  | SBOM diff alerts; dependency freshness dashboards.         | Lockfiles; dependency review; provenance attestations.                 | Medium        | Monthly        | Critical dependency CVE; major version drift.                              |
+| R-GOV-01  | Control drift between written policy and actual enforcement.                                 | Governance & Compliance | Near    | GA          | Medium     | High   | High               | Compliance Lead            | Policy-as-code drift reports; audit sampling.              | OPA policy tests; control owners; change logs.                         | Medium        | Monthly        | Drift report non-zero; control test failure.                               |
+| R-GOV-02  | Evidence gaps (missing attestations, incomplete audit trails).                               | Governance & Compliance | Near    | GA          | High       | Medium | High               | Audit Readiness Lead       | Evidence freshness dashboard; audit artifact checks.       | Evidence index; automated collection; release checklist.               | Medium        | Biweekly       | Missing evidence >7 days; audit bundle errors.                             |
+| R-GOV-03  | Demo vs production inconsistency creates governance misalignment.                            | Governance & Compliance | Mid     | GA-Adjacent | Medium     | Medium | Medium             | Program Governance Lead    | Demo/GA parity tracker; waiver log.                        | Demo gating; waiver approvals; parity checklist.                       | Low           | Monthly        | New demo feature lacks parity plan; waiver age >30 days.                   |
+| R-SEC-01  | Unauthorized access to tenant data through misconfigured auth.                               | Security & Abuse        | Near    | GA          | Low        | High   | Medium             | Security Engineering Lead  | Access logs; authz audit alerts.                           | RBAC/ABAC policy tests; access review.                                 | Low           | Weekly         | Privileged access anomalies; failed authz checks spike.                    |
+| R-SEC-02  | Privilege escalation via service-to-service trust gaps.                                      | Security & Abuse        | Mid     | GA          | Medium     | High   | High               | Security Architecture Lead | Service authz tests; policy evaluation traces.             | Zero-trust enforcement; mTLS; policy-as-code.                          | Medium        | Monthly        | New service without policy; privilege boundaries changed.                  |
+| R-SEC-03  | Data leakage through exports or misinterpreted outputs.                                      | Security & Abuse        | Near    | GA          | Medium     | High   | High               | Data Protection Officer    | DLP scans; export audit logs.                              | Export approvals; watermarking; redaction defaults.                    | Medium        | Weekly         | Export spike; DLP violation; unredacted PII event.                         |
+| R-DEL-01  | Lane overload reduces throughput and causes missed commitments.                              | Delivery & Execution    | Near    | GA-Adjacent | High       | Medium | High               | Delivery Manager           | WIP limits; cycle time dashboard.                          | Lane WIP caps; staffing review; scope pruning.                         | Medium        | Weekly         | WIP > limit for 2 weeks; cycle time > target.                              |
+| R-DEL-02  | Review bottlenecks delay merges and increase risk of hotfixes.                               | Delivery & Execution    | Near    | GA          | Medium     | Medium | Medium             | Engineering Manager        | PR age heatmap; review SLA tracking.                       | Reviewer rotation; review SLAs; automation.                            | Low           | Weekly         | PR median age >4 days; review SLA miss rate >20%.                          |
+| R-DEL-03  | Key-person dependency causes delivery deadlock.                                              | Delivery & Execution    | Mid     | GA          | Medium     | High   | High               | Program Director           | Bus-factor reports; on-call coverage gaps.                 | Rotation plans; knowledge transfer; runbooks.                          | Medium        | Monthly        | Single owner for critical component >30 days.                              |
+| R-STR-01  | Over-investment ahead of maturity drives cost without ROI.                                   | Strategic & Capital     | Mid     | GA-Adjacent | Medium     | High   | High               | Finance Lead               | Cost-to-value dashboards; ROI reviews.                     | Stage-gate funding; ROI checkpoints.                                   | Medium        | Monthly        | Spend growth >2x revenue growth; ROI misses.                               |
+| R-STR-02  | Under-investment in trust foundations undermines adoption.                                   | Strategic & Capital     | Near    | GA          | Medium     | High   | High               | Trust & Safety Lead        | Trust KPI scorecards; customer feedback.                   | Minimum trust roadmap; budget floor.                                   | Medium        | Monthly        | Trust KPIs trend down for 2 periods.                                       |
+| R-STR-03  | Narrative drift causes market misalignment and overcommitment.                               | Strategic & Capital     | Mid     | GA          | Medium     | Medium | Medium             | Strategy Lead              | Narrative alignment reviews; roadmap vs claims diff.       | Quarterly narrative review; claims guardrails.                         | Low           | Quarterly      | Claims not supported by roadmap; partner feedback mismatch.                |
+
+## Notes
+
+- All risk decisions that require acceptance must be recorded in the risk
+  acceptance log and linked to the associated Risk ID.
+- The register is the source of truth for graduation, capacity, and capital
+  decisions (see governance policy).
