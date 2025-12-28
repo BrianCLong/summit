@@ -3,6 +3,7 @@ import { KPIStrip } from '@/components/panels/KPIStrip'
 import { EROpsPanel } from '@/components/panels/EROpsPanel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
 import mockData from '@/mock/data.json'
 import type { KPIMetric } from '@/types'
 
@@ -52,12 +53,53 @@ export default function CommandCenterDashboard() {
         </Badge>
       </div>
 
-      <KPIStrip
-        data={commandCenterMetrics}
-        loading={loading}
-        columns={6}
-        className="cyber-glow"
-      />
+      <div
+        className="rounded-lg border bg-muted/20 p-3 space-y-2"
+        data-testid="command-center-truth-panel"
+      >
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <Badge variant="secondary" data-testid="command-center-provenance">
+            Provenance: Simulated MVP-3-GA dataset
+          </Badge>
+          <Badge variant="secondary" data-testid="command-center-window">
+            Time window: last 60 minutes + realtime feed
+          </Badge>
+          <Badge variant="secondary" data-testid="command-center-units">
+            Units: counts, percentages, alerts
+          </Badge>
+        </div>
+        <p
+          className="text-xs text-amber-700"
+          data-testid="command-center-safety-note"
+        >
+          Observational only. No automated actions are executed from this view.
+        </p>
+      </div>
+
+      <div data-testid="command-center-kpis">
+        <KPIStrip
+          data={commandCenterMetrics}
+          loading={loading}
+          columns={6}
+          className="cyber-glow"
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          disabled
+          variant="outline"
+          data-testid="command-center-disabled-action"
+        >
+          Automated Response
+        </Button>
+        <span
+          className="text-xs text-muted-foreground"
+          data-testid="command-center-disabled-explainer"
+        >
+          Disabled: Command Center is read-only in MVP-3-GA.
+        </span>
+      </div>
 
       <EROpsPanel />
 

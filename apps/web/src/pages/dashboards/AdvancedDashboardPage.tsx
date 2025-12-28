@@ -247,6 +247,29 @@ export default function AdvancedDashboardPage() {
         </div>
       </div>
 
+      <div
+        className="rounded-lg border bg-muted/20 p-3 space-y-2"
+        data-testid="advanced-dashboard-truth-panel"
+      >
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <Badge variant="secondary" data-testid="advanced-dashboard-provenance">
+            Provenance: Simulated analytics sandbox
+          </Badge>
+          <Badge variant="secondary" data-testid="advanced-dashboard-window">
+            Time window: operator-selected range
+          </Badge>
+          <Badge variant="secondary" data-testid="advanced-dashboard-units">
+            Units: entities, relationships, confidence
+          </Badge>
+        </div>
+        <p
+          className="text-xs text-amber-700"
+          data-testid="advanced-dashboard-safety-note"
+        >
+          Observational only. Interactive controls do not execute autonomous actions.
+        </p>
+      </div>
+
       {/* Grid Layout */}
       <div className={cn(
         "grid gap-4 flex-1 min-h-0 transition-all",

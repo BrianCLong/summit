@@ -54,6 +54,14 @@ const computeBanner = (statuses: Partial<Record<StatusKey, StatusResponse>>): St
     }
   }
 
+  if (values.some(value => value.summary === 'Status unavailable')) {
+    return {
+      level: 'red',
+      headline: 'Status unavailable',
+      detail: 'Backend telemetry failed; data may be stale or incomplete.',
+    }
+  }
+
   const worst = values.reduce<StatusResponse | undefined>((current, candidate) => {
     if (!current) return candidate
     return severityRank[candidate.status] > severityRank[current.status] ? candidate : current
