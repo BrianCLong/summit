@@ -2,6 +2,7 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'services/*'
+  - 'companyos/services/*'
   - 'libs/*/node'
   - 'client'
   - 'server'
