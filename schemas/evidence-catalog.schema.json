@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidenceCatalog",
+  "type": "object",
+  "required": ["schemaVersion", "generatedAt", "git", "records", "summary"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "git": {
+      "type": "object",
+      "required": ["commit", "branch"],
+      "properties": {
+        "commit": { "type": "string" },
+        "branch": { "type": "string" },
+        "shortCommit": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "./evidence-record.schema.json" }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["totalControls", "present", "missing", "stale"],
+      "properties": {
+        "totalControls": { "type": "integer" },
+        "present": { "type": "integer" },
+        "missing": { "type": "integer" },
+        "stale": { "type": "integer" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

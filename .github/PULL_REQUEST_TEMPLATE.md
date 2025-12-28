@@ -22,6 +22,7 @@ _If this PR involves integrating an external system or library:_
 ## Test Evidence
 
 - Provide details on tests performed and evidence of success
+- Evidence catalog is auto-generated in CI (`audit/evidence-catalog.json`) and validated via OPA drift checks
 
 ## CI Confirmation
 

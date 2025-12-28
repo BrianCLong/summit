@@ -1,0 +1,309 @@
+{
+  "version": "1.0.0",
+  "domains": [
+    {
+      "id": "product-claims",
+      "name": "Product & Claims Evidence",
+      "controls": [
+        {
+          "id": "product-claims-ga",
+          "claim": "GA claims are traceable to code, tests, and releases.",
+          "source": "ci",
+          "sources": ["audit/ga-evidence/ci", "audit/ga-evidence/attestations", "evidence-bundles"],
+          "requiredLinkTypes": ["code", "test", "release"],
+          "links": [
+            {
+              "type": "code",
+              "target": "server"
+            },
+            {
+              "type": "test",
+              "target": "server/tests"
+            },
+            {
+              "type": "release",
+              "target": "release"
+            }
+          ],
+          "retention": {
+            "duration": "7_years",
+            "policy": "regulatory-default"
+          },
+          "access": "auditor",
+          "redaction": {
+            "strategy": "hash",
+            "fields": ["tokens", "credentials"]
+          },
+          "stalenessHours": 8760
+        },
+        {
+          "id": "product-claims-demo",
+          "claim": "Exposure mode and experimental features are gated and reversible.",
+          "source": "policy",
+          "sources": ["feature-flags", "flags", "policies"],
+          "requiredLinkTypes": ["policy", "behavior"],
+          "links": [
+            {
+              "type": "policy",
+              "target": "policies"
+            },
+            {
+              "type": "behavior",
+              "target": "demo-composer-vnext.sh"
+            }
+          ],
+          "retention": {
+            "duration": "5_years",
+            "policy": "product-claims"
+          },
+          "access": "auditor",
+          "redaction": {
+            "strategy": "none",
+            "fields": []
+          },
+          "stalenessHours": 8760
+        }
+      ]
+    },
+    {
+      "id": "governance-decisions",
+      "name": "Governance & Decision Evidence",
+      "controls": [
+        {
+          "id": "governance-graduation",
+          "claim": "Graduation approvals and rejections are logged with evidence.",
+          "source": "governance",
+          "sources": ["audit/ga-evidence/governance", "governance"],
+          "requiredLinkTypes": ["decision", "policy"],
+          "links": [
+            {
+              "type": "decision",
+              "target": "audit/ga-evidence/governance"
+            },
+            {
+              "type": "policy",
+              "target": "docs/governance"
+            }
+          ],
+          "retention": {
+            "duration": "7_years",
+            "policy": "governance"
+          },
+          "access": "auditor",
+          "redaction": {
+            "strategy": "mask",
+            "fields": ["approver_email"]
+          },
+          "stalenessHours": 8760
+        },
+        {
+          "id": "governance-risk-exceptions",
+          "claim": "Risk acceptances and exceptions are captured with compensating controls.",
+          "source": "governance",
+          "sources": ["audit/ga-evidence/governance", "compliance"],
+          "requiredLinkTypes": ["decision", "policy"],
+          "links": [
+            {
+              "type": "decision",
+              "target": "audit/ga-evidence/governance"
+            },
+            {
+              "type": "policy",
+              "target": "policy"
+            }
+          ],
+          "retention": {
+            "duration": "7_years",
+            "policy": "governance"
+          },
+          "access": "internal",
+          "redaction": {
+            "strategy": "mask",
+            "fields": ["risk_owner"]
+          },
+          "stalenessHours": 8760
+        }
+      ]
+    },
+    {
+      "id": "delivery-change",
+      "name": "Delivery & Change Management",
+      "controls": [
+        {
+          "id": "delivery-pr-gates",
+          "claim": "PR gating and approvals are enforced with CI evidence.",
+          "source": "ci",
+          "sources": [".github/workflows", "audit/ga-evidence/ci"],
+          "requiredLinkTypes": ["code", "test"],
+          "links": [
+            {
+              "type": "code",
+              "target": ".github/workflows"
+            },
+            {
+              "type": "test",
+              "target": "scripts"
+            }
+          ],
+          "retention": {
+            "duration": "3_years",
+            "policy": "change-management"
+          },
+          "access": "auditor",
+          "redaction": {
+            "strategy": "hash",
+            "fields": ["actor"]
+          },
+          "stalenessHours": 8760
+        },
+        {
+          "id": "delivery-release-artifacts",
+          "claim": "Release artifacts are versioned and hashed.",
+          "source": "release",
+          "sources": ["release", "release-artifacts", "evidence-bundles"],
+          "requiredLinkTypes": ["release", "artifact"],
+          "links": [
+            {
+              "type": "release",
+              "target": "release"
+            },
+            {
+              "type": "artifact",
+              "target": "release-artifacts"
+            }
+          ],
+          "retention": {
+            "duration": "7_years",
+            "policy": "release"
+          },
+          "access": "auditor",
+          "redaction": {
+            "strategy": "none",
+            "fields": []
+          },
+          "stalenessHours": 8760
+        }
+      ]
+    },
+    {
+      "id": "security-access",
+      "name": "Security & Access",
+      "controls": [
+        {
+          "id": "security-privilege",
+          "claim": "Role assignments and privilege changes are logged.",
+          "source": "security",
+          "sources": ["audit/ga-evidence/security", "rbac", "security"],
+          "requiredLinkTypes": ["policy", "decision"],
+          "links": [
+            {
+              "type": "policy",
+              "target": "rbac"
+            },
+            {
+              "type": "decision",
+              "target": "audit/ga-evidence/security"
+            }
+          ],
+          "retention": {
+            "duration": "7_years",
+            "policy": "security"
+          },
+          "access": "internal",
+          "redaction": {
+            "strategy": "hash",
+            "fields": ["user_id", "email"]
+          },
+          "stalenessHours": 8760
+        },
+        {
+          "id": "security-incident-activation",
+          "claim": "Incident command activations are recorded with audit logs.",
+          "source": "ops",
+          "sources": ["incident", "ops/audit-log", "postmortems"],
+          "requiredLinkTypes": ["behavior", "decision"],
+          "links": [
+            {
+              "type": "behavior",
+              "target": "incident"
+            },
+            {
+              "type": "decision",
+              "target": "postmortems"
+            }
+          ],
+          "retention": {
+            "duration": "7_years",
+            "policy": "security"
+          },
+          "access": "internal",
+          "redaction": {
+            "strategy": "mask",
+            "fields": ["host", "ip"]
+          },
+          "stalenessHours": 8760
+        }
+      ]
+    },
+    {
+      "id": "reliability-ops",
+      "name": "Reliability & Operations",
+      "controls": [
+        {
+          "id": "reliability-slo",
+          "claim": "SLO measurements and error budget status are captured continuously.",
+          "source": "ops",
+          "sources": ["slo", "ops/slo", "ops/observability"],
+          "requiredLinkTypes": ["behavior", "artifact"],
+          "links": [
+            {
+              "type": "behavior",
+              "target": "slo"
+            },
+            {
+              "type": "artifact",
+              "target": "ops/observability"
+            }
+          ],
+          "retention": {
+            "duration": "3_years",
+            "policy": "reliability"
+          },
+          "access": "auditor",
+          "redaction": {
+            "strategy": "none",
+            "fields": []
+          },
+          "stalenessHours": 8760
+        },
+        {
+          "id": "reliability-rollbacks",
+          "claim": "Rollback and disable actions are recorded with evidence.",
+          "source": "ops",
+          "sources": ["ops/rollout", "ops/deployment"],
+          "requiredLinkTypes": ["behavior", "decision"],
+          "links": [
+            {
+              "type": "behavior",
+              "target": "ops/rollout"
+            },
+            {
+              "type": "decision",
+              "target": "ops/deployment"
+            }
+          ],
+          "retention": {
+            "duration": "5_years",
+            "policy": "reliability"
+          },
+          "access": "internal",
+          "redaction": {
+            "strategy": "mask",
+            "fields": ["operator"]
+          },
+          "stalenessHours": 8760
+        }
+      ]
+    }
+  ]
+}

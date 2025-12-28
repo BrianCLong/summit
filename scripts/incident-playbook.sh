@@ -481,6 +481,26 @@ EOF
        mv "$incident_dir/metadata.json.tmp" "$incident_dir/metadata.json" 2>/dev/null || true
 }
 
+# Record audit evidence summary for incident command activation
+record_incident_evidence() {
+    local evidence_dir="audit/ga-evidence/ops/incident-records"
+    mkdir -p "$evidence_dir"
+
+    cat > "$evidence_dir/incident-${INCIDENT_ID}.json" << EOF
+{
+  "evidence_id": "incident-${INCIDENT_ID}",
+  "incident_id": "${INCIDENT_ID}",
+  "incident_type": "${INCIDENT_TYPE}",
+  "severity": "${SEVERITY}",
+  "commander": "${COMMANDER}",
+  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "report_path": "incidents/${INCIDENT_ID}/reports/incident_report.md",
+  "evidence_path": "incidents/${INCIDENT_ID}/evidence/",
+  "status": "recorded"
+}
+EOF
+}
+
 # Interactive incident setup
 interactive_setup() {
     say "🚨 Conductor Incident Response Setup"
@@ -551,7 +571,8 @@ main() {
     read -p "Root cause analysis: " ROOT_CAUSE
     export ROOT_CAUSE
     generate_report
-    
+    record_incident_evidence
+
     say "✅ Incident Response Complete"
     echo ""
     info "Incident ID: $INCIDENT_ID"
