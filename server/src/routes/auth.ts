@@ -5,15 +5,10 @@ import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
 import AuthService from '../services/AuthService.js';
 import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 import { recordEndpointResult } from '../observability/reliability-metrics.js';
+import { asyncHandler } from '../middleware/async-handler.js';
 
 const router = Router();
 const authService = new AuthService();
-
-// Type-safe wrapper for async handlers
-const asyncHandler = (fn: (req: Request, res: Response) => Promise<void>): RequestHandler =>
-  (req, res, next) => {
-    Promise.resolve(fn(req, res)).catch(next);
-  };
 
 /**
  * @route POST /auth/signup
@@ -47,7 +42,6 @@ router.post('/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
   const start = process.hrtime();
   const { email, password } = req.body;
 
-  try {
     if (!email || !password) {
       recordEndpointResult({
         endpoint: 'login',
@@ -71,31 +65,6 @@ router.post('/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
     });
 
     return res.json(result);
-  } catch (err: any) {
-    const [seconds, nanoseconds] = process.hrtime(start);
-    const duration = seconds + nanoseconds / 1e9;
-
-    // Determine status code from error if possible, default to 500
-    // Don't treat 4xx errors (client errors) as reliability failures if possible,
-    // but the recordEndpointResult logic classifies them.
-    // However, for Auth, 401/400 are common and not system errors.
-
-    let statusCode = err.statusCode || 500;
-
-    // Check for common auth errors that might not have statusCode set
-    if (err.message === 'Invalid credentials' || err.message === 'User not found') {
-        statusCode = 401;
-    }
-
-    recordEndpointResult({
-      endpoint: 'login',
-      statusCode: statusCode,
-      durationSeconds: duration,
-      tenantId: 'unknown',
-    });
-
-    throw err;
-  }
 }));
 
 /**

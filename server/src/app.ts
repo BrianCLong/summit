@@ -112,6 +112,7 @@ import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
+import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -582,7 +583,7 @@ export const createApp = async () => {
   appLogger.info('Anomaly detector activated.');
 
   // Global Error Handler - must be last
-  app.use(errorHandler);
+  app.use(centralizedErrorHandler);
 
   return app;
 };
