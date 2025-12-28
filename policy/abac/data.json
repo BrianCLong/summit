@@ -47,6 +47,16 @@
         "allowedRoles": ["admin"],
         "requiresStepUp": true,
         "requiresDualControl": true
+      },
+      "resource:export": {
+        "allowedRoles": ["admin", "analyst"],
+        "requiresStepUp": true,
+        "requiresDualControl": false
+      },
+      "resource:delete": {
+        "allowedRoles": ["admin"],
+        "requiresStepUp": true,
+        "requiresDualControl": true
       }
     },
     "residency_matrix": {
