@@ -75,11 +75,17 @@ describe('NetworkSecurityService', () => {
              });
         }
 
+        const anomalyPromise = new Promise((resolve) => {
+            service.once('anomaly', (result) => {
+                resolve(result);
+            });
+        });
+
         service.ingestFlows(ddosFlows);
-        const result = await service.analyzeNow();
+        const result: any = await anomalyPromise;
 
         expect(result).toBeDefined();
-        expect(result!.isAnomaly).toBe(true);
-        expect(JSON.stringify(result!.explanation)).toContain('DDOS');
+        expect(result.isAnomaly).toBe(true);
+        expect(JSON.stringify(result.explanation)).toContain('DDOS');
     });
 });
