@@ -20,6 +20,8 @@ import { QueryPreviewService, type CreatePreviewInput, type QueryPreview, type E
 import { GlassBoxRunService, type GlassBoxRun } from './GlassBoxRunService.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { meteringEmitter } from '../metering/emitter.js';
+import { getContext, recordTurn, type Turn } from '../rag/context.js';
+import { detectLang, templateFor } from '../rag/lang.js';
 
 export type GraphRAGQueryRequest = {
   investigationId: string;
@@ -142,6 +144,19 @@ export class GraphRAGQueryService {
 
     try {
       await this.glassBoxService.updateStatus(run.id, 'running');
+
+      // 1. Get Context & Detect Language
+      // We pass 'this.pool' (Postgres) as the db for persistent storage if setup
+      const history = await getContext(request.investigationId, 4, this.pool);
+      const lang = detectLang(request.question);
+      const templateId = templateFor(lang);
+
+      logger.info({
+        runId: run.id,
+        lang,
+        templateId,
+        historyCount: history.length
+      }, 'Context and Language detection');
 
       let preview: QueryPreview | undefined;
 
@@ -280,6 +295,15 @@ export class GraphRAGQueryService {
         executionTimeMs,
         subgraphSize,
       };
+
+      // Record this turn
+      const turn: Turn = {
+        q: request.question,
+        cypher: preview?.generatedQuery || '',
+        evidenceIds: enrichedCitations.map(c => c.entityId),
+        ts: Date.now()
+      };
+      await recordTurn(request.investigationId, turn, this.pool);
 
       await this.glassBoxService.updateStatus(run.id, 'completed', response);
 

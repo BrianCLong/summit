@@ -9,6 +9,7 @@ import { tenantLimitEnforcer } from '../lib/resources/tenant-limit-enforcer.js';
 import { quotaOverrideService } from '../lib/resources/overrides/QuotaOverrideService.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { metrics } from '../monitoring/metrics.js';
+import { checkThrottle } from '../admin/throttle.js';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -81,6 +82,20 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
 
     // 2. Check Limit
     try {
+        // Admin Ops: Check Tenant Throttles first
+        if (tenantContext) {
+           let op: 'ANALYTICS' | 'EXPORT' | 'JOB' | undefined;
+           if (endpointClass === EndpointClass.EXPORT) op = 'EXPORT';
+           else if (endpointClass === EndpointClass.QUERY) op = 'ANALYTICS'; // Approximate mapping
+
+           if (op) {
+               const throttle = checkThrottle({ tenant: tenantContext, metrics: { inFlight: { /* TODO: wire up real metrics */ } } }, op);
+               if (!throttle.allowed) {
+                   return res.status(429).json({ error: 'Tenant throttled by admin', code: throttle.reason });
+               }
+           }
+        }
+
         // QUO-4: Operator Override Check (Short Circuit)
         if (tenantContext?.tenantId && await quotaOverrideService.hasOverride(tenantContext.tenantId, 'api_all')) {
             // If global API override exists, skip checks

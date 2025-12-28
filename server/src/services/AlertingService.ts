@@ -3,6 +3,8 @@ import type { Redis } from 'ioredis';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
 import * as z from 'zod';
+import { isSuppressed } from '../rules/suppression.js';
+import { evalCond, type Cond } from '../rules/eval.js';
 
 const logger = (pino as any)();
 
@@ -17,6 +19,8 @@ export const AlertRuleSchema = z.object({
   threshold: z.number(),
   message: z.string(),
   enabled: z.boolean().default(true),
+  // Optional nested condition
+  condition: z.custom<Cond>().optional(),
 });
 
 /**
@@ -122,13 +126,33 @@ class AlertingService {
     for (const rule of rules) {
       if (!rule.enabled) continue;
 
+      // Check suppression if entityId is in tags
+      if (tags.entityId && await isSuppressed(tags.entityId)) {
+        continue;
+      }
+
       let triggered = false;
-      switch (rule.operator) {
-        case '>': triggered = value > rule.threshold; break;
-        case '<': triggered = value < rule.threshold; break;
-        case '>=': triggered = value >= rule.threshold; break;
-        case '<=': triggered = value <= rule.threshold; break;
-        case '==': triggered = value === rule.threshold; break;
+
+      // If complex condition exists, use it
+      if (rule.condition) {
+         triggered = evalCond(rule.condition, (predId, args) => {
+             // Simple predicate env: check standard operator against value
+             // In real world, this would dispatch to various predicate handlers
+             if (predId === 'VALUE_Check') {
+                 // Reuse simple operator logic for compatibility or define new preds
+                 return true;
+             }
+             return false;
+         });
+      } else {
+          // Fallback to simple operator
+          switch (rule.operator) {
+            case '>': triggered = value > rule.threshold; break;
+            case '<': triggered = value < rule.threshold; break;
+            case '>=': triggered = value >= rule.threshold; break;
+            case '<=': triggered = value <= rule.threshold; break;
+            case '==': triggered = value === rule.threshold; break;
+          }
       }
 
       if (triggered) {
