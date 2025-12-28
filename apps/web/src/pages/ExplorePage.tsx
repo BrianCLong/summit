@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck, History } from 'lucide-react'
+import React, { useState, useEffect, useMemo } from 'react'
+import { Search, Filter, Settings, Download, RefreshCw, Shield, History, X } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
@@ -7,6 +7,7 @@ import { EntityDrawer } from '@/components/panels/EntityDrawer'
 import { FilterPanel } from '@/components/panels/FilterPanel'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Badge } from '@/components/ui/Badge'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { useEntities, useEntityUpdates } from '@/hooks/useGraphQL'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
@@ -20,6 +21,21 @@ import type {
   TimelineEvent,
   GraphLayout,
 } from '@/types'
+
+type ActiveFilterChip = {
+  key: string
+  label: string
+  onClear: () => void
+}
+
+const createDefaultFilters = (): FilterState => ({
+  entityTypes: [],
+  relationshipTypes: [],
+  dateRange: { start: '', end: '' },
+  confidenceRange: { min: 0, max: 1 },
+  tags: [],
+  sources: [],
+})
 
 export default function ExplorePage(): React.ReactElement {
   // GraphQL hooks
@@ -47,6 +63,7 @@ export default function ExplorePage(): React.ReactElement {
   const [snapshotsOpen, setSnapshotsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [policyOverlay, setPolicyOverlay] = useState<'none' | 'purpose' | 'retention' | 'residency'>('none')
+  const [lastRefreshAt, setLastRefreshAt] = useState<Date | null>(null)
 
   // Graph state
   const [graphLayout] = useState<GraphLayout>({
@@ -55,14 +72,7 @@ export default function ExplorePage(): React.ReactElement {
   })
 
   // Filters
-  const [filters, setFilters] = useState<FilterState>({
-    entityTypes: [],
-    relationshipTypes: [],
-    dateRange: { start: '', end: '' },
-    confidenceRange: { min: 0, max: 1 },
-    tags: [],
-    sources: [],
-  })
+  const [filters, setFilters] = useState<FilterState>(createDefaultFilters())
 
   // Load data - prefer GraphQL over mock data
   useEffect(() => {
@@ -73,6 +83,9 @@ export default function ExplorePage(): React.ReactElement {
       setEntities(entitiesData.entities)
       setLoading(entitiesLoading)
       setError(entitiesError)
+      if (!entitiesLoading) {
+        setLastRefreshAt(new Date())
+      }
     } else {
       // Fallback to mock data for development
       const loadMockData = async () => {
@@ -83,6 +96,7 @@ export default function ExplorePage(): React.ReactElement {
           setEntities(mockData.entities as Entity[])
           setRelationships(mockData.relationships as Relationship[])
           setTimelineEvents(mockData.timelineEvents as TimelineEvent[])
+          setLastRefreshAt(new Date())
         } catch (err) {
           setError(err as Error)
         } finally {
@@ -179,6 +193,7 @@ export default function ExplorePage(): React.ReactElement {
       await new Promise(resolve => setTimeout(resolve, 1000))
       setLoading(false)
     }
+    setLastRefreshAt(new Date())
   }
 
   const handleExport = async (format: 'json' | 'csv' | 'png') => {
@@ -249,6 +264,105 @@ export default function ExplorePage(): React.ReactElement {
       // In a real implementation, this would use html2canvas or similar
       alert('PNG export requires canvas integration not available in this environment.');
     }
+  }
+
+  const dataSourceLabel = entitiesData?.entities ? 'GraphQL' : 'Mock data'
+  const defaultFilters = useMemo(() => createDefaultFilters(), [])
+  const hasActiveFilters =
+    searchQuery.trim().length > 0 ||
+    filters.entityTypes.length > 0 ||
+    filters.relationshipTypes.length > 0 ||
+    filters.tags.length > 0 ||
+    filters.sources.length > 0 ||
+    filters.dateRange.start !== '' ||
+    filters.dateRange.end !== '' ||
+    filters.confidenceRange.min > defaultFilters.confidenceRange.min ||
+    filters.confidenceRange.max < defaultFilters.confidenceRange.max
+
+  const activeFilterChips = useMemo<ActiveFilterChip[]>(
+    () =>
+      [
+        searchQuery.trim()
+          ? {
+              key: 'search',
+              label: `Search: ${searchQuery.trim()}`,
+              onClear: () => setSearchQuery(''),
+            }
+          : null,
+        filters.entityTypes.length > 0
+          ? {
+              key: 'entity-types',
+              label: `Entities: ${filters.entityTypes.join(', ')}`,
+              onClear: () =>
+                setFilters(prev => ({ ...prev, entityTypes: [] })),
+            }
+          : null,
+        filters.relationshipTypes.length > 0
+          ? {
+              key: 'relationship-types',
+              label: `Relationships: ${filters.relationshipTypes.join(', ')}`,
+              onClear: () =>
+                setFilters(prev => ({ ...prev, relationshipTypes: [] })),
+            }
+          : null,
+        filters.tags.length > 0
+          ? {
+              key: 'tags',
+              label: `Tags: ${filters.tags.join(', ')}`,
+              onClear: () => setFilters(prev => ({ ...prev, tags: [] })),
+            }
+          : null,
+        filters.sources.length > 0
+          ? {
+              key: 'sources',
+              label: `Sources: ${filters.sources.join(', ')}`,
+              onClear: () => setFilters(prev => ({ ...prev, sources: [] })),
+            }
+          : null,
+        filters.dateRange.start || filters.dateRange.end
+          ? {
+              key: 'date-range',
+              label: `Date: ${filters.dateRange.start || 'Any'} → ${
+                filters.dateRange.end || 'Any'
+              }`,
+              onClear: () =>
+                setFilters(prev => ({
+                  ...prev,
+                  dateRange: { start: '', end: '' },
+                })),
+            }
+          : null,
+        filters.confidenceRange.min > defaultFilters.confidenceRange.min ||
+        filters.confidenceRange.max < defaultFilters.confidenceRange.max
+          ? {
+              key: 'confidence',
+              label: `Confidence: ${filters.confidenceRange.min.toFixed(2)}–${filters.confidenceRange.max.toFixed(2)}`,
+              onClear: () =>
+                setFilters(prev => ({
+                  ...prev,
+                  confidenceRange: { min: 0, max: 1 },
+                })),
+            }
+          : null,
+      ].filter((chip): chip is ActiveFilterChip => Boolean(chip)),
+    [
+      defaultFilters.confidenceRange.max,
+      defaultFilters.confidenceRange.min,
+      filters.confidenceRange.max,
+      filters.confidenceRange.min,
+      filters.dateRange.end,
+      filters.dateRange.start,
+      filters.entityTypes,
+      filters.relationshipTypes,
+      filters.sources,
+      filters.tags,
+      searchQuery,
+    ]
+  )
+
+  const handleClearAllFilters = () => {
+    setFilters(createDefaultFilters())
+    setSearchQuery('')
   }
 
   if (error) {
@@ -359,6 +473,70 @@ export default function ExplorePage(): React.ReactElement {
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-3 border-b bg-muted/30">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Results</span>
+            <Badge variant="outline">
+              {filteredEntities.length}/{entities.length} Entities
+            </Badge>
+            <Badge variant="outline">
+              {filteredRelationships.length}/{relationships.length} Relationships
+            </Badge>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {activeFilterChips.length === 0 ? (
+              <span className="text-xs text-muted-foreground">
+                No active filters
+              </span>
+            ) : (
+              activeFilterChips.map(filter => (
+                <Badge
+                  key={filter?.key}
+                  variant="secondary"
+                  className="gap-1 pr-1"
+                >
+                  <span className="truncate max-w-[220px]">
+                    {filter?.label}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={filter?.onClear}
+                    aria-label={`Clear ${filter?.label}`}
+                    className="rounded-full p-0.5 text-muted-foreground hover:text-foreground hover:bg-muted"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span>Source: {dataSourceLabel}</span>
+          <span>•</span>
+          <span>
+            Last refresh{' '}
+            {lastRefreshAt
+              ? lastRefreshAt.toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })
+              : '—'}
+          </span>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearAllFilters}
+              className="text-xs"
+            >
+              Clear all
+            </Button>
+          )}
+        </div>
+      </div>
+
       {/* Main Content Grid */}
       <div className="flex-1 flex">
         {/* Left Sidebar - Filters */}
@@ -395,15 +573,7 @@ export default function ExplorePage(): React.ReactElement {
                 action={{
                   label: 'Clear filters',
                   onClick: () => {
-                    setFilters({
-                      entityTypes: [],
-                      relationshipTypes: [],
-                      dateRange: { start: '', end: '' },
-                      confidenceRange: { min: 0, max: 1 },
-                      tags: [],
-                      sources: [],
-                    })
-                    setSearchQuery('')
+                    handleClearAllFilters()
                   },
                 }}
               />
