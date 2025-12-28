@@ -10,7 +10,7 @@ router.get('/threats', ensureAuthenticated, async (req, res) => {
   try {
     const threats = await psyOpsService.getActiveThreats();
     res.json(threats);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Failed to fetch threats' });
   }
 });
@@ -24,7 +24,7 @@ router.post('/scan', ensureAuthenticated, async (req, res) => {
 
     const threat = await psyOpsService.detectPsychologicalThreats(content, {
       source: source || 'MANUAL_SCAN',
-      user: (req as any).user,
+      user: (req as unknown as { user: unknown }).user,
     });
 
     if (threat) {
@@ -32,7 +32,7 @@ router.post('/scan', ensureAuthenticated, async (req, res) => {
     } else {
       res.status(200).json({ detected: false });
     }
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Scan failed' });
   }
 });
@@ -44,7 +44,7 @@ router.post('/threats/:id/resolve', ensureAuthenticated, async (req, res) => {
     const { notes } = req.body;
     await psyOpsService.resolveThreat(id, notes || 'Resolved by user');
     res.json({ success: true });
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: 'Resolution failed' });
   }
 });
