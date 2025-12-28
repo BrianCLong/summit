@@ -1,1 +1,5 @@
-{"name": "@intelgraph/ci-analytics", "version": "1.0.0", "main": "index.js"}
+{
+  "name": "@intelgraph/ci-analytics",
+  "version": "2.0.0",
+  "main": "index.js"
+}

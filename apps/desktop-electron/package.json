@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/desktop",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "IntelGraph Desktop Application (Windows, Mac, Linux)",
   "main": "dist-electron/main.js",
   "author": "IntelGraph Team",
