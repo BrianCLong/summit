@@ -335,7 +335,7 @@ export function createBulkheadMiddleware(
     const result = await bulkhead.acquire();
 
     if (!result.data) {
-      const verdict = result.metadata?.governanceVerdict || createVerdict(
+      const verdict = result.governanceVerdict || createVerdict(
         GovernanceResult.DENY,
         'Bulkhead rejected request'
       );
@@ -390,7 +390,7 @@ export async function withBulkhead<T>(
   const acquired = await bulkhead.acquire();
 
   if (!acquired.data) {
-    throw new BulkheadRejectError(poolName, acquired.metadata?.governanceVerdict);
+    throw new BulkheadRejectError(poolName, acquired.governanceVerdict);
   }
 
   try {

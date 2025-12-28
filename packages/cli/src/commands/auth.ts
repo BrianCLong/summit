@@ -8,6 +8,7 @@
  * @module @summit/cli/commands/auth
  */
 
+/* eslint-disable no-console */
 import chalk from 'chalk';
 import { loadConfig, saveConfig, getConfig, isConfigured } from '../config.js';
 
@@ -60,8 +61,8 @@ export async function login(options: LoginOptions): Promise<void> {
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Authentication failed' }));
-        console.error(chalk.red(`Login failed: ${error.error || error.message}`));
+        const errorData = await response.json().catch(() => ({ error: 'Authentication failed' })) as { error?: string; message?: string };
+        console.error(chalk.red(`Login failed: ${errorData.error || errorData.message}`));
         process.exit(1);
       }
 
@@ -78,8 +79,8 @@ export async function login(options: LoginOptions): Promise<void> {
       console.log(`Tenant: ${data.data.user.tenantId}`);
       console.log(`Role:   ${data.data.user.role}`);
       return;
-    } catch (error) {
-      console.error(chalk.red(`Login failed: ${(error as Error).message}`));
+    } catch (err) {
+      console.error(chalk.red(`Login failed: ${(err as Error).message}`));
       process.exit(1);
     }
   }
@@ -139,8 +140,8 @@ export async function login(options: LoginOptions): Promise<void> {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Authentication failed' }));
-      console.error(chalk.red(`Login failed: ${error.error || error.message}`));
+      const errorData = await response.json().catch(() => ({ error: 'Authentication failed' })) as { error?: string; message?: string };
+      console.error(chalk.red(`Login failed: ${errorData.error || errorData.message}`));
       process.exit(1);
     }
 

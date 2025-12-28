@@ -30,6 +30,7 @@ import {
 } from '../types/data-envelope.js';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../utils/logger.js';
+import { getFrameworkMetadata as getNewFrameworkMetadata } from './frameworks/index.js';
 
 // ============================================================================
 // Helper Functions
@@ -283,6 +284,65 @@ const FRAMEWORKS: FrameworkMetadata[] = [
     totalControls: 54,
     automationCoverage: 55,
     lastUpdated: '2024-01-01',
+  },
+  {
+    id: 'FedRAMP',
+    name: 'FedRAMP Moderate',
+    version: 'Rev 5',
+    description: 'Federal Risk and Authorization Management Program - Moderate Baseline',
+    categories: [
+      'Access Control', 'Awareness and Training', 'Audit and Accountability',
+      'Assessment and Authorization', 'Configuration Management', 'Contingency Planning',
+      'Identification and Authentication', 'Incident Response', 'Maintenance',
+      'Media Protection', 'Physical and Environmental Protection', 'Planning',
+      'Program Management', 'Personnel Security', 'PII Processing',
+      'Risk Assessment', 'System and Services Acquisition', 'System and Communications Protection',
+      'System and Information Integrity', 'Supply Chain Risk Management',
+    ],
+    totalControls: 325,
+    automationCoverage: 70,
+    lastUpdated: '2024-12-01',
+  },
+  {
+    id: 'PCI-DSS',
+    name: 'PCI-DSS v4.0',
+    version: '4.0',
+    description: 'Payment Card Industry Data Security Standard',
+    categories: [
+      'Network Security', 'System Configuration', 'Account Data Protection',
+      'Data Encryption', 'Malware Protection', 'Secure Systems Development',
+      'Access Restriction', 'User Identification', 'Physical Access Restriction',
+      'Logging and Monitoring', 'Security Testing', 'Security Policy',
+    ],
+    totalControls: 250,
+    automationCoverage: 65,
+    lastUpdated: '2024-12-01',
+  },
+  {
+    id: 'NIST-CSF',
+    name: 'NIST CSF 2.0',
+    version: '2.0',
+    description: 'NIST Cybersecurity Framework - Risk Management Framework',
+    categories: ['Govern', 'Identify', 'Protect', 'Detect', 'Respond', 'Recover'],
+    totalControls: 106,
+    automationCoverage: 75,
+    lastUpdated: '2024-12-01',
+  },
+  {
+    id: 'CMMC',
+    name: 'CMMC 2.0',
+    version: '2.0',
+    description: 'Cybersecurity Maturity Model Certification for DoD Contractors',
+    categories: [
+      'Access Control', 'Awareness and Training', 'Audit and Accountability',
+      'Configuration Management', 'Identification and Authentication', 'Incident Response',
+      'Maintenance', 'Media Protection', 'Personnel Security', 'Physical Protection',
+      'Risk Assessment', 'Security Assessment', 'System and Communications Protection',
+      'System and Information Integrity',
+    ],
+    totalControls: 130,
+    automationCoverage: 68,
+    lastUpdated: '2024-12-01',
   },
 ];
 

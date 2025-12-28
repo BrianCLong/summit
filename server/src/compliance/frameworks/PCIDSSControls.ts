@@ -10,7 +10,8 @@
  */
 
 import { EventEmitter } from 'events';
-import { createDataEnvelope, GovernanceResult } from '../../types/data-envelope.js';
+import { v4 as uuidv4 } from 'uuid';
+import { createDataEnvelope, GovernanceResult, DataClassification } from '../../types/data-envelope.js';
 import type { DataEnvelope, GovernanceVerdict } from '../../types/data-envelope.js';
 
 // ============================================================================
@@ -353,16 +354,14 @@ export interface PCIDSSStats {
 // Helper Functions
 // ============================================================================
 
-function createVerdict(
-  result: GovernanceResult,
-  reason: string,
-  riskScore = 0
-): GovernanceVerdict {
+function createVerdict(result: GovernanceResult, reason?: string): GovernanceVerdict {
   return {
+    verdictId: `verdict-${uuidv4()}`,
+    policyId: 'pci-dss-compliance-policy',
     result,
+    decidedAt: new Date(),
     reason,
-    riskScore,
-    evaluatedAt: new Date(),
+    evaluator: 'PCIDSSControls',
   };
 }
 
@@ -1159,14 +1158,11 @@ export class PCIDSSControlsService extends EventEmitter {
   public getAllControls(): DataEnvelope<PCIDSSControl[]> {
     const controls = Array.from(this.controls.values());
 
-    return createDataEnvelope(
-      controls,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        'PCI-DSS controls retrieved successfully',
-        0.0
-      )
-    );
+    return createDataEnvelope(controls, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'PCI-DSS controls retrieved successfully'),
+      classification: DataClassification.PUBLIC,
+    });
   }
 
   /**
@@ -1176,14 +1172,11 @@ export class PCIDSSControlsService extends EventEmitter {
     const controls = Array.from(this.controls.values())
       .filter((c) => c.requirementNumber === requirement);
 
-    return createDataEnvelope(
-      controls,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        `Retrieved ${controls.length} controls for ${requirement}`,
-        0.0
-      )
-    );
+    return createDataEnvelope(controls, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, `Retrieved ${controls.length} controls for ${requirement}`),
+      classification: DataClassification.PUBLIC,
+    });
   }
 
   /**
@@ -1193,14 +1186,11 @@ export class PCIDSSControlsService extends EventEmitter {
     const controls = Array.from(this.controls.values())
       .filter((c) => c.goal === goal);
 
-    return createDataEnvelope(
-      controls,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        `Retrieved ${controls.length} controls for goal: ${goal}`,
-        0.0
-      )
-    );
+    return createDataEnvelope(controls, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, `Retrieved ${controls.length} controls for goal: ${goal}`),
+      classification: DataClassification.PUBLIC,
+    });
   }
 
   /**
@@ -1212,14 +1202,11 @@ export class PCIDSSControlsService extends EventEmitter {
         (a) => a.saqType === saqType && a.applicability === 'required'
       ));
 
-    return createDataEnvelope(
-      controls,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        `Retrieved ${controls.length} required controls for ${saqType}`,
-        0.0
-      )
-    );
+    return createDataEnvelope(controls, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, `Retrieved ${controls.length} required controls for ${saqType}`),
+      classification: DataClassification.PUBLIC,
+    });
   }
 
   /**
@@ -1229,14 +1216,11 @@ export class PCIDSSControlsService extends EventEmitter {
     const controls = Array.from(this.controls.values())
       .filter((c) => c.isNewInV4);
 
-    return createDataEnvelope(
-      controls,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        `Retrieved ${controls.length} new v4.0 controls`,
-        0.0
-      )
-    );
+    return createDataEnvelope(controls, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, `Retrieved ${controls.length} new v4.0 controls`),
+      classification: DataClassification.PUBLIC,
+    });
   }
 
   /**
@@ -1248,14 +1232,11 @@ export class PCIDSSControlsService extends EventEmitter {
   ): DataEnvelope<ControlImplementation> {
     const control = this.controls.get(implementation.controlId);
     if (!control) {
-      return createDataEnvelope(
-        null as unknown as ControlImplementation,
-        createVerdict(
-          GovernanceResult.DENY,
-          `Control ${implementation.controlId} not found`,
-          0.8
-        )
-      );
+      return createDataEnvelope(null as unknown as ControlImplementation, {
+        source: 'PCIDSSControlsService',
+        governanceVerdict: createVerdict(GovernanceResult.DENY, `Control ${implementation.controlId} not found`),
+        classification: DataClassification.CONFIDENTIAL,
+      });
     }
 
     const impl: ControlImplementation = {
@@ -1278,14 +1259,11 @@ export class PCIDSSControlsService extends EventEmitter {
 
     this.emit('implementationRecorded', { tenantId, implementation: impl });
 
-    return createDataEnvelope(
-      impl,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        'Control implementation recorded successfully',
-        0.0
-      )
-    );
+    return createDataEnvelope(impl, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Control implementation recorded successfully'),
+      classification: DataClassification.CONFIDENTIAL,
+    });
   }
 
   /**
@@ -1305,14 +1283,11 @@ export class PCIDSSControlsService extends EventEmitter {
 
     this.emit('cdeScopeDefined', { tenantId, scope: cdeScope });
 
-    return createDataEnvelope(
-      cdeScope,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        'CDE scope defined successfully',
-        0.0
-      )
-    );
+    return createDataEnvelope(cdeScope, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'CDE scope defined successfully'),
+      classification: DataClassification.CONFIDENTIAL,
+    });
   }
 
   /**
@@ -1321,14 +1296,14 @@ export class PCIDSSControlsService extends EventEmitter {
   public getCDEScope(tenantId: string): DataEnvelope<CDEScope | null> {
     const scope = this.cdeScopes.get(tenantId) || null;
 
-    return createDataEnvelope(
-      scope,
-      createVerdict(
+    return createDataEnvelope(scope, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(
         scope ? GovernanceResult.ALLOW : GovernanceResult.FLAG,
-        scope ? 'CDE scope retrieved' : 'No CDE scope defined for tenant',
-        scope ? 0.0 : 0.5
-      )
-    );
+        scope ? 'CDE scope retrieved' : 'No CDE scope defined for tenant'
+      ),
+      classification: DataClassification.CONFIDENTIAL,
+    });
   }
 
   /**
@@ -1344,26 +1319,20 @@ export class PCIDSSControlsService extends EventEmitter {
   }> {
     const scope = this.cdeScopes.get(tenantId);
     if (!scope) {
-      return createDataEnvelope(
-        { flow: null, risks: [], recommendations: [] },
-        createVerdict(
-          GovernanceResult.DENY,
-          'No CDE scope defined for tenant',
-          0.7
-        )
-      );
+      return createDataEnvelope({ flow: null, risks: [], recommendations: [] }, {
+        source: 'PCIDSSControlsService',
+        governanceVerdict: createVerdict(GovernanceResult.DENY, 'No CDE scope defined for tenant'),
+        classification: DataClassification.CONFIDENTIAL,
+      });
     }
 
     const flow = scope.dataFlows.find((f) => f.id === flowId);
     if (!flow) {
-      return createDataEnvelope(
-        { flow: null, risks: [], recommendations: [] },
-        createVerdict(
-          GovernanceResult.DENY,
-          `Data flow ${flowId} not found`,
-          0.7
-        )
-      );
+      return createDataEnvelope({ flow: null, risks: [], recommendations: [] }, {
+        source: 'PCIDSSControlsService',
+        governanceVerdict: createVerdict(GovernanceResult.DENY, `Data flow ${flowId} not found`),
+        classification: DataClassification.CONFIDENTIAL,
+      });
     }
 
     const risks: string[] = [];
@@ -1389,16 +1358,16 @@ export class PCIDSSControlsService extends EventEmitter {
       recommendations.push('Ensure SAD is not stored after authorization');
     }
 
-    return createDataEnvelope(
-      { flow, risks, recommendations },
-      createVerdict(
+    return createDataEnvelope({ flow, risks, recommendations }, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(
         risks.length > 0 ? GovernanceResult.FLAG : GovernanceResult.ALLOW,
         risks.length > 0
           ? `Data flow analysis found ${risks.length} risk(s)`
-          : 'Data flow analysis complete - no issues found',
-        risks.length * 0.2
-      )
-    );
+          : 'Data flow analysis complete - no issues found'
+      ),
+      classification: DataClassification.CONFIDENTIAL,
+    });
   }
 
   /**
@@ -1411,14 +1380,11 @@ export class PCIDSSControlsService extends EventEmitter {
   ): DataEnvelope<PCIDSSAssessment> {
     const scope = this.cdeScopes.get(tenantId);
     if (!scope) {
-      return createDataEnvelope(
-        null as unknown as PCIDSSAssessment,
-        createVerdict(
-          GovernanceResult.DENY,
-          'CDE scope must be defined before assessment',
-          0.8
-        )
-      );
+      return createDataEnvelope(null as unknown as PCIDSSAssessment, {
+        source: 'PCIDSSControlsService',
+        governanceVerdict: createVerdict(GovernanceResult.DENY, 'CDE scope must be defined before assessment'),
+        classification: DataClassification.CONFIDENTIAL,
+      });
     }
 
     const tenantImpls = this.implementations.get(tenantId) || [];
@@ -1513,16 +1479,14 @@ export class PCIDSSControlsService extends EventEmitter {
 
     this.emit('assessmentCompleted', { tenantId, assessment });
 
-    return createDataEnvelope(
-      assessment,
-      createVerdict(
-        overallCompliance === 'compliant'
-          ? GovernanceResult.ALLOW
-          : GovernanceResult.FLAG,
-        `PCI-DSS assessment completed: ${overallCompliance}`,
-        overallCompliance === 'compliant' ? 0.0 : 0.6
-      )
-    );
+    return createDataEnvelope(assessment, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(
+        overallCompliance === 'compliant' ? GovernanceResult.ALLOW : GovernanceResult.FLAG,
+        `PCI-DSS assessment completed: ${overallCompliance}`
+      ),
+      classification: DataClassification.CONFIDENTIAL,
+    });
   }
 
   /**
@@ -1531,14 +1495,11 @@ export class PCIDSSControlsService extends EventEmitter {
   public getAssessmentHistory(tenantId: string): DataEnvelope<PCIDSSAssessment[]> {
     const assessments = this.assessments.get(tenantId) || [];
 
-    return createDataEnvelope(
-      assessments,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        `Retrieved ${assessments.length} assessment(s)`,
-        0.0
-      )
-    );
+    return createDataEnvelope(assessments, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, `Retrieved ${assessments.length} assessment(s)`),
+      classification: DataClassification.CONFIDENTIAL,
+    });
   }
 
   /**
@@ -1552,14 +1513,11 @@ export class PCIDSSControlsService extends EventEmitter {
       .find((c) => c.subRequirement === ccw.originalRequirement);
 
     if (!control) {
-      return createDataEnvelope(
-        null as unknown as CompensatingControl,
-        createVerdict(
-          GovernanceResult.DENY,
-          `Original requirement ${ccw.originalRequirement} not found`,
-          0.7
-        )
-      );
+      return createDataEnvelope(null as unknown as CompensatingControl, {
+        source: 'PCIDSSControlsService',
+        governanceVerdict: createVerdict(GovernanceResult.DENY, `Original requirement ${ccw.originalRequirement} not found`),
+        classification: DataClassification.CONFIDENTIAL,
+      });
     }
 
     const compensatingControl: CompensatingControl = {
@@ -1569,14 +1527,11 @@ export class PCIDSSControlsService extends EventEmitter {
 
     this.emit('compensatingControlCreated', { tenantId, ccw: compensatingControl });
 
-    return createDataEnvelope(
-      compensatingControl,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        'Compensating control worksheet created',
-        0.3
-      )
-    );
+    return createDataEnvelope(compensatingControl, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Compensating control worksheet created'),
+      classification: DataClassification.CONFIDENTIAL,
+    });
   }
 
   /**
@@ -1587,14 +1542,11 @@ export class PCIDSSControlsService extends EventEmitter {
   ): DataEnvelope<typeof REQUIREMENT_METADATA[PCIDSSRequirement]> {
     const metadata = REQUIREMENT_METADATA[requirement];
 
-    return createDataEnvelope(
-      metadata,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        'Requirement metadata retrieved',
-        0.0
-      )
-    );
+    return createDataEnvelope(metadata, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Requirement metadata retrieved'),
+      classification: DataClassification.PUBLIC,
+    });
   }
 
   /**
@@ -1603,14 +1555,11 @@ export class PCIDSSControlsService extends EventEmitter {
   public getGoalDescription(goal: PCIDSSGoal): DataEnvelope<string> {
     const description = GOAL_DESCRIPTIONS[goal];
 
-    return createDataEnvelope(
-      description,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        'Goal description retrieved',
-        0.0
-      )
-    );
+    return createDataEnvelope(description, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Goal description retrieved'),
+      classification: DataClassification.PUBLIC,
+    });
   }
 
   /**
@@ -1642,14 +1591,11 @@ export class PCIDSSControlsService extends EventEmitter {
       dataFlowCount: scope?.dataFlows.length || 0,
     };
 
-    return createDataEnvelope(
-      stats,
-      createVerdict(
-        GovernanceResult.ALLOW,
-        'PCI-DSS statistics retrieved',
-        0.0
-      )
-    );
+    return createDataEnvelope(stats, {
+      source: 'PCIDSSControlsService',
+      governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'PCI-DSS statistics retrieved'),
+      classification: DataClassification.INTERNAL,
+    });
   }
 }
 

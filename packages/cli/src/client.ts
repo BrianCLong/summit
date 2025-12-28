@@ -6,6 +6,7 @@
  * @module @summit/cli/client
  */
 
+/* eslint-disable no-console */
 import chalk from 'chalk';
 import { getConfig, isAuthenticated, isConfigured } from './config.js';
 
@@ -72,8 +73,8 @@ export async function apiRequest<T>(
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-      console.error(chalk.red(`Error: ${error.error || error.message || `HTTP ${response.status}`}`));
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' })) as { error?: string; message?: string };
+      console.error(chalk.red(`Error: ${errorData.error || errorData.message || `HTTP ${response.status}`}`));
       process.exit(1);
     }
 
