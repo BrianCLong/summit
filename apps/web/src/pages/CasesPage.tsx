@@ -18,6 +18,7 @@ import {
   Clock,
   User,
   FolderOpen,
+  Network,
   ChevronDown,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -145,6 +146,13 @@ export default function CasesPage() {
     return 'on-track'
   }
 
+  const getHoursRemaining = (caseItem: Case): number | null => {
+    if (!caseItem.dueDate) return null
+    const now = new Date()
+    const due = new Date(caseItem.dueDate)
+    return (due.getTime() - now.getTime()) / (1000 * 60 * 60)
+  }
+
   const formatDueDate = (dueDate?: string): string => {
     if (!dueDate) return 'No due date'
 
@@ -161,6 +169,31 @@ export default function CasesPage() {
     return `Due ${due.toLocaleDateString()}`
   }
 
+  const summaryStats = useMemo(() => {
+    const totals = filteredCases.reduce(
+      (acc, caseItem) => {
+        acc.alerts += caseItem.alertIds.length
+        acc.investigations += caseItem.investigationIds.length
+
+        const hoursRemaining = getHoursRemaining(caseItem)
+        if (hoursRemaining !== null) {
+          if (hoursRemaining < 0) {
+            acc.overdue += 1
+          } else if (hoursRemaining <= 48) {
+            acc.dueSoon += 1
+          }
+        }
+        return acc
+      },
+      { alerts: 0, investigations: 0, dueSoon: 0, overdue: 0 }
+    )
+
+    return {
+      total: filteredCases.length,
+      ...totals,
+    }
+  }, [filteredCases])
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -175,6 +208,55 @@ export default function CasesPage() {
           <Plus className="h-4 w-4" />
           New Case
         </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Filtered Cases</p>
+                <p className="text-2xl font-semibold">{summaryStats.total}</p>
+              </div>
+              <FolderOpen className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Linked Alerts</p>
+                <p className="text-2xl font-semibold">{summaryStats.alerts}</p>
+              </div>
+              <AlertCircle className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Investigations</p>
+                <p className="text-2xl font-semibold">{summaryStats.investigations}</p>
+              </div>
+              <Network className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Due Soon / Overdue</p>
+                <p className="text-2xl font-semibold">
+                  {summaryStats.dueSoon} / {summaryStats.overdue}
+                </p>
+              </div>
+              <Clock className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters and Search */}

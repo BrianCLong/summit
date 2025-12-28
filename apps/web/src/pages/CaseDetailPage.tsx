@@ -278,6 +278,30 @@ export default function CaseDetailPage() {
     }
   }, [tasks])
 
+  const dueStatus = useMemo(() => {
+    if (!caseData.dueDate) return null
+    const now = new Date()
+    const due = new Date(caseData.dueDate)
+    const hoursRemaining = (due.getTime() - now.getTime()) / (1000 * 60 * 60)
+
+    if (hoursRemaining < 0) return 'overdue'
+    if (hoursRemaining < 24) return 'at-risk'
+    return 'on-track'
+  }, [caseData.dueDate])
+
+  const dueBadgeClasses = useMemo(() => {
+    if (dueStatus === 'overdue') {
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    }
+    if (dueStatus === 'at-risk') {
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+    }
+    if (dueStatus === 'on-track') {
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+    }
+    return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'
+  }, [dueStatus])
+
   return (
     <div className="h-screen flex flex-col">
       <CaseExportModal
@@ -545,6 +569,43 @@ export default function CaseDetailPage() {
 
                   {/* Right: Stats & Watchlists */}
                   <div className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-sm">Case Snapshot</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Assigned</span>
+                          <span className="font-medium">{caseData.assignedTo}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Created</span>
+                          <span className="font-medium">
+                            {new Date(caseData.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Last Updated</span>
+                          <span className="font-medium">
+                            {new Date(caseData.updatedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {caseData.dueDate && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Due Date</span>
+                            <span className="font-medium">
+                              {new Date(caseData.dueDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">Due Status</span>
+                          <Badge className={dueBadgeClasses} variant="outline">
+                            {dueStatus ? dueStatus.replace('-', ' ') : 'not set'}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-sm">Task Progress</CardTitle>
