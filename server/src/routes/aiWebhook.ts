@@ -1,55 +1,95 @@
 import { Router } from 'express';
 import crypto from 'crypto';
-import { pubsub } from '../realtime/pubsub';
+import { pubsub } from '../realtime/pubsub.js';
 import { randomUUID as uuid } from 'node:crypto';
+import { logger } from '../logger.js';
 
 const router = Router();
-const SECRET = process.env.ML_WEBHOOK_SECRET!;
+const SECRET = process.env.ML_WEBHOOK_SECRET;
 
-function verifySignature(body: string, sig: string) {
+function verifySignature(body: Buffer, sig: string): boolean {
+  if (!SECRET) {
+    logger.error('ML_WEBHOOK_SECRET is not configured');
+    return false;
+  }
+
+  if (!body) {
+    return false;
+  }
+
   const h = crypto.createHmac('sha256', SECRET).update(body).digest('hex');
+  const digestBuffer = Buffer.from(h);
+  const sigBuffer = Buffer.from(sig || '');
+
   try {
-    return crypto.timingSafeEqual(Buffer.from(h), Buffer.from(sig || ''));
-  } catch {
+    if (digestBuffer.length !== sigBuffer.length) {
+        return false;
+    }
+    return crypto.timingSafeEqual(digestBuffer, sigBuffer);
+  } catch (error) {
     return false;
   }
 }
 
 router.post('/ai/webhook', async (req, res) => {
   const sig = req.header('X-IntelGraph-Signature') || '';
-  const raw = (req as any).rawBody || JSON.stringify(req.body);
-  if (!verifySignature(raw, sig))
-    return res.status(401).json({ error: 'invalid signature' });
-  const evt = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+
+  // Sentinel: CRITICAL Fix - Do not fallback to JSON.stringify(req.body)
+  // JSON serialization is non-deterministic and can be manipulated to bypass signature checks.
+  // We must rely on the raw buffer captured by the express.json() verify hook.
+  const raw = (req as any).rawBody;
+
+  if (!raw) {
+    logger.error('Webhook received without rawBody. Ensure express.json() is configured with verify hook.');
+    return res.status(500).json({ error: 'System configuration error' });
+  }
+
+  if (!verifySignature(raw, sig)) {
+    logger.warn('Invalid webhook signature attempt');
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  const evt = req.body; // Body is already parsed by express.json()
   const { job_id, kind } = evt;
   const db = (req as any).db;
 
-  await db.jobs.update(job_id, {
-    status: 'SUCCESS',
-    finishedAt: new Date().toISOString(),
-  });
-
-  const insights = normalizeInsights(evt);
-  for (const payload of insights) {
-    const ins = await db.insights.insert({
-      id: uuid(),
-      jobId: job_id,
-      kind,
-      payload,
-      status: 'PENDING',
-      createdAt: new Date().toISOString(),
-    });
-    pubsub.publish(`INSIGHT_PENDING_${kind || '*'}`, ins);
+  // Ideally db should be typed, but for now we assume it's injected middleware
+  if (!db) {
+      logger.error('Database connection missing in request context');
+      return res.status(500).json({ error: 'Database unavailable' });
   }
-  pubsub.publish(`AI_JOB_${job_id}`, { id: job_id, kind, status: 'SUCCESS' });
-  await db.audit.insert({
-    id: uuid(),
-    type: 'ML_WEBHOOK',
-    actorId: 'ml-service',
-    createdAt: new Date().toISOString(),
-    meta: { jobId: job_id, kind, count: insights.length },
-  });
-  res.json({ ok: true });
+
+  try {
+    await db.jobs.update(job_id, {
+      status: 'SUCCESS',
+      finishedAt: new Date().toISOString(),
+    });
+
+    const insights = normalizeInsights(evt);
+    for (const payload of insights) {
+      const ins = await db.insights.insert({
+        id: uuid(),
+        jobId: job_id,
+        kind,
+        payload,
+        status: 'PENDING',
+        createdAt: new Date().toISOString(),
+      });
+      pubsub.publish(`INSIGHT_PENDING_${kind || '*'}`, ins);
+    }
+    pubsub.publish(`AI_JOB_${job_id}`, { id: job_id, kind, status: 'SUCCESS' });
+    await db.audit.insert({
+      id: uuid(),
+      type: 'ML_WEBHOOK',
+      actorId: 'ml-service',
+      createdAt: new Date().toISOString(),
+      meta: { jobId: job_id, kind, count: insights.length },
+    });
+    res.json({ ok: true });
+  } catch (err: any) {
+    logger.error(`Webhook processing failed: ${err.message}`);
+    res.status(500).json({ error: 'Processing failed' });
+  }
 });
 
 function normalizeInsights(evt: any) {
