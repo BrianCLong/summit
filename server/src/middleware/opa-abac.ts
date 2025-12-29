@@ -10,21 +10,43 @@ import type { User, OPAClient as IOPAClient } from '../graphql/intelgraph/types.
 const tracer = trace.getTracer('intelgraph-opa-abac');
 
 interface OPAPolicyInput {
-  user: User;
+  subject: {
+    id: string;
+    tenantId: string;
+    roles: string[];
+    residency: string;
+    clearance: string;
+    entitlements?: string[];
+  };
   resource: {
     type: string;
     id?: string;
-    tenant?: string;
-    purpose?: string;
-    region?: string;
-    pii_flags?: Record<string, boolean>;
+    tenantId?: string;
+    residency?: string;
+    classification?: string;
   };
-  operation_type: 'query' | 'mutation' | 'subscription';
-  field_name?: string;
+  action: string;
+  context: {
+    ip: string;
+    userAgent?: string;
+    time: number;
+    protectedActions?: string[];
+    currentAcr?: string;
+    dualControlApprovals?: string[];
+  };
 }
 
-interface OPAPolicyResult {
-  result: boolean | string[] | Record<string, any>;
+interface OPAObligation {
+  type: string;
+  mechanism?: string;
+  required_acr?: string;
+  required_approvals?: number;
+}
+
+interface OPADecision {
+  allow: boolean;
+  reason: string;
+  obligations: OPAObligation[];
 }
 
 export class OPAClient implements IOPAClient {
@@ -37,12 +59,12 @@ export class OPAClient implements IOPAClient {
     this.timeout = timeout;
   }
 
-  async evaluate(policy: string, input: any): Promise<any> {
+  async evaluate(policy: string, input: any): Promise<OPADecision | boolean> {
     const span = tracer.startSpan('opa-policy-evaluation', {
       attributes: {
         'opa.policy': policy,
-        'opa.input.user_tenant': input.user?.tenant || 'unknown',
-        'opa.input.resource_type': input.resource?.type || 'unknown',
+        'opa.input.subject_tenant': input.subject?.tenantId || 'unknown',
+        'opa.input.action': input.action || 'unknown',
       },
     });
 
@@ -62,15 +84,15 @@ export class OPAClient implements IOPAClient {
 
       span.setAttributes({
         'opa.result.type': typeof result,
-        'opa.result.allowed': typeof result === 'boolean' ? result : !!result,
+        'opa.result.allowed': (typeof result === 'object' && result !== null) ? result.allow : !!result,
         'opa.response.status': response.status,
       });
 
       this.logger.debug('OPA policy evaluation result', {
         policy,
         input: {
-          user_tenant: input.user?.tenant,
-          resource_type: input.resource?.type,
+          subject_tenant: input.subject?.tenantId,
+          action: input.action,
         },
         result: typeof result === 'object' ? JSON.stringify(result) : result,
       });
@@ -86,7 +108,7 @@ export class OPAClient implements IOPAClient {
       });
 
       // Fail closed - deny access if OPA is unavailable
-      return false;
+      return { allow: false, reason: 'opa_unavailable', obligations: [] };
     } finally {
       span.end();
     }
@@ -111,7 +133,8 @@ export function validateOIDCToken(
       if (process.env.NODE_ENV === 'development') {
         (req as any).user = {
           id: 'dev-user',
-          tenant: 'default',
+          tenantId: 'default',
+          tenant: 'default', // Backward compat
           roles: ['developer'],
           scopes: [
             'purpose:investigation',
@@ -119,6 +142,7 @@ export function validateOIDCToken(
             'scope:pii',
           ],
           residency: 'US',
+          clearance: 'top-secret',
           email: 'dev@topicality.co',
         };
         span.setAttributes({ 'auth.mode': 'development' });
@@ -142,17 +166,19 @@ export function validateOIDCToken(
       );
       (req as any).user = {
         id: decoded.sub || 'demo-user',
-        tenant: decoded.tenant || 'default',
+        tenantId: decoded.tenant || 'default',
+        tenant: decoded.tenant || 'default', // Backward compat
         roles: decoded.roles || ['user'],
         scopes: decoded.scopes || ['purpose:investigation'],
         residency: decoded.residency || 'US',
+        clearance: decoded.clearance || 'restricted',
         email: decoded.email,
       };
 
       span.setAttributes({
         'auth.mode': 'development',
         'user.id': (req as any).user.id,
-        'user.tenant': (req as any).user.tenant,
+        'user.tenant': (req as any).user.tenantId,
       });
 
       span.end();
@@ -165,8 +191,6 @@ export function validateOIDCToken(
     if (process.env.OIDC_PUBLIC_KEY) {
       publicKey = process.env.OIDC_PUBLIC_KEY.replace(/\\n/g, '\n');
     } else {
-      // Fallback or fetch from OIDC provider (implementation placeholder for JWKS)
-      // For now, we require OIDC_PUBLIC_KEY in production to be secure
       throw new Error('OIDC_PUBLIC_KEY environment variable is required in production');
     }
 
@@ -177,17 +201,19 @@ export function validateOIDCToken(
 
     (req as any).user = {
       id: decoded.sub || 'unknown',
-      tenant: decoded.tenant || 'default',
+      tenantId: decoded.tenant || 'default',
+      tenant: decoded.tenant || 'default', // Backward compat
       roles: (decoded.roles as string[]) || ['user'],
       scopes: (decoded.scopes as string[]) || [],
       residency: decoded.residency || 'US',
+      clearance: decoded.clearance || 'restricted',
       email: decoded.email,
     };
 
     span.setAttributes({
       'auth.mode': 'production',
       'user.id': (req as any).user.id,
-      'user.tenant': (req as any).user.tenant,
+      'user.tenant': (req as any).user.tenantId,
     });
 
     span.end();
@@ -210,6 +236,7 @@ export function validateOIDCToken(
 
 /**
  * GraphQL context builder with OPA client
+ * Restored for backward compatibility
  */
 export function buildGraphQLContext(opaClient: OPAClient) {
   return ({ req }: { req: Request }) => {
@@ -229,51 +256,157 @@ export function buildGraphQLContext(opaClient: OPAClient) {
 }
 
 /**
- * Express middleware for OPA authorization
+ * Express middleware for OPA authorization using summit.abac
  */
 export function opaAuthzMiddleware(opaClient: OPAClient) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const span = tracer.startSpan('opa-authz-middleware');
 
     try {
-      const user = (req as any).user as User;
+      const user = (req as any).user;
       if (!user) {
         span.setStatus({ code: 2, message: 'No user in request' });
         span.end();
         throw new AuthenticationError('Authentication required');
       }
 
-      // For GraphQL requests, we'll do field-level authorization in resolvers
-      if (req.path === '/graphql') {
-        span.setAttributes({ 'request.type': 'graphql' });
-        span.end();
-        return next();
+      // Determine action from method/path or explicit override
+      const action = (req as any).action || mapMethodToAction(req.method);
+
+      // Robust resource extraction
+      // Attempt to find ID in path params first, then path itself
+      let resourceId = req.params.id || (req.body && req.body.id);
+      let resourceType = 'api';
+
+      // If used as global middleware, req.params might be empty.
+      // Parse path: /api/resourceType/resourceId
+      if (!resourceId) {
+          const pathParts = req.path.split('/').filter(Boolean);
+          // Heuristic: api/v1/users/123 -> type=users, id=123
+          if (pathParts.length >= 2) {
+             const potentialId = pathParts[pathParts.length - 1];
+             // Check if it looks like an ID (UUID or numeric or slug)
+             if (potentialId.match(/^[a-zA-Z0-9-]+$/)) {
+                 resourceId = potentialId;
+                 resourceType = pathParts[pathParts.length - 2];
+             } else {
+                 resourceType = potentialId; // Collection access
+             }
+          } else if (pathParts.length === 1) {
+              resourceType = pathParts[0];
+          }
+      } else {
+          // If params had ID, try to get type from baseUrl
+          resourceType = req.baseUrl.split('/').pop() || 'api';
       }
 
-      // For REST endpoints, check general API access
+      // Security: Determine ACR (Authentication Context Reference)
+      // DO NOT trust x-step-up-auth header blindly for elevation in production.
+      let currentAcr = 'loa1';
+      const stepUpHeader = req.headers['x-step-up-auth'];
+      if (stepUpHeader) {
+          if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+             // In dev/test, mock validation
+             if (stepUpHeader === 'valid-token' || stepUpHeader.length > 5) {
+                 currentAcr = 'loa2';
+             }
+          } else {
+             // Production: Verify JWT token signature
+             try {
+                 let publicKey: string | Buffer;
+                 if (process.env.OIDC_PUBLIC_KEY) {
+                    publicKey = process.env.OIDC_PUBLIC_KEY.replace(/\\n/g, '\n');
+                 } else {
+                    throw new Error('OIDC_PUBLIC_KEY required');
+                 }
+
+                 const issuer = process.env.OIDC_ISSUER || 'https://auth.topicality.co/';
+
+                 verify(stepUpHeader as string, publicKey, {
+                    issuer,
+                    algorithms: ['RS256'],
+                 });
+
+                 currentAcr = 'loa2';
+             } catch (err) {
+                 logger.warn('Step-Up token verification failed', { error: (err as Error).message });
+             }
+          }
+      }
+
       const policyInput: OPAPolicyInput = {
-        user,
-        resource: {
-          type: 'api',
-          tenant: user.tenant,
+        subject: {
+          id: user.id,
+          tenantId: user.tenantId || user.tenant || 'default',
+          roles: user.roles || [],
+          residency: user.residency || 'US',
+          clearance: user.clearance || 'public',
+          entitlements: user.entitlements || [],
         },
-        operation_type: req.method.toLowerCase() as any,
+        resource: {
+          type: resourceType,
+          id: resourceId,
+          tenantId: user.tenantId || user.tenant || 'default', // Default to own tenant if not specified
+          residency: user.residency || 'US', // Default to own residency
+          classification: 'restricted', // Default classification
+          ...req.body?.resource // Allow override from body
+        },
+        action: action,
+        context: {
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+          time: Date.now(),
+          currentAcr: currentAcr
+        }
       };
 
-      const allowed = await opaClient.evaluate(
-        'intelgraph.abac.allow',
+      const decisionRaw = await opaClient.evaluate(
+        'summit.abac.decision',
         policyInput,
       );
 
-      if (!allowed) {
-        span.setStatus({ code: 2, message: 'Access denied by policy' });
+      // Normalize decision (handle boolean legacy)
+      const decision: OPADecision = (typeof decisionRaw === 'boolean')
+        ? { allow: decisionRaw, reason: decisionRaw ? 'allow' : 'denied', obligations: [] }
+        : (decisionRaw as OPADecision);
+
+      if (!decision || !decision.allow) {
+        const reason = decision?.reason || 'Access denied by policy';
+        span.setStatus({ code: 2, message: `Access denied: ${reason}` });
         span.end();
-        throw new ForbiddenError('Access denied by authorization policy');
+
+        // Return structured denial for frontend
+        res.status(403).json({
+            error: 'Access Denied',
+            code: 'FORBIDDEN',
+            reason: reason,
+            help: 'Contact your administrator to request access.',
+            rule_id: 'summit.abac' // placeholder
+        });
+        return;
+      }
+
+      // Check obligations
+      if (decision.obligations && decision.obligations.length > 0) {
+        for (const obligation of decision.obligations) {
+            if (obligation.type === 'step_up') {
+                span.setStatus({ code: 2, message: 'Step-up authentication required' });
+                span.end();
+                res.status(401).json({
+                    error: 'Step-up Authentication Required',
+                    code: 'STEP_UP_REQUIRED',
+                    mechanism: obligation.mechanism || 'webauthn',
+                    message: 'Please re-authenticate with a second factor to perform this action.'
+                });
+                return;
+            }
+            // Future: Handle 'dual_control' obligation (check for approvals in context)
+        }
       }
 
       span.setAttributes({
         'authz.allowed': true,
-        'user.tenant': user.tenant,
+        'user.tenant': user.tenantId,
       });
 
       span.end();
@@ -284,8 +417,7 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
       span.end();
 
       if (
-        error instanceof AuthenticationError ||
-        error instanceof ForbiddenError
+        error instanceof AuthenticationError
       ) {
         throw error;
       }
@@ -294,9 +426,21 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
         error: (error as Error).message,
       });
 
-      throw new ForbiddenError('Authorization check failed');
+      // Fail closed
+      res.status(403).json({ error: 'Authorization check failed' });
     }
   };
+}
+
+function mapMethodToAction(method: string): string {
+    switch(method.toUpperCase()) {
+        case 'GET': return 'read';
+        case 'POST': return 'write';
+        case 'PUT': return 'write';
+        case 'PATCH': return 'write';
+        case 'DELETE': return 'delete';
+        default: return 'read';
+    }
 }
 
 /**
@@ -328,32 +472,56 @@ export function createAuthzDirective(opaClient: OPAClient) {
           }
 
           const policyInput: OPAPolicyInput = {
-            user: context.user,
+            subject: {
+                id: context.user.id,
+                tenantId: context.user.tenant || context.user.tenantId,
+                roles: context.user.roles || [],
+                residency: context.user.residency || 'US',
+                clearance: context.user.clearance || 'public'
+            },
             resource: {
               type: info.parentType.name.toLowerCase(),
-              tenant: context.user.tenant,
+              id: source?.id,
+              tenantId: context.user.tenant,
+              classification: source?.classification || 'restricted',
               // Add field-specific resource attributes
-              ...(source && source.id && { id: source.id }),
               ...(source && source.purpose && { purpose: source.purpose }),
               ...(source && source.region && { region: source.region }),
               ...(source &&
                 source.pii_flags && { pii_flags: source.pii_flags }),
             },
-            operation_type: info.operation.operation || 'query',
-            field_name: info.fieldName,
+            action: info.operation.operation || 'query',
+            context: {
+                ip: 'unknown', // Context not always available in GQL resolve without extra wiring
+                time: Date.now()
+            }
           };
 
-          const allowed = await opaClient.evaluate(
-            'intelgraph.abac.graphql_allowed',
+          const decisionRaw = await opaClient.evaluate(
+            'summit.abac.decision',
             policyInput,
           );
 
-          if (!allowed) {
+          const decision: OPADecision = (typeof decisionRaw === 'boolean')
+            ? { allow: decisionRaw, reason: decisionRaw ? 'allow' : 'denied', obligations: [] }
+            : (decisionRaw as OPADecision);
+
+          if (!decision || !decision.allow) {
             span.setStatus({ code: 2, message: 'Field access denied' });
             span.end();
             throw new ForbiddenError(
-              `Access denied to field ${info.fieldName}`,
+              `Access denied to field ${info.fieldName}: ${decision?.reason || 'policy'}`,
             );
+          }
+
+          // Check obligations for GraphQL - Fail closed if step-up is required but not satisfied
+          if (decision.obligations && decision.obligations.length > 0) {
+              const hasStepUp = decision.obligations.some(o => o.type === 'step_up');
+              if (hasStepUp) {
+                  span.setStatus({ code: 2, message: 'Step-up required for field access' });
+                  span.end();
+                  throw new AuthenticationError('Step-up authentication required to access this field');
+              }
           }
 
           span.setAttributes({ 'authz.field.allowed': true });
