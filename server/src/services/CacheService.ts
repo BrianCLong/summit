@@ -1,13 +1,13 @@
-import { getRedisClient } from '../config/database.js';
+import { getCacheManager } from '../cache/factory.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import { cfg } from '../config.js';
 import logger from '../config/logger.js';
+import CacheManager from '../cache/AdvancedCachingStrategy.js';
 
 /**
  * @class CacheService
- * @description Provides a layer of abstraction for caching operations, backed by Redis.
- * It includes methods for getting, setting, deleting, and invalidating cache entries.
- * It also provides a convenient getOrSet method to simplify cache-aware data fetching.
+ * @description Provides a layer of abstraction for caching operations, backed by Redis and memory (L1/L2).
+ * It delegates to the AdvancedCachingStrategy (CacheManager) for robust caching with circuit breakers.
  *
  * @example
  * ```typescript
@@ -26,6 +26,7 @@ export class CacheService {
   private readonly namespace = 'cache';
   private defaultTtl: number;
   private enabled: boolean;
+  private cacheManager: CacheManager;
 
   /**
    * @constructor
@@ -36,6 +37,7 @@ export class CacheService {
     this.metrics.createCounter('ops_total', 'Total cache operations', ['operation', 'status']);
     this.defaultTtl = cfg.CACHE_TTL_DEFAULT;
     this.enabled = cfg.CACHE_ENABLED;
+    this.cacheManager = getCacheManager();
   }
 
   /**
@@ -46,6 +48,13 @@ export class CacheService {
    * @returns {string} The namespaced cache key.
    */
   private getKey(key: string): string {
+    // CacheManager handles its own prefixing (summit:cache:), but to maintain backward compatibility
+    // with existing keys or specific namespace logic, we keep this.
+    // However, CacheManager might double-prefix if we are not careful.
+    // The previous implementation used "cache:<key>".
+    // CacheManager uses "summit:cache:<key>".
+    // We will pass the raw key to CacheManager and let it handle the standard prefix.
+    // If we want to keep the 'cache' namespace explicitly:
     return `${this.namespace}:${key}`;
   }
 
@@ -62,14 +71,14 @@ export class CacheService {
    * ```
    */
   async get<T>(key: string): Promise<T | null> {
-    const redisClient = getRedisClient();
-    if (!this.enabled || !redisClient) return null;
+    if (!this.enabled) return null;
 
     try {
-      const data = await redisClient.get(this.getKey(key));
+      // CacheManager handles JSON parsing internally
+      const data = await this.cacheManager.get<T>(this.getKey(key));
       if (data) {
         this.metrics.incrementCounter('ops_total', { operation: 'get', status: 'hit' });
-        return JSON.parse(data) as T;
+        return data;
       }
       this.metrics.incrementCounter('ops_total', { operation: 'get', status: 'miss' });
       return null;
@@ -84,7 +93,7 @@ export class CacheService {
    * @method set
    * @description Sets a value in the cache with an optional TTL.
    * @param {string} key - The key for the cache entry.
-   * @param {*} value - The value to cache. It will be JSON.stringified.
+   * @param {*} value - The value to cache.
    * @param {number} [ttl] - The time-to-live for the cache entry in seconds. Defaults to the system's default TTL.
    * @returns {Promise<void>}
    *
@@ -94,13 +103,11 @@ export class CacheService {
    * ```
    */
   async set(key: string, value: any, ttl?: number): Promise<void> {
-    const redisClient = getRedisClient();
-    if (!this.enabled || !redisClient) return;
+    if (!this.enabled) return;
 
     try {
-      const serialized = JSON.stringify(value);
       const expiry = ttl || this.defaultTtl;
-      await redisClient.setex(this.getKey(key), expiry, serialized);
+      await this.cacheManager.set(this.getKey(key), value, { ttl: expiry });
       this.metrics.incrementCounter('ops_total', { operation: 'set', status: 'success' });
     } catch (error) {
       logger.error({ err: error, key }, 'Cache set error');
@@ -120,10 +127,9 @@ export class CacheService {
    * ```
    */
   async del(key: string): Promise<void> {
-    const redisClient = getRedisClient();
-    if (!this.enabled || !redisClient) return;
+    if (!this.enabled) return;
     try {
-      await redisClient.del(this.getKey(key));
+      await this.cacheManager.delete(this.getKey(key));
       this.metrics.incrementCounter('ops_total', { operation: 'del', status: 'success' });
     } catch (error) {
       logger.error({ err: error, key }, 'Cache del error');
@@ -132,7 +138,7 @@ export class CacheService {
 
   /**
    * @method invalidatePattern
-   * @description Invalidates cache keys matching a given pattern. Uses SCAN to avoid blocking the Redis server.
+   * @description Invalidates cache keys matching a given pattern.
    * @param {string} pattern - The pattern to match keys against (e.g., 'users:*').
    * @returns {Promise<void>}
    *
@@ -142,26 +148,15 @@ export class CacheService {
    * ```
    */
   async invalidatePattern(pattern: string): Promise<void> {
-    const redisClient = getRedisClient();
-    if (!this.enabled || !redisClient) return;
+    if (!this.enabled) return;
 
-    const fullPattern = this.getKey(pattern);
-    const stream = redisClient.scanStream({
-      match: fullPattern,
-      count: 100
-    });
-
-    stream.on('data', (keys: string[]) => {
-      if (keys.length) {
-        const pipeline = redisClient!.pipeline();
-        keys.forEach(key => pipeline.del(key));
-        pipeline.exec();
-      }
-    });
-
-    stream.on('end', () => {
-      logger.info({ pattern: fullPattern }, 'Cache pattern invalidated');
-    });
+    try {
+        const fullPattern = this.getKey(pattern);
+        await this.cacheManager.invalidateByPattern(fullPattern);
+        logger.info({ pattern: fullPattern }, 'Cache pattern invalidated');
+    } catch (error) {
+        logger.error({ err: error, pattern }, 'Cache pattern invalidation error');
+    }
   }
 
   /**
@@ -181,14 +176,13 @@ export class CacheService {
    * ```
    */
   async getOrSet<T>(key: string, factory: () => Promise<T>, ttl?: number): Promise<T> {
-    const cached = await this.get<T>(key);
-    if (cached) return cached;
-
-    const fresh = await factory();
-    if (fresh !== undefined && fresh !== null) {
-      await this.set(key, fresh, ttl);
-    }
-    return fresh;
+    // cacheManager.getOrSet signature matches what we need
+    // but we need to handle the namespacing of the key
+    return this.cacheManager.getOrSet(
+        this.getKey(key),
+        factory,
+        { ttl: ttl || this.defaultTtl }
+    );
   }
 }
 

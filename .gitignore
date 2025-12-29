@@ -345,3 +345,4 @@ reports/
 # Policy artifacts
 policy/bin/
 policy/test_report.json
+.Jules/

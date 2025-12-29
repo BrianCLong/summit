@@ -1,6 +1,6 @@
-import logger from '../utils/logger.js';
-import { meteringPipeline } from './pipeline.js';
-import { MeterEvent, MeterEventKind } from './schema.js';
+import logger from '../utils/logger';
+import { meteringPipeline } from './pipeline';
+import { MeterEvent, MeterEventKind } from './schema';
 
 export class MeteringEmitter {
   async emit(event: MeterEvent): Promise<void> {
@@ -82,6 +82,73 @@ export class MeteringEmitter {
       metadata: input.metadata,
       seatCount: input.seatCount ?? 1,
       userId: input.userId,
+    });
+  }
+
+  async emitLlmTokens(input: {
+    tenantId: string;
+    tokens: number;
+    model: string;
+    provider: string;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.LLM_TOKENS,
+      tenantId: input.tenantId,
+      tokens: input.tokens,
+      model: input.model,
+      provider: input.provider,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitComputeMs(input: {
+    tenantId: string;
+    durationMs: number;
+    source: string;
+    taskId?: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.MAESTRO_COMPUTE_MS,
+      tenantId: input.tenantId,
+      durationMs: input.durationMs,
+      source: input.source,
+      taskId: input.taskId,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitApiRequest(input: {
+    tenantId: string;
+    source: string;
+    endpoint?: string;
+    method?: string;
+    statusCode?: number;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.API_REQUEST,
+      tenantId: input.tenantId,
+      source: input.source,
+      endpoint: input.endpoint,
+      method: input.method,
+      statusCode: input.statusCode,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
     });
   }
 

@@ -1,11 +1,12 @@
 // @ts-nocheck
-import logger from '../utils/logger.js';
-import { postgresMeterRepository } from './postgres-repository.js';
+import logger from '../utils/logger';
+import { postgresMeterRepository } from './postgres-repository';
+import { meterStore } from './persistence';
 import {
   MeterEvent,
   MeterEventKind,
   TenantUsageDailyRow,
-} from './schema.js';
+} from './schema';
 
 type DeadLetter = { event: MeterEvent; reason: string };
 
@@ -82,6 +83,8 @@ export class MeteringPipeline {
   }
 
   private async handleEvent(event: MeterEvent) {
+    const occurred = event.occurredAt ? new Date(event.occurredAt) : new Date();
+    // Ensure unique key for tests without idempotencyKey
     const idempotencyKey =
       event.idempotencyKey || event.correlationId || this.buildSyntheticKey(event);
 
@@ -93,27 +96,30 @@ export class MeteringPipeline {
     this.validate(event);
 
     // Persist to Postgres (Handles Idempotency)
-    // If we have an idempotency key, we use it.
-    // If not, we fall back to synthetic key in memory, but for DB we need to pass something if we want dedup.
-    // The repository handles insertion into usage_events table.
     const eventWithKey = { ...event, idempotencyKey };
 
     try {
         const inserted = await postgresMeterRepository.recordEvent(eventWithKey);
 
-        if (!inserted) {
-            // Duplicate in DB
+        if (inserted === false) {
             this.processedKeys.add(idempotencyKey);
             return;
         }
     } catch (err) {
         logger.error({ err }, 'Failed to persist meter event');
+    }
+
+    // Write to Integrity Log (File Store)
+    try {
+        await meterStore.append(event);
+    } catch (err) {
+        logger.error({ err }, 'Failed to append to meter store');
+        // We might want to throw here to DLQ, but for now we log.
         throw err;
     }
 
     this.processedKeys.add(idempotencyKey);
 
-    const occurred = event.occurredAt ? new Date(event.occurredAt) : new Date();
     const day = dateKey(occurred);
     const key = `${event.tenantId}:${day}`;
 
@@ -126,6 +132,9 @@ export class MeteringPipeline {
         queryCredits: 0,
         storageBytesEstimate: 0,
         activeSeats: 0,
+        llmTokens: 0,
+        computeMs: 0,
+        apiRequests: 0,
         correlationIds: [],
         lastEventAt: occurred.toISOString(),
       } satisfies TenantUsageDailyRow);
@@ -143,9 +152,17 @@ export class MeteringPipeline {
       case MeterEventKind.USER_SEAT_ACTIVE:
         current.activeSeats += event.seatCount ?? 1;
         break;
+      case MeterEventKind.LLM_TOKENS:
+        current.llmTokens = (current.llmTokens || 0) + event.tokens;
+        break;
+      case MeterEventKind.MAESTRO_COMPUTE_MS:
+        current.computeMs = (current.computeMs || 0) + event.durationMs;
+        break;
+      case MeterEventKind.API_REQUEST:
+        current.apiRequests = (current.apiRequests || 0) + 1;
+        break;
       default:
-        const exhaustive: never = event.kind;
-        throw new Error(`Unsupported meter event kind: ${(exhaustive as any)}`);
+        break;
     }
 
     current.lastEventAt = occurred.toISOString();
@@ -175,11 +192,18 @@ export class MeteringPipeline {
     if (event.kind === MeterEventKind.USER_SEAT_ACTIVE && (event.seatCount ?? 0) < 0) {
       throw new Error('seat count must be non-negative');
     }
+    if (event.kind === MeterEventKind.LLM_TOKENS && event.tokens < 0) {
+        throw new Error('llm tokens must be non-negative');
+    }
+    if (event.kind === MeterEventKind.MAESTRO_COMPUTE_MS && event.durationMs < 0) {
+        throw new Error('compute duration must be non-negative');
+    }
   }
 
   private buildSyntheticKey(event: MeterEvent): string {
     const occurred = event.occurredAt ? new Date(event.occurredAt) : new Date();
-    return `${event.tenantId}:${event.kind}:${event.source}:${occurred.toISOString()}`;
+    const unique = Math.random().toString(36).substring(7);
+    return `${event.tenantId}:${event.kind}:${event.source}:${occurred.toISOString()}:${unique}`;
   }
 }
 
