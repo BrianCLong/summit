@@ -6,23 +6,24 @@
  * @module @summit/cli/utils
  */
 
+/* eslint-disable no-console */
 import chalk from 'chalk';
 
 /**
  * Format data as a table
  */
-export function formatOutput(
-  data: Record<string, unknown>[],
+export function formatOutput<T extends object>(
+  data: T[],
   columns: string[]
 ): string {
-  if (data.length === 0) return '';
+  if (data.length === 0) {return '';}
 
   // Calculate column widths
   const widths: Record<string, number> = {};
   columns.forEach((col) => {
     widths[col] = Math.max(
       col.length,
-      ...data.map((row) => String(row[col] || '').length)
+      ...data.map((row) => String((row as Record<string, unknown>)[col] || '').length)
     );
   });
 
@@ -38,7 +39,7 @@ export function formatOutput(
   const dataRows = data.map((row) =>
     columns
       .map((col) => {
-        const value = String(row[col] || '');
+        const value = String((row as Record<string, unknown>)[col] || '');
         return value.padEnd(widths[col]);
       })
       .join('  ')
@@ -52,7 +53,7 @@ export function formatOutput(
  */
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return dateStr;
+  if (isNaN(date.getTime())) {return dateStr;}
 
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -67,8 +68,8 @@ export function formatDate(dateStr: string): string {
  * Truncate string to max length
  */
 export function truncate(str: string, maxLength: number): string {
-  if (str.length <= maxLength) return str;
-  return str.substring(0, maxLength - 3) + '...';
+  if (str.length <= maxLength) {return str;}
+  return `${str.substring(0, maxLength - 3)  }...`;
 }
 
 /**

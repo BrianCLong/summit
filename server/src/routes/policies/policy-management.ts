@@ -21,7 +21,7 @@ import {
   PolicySimulatorService,
   simulationRequestSchema,
 } from '../../services/PolicySimulatorService.js';
-import { Principal } from '../../types/identity.js';
+import { Principal, Action } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
 
 const router = express.Router();
@@ -62,7 +62,7 @@ const buildPrincipal = (req: Request, res: Response, next: NextFunction): void =
 /**
  * Require policy management permission
  */
-const requirePolicyPermission = (action: string) => {
+const requirePolicyPermission = (action: Action) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const principal = (req as any).principal;

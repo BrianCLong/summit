@@ -1,0 +1,234 @@
+# Summit v4.0.0 Alpha Alerting Rules
+# ===================================
+
+groups:
+  # ===========================================
+  # Critical Alerts (P0)
+  # ===========================================
+  - name: v4_critical
+    interval: 30s
+    rules:
+      - alert: V4APIDown
+        expr: up{job="summit-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          phase: alpha
+        annotations:
+          summary: "Summit v4 API is down"
+          description: "The Summit v4 API has been unreachable for more than 1 minute."
+          runbook: "https://docs.summit.internal/runbooks/api-down"
+
+      - alert: V4ErrorRateCritical
+        expr: |
+          (
+            sum(rate(summit_v4_errors_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(summit_v4_api_calls_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          phase: alpha
+        annotations:
+          summary: "v4 API error rate critical (>5%)"
+          description: "The v4 API 5xx error rate has exceeded 5% for 5 minutes."
+
+      - alert: HSMUnavailable
+        expr: summit_hsm_service_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          phase: alpha
+        annotations:
+          summary: "HSM service unavailable"
+          description: "HSM service has been unavailable for more than 1 minute."
+
+      - alert: AuditChainIntegrityFailure
+        expr: summit_audit_chain_verification_failures_total > 0
+        for: 0m
+        labels:
+          severity: critical
+          phase: alpha
+        annotations:
+          summary: "Audit chain integrity failure detected"
+          description: "The immutable audit ledger has detected a chain integrity violation."
+
+  # ===========================================
+  # High Priority Alerts (P1)
+  # ===========================================
+  - name: v4_high
+    interval: 1m
+    rules:
+      - alert: V4LatencyHigh
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(summit_v4_api_latency_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 10m
+        labels:
+          severity: high
+          phase: alpha
+        annotations:
+          summary: "v4 API p99 latency high (>2s)"
+          description: "The v4 API p99 latency has exceeded 2 seconds for 10 minutes."
+
+      - alert: AIServiceDegraded
+        expr: |
+          (
+            sum(rate(summit_ai_errors_total[5m]))
+            /
+            sum(rate(summit_ai_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: high
+          phase: alpha
+        annotations:
+          summary: "AI service degraded (>5% error rate)"
+          description: "The AI governance service error rate has exceeded 5%."
+
+      - alert: LLMProviderLatencyHigh
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(summit_llm_request_latency_seconds_bucket[5m])) by (le)
+          ) > 5
+        for: 5m
+        labels:
+          severity: high
+          phase: alpha
+        annotations:
+          summary: "LLM provider latency high (>5s)"
+          description: "The LLM provider p99 latency has exceeded 5 seconds."
+
+      - alert: ComplianceAssessmentFailures
+        expr: |
+          (
+            sum(rate(summit_compliance_assessment_failures_total[15m]))
+            /
+            sum(rate(summit_compliance_assessments_total[15m]))
+          ) > 0.1
+        for: 15m
+        labels:
+          severity: high
+          phase: alpha
+        annotations:
+          summary: "Compliance assessment failure rate high (>10%)"
+          description: "More than 10% of compliance assessments are failing."
+
+      - alert: HSMOperationLatencyHigh
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(summit_hsm_operation_latency_seconds_bucket[5m])) by (le)
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: high
+          phase: alpha
+        annotations:
+          summary: "HSM operation latency high (>500ms)"
+          description: "HSM operation p99 latency has exceeded 500ms."
+
+  # ===========================================
+  # Warning Alerts (P2)
+  # ===========================================
+  - name: v4_warning
+    interval: 2m
+    rules:
+      - alert: V4ErrorRateElevated
+        expr: |
+          (
+            sum(rate(summit_v4_errors_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(summit_v4_api_calls_total[5m]))
+          ) > 0.01
+        for: 15m
+        labels:
+          severity: warning
+          phase: alpha
+        annotations:
+          summary: "v4 API error rate elevated (>1%)"
+          description: "The v4 API 5xx error rate has exceeded 1% for 15 minutes."
+
+      - alert: AIExplanationCacheHitLow
+        expr: summit_ai_explanations_cache_hit_ratio < 0.5
+        for: 30m
+        labels:
+          severity: warning
+          phase: alpha
+        annotations:
+          summary: "AI explanation cache hit ratio low (<50%)"
+          description: "The verdict explanation cache hit ratio is below 50%."
+
+      - alert: AISuggestionQuotaApproaching
+        expr: |
+          (summit_ai_suggestions_generated_today / summit_ai_suggestions_daily_limit) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          phase: alpha
+        annotations:
+          summary: "AI suggestion quota approaching limit (>80%)"
+          description: "Daily AI suggestion quota is approaching the limit."
+
+      - alert: DatabaseConnectionPoolHigh
+        expr: |
+          (summit_db_connections_active / summit_db_connections_max) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          phase: alpha
+        annotations:
+          summary: "Database connection pool utilization high (>80%)"
+          description: "Database connection pool is over 80% utilized."
+
+      - alert: MemoryUsageHigh
+        expr: |
+          (
+            process_resident_memory_bytes{job="summit-api"}
+            /
+            (1024 * 1024 * 1024)
+          ) > 6
+        for: 10m
+        labels:
+          severity: warning
+          phase: alpha
+        annotations:
+          summary: "Memory usage high (>6GB)"
+          description: "Summit API memory usage has exceeded 6GB."
+
+  # ===========================================
+  # Informational Alerts
+  # ===========================================
+  - name: v4_info
+    interval: 5m
+    rules:
+      - alert: NewTenantEnabledAIFeatures
+        expr: increase(summit_v4_feature_enabled{feature="ai_governance"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: info
+          phase: alpha
+        annotations:
+          summary: "New tenant enabled AI governance features"
+          description: "A tenant has enabled AI governance features."
+
+      - alert: AnomalyDetected
+        expr: increase(summit_ai_anomalies_detected_total{severity="high"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: info
+          phase: alpha
+        annotations:
+          summary: "High severity anomaly detected"
+          description: "Behavioral anomaly detection found a high severity anomaly."
+
+      - alert: ComplianceAssessmentCompleted
+        expr: increase(summit_compliance_assessments_total{status="completed"}[5m]) > 0
+        for: 0m
+        labels:
+          severity: info
+          phase: alpha
+        annotations:
+          summary: "Compliance assessment completed"
+          description: "A compliance assessment has been completed."

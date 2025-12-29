@@ -81,12 +81,23 @@ export interface ServiceAccount {
 
 export type Action =
   | 'view'
+  | 'read' // Alias for view, used in analytics/compliance routes
   | 'create'
   | 'update'
   | 'delete'
   | 'execute'
   | 'administer'
-  | 'manage_settings';
+  | 'admin' // Alias for administer, used in admin routes
+  | 'manage' // For role/user/policy management
+  | 'manage_settings'
+  | 'assign' // Role assignment
+  | 'revoke' // Role revocation
+  | 'lock' // User lock
+  | 'unlock' // User unlock
+  | 'submit' // Policy submission
+  | 'approve' // Policy approval
+  | 'publish' // Policy publishing
+  | 'simulate'; // Policy simulation
 
 export interface ResourceRef {
   type: string; // e.g. "maestro.run", "graph.query", "document"

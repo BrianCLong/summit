@@ -3,6 +3,10 @@ import type { Redis } from 'ioredis';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
 import * as z from 'zod';
+import { suppressionService } from './alert/SuppressionService.js';
+import { correlationService } from './alert/CorrelationService.js';
+import { AlertEvent } from '../types/alerts.js';
+import crypto from 'crypto';
 
 const logger = (pino as any)();
 
@@ -35,14 +39,9 @@ export type AlertRule = z.infer<typeof AlertRuleSchema>;
  * @property {string} message - The human-readable message associated with the alert.
  * @property {number} timestamp - The UNIX timestamp (in ms) when the alert was triggered.
  */
-export interface AlertEvent {
-  ruleId: string;
-  metric: string;
-  value: number;
-  threshold: number;
-  message: string;
-  timestamp: number;
-}
+// AlertEvent interface is now imported from ../types/alerts.js
+// Re-exporting it or using the imported one.
+// The local interface definition is removed to avoid conflict and duplication.
 
 /**
  * @class AlertingService
@@ -115,6 +114,11 @@ class AlertingService {
    * @param {Record<string, string>} [tags={}] - Optional tags for more complex rule evaluation (currently unused).
    * @returns {Promise<void>}
    */
+  // Simple flood control: map of ruleId -> timestamp of last alert
+  private lastAlertByRule: Map<string, number> = new Map();
+  // Flood threshold: min 1 second between alerts per rule
+  private floodThresholdMs: number = 1000;
+
   async checkAlerts(metric: string, value: number, tags: Record<string, string> = {}): Promise<void> {
     const rules = this.rules.get(metric);
     if (!rules || !this.redis) return;
@@ -132,16 +136,45 @@ class AlertingService {
       }
 
       if (triggered) {
+        // Construct the AlertEvent
+        const entityKey = tags.entityId || 'global';
         const alert: AlertEvent = {
+          id: crypto.randomUUID(),
           ruleId: rule.id,
           metric,
           value,
           threshold: rule.threshold,
           message: rule.message,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          entities: [entityKey],
+          attributes: tags
         };
 
+        // Check suppressions
+        if (suppressionService.isSuppressed(rule.id, entityKey, alert.timestamp)) {
+          logger.info({ alertId: alert.id, ruleId: rule.id }, 'Alert suppressed');
+          continue;
+        }
+
+        // Check flood control (Circuit Breaker)
+        const lastTime = this.lastAlertByRule.get(rule.id) || 0;
+        if (alert.timestamp - lastTime < this.floodThresholdMs) {
+             logger.warn({ ruleId: rule.id }, 'Alert flood detected, dropping alert');
+             continue; // Drop alert
+        }
+        this.lastAlertByRule.set(rule.id, alert.timestamp);
+
         logger.info({ alert }, 'Alert triggered');
+
+        // Feed to correlation engine (fire and forget for this MVP step, or await/process)
+        // In a real system, this might push to a queue that the correlator consumes.
+        // Here we just invoke it directly for demonstration.
+        const incidents = correlationService.correlate([alert]);
+        if (incidents.length > 0) {
+            logger.info({ incidentCount: incidents.length }, 'Correlated incidents generated');
+            // Publish incidents to Redis as well
+             await this.redis.publish('incidents', JSON.stringify(incidents));
+        }
 
         // Publish alert to a metric-specific channel and a global channel
         await this.redis.publish(`alert:${metric}`, JSON.stringify(alert));

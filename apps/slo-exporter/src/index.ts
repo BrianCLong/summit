@@ -168,6 +168,15 @@ app.get('/metrics', async (req, res) => {
   }
 });
 
+app.get('/metrics.json', async (req, res) => {
+  try {
+    const metrics = await register.getMetricsAsJSON();
+    res.json(metrics);
+  } catch (ex) {
+    res.status(500).json({ error: String(ex) });
+  }
+});
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
 });

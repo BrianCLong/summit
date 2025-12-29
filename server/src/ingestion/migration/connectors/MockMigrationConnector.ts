@@ -1,6 +1,7 @@
 import { SourceConnector } from '../../../connectors/types';
 import { ConnectorContext } from '../../../data-model/types';
 import { BaseConnector } from '../../../connectors/BaseConnector';
+import { DataEnvelope } from '../../../types/data-envelope';
 
 export interface MockConfig {
   recordCount?: number;
@@ -15,10 +16,10 @@ export class MockMigrationConnector extends BaseConnector implements SourceConne
     this.config = config || { recordCount: 20, batchSize: 10 };
   }
 
-  async fetchBatch(ctx: ConnectorContext, cursor?: string | null): Promise<{
+  async fetchBatch(ctx: ConnectorContext, cursor?: string | null): Promise<DataEnvelope<{
     records: any[];
     nextCursor?: string | null;
-  }> {
+  }>> {
     const batchSize = this.config.batchSize || 10;
     const maxRecords = this.config.recordCount || 20;
 
@@ -49,10 +50,7 @@ export class MockMigrationConnector extends BaseConnector implements SourceConne
        const nextOffset = currentOffset + count;
        const nextCursor = nextOffset >= maxRecords ? 'DONE' : nextOffset.toString();
 
-       return {
-         records: mockRecords,
-         nextCursor
-       };
+       return { records: mockRecords, nextCursor };
     }, ctx);
   }
 }

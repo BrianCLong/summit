@@ -50,7 +50,7 @@ describe('Tenant Isolation via OPAMiddleware', () => {
     };
     const args = { tenantId: tenantB }; // User A accessing Tenant B data
 
-    const resolver = vi.fn();
+    const resolver = jest.fn();
     const wrapped = middleware.createGraphQLMiddleware();
 
     await expect(wrapped(resolver, {}, args, context, info))
@@ -87,7 +87,7 @@ describe('Tenant Isolation via OPAMiddleware', () => {
     };
     const args = { tenantId: tenantA };
 
-    const resolver = vi.fn().mockReturnValue('success');
+    const resolver = jest.fn().mockReturnValue('success');
     const wrapped = middleware.createGraphQLMiddleware();
 
     const result = await wrapped(resolver, {}, args, context, info);

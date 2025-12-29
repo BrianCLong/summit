@@ -162,7 +162,7 @@ export class PluginSandbox {
     const allowedDomains = this.config.allowedDomains || ['*'];
 
     return {
-      fetch: async (url: string, options?: RequestInit) => {
+      fetch: async (url: string, options?: globalThis.RequestInit) => {
         // Check call limit
         if (callCount >= maxCalls) {
           throw new Error(`API call limit exceeded (max: ${maxCalls})`);

@@ -1,4 +1,4 @@
-import Ajv, { DefinedError, ValidateFunction } from 'ajv';
+import Ajv, { DefinedError, type ValidateFunction } from 'ajv';
 import addFormats from 'ajv-formats';
 import { DataRecord, DeadLetterEntry, ValidationErrorDetail } from './types.js';
 
@@ -7,7 +7,7 @@ export class SchemaValidator {
   private readonly validateFn: ValidateFunction;
 
   constructor(schema: Record<string, unknown>) {
-    this.ajv = new Ajv({ allErrors: true, removeAdditional: 'failing' });
+    this.ajv = new Ajv({ allErrors: true, removeAdditional: 'failing', coerceTypes: true });
     addFormats(this.ajv);
     this.validateFn = this.ajv.compile(schema);
   }

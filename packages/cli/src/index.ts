@@ -9,6 +9,7 @@
  * @module @summit/cli
  */
 
+/* eslint-disable no-console */
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { policyCommands } from './commands/policy.js';
@@ -16,6 +17,7 @@ import { tenantCommands } from './commands/tenant.js';
 import { auditCommands } from './commands/audit.js';
 import { complianceCommands } from './commands/compliance.js';
 import { configCommands } from './commands/config.js';
+import { pluginCommands } from './commands/plugin.js';
 import { loadConfig, getConfig } from './config.js';
 
 const program = new Command();
@@ -27,7 +29,7 @@ program
   .hook('preAction', async () => {
     try {
       await loadConfig();
-    } catch (error) {
+    } catch (_error) {
       // Config loading is optional for some commands
     }
   });
@@ -79,6 +81,17 @@ program
   .addCommand(complianceCommands.evidence)
   .addCommand(complianceCommands.report);
 
+// Plugin commands
+program
+  .command('plugin')
+  .description('Plugin development commands')
+  .addCommand(pluginCommands.create)
+  .addCommand(pluginCommands.validate)
+  .addCommand(pluginCommands.test)
+  .addCommand(pluginCommands.build)
+  .addCommand(pluginCommands.publish)
+  .addCommand(pluginCommands.list);
+
 // Login command
 program
   .command('login')
@@ -104,7 +117,7 @@ program
 program
   .command('status')
   .description('Show current connection status')
-  .action(async () => {
+  .action(() => {
     const config = getConfig();
     if (!config.baseUrl) {
       console.log(chalk.yellow('Not configured. Run `summit config init` to set up.'));

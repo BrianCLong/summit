@@ -1,0 +1,211 @@
+# Summit v4.0.0 Alpha Environment
+# Docker Compose configuration for alpha testing
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # Core Application
+  # ===========================================
+  summit-api:
+    image: summit/server:v4.0.0-alpha
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+      args:
+        - BUILD_ENV=alpha
+        - VERSION=4.0.0-alpha
+    container_name: summit-api-alpha
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=alpha
+      - LOG_LEVEL=debug
+      - API_VERSION=4.0
+      - ENABLE_V4_FEATURES=true
+      # Database
+      - DATABASE_URL=postgresql://summit:summit_alpha@postgres:5432/summit_alpha
+      - REDIS_URL=redis://redis:6379
+      # AI Governance
+      - AI_GOVERNANCE_ENABLED=true
+      - LLM_PROVIDER=mock
+      - LLM_MOCK_DELAY_MS=500
+      - AI_SUGGESTIONS_DAILY_LIMIT=100
+      - AI_EXPLANATIONS_CACHE_TTL=3600
+      # Compliance
+      - HIPAA_MODULE_ENABLED=true
+      - SOX_MODULE_ENABLED=true
+      - COMPLIANCE_AUTO_ASSESS=false
+      # Zero-Trust
+      - HSM_PROVIDER=software
+      - HSM_SOFTWARE_KEY_DIR=/app/data/hsm-keys
+      - AUDIT_LEDGER_ENABLED=true
+      - AUDIT_BLOCKCHAIN_ANCHOR=false
+      # Observability
+      - METRICS_ENABLED=true
+      - METRICS_PORT=9090
+      - TRACING_ENABLED=true
+      - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+    volumes:
+      - summit-data:/app/data
+      - summit-logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - summit-alpha
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "environment=alpha"
+      - "version=4.0.0-alpha"
+
+  # ===========================================
+  # Database
+  # ===========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: summit-postgres-alpha
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=summit
+      - POSTGRES_PASSWORD=summit_alpha
+      - POSTGRES_DB=summit_alpha
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - summit-alpha
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U summit -d summit_alpha"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Cache
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: summit-redis-alpha
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - summit-alpha
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Observability Stack
+  # ===========================================
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: summit-prometheus-alpha
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts:/etc/prometheus/alerts
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    networks:
+      - summit-alpha
+
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: summit-grafana-alpha
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=summit_alpha
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - summit-alpha
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.47
+    container_name: summit-jaeger-alpha
+    ports:
+      - "16686:16686"  # UI
+      - "14268:14268"  # Collector HTTP
+      - "6831:6831/udp"  # Agent
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - summit-alpha
+
+  # ===========================================
+  # Log Aggregation
+  # ===========================================
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: summit-loki-alpha
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - summit-alpha
+
+  promtail:
+    image: grafana/promtail:2.8.0
+    container_name: summit-promtail-alpha
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - summit-logs:/var/log/summit
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - summit-alpha
+
+# ===========================================
+# Networks
+# ===========================================
+networks:
+  summit-alpha:
+    driver: bridge
+    name: summit-alpha-network
+
+# ===========================================
+# Volumes
+# ===========================================
+volumes:
+  summit-data:
+    name: summit-alpha-data
+  summit-logs:
+    name: summit-alpha-logs
+  postgres-data:
+    name: summit-alpha-postgres
+  redis-data:
+    name: summit-alpha-redis
+  prometheus-data:
+    name: summit-alpha-prometheus
+  grafana-data:
+    name: summit-alpha-grafana
+  loki-data:
+    name: summit-alpha-loki

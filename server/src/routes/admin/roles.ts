@@ -17,7 +17,7 @@ import {
   createRoleSchema,
   updateRoleSchema,
 } from '../../services/RoleManagementService.js';
-import { Principal } from '../../types/identity.js';
+import { Principal, Action } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
 
 const router = express.Router();
@@ -57,7 +57,7 @@ const buildPrincipal = (req: Request, res: Response, next: NextFunction): void =
 /**
  * Require role management permission
  */
-const requireRolePermission = (action: string) => {
+const requireRolePermission = (action: Action) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const principal = (req as any).principal;

@@ -13,7 +13,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { ensureAuthenticated } from '../../middleware/auth.js';
 import { AuthorizationServiceImpl } from '../../services/AuthorizationService.js';
 import { UserManagementService, listUsersSchema, createUserSchema, updateUserSchema } from '../../services/UserManagementService.js';
-import { Principal } from '../../types/identity.js';
+import { Principal, Action } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { z } from 'zod';
@@ -55,7 +55,7 @@ const buildPrincipal = (req: Request, res: Response, next: NextFunction): void =
 /**
  * Require user management permission
  */
-const requireUserPermission = (action: string) => {
+const requireUserPermission = (action: Action) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const principal = (req as any).principal;

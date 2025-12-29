@@ -1,0 +1,392 @@
+# =============================================================================
+# Summit v4.0 Beta Environment - Docker Compose
+# =============================================================================
+# Multi-tenant beta environment with production-like configuration
+# =============================================================================
+
+version: "3.9"
+
+x-common-env: &common-env
+  NODE_ENV: beta
+  LOG_LEVEL: info
+  LOG_FORMAT: json
+  API_VERSION: "4.0"
+  ENABLE_V4_FEATURES: "true"
+  ENABLE_V3_COMPATIBILITY: "true"
+
+x-healthcheck: &healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 60s
+
+services:
+  # ===========================================================================
+  # API Servers (Load Balanced)
+  # ===========================================================================
+  api-1:
+    image: summit/server:v4.0.0-beta
+    container_name: summit-beta-api-1
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      PORT: "3000"
+      HOST: "0.0.0.0"
+      INSTANCE_ID: "api-1"
+      DATABASE_URL: postgresql://summit:${DB_PASSWORD}@postgresql:5432/summit_beta?sslmode=prefer
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      # AI Governance
+      AI_GOVERNANCE_ENABLED: "true"
+      AI_SUGGESTIONS_ENABLED: "true"
+      AI_SUGGESTIONS_DAILY_LIMIT: "500"
+      AI_SUGGESTIONS_REQUIRE_APPROVAL: "true"
+      AI_EXPLANATIONS_ENABLED: "true"
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      # Compliance
+      HIPAA_MODULE_ENABLED: "true"
+      SOX_MODULE_ENABLED: "true"
+      COMPLIANCE_DASHBOARD_ENABLED: "true"
+      # Security
+      AUDIT_LEDGER_ENABLED: "true"
+      AUDIT_MERKLE_ENABLED: "true"
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      # Observability
+      METRICS_ENABLED: "true"
+      METRICS_PORT: "9090"
+      TRACING_ENABLED: "true"
+      TRACE_SAMPLE_RATE: "0.5"
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    ports:
+      - "3001:3000"
+      - "9091:9090"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health/ready"]
+    networks:
+      - summit-beta
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 2G
+
+  api-2:
+    image: summit/server:v4.0.0-beta
+    container_name: summit-beta-api-2
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      PORT: "3000"
+      HOST: "0.0.0.0"
+      INSTANCE_ID: "api-2"
+      DATABASE_URL: postgresql://summit:${DB_PASSWORD}@postgresql:5432/summit_beta?sslmode=prefer
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      AI_GOVERNANCE_ENABLED: "true"
+      AI_SUGGESTIONS_ENABLED: "true"
+      AI_SUGGESTIONS_DAILY_LIMIT: "500"
+      AI_SUGGESTIONS_REQUIRE_APPROVAL: "true"
+      AI_EXPLANATIONS_ENABLED: "true"
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      HIPAA_MODULE_ENABLED: "true"
+      SOX_MODULE_ENABLED: "true"
+      COMPLIANCE_DASHBOARD_ENABLED: "true"
+      AUDIT_LEDGER_ENABLED: "true"
+      AUDIT_MERKLE_ENABLED: "true"
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      METRICS_ENABLED: "true"
+      METRICS_PORT: "9090"
+      TRACING_ENABLED: "true"
+      TRACE_SAMPLE_RATE: "0.5"
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    ports:
+      - "3002:3000"
+      - "9092:9090"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health/ready"]
+    networks:
+      - summit-beta
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 2G
+
+  api-3:
+    image: summit/server:v4.0.0-beta
+    container_name: summit-beta-api-3
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      PORT: "3000"
+      HOST: "0.0.0.0"
+      INSTANCE_ID: "api-3"
+      DATABASE_URL: postgresql://summit:${DB_PASSWORD}@postgresql:5432/summit_beta?sslmode=prefer
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      AI_GOVERNANCE_ENABLED: "true"
+      AI_SUGGESTIONS_ENABLED: "true"
+      AI_SUGGESTIONS_DAILY_LIMIT: "500"
+      AI_SUGGESTIONS_REQUIRE_APPROVAL: "true"
+      AI_EXPLANATIONS_ENABLED: "true"
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      HIPAA_MODULE_ENABLED: "true"
+      SOX_MODULE_ENABLED: "true"
+      COMPLIANCE_DASHBOARD_ENABLED: "true"
+      AUDIT_LEDGER_ENABLED: "true"
+      AUDIT_MERKLE_ENABLED: "true"
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      METRICS_ENABLED: "true"
+      METRICS_PORT: "9090"
+      TRACING_ENABLED: "true"
+      TRACE_SAMPLE_RATE: "0.5"
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    ports:
+      - "3003:3000"
+      - "9093:9090"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health/ready"]
+    networks:
+      - summit-beta
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 2G
+
+  # ===========================================================================
+  # Load Balancer
+  # ===========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: summit-beta-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api-1
+      - api-2
+      - api-3
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "nginx", "-t"]
+    networks:
+      - summit-beta
+
+  # ===========================================================================
+  # Database
+  # ===========================================================================
+  postgresql:
+    image: postgres:15-alpine
+    container_name: summit-beta-postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: summit_beta
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD-SHELL", "pg_isready -U summit -d summit_beta"]
+    networks:
+      - summit-beta
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+        reservations:
+          cpus: "2"
+          memory: 4G
+
+  # ===========================================================================
+  # Redis Cluster
+  # ===========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: summit-beta-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+    networks:
+      - summit-beta
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 3G
+        reservations:
+          cpus: "1"
+          memory: 2G
+
+  # ===========================================================================
+  # Observability Stack
+  # ===========================================================================
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: summit-beta-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts:/etc/prometheus/alerts:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
+    networks:
+      - summit-beta
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: summit-beta-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: https://beta-monitoring.summit.io
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health"]
+    networks:
+      - summit-beta
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    container_name: summit-beta-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "4317:4317"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:14269/"]
+    networks:
+      - summit-beta
+
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: summit-beta-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3100/ready"]
+    networks:
+      - summit-beta
+
+  # ===========================================================================
+  # Alerting
+  # ===========================================================================
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: summit-beta-alertmanager
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    ports:
+      - "9093:9093"
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9093/-/healthy"]
+    networks:
+      - summit-beta
+
+networks:
+  summit-beta:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  postgresql_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+  alertmanager_data:
+    driver: local

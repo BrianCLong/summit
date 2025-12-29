@@ -340,7 +340,7 @@ export function createAdaptiveThrottlingMiddleware(config: Partial<AdaptiveThrot
     const result = throttler.tryAcquire();
 
     if (!result.data) {
-      const verdict = result.metadata?.governanceVerdict || createVerdict(
+      const verdict = result.governanceVerdict || createVerdict(
         GovernanceResult.DENY,
         'Rate limit exceeded'
       );

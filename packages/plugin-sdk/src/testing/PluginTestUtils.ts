@@ -1,10 +1,10 @@
+/* eslint-disable require-await, @typescript-eslint/no-non-null-assertion */
 import {
   Plugin,
   PluginContext,
   PluginLogger,
   PluginStorage,
   PluginAPI,
-  IPluginEventBus,
 } from '@intelgraph/plugin-system';
 
 /**
@@ -18,7 +18,7 @@ export function createMockContext(overrides?: Partial<PluginContext>): PluginCon
     logger: createMockLogger(),
     storage: createMockStorage(),
     api: createMockAPI(),
-    events: createMockEventBus() as any,
+    events: createMockEventBus() as PluginContext['events'],
     ...overrides,
   };
 }
@@ -27,13 +27,13 @@ export function createMockContext(overrides?: Partial<PluginContext>): PluginCon
  * Create a mock logger
  */
 export function createMockLogger(): PluginLogger {
-  const logs: any[] = [];
+  const logs: Array<{ level: string; message: string; meta?: unknown; error?: unknown }> = [];
 
   return {
-    debug: (message, meta) => logs.push({ level: 'debug', message, meta }),
-    info: (message, meta) => logs.push({ level: 'info', message, meta }),
-    warn: (message, meta) => logs.push({ level: 'warn', message, meta }),
-    error: (message, error, meta) => logs.push({ level: 'error', message, error, meta }),
+    debug: (message: string, meta?: unknown) => logs.push({ level: 'debug', message, meta }),
+    info: (message: string, meta?: unknown) => logs.push({ level: 'info', message, meta }),
+    warn: (message: string, meta?: unknown) => logs.push({ level: 'warn', message, meta }),
+    error: (message: string, error?: unknown, meta?: unknown) => logs.push({ level: 'error', message, error, meta }),
   };
 }
 
@@ -41,13 +41,13 @@ export function createMockLogger(): PluginLogger {
  * Create a mock storage
  */
 export function createMockStorage(): PluginStorage {
-  const store = new Map<string, any>();
+  const store = new Map<string, unknown>();
 
   return {
-    get: async (key) => store.get(key) ?? null,
-    set: async (key, value) => { store.set(key, value); },
-    delete: async (key) => { store.delete(key); },
-    has: async (key) => store.has(key),
+    get: async (key: string) => store.get(key) ?? null,
+    set: async (key: string, value: unknown) => { store.set(key, value); },
+    delete: async (key: string) => { store.delete(key); },
+    has: async (key: string) => store.has(key),
     keys: async () => Array.from(store.keys()),
     clear: async () => { store.clear(); },
   };
@@ -58,32 +58,39 @@ export function createMockStorage(): PluginStorage {
  */
 export function createMockAPI(): PluginAPI {
   return {
-    request: async (endpoint: string, options?: any) => {
-      return { success: true, data: {} } as any;
+    request: async (_endpoint: string, _options?: unknown) => {
+      return { success: true, data: {} } as unknown;
     },
-    graphql: async (query: string, variables?: any) => {
-      return { data: {} } as any;
+    graphql: async (_query: string, _variables?: unknown) => {
+      return { data: {} } as unknown;
     },
   };
 }
 
+type EventHandler = (...args: unknown[]) => void | Promise<void>;
+
 /**
  * Create a mock event bus
  */
-export function createMockEventBus(): any {
-  const handlers = new Map<string, Set<Function>>();
+export function createMockEventBus(): {
+  on: (event: string, handler: EventHandler) => void;
+  off: (event: string, handler: EventHandler) => void;
+  emit: (event: string, ...args: unknown[]) => Promise<void>;
+  once: (event: string, handler: EventHandler) => void;
+} {
+  const handlers = new Map<string, Set<EventHandler>>();
 
   return {
-    on: (event: string, handler: any) => {
+    on: (event: string, handler: EventHandler) => {
       if (!handlers.has(event)) {
         handlers.set(event, new Set());
       }
       handlers.get(event)!.add(handler);
     },
-    off: (event: string, handler: any) => {
+    off: (event: string, handler: EventHandler) => {
       handlers.get(event)?.delete(handler);
     },
-    emit: async (event: string, ...args: any[]) => {
+    emit: async (event: string, ...args: unknown[]) => {
       const eventHandlers = handlers.get(event);
       if (eventHandlers) {
         for (const handler of eventHandlers) {
@@ -91,8 +98,8 @@ export function createMockEventBus(): any {
         }
       }
     },
-    once: (event: string, handler: any) => {
-      const wrappedHandler = (...args: any[]) => {
+    once: (event: string, handler: EventHandler) => {
+      const wrappedHandler = (...args: unknown[]) => {
         handler(...args);
         handlers.get(event)?.delete(wrappedHandler);
       };

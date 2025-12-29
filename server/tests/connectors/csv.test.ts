@@ -1,3 +1,16 @@
+// Mock config before any imports to prevent process.exit
+jest.mock('../../src/config.js', () => ({
+  cfg: {
+    NODE_ENV: 'test',
+    DATABASE_URL: 'postgres://test:test@localhost:5432/test',
+    NEO4J_URI: 'bolt://localhost:7687',
+    NEO4J_USER: 'neo4j',
+    NEO4J_PASSWORD: 'test',
+    REDIS_URL: 'redis://localhost:6379',
+    JWT_SECRET: 'test-secret',
+    JWT_ISSUER: 'test',
+  },
+}));
 
 import { CSVConnector } from '../../src/connectors/implementations/csv-s3';
 import { ConnectorConfig } from '../../src/connectors/types';

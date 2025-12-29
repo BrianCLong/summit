@@ -47,8 +47,9 @@ const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => 
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
-const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
+// const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
+const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -118,6 +119,7 @@ function App() {
                       element={<AccessDeniedPage />}
                     />
                     <Route path="/maestro/*" element={<MaestroDashboard />} />
+                    <Route path="/trust" element={<TrustDashboard />} />
 
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
@@ -185,7 +187,7 @@ function App() {
                       <Route path="changelog" element={<ChangelogPage />} />
 
                       <Route path="demo" element={<DemoControlPage />} />
-                      <Route path="onboarding" element={<OnboardingWizard />} />
+                      {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
 
                       {/* Catch all */}
                       <Route path="*" element={<NotFound />} />
