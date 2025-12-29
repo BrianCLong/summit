@@ -523,3 +523,12 @@ To maintain clear accountability and human oversight, the following boundaries a
 - **Principle**: Decision rights are exclusively human.
 - **Rule**: Automated systems cannot make "judgment call" decisions (e.g., overriding a safety check, approving a budget increase).
 - **Constraint**: All critical decisions must be traceable to a specific human identity in the `provenance-ledger`.
+
+## Post-GA Governance (Effective Immediately)
+
+* **Change Classification**: All PRs must be labeled `patch`, `minor`, or `major`.
+* **Evidence**: Any feature PR must include a test plan producing evidence artifacts.
+* **Agent Operations**:
+  * No direct commits to `main`.
+  * All generated code must be reviewable by humans (clean, commented).
+  * Major refactors require explicit human approval via issue comment.

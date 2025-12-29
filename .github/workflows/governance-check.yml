@@ -1,0 +1,30 @@
+name: Governance Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+jobs:
+  enforce-classification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
+            if (!valid) {
+              core.setFailed("PR must have a classification label: patch, minor, or major.");
+            }
+
+  check-approvals:
+    needs: enforce-classification
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'major')
+    steps:
+      - name: Verify Major Approval
+        run: echo "Checking for Architecture Review (Mock)..."
