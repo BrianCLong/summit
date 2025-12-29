@@ -61,6 +61,8 @@ jobs:
       - run: make bootstrap
       - run: make up
       - run: make smoke
+      - run: npx playwright install chromium
+      - run: npx playwright test e2e/smoke.spec.ts --project=chromium
       - run: make down
         if: always()
 
