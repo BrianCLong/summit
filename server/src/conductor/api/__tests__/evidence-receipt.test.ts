@@ -43,6 +43,9 @@ describe('evidence receipt routes', () => {
   afterEach(() => {
     jest.restoreAllMocks();
     jest.useRealTimers();
+    delete process.env.EVIDENCE_SCORE_ENABLED;
+    delete process.env.EVIDENCE_SCORE_THRESHOLD;
+    delete process.env.EVIDENCE_SCORE_ACTION;
   });
 
   test('canonical hashing is deterministic', () => {
@@ -159,5 +162,42 @@ describe('evidence receipt routes', () => {
       .send({ runId: 'run-1' });
 
     expect(res.status).toBe(403);
+  });
+
+  test('evidence score warns when below threshold in warn mode', async () => {
+    process.env.EVIDENCE_SCORE_ENABLED = 'true';
+    process.env.EVIDENCE_SCORE_THRESHOLD = '0.9';
+    process.env.EVIDENCE_SCORE_ACTION = 'warn';
+
+    const runRow = {
+      id: 'run-2',
+      runbook: 'demo',
+      started_at: '2024-01-01T00:00:00Z',
+    };
+    const events: any[] = [];
+    const artifacts = [
+      {
+        id: 'artifact-2',
+        artifact_type: 'log',
+        sha256_hash: 'abc123',
+        created_at: '2024-01-01T00:10:00Z',
+      },
+    ];
+
+    queryMock
+      .mockResolvedValueOnce({ rows: [runRow] })
+      .mockResolvedValueOnce({ rows: events })
+      .mockResolvedValueOnce({ rows: artifacts })
+      .mockResolvedValue({ rows: [] });
+
+    jest.spyOn(crypto, 'randomUUID').mockReturnValueOnce('receipt-uuid').mockReturnValueOnce('artifact-uuid');
+
+    const res = await request(app)
+      .post('/api/conductor/evidence/receipt')
+      .set('x-allow-evidence:create', '1')
+      .send({ runId: 'run-2' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.warnings?.[0]?.code).toBe('EVIDENCE_COMPLETENESS_BELOW_THRESHOLD');
   });
 });

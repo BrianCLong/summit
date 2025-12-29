@@ -14,6 +14,10 @@ import {
   RunEventRow,
   RunRow,
 } from '../../maestro/evidence/receipt.js';
+import {
+  evaluateEvidenceScore,
+  scoreEvidenceCompleteness,
+} from '../../provenance/evidenceScore.js';
 
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
@@ -79,6 +83,43 @@ router.post(
         .update(receiptBuffer)
         .digest('hex');
 
+      const evidenceScoreEnabled =
+        (process.env.EVIDENCE_SCORE_ENABLED || 'false').toLowerCase() === 'true';
+      const evidenceScoreThreshold = Number.parseFloat(
+        process.env.EVIDENCE_SCORE_THRESHOLD || '0.8',
+      );
+      const evidenceScoreAction =
+        (process.env.EVIDENCE_SCORE_ACTION || 'warn').toLowerCase() === 'error'
+          ? 'error'
+          : 'warn';
+
+      const warnings: Array<{ code: string; message: string; missing?: string[] }> = [];
+
+      if (evidenceScoreEnabled) {
+        const scoreResult = scoreEvidenceCompleteness(receipt, 'receipt');
+        const evaluation = evaluateEvidenceScore(
+          scoreResult,
+          evidenceScoreThreshold,
+          evidenceScoreAction,
+        );
+
+        if (evaluation.severity === 'error' && evaluation.triggered) {
+          return res.status(422).json({
+            success: false,
+            error: 'Evidence completeness below required threshold',
+            data: { score: evaluation.score, missing: evaluation.missing },
+          });
+        }
+
+        if (evaluation.severity === 'warn' && evaluation.triggered) {
+          warnings.push({
+            code: 'EVIDENCE_COMPLETENESS_BELOW_THRESHOLD',
+            message: `Evidence completeness score ${evaluation.score} below threshold ${evaluation.threshold}.`,
+            missing: evaluation.missing,
+          });
+        }
+      }
+
       const pool = getPostgresPool();
 
       await pool.query(
@@ -94,7 +135,12 @@ router.post(
         [artifactId, receiptBuffer, 'application/json'],
       );
 
-      return res.json({ success: true, data: { receipt, artifactId } });
+      const responseBody: any = { success: true, data: { receipt, artifactId } };
+      if (warnings.length) {
+        responseBody.warnings = warnings;
+      }
+
+      return res.json(responseBody);
     } catch (error: any) {
       const message =
         error?.message || 'Failed to generate provenance receipt';
