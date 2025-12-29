@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts', '.mjs'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
@@ -12,7 +12,7 @@ module.exports = {
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts'],
+  roots: ['server', 'client', 'packages', 'services', 'middleware', 'tests', 'scripts'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
