@@ -116,9 +116,9 @@ describe('RelationshipRepo', () => {
       };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] }); // Source entity check
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] }); // Dest entity check
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] }); // INSERT
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] } as any); // Source entity check
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] } as any); // Dest entity check
+      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] } as any); // INSERT
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
@@ -138,7 +138,7 @@ describe('RelationshipRepo', () => {
 
     it('should throw error if source entity does not exist', async () => {
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [] }); // Source entity check (not found)
+      mockPgClient.query.mockResolvedValueOnce({ rows: [] } as any); // Source entity check (not found)
 
       await expect(
         relationshipRepo.create(mockRelationshipInput, mockUserId),
@@ -150,8 +150,8 @@ describe('RelationshipRepo', () => {
 
     it('should throw error if destination entity does not exist', async () => {
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] }); // Source entity check (found)
-      mockPgClient.query.mockResolvedValueOnce({ rows: [] }); // Dest entity check (not found)
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] } as any); // Source entity check (found)
+      mockPgClient.query.mockResolvedValueOnce({ rows: [] } as any); // Dest entity check (not found)
 
       await expect(
         relationshipRepo.create(mockRelationshipInput, mockUserId),
@@ -175,9 +175,9 @@ describe('RelationshipRepo', () => {
       };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] });
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] } as any);
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
@@ -206,9 +206,9 @@ describe('RelationshipRepo', () => {
       };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] });
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] } as any);
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
@@ -234,9 +234,9 @@ describe('RelationshipRepo', () => {
       };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] });
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] } as any);
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockRejectedValue(
@@ -275,9 +275,9 @@ describe('RelationshipRepo', () => {
       };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] });
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] } as any);
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
@@ -289,8 +289,8 @@ describe('RelationshipRepo', () => {
 
     it('should rollback on PostgreSQL error', async () => {
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] });
-      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] });
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-src' }] } as any);
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ id: 'entity-dst' }] } as any);
       mockPgClient.query.mockRejectedValueOnce(
         new Error('PostgreSQL constraint violation'),
       );

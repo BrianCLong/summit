@@ -4,6 +4,21 @@
 
 import { IngestService, IngestInput } from '../IngestService';
 import { Pool } from 'pg';
+
+jest.mock('../../config/database', () => ({
+  getPostgresPool: jest.fn(() => ({
+    connect: jest.fn(),
+    query: jest.fn(),
+    end: jest.fn(),
+  })),
+  getRedisClient: jest.fn(() => ({
+    get: jest.fn(),
+    set: jest.fn(),
+    on: jest.fn(),
+    quit: jest.fn(),
+    subscribe: jest.fn(),
+  })),
+}));
 import { Driver } from 'neo4j-driver';
 
 // Mock dependencies

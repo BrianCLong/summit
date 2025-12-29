@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator';
+import { HuntFinding, HypothesisGenerationOutput, QueryGenerationOutput, ResultAnalysisOutput } from '../types';
 import type {
   GeneratedCypherQuery,
   HuntContext,

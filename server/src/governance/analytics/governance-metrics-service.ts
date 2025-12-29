@@ -876,9 +876,10 @@ export class GovernanceMetricsService {
     this.refreshInterval = setInterval(async () => {
       // Background refresh for all active tenants
       const tenants = await this.redis.smembers('governance:active_tenants');
-      for (const tenantId of tenants) {
-        const timeRange: TimeRange = {
-          start: Date.now() - 24 * 60 * 60 * 1000,
+      if (tenants) {
+        for (const tenantId of tenants) {
+          const timeRange: TimeRange = {
+            start: Date.now() - 24 * 60 * 60 * 1000,
           end: Date.now(),
           label: 'Last 24 hours',
         };

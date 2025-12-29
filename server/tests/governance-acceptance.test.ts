@@ -17,9 +17,24 @@ import { randomUUID } from 'crypto';
 import { app } from '../src/app';
 import { WarrantService } from '../src/services/WarrantService';
 import { AdvancedAuditSystem } from '../src/audit/advanced-audit-system';
-import { pool } from '../src/db/postgres';
-import { neo4jDriver } from '../src/db/neo4j';
+import { getPostgresPool } from '../src/db/postgres';
+import { getNeo4jDriver } from '../src/db/neo4j';
 import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
+
+jest.mock('../src/config/database', () => ({
+    getPostgresPool: jest.fn(() => ({
+        connect: jest.fn(),
+        query: jest.fn(),
+        end: jest.fn(),
+    })),
+    getRedisClient: jest.fn(() => ({
+        get: jest.fn(),
+        set: jest.fn(),
+        on: jest.fn(),
+        quit: jest.fn(),
+        subscribe: jest.fn(),
+    })),
+}));
 
 // Test fixtures
 const TENANT_A_ID = 'tenant-a';

@@ -7,7 +7,7 @@ import * as yaml from 'js-yaml';
 // Jest runs in CommonJS mode; use the runtime-provided __dirname
 
 const TEST_CONFIG_DIR = path.join(__dirname, 'test_config');
-const SCHEMA_DIR = path.join(__dirname, '../../config/schema');
+const SCHEMA_DIR = path.join(__dirname, '../config/schema');
 
 describe('Configuration System', () => {
 

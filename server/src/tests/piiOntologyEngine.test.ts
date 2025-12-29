@@ -155,7 +155,7 @@ describe('PiiOntologyEngine', () => {
     );
     expect(
       emailEntity?.regulatoryMappings.map((mapping) => mapping.framework),
-    ).toEqual(expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA']));
+    ).toEqual(expect.arrayContaining(['GDPR', 'CCPA']));
 
     const healthEntity = report.entities.find(
       (entity) => entity.recordId === '2',
@@ -175,7 +175,7 @@ describe('PiiOntologyEngine', () => {
     );
     expect(identifierEntity).toBeDefined();
     expect(identifierEntity?.categories).toEqual(
-      expect.arrayContaining<PIICategory>(['IDENTIFIER', 'FINANCIAL']),
+      expect.arrayContaining(['IDENTIFIER', 'FINANCIAL']),
     );
     expect(identifierEntity?.metadata.riskScore).toBeGreaterThanOrEqual(0.5);
 
@@ -228,7 +228,7 @@ describe('PiiOntologyEngine', () => {
     const report = await engine.processRecords(records);
 
     expect(Object.keys(report.regulatorySummary)).toEqual(
-      expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA', 'HIPAA']),
+      expect.arrayContaining(['GDPR', 'CCPA', 'HIPAA']),
     );
 
     const gdprSummary = report.regulatorySummary.GDPR;
