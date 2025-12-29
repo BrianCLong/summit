@@ -1,0 +1,16 @@
+{
+  "name": "scim-service",
+  "version": "1.0.0",
+  "description": "SCIM 2.0 service for user and group synchronization",
+  "main": "index.ts",
+  "scripts": {
+    "start": "tsx index.ts"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "tsx": "^4.7.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13"
+  }
+}
