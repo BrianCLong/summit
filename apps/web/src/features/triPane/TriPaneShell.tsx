@@ -40,7 +40,8 @@ import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 import { useSnapshotHandler } from '@/features/snapshots'
 import { isFeatureEnabled } from '@/config'
-import { usePresenceChannel } from './usePresenceChannel'
+import { usePresenceChannel, type PresenceChannelSelection } from './usePresenceChannel'
+import { getStringColor } from '@/lib/utils/colors'
 
 /**
  * Main TriPaneShell component
@@ -89,7 +90,42 @@ export function TriPaneShell({
     timelineEvent?: TimelineEvent
     locationId?: string
   }>({})
+  const { user } = useAuth()
   const triPaneRef = useRef<HTMLDivElement | null>(null)
+  const localUserId = user?.id || 'anon'
+
+  const parsePresenceSelection = useCallback(
+    (selection?: string): PresenceChannelSelection | null => {
+      if (!selection) return null
+      try {
+        const parsed = JSON.parse(selection) as PresenceChannelSelection
+        if (!parsed?.pane || !parsed?.id) return null
+        return parsed
+      } catch (error) {
+        return null
+      }
+    },
+    []
+  )
+
+  const hexToRgba = useCallback((hex: string, alpha: number) => {
+    const normalized = hex.replace('#', '')
+    const full =
+      normalized.length === 3
+        ? normalized
+            .split('')
+            .map((char) => `${char}${char}`)
+            .join('')
+        : normalized
+    const int = Number.parseInt(full, 16)
+    if (Number.isNaN(int)) {
+      return `rgba(59, 130, 246, ${alpha})`
+    }
+    const r = (int >> 16) & 255
+    const g = (int >> 8) & 255
+    const b = int & 255
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }, [])
 
   // Snapshot integration
   useSnapshotHandler(
@@ -111,7 +147,6 @@ export function TriPaneShell({
   )
 
   // Auth context
-  const { user } = useAuth()
   const token = localStorage.getItem('auth_token') || undefined
 
   // Initialize collaboration
@@ -121,13 +156,31 @@ export function TriPaneShell({
     token
   )
 
-  const { cursors: presenceCursors, emitPresenceUpdate } = usePresenceChannel({
+  const { cursors: presenceCursors, members: presenceMembers, emitPresenceUpdate } = usePresenceChannel({
     workspaceId: 'tri-pane',
     channel: 'tri-pane',
-    userId: user?.id || 'anon',
+    userId: localUserId,
     userName: user?.name || user?.email || 'Anonymous',
     token,
   })
+
+  const remoteSelections = useMemo(() => {
+    return Array.from(presenceMembers.values())
+      .filter((member) => member.userId !== localUserId && member.selection)
+      .map((member) => {
+        const selection = parsePresenceSelection(member.selection)
+        if (!selection) return null
+        return {
+          userId: member.userId,
+          userName: member.userName,
+          selection,
+        }
+      })
+      .filter(
+        (entry): entry is { userId: string; userName: string; selection: PresenceChannelSelection } =>
+          Boolean(entry),
+      )
+  }, [localUserId, parsePresenceSelection, presenceMembers])
 
   // Sync graph data
   const {
@@ -282,6 +335,115 @@ export function TriPaneShell({
     syncState.timeline.selectedEventId,
     syncState.map.selectedLocationId,
   ])
+
+  useEffect(() => {
+    if (!triPaneRef.current) return
+    const $root = $(triPaneRef.current)
+    const panes: Array<'graph' | 'timeline' | 'map'> = [
+      'graph',
+      'timeline',
+      'map',
+    ]
+    const selectionsByPane = new Map<
+      'graph' | 'timeline' | 'map',
+      Array<{ userId: string; userName: string; selection: PresenceChannelSelection }>
+    >()
+
+    remoteSelections.forEach((entry) => {
+      const pane = entry.selection.pane
+      const list = selectionsByPane.get(pane) ?? []
+      list.push(entry)
+      selectionsByPane.set(pane, list)
+    })
+
+    panes.forEach((pane) => {
+      const $pane = $root.find(`[data-pane="${pane}"]`)
+      if ($pane.length === 0) return
+
+      let $layer = $pane.find('.tri-pane-remote-selection-layer')
+      const paneSelections = selectionsByPane.get(pane) ?? []
+
+      if (paneSelections.length === 0) {
+        $layer.remove()
+        return
+      }
+
+      if ($layer.length === 0) {
+        $layer = $('<div/>', { class: 'tri-pane-remote-selection-layer' }).css(
+          {
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 9,
+          }
+        )
+        $pane.append($layer)
+      }
+
+      const activeUserIds = new Set(paneSelections.map((entry) => entry.userId))
+
+      paneSelections.forEach((entry, index) => {
+        const { userId, userName, selection } = entry
+        let $overlay = $layer.find(`[data-user="${userId}"]`)
+        const baseColor = getStringColor(userId)
+        const borderColor = hexToRgba(baseColor, 0.55)
+        const fillColor = hexToRgba(baseColor, 0.12)
+        const labelText = `${userName}: ${selection.label || selection.id}`
+
+        if ($overlay.length === 0) {
+          $overlay = $('<div/>', {
+            class: 'tri-pane-remote-selection-overlay',
+            'data-user': userId,
+          }).css({
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '0.5rem',
+            borderStyle: 'dashed',
+            borderWidth: '2px',
+            pointerEvents: 'none',
+            display: 'none',
+          })
+          const $label = $('<div/>', {
+            class: 'tri-pane-remote-selection-overlay__label',
+          }).css({
+            position: 'absolute',
+            left: '0.5rem',
+            background: baseColor,
+            color: '#fff',
+            padding: '0.2rem 0.5rem',
+            borderRadius: '9999px',
+            fontSize: '0.7rem',
+            fontWeight: 600,
+            maxWidth: '70%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          })
+          $overlay.append($label)
+          $layer.append($overlay)
+        }
+
+        $overlay.css({
+          borderColor,
+          background: fillColor,
+          display: selection.id ? 'block' : 'none',
+        })
+
+        $overlay
+          .find('.tri-pane-remote-selection-overlay__label')
+          .css({ top: `calc(0.5rem + ${index * 1.5}rem)` })
+          .text(labelText)
+      })
+
+      $layer.find('.tri-pane-remote-selection-overlay').each((_, element) => {
+        const $element = $(element)
+        const userId = $element.data('user')
+        if (!activeUserIds.has(userId)) {
+          $element.remove()
+        }
+      })
+    })
+  }, [remoteSelections, hexToRgba])
 
   useEffect(() => {
     if (!triPaneRef.current) return

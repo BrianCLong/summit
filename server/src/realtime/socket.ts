@@ -8,6 +8,8 @@ import {
   getGraphSnapshot,
   type GraphOperation,
 } from './graph-crdt.js';
+import { createCollaborationHub } from './collaborationHub.js';
+import { createCollaborationHub } from './collaborationHub.js';
 import {
   addAnnotation,
   addComment,
@@ -100,6 +102,10 @@ export function initSocket(httpServer: any): Server {
       credentials: true,
     },
   });
+
+  createCollaborationHub(io);
+
+  createCollaborationHub(io);
 
   const ns = io.of('/realtime');
 
