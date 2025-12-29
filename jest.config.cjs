@@ -1,9 +1,9 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts', '.mjs'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
-    '^.+\\.[cm]?[tj]sx?$': [
+    '^.+\\.[cm]?tsx?$': [
       'ts-jest',
       {
         useESM: true,
@@ -82,11 +82,12 @@ module.exports = {
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',
+    '<rootDir>/tests/utils/jest-setup\\.js',
   ],
   testTimeout: 30000,
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
