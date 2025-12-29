@@ -35,6 +35,12 @@ interface DiagnosticResult {
   impact?: 'low' | 'medium' | 'high';
 }
 
+/**
+ * Runs a curated suite of environment, tooling, and configuration diagnostics
+ * to validate that Maestro and Composer vNext can execute reliably on the
+ * current workstation. Checks are grouped so recommendations can be
+ * actioned without reading raw logs.
+ */
 class MaestroDoctor {
   private checks: DiagnosticCheck[] = [];
 
@@ -42,6 +48,10 @@ class MaestroDoctor {
     this.initializeChecks();
   }
 
+  /**
+   * Execute all registered diagnostic checks in sequence and print a
+   * human-friendly report that includes summaries and remediation guidance.
+   */
   async runDiagnostics(): Promise<void> {
     console.log('🩺 Maestro Doctor - Build System Health Check\n');
     console.log('='.repeat(60));
@@ -91,6 +101,11 @@ class MaestroDoctor {
     this.printRecommendations(results);
   }
 
+  /**
+   * Register the baseline set of environment, tooling, configuration, and
+   * performance checks. This method keeps the constructor lean and makes
+   * the check catalog easy to extend.
+   */
   private initializeChecks(): void {
     // Environment checks
     this.checks.push({
