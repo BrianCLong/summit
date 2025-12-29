@@ -129,6 +129,7 @@ import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
+import federatedRadarRouter from './routes/federated-radar.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -439,6 +440,7 @@ export const createApp = async () => {
   app.use('/api/v1/i18n', i18nRouter);
   app.use('/api/v1/experiments', experimentationRouter);
   app.use('/api/v1/palettes', palettesRouter);
+  app.use('/api/federated-radar', federatedRadarRouter);
 
   // Summit v4 API Routes (AI Governance, Compliance, Zero-Trust)
   app.use('/api/v4', v4Router);
