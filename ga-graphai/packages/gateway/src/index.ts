@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import type {
   EvidenceBundle,
@@ -1514,6 +1514,10 @@ export class CursorGateway {
     ruleIds: string[],
   ): PolicyDecision {
     return {
+      decision_id: randomUUID(),
+      correlation_id:
+        event.provenance?.requestId ?? event.provenance?.parentRequestId,
+      evidence_refs: [],
       decision: 'deny',
       explanations: [explanation],
       ruleIds,

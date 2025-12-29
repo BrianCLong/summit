@@ -870,6 +870,9 @@ export interface PolicyDecision {
   obligations?: string[];
   metadata?: Record<string, unknown>;
   timestamp: string;
+  decision_id: string;
+  correlation_id?: string;
+  evidence_refs: string[];
 }
 
 export interface PolicyEvaluationContext {

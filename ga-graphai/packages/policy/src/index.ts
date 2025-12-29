@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
 import {
   MODEL_ALLOWLIST,
   PURPOSE_ALLOWLIST,
@@ -40,6 +40,10 @@ import type {
   SecretRef,
 } from 'common-types';
 import type { ZeroTrustSecretsManager } from 'secrets';
+import {
+  emitPolicyDecisionRecorded,
+  type PolicyDecisionProvenanceWriter,
+} from './provenance.js';
 
 // ============================================================================
 // RUNTIME POLICY ENGINE - From HEAD
@@ -331,6 +335,8 @@ export interface PolicyConfig {
 export interface PolicyEvaluatorOptions {
   config: PolicyConfig;
   now?: () => Date;
+  enableProvenanceEmission?: boolean;
+  provenanceWriter?: PolicyDecisionProvenanceWriter;
 }
 
 const DEFAULT_CONFIG: PolicyConfig = {
@@ -345,10 +351,16 @@ const DEFAULT_CONFIG: PolicyConfig = {
 export class PolicyEvaluator {
   private readonly config: PolicyConfig;
   private readonly now: () => Date;
+  private readonly provenanceEnabled: boolean;
+  private readonly provenanceWriter?: PolicyDecisionProvenanceWriter;
 
   constructor(options?: PolicyEvaluatorOptions) {
     this.config = options?.config ?? DEFAULT_CONFIG;
     this.now = options?.now ?? (() => new Date());
+    this.provenanceEnabled =
+      options?.enableProvenanceEmission ??
+      process.env.POLICY_PROVENANCE_ENABLED === 'true';
+    this.provenanceWriter = options?.provenanceWriter;
   }
 
   evaluate(
@@ -416,6 +428,10 @@ export class PolicyEvaluator {
     }
 
     const decision: PolicyDecision = {
+      decision_id: randomUUID(),
+      correlation_id:
+        event.provenance?.requestId ?? event.provenance?.parentRequestId,
+      evidence_refs: this.buildEvidenceRefs(event, context),
       decision: denies.length > 0 ? 'deny' : 'allow',
       explanations,
       ruleIds,
@@ -436,7 +452,37 @@ export class PolicyEvaluator {
       };
     }
 
+      if (this.provenanceEnabled && this.provenanceWriter) {
+        emitPolicyDecisionRecorded(decision, this.provenanceWriter, {
+          source: 'policy-evaluator',
+          event,
+        });
+      }
+
     return decision;
+  }
+
+  private buildEvidenceRefs(
+    event: CursorEvent,
+    context: PolicyEvaluationContext,
+  ): string[] {
+    const refs = new Set<string>();
+
+    if (event.inputRef?.promptSha256) {
+      refs.add(event.inputRef.promptSha256);
+    }
+
+    event.inputRef?.contextRefs?.forEach((ref) => refs.add(ref));
+
+    if (event.outputRef?.artifactSha256) {
+      refs.add(event.outputRef.artifactSha256);
+    }
+
+    if (context.story?.id) {
+      refs.add(context.story.id);
+    }
+
+    return Array.from(refs);
   }
 
   private checkModel(modelName: string): string {
@@ -1817,6 +1863,11 @@ export class PolicyBacktestEngine {
 
 export { analyzeEvidence } from 'common-types';
 export { ConsentStateReconciler } from './consent-reconciler';
+export {
+  emitPolicyDecisionRecorded,
+  type PolicyDecisionProvenanceWriter,
+  type PolicyDecisionRecordedEvent,
+} from './provenance.js';
 export type {
   AbacControl,
   AttributeCatalog,
