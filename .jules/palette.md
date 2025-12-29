@@ -1,3 +1,22 @@
-## 2025-10-27 - Button Accessibility & Tooltips
-**Learning:** React/Radix buttons with `disabled` attribute + `pointer-events-none` (common in shadcn/ui) prevent tooltips from appearing. Removing `pointer-events-none` and adding `cursor-not-allowed` allows the tooltip to show, but implementing it requires wrapping the disabled button in a `span` or similar to ensure the tooltip trigger works reliably across browsers without relying on the disabled element firing events.
-**Action:** When implementing tooltips on disabled actions, always remove `pointer-events-none` from the base component and wrap the trigger in a span to capture the hover event.
+## 2025-10-25 - Maestro Run Console Status & Onboarding
+
+**Learning:** Users often stare at empty text areas with "writer's block". Providing clickable example prompts not only speeds up testing but educates users on the tool's capabilities (e.g., "analyze PRs" vs "summarize risk").
+**Action:** Always provide "Quick Start" chips or buttons for empty states in complex input interfaces.
+
+**Learning:** Color-only status indicators (red/green badges) are insufficient for quick scanning and accessibility.
+**Action:** Augment status badges with semantic icons (Check, AlertTriangle, Loader) to reinforce state.
+
+## 2025-10-28 - Unit Test Priority
+
+**Learning:** When local dev environments are unstable (e.g., 500 errors, MSW conflicts), rely on robust unit tests () to verify logic and UX flows instead of getting blocked by visual verification.
+**Action:** Prioritize writing comprehensive unit tests for UI interactions early in the process.
+
+## 2025-10-28 - Unit Test Priority
+
+**Learning:** When local dev environments are unstable, rely on robust unit tests to verify logic and UX flows.
+**Action:** Prioritize writing comprehensive unit tests for UI interactions early in the process.
+
+## 2025-10-28 - Fixing Legacy Debt
+
+**Learning:** Even when assigned a focused task (e.g., UX), one may inherit a broken branch or be required to fix blocking architectural issues (e.g., API drift, Type mismatches) to land changes.
+**Action:** Be prepared to step outside the assigned persona to unblock the build.
