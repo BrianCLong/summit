@@ -51,7 +51,11 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-4">
+    <main
+      role="main"
+      aria-label="Sign in"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-4"
+    >
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="h-12 w-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -111,6 +115,7 @@ export default function SignInPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/70 hover:text-white"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -156,6 +161,6 @@ export default function SignInPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   )
 }
