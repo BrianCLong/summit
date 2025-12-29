@@ -42,6 +42,15 @@ export class QuotaService {
     bytes: number,
     fingerprint?: string,
   ): QuotaCheckResult {
+      if (!this.isEnabled()) {
+        return {
+          allowed: true,
+          limit: Infinity,
+          used: 0,
+          remaining: Infinity,
+        };
+      }
+
     const limits = getTenantQuota(tenantId);
     const used = this.store.incrementDeterministic(
       tenantId,
@@ -65,6 +74,15 @@ export class QuotaService {
     evidenceId: string,
     footprintBytes?: number,
   ): QuotaCheckResult {
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+      };
+    }
+
     const limits = getTenantQuota(tenantId);
     const used = this.store.incrementDeterministic(
       tenantId,
@@ -98,6 +116,15 @@ export class QuotaService {
   }
 
   checkExport(tenantId: string, exportId: string): QuotaCheckResult {
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+      };
+    }
+
     const limits = getTenantQuota(tenantId);
     const used = this.store.incrementDeterministic(
       tenantId,
@@ -117,14 +144,47 @@ export class QuotaService {
   }
 
   checkJobEnqueue(tenantId: string, jobKey?: string): QuotaCheckResult {
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+      };
+    }
+
     const limits = getTenantQuota(tenantId);
+    const tracker = jobKey ? this.store.getUniqueTracker(tenantId, 'jobConcurrency') : null;
+    const currentUsage = this.store.getCounter(tenantId).jobConcurrency;
+    if (tracker?.has(jobKey!)) {
+      const remaining = Math.max(0, limits.jobConcurrency - currentUsage);
+      return {
+        allowed: currentUsage <= limits.jobConcurrency,
+        limit: limits.jobConcurrency,
+        used: currentUsage,
+        remaining,
+        reason: currentUsage <= limits.jobConcurrency ? undefined : 'jobs_exceeded',
+      };
+    }
+
+    const projected = currentUsage + 1;
+    const allowed = projected <= limits.jobConcurrency;
+    if (!allowed) {
+      return {
+        allowed: false,
+        limit: limits.jobConcurrency,
+        used: currentUsage,
+        remaining: Math.max(0, limits.jobConcurrency - currentUsage),
+        reason: 'jobs_exceeded',
+      };
+    }
+
     const used = this.store.incrementDeterministic(
       tenantId,
       'jobConcurrency',
       1,
       jobKey,
     );
-    const allowed = used <= limits.jobConcurrency;
     const remaining = Math.max(0, limits.jobConcurrency - used);
     return {
       allowed,
@@ -140,6 +200,16 @@ export class QuotaService {
   }
 
   checkApiRequest(tenantId: string): QuotaCheckResult {
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+        retryAfterMs: 0,
+      };
+    }
+
     const limits = getTenantQuota(tenantId);
     const window = this.store.trackApiRequest(tenantId, minute);
     const allowed = window.count <= limits.apiRatePerMinute;

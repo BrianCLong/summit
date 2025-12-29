@@ -10,14 +10,21 @@ const getTenantId = (req: Request): string => {
   );
 };
 
-const reject = (res: Response, status: number, reason: string, retryAfterMs?: number) => {
+const quotaReject = (res: Response, status: number, result: ReturnType<typeof quotaService.checkApiRequest>) => {
   const payload: Record<string, unknown> = {
     error: 'QUOTA_EXCEEDED',
-    reason,
+    reason: result.reason,
+    limit: result.limit,
+    used: result.used,
+    remaining: result.remaining,
   };
-  if (retryAfterMs !== undefined) {
-    payload.retryAfterMs = retryAfterMs;
+
+  if (result.retryAfterMs !== undefined) {
+    payload.retryAfterMs = result.retryAfterMs;
+    const retrySeconds = Math.max(0, Math.ceil(result.retryAfterMs / 1000));
+    res.setHeader('Retry-After', retrySeconds);
   }
+
   return res.status(status).json(payload);
 };
 
@@ -29,11 +36,13 @@ export const quotaMiddleware = (req: Request, res: Response, next: NextFunction)
   const tenantId = getTenantId(req);
   const result = quotaService.checkApiRequest(tenantId);
   if (!result.allowed) {
-    return reject(res, 429, result.reason ?? 'api_rate_exceeded', result.retryAfterMs);
+    return quotaReject(res, 429, result);
   }
 
-  res.setHeader('X-RateLimit-Limit', result.limit);
-  res.setHeader('X-RateLimit-Remaining', Math.max(0, result.remaining));
+  if (Number.isFinite(result.limit)) {
+    res.setHeader('X-RateLimit-Limit', result.limit);
+    res.setHeader('X-RateLimit-Remaining', Math.max(0, result.remaining));
+  }
   return next();
 };
 
