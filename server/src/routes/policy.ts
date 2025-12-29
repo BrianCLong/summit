@@ -1,36 +1,31 @@
-import { Router } from 'express';
+import express from 'express';
+import { z } from 'zod';
+import { simulatePolicyDecision, policySimulationInputSchema, overlayContextSchema } from '../policy/tenantBundle.js';
+import { Profiles } from '../policy/profiles.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
-import {
-  OverlayContext,
-  PolicySimulationInput,
-  policySimulationInputSchema,
-  simulatePolicyDecision,
-  overlayContextSchema,
-  tenantPolicyBundleSchema,
-} from '../policy/tenantBundle.js';
 
-const router = Router();
+// Named export for compatibility (reverted from default)
+export const policyRouter = express.Router();
 
-router.use(ensureAuthenticated);
-
-router.post('/simulate', (req, res) => {
+policyRouter.post('/simulate', ensureAuthenticated, async (req, res) => {
   try {
-    const { bundle, input, overlayContext } = req.body || {};
-    const parsedBundle = tenantPolicyBundleSchema.parse(bundle);
-    const parsedInput: PolicySimulationInput = policySimulationInputSchema.parse(input);
-    const context: OverlayContext | undefined = overlayContext
-      ? overlayContextSchema.parse(overlayContext)
-      : undefined;
+    const input = policySimulationInputSchema.parse(req.body);
+    const context = req.body.context ? overlayContextSchema.parse(req.body.context) : undefined;
 
-    const result = simulatePolicyDecision(parsedBundle, parsedInput, context);
-    return res.json({ ok: true, result });
-  } catch (error: any) {
-    const status = error?.name === 'ZodError' ? 400 : 500;
-    return res.status(status).json({
-      ok: false,
-      error: error?.errors || error?.message || 'policy simulation failed',
-    });
+    // Check if the request specifies a template/profile
+    let bundle = Profiles.strict;
+    // We treat 'profile' as an extra field outside the schema for simulation purposes
+    if ((req.body as any).profile === 'balanced') bundle = Profiles.balanced;
+    if ((req.body as any).profile === 'fast_ops') bundle = Profiles.fast_ops;
+
+    const result = simulatePolicyDecision(bundle, input, context);
+
+    res.json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Invalid input', details: error.errors });
+    } else {
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
 });
-
-export const policyRouter = router;

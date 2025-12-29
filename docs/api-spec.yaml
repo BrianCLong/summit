@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   title: IntelGraph Summit API
-  version: 1.0.0
-  description: API for IntelGraph Summit, including Maestro orchestration and monitoring.
+  version: 1.1.0
+  description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
 
 servers:
   - url: /api
@@ -40,6 +40,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthStatus'
+
+  /api/tenants:
+    post:
+      summary: Create a new tenant
+      tags: [Tenancy]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '201':
+          description: Tenant created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+
+    get:
+      summary: List tenants (Admin only)
+      tags: [Tenancy]
+      responses:
+        '200':
+          description: List of tenants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tenant'
+
+  /api/policy/simulate:
+    post:
+      summary: Simulate a policy decision (Preflight)
+      tags: [Governance]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicySimulationInput'
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationResult'
+
+  /api/export/bundles:
+    post:
+      summary: Create an Intel Bundle export
+      tags: [Disclosure]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBundleRequest'
+      responses:
+        '202':
+          description: Bundle generation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+
+  /api/receipts/{id}:
+    get:
+      summary: Get a signed receipt by ID
+      tags: [Provenance]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Signed receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receipt'
 
   /api/maestro/route/preview:
     post:
@@ -196,6 +281,116 @@ components:
           type: string
           format: date-time
         error:
+          type: string
+
+    CreateTenantRequest:
+      type: object
+      required: [name, slug, adminEmail]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        adminEmail:
+          type: string
+        tier:
+          type: string
+          enum: [internal, partner, hosted]
+        policyProfile:
+          type: string
+          enum: [strict, balanced, fast_ops]
+
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        tier:
+          type: string
+        status:
+          type: string
+
+    PolicySimulationInput:
+      type: object
+      required: [subjectTenantId, resourceTenantId, action]
+      properties:
+        subjectTenantId:
+          type: string
+        resourceTenantId:
+          type: string
+        action:
+          type: string
+        purpose:
+          type: string
+        justification:
+          type: string
+        profile:
+          type: string
+          enum: [strict, balanced, fast_ops]
+          description: Optional profile to simulate against
+
+    PolicySimulationResult:
+      type: object
+      properties:
+        allow:
+          type: boolean
+        reason:
+          type: string
+        overlaysApplied:
+          type: array
+          items:
+            type: string
+        evaluationPath:
+          type: array
+          items:
+            type: string
+
+    CreateBundleRequest:
+      type: object
+      required: [runId]
+      properties:
+        runId:
+          type: string
+        redactionProfile:
+          type: string
+          enum: [none, sources, raw_content, actor_ids, minimize_pii]
+        includeReceipts:
+          type: boolean
+
+    JobStatus:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [queued, processing, completed, failed]
+
+    Receipt:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        action:
+          type: string
+        actor:
+          type: string
+        resource:
+          type: string
+        inputHash:
+          type: string
+        policyDecisionId:
+          type: string
+        signature:
+          type: string
+        signerKeyId:
           type: string
 
     Candidate:

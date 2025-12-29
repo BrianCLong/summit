@@ -38,6 +38,7 @@ import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { metricsRoute } from './http/metricsRoute.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
@@ -364,13 +365,16 @@ export const createApp = async () => {
   app.use('/sso', ssoRouter);
 
   // Other routes
+  app.use('/api/policy', policyRouter);
+  app.use('/api/receipts', receiptsRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/api/predictive', predictiveRouter);
-  app.use('/disclosures', disclosuresRouter);
+  app.use('/api/export', disclosuresRouter); // Mount export under /api/export as per spec
+  app.use('/disclosures', disclosuresRouter); // Keep old mount for compat
   app.use('/rbac', rbacRouter);
   app.use('/api/billing', billingRouter);
   app.use('/api/er', entityResolutionRouter);
