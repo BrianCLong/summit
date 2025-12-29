@@ -1,0 +1,9 @@
+{
+  "service": {
+    "name": "incident-api",
+    "port": 4000
+  },
+  "opa": {
+    "url": "http://opa:8181/v1/data/companyos/incident/allow"
+  }
+}

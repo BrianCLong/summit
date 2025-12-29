@@ -1,0 +1,14 @@
+replicaCount: 2
+
+canary:
+  enabled: true
+  weight: 10 # percent of traffic
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+service:
+  name: incident-api
+  port: 4000
