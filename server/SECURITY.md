@@ -23,6 +23,15 @@ cp .env.production.template .env
 npm run secrets:generate  # Generate new secrets
 ```
 
+## Tenant Context Handling
+
+Multi-tenant endpoints that mutate or evaluate policy now fail fast when a tenant
+identifier is missing or conflicting. Requests to ingestion (`/api/v1/ingest`),
+plugin administration (`/plugins`), and policy evaluation (`/opa/evaluate`) must
+carry the tenant in the `x-tenant-id` header or authenticated claim. If absent,
+the API returns `400` with `error: TENANT_CONTEXT_REQUIRED`; mismatched header
+and claim values return `409` with `error: TENANT_CONTEXT_MISMATCH`.
+
 ## Environment Variables
 
 ### Required Configuration

@@ -11,9 +11,9 @@ import { IngestService } from '../services/IngestService.js';
 import { verifyTenantAccess } from '../services/opa-client.js';
 import logger from '../config/logger.js';
 import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
-import { requireTenantContext } from '../security/tenantContext.js';
 import { TenantContext } from '../tenancy/types.js';
 import { queryWithTenantContext } from '../db/tenant.js';
+import { requireTenantContextMiddleware } from '../middleware/require-tenant-context.js';
 
 const ingestRouter = Router();
 const ingestLogger = logger.child({ name: 'IngestAPI' });
@@ -34,6 +34,7 @@ const ingestLimiter = rateLimit({
 ingestRouter.post(
   '/api/v1/ingest',
   ingestLimiter,
+  requireTenantContextMiddleware(),
   [
     body('tenantId').isString().notEmpty(),
     body('sourceType').isString().notEmpty(),
@@ -80,7 +81,14 @@ ingestRouter.post(
 
       const tenantContext =
         ((req as any).tenant as TenantContext | undefined) ||
-        requireTenantContext(req);
+        ((req as any).tenantContext as TenantContext);
+
+      if (!tenantContext) {
+        return res.status(400).json({
+          error: 'TENANT_CONTEXT_REQUIRED',
+          message: 'Tenant context is required to ingest data',
+        });
+      }
 
       const policyDecision = tenantIsolationGuard.evaluatePolicy(
         tenantContext,
@@ -210,13 +218,21 @@ ingestRouter.post(
  */
 ingestRouter.get(
   '/api/v1/ingest/status/:provenanceId',
+  requireTenantContextMiddleware(),
   async (req: Request, res: Response) => {
     try {
       const { provenanceId } = req.params;
       const user = (req as any).user;
       const tenantContext =
         ((req as any).tenant as TenantContext | undefined) ||
-        requireTenantContext(req);
+        ((req as any).tenantContext as TenantContext);
+
+      if (!tenantContext) {
+        return res.status(400).json({
+          error: 'TENANT_CONTEXT_REQUIRED',
+          message: 'Tenant context is required to query ingest status',
+        });
+      }
 
       if (!user) {
         return res.status(401).json({ error: 'Unauthorized' });
