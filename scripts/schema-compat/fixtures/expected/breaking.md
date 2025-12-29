@@ -2,6 +2,7 @@
 
 Baseline: /workspace/summit/scripts/schema-compat/fixtures/baseline
 Current: /workspace/summit/scripts/schema-compat/fixtures/breaking
+
 Breaking changes: 6
 Allowed (version bump or map): 0
 Unresolved breaking: 6

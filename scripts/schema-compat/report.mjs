@@ -1,7 +1,7 @@
 function formatChange(change) {
   const status = change.allowed ? 'allowed' : change.severity === 'breaking' ? 'breaking' : 'info';
   const rationale = change.details && 'rationale' in change.details ? ` — ${change.details.rationale}` : '';
-  const detail = change.details && change.details.key ? ` (${JSON.stringify(change.details)})` : '';
+  const detail = change.details ? ` (${JSON.stringify(change.details)})` : '';
   return `- [${status}] (${change.code}) ${change.path}: ${change.message}${detail}${rationale}`;
 }
 
@@ -40,9 +40,9 @@ export function buildReport(diff, baselineDir, currentDir) {
     `Allowed (version bump or map): ${diff.allowed.length}`,
     `Unresolved breaking: ${diff.unresolved.length}`,
     `Additive/Informational: ${diff.nonBreaking.length}`,
-    diff.versionBumped ? '- Major version bump detected; unresolved changes treated as allowed.' : '',
+    diff.versionBumped ? '- Major version bump detected; unresolved changes treated as allowed.' : undefined,
     '',
-  ].filter(Boolean);
+  ].filter((line) => line !== undefined && line !== null);
 
   const fileSections = diff.results
     .sort((a, b) => a.file.localeCompare(b.file))
@@ -58,5 +58,5 @@ export function buildReport(diff, baselineDir, currentDir) {
     ? ['## Unresolved breaking changes', ...diff.unresolved.map(formatChange), '']
     : ['## Unresolved breaking changes', 'None', ''];
 
-  return [...header, ...unresolvedSection, ...fileSections].join('\n');
+  return [...header, ...unresolvedSection, ...fileSections, ''].join('\n');
 }

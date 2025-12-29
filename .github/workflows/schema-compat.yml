@@ -1,54 +1,58 @@
-name: Schema compatibility
+name: Schema compatibility guard
 
 on:
   pull_request:
     paths:
-      - "schemas/**"
       - "scripts/schema-compat/**"
-      - "scripts/schema_compat.js"
+      - ".github/workflows/schema-compat.yml"
+  workflow_dispatch:
 
 jobs:
-  schema-compatibility:
+  schema-compat:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout baseline
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.base_ref }}
-          path: baseline
-          fetch-depth: 0
 
-      - name: Checkout proposed changes
-        uses: actions/checkout@v4
-        with:
-          path: current
-          fetch-depth: 0
-
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: "22"
+          cache: "pnpm"
 
-      - name: Install dependencies (head)
-        working-directory: current
-        run: npm install --ignore-scripts
-
-      - name: Run schema compatibility check
-        working-directory: current
-        env:
-          BASELINE_SCHEMAS: ../baseline/schemas
+      - name: Install dependencies
         run: |
-          REPORT_PATH="schema-compat-report.md"
-          COMPAT_FLAG=""
-          if [ -f schemas/compatibility-map.json ]; then
-            COMPAT_FLAG="--compat schemas/compatibility-map.json"
-          fi
-          node scripts/schema-compat/cli.mjs --baseline "$BASELINE_SCHEMAS" --current schemas --report "$REPORT_PATH" $COMPAT_FLAG
+          corepack enable
+          pnpm install --frozen-lockfile
 
-      - name: Upload schema compatibility report
-        if: always()
+      - name: Validate schema compatibility fixtures
+        run: pnpm exec node scripts/schema-compat/check-fixtures.mjs
+
+      - name: Generate additive compatibility report
+        run: |
+          mkdir -p schema-compat-artifacts
+          pnpm exec node scripts/schema-compat/cli.mjs \
+            --baseline scripts/schema-compat/fixtures/baseline \
+            --current scripts/schema-compat/fixtures/additive \
+            --report schema-compat-artifacts/additive.md
+
+      - name: Generate breaking compatibility report (expected failure)
+        run: |
+          mkdir -p schema-compat-artifacts
+          set +e
+          pnpm exec node scripts/schema-compat/cli.mjs \
+            --baseline scripts/schema-compat/fixtures/baseline \
+            --current scripts/schema-compat/fixtures/breaking \
+            --report schema-compat-artifacts/breaking.md
+          status=$?
+          if [ "$status" -eq 0 ]; then
+            echo "Expected breaking scenario to fail without version bump or allow-list"
+            exit 1
+          fi
+
+      - name: Upload schema compatibility reports
         uses: actions/upload-artifact@v4
         with:
-          name: schema-compatibility-report
-          path: current/schema-compat-report.md
+          name: schema-compatibility-reports
+          path: schema-compat-artifacts/*.md
+          retention-days: 14

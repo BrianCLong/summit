@@ -44,17 +44,11 @@ function isTypeNarrowing(baselineType, currentType) {
   const current = parseType(currentType);
   if (!baseline.size || !current.size) return false;
 
-  for (const type of current) {
-    if (!baseline.has(type)) {
-      return true;
-    }
-  }
+  const currentNotInBaseline = [...current].filter((type) => !baseline.has(type));
+  const removedTypes = [...baseline].filter((type) => !current.has(type));
 
-  if ([...current].every((value) => baseline.has(value)) && baseline.size > current.size) {
-    return true;
-  }
-
-  return false;
+  // Any incompatibility (swapped or removed types) is considered narrowing/breaking.
+  return currentNotInBaseline.length > 0 || removedTypes.length > 0;
 }
 
 function compareEnums(baseline, current) {
@@ -67,17 +61,19 @@ function semanticsChanged(baselineSchema, currentSchema, propertyName) {
   for (const key of SEMANTIC_TAG_KEYS) {
     const baselineTag = baselineSchema?.[key];
     const currentTag = currentSchema?.[key];
-    if (baselineTag && currentTag && baselineTag[propertyName] && currentTag[propertyName]) {
-      if (baselineTag[propertyName] !== currentTag[propertyName]) {
-        return { changed: true, key, from: baselineTag[propertyName], to: currentTag[propertyName] };
-      }
+    const baselineValue = baselineTag?.[propertyName];
+    const currentValue = currentTag?.[propertyName];
+
+    if (baselineValue === undefined) continue;
+    if (baselineValue !== currentValue) {
+      return { changed: true, key, from: baselineValue, to: currentValue }; // explicit change or removal
     }
   }
   return { changed: false };
 }
 
-function addChange(target, change) {
-  target.push({ ...change, path: change.path.replace(/^\./, '') });
+function addChange(target, file, change) {
+  target.push({ ...change, file, path: change.path.replace(/^\./, '') });
 }
 
 function compareObjects(baseline, current, file, prefix = '', accumBreaking = [], accumNonBreaking = []) {
@@ -88,7 +84,7 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
 
   for (const requiredField of baselineRequired) {
     if (!currentRequired.has(requiredField)) {
-      addChange(accumBreaking, {
+      addChange(accumBreaking, file, {
         code: 'required.removed',
         path: `${prefix}${prefix ? '.' : ''}${requiredField}`,
         message: `Required field "${requiredField}" was removed or made optional in ${file}`,
@@ -103,7 +99,7 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
 
     if (!currentProp) {
       if (baselineRequired.has(propName)) {
-        addChange(accumBreaking, {
+        addChange(accumBreaking, file, {
           code: 'property.missing',
           path: propPath,
           message: `Property "${propName}" was removed from ${file}`,
@@ -114,7 +110,7 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
     }
 
     if (isTypeNarrowing(baselineProp.type, currentProp.type)) {
-      addChange(accumBreaking, {
+      addChange(accumBreaking, file, {
         code: 'type.narrowed',
         path: propPath,
         message: `Type for "${propName}" narrowed from ${String(baselineProp.type)} to ${String(currentProp.type)} in ${file}`,
@@ -123,7 +119,7 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
     }
 
     if (compareEnums(baselineProp.enum, currentProp.enum)) {
-      addChange(accumBreaking, {
+      addChange(accumBreaking, file, {
         code: 'enum.value.removed',
         path: propPath,
         message: `Enum on "${propName}" removed one or more values in ${file}`,
@@ -133,7 +129,7 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
 
     const semanticChange = semanticsChanged(baseline, current, propName);
     if (semanticChange.changed) {
-      addChange(accumBreaking, {
+      addChange(accumBreaking, file, {
         code: 'semantics.changed',
         path: propPath,
         message: `Semantic tag ${semanticChange.key} changed for "${propName}" (${semanticChange.from} -> ${semanticChange.to})`,
@@ -153,7 +149,7 @@ function compareObjects(baseline, current, file, prefix = '', accumBreaking = []
 
   for (const propName of Object.keys(currentProps)) {
     if (!Object.prototype.hasOwnProperty.call(baselineProps, propName)) {
-      addChange(accumNonBreaking, {
+      addChange(accumNonBreaking, file, {
         code: 'property.missing',
         path: `${prefix}${prefix ? '.' : ''}${propName}`,
         message: `Property "${propName}" added to ${file}`,
@@ -177,18 +173,35 @@ function isMajorBump(baseline, current) {
   return currentSemver.major > baselineSemver.major;
 }
 
-function markAllowed(changes, compatibility) {
-  if (!compatibility?.allow?.length) return changes;
+function markAllowed(changes, compatibility, versionBumps) {
   const allowIndex = new Map();
-  for (const entry of compatibility.allow) {
-    allowIndex.set(`${entry.code}:${entry.path}`, entry);
+
+  for (const entry of compatibility?.allow ?? []) {
+    const fileKey = entry.file ?? '*';
+    allowIndex.set(`${entry.code}:${fileKey}:${entry.path}`, entry);
   }
 
   return changes.map((change) => {
-    const key = `${change.code}:${change.path}`;
-    if (allowIndex.has(key)) {
-      return { ...change, allowed: true, details: { ...change.details, rationale: allowIndex.get(key)?.rationale } };
+    const candidateKeys = [
+      `${change.code}:${change.file ?? '*'}:${change.path}`,
+      `${change.code}:*:${change.path}`,
+    ];
+
+    for (const key of candidateKeys) {
+      if (allowIndex.has(key)) {
+        const allow = allowIndex.get(key);
+        return {
+          ...change,
+          allowed: true,
+          details: { ...change.details, allowedBy: 'compatibility-map', rationale: allow?.rationale },
+        };
+      }
     }
+
+    if (change.file && versionBumps.has(change.file)) {
+      return { ...change, allowed: true, details: { ...change.details, allowedBy: 'major-version' } };
+    }
+
     return change;
   });
 }
@@ -212,7 +225,7 @@ export async function compareDirectories(options) {
   const breaking = [];
   const nonBreaking = [];
   const results = [];
-  let versionBumped = false;
+  const versionBumps = new Set();
 
   for (const [file, baselineSchema] of baselineSchemas.entries()) {
     const currentSchema = currentSchemas.get(file);
@@ -222,6 +235,7 @@ export async function compareDirectories(options) {
         path: file,
         message: `${file} missing from current schemas`,
         severity: 'breaking',
+        file,
       });
       continue;
     }
@@ -231,27 +245,20 @@ export async function compareDirectories(options) {
     breaking.push(...result.breaking);
     nonBreaking.push(...result.nonBreaking);
 
-    versionBumped = versionBumped || isMajorBump(result.baselineVersion, result.version);
-  }
-
-  const allowed = markAllowed(breaking, options.compatibility);
-  const unresolved = allowed.filter((change) => !change.allowed && change.severity === 'breaking');
-  const finalBreaking = allowed;
-
-  if (versionBumped) {
-    for (const change of unresolved) {
-      change.allowed = true;
+    if (isMajorBump(result.baselineVersion, result.version)) {
+      versionBumps.add(file);
     }
   }
 
-  const finalUnresolved = finalBreaking.filter((change) => change.severity === 'breaking' && !change.allowed);
-  const finalAllowed = finalBreaking.filter((change) => change.allowed);
+  const allowed = markAllowed(breaking, options.compatibility, versionBumps);
+  const finalUnresolved = allowed.filter((change) => change.severity === 'breaking' && !change.allowed);
+  const finalAllowed = allowed.filter((change) => change.allowed);
 
   return {
-    breaking: finalBreaking,
+    breaking: allowed,
     nonBreaking,
     results,
-    versionBumped,
+    versionBumped: versionBumps.size > 0,
     unresolved: finalUnresolved,
     allowed: finalAllowed,
   };
