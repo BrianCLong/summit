@@ -12,3 +12,21 @@ jobs:
       run_dast: false # DAST is too slow for a PR check
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
+
+  changelog-check:
+    name: Check for CHANGELOG.md update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for CHANGELOG.md or skip label
+        uses: tj-actions/changed-files@v44
+        id: changed-files
+        with:
+          files: |
+            CHANGELOG.md
+
+      - name: Enforce CHANGELOG.md update
+        if: steps.changed-files.outputs.all_changed_files_count == '0' && !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
+        run: |
+          echo "ERROR: No update to CHANGELOG.md found."
+          echo "If this PR does not require a changelog entry, please add the 'skip-changelog' label."
+          exit 1
