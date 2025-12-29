@@ -1,4 +1,14 @@
-import schema from '../../../prov-ledger/schema/receipt.v0.1.json';
+import { readFileSync } from 'fs';
+import path from 'path';
+
+const receiptSchemaPath = path.resolve(
+  __dirname,
+  '../../../..',
+  'prov-ledger',
+  'schema',
+  'receipt.v0.1.json',
+);
+const schema = JSON.parse(readFileSync(receiptSchemaPath, 'utf-8'));
 
 export const RECEIPT_SCHEMA_VERSION = '0.1';
 

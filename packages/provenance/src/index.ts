@@ -115,7 +115,7 @@ export function computeReceiptHash(receipt: Receipt): string {
 }
 
 export function verifyReceiptSignature(receipt: Receipt): boolean {
-  if (receipt.signature.algorithm !== 'ed25519') return false;
+  if (receipt.signature.algorithm !== 'ed25519') {return false;}
 
   const payloadHash = computeReceiptPayloadHash(receipt);
   if (payloadHash !== receipt.payloadHash) {
@@ -187,7 +187,11 @@ export function applyRedactions<T extends object>(source: T, redactions: Redacti
     let cursor: any = clone;
 
     for (let i = 0; i < segments.length; i += 1) {
-      const key = segments[i]!;
+      const key = segments[i];
+
+      if (!key) {
+        continue;
+      }
 
       if (i === segments.length - 1) {
         if (cursor && typeof cursor === 'object' && key in cursor) {
@@ -211,3 +215,5 @@ export type ExecutionReceipt = Receipt;
 // Function aliases for backward compatibility
 export const canonicalReceiptPayload = canonicalizeReceiptPayload;
 export const hashReceiptPayload = computeReceiptPayloadHash;
+
+export * from './queryHelpers.js';
