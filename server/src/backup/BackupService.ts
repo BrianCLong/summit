@@ -15,7 +15,7 @@ const execAsync = promisify(exec);
 // Metrics
 const backupMetrics = new PrometheusMetrics('backup_service');
 backupMetrics.createCounter('ops_total', 'Total backup operations', ['type', 'status']);
-backupMetrics.createHistogram('duration_seconds', 'Backup duration', ['type', 'status']);
+backupMetrics.createHistogram('duration_seconds', 'Backup duration', { buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 120] });
 backupMetrics.createGauge('size_bytes', 'Backup size', ['type']);
 
 export interface S3Config {
@@ -157,34 +157,37 @@ export class BackupService {
       const session = driver.session();
 
       try {
-          const writeStream = options.compress
+          const fileStream = createWriteStream(finalPath);
+          const outputStream = options.compress
               ? zlib.createGzip()
-              : createWriteStream(filepath);
+              : null;
 
-          if (options.compress) {
-              writeStream.pipe(createWriteStream(finalPath));
+          if (outputStream) {
+              outputStream.pipe(fileStream as unknown as NodeJS.WritableStream);
           }
+
+          const writeTarget = outputStream || fileStream;
 
           // Full logical backup (removed LIMIT)
           const nodeResult = await session.run('MATCH (n) RETURN n');
           for (const record of nodeResult.records) {
               const node = record.get('n');
               const line = JSON.stringify({ type: 'node', labels: node.labels, props: node.properties }) + '\n';
-              writeStream.write(line);
+              writeTarget.write(line);
           }
 
           const relResult = await session.run('MATCH ()-[r]->() RETURN r');
           for (const record of relResult.records) {
               const rel = record.get('r');
               const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
-              writeStream.write(line);
+              writeTarget.write(line);
           }
 
-          writeStream.end();
+          writeTarget.end();
 
-          await new Promise((resolve, reject) => {
-              writeStream.on('finish', resolve);
-              writeStream.on('error', reject);
+          await new Promise<void>((resolve, reject) => {
+              fileStream.on('finish', () => resolve());
+              fileStream.on('error', (err) => reject(err));
           });
 
       } finally {

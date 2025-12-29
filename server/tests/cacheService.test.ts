@@ -1,6 +1,12 @@
-import { CacheService } from '../src/services/CacheService.js';
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { getCacheManager, _resetCacheManagerForTesting } from '../src/cache/factory.js';
+
+// Mock config before importing CacheService
+jest.mock('../src/config.js', () => ({
+  cfg: {
+    CACHE_TTL_DEFAULT: 300,
+    CACHE_ENABLED: true,
+  },
+}));
 
 // Mock dependencies
 jest.mock('../src/config/logger.js', () => ({
@@ -37,38 +43,44 @@ jest.mock('../src/config/database.js', () => ({
 
 // Mock AdvancedCachingStrategy
 jest.mock('../src/cache/AdvancedCachingStrategy.js', () => {
-    return {
-        default: class MockCacheManager {
-            private storage = new Map<string, any>();
-            constructor() {}
+    const MockCacheManager = class {
+        private storage = new Map<string, any>();
+        constructor() {}
 
-            async get(key: string) {
-                return this.storage.get(key) || null;
-            }
-            async set(key: string, value: any, options?: any) {
-                this.storage.set(key, value);
-            }
-            async delete(key: string) {
-                this.storage.delete(key);
-            }
-            async invalidateByPattern(pattern: string) {
-                // simple mock pattern match (contains)
-                const p = pattern.replace('*', '');
-                for (const key of this.storage.keys()) {
-                    if (key.includes(p)) {
-                        this.storage.delete(key);
-                    }
+        async get(key: string) {
+            return this.storage.get(key) || null;
+        }
+        async set(key: string, value: any, _options?: any) {
+            this.storage.set(key, value);
+        }
+        async delete(key: string) {
+            this.storage.delete(key);
+        }
+        async invalidateByPattern(pattern: string) {
+            const p = pattern.replace('*', '');
+            for (const key of this.storage.keys()) {
+                if (key.includes(p)) {
+                    this.storage.delete(key);
                 }
             }
-            async getOrSet(key: string, factory: any, options: any) {
-                if (this.storage.has(key)) return this.storage.get(key);
-                const val = await factory();
-                this.storage.set(key, val);
-                return val;
-            }
         }
-    }
+        async getOrSet(key: string, factory: any, _options: any) {
+            if (this.storage.has(key)) return this.storage.get(key);
+            const val = await factory();
+            this.storage.set(key, val);
+            return val;
+        }
+    };
+    return {
+        __esModule: true,
+        default: MockCacheManager,
+        CacheManager: MockCacheManager,
+    };
 });
+
+// Import after mocks
+import { CacheService } from '../src/services/CacheService.js';
+import { _resetCacheManagerForTesting } from '../src/cache/factory.js';
 
 describe('CacheService', () => {
   let cache: CacheService;
