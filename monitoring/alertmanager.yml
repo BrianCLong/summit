@@ -17,6 +17,13 @@ route:
   repeat_interval: 1h
   receiver: 'web.hook'
   routes:
+    # SLO alerts
+    - match:
+        slo: "true"
+      receiver: slo-alerts
+      group_wait: 30s
+      repeat_interval: 10m
+
     # Critical alerts go to on-call immediately
     - match:
         severity: critical
@@ -112,6 +119,19 @@ receivers:
         text: |
           {{ range .Alerts }}
           {{ .Annotations.summary }}
+          {{ end }}
+  # SLO alerts
+  - name: 'slo-alerts'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#slo-alerts'
+        title: '🔥 SLO Breach: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+
+          *Labels:* {{ range .Labels.SortedPairs }}`{{ .Name }}={{ .Value }}` {{ end }}
           {{ end }}
 
 # Inhibition rules to prevent alert spam

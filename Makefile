@@ -20,7 +20,7 @@ from pathlib import Path
 pyproject = Path("pyproject.toml")
 try:
     with pyproject.open('rb') as f:
-        data = tomllib.load(f)
+	data = tomllib.load(f)
     print(data.get("project", {}).get("version", "latest"))
 except FileNotFoundError:
     print("latest")
@@ -74,15 +74,15 @@ lint:   ## Lint js/ts + python
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	$(VENV_BIN)/ruff format .
+	$(VVENV_BIN)/ruff format .
 
 build:  ## Build all images
-        docker compose -f $(COMPOSE_DEV_FILE) build
+	docker compose -f $(COMPOSE_DEV_FILE) build
 
 release: ## Build Python wheel and Docker image tagged with project version
-        $(PYTHON) -m pip wheel . -w dist
-        docker build -t $(IMAGE) -f Dockerfile .
-        docker tag $(IMAGE) $(IMAGE_NAME):latest
+	$(PYTHON) -m pip wheel . -w dist
+	docker build -t $(IMAGE) -f Dockerfile .
+	docker tag $(IMAGE) $(IMAGE_NAME):latest
 
 ci: lint test
 
