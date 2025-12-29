@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "pnpm run build && jest"
+    "test": "pnpm run build && jest --config jest.config.cjs"
   },
   "dependencies": {
     "@intelgraph/provenance": "workspace:*"
