@@ -50,6 +50,7 @@ import type { Pool, PoolClient } from 'pg';
 import { metrics } from '../observability/metrics.js';
 import GAEnrollmentService from './GAEnrollmentService.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
+import { checkScope } from '../api/scopeGuard.js';
 
 /**
  * User registration data payload
@@ -100,6 +101,7 @@ interface User {
   lastLogin?: Date;
   createdAt: Date;
   updatedAt?: Date;
+  scopes: string[];
 }
 
 /**
@@ -154,6 +156,7 @@ interface TokenPayload {
   email: string;
   role: string;
   tenantId: string;
+  scp: string[];
 }
 
 /**
@@ -215,6 +218,28 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'tag:read',
     'graph:read',
     'graph:export',
+  ],
+};
+
+/**
+ * Role-based scope mappings for OAuth-style enforcement
+ */
+const ROLE_SCOPES: Record<string, string[]> = {
+  ADMIN: [
+    'read:graph',
+    'write:case',
+    'run:analytics',
+    'export:*',
+    'manage:keys',
+  ],
+  ANALYST: [
+    'read:graph',
+    'write:case',
+    'run:analytics',
+    'export:bundle',
+  ],
+  VIEWER: [
+    'read:graph',
   ],
 };
 
@@ -493,11 +518,14 @@ export class AuthService {
     user: DatabaseUser,
     client: PoolClient,
   ): Promise<TokenPair> {
+    const userScopes = ROLE_SCOPES[user.role.toUpperCase()] || [];
+
     const tokenPayload: TokenPayload = {
       userId: user.id,
       email: user.email,
       role: user.role,
       tenantId: user.tenant_id || user.default_tenant_id || 'unknown',
+      scp: userScopes,
     };
 
     const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
@@ -567,7 +595,10 @@ export class AuthService {
         return null;
       }
 
-      return this.formatUser(userResult.rows[0] as DatabaseUser);
+      const user = this.formatUser(userResult.rows[0] as DatabaseUser);
+      // Fallback to role-based scopes if scp claim is missing (legacy tokens)
+      user.scopes = decoded.scp || ROLE_SCOPES[user.role.toUpperCase()] || [];
+      return user;
     } catch (error: any) {
       logger.warn('Invalid token:', error.message);
       return null;
@@ -768,6 +799,18 @@ export class AuthService {
   }
 
   /**
+   * Checks if a user has a specific scope.
+   *
+   * @param {User | null} user - The user object to check.
+   * @param {string} scope - The scope string to check for (e.g., 'read:graph').
+   * @returns {boolean} True if the user has the scope, false otherwise.
+   */
+  hasScope(user: User | null, scope: string): boolean {
+    if (!user || !user.scopes) return false;
+    return checkScope(user.scopes, scope);
+  }
+
+  /**
    * Transform database user record to public User interface
    *
    * Converts snake_case database fields to camelCase and computes fullName.
@@ -791,6 +834,7 @@ export class AuthService {
       lastLogin: user.last_login,
       createdAt: user.created_at,
       updatedAt: user.updated_at,
+      scopes: [],
     };
   }
 }
