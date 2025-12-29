@@ -1,0 +1,13 @@
+{
+  "name": "prod-without-approval",
+  "owner": "ops@example.com",
+  "environment": "prod",
+  "required_policies": ["owner-present", "prod-requires-approval"],
+  "steps": [
+    {
+      "id": "noop",
+      "name": "Should not run",
+      "command": "echo 'this should not execute'"
+    }
+  ]
+}
