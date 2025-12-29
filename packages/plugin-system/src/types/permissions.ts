@@ -1,0 +1,15 @@
+export enum PluginPermission {
+  READ_DATA = 'read:data',
+  WRITE_DATA = 'write:data',
+  EXECUTE_QUERIES = 'execute:queries',
+  ACCESS_GRAPH = 'access:graph',
+  NETWORK_ACCESS = 'network:access',
+  FILE_SYSTEM = 'filesystem:access',
+  DATABASE_ACCESS = 'database:access',
+  API_ENDPOINTS = 'api:endpoints',
+  UI_EXTENSIONS = 'ui:extensions',
+  ANALYTICS = 'analytics:access',
+  ML_MODELS = 'ml:models',
+  WEBHOOKS = 'webhooks:manage',
+  SCHEDULED_TASKS = 'tasks:schedule',
+}
