@@ -563,7 +563,13 @@ const metrics = {
   llmRequestDuration,
   rateLimitExceededTotal,
   breakerState,
-  intelgraphJobQueueDepth
+  intelgraphJobQueueDepth,
+  goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours
 };
 
 // Update memory usage periodically

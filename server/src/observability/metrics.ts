@@ -44,7 +44,13 @@ import {
   intelgraphQueryPreviewExecutionsTotal,
   intelgraphGlassBoxRunsTotal,
   intelgraphGlassBoxRunDurationMs,
-  intelgraphGlassBoxCacheHits
+  intelgraphGlassBoxCacheHits,
+  goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -85,7 +91,13 @@ export {
   intelgraphQueryPreviewExecutionsTotal,
   intelgraphGlassBoxRunsTotal,
   intelgraphGlassBoxRunDurationMs,
-  intelgraphGlassBoxCacheHits
+  intelgraphGlassBoxCacheHits,
+  goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours
 };
 
 export const metrics = {
@@ -124,5 +136,11 @@ export const metrics = {
   intelgraphQueryPreviewExecutionsTotal,
   intelgraphGlassBoxRunsTotal,
   intelgraphGlassBoxRunDurationMs,
-  intelgraphGlassBoxCacheHits
+  intelgraphGlassBoxCacheHits,
+  goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours
 };
