@@ -6,11 +6,119 @@
 // Extend Jest with additional matchers from jest-extended
 require('jest-extended');
 
-import * as dotenv from 'dotenv';
+const dotenv = require('dotenv');
 dotenv.config({ path: './.env.test' });
 
 // Global test timeout
 jest.setTimeout(30000);
+
+// Use Zero Footprint mode to avoid real DB connections by default
+process.env.ZERO_FOOTPRINT = 'true';
+
+// Mock required environment variables for config.ts validation
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'postgres://postgres:postgres@localhost:5432/intelgraph_test';
+}
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only-must-be-32-chars';
+}
+if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 32) {
+  process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret-for-testing-only-32-chars';
+}
+if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
+if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
+if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
+
+// Mock IORedis globally to prevent connection errors
+jest.mock('ioredis', () => {
+  const EventEmitter = require('events');
+  const subscribers = new Map();
+
+  class MockRedis extends EventEmitter {
+    constructor() {
+      super();
+      this.status = 'ready';
+      setTimeout(() => this.emit('ready'), 0);
+      setTimeout(() => this.emit('connect'), 0);
+    }
+    async connect() { return Promise.resolve(); }
+    async disconnect() { return Promise.resolve(); }
+    async quit() { return Promise.resolve(); }
+    async get() { return null; }
+    async set() { return 'OK'; }
+    async del() { return 1; }
+    async publish(channel, message) {
+      if (subscribers.has(channel)) {
+        subscribers.get(channel).forEach(client => {
+          client.emit('message', channel, message);
+        });
+        return subscribers.get(channel).size;
+      }
+      return 0;
+    }
+    async subscribe(...channels) {
+      channels.forEach(channel => {
+        if (!subscribers.has(channel)) {
+          subscribers.set(channel, new Set());
+        }
+        subscribers.get(channel).add(this);
+      });
+      return channels.length;
+    }
+    async unsubscribe(...channels) {
+      channels.forEach(channel => {
+        if (subscribers.has(channel)) {
+          subscribers.get(channel).delete(this);
+        }
+      });
+      return channels.length;
+    }
+    duplicate() { return new MockRedis(); }
+    defineCommand() { }
+  }
+  return {
+    __esModule: true,
+    default: MockRedis,
+  };
+});
+
+// Mock database config to bypass initialization checks
+jest.mock('../../src/config/database', () => {
+  const mockPool = {
+    connect: jest.fn().mockResolvedValue({
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+      release: jest.fn(),
+    }),
+    query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+    on: jest.fn(),
+    end: jest.fn(),
+  };
+
+  return {
+    __esModule: true,
+    connectPostgres: jest.fn().mockResolvedValue(mockPool),
+    connectRedis: jest.fn(),
+    connectNeo4j: jest.fn(),
+    getPostgresPool: jest.fn().mockReturnValue(mockPool),
+    getRedisClient: jest.fn().mockReturnValue({
+      get: jest.fn(),
+      set: jest.fn(),
+      del: jest.fn(),
+      keys: jest.fn().mockResolvedValue([]),
+      mget: jest.fn().mockResolvedValue([]),
+      quit: jest.fn(),
+      disconnect: jest.fn(),
+    }),
+    getNeo4jDriver: jest.fn().mockReturnValue({
+      session: () => ({
+        run: jest.fn().mockResolvedValue({ records: [] }),
+        close: jest.fn(),
+      }),
+      close: jest.fn(),
+    }),
+    closeConnections: jest.fn(),
+  };
+});
 
 // Mock console methods to reduce noise in tests unless debugging
 const originalConsole = { ...console };
@@ -104,6 +212,24 @@ global.testUtils = {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
+
+// Mock tracing service to avoid OTel initialization issues
+jest.mock('../../src/observability/tracing', () => ({
+  __esModule: true,
+  otelService: {
+    start: jest.fn(),
+    shutdown: jest.fn(),
+    createSpan: jest.fn(() => ({ end: jest.fn() })),
+    getCurrentTraceContext: jest.fn(() => null),
+    trace: jest.fn((name, fn) => fn({ end: jest.fn() })),
+  },
+  TracingService: jest.fn().mockImplementation(() => ({
+    start: jest.fn(),
+    shutdown: jest.fn(),
+    createSpan: jest.fn(() => ({ end: jest.fn() })),
+    trace: jest.fn((name, fn) => fn({ end: jest.fn() })),
+  })),
+}));
 
 // Clean up after each test
 afterEach(() => {
