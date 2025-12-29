@@ -18,6 +18,17 @@ These capabilities build on Summit's core commitments to governance, provenance,
 
 ---
 
+## Release Candidate (v4.0.0-rc1) Highlights
+
+- **Stability first:** All P0/P1 beta issues from Cohort 1 and Cohort 2 are resolved (BETA-015, BETA-028, BETA-041, BETA-003, BETA-007, BETA-012, BETA-019, BETA-025) with targeted P2 coverage for AI suggestion scale (BETA-002).
+- **Performance and accuracy:** AI suggestion p95 improved to 2.4s under load through caching + batching, and anomaly detection thresholds were tuned to reduce false positives during burst traffic without regressing recall.
+- **Compliance hardening:** HIPAA/SOX evidence flows now handle 50MB–500MB uploads with resumable transfers; governance policy updates use optimistic locking to eliminate data loss observed in beta.
+- **Migration refinements:** Custom policy import guardrails, dual-stack token support, and rollback validation steps were added based on Cohort 2 feedback.
+- **Known deferrals:** Dashboard initial-load optimization (BETA-001), compliance PDF formatting (BETA-008), notification delivery latency (BETA-016), and audit search indexing (BETA-022) remain planned for GA/patch follow-ups to preserve RC freeze.
+- **Validation:** Regression pass rate is 99.5% with two non-blocking watchlist tests (anomaly burst tuning, audit search p99 latency); load, soak, and security scans (Trivy/Snyk/CodeQL/Aqua/GitLeaks) are green.
+
+---
+
 ## New Features
 
 ### 1. AI-Assisted Governance Services

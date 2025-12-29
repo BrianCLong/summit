@@ -31,6 +31,14 @@ Before starting the migration, ensure you have:
   - Python 3.9+ (if using Python SDK)
   - TLS 1.2+ required for all API connections
 
+### Beta Migration Lessons (RC Update)
+
+- **Custom policy imports:** Validate policy YAML/JSON against the new schema linter (`scripts/validate_policies.sh`) before posting to `/api/v4/ai/policy-suggestions`; this prevents the Cohort 2 edge case (BETA-025).
+- **Token compatibility:** Enable dual JWT parsing (snake_case + camelCase `tenantId`) during the cutover window to prevent authorization drops while SDKs roll forward.
+- **Evidence uploads:** Use resumable uploads (`Content-Range` headers) for 50MB–500MB SOX/HIPAA evidence to align with RC hardening; disable client-side gzip to keep integrity hashes stable.
+- **Rollback drills:** Capture a signed audit ledger snapshot before and after migration steps; validate with `/api/v4/zero-trust/audit/verify` to confirm integrity before promoting traffic.
+- **Performance guardrails:** Run a smoke load of 100 concurrent AI suggestion requests (large documents) after enabling v4 to confirm the BETA-002/003 fixes hold in your environment.
+
 ---
 
 ## SDK Upgrade
@@ -591,6 +599,18 @@ await client.admin.updateTenantConfig({
 ### Q: What happens to my v3 audit logs?
 
 **A:** v3 audit logs remain accessible. New v4 audit events use the immutable ledger with enhanced integrity verification.
+
+### Q: How should we handle large evidence uploads during the cutover?
+
+**A:** Use resumable uploads with `Content-Range` headers and keep individual chunks under 25MB. The RC build validates chunk ordering and integrity; failed parts can be retried without restarting the upload.
+
+### Q: Can tenants still send snake_case JWT claims during rollout?
+
+**A:** Yes. The RC build accepts both `tenant_id` and `tenantId` to support staggered SDK upgrades. Enable the compatibility flag for one release cycle, then lock to camelCase once all services are upgraded.
+
+### Q: How do we validate AI suggestion performance after migrating?
+
+**A:** Run the `tests/ai/suggestion-scale.spec.ts` suite or issue 100 concurrent requests with 100+ page documents. p95 should remain under 3s; if exceeded, enable caching and batching options in the SDK client and contact support.
 
 ---
 
