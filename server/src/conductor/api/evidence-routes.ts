@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import { getPostgresPool } from '../../db/postgres.js';
 import { requirePermission } from '../auth/rbac-middleware.js';
+import { usageLedger } from '../../usage/usage-ledger.js';
 import {
   buildProvenanceReceipt,
   canonicalStringify,
@@ -57,9 +58,23 @@ router.post(
   requirePermission('evidence:create'),
   express.json(),
   async (req, res) => {
+    const requestSizeBytes = Buffer.byteLength(
+      JSON.stringify(req.body ?? {}),
+      'utf8',
+    );
     try {
       const { runId } = req.body || {};
       if (!runId) {
+        usageLedger.recordUsage({
+          operationName: 'conductor.receipt.create',
+          tenantId: req?.user?.tenantId,
+          userId: req?.user?.userId || req?.user?.sub,
+          timestamp: new Date(),
+          requestSizeBytes,
+          success: false,
+          statusCode: 400,
+          errorCategory: 'validation',
+        });
         return res
           .status(400)
           .json({ success: false, error: 'runId is required' });
@@ -94,10 +109,30 @@ router.post(
         [artifactId, receiptBuffer, 'application/json'],
       );
 
+      usageLedger.recordUsage({
+        operationName: 'conductor.receipt.create',
+        tenantId: req?.user?.tenantId,
+        userId: req?.user?.userId || req?.user?.sub,
+        timestamp: new Date(),
+        requestSizeBytes,
+        success: true,
+        statusCode: 200,
+      });
+
       return res.json({ success: true, data: { receipt, artifactId } });
     } catch (error: any) {
       const message =
         error?.message || 'Failed to generate provenance receipt';
+      usageLedger.recordUsage({
+        operationName: 'conductor.receipt.create',
+        tenantId: req?.user?.tenantId,
+        userId: req?.user?.userId || req?.user?.sub,
+        timestamp: new Date(),
+        requestSizeBytes,
+        success: false,
+        statusCode: 500,
+        errorCategory: 'runtime',
+      });
       return res.status(500).json({ success: false, error: message });
     }
   },
