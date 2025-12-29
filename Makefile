@@ -101,6 +101,13 @@ smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1)
 	@echo "Smoke test complete."
 
+rollback: ## Rollback deployment (Usage: make rollback v=v3.0.0 env=prod)
+	@if [ -z "$(v)" ]; then echo "Error: Version v is required (e.g., v=v3.0.0)"; exit 1; fi
+	@if [ -z "$(env)" ]; then echo "Error: Environment env is required (e.g., env=prod)"; exit 1; fi
+	@echo "Rolling back $(env) to version $(v)..."
+	@chmod +x scripts/rollback.sh
+	@./scripts/rollback.sh $(v) $(env)
+
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
 SHELL := /bin/bash

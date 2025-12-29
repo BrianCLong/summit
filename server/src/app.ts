@@ -1,7 +1,8 @@
-// @ts-nocheck
+
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
+import { GraphQLError } from 'graphql';
 import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { applyMiddleware } from 'graphql-middleware';
@@ -139,7 +140,7 @@ export const createApp = async () => {
   const tracer = initializeTracing();
   // Ensure initialized if this entry point is used standalone (e.g. tests)
   if (!tracer.isInitialized()) {
-      await tracer.initialize();
+    await tracer.initialize();
   }
 
   const app = express();
@@ -166,16 +167,16 @@ export const createApp = async () => {
     helmet({
       contentSecurityPolicy: isProduction
         ? {
-            useDefaults: true,
-            directives: {
-              defaultSrc: ["'self'"],
-              objectSrc: ["'none'"],
-              imgSrc: ["'self'", 'data:'],
-              scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-              styleSrc: ["'self'", "'unsafe-inline'"],
-              connectSrc: ["'self'", ...allowedOrigins, 'https://api.intelgraph.example'],
-            },
-          }
+          useDefaults: true,
+          directives: {
+            defaultSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            imgSrc: ["'self'", 'data:'],
+            scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            connectSrc: ["'self'", ...allowedOrigins, 'https://api.intelgraph.example'],
+          },
+        }
         : false,
       referrerPolicy: { policy: 'no-referrer' },
       hsts: isProduction
@@ -259,6 +260,36 @@ export const createApp = async () => {
     next();
   });
 
+  // Production Authentication - Use proper JWT validation
+  const {
+    productionAuthMiddleware,
+    applyProductionSecurity,
+  } = await import('./config/production-security.js');
+
+  // Apply security middleware based on environment
+  if (cfg.NODE_ENV === 'production') {
+    applyProductionSecurity(app);
+  }
+
+  const authenticateToken =
+    cfg.NODE_ENV === 'production'
+      ? productionAuthMiddleware
+      : (req: Request, res: Response, next: NextFunction) => {
+        // Development mode - relaxed auth for easier testing
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) {
+          console.warn('Development: No token provided, allowing request');
+          (req as any).user = {
+            sub: 'dev-user',
+            email: 'dev@intelgraph.local',
+            role: 'admin',
+          };
+        }
+        next();
+      };
+
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
 
@@ -301,41 +332,13 @@ export const createApp = async () => {
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  // Production Authentication - Use proper JWT validation
-  const {
-    productionAuthMiddleware,
-    applyProductionSecurity,
-  } = await import('./config/production-security.js');
 
-  // Apply security middleware based on environment
-  if (cfg.NODE_ENV === 'production') {
-    applyProductionSecurity(app);
-  }
-
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
-
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
 
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
   app.use((req, res, next) => {
-      if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
-      return advancedRateLimiter.middleware()(req, res, next);
+    if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
+    return advancedRateLimiter.middleware()(req, res, next);
   });
 
   // Admin Rate Limit Dashboard Endpoint
@@ -343,8 +346,8 @@ export const createApp = async () => {
   app.get('/api/admin/rate-limits/:userId', authenticateToken, async (req, res) => {
     const user = (req as any).user;
     if (!user || user.role !== 'admin') {
-         res.status(403).json({ error: 'Forbidden' });
-         return;
+      res.status(403).json({ error: 'Forbidden' });
+      return;
     }
     try {
       const status = await advancedRateLimiter.getStatus(req.params.userId);
@@ -460,10 +463,13 @@ export const createApp = async () => {
   });
   // Simple LLM stub
   const llmClient = {
+    apiKey: 'stub-key',
+    costMeter,
+    fakeOpenAIChatCompletion: async () => 'stub',
     callCompletion: async (prompt: string, model: string) => `[Stub LLM Response] for: ${prompt}`
   };
 
-  const maestro = new Maestro(igClient, costMeter, llmClient, {
+  const maestro = new Maestro(igClient, costMeter, llmClient as any, {
     defaultPlannerAgent: 'openai:gpt-4.1',
     defaultActionAgent: 'openai:gpt-4.1',
   });
@@ -569,16 +575,33 @@ export const createApp = async () => {
       depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
     ],
     // Security context
-    formatError: (err) => {
-      // Don't expose internal errors in production
+    formatError: (formattedError, error) => {
+      // Always allow introspection errors (dev) or client-side validation errors
+      if (
+        formattedError.extensions?.code === 'GRAPHQL_VALIDATION_FAILED' ||
+        formattedError.extensions?.code === 'BAD_USER_INPUT' ||
+        formattedError.extensions?.code === 'UNAUTHENTICATED' ||
+        formattedError.extensions?.code === 'FORBIDDEN'
+      ) {
+        return formattedError;
+      }
+
+      // In production, mask everything else as Internal Server Error
       if (cfg.NODE_ENV === 'production') {
         appLogger.error(
-          { err, stack: (err as any).stack },
-          `GraphQL Error: ${err.message}`,
+          { err: error, stack: (error as any)?.stack },
+          `GraphQL Error: ${formattedError.message}`,
         );
-        return new Error('Internal server error');
+        return new GraphQLError('Internal server error', {
+          extensions: {
+            code: 'INTERNAL_SERVER_ERROR',
+            http: { status: 500 }
+          }
+        });
       }
-      return err as any;
+
+      // In development, return the full error
+      return formattedError;
     },
   });
   await apollo.start();
@@ -588,7 +611,9 @@ export const createApp = async () => {
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
-    expressMiddleware(apollo, { context: getContext }),
+    expressMiddleware(apollo, {
+      context: async ({ req }) => getContext({ req: req as any })
+    }),
   );
 
   if (!safetyState.killSwitch && !safetyState.safeMode) {
@@ -611,8 +636,8 @@ export const createApp = async () => {
   // In a real production setup, this might be in a separate process/container.
   // For MVP/Monolith, we keep it here.
   if (webhookWorker) {
-      // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
-      // though import side-effects usually suffice.
+    // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
+    // though import side-effects usually suffice.
   }
 
   appLogger.info('Anomaly detector activated.');

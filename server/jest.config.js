@@ -31,6 +31,8 @@ export default {
     '/tests/governance-acceptance.test.ts',
     // Skip tests that have ESM/import.meta conflicts with source files
     '/tests/api-docs.test.ts',
+    // FLAKY TEST QUARANTINE: Exclude flaky tests from main run
+    '\\.flaky\\.test\\.ts$',
   ],
 
   moduleNameMapper: {

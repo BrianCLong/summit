@@ -3,7 +3,7 @@ name: GA Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -11,8 +11,8 @@ permissions:
   id-token: write # For OIDC/Cosign if needed
 
 jobs:
-  release-pipeline:
-    name: GA Release Pipeline
+  test-and-verify:
+    name: Verification Gates
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,14 +22,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "pnpm"
 
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      # P1: Verification Gates (Tests & Policy)
       - name: Run Server Tests
-        run: npm run test:server
+        run: pnpm test:server
         continue-on-error: false
 
       - name: Run Policy Checks
@@ -40,80 +39,71 @@ jobs:
         run: ./scripts/check_traceability.cjs
         continue-on-error: false
 
-      # Collect Test Artifacts (Simulated/Actual)
-      - name: Collect Test Results
-        run: |
-          mkdir -p evidence/ga/test-results
-          # Assuming test runners output to standard locations
-          if [ -f junit.xml ]; then cp junit.xml evidence/ga/test-results/; fi
-          if [ -f coverage/coverage-summary.json ]; then cp coverage/coverage-summary.json evidence/ga/test-results/; fi
+  build-server:
+    name: Build Server
+    needs: test-and-verify
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: server
+      dockerfile: server/Dockerfile
+      context: .
+      push: true
+      sign: true
+      sbom: true
+      slsa_provenance: true
+    secrets: inherit
 
-      # P1: Deterministic Build & Artifact Generation
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.4.0
+  build-client:
+    name: Build Client
+    needs: test-and-verify
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: client
+      dockerfile: client/Dockerfile
+      context: .
+      push: true
+      sign: true
+      sbom: true
+      slsa_provenance: true
+    secrets: inherit
 
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0.15.8
+  release:
+    name: Create Release
+    needs: [build-server, build-client]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Build Server Image
-        id: build-server
-        run: |
-          echo "Building Server..."
-          # docker build ...
-          echo "image=ghcr.io/${{ github.repository }}/server:${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
-      - name: Build Client Image
-        id: build-client
-        run: |
-          echo "Building Client..."
-          # docker build ...
-          echo "image=ghcr.io/${{ github.repository }}/client:${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
-      # P1: SBOM Generation
-      - name: Generate SBOMs
-        run: ./scripts/compliance/generate_sbom.sh compliance/sbom
-
-      # P2: Evidence Collection
-      - name: Collect Evidence Bundle
-        run: ./scripts/compliance/generate_evidence_bundle.sh evidence/ga
-
-      # P1: Artifact Signing
-      - name: Sign Evidence
-        env:
-          COSIGN_KEY_CONTENT: ${{ secrets.COSIGN_PRIVATE_KEY }}
-          EVIDENCE_DIR: evidence/ga
-        run: |
-          if [ -n "$COSIGN_KEY_CONTENT" ]; then
-            echo "$COSIGN_KEY_CONTENT" > cosign.key
-            # Pass the filename, not the content
-            export COSIGN_KEY=cosign.key
-            ./scripts/sign-evidence.sh
-            rm cosign.key
-          else
-            echo "Skipping signing (no key provided)"
-          fi
-
-      - name: Archive Release Bundle
-        run: |
-          tar -czf release-bundle.tar.gz evidence/ga compliance/sbom
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Download Server Artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: release-bundle
-          path: release-bundle.tar.gz
+          name: build-artifacts-server-${{ github.run_id }}
+          path: evidence/server
 
-      # P1: Release Notes & Publish
+      - name: Download Client Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-client-${{ github.run_id }}
+          path: evidence/client
+
+      - name: Create Evidence Bundle
+        run: |
+          mkdir -p release-assets
+          tar -czf release-assets/evidence.tar.gz evidence/
+
       - name: Generate Release Notes
         id: notes
         run: |
-          # Simple placeholder notes
-          echo "notes=GA Release ${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-bundle.tar.gz
+          files: release-assets/evidence.tar.gz
           body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: false

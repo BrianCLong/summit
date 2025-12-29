@@ -20,6 +20,7 @@ import { cfg } from '../../config.js';
 import { getPostgresPool } from '../../config/database.js';
 import argon2 from 'argon2';
 import type { GraphQLContext } from '../apollo-v5-server.js';
+import { authGuard } from '../utils/auth.js';
 
 const logger = (pino as any)();
 
@@ -80,7 +81,7 @@ const userResolvers = {
     /**
      * Fetch a single user by ID
      */
-    user: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+    user: authGuard(async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       const cacheKey = `user:${id}`;
 
       try {
@@ -118,19 +119,23 @@ const userResolvers = {
           extensions: { code: 'USER_FETCH_FAILED' },
         });
       }
-    },
+    }),
 
     /**
      * List users with pagination
      */
-    users: async (
+    users: authGuard(async (
       _: any,
       { limit = 25, offset = 0 }: { limit: number; offset: number },
-      context: any
+      context: GraphQLContext // Correctly typed
     ) => {
       try {
-        // Check if user has permission to list users
-        if (context.user && context.user.role !== 'ADMIN') {
+        // Permission check is handled by authGuard if we pass 'admin' or handled inside.
+        // The original code was: context.user.role !== 'ADMIN' check.
+        // Let's rely on authGuard with permission 'read:users' or just enforce ADMIN check inside if RBAC isn't fully set up yet.
+        // For now, I'll keep the internal check but ensure authGuard is present.
+
+        if (context.user && !context.user.roles.includes('ADMIN')) {
           throw new GraphQLError('Only administrators can list all users', {
             extensions: { code: 'FORBIDDEN' },
           });
@@ -162,21 +167,20 @@ const userResolvers = {
           extensions: { code: 'USERS_FETCH_FAILED' },
         });
       }
-    },
+    }),
   },
 
   Mutation: {
     /**
      * Create a new user (admin only)
      */
-    createUser: async (
+    createUser: authGuard(async (
       _: any,
       { input }: { input: { email: string; username?: string } },
-      context: any
+      context: GraphQLContext // Correctly typed
     ) => {
       try {
-        // Check admin permission
-        if (context.user && context.user.role !== 'ADMIN') {
+        if (!context.user!.roles.includes('ADMIN')) { // context.user guaranteed by authGuard
           throw new GraphQLError('Only administrators can create users', {
             extensions: { code: 'FORBIDDEN' },
           });
@@ -236,22 +240,22 @@ const userResolvers = {
           extensions: { code: 'USER_CREATE_FAILED' },
         });
       }
-    },
+    }),
 
     /**
      * Update an existing user
      */
-    updateUser: async (
+    updateUser: authGuard(async (
       _: any,
       {
         id,
         input,
       }: { id: string; input: { email?: string; username?: string } },
-      context: any
+      context: GraphQLContext // Correctly typed
     ) => {
       try {
         // Users can only update themselves unless admin
-        if (context.user && context.user.id !== id && context.user.role !== 'ADMIN') {
+        if (context.user!.id !== id && !context.user!.roles.includes('ADMIN')) {
           throw new GraphQLError('You can only update your own profile', {
             extensions: { code: 'FORBIDDEN' },
           });
@@ -312,22 +316,22 @@ const userResolvers = {
           extensions: { code: 'USER_UPDATE_FAILED' },
         });
       }
-    },
+    }),
 
     /**
      * Delete a user (soft delete)
      */
-    deleteUser: async (_: any, { id }: { id: string }, context: any) => {
+    deleteUser: authGuard(async (_: any, { id }: { id: string }, context: GraphQLContext) => {
       try {
         // Check admin permission
-        if (context.user && context.user.role !== 'ADMIN') {
+        if (!context.user!.roles.includes('ADMIN')) {
           throw new GraphQLError('Only administrators can delete users', {
             extensions: { code: 'FORBIDDEN' },
           });
         }
 
         // Prevent self-deletion
-        if (context.user && context.user.id === id) {
+        if (context.user!.id === id) {
           throw new GraphQLError('You cannot delete your own account', {
             extensions: { code: 'FORBIDDEN' },
           });
@@ -371,25 +375,24 @@ const userResolvers = {
           extensions: { code: 'USER_DELETE_FAILED' },
         });
       }
-    },
+    }),
 
     /**
      * Update user preferences (JSON merge)
      */
-    updateUserPreferences: async (
+    updateUserPreferences: authGuard(async (
       _: any,
       {
         userId,
         preferences,
       }: { userId: string; preferences: Record<string, any> },
-      context: any
+      context: GraphQLContext
     ) => {
       try {
         // Users can only update their own preferences unless admin
         if (
-          context.user &&
-          context.user.id !== userId &&
-          context.user.role !== 'ADMIN'
+          context.user!.id !== userId &&
+          !context.user!.roles.includes('ADMIN')
         ) {
           throw new GraphQLError('You can only update your own preferences', {
             extensions: { code: 'FORBIDDEN' },
@@ -434,7 +437,7 @@ const userResolvers = {
           extensions: { code: 'PREFERENCES_UPDATE_FAILED' },
         });
       }
-    },
+    }),
   },
 };
 

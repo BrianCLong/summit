@@ -1,6 +1,7 @@
 import pino from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
+import { authGuard } from '../utils/auth.js';
 
 const logger = (pino as any)();
 
@@ -125,23 +126,15 @@ const investigationResolvers = {
       };
     },
   },
+
   Mutation: {
-    createInvestigationSnapshot: async (
+    createInvestigationSnapshot: authGuard(async (
       _: any,
       { investigationId, label }: { investigationId: string; label?: string },
-      context: any
+      context: GraphQLContext
     ) => {
       logger.info(`Creating snapshot for investigation ${investigationId}`);
       const pool = getPostgresPool();
-
-      // In a real implementation, we would fetch the current full state of the investigation
-      // (entities, relationships, etc.) from Neo4j/Postgres.
-      // For this MVP/Mock context, we will snapshot what we can find or mock it if the investigation is just a placeholder.
-
-      // Attempt to fetch investigation details
-      // Since the main investigation query is a placeholder, we'll assume we need to snapshot *something*
-      // If we are in a dev environment with mock data, we might just store a timestamped mock object.
-      // But let's try to query the 'maestro.investigations' table if it exists.
 
       let investigationData = {};
       try {
@@ -149,25 +142,25 @@ const investigationResolvers = {
         if (invResult.rows.length > 0) {
           investigationData = invResult.rows[0];
         } else {
-            // Fallback for placeholder IDs like 'inv-1'
-            investigationData = {
-                id: investigationId,
-                name: `Investigation ${investigationId}`,
-                description: 'Placeholder investigation state',
-                entities: [], // Would fetch from Neo4j
-                relationships: []
-            };
+          // Fallback for placeholder IDs like 'inv-1'
+          investigationData = {
+            id: investigationId,
+            name: `Investigation ${investigationId}`,
+            description: 'Placeholder investigation state',
+            entities: [], // Would fetch from Neo4j
+            relationships: []
+          };
         }
       } catch (e) {
-         logger.warn(`Failed to fetch investigation details for snapshot, using placeholder: ${e}`);
-          investigationData = {
-              id: investigationId,
-              error: 'Failed to fetch real state',
-              timestamp: new Date().toISOString()
-          };
+        logger.warn(`Failed to fetch investigation details for snapshot, using placeholder: ${e}`);
+        investigationData = {
+          id: investigationId,
+          error: 'Failed to fetch real state',
+          timestamp: new Date().toISOString()
+        };
       }
 
-      const userId = context.user?.id || 'system'; // Assuming context is populated
+      const userId = context.user?.id || 'system';
 
       const result = await pool.query(
         `INSERT INTO maestro.investigation_snapshots
@@ -186,21 +179,22 @@ const investigationResolvers = {
         createdAt: row.created_at,
         createdBy: row.created_by
       };
-    },
-    createInvestigation: async (
+    }),
+
+    createInvestigation: authGuard(async (
       _: any,
       { input }: { input: { name: string; description?: string } },
     ) => {
       logger.info(`Creating investigation: ${input.name} (placeholder)`);
-      // Placeholder: In a real implementation, create investigation in PostgreSQL
       return {
         id: 'new-inv-id',
         name: input.name,
         description: input.description,
         createdAt: new Date().toISOString(),
       };
-    },
-    updateInvestigation: async (
+    }, 'write:case'),
+
+    updateInvestigation: authGuard(async (
       _: any,
       {
         id,
@@ -210,19 +204,18 @@ const investigationResolvers = {
       logger.info(
         `Updating investigation ${id}: ${JSON.stringify(input)} (placeholder)`,
       );
-      // Placeholder: In a real implementation, update investigation in PostgreSQL
       return {
         id: id,
         name: input.name || `Investigation ${id}`,
         description: input.description || `Description for investigation ${id}`,
         updatedAt: new Date().toISOString(),
       };
-    },
-    deleteInvestigation: async (_: any, { id }: { id: string }) => {
+    }, 'write:case'),
+
+    deleteInvestigation: authGuard(async (_: any, { id }: { id: string }) => {
       logger.info(`Deleting investigation: ${id} (placeholder)`);
-      // Placeholder: In a real implementation, soft delete investigation in PostgreSQL
       return true;
-    },
+    }, 'write:case'),
   },
 };
 
