@@ -340,3 +340,4 @@ logs_*.zip
 .aider.chat.history.md
 .aider.input.history
 .aider.tags.cache.v4/
+server/src/nl2cypher/grammar.js

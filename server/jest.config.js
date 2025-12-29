@@ -26,7 +26,7 @@ export default {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
   transform: {
-    '^.+\\.tsx?$': [
+    '^.+\\.(t|j)sx?$': [
       'ts-jest',
       {
         useESM: true,
