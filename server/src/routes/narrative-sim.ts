@@ -13,7 +13,7 @@ import type {
   ShockDefinition,
   SimulationConfig,
 } from '../narrative/types.js';
-import { isFeatureEnabled } from '../config/mvp1-features.js';
+import { FeatureFlags } from '../config/featureFlags.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
@@ -24,7 +24,7 @@ router.use(requirePermission('simulation:run'));
 
 // Feature Flag Gate
 router.use((_req, res, next) => {
-  if (!isFeatureEnabled('NARRATIVE_SIMULATION')) {
+  if (!FeatureFlags.isEnabled('narrative.simulation')) {
     res.status(403).json({
       error: 'feature-disabled',
       message: 'Narrative Simulation Engine is not enabled for this environment.',

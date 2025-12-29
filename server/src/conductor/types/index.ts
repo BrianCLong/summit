@@ -22,6 +22,7 @@ export interface ConductInput {
   investigationId?: string;
   runId?: string;
   missionControlContext?: MissionControlConflictContext;
+  emergency_justification?: string;
 }
 
 export interface ConductResult {

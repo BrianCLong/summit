@@ -9,6 +9,7 @@ interface SearchBarProps {
   onClear?: () => void
   showShortcut?: boolean
   className?: string
+  debounceTime?: number
 }
 
 export function SearchBar({
@@ -18,22 +19,39 @@ export function SearchBar({
   onClear,
   showShortcut = true,
   className,
+  debounceTime = 300,
 }: SearchBarProps) {
   const [internalValue, setInternalValue] = React.useState(value)
+  const onChangeRef = React.useRef(onChange)
+
+  // Keep the latest onChange reference
+  React.useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
   React.useEffect(() => {
     setInternalValue(value)
   }, [value])
 
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      // Use the ref to avoid resetting the timer if onChange changes identity
+      if (internalValue !== value) {
+        onChangeRef.current?.(internalValue)
+      }
+    }, debounceTime)
+
+    return () => clearTimeout(timer)
+  }, [internalValue, debounceTime, value]) // Removed onChange from dependencies
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setInternalValue(newValue)
-    onChange?.(newValue)
   }
 
   const handleClear = () => {
     setInternalValue('')
-    onChange?.('')
+    onChangeRef.current?.('')
     onClear?.()
   }
 
