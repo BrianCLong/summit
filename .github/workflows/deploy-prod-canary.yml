@@ -42,9 +42,17 @@ jobs:
           python - <<'PY'
 import json, os, pathlib, sys
 
-config_path = pathlib.Path(os.environ["CANARY_CONFIG_PATH"])
-if not config_path.exists():
-    sys.exit(f"Missing canary config at {config_path}")
+candidates = []
+configured_path = os.environ.get("CANARY_CONFIG_PATH", "")
+if configured_path:
+    candidates.append(pathlib.Path(configured_path))
+
+# Allow multi-account pack to host rollout config as well.
+candidates.append(pathlib.Path("summit_helm_argocd_multiacct_pack/helm/canary/canary-stage-config.json"))
+
+config_path = next((path for path in candidates if path.exists()), None)
+if not config_path:
+    sys.exit("Missing canary config under summit_release_env_pack/ or summit_helm_argocd_multiacct_pack/")
 
 service = os.environ["SERVICE_KEY"]
 target_env = os.environ["TARGET_ENV"]
@@ -53,16 +61,25 @@ service_cfg = data.get("services", {}).get(service)
 if not service_cfg:
     sys.exit(f"Service '{service}' not defined in {config_path}")
 
+stage_weights = [
+    stage["weight"]
+    for stage in service_cfg.get("canaryStages", [])
+    if isinstance(stage, dict) and "weight" in stage
+]
+weights = stage_weights or service_cfg.get("trafficWeights", [])
+if not weights:
+    sys.exit(f"No canary traffic weights configured for '{service}' in {config_path}")
+
 namespace = service_cfg.get("namespaces", {}).get(target_env)
 host = service_cfg.get("hosts", {}).get(target_env)
 chart = service_cfg.get("chart", "charts/server")
 release = service_cfg.get("release", service)
-weights = service_cfg.get("trafficWeights", [])
 flag = service_cfg.get("featureFlag", f"{service}_canary_enabled")
 service_name = service_cfg.get("serviceName", f"{service}-service")
 
 output = pathlib.Path(os.environ["GITHUB_OUTPUT"])
 with output.open("a") as fh:
+    fh.write(f"config_path={config_path}\n")
     fh.write(f"namespace={namespace}\n")
     fh.write(f"host={host}\n")
     fh.write(f"chart={chart}\n")

@@ -18,9 +18,8 @@ on:
         default: '10'
         type: choice
         options:
-          - '5'
           - '10'
-          - '20'
+          - '25'
           - '50'
       environment:
         description: 'Target environment'
@@ -64,6 +63,9 @@ jobs:
       feature-flag: ${{ steps.validate.outputs.feature-flag }}
       weights: ${{ steps.validate.outputs.weights }}
       service-name: ${{ steps.validate.outputs.service-name }}
+      canary-percent: ${{ steps.validate.outputs.canary-percent }}
+      canary-plan: ${{ steps.validate.outputs.canary-plan }}
+      config-path: ${{ steps.validate.outputs.config-path }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,7 +75,8 @@ jobs:
         run: |
           SERVICE="${{ inputs.service }}"
           TARGET_ENV="${{ inputs.environment }}"
-          export SERVICE TARGET_ENV
+          CANARY_PERCENT_INPUT="${{ inputs.canary_percentage }}"
+          export SERVICE TARGET_ENV CANARY_PERCENT_INPUT
 
           # Validate version format
           if [[ "${{ inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -87,36 +90,72 @@ jobs:
           python - <<'PY'
 import json, os, pathlib, sys
 
-config_path = pathlib.Path(os.environ["CANARY_CONFIG_PATH"])
-if not config_path.exists():
-    sys.exit(f"Missing canary config at {config_path}")
+candidates = []
+configured_path = os.environ.get("CANARY_CONFIG_PATH", "")
+if configured_path:
+    candidates.append(pathlib.Path(configured_path))
+
+# Allow traffic-split config to live in the multi-account pack too.
+candidates.append(pathlib.Path("summit_helm_argocd_multiacct_pack/helm/canary/canary-stage-config.json"))
+
+config_path = next((path for path in candidates if path.exists()), None)
+if not config_path:
+    sys.exit("Missing canary config under summit_release_env_pack/ or summit_helm_argocd_multiacct_pack/")
 
 service = os.environ.get("SERVICE")
 target_env = os.environ.get("TARGET_ENV")
+requested_percent = os.environ.get("CANARY_PERCENT_INPUT", "0")
+
 data = json.loads(config_path.read_text())
 service_cfg = data.get("services", {}).get(service)
 if not service_cfg:
     sys.exit(f"Service '{service}' not found in {config_path}")
 
+stage_weights = [
+    stage["weight"]
+    for stage in service_cfg.get("canaryStages", [])
+    if isinstance(stage, dict) and "weight" in stage
+]
+weights = stage_weights or service_cfg.get("trafficWeights", [])
+if not weights:
+    sys.exit(f"No canary stages configured for '{service}' in {config_path}")
+
+try:
+    requested_int = int(requested_percent)
+except ValueError:
+    requested_int = 0
+
+pre_ga_weights = [w for w in weights if w < 100]
+if not pre_ga_weights:
+    sys.exit(f"Configured weights for '{service}' must include at least one pre-GA stage")
+
+if requested_int not in pre_ga_weights:
+    selected_percent = pre_ga_weights[0]
+    print(f"::warning::Requested canary percentage {requested_percent}% not in plan {pre_ga_weights}; using {selected_percent}%")
+else:
+    selected_percent = requested_int
+
 namespaces = service_cfg.get("namespaces", {})
 namespace = namespaces.get("production" if target_env == "production" else "staging")
 feature_flag = service_cfg.get("featureFlag", f"{service}_canary_enabled")
 release = service_cfg.get("release", service)
-weights = service_cfg.get("trafficWeights", [])
 service_name = service_cfg.get("serviceName", f"{service}-service")
 
 if not namespace:
     sys.exit(f"No namespace configured for env '{target_env}' in {config_path}")
 
 with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+    fh.write(f"config-path={config_path}\n")
     fh.write(f"namespace={namespace}\n")
     fh.write(f"release={release}\n")
     fh.write(f"feature-flag={feature_flag}\n")
     fh.write(f"weights={','.join(map(str, weights))}\n")
     fh.write(f"service-name={service_name}\n")
+    fh.write(f"canary-plan={','.join(map(str, pre_ga_weights))}\n")
+    fh.write(f"canary-percent={selected_percent}\n")
 PY
 
-          # Validate canary percentage
+          # Validate canary percentage against configured plan
           if [ "${{ inputs.canary_percentage }}" -gt 50 ]; then
             echo "❌ Canary percentage cannot exceed 50%"
             exit 1
@@ -261,12 +300,17 @@ PY
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
           RELEASE="${{ needs.validate-inputs.outputs.release }}"
+          CANARY_PLAN="${{ needs.validate-inputs.outputs.canary-plan }}"
+          CANARY_PERCENT="${{ needs.validate-inputs.outputs.canary-percent }}"
+
+          echo "Configured canary stages: ${CANARY_PLAN}"
+          echo "Deploying initial stage at ${CANARY_PERCENT}%"
 
           RELEASE_NAME="${RELEASE}" NAMESPACE="${NAMESPACE}" \
             ./scripts/rollback-deployment.sh canary-deploy ${{ inputs.version }} \
             --namespace ${NAMESPACE} \
             --release ${RELEASE} \
-            --canary-percent ${{ inputs.canary_percentage }}
+            --canary-percent ${CANARY_PERCENT}
 
       - name: Run canary health checks (SLO Gate)
         run: |
@@ -291,7 +335,7 @@ PY
           echo "🚀 Canary deployment successful!"
           echo "Service: ${{ inputs.service }}"
           echo "Version: ${{ inputs.version }}"
-          echo "Traffic: ${{ inputs.canary_percentage }}%"
+          echo "Traffic: ${{ needs.validate-inputs.outputs.canary-percent }}%"
           echo "Environment: ${{ inputs.environment }}"
 
   promote-canary:
@@ -328,47 +372,47 @@ PY
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-        - name: Verify signatures, digests, and attestations
-          id: verify-promote-artifacts
-          env:
-            IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
-            IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
-          run: |
-            set -euo pipefail
+      - name: Verify signatures, digests, and attestations
+        id: verify-promote-artifacts
+        env:
+          IMAGE_SERVER: ${{ env.REGISTRY }}/${{ github.repository }}/server:${{ inputs.version }}
+          IMAGE_CLIENT: ${{ env.REGISTRY }}/${{ github.repository }}/client:${{ inputs.version }}
+        run: |
+          set -euo pipefail
 
-            verify_and_pin() {
-              local image="$1"
-              local name="$2"
+          verify_and_pin() {
+            local image="$1"
+            local name="$2"
 
-              verification=$(cosign verify --output json "$image")
-              digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
+            verification=$(cosign verify --output json "$image")
+            digest=$(echo "$verification" | jq -r '.[0].critical.image["docker-manifest-digest"]')
 
-              if [ -z "$digest" ] || [ "$digest" = "null" ]; then
-                echo "❌ Unable to resolve digest after verification for $image" >&2
-                exit 1
-              fi
+            if [ -z "$digest" ] || [ "$digest" = "null" ]; then
+              echo "❌ Unable to resolve digest after verification for $image" >&2
+              exit 1
+            fi
 
-              pinned="${image%@*}@${digest}"
-              echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
+            pinned="${image%@*}@${digest}"
+            echo "${name}-pinned=${pinned}" >> "$GITHUB_OUTPUT"
 
-              cosign verify-attestation --type slsaprovenance "$pinned"
-              cosign verify-attestation --type spdx "$pinned"
-            }
+            cosign verify-attestation --type slsaprovenance "$pinned"
+            cosign verify-attestation --type spdx "$pinned"
+          }
 
-            verify_and_pin "$IMAGE_SERVER" server
-            verify_and_pin "$IMAGE_CLIENT" client
+          verify_and_pin "$IMAGE_SERVER" server
+          verify_and_pin "$IMAGE_CLIENT" client
 
-        - name: Download SBOM attestations
-          env:
-            IMAGE_SERVER: ${{ steps.verify-promote-artifacts.outputs.server-pinned }}
-            IMAGE_CLIENT: ${{ steps.verify-promote-artifacts.outputs.client-pinned }}
-          run: |
-            set -euo pipefail
-            for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
-              target=$(echo "$image" | sed 's/[:\/]/-/g')
-              cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
-              cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
-            done
+      - name: Download SBOM attestations
+        env:
+          IMAGE_SERVER: ${{ steps.verify-promote-artifacts.outputs.server-pinned }}
+          IMAGE_CLIENT: ${{ steps.verify-promote-artifacts.outputs.client-pinned }}
+        run: |
+          set -euo pipefail
+          for image in "$IMAGE_SERVER" "$IMAGE_CLIENT"; do
+            target=$(echo "$image" | sed 's/[:\/]/-/g')
+            cosign download attestation --predicate-type spdx "$image" > "${target}-att.json"
+            cat "${target}-att.json" | jq -r '.attestations[0].payload' | base64 -d | jq -r '.predicate' > "${target}-sbom.json"
+          done
 
       - name: Enforce SBOM policy with Conftest
         run: |
