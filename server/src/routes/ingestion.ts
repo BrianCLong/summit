@@ -6,6 +6,7 @@ import { PipelineConfig } from '../data-model/types';
 import { Pool } from 'pg';
 import { QueueService } from '../ingestion/QueueService';
 import { ensureAuthenticated } from '../middleware/auth';
+import { BackpressureGuard } from '../backpressure/guard';
 
 const router = express.Router();
 const orchestrator = new PipelineOrchestrator();
@@ -38,6 +39,10 @@ router.post('/pipelines/:key/run', async (req, res) => {
 // Admin API: Start Ingestion via Queue (New Endpoint)
 router.post('/start', ensureAuthenticated, async (req, res) => {
   try {
+    if (BackpressureGuard.getInstance().shouldBlock()) {
+      return res.status(503).json({ error: 'Service Unavailable: Backpressure applied' });
+    }
+
     const config: PipelineConfig = req.body;
 
     // Basic validation
