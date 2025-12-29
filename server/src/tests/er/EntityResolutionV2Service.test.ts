@@ -109,11 +109,18 @@ describe('EntityResolutionV2Service', () => {
     it('should short-circuit on idempotency key', async () => {
       const tx = {
         run: jest.fn(async (query: string) => {
-          if (query.includes('MATCH (d:ERDecision {idempotencyKey')) {
+          if (query.includes('MERGE (d:ERDecision {idempotencyKey')) {
             return {
               records: [
                 {
-                  get: (key: string) => (key === 'decisionId' ? 'dec-1' : 'merge-1'),
+                  get: (key: string) => {
+                    if (key === 'decisionId') return 'dec-1';
+                    if (key === 'mergeId') return 'merge-1';
+                    if (key === 'masterId') return 'm1';
+                    if (key === 'mergeIds') return ['d1'];
+                    if (key === 'created') return false;
+                    return null;
+                  },
                 },
               ],
             };

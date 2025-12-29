@@ -4,6 +4,11 @@ import { createHash, randomUUID } from 'crypto';
 import { soundex } from './soundex.js';
 import { getPostgresPool } from '../../config/database.js';
 import { dlqFactory } from '../../lib/dlq/index.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
+import {
+  evaluateGuardrails as evaluateGuardrailDataset,
+  type GuardrailResult,
+} from './guardrails.js';
 
 const log = (pino as any)({ name: 'EntityResolutionV2Service' });
 
@@ -53,12 +58,6 @@ export interface MergeRequest {
   guardrailDatasetId?: string;
   /** Override reason when bypassing guardrails */
   guardrailOverrideReason?: string;
-}
-
-export interface GuardrailResult {
-  datasetId: string;
-  passed: boolean;
-  checks: Array<{ name: string; passed: boolean; message?: string }>;
 }
 
 export class EntityResolutionV2Service {
@@ -314,16 +313,29 @@ export class EntityResolutionV2Service {
    * Evaluate guardrails for merge operations
    */
   public evaluateGuardrails(datasetId?: string): GuardrailResult {
-    // Stub implementation for guardrail evaluation
-    return {
-      datasetId: datasetId || 'default',
-      passed: true,
-      checks: [
-        { name: 'cardinality', passed: true },
-        { name: 'conflict_detection', passed: true },
-        { name: 'data_quality', passed: true },
-      ],
-    };
+    const resolvedDatasetId =
+      datasetId || process.env.ER_GUARDRAIL_DATASET_ID || 'baseline';
+
+    return evaluateGuardrailDataset(
+      resolvedDatasetId,
+      (entityA, entityB) => {
+        const scored = this.explain(
+          {
+            id: entityA.id,
+            labels: entityA.labels,
+            properties: entityA.properties,
+            lacLabels: entityA.lacLabels,
+          },
+          {
+            id: entityB.id,
+            labels: entityB.labels,
+            properties: entityB.properties,
+            lacLabels: entityB.lacLabels,
+          },
+        );
+        return scored.score;
+      },
+    );
   }
 
   public async merge(
@@ -341,6 +353,11 @@ export class EntityResolutionV2Service {
     const uniqueMergeIds = Array.from(new Set(mergeIds));
     const mergeId = req.mergeId || this.buildMergeId(masterId, uniqueMergeIds);
     const idempotencyKey = req.idempotencyKey || mergeId;
+    const guardrailDatasetId =
+      req.guardrailDatasetId || process.env.ER_GUARDRAIL_DATASET_ID;
+    const guardrailResult = guardrailDatasetId
+      ? this.evaluateGuardrails(guardrailDatasetId)
+      : undefined;
 
     if (uniqueMergeIds.length !== mergeIds.length) {
       await this.recordMergeConflict({
@@ -374,6 +391,43 @@ export class EntityResolutionV2Service {
         metadata: { limit: MERGE_GUARDRAILS.maxMergeIds },
       });
       throw new Error('Merge cardinality exceeds guardrail limits');
+    }
+
+    if (guardrailResult && !guardrailResult.passed) {
+      if (!req.guardrailOverrideReason) {
+        await this.recordMergeConflict({
+          mergeId,
+          masterId,
+          mergeIds: uniqueMergeIds,
+          reason: 'Merge guardrails failed',
+          userContext,
+          metadata: {
+            guardrails: guardrailResult,
+          },
+        });
+        throw new Error('Merge guardrails failed; override required');
+      }
+
+      await provenanceLedger.appendEntry({
+        tenantId: userContext?.tenantId || 'system',
+        actionType: 'ER_GUARDRAIL_OVERRIDE',
+        resourceType: 'entity-merge',
+        resourceId: mergeId,
+        actorId: userContext?.userId || 'unknown',
+        actorType: 'user',
+        payload: {
+          mergeId,
+          masterId,
+          mergeIds: uniqueMergeIds,
+          datasetId: guardrailResult.datasetId,
+          thresholds: guardrailResult.thresholds,
+          metrics: guardrailResult.metrics,
+          reason: req.guardrailOverrideReason,
+        },
+        metadata: {
+          evaluatedAt: guardrailResult.evaluatedAt,
+        },
+      });
     }
 
     const result = await session.run(
@@ -415,27 +469,83 @@ export class EntityResolutionV2Service {
 
     const tx = session.beginTransaction();
     try {
-      const existingDecision = await tx.run(
+      const decisionId = randomUUID();
+      const decisionResult = await tx.run(
         `
-          MATCH (d:ERDecision {idempotencyKey: $idempotencyKey})
-          RETURN d.id AS decisionId, d.mergeId AS mergeId
-          LIMIT 1
+          MERGE (d:ERDecision {idempotencyKey: $idempotencyKey})
+          ON CREATE SET d.id = $decisionId,
+                        d.mergeId = $mergeId,
+                        d.timestamp = datetime(),
+                        d.user = $userId,
+                        d.rationale = $rationale,
+                        d.originalIds = $mergeIds,
+                        d.masterId = $masterId
+          WITH d, d.id = $decisionId AS created
+          RETURN d.id AS decisionId,
+                 d.mergeId AS mergeId,
+                 d.masterId AS masterId,
+                 d.originalIds AS mergeIds,
+                 created
         `,
-        { idempotencyKey },
+        {
+          decisionId,
+          userId: userContext.userId || 'unknown',
+          rationale,
+          mergeIds: uniqueMergeIds,
+          masterId,
+          mergeId,
+          idempotencyKey,
+        },
       );
 
-      if (existingDecision.records.length > 0) {
-        const decisionId = existingDecision.records[0].get('decisionId');
+      if (decisionResult.records.length === 0) {
+        throw new Error('Failed to create merge decision');
+      }
+
+      const decisionRecord = decisionResult.records[0];
+      const created = decisionRecord.get('created');
+      const persistedDecisionId = decisionRecord.get('decisionId');
+      const persistedMergeId = decisionRecord.get('mergeId');
+      const persistedMasterId = decisionRecord.get('masterId');
+      const persistedMergeIds = (decisionRecord.get('mergeIds') || []) as string[];
+
+      if (!created) {
+        const sortedPersisted = [...persistedMergeIds].sort();
+        const sortedIncoming = [...uniqueMergeIds].sort();
+        const mergeIdsMatch =
+          sortedPersisted.length === sortedIncoming.length &&
+          sortedPersisted.every((value, index) => value === sortedIncoming[index]);
+        const masterMatch = persistedMasterId === masterId;
+        const mergeIdMatch = persistedMergeId === mergeId;
+
+        if (!mergeIdsMatch || !masterMatch || !mergeIdMatch) {
+          await this.recordMergeConflict({
+            mergeId,
+            masterId,
+            mergeIds: uniqueMergeIds,
+            reason: 'Idempotency key conflict with existing merge decision',
+            userContext,
+            metadata: {
+              persisted: {
+                mergeId: persistedMergeId,
+                masterId: persistedMasterId,
+                mergeIds: persistedMergeIds,
+              },
+            },
+          });
+          throw new Error('Idempotency key conflict detected');
+        }
+
         await tx.commit();
         log.info(
-          { mergeId, decisionId },
+          { mergeId, decisionId: persistedDecisionId },
           'Idempotent merge request detected; skipping duplicate merge',
         );
         return {
-          decisionId,
-          mergeId,
+          decisionId: persistedDecisionId,
+          mergeId: persistedMergeId,
           idempotent: true,
-          guardrails: req.guardrailDatasetId ? this.evaluateGuardrails(req.guardrailDatasetId) : undefined,
+          guardrails: guardrailResult,
           overrideUsed: !!req.guardrailOverrideReason,
         };
       }
@@ -474,26 +584,14 @@ export class EntityResolutionV2Service {
         throw new Error('Relationship cardinality exceeds guardrail limits');
       }
 
-      // 2. Create ERDecision node
-      const decisionId = randomUUID();
       await tx.run(
         `
-          CREATE (d:ERDecision {
-            id: $decisionId,
-            mergeId: $mergeId,
-            idempotencyKey: $idempotencyKey,
-            timestamp: datetime(),
-            user: $userId,
-            rationale: $rationale,
-            originalIds: $mergeIds,
-            masterId: $masterId
-          })
-          WITH d
+          MATCH (d:ERDecision {id: $decisionId})
           MATCH (m {id: $masterId})
           MERGE (d)-[:AFFECTS]->(m)
         `,
         {
-          decisionId,
+          decisionId: persistedDecisionId,
           userId: userContext.userId || 'unknown',
           rationale,
           mergeIds: uniqueMergeIds,
@@ -553,7 +651,7 @@ export class EntityResolutionV2Service {
 
       const snapshotId = await this.persistRollbackSnapshot({
         mergeId,
-        decisionId,
+        decisionId: persistedDecisionId,
         masterId,
         mergeIds: uniqueMergeIds,
         entities,
@@ -562,13 +660,15 @@ export class EntityResolutionV2Service {
         metadata: {
           rationale,
           guardrails: MERGE_GUARDRAILS,
+          guardrailResult,
+          idempotencyKey,
         },
       });
 
       await tx.run(`
         MATCH (d:ERDecision {id: $decisionId})
         SET d.archivedRelationships = $blob
-      `, { decisionId, blob: JSON.stringify(relationshipsToArchive) });
+      `, { decisionId: persistedDecisionId, blob: JSON.stringify(relationshipsToArchive) });
 
       await tx.run(`
         MATCH (n)-[r]-()
@@ -576,7 +676,7 @@ export class EntityResolutionV2Service {
         SET r.merged = true
         SET r.mergedAt = datetime()
         SET r.mergedByDecision = $decisionId
-      `, { mergeIds: uniqueMergeIds, decisionId });
+      `, { mergeIds: uniqueMergeIds, decisionId: persistedDecisionId });
 
       for (const id of uniqueMergeIds) {
          await tx.run(`
@@ -590,15 +690,15 @@ export class EntityResolutionV2Service {
 
       await tx.commit();
       log.info(
-        `Merged entities ${uniqueMergeIds.join(', ')} into ${masterId} with decision ${decisionId}`,
+        `Merged entities ${uniqueMergeIds.join(', ')} into ${masterId} with decision ${persistedDecisionId}`,
       );
 
       return {
-        decisionId,
+        decisionId: persistedDecisionId,
         mergeId,
         snapshotId,
         idempotent: false,
-        guardrails: req.guardrailDatasetId ? this.evaluateGuardrails(req.guardrailDatasetId) : undefined,
+        guardrails: guardrailResult,
         overrideUsed: !!req.guardrailOverrideReason,
       };
     } catch (e) {
