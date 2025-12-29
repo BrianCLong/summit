@@ -10,3 +10,4 @@ export * from './er-tuner.js';
 export * from './cost-guard-tiles.js';
 export * from './osint-mapping.js';
 export * from './components/graph/LineageDashboard.js';
+export * from './components/graph/GraphExperiencePanel.js';
