@@ -90,7 +90,7 @@ export default {
   verbose: true,
   clearMocks: true,
   restoreMocks: true,
-  resetMocks: true,
+  resetMocks: false, // Keep mock implementations between tests
   bail: false,
   errorOnDeprecated: true,
 
