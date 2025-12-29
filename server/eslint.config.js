@@ -116,6 +116,7 @@ export default [
     linterOptions: { reportUnusedDisableDirectives: true },
     rules: {
       'no-unused-expressions': 'off', // Disable due to ESLint 9/typescript-eslint compatibility issue
+      'no-unused-vars': 'off', // Disable base rule in favor of @typescript-eslint version
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-process-exit': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -155,7 +156,10 @@ export default [
       '**/*.test.ts',
       '**/*.test.js',
     ],
-    plugins: { jest: (await import('eslint-plugin-jest')).default },
+    plugins: {
+      jest: (await import('eslint-plugin-jest')).default,
+      '@typescript-eslint': tseslint.plugin,
+    },
     languageOptions: {
       parser: tseslint.parser, // Use TypeScript parser for .ts test files
       ecmaVersion: 2022,
@@ -174,6 +178,8 @@ export default [
       'jest/no-disabled-tests': 'warn',
       'jest/no-identical-title': 'error',
       'no-console': 'off', // Allow console in tests
+      'no-unused-vars': 'off', // Disable base rule in favor of @typescript-eslint version
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
   // Legacy files exemption (gradual migration)

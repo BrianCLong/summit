@@ -313,6 +313,7 @@ jest.mock('prom-client', () => {
   };
 });
 
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks();

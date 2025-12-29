@@ -40,6 +40,10 @@ export default {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     // Handle .js extensions in imports
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    // Mock native/unavailable modules
+    '^pkcs11js$': '<rootDir>/tests/__mocks__/pkcs11js.js',
+    '^@packages/cache$': '<rootDir>/tests/__mocks__/packages-cache.js',
+    '^@server/pits$': '<rootDir>/tests/__mocks__/server-pits.js',
   },
 
   transform: {
