@@ -9,7 +9,7 @@ import {
   type GraphOperation,
 } from './graph-crdt.js';
 import { createCollaborationHub } from './collaborationHub.js';
-import { createCollaborationHub } from './collaborationHub.js';
+
 import {
   addAnnotation,
   addComment,
@@ -102,8 +102,6 @@ export function initSocket(httpServer: any): Server {
       credentials: true,
     },
   });
-
-  createCollaborationHub(io);
 
   createCollaborationHub(io);
 
@@ -616,34 +614,34 @@ export function initSocket(httpServer: any): Server {
         if (!auth.allowed) return;
         try {
           await deleteComment(investigationId, commentId);
-        ns.to(roomFor(investigationId)).emit('comment:deleted', {
-          investigationId,
-          commentId,
-        });
-        const activityEntry = await recordActivity(investigationId, {
-          type: 'comment',
-          action: 'deleted',
-          actorId: socket.user!.id,
-          actorName: displayName(),
-          details: { commentId },
-        });
-        ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
-        await emitRealtimeAudit(
-          'comment.deleted',
-          {
-            type: 'comment',
-            id: commentId,
-            path: `investigations/${investigationId}`,
-          },
-          {
+          ns.to(roomFor(investigationId)).emit('comment:deleted', {
             investigationId,
-          },
-        );
-      } catch (err) {
-        logger.warn(
-          { err: (err as Error).message, investigationId },
-          'Failed to delete comment',
-        );
+            commentId,
+          });
+          const activityEntry = await recordActivity(investigationId, {
+            type: 'comment',
+            action: 'deleted',
+            actorId: socket.user!.id,
+            actorName: displayName(),
+            details: { commentId },
+          });
+          ns.to(roomFor(investigationId)).emit('activity:event', activityEntry);
+          await emitRealtimeAudit(
+            'comment.deleted',
+            {
+              type: 'comment',
+              id: commentId,
+              path: `investigations/${investigationId}`,
+            },
+            {
+              investigationId,
+            },
+          );
+        } catch (err) {
+          logger.warn(
+            { err: (err as Error).message, investigationId },
+            'Failed to delete comment',
+          );
         }
       },
     );

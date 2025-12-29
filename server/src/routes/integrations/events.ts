@@ -1,7 +1,7 @@
 import express from 'express';
-import { eventService } from '../../events/EventService';
-import { requireAuth } from '../../middleware/auth';
-import { requireRole } from '../../middleware/roles';
+import { eventService } from '../../events/EventService.js';
+import { requireAuth } from '../../middleware/unifiedAuth.js';
+import { requireRole } from '../../middleware/rbac.js';
 
 const router = express.Router();
 
