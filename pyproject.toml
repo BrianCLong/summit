@@ -17,7 +17,7 @@ sbom = []
 perf = []
 
 [tool.setuptools.packages.find]
-where = ["src"]
+include = ["maestro*", "api*"]
 
 [tool.ruff]
 line-length = 100

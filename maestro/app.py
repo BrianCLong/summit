@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from fastapi import FastAPI
 
 from api.maestro import router as maestro_router
+from api.conductor import router as conductor_router
 from maestro.storage import MaestroStore
 
 
@@ -25,6 +26,7 @@ def create_maestro_app() -> FastAPI:
 
     # Include routers
     app.include_router(maestro_router)
+    app.include_router(conductor_router)
 
     # Health check
     @app.get("/health")
