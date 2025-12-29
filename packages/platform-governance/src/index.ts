@@ -9,6 +9,7 @@
  * - Service and code ownership tracking
  * - CODEOWNERS generation
  * - Coverage validation
+ * - Agent control-plane primitives (tool registry, quotas, approvals, sandbox validation)
  */
 
 // Policy exports
@@ -16,6 +17,18 @@ export * from './policy/engine.js';
 
 // Ownership exports
 export * from './ownership/matrix.js';
+
+// Isolation
+export * from './isolation/primitives.js';
+
+// Control plane exports
+export * from './control-plane/types.js';
+export * from './control-plane/tool-registry.js';
+export * from './control-plane/quota.js';
+export * from './control-plane/execution-guard.js';
+export * from './control-plane/sandbox.js';
+export * from './control-plane/safe-tool.js';
+export * from './control-plane/audit.js';
 
 // Re-export commonly used items
 export {
