@@ -5,6 +5,7 @@ import { BackupService } from '../backup/BackupService.js';
 import { DisasterRecoveryService } from '../dr/DisasterRecoveryService.js';
 import { ensureRole } from '../middleware/auth.js';
 import logger from '../config/logger.js';
+import { evidenceIntegrityService } from '../evidence/integrity-service.js';
 
 const router = Router();
 const backupService = new BackupService();
@@ -93,6 +94,33 @@ router.get('/dr/status', async (req, res) => {
         res.json(status);
     } catch (error) {
         res.status(500).json({ error: 'Failed to get DR status' });
+    }
+});
+
+/**
+ * @route POST /ops/evidence/verify
+ * @description Trigger chunked evidence re-hashing for integrity verification
+ */
+router.post('/evidence/verify', async (req, res) => {
+    if (process.env.EVIDENCE_INTEGRITY !== 'true') {
+        return res.status(503).json({ ok: false, error: 'Evidence integrity verification is disabled' });
+    }
+
+    const chunkSize = Number(req.body?.chunkSize ?? process.env.EVIDENCE_INTEGRITY_CHUNK ?? 50);
+    const rateLimitPerSecond = Number(req.body?.rateLimitPerSecond ?? process.env.EVIDENCE_INTEGRITY_RPS ?? 5);
+    const emitIncidents = req.body?.emitIncidents ?? process.env.EVIDENCE_INTEGRITY_INCIDENTS === 'true';
+
+    try {
+        const result = await evidenceIntegrityService.verifyAll({
+            chunkSize: Number.isFinite(chunkSize) ? chunkSize : undefined,
+            rateLimitPerSecond: Number.isFinite(rateLimitPerSecond) ? rateLimitPerSecond : undefined,
+            emitIncidents,
+        });
+
+        return res.json({ ok: true, ...result });
+    } catch (error) {
+        logger.error('Failed to run evidence integrity verification', error);
+        return res.status(500).json({ ok: false, error: 'Failed to verify evidence integrity' });
     }
 });
 
