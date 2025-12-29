@@ -1,4 +1,7 @@
 
+import { provenanceLedger } from '../../src/provenance/ledger.js';
+import { RollbackEngine } from './rollback-engine.js';
+
 // Mock external services for demonstration
 const mockLoadBalancer = {
   setTrafficPercentage: async (service: string, version: string, percentage: number): Promise<void> => {
@@ -19,7 +22,7 @@ const mockMonitoringService = {
   },
 };
 
-interface CanaryConfig {
+export interface CanaryConfig {
   serviceName: string;
   stableVersion: string;
   canaryVersion: string;
@@ -27,28 +30,57 @@ interface CanaryConfig {
   healthCheckEndpoint: string;
   errorRateThreshold: number; // e.g., 0.01 for 1%
   latencyThreshold: number; // e.g., 500ms
+  tenantId: string;
+  actorId: string;
 }
 
 export class CanaryOrchestrator {
   private config: CanaryConfig;
+  private rollbackEngine: RollbackEngine;
+  // Allow overriding monitoring for tests
+  public _monitoringService = mockMonitoringService;
 
-  constructor(config: CanaryConfig) {
+  constructor(config: CanaryConfig, rollbackEngine?: RollbackEngine) {
     this.config = config;
+    this.rollbackEngine = rollbackEngine || new RollbackEngine();
   }
 
   public async start(): Promise<boolean> {
     console.log(`Starting canary deployment for ${this.config.serviceName} from ${this.config.stableVersion} to ${this.config.canaryVersion}`);
 
+    try {
+      await provenanceLedger.appendEntry({
+        tenantId: this.config.tenantId,
+        actorId: this.config.actorId,
+        actorType: 'system',
+        actionType: 'CANARY_START',
+        resourceType: 'Deployment',
+        resourceId: this.config.serviceName,
+        payload: {
+          stableVersion: this.config.stableVersion,
+          canaryVersion: this.config.canaryVersion,
+          steps: this.config.trafficSteps
+        },
+        metadata: {
+           purpose: 'Canary Deployment',
+           component: 'CanaryOrchestrator'
+        }
+      });
+    } catch (e) {
+      console.warn('Failed to record canary start to ledger', e);
+    }
+
     for (const step of this.config.trafficSteps) {
       await this.shiftTraffic(step);
 
       // Allow time for metrics to propagate
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      // Use shorter time if in test/simulated mode?
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Reduced from 5000 for demo speed
 
       const isHealthy = await this.validateHealth();
       if (!isHealthy) {
         console.error('Canary version is unhealthy. Rolling back.');
-        await this.rollback();
+        await this.rollback("SLO Breach detected during canary step");
         return false;
       }
       console.log(`Canary version is healthy at ${step}% traffic.`);
@@ -67,23 +99,63 @@ export class CanaryOrchestrator {
 
   private async validateHealth(): Promise<boolean> {
     console.log(`Validating health of canary version ${this.config.canaryVersion}...`);
-    const { errorRate, latency } = await mockMonitoringService.getMetrics(this.config.serviceName, this.config.canaryVersion);
+    const { errorRate, latency } = await this._monitoringService.getMetrics(this.config.serviceName, this.config.canaryVersion);
 
     console.log(`Metrics - Error Rate: ${errorRate}, Latency: ${latency}ms`);
 
+    let failureReason = "";
     if (errorRate > this.config.errorRateThreshold) {
-      console.error(`Health check failed: Error rate ${errorRate} exceeds threshold of ${this.config.errorRateThreshold}`);
-      return false;
+      failureReason = `Error rate ${errorRate} exceeds threshold of ${this.config.errorRateThreshold}`;
+    } else if (latency > this.config.latencyThreshold) {
+      failureReason = `Latency ${latency}ms exceeds threshold of ${this.config.latencyThreshold}`;
     }
-    if (latency > this.config.latencyThreshold) {
-      console.error(`Health check failed: Latency ${latency}ms exceeds threshold of ${this.config.latencyThreshold}`);
+
+    if (failureReason) {
+      console.error(`Health check failed: ${failureReason}`);
+
+      try {
+        await provenanceLedger.appendEntry({
+          tenantId: this.config.tenantId,
+          actorId: this.config.actorId,
+          actorType: 'system',
+          actionType: 'SLO_BREACH',
+          resourceType: 'Deployment',
+          resourceId: this.config.serviceName,
+          payload: {
+            errorRate,
+            latency,
+            thresholds: {
+              errorRate: this.config.errorRateThreshold,
+              latency: this.config.latencyThreshold
+            },
+            reason: failureReason
+          },
+          metadata: {
+             purpose: 'Canary Health Check',
+             component: 'CanaryOrchestrator'
+          }
+        });
+      } catch (e) {
+        console.warn('Failed to record SLO breach to ledger', e);
+      }
+
       return false;
     }
     return true;
   }
 
-  private async rollback(): Promise<void> {
+  private async rollback(reason: string): Promise<void> {
     console.log("Rolling back traffic to the stable version...");
+
+    // Use RollbackEngine
+    await this.rollbackEngine.performRollback({
+      serviceName: this.config.serviceName,
+      reason: reason,
+      tenantId: this.config.tenantId,
+      actorId: this.config.actorId,
+      migrationSteps: 0 // Assume no DB migration for canary rollback usually
+    });
+
     await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, 0);
     await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 100);
     console.log('Rollback complete.');
@@ -92,6 +164,27 @@ export class CanaryOrchestrator {
   private async promote(): Promise<void> {
     await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.canaryVersion, 100);
     await mockLoadBalancer.setTrafficPercentage(this.config.serviceName, this.config.stableVersion, 0);
+
+    try {
+        await provenanceLedger.appendEntry({
+          tenantId: this.config.tenantId,
+          actorId: this.config.actorId,
+          actorType: 'system',
+          actionType: 'CANARY_PROMOTE',
+          resourceType: 'Deployment',
+          resourceId: this.config.serviceName,
+          payload: {
+            version: this.config.canaryVersion
+          },
+          metadata: {
+             purpose: 'Canary Promotion',
+             component: 'CanaryOrchestrator'
+          }
+        });
+      } catch (e) {
+        console.warn('Failed to record promotion to ledger', e);
+      }
+
     console.log('Promotion to 100% complete.');
   }
 }
