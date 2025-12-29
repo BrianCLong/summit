@@ -84,6 +84,25 @@ describe('MetricsCollector', () => {
 
       expect(metrics.averageQueryTime).toBe(200);
     });
+
+    it('should track p95 latency and ground truth coverage', () => {
+      collector.startSession('ground-truth-session', 'fraud-ring');
+      collector.updateSessionMetrics('ground-truth-session', {
+        groundTruthTotal: 4,
+        groundTruthFound: 2,
+        groundTruthCoverage: 0.5,
+      });
+
+      collector.recordStepCompletion('ground-truth-session', 'STEP1', 50);
+      collector.recordStepCompletion('ground-truth-session', 'STEP2', 100);
+      collector.recordStepCompletion('ground-truth-session', 'STEP3', 150);
+      collector.recordStepCompletion('ground-truth-session', 'STEP4', 200);
+
+      const metrics = collector.endSession('ground-truth-session');
+
+      expect(metrics.p95StepLatency).toBeGreaterThan(0);
+      expect(metrics.groundTruthCoverage).toBeCloseTo(0.5);
+    });
   });
 
   describe('Metrics Aggregation', () => {

@@ -11,6 +11,7 @@ import {
   Relationship,
   EntityType,
   RelationshipType,
+  GroundTruth,
   GRAPH_SIZE_CONFIGS,
   GraphSize,
   ScenarioType,
@@ -200,6 +201,7 @@ export class ScenarioGenerator {
         seed: this.seed,
         generatedAt: new Date().toISOString(),
         parameters: params,
+        groundTruth: this.buildGroundTruth(entities, relationships),
       },
     };
   }
@@ -316,6 +318,7 @@ export class ScenarioGenerator {
         seed: this.seed,
         generatedAt: new Date().toISOString(),
         parameters: params,
+        groundTruth: this.buildGroundTruth(entities, relationships),
       },
     };
   }
@@ -448,6 +451,7 @@ export class ScenarioGenerator {
         seed: this.seed,
         generatedAt: new Date().toISOString(),
         parameters: params,
+        groundTruth: this.buildGroundTruth(entities, relationships),
       },
     };
   }
@@ -521,6 +525,7 @@ export class ScenarioGenerator {
         seed: this.seed,
         generatedAt: new Date().toISOString(),
         parameters: params,
+        groundTruth: this.buildGroundTruth(entities, relationships),
       },
     };
   }
@@ -630,6 +635,7 @@ export class ScenarioGenerator {
         seed: this.seed,
         generatedAt: new Date().toISOString(),
         parameters: params,
+        groundTruth: this.buildGroundTruth(entities, relationships),
       },
     };
   }
@@ -712,6 +718,7 @@ export class ScenarioGenerator {
         seed: this.seed,
         generatedAt: new Date().toISOString(),
         parameters: params,
+        groundTruth: this.buildGroundTruth(entities, relationships),
       },
     };
   }
@@ -1223,6 +1230,61 @@ export class ScenarioGenerator {
     const twoYears = 2 * 365 * 24 * 60 * 60 * 1000;
     const timestamp = now - this.rng.next() * twoYears;
     return new Date(timestamp).toISOString().split('T')[0];
+  }
+
+  private buildGroundTruth(
+    entities: Entity[],
+    relationships: Relationship[]
+  ): GroundTruth {
+    const rankedEntities = entities
+      .map((entity, index) => {
+        const weight =
+          Number(entity.properties?.risk_score) ||
+          Number(entity.properties?.threat_level) ||
+          Number(entity.properties?.influence_score) ||
+          (entity.type === 'PERSON' || entity.type === 'ORGANIZATION' ? 50 : 10);
+
+        return { index, weight };
+      })
+      .sort((a, b) => b.weight - a.weight);
+
+    const keyEntityCount = Math.max(1, Math.floor(entities.length * 0.05));
+    const keyEntityIndices = rankedEntities
+      .slice(0, keyEntityCount)
+      .map((item) => item.index);
+
+    const relationshipWeights = relationships.map((relationship, index) => ({
+      index,
+      weight: ['AFFILIATED_WITH', 'TRANSACTED_WITH', 'COMMUNICATES_WITH'].includes(
+        relationship.type
+      )
+        ? 100
+        : ['OWNS', 'CONTROLS', 'EMPLOYED_BY'].includes(relationship.type)
+          ? 75
+          : 25,
+    }));
+
+    const criticalRelationshipCount = Math.max(
+      1,
+      Math.floor(relationshipWeights.length * 0.1)
+    );
+
+    const criticalRelationshipIndices = relationshipWeights
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, criticalRelationshipCount)
+      .map((item) => item.index);
+
+    const citationSources = entities
+      .map((entity, index) => ({ entity, index }))
+      .filter(({ entity }) => entity.type === 'DOCUMENT')
+      .slice(0, 5)
+      .map((item) => item.index);
+
+    return {
+      keyEntityIndices,
+      criticalRelationshipIndices,
+      citationSources,
+    };
   }
 
   private generateEntityName(type: EntityType, index: number): string {
