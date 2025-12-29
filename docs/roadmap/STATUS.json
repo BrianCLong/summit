@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2025-12-29T21:35:41Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,30 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
+          "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Graph Performance & Collaboration Scale",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "LOD WebGL Rendering",
+          "status": "planning",
+          "owner": "Jules"
+        },
+        {
+          "id": "D2",
+          "name": "Neo4j Relationship Bucketing",
+          "status": "planning",
+          "owner": "Jules"
+        },
+        {
+          "id": "D3",
+          "name": "Redis Pub/Sub Collaboration",
+          "status": "planning",
           "owner": "Jules"
         }
       ]
