@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts', '.mjs'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
@@ -9,6 +9,9 @@ module.exports = {
         useESM: true,
         tsconfig: 'tsconfig.test.json',
         isolatedModules: true,
+        diagnostics: {
+          ignoreCodes: ['TS5023'],
+        },
       },
     ],
   },
