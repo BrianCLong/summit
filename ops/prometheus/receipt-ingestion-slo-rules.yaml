@@ -1,0 +1,40 @@
+---
+groups:
+  - name: receipt-ingestion-slos
+    interval: 30s
+    rules:
+      - record: service:receipt_ingestion_p95_latency_seconds:rate5m
+        expr: histogram_quantile(0.95, sum(rate(receipt_ingestion_duration_seconds_bucket[5m])) by (le, service))
+
+      - record: service:receipt_ingestion_error_ratio:rate5m
+        expr: |
+          sum by (service) (rate(receipt_ingestion_errors_total[5m]))
+            / clamp_min(sum by (service) (rate(receipt_ingestion_total[5m])), 0.001)
+
+      - alert: ReceiptIngestionP95LatencyHigh
+        expr: service:receipt_ingestion_p95_latency_seconds:rate5m > 2
+        for: 10m
+        labels:
+          severity: page
+          slo: latency
+          pagerduty: "true"
+        annotations:
+          summary: "Receipt ingestion p95 latency breaching SLO"
+          description: |
+            Receipt ingestion p95 latency is {{ $value | printf "%.2f" }}s (limit 2.0s) for 10m.
+            Check upstream dependencies, cache effectiveness, and recent deploys.
+          runbook_url: https://runbooks.intelgraph.io/receipt-ingestion
+
+      - alert: ReceiptIngestionAvailabilityErrorBudgetBurn
+        expr: (service:receipt_ingestion_error_ratio:rate5m > 0.002)
+        for: 5m
+        labels:
+          severity: page
+          slo: availability
+          pagerduty: "true"
+        annotations:
+          summary: "Receipt ingestion error budget burning too fast"
+          description: |
+            Receipt ingestion 5xx ratio above 0.2% (5m).
+            Investigate recent deploys, dependency errors, and rollout status.
+          runbook_url: https://runbooks.intelgraph.io/receipt-ingestion

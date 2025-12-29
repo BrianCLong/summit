@@ -1,0 +1,37 @@
+---
+# Service Level Objectives for Receipt Ingestion
+
+apiVersion: monitoring.intelgraph.io/v1
+kind: SLOConfig
+metadata:
+  name: receipt-ingestion-slos
+  version: '1.0.0'
+
+spec:
+  slis:
+    receipt_ingestion_latency:
+      name: 'Receipt Ingestion Latency'
+      description: 'Time to process incoming receipts'
+      metric: 'histogram_quantile(0.95, sum(rate(receipt_ingestion_duration_seconds_bucket[5m])) by (le))'
+      unit: 'seconds'
+
+    receipt_ingestion_error_rate:
+      name: 'Receipt Ingestion Error Rate'
+      description: 'Percentage of failed receipt ingestions'
+      metric: "sum(rate(receipt_ingestion_errors_total[5m])) / sum(rate(receipt_ingestion_total[5m]))"
+      unit: 'percentage'
+
+  slos:
+    receipt_ingestion_latency_slo:
+      sli: 'receipt_ingestion_latency'
+      target: 0.95 # 95% within threshold
+      threshold: 2.0 # 2s
+      description: '95% of receipts ingested within 2s'
+      priority: 'P1'
+
+    receipt_ingestion_availability_slo:
+      sli: 'receipt_ingestion_error_rate'
+      target: 0.999 # 99.9% availability
+      threshold: 0.001 # 0.1% error rate threshold
+      description: 'Receipt ingestion error rate below 0.1%'
+      priority: 'P0'

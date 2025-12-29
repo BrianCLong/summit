@@ -1,0 +1,23 @@
+{
+  "title": "Receipt Ingestion",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Receipt Ingestion - p95 Latency (ms)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(receipt_ingestion_duration_seconds_bucket[5m])) by (le)) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Receipt Ingestion - Error Rate",
+      "targets": [
+        {
+          "expr": "sum(rate(receipt_ingestion_errors_total[5m])) / clamp_min(sum(rate(receipt_ingestion_total[5m])), 0.001)"
+        }
+      ]
+    }
+  ]
+}

@@ -29,6 +29,15 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - name: Install validation tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yamllint jq
+      - name: Validate new SLOs and configs
+        run: |
+          yamllint ops/slo/receipt-ingestion-slos.yaml
+          yamllint ops/prometheus/receipt-ingestion-slo-rules.yaml
+          jq . ops/grafana/dashboards/receipt-ingestion-dashboard.json
 
   test:
     name: Test
