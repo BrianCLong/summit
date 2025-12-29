@@ -10,4 +10,5 @@ const changes = await diff(parse(baseSDL), parse(nextSDL));
 const breaking = changes.filter((c) => c.criticality?.level === 'BREAKING');
 for (const c of breaking) console.error(`[BREAKING] ${c.path} — ${c.message}`);
 if (breaking.length) process.exit(1);
+// eslint-disable-next-line no-console
 console.log('No breaking schema changes.');
