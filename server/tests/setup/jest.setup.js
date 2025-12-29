@@ -1,17 +1,12 @@
-import { jest, describe, it, beforeAll, afterAll, afterEach, expect } from '@jest/globals';
 /**
  * Jest Global Setup Configuration
  * Provides common test utilities and matchers
  */
 
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-
 // Extend Jest with additional matchers from jest-extended
-import 'jest-extended';
+require('jest-extended');
 
-import dotenv from 'dotenv';
-dotenv.config({ path: './.env.test' });
+require('dotenv').config({ path: './.env.test' });
 
 // Global test timeout
 jest.setTimeout(30000);
@@ -152,19 +147,6 @@ afterAll(() => {
   }
   console.error = originalConsoleError;
 });
-
-// Prevent focused tests slipping through
-const blockFocus = (what) => {
-  throw new Error(
-    `[no-only-tests] Detected ${what}. Remove '.only' to maintain coverage.`,
-  );
-};
-
-
-// In ESM with @jest/globals, we might not need to hack global.it
-// But if we do, we need to access the imported 'it'.
-// For now, let's comment out the hack as it might fail if global.it is undefined
-// global.it = it; // assign imported it to global if needed? No, let's skip hacking for now.
 
 // Global test utilities
 global.testUtils = {
