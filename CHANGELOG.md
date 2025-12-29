@@ -1,5 +1,12 @@
 # Changelog
 
+<!--
+POLICY:
+1. Always maintain an [Unreleased] section at the top.
+2. Use subsections: Added, Changed, Deprecated, Removed, Fixed, Security.
+3. Every PR must add an entry here unless labeled 'skip-changelog'.
+-->
+
 All notable changes to Summit MVP-3 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
