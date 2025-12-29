@@ -8,6 +8,7 @@ import type {
 } from '../../../packages/policy-audit/src/types';
 import { getPostgresPool } from '../db/postgres.js';
 import { logger } from '../config/logger.js';
+import { policyBundleStore } from '../policy/bundleStore.js';
 
 interface PreflightMeta {
   correlationId?: string;
@@ -54,6 +55,25 @@ function normalize(value: unknown): unknown {
   return value;
 }
 
+function resolvePolicyVersion(request: PreflightRequest): string | undefined {
+  const pinned =
+    (request as any).policyVersion ||
+    request.context?.policyVersion ||
+    request.context?.pinnedPolicyVersion;
+  if (pinned) return pinned;
+
+  try {
+    const resolved = policyBundleStore.resolve();
+    return resolved.versionId;
+  } catch (error) {
+    logger.warn(
+      { error: error instanceof Error ? error.message : String(error) },
+      'Falling back to request-supplied policy version',
+    );
+    return request.context?.policyVersion;
+  }
+}
+
 export function calculateRequestHash(request: PreflightRequest): string {
   const canonical = normalize({
     action: request.action,
@@ -61,6 +81,7 @@ export function calculateRequestHash(request: PreflightRequest): string {
     resource: request.resource,
     payload: request.payload,
     approvers: request.approvers || [],
+    policyVersion: request.context?.policyVersion || request.context?.pinnedPolicyVersion,
   });
 
   return createHash('sha256')
@@ -203,15 +224,42 @@ export class ActionPolicyService {
       },
     };
 
+    if (!normalized.context) normalized.context = {} as any;
+    if ((normalized as any).policyVersion && !normalized.context?.policyVersion) {
+      normalized.context = {
+        ...normalized.context,
+        policyVersion: (normalized as any).policyVersion,
+      };
+    }
+
+    const requestedPolicyVersion =
+      (normalized as any).policyVersion ||
+      normalized.context?.policyVersion ||
+      normalized.context?.pinnedPolicyVersion;
+    const policyVersion = requestedPolicyVersion || resolvePolicyVersion(normalized);
+
+    if (policyVersion) {
+      normalized.context = {
+        ...(normalized.context || {}),
+        policyVersion,
+      };
+    }
+
     const requestHash = calculateRequestHash(normalized);
     const started = Date.now();
-    const opaDecision = await this.evaluateWithOpa(normalized, requestHash, meta);
+    const opaDecision = await this.evaluateWithOpa(
+      normalized,
+      requestHash,
+      meta,
+      policyVersion,
+    );
 
     const decision: PolicyDecision = {
       allow: opaDecision.allow,
       reason: opaDecision.reason || (opaDecision.allow ? 'allow' : 'deny'),
       obligations: opaDecision.obligations || [],
-      policyVersion: opaDecision.policy_version || opaDecision.policyVersion,
+      policyVersion:
+        opaDecision.policy_version || opaDecision.policyVersion || policyVersion,
       decisionId: opaDecision.decision_id || randomUUID(),
       expiresAt:
         opaDecision.expires_at ||
@@ -286,6 +334,7 @@ export class ActionPolicyService {
     request: PreflightRequest,
     requestHash: string,
     meta: PreflightMeta,
+    policyVersion?: string,
   ): Promise<OpaDecision> {
     try {
       const response = await this.http.post(
@@ -300,6 +349,7 @@ export class ActionPolicyService {
               approvers: request.approvers || [],
               correlationId: meta.correlationId,
               requestHash,
+              policyVersion: policyVersion || request.context?.policyVersion,
             },
           },
         },
