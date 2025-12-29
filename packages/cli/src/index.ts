@@ -18,6 +18,7 @@ import { auditCommands } from './commands/audit.js';
 import { complianceCommands } from './commands/compliance.js';
 import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
+import { doctor } from './commands/doctor.js';
 import { loadConfig, getConfig } from './config.js';
 
 const program = new Command();
@@ -42,6 +43,8 @@ program
   .addCommand(configCommands.get)
   .addCommand(configCommands.list)
   .addCommand(configCommands.init);
+
+program.addCommand(doctor);
 
 // Policy commands
 program
