@@ -1,0 +1,23 @@
+{
+  "decision": "rollback",
+  "reasons": [
+    "error_rate_above_absolute",
+    "error_rate_delta_exceeded",
+    "latency_p95_above_absolute",
+    "latency_p95_delta_exceeded",
+    "failed_probes:login-and-search"
+  ],
+  "breach_metrics": {
+    "error_rate": 0.021,
+    "error_rate_delta": 0.017,
+    "latency_p95_ms": 520.0,
+    "latency_p95_delta_ratio": 0.4444444444444444
+  },
+  "deployment_id": "canary-2025-12-29T22:20:00Z",
+  "build_sha": "abc123deadbeef",
+  "artifact_digest": "sha256:deadbeef",
+  "policy_version": "canary-policy-v1",
+  "stage": "wave-2",
+  "timestamp": "2025-12-29T22:16:11.200565+00:00",
+  "rollback_command": "kubectl rollout undo deployment/intelgraph-server --namespace canary"
+}

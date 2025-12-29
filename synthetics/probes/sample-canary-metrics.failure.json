@@ -1,0 +1,17 @@
+{
+  "deployment_id": "canary-2025-12-29T22:20:00Z",
+  "build_sha": "abc123deadbeef",
+  "artifact_digest": "sha256:deadbeef",
+  "policy_version": "canary-policy-v1",
+  "stage": "wave-2",
+  "service": "intelgraph-server",
+  "error_rate": 0.021,
+  "baseline_error_rate": 0.004,
+  "latency_p95_ms": 520,
+  "baseline_latency_p95_ms": 360,
+  "probe_results": {
+    "login-page": { "status": "pass", "latency_ms": 210 },
+    "login-and-search": { "status": "fail", "latency_ms": 480, "errors": ["search timeout"] },
+    "export-download": { "status": "pass", "latency_ms": 430 }
+  }
+}

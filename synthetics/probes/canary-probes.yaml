@@ -1,0 +1,35 @@
+runner:
+  base_url: https://canary.intelgraph.local
+  interval_seconds: 60
+  post_promotion_interval_seconds: 180
+  timeout_ms: 120000
+  labels:
+    service: intelgraph-server
+    canary: "true"
+criteria:
+  error_rate_absolute: 0.015
+  error_rate_delta: 0.005
+  latency_p95_ms: 450
+  latency_p95_delta_ratio: 0.20
+  minimum_windows: 2
+probes:
+  - name: login-page
+    required: true
+    type: http
+    method: GET
+    path: /login
+    expected_status: 200
+    max_latency_ms: 300
+  - name: login-and-search
+    required: true
+    type: synthetic
+    script: ./canary-critical.spec.ts
+    project: canary
+    max_latency_ms: 450
+  - name: export-download
+    required: false
+    type: http
+    method: GET
+    path: /export?format=csv
+    expected_status: 200
+    max_latency_ms: 500

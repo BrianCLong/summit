@@ -1,0 +1,53 @@
+{
+  "title": "Canary vs Baseline - intelgraph-server",
+  "type": "timeseries",
+  "description": "Split canary vs baseline error rate, p95 latency, and probe pass rate",
+  "targets": [
+    {
+      "refId": "A",
+      "expr": "sum by (bucket) (rate(http_requests_total{service='intelgraph-server',canary='true',status=~'5..'}[5m])) / sum by (bucket) (rate(http_requests_total{service='intelgraph-server',canary='true'}[5m]))",
+      "legendFormat": "error rate (canary)"
+    },
+    {
+      "refId": "B",
+      "expr": "sum by (bucket) (rate(http_requests_total{service='intelgraph-server',canary='false',status=~'5..'}[5m])) / sum by (bucket) (rate(http_requests_total{service='intelgraph-server',canary='false'}[5m]))",
+      "legendFormat": "error rate (baseline)"
+    },
+    {
+      "refId": "C",
+      "expr": "histogram_quantile(0.95, sum by (le, bucket) (rate(http_request_duration_seconds_bucket{service='intelgraph-server',canary='true'}[5m])))",
+      "legendFormat": "p95 latency (canary)"
+    },
+    {
+      "refId": "D",
+      "expr": "histogram_quantile(0.95, sum by (le, bucket) (rate(http_request_duration_seconds_bucket{service='intelgraph-server',canary='false'}[5m])))",
+      "legendFormat": "p95 latency (baseline)"
+    },
+    {
+      "refId": "E",
+      "expr": "avg_over_time(probe_success{service='intelgraph-server',canary='true'}[5m])",
+      "legendFormat": "probe success (canary)"
+    }
+  ],
+  "thresholds": [
+    { "color": "red", "value": 0.015, "op": "gt", "yaxis": "left", "label": "Error rate ceiling" },
+    { "color": "orange", "value": 450, "op": "gt", "yaxis": "right", "label": "P95 ceiling (ms)" }
+  ],
+  "fieldConfig": {
+    "defaults": {
+      "unit": "short",
+      "custom": {
+        "drawStyle": "line",
+        "lineWidth": 2
+      }
+    }
+  },
+  "options": {
+    "legend": { "displayMode": "table" },
+    "tooltip": { "mode": "multi" },
+    "series": {
+      "lines": true,
+      "fill": 10
+    }
+  }
+}
