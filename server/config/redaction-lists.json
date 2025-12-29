@@ -1,0 +1,16 @@
+{
+  "allowlist": ["requestId", "tenantId", "service", "traceId", "actorRole"],
+  "denylist": [
+    "email",
+    "phone",
+    "ssn",
+    "creditCard",
+    "ip",
+    "ipAddress",
+    "sessionId",
+    "userAgent",
+    "authToken",
+    "address"
+  ],
+  "mask": "[REDACTED]"
+}

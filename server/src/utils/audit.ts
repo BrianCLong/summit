@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import { getPostgresPool } from '../config/database.js';
+import { sanitizeForProvenance } from './redactionLists.js';
 
 type JsonObject = Record<string, unknown>;
 
@@ -113,17 +114,19 @@ async function writeAudit({
     if (actorRole) enrichedDetails.actorRole = actorRole;
     if (sessionId) enrichedDetails.sessionId = sessionId;
     if (ip) enrichedDetails.ip = ip;
-    // Signature for integrity
+    const sanitizedDetails = sanitizeForProvenance(enrichedDetails);
+
+    // Signature for integrity against the sanitized payload that will be stored
     const secret = process.env.AUDIT_SIGNING_SECRET;
     if (secret) {
-      enrichedDetails.signature = signAuditPayload(
+      sanitizedDetails.signature = signAuditPayload(
         {
           userId: userId || null,
           action,
           resourceType: resourceType || null,
           resourceId: resourceId || null,
-          before: enrichedDetails.before ?? null,
-          after: enrichedDetails.after ?? null,
+          before: sanitizedDetails.before ?? null,
+          after: sanitizedDetails.after ?? null,
           at: new Date().toISOString(),
         },
         secret,
@@ -138,7 +141,7 @@ async function writeAudit({
         action,
         resourceType || null,
         resourceId || null,
-        enrichedDetails,
+        sanitizedDetails,
         ip || null,
         userAgent || null,
       ],
