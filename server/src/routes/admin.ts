@@ -242,6 +242,11 @@ router.post('/admin/tenant-defaults', express.json(), (req, res) => {
   });
 });
 
+// Health check endpoint for secret rotation
+router.get('/admin/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Get all tenant defaults
 router.get('/admin/tenant-defaults', (req, res) => {
   res.json({
@@ -452,6 +457,50 @@ router.post('/admin/opa/sync-n8n-flows', async (_req, res) => {
       .status(200)
       .json({ ok: false, message: e?.message || 'sync failed' });
   }
+});
+
+import { SecretManager } from '../services/secretManager';
+import { MockServiceRegistry } from '../services/serviceRegistry';
+
+const secretManager = new SecretManager();
+const serviceRegistry = new MockServiceRegistry();
+
+// Secret Rotation API
+router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
+  const { secretName, newVersion, services } = req.body;
+
+  if (!secretName || !newVersion || !services) {
+    return res.status(400).json({ ok: false, error: 'Missing required parameters' });
+  }
+
+  console.log(`Rotating secret "${secretName}" to version "${newVersion}" for services:`, services);
+
+  const previousSecret = await secretManager.getSecret(secretName, 'current');
+
+  if (!previousSecret) {
+    return res.status(404).json({ ok: false, error: `Secret not found: ${secretName}` });
+  }
+
+  for (const service of services) {
+    console.log(`Updating secret for service: ${service}`);
+    await secretManager.setSecret(secretName, 'current', await secretManager.getSecret(secretName, newVersion));
+    console.log(`Health check for service ${service}...`);
+    const healthUrl = serviceRegistry.getServiceHealthUrl(service);
+    if (!healthUrl) {
+      console.error(`Health check URL not found for service: ${service}`);
+      // In a real implementation, we might want to roll back here as well
+      continue;
+    }
+    const health = await axios.get(healthUrl).then(res => res.data);
+    if (health.status !== 'ok') {
+      console.error(`Service ${service} is unhealthy after secret rotation. Rolling back...`);
+      await secretManager.setSecret(secretName, 'current', previousSecret);
+      return res.status(500).json({ ok: false, error: `Service ${service} failed to restart with new secret` });
+    }
+    console.log(`Service ${service} is healthy.`);
+  }
+
+  res.json({ ok: true, message: 'Secret rotation completed successfully' });
 });
 
 // Temporal runtime toggle
