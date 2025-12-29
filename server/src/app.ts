@@ -129,6 +129,7 @@ import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
+import cogwarRouter from './routes/cogwar.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -445,6 +446,9 @@ export const createApp = async () => {
 
   // Vector Store Routes
   app.use('/api/vector-store', vectorStoreRouter);
+
+  // SummitCogWar Routes
+  app.use('/api/cogwar', cogwarRouter);
 
   app.get('/metrics', metricsRoute);
 

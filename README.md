@@ -29,6 +29,11 @@
 
 We follow a **"Golden Path"** philosophy. If the build breaks, we stop and fix it.
 
+**Testing Note:** This repository uses `pnpm` workspaces. To run server tests, execute from the root:
+`pnpm -C server test` or `pnpm --filter intelgraph-server test`.
+
+> **Note:** Running `npm install` inside `server/` will fail due to the `workspace:*` protocol used in `package.json`. These tests cannot be run directly in restricted sandbox environments that lack `pnpm` or proper workspace support.
+
 **Prerequisites:** Docker Desktop ≥ 4.x, Node 18+, pnpm 9, Python 3.11+.
 
 ```bash
@@ -70,6 +75,7 @@ Summit is built on a modern, distributed stack designed for scalability and audi
   - **TimescaleDB**: Telemetry and metrics.
   - **Redis**: Caching, Rate limiting, Real-time Pub/Sub.
 - **Orchestration**: Maestro (BullMQ) for background jobs and AI pipelines.
+- **SummitCogWar**: Cognitive warfare vanguard with Red/Blue teaming, population simulation, and ethical guardrails.
 
 👉 **[Read the full Architecture Guide](docs/ARCHITECTURE.md)**
 
