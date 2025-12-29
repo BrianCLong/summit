@@ -1,19 +1,20 @@
 # Contributing to Summit (IntelGraph)
 
-> **⚠️ IMPORTANT:** This document is being superseded by the **[Developer Enablement Pack](planning/enablement-pack/README.md)**.
-> Please refer to that directory for the authoritative "Golden Path" on onboarding, workflows, and architecture.
-
-## Prerequisites & Setup
-
-Please follow the **[Onboarding & Quickstart Guide](planning/enablement-pack/onboarding-quickstart.md)**.
+> **⚠️ IMPORTANT:** The authoritative documentation has moved to the **[docs/](docs/)** directory.
+>
+> - **[Onboarding & Quickstart](docs/get-started/index.md)**
+> - **[Daily Workflows](docs/how-to/daily-workflows.md)**
+> - **[Testing Guidelines](docs/how-to/testing.md)**
+> - **[Merge Policy](docs/how-to/merge-policy.md)**
 
 ## Common Development Tasks
 
-See **[Daily Developer Workflows](planning/enablement-pack/daily-dev-workflows.md)**.
+See **[Daily Workflows](docs/how-to/daily-workflows.md)**.
 
 > **Note:** Check out the [Examples Directory](examples/) for plugins and custom pipelines.
 
 ## Branch & Pull Request Workflow
+
 ## Mergefix / Express 5 Changes (Fast Path)
 
 This section defines **coding rules, commit conventions, and the minimal gate** for any PR that touches the Express 5 migration or related merge conflict work. Use it for PRs labeled `mergefix`.
@@ -102,11 +103,12 @@ See **[AI Agent Guidelines](planning/enablement-pack/ai-agent-guidelines.md)**.
 ## Merge Rules & CI Gates
 
 See **[Merge Rules & CI Gates](planning/enablement-pack/merge-rules-and-ci-gates.md)** for:
-*   Branching Strategy
-*   Pull Request Expectations
-*   CI Gates
-*   Fast Path / Mergefix instructions
-Unit tests focus on testing individual functions, classes, and modules in isolation.
+
+- Branching Strategy
+- Pull Request Expectations
+- CI Gates
+- Fast Path / Mergefix instructions
+  Unit tests focus on testing individual functions, classes, and modules in isolation.
 
 **Location:** `__tests__` directories next to source files **Pattern:** `*.test.ts`, `*.test.tsx`
 
@@ -114,12 +116,12 @@ Unit tests focus on testing individual functions, classes, and modules in isolat
 
 ```typescript
 // server/src/middleware/__tests__/auth.test.ts
-import { ensureAuthenticated } from '../auth';
-import { requestFactory, responseFactory, nextFactory } from '../../../tests/factories';
+import { ensureAuthenticated } from "../auth";
+import { requestFactory, responseFactory, nextFactory } from "../../../tests/factories";
 
-describe('ensureAuthenticated', () => {
-  it('should authenticate a valid token', async () => {
-    const req = requestFactory({ headers: { authorization: 'Bearer token' } });
+describe("ensureAuthenticated", () => {
+  it("should authenticate a valid token", async () => {
+    const req = requestFactory({ headers: { authorization: "Bearer token" } });
     const res = responseFactory();
     const next = nextFactory();
 
@@ -148,8 +150,8 @@ Integration tests verify that multiple components work together correctly.
 
 ```typescript
 // tests/integration/auth.integration.test.ts
-describe('Authentication Flow', () => {
-  it('should complete full login workflow', async () => {
+describe("Authentication Flow", () => {
+  it("should complete full login workflow", async () => {
     const user = await login(email, password);
     expect(user).toBeDefined();
     expect(user.token).toBeDefined();
@@ -175,14 +177,14 @@ End-to-end tests validate complete user flows in a browser environment.
 
 ```typescript
 // tests/e2e/login-logout.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('should login successfully', async ({ page }) => {
-  await page.goto('/login');
-  await page.fill('input[name="email"]', 'test@example.com');
-  await page.fill('input[name="password"]', 'password');
+test("should login successfully", async ({ page }) => {
+  await page.goto("/login");
+  await page.fill('input[name="email"]', "test@example.com");
+  await page.fill('input[name="password"]', "password");
   await page.click('button[type="submit"]');
-  await expect(page).toHaveURL('/dashboard');
+  await expect(page).toHaveURL("/dashboard");
 });
 ```
 
@@ -199,13 +201,13 @@ test('should login successfully', async ({ page }) => {
 Use test factories to generate consistent test data:
 
 ```typescript
-import { userFactory, entityFactory, investigationFactory, graphFactory } from '@tests/factories';
+import { userFactory, entityFactory, investigationFactory, graphFactory } from "@tests/factories";
 
 // Create a test user
-const user = userFactory({ role: 'admin' });
+const user = userFactory({ role: "admin" });
 
 // Create a test entity
-const entity = entityFactory({ type: 'person' });
+const entity = entityFactory({ type: "person" });
 
 // Create a test graph
 const graph = graphFactory({ nodeCount: 10, relationshipDensity: 0.3 });
@@ -324,14 +326,14 @@ project/
 **Mock modules:**
 
 ```typescript
-jest.mock('../services/AuthService');
+jest.mock("../services/AuthService");
 ```
 
 **Mock functions:**
 
 ```typescript
-const mockFn = jest.fn().mockReturnValue('value');
-const mockAsyncFn = jest.fn().mockResolvedValue({ data: 'value' });
+const mockFn = jest.fn().mockReturnValue("value");
+const mockAsyncFn = jest.fn().mockResolvedValue({ data: "value" });
 ```
 
 **Mock timers:**
@@ -389,7 +391,7 @@ Tests run automatically in CI/CD:
 **Testing middleware:**
 
 ```typescript
-const req = requestFactory({ headers: { 'x-tenant-id': 'test' } });
+const req = requestFactory({ headers: { "x-tenant-id": "test" } });
 const res = responseFactory();
 const next = nextFactory();
 
@@ -410,7 +412,7 @@ expect(result).toBeDefined();
 **Testing async errors:**
 
 ```typescript
-await expect(asyncFunction()).rejects.toThrow('Error message');
+await expect(asyncFunction()).rejects.toThrow("Error message");
 ```
 
 ### Resources
@@ -521,6 +523,7 @@ We enforce strict TypeScript checks (`strict: true`, `noImplicitAny`) and ESLint
 ### Legacy Code Exemption
 
 To support gradual migration, existing files with errors are grandfathered via:
+
 - `.eslint-legacy-files.json`: Files exempt from strict ESLint rules.
 - `tsconfig.strict.json` exclude list: Files exempt from strict type checking.
 

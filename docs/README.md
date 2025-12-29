@@ -1,41 +1,51 @@
-# Summit Documentation Index
+# Summit Documentation
 
-Use this page as the fast path to the docs you need. The golden path details live in `README.md`; onboarding mirrors it with only the steps required to get productive.
+Welcome to the Summit documentation.
 
-## If you only have 30 minutes
+## 🚀 Get Started
 
-- Spin up the stack: follow **[Developer Onboarding](ONBOARDING.md#-quickstart-30-minutes-to-productive)** and run `make bootstrap && make up && make smoke`.
-- Run tests: `pnpm test` for the suite, `pnpm smoke` for the golden path harness.
-- Skim architecture: **[ARCHITECTURE.md](ARCHITECTURE.md)** for high-level components, data stores, and boundaries.
+- **[Onboarding & Quickstart](get-started/index.md)**: Set up your environment in 10 minutes.
+- **[User Guide](get-started/user-guide.md)**: The Analyst's Handbook for non-technical users.
 
-## Getting Started
+## 📘 Guides & How-Tos
 
-- **[README.md](../README.md)** – Single source of truth for prerequisites, golden path commands, and service endpoints.
-- **[ONBOARDING.md](ONBOARDING.md)** – Day-one setup that mirrors the README without duplicating every detail.
-- **[GOLDEN_PATH.md](GOLDEN_PATH.md)** – Additional context on the Investigation → Entities → Relationships → Copilot → Results workflow.
+- **[Daily Workflows](how-to/daily-workflows.md)**: Standard commands for dev, test, and debug.
+- **[Testing Guidelines](how-to/testing.md)**: How to write unit, integration, and E2E tests.
+- **[AI Agent Guidelines](how-to/ai-agents.md)**: How to collaborate with AI agents.
+- **[Merge Policy](how-to/merge-policy.md)**: CI gates and PR expectations.
+- **[First Investigation Tutorial](tutorials/first-investigation.md)**: Step-by-step end-to-end tutorial.
 
-## Runbooks & Operations
+## 🧠 Concepts & Architecture
 
-- **[RUNBOOKS/INDEX.md](../RUNBOOKS/INDEX.md)** – Operational guides and incident playbooks.
-- **[RUNBOOKS/dev-bootstrap.md](../RUNBOOKS/dev-bootstrap.md)** – Local stack bring-up with verification steps.
-- **[RUNBOOKS/schema-migration-playbook.md](../RUNBOOKS/schema-migration-playbook.md)** – Safe database migration procedures.
+- **[Architecture Overview](concepts/architecture.md)**: System components and data flow.
+- **[Data Model](concepts/data-model.md)**: Entities, Relationships, and Provenance schema.
+- **[AI & ML Architecture](concepts/ai-architecture.md)**: Copilot, GraphRAG, and Narrative Sim internals.
+- **[Security Model](concepts/security-model.md)**: AuthN/AuthZ, RBAC/ABAC, and OPA.
+- **[Architecture Decision Records](concepts/adrs.md)**: Log of key technical decisions.
 
-## Security & Governance
+## ⚙️ Operations
 
-- **[SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md)** – Security posture and privacy controls.
-- **[AI_GOVERNANCE_AGENT_FLEET.md](AI_GOVERNANCE_AGENT_FLEET.md)** – AI governance framework, agent fleet management, and incident response procedures.
-- **[COMPLIANCE.md](COMPLIANCE.md)** and **[DATA_RETENTION_POLICY.md](DATA_RETENTION_POLICY.md)** – Compliance, retention, and auditing references.
-- **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** – Expected behavior and reporting channels.
+- **[Observability](operations/observability.md)**: Monitoring, Logging, and Alerting.
+- **[Configuration](operations/configuration.md)**: Env vars and Feature Flags.
 
-## Product & Architecture References
+## 📚 Reference
 
-- **[RFI_CAPABILITIES_SUMMARY.md](RFI_CAPABILITIES_SUMMARY.md)** – RFI-ready capabilities summary with metrics and differentiators.
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** – Core components, data flows, and dependencies.
-- **[DATA_MODEL.md](DATA_MODEL.md)** – Graph schema and storage expectations.
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.
-- **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
+- **[CLI Reference](reference/cli.md)**: `make` and `pnpm` command reference.
+- **[API Reference](reference/api.md)**: GraphQL and REST API overviews.
+- **[Service Catalog](reference/service-catalog.md)**: Inventory of 150+ microservices.
+- **[Glossary](reference/glossary.md)**: Terminology definitions.
 
-## Archived & Historical Material
+## 🔮 Future & History
 
-- `docs/archived/` – Historical documents retained for context; not authoritative for current workflows.
-- See [`docs/archived/README.md`](archived/README.md) for archive conventions and retrieval hints.
+- **[Strategic Roadmap](archive/future-roadmap.md)**: The "Infinite Horizon" plan.
+- **[Historical Index](archive/historical-index.md)**: Map of all documentation across the repo.
+
+---
+
+## Structure
+
+- `get-started/`: Onboarding and setup.
+- `how-to/`: Practical guides for common tasks.
+- `concepts/`: Explanations of architecture and design.
+- `reference/`: Technical references.
+- `archive/`: Deprecated or historical documents.
