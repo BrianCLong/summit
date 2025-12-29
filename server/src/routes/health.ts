@@ -3,8 +3,75 @@ import type { Request, Response } from 'express';
 import { logger } from '../utils/logger.js';
 import { getVariant, isEnabled } from '../lib/featureFlags.js';
 import { telemetryService } from '../analytics/telemetry/TelemetryService.js';
+import { createRequire } from 'module';
+
+const requireJson = createRequire(import.meta.url);
+const packageJson = requireJson('../../package.json');
 
 const router = Router();
+
+/**
+ * @openapi
+ * /healthz:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Liveness probe
+ *     description: Returns 200 OK if the service is running.
+ *     responses:
+ *       200:
+ *         description: Service is alive
+ */
+router.get('/healthz', (_req: Request, res: Response) => {
+  res.status(200).send('OK');
+});
+
+/**
+ * @openapi
+ * /readyz:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Readiness probe
+ *     description: Returns 200 OK if the service is ready to accept traffic.
+ *     responses:
+ *       200:
+ *         description: Service is ready
+ */
+router.get('/readyz', (_req: Request, res: Response) => {
+  res.status(200).send('OK');
+});
+
+/**
+ * @openapi
+ * /status:
+ *   get:
+ *     tags:
+ *       - Health
+ *     summary: Service status and build info
+ *     description: Returns version, commit hash, and uptime.
+ *     responses:
+ *       200:
+ *         description: Service status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 version:
+ *                   type: string
+ *                 commit:
+ *                   type: string
+ *                 uptime:
+ *                   type: number
+ */
+router.get('/status', (_req: Request, res: Response) => {
+  res.status(200).json({
+    version: packageJson.version,
+    commit: process.env.GIT_COMMIT || 'unknown',
+    uptime: process.uptime(),
+  });
+});
 
 // Error details interface for better type safety
 interface ServiceHealthError {

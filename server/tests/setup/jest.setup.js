@@ -4,9 +4,11 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+import 'jest-extended';
+import dotenv from 'dotenv';
+import { jest } from '@jest/globals';
 
-require('dotenv').config({ path: './.env.test' });
+dotenv.config({ path: './.env.test' });
 
 // Global test timeout
 jest.setTimeout(30000);
