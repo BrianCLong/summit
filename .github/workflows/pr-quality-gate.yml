@@ -12,3 +12,13 @@ jobs:
       run_dast: false # DAST is too slow for a PR check
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
+
+  upgrade-notes:
+    name: Verify Upgrade & Migration Notes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enforce release upgrade template
+        run: scripts/check-upgrade-notes.sh
