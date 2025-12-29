@@ -140,3 +140,74 @@ class DisclosurePack(BaseModel):
                 "artifact_ids": ["art1", "art2", "art3"],
             }
         }
+
+
+# Models for Maestro Conductor (Multi-agent workflows)
+
+
+class AgentType(str, Enum):
+    """Type of agent."""
+
+    CODE_GENERATION = "code_generation"
+    CODE_REVIEW = "code_review"
+    SECURITY_ANALYSIS = "security_analysis"
+    TESTING = "testing"
+    DOCUMENTATION = "documentation"
+    OTHER = "other"
+
+
+class Agent(BaseModel):
+    """An AI agent available for work."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    name: str = Field(..., description="Unique name of the agent (e.g., 'Jules', 'Codex-Reviewer')")
+    type: AgentType = Field(..., description="Primary function of the agent")
+    description: str | None = Field(None, description="Description of the agent's capabilities")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    is_active: bool = Field(default=True, description="Whether the agent is available for new work")
+
+
+class WorkItemStatus(str, Enum):
+    """Status of a work item."""
+
+    PENDING = "pending"
+    ASSIGNED = "assigned"
+    IN_PROGRESS = "in_progress"
+    IN_REVIEW = "in_review"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class WorkItem(BaseModel):
+    """A unit of work to be performed by an agent, sourced from a GitHub issue."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    github_issue_url: str = Field(..., description="URL of the source GitHub issue")
+    title: str = Field(..., description="Title of the work item")
+    description: str | None = Field(None, description="Detailed description of the task")
+    status: WorkItemStatus = Field(default=WorkItemStatus.PENDING)
+    priority: int = Field(default=0, description="Priority of the work item (higher is more urgent)")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    assigned_to_agent_id: str | None = Field(None, description="ID of the agent currently assigned to this item")
+    related_run_id: str | None = Field(None, description="ID of the Maestro Run associated with this work")
+
+
+class ReviewStatus(str, Enum):
+    """Status of a review."""
+
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    COMMENTED = "commented"
+
+
+class Review(BaseModel):
+    """Feedback from an agent on a work item."""
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    work_item_id: str = Field(..., description="ID of the work item being reviewed")
+    reviewer_agent_id: str = Field(..., description="ID of the agent performing the review")
+    status: ReviewStatus = Field(..., description="Outcome of the review")
+    comments: str | None = Field(None, description="Review comments in Markdown format")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
