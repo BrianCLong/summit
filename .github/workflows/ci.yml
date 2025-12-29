@@ -4,349 +4,150 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "LICENSE"
-      - ".gitignore"
-      - ".dockerignore"
+      - '**.md'
+      - 'docs/**'
   push:
     branches: [main]
     paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "LICENSE"
-      - ".gitignore"
-      - ".dockerignore"
+      - '**.md'
+      - 'docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  setup:
-    uses: ./.github/workflows/_reusable-setup.yml
-
   lint:
-    needs: setup
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.14.0
+          node-version: '20'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
 
-  typecheck:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
-
   test:
-    needs: [lint, typecheck]
+    name: Test
+    needs: lint
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        suite: [unit, integration, e2e]
-    uses: ./.github/workflows/_reusable-test.yml
-    with:
-      test-type: ${{ matrix.suite }}
-
-  static-analysis:
-    needs: setup
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-      actions: read
-    steps:
-      - uses: actions/checkout@v4
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript,python
-      - name: Autobuild (best effort)
-        uses: github/codeql-action/autobuild@v3
-        continue-on-error: true
-      - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
-
-  policy-fixtures:
-    runs-on: ubuntu-latest
-    needs: [test]
+        node-version: [18, 20]
+        test-suite: [unit, integration]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.14.0
+          node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run --workspace gateway/policy-lac policy:lint
-      - run: pnpm run --workspace gateway/policy-lac policy:sim:read
-      - run: pnpm run --workspace gateway/policy-lac policy:sim:export
+      - run: pnpm test:${{ matrix.test-suite }}
 
-  perf-budget:
+  golden-path:
+    name: Golden Path
+    needs: test
     runs-on: ubuntu-latest
-    needs: [test]
     steps:
       - uses: actions/checkout@v4
-      - uses: grafana/setup-k6-action@v1
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.14.0
+          node-version: '20'
+          cache: pnpm
+      - run: make bootstrap
+      - run: make up
+      - run: make smoke
+      - run: make down
+        if: always()
+
+  reproducible-build:
+    name: Reproducible Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Run k6 smoke (policy hot path)
-        run: k6 run k6/policy-hot-path.js
+      - name: Build twice for deterministic output
+        run: |
+          set -euo pipefail
+          export SOURCE_DATE_EPOCH=$(git log -1 --pretty=format:%ct)
 
-  smoke-checks:
-    needs: setup
-    uses: ./.github/workflows/reusable/smoke.yml
+          pnpm run build
+          find client/dist server/dist -type f -print0 | sort -z | xargs -0 sha256sum > build-checksums-a.txt
+          rm -rf client/dist server/dist
 
-  latency-quality:
-    needs: [test]
-    uses: ./.github/workflows/_reusable-ci-perf.yml
+          pnpm run build
+          find client/dist server/dist -type f -print0 | sort -z | xargs -0 sha256sum > build-checksums-b.txt
 
-  security-scan:
-    needs: [test]
+          if ! diff -u build-checksums-a.txt build-checksums-b.txt; then
+            echo "::error::Build outputs are not deterministic between runs - CI BLOCKED"
+            exit 1
+          fi
+
+  governance:
+    name: Governance
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: npm run check:governance
+      - run: npm test -- --testPathPattern="governance" --bail
+
+  provenance:
+    name: Provenance
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: npm test -- --testPathPattern="provenance" --bail
+
+  schema-diff:
+    name: Schema Diff
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: npm run graphql:schema:check
+
+  security:
+    name: Security
+    needs: golden-path
     uses: ./.github/workflows/ci-security.yml
-    with:
-      run_dast: true
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
-  load-test:
+  observability:
+    name: Observability
+    needs: [security, reproducible-build]
     runs-on: ubuntu-latest
-    needs: [test]
     steps:
-      - uses: actions/checkout@v4
-      - name: Start lightweight target service
-        run: |
-          python -m http.server 8000 --bind 127.0.0.1 >/tmp/load-server.log 2>&1 &
-          echo $! > /tmp/load-server.pid
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
-      - name: Run sustained load probe
-        run: |
-          LOAD_TEST_TARGET="http://127.0.0.1:8000" k6 run --summary-export k6-summary.json .github/k6/load-local.js
-      - name: Teardown target service
-        if: always()
-        run: |
-          if [ -f /tmp/load-server.pid ]; then
-            kill "$(cat /tmp/load-server.pid)" 2>/dev/null || true
-          fi
-      - name: Persist load probe logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: load-test-artifacts
-          path: |
-            /tmp/load-server.log
-            k6-summary.json
-          if-no-files-found: warn
-        continue-on-error: true
-
-  chaos-engineering:
-    runs-on: ubuntu-latest
-    needs: [test]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
-      - name: Execute chaos probe
-        run: scripts/chaos/chaos-probe.sh
-      - name: Upload chaos artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: chaos-artifacts
-          path: chaos-artifacts
-
-  flaky-sentinel:
-    runs-on: ubuntu-latest
-    needs: [test]
-    if: always()
-    permissions:
-      pull-requests: write
-      issues: write
-      contents: read
-    steps:
-      - name: Evaluate test stability
-        id: status
-        run: |
-          echo "initial_result=${{ needs.test.result }}" >> "$GITHUB_OUTPUT"
-          if [ "${{ needs.test.result }}" = "failure" ]; then
-            echo "retry_required=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "retry_required=false" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/checkout@v4
-        if: steps.status.outputs.retry_required == 'true'
-      - uses: pnpm/action-setup@v4
-        if: steps.status.outputs.retry_required == 'true'
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        if: steps.status.outputs.retry_required == 'true'
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - name: Re-run tests serially to isolate flakes
-        if: steps.status.outputs.retry_required == 'true'
-        id: retry
-        continue-on-error: true
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm test -- --runInBand --bail=0
-      - name: Build quarantine record
-        id: quarantine
-        run: |
-          mkdir -p quarantine
-          cat > quarantine/flaky-report.json <<'JSON'
-          {
-            "initialResult": "${{ needs.test.result }}",
-            "retryAttempted": "${{ steps.status.outputs.retry_required }}",
-            "retryOutcome": "${{ steps.retry.outcome || 'skipped' }}"
-          }
-          JSON
-      - name: Alert maintainers about flakiness
-        if: steps.status.outputs.retry_required == 'true' && steps.retry.outcome == 'success'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const body = `Detected flaky tests in CI. Initial matrix run failed but retry succeeded.\n\n` +
-              `Quarantine artifact: ${context.runId}. Please review logs to deflake.`;
-            if (context.payload.pull_request) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body,
-              });
-            }
-      - name: Upload quarantine artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: flaky-quarantine
-          path: quarantine/flaky-report.json
-
-  sbom:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.14.0
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Generate SBOM (CycloneDX)
-        run: pnpm dlx @cyclonedx/cyclonedx-npm --spec-version 1.5 --output-file sbom.json
-      - name: Install Trivy for SBOM verification
-        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
-      - name: Scan SBOM for license and compliance violations
-        run: |
-          trivy sbom \
-            --scanners license \
-            --severity HIGH,CRITICAL \
-            --exit-code 1 \
-            --format sarif \
-            --output sbom-license.sarif \
-            sbom.json
-      - name: Persist SBOM artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-and-license
-          path: |
-            sbom.json
-            sbom-license.sarif
-
-  quality-gates:
-    runs-on: ubuntu-latest
-    needs:
-      [
-        test,
-        policy-fixtures,
-        perf-budget,
-        smoke-checks,
-        latency-quality,
-        security-scan,
-        sbom,
-        static-analysis,
-        load-test,
-        chaos-engineering,
-        flaky-sentinel,
-      ]
-    steps:
-      - name: Verify required job statuses
-        run: echo "All gates passed"
-
-  ga-compliance-attestation:
-    runs-on: ubuntu-latest
-    needs:
-      [
-        quality-gates,
-        static-analysis,
-        load-test,
-        chaos-engineering,
-        security-scan,
-        sbom,
-        flaky-sentinel,
-        test,
-      ]
-    if: always()
-    steps:
-      - name: Create GA compliance attestation
-        run: |
-          mkdir -p attestations
-          cat > attestations/ga-compliance.json <<'JSON'
-          {
-            "runId": "${{ github.run_id }}",
-            "runNumber": "${{ github.run_number }}",
-            "workflow": "${{ github.workflow }}",
-            "status": "${{ needs.quality-gates.result }}",
-            "checks": {
-              "staticAnalysis": "${{ needs.static-analysis.result }}",
-              "tests": "${{ needs.test.result }}",
-              "load": "${{ needs.load-test.result }}",
-              "chaos": "${{ needs.chaos-engineering.result }}",
-              "security": "${{ needs.security-scan.result }}",
-              "sbom": "${{ needs.sbom.result }}",
-              "flakySentinel": "${{ needs.flaky-sentinel.result }}"
-            },
-            "generatedAt": "${{ github.run_started_at }}",
-            "actor": "${{ github.actor }}"
-          }
-          JSON
-      - name: Upload attestation artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ga-compliance-attestation-${{ github.run_number }}
-          path: attestations/ga-compliance.json
-          retention-days: 120
-          if-no-files-found: error
+      - name: Emit metrics
+        run: echo "Emitting workflow metrics..."

@@ -57,7 +57,7 @@ graph TD
     API -->|SQL| Postgres[(Postgres + Vector)]
     API -->|Redis Protocol| Redis[(Redis Cache)]
     API -->|Jobs| Maestro[Maestro Worker]
-    Maestro -->|Enrichment| AI[AI/ML Services]
+    Maestro -->|Enrichment| Python[Python Services]
     Maestro -->|Write| Neo4j
 ```
 
