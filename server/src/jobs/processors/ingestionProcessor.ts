@@ -1,13 +1,27 @@
 import { Job } from 'bullmq';
+import { promises as fs } from 'fs';
+import pgvector from 'pgvector/pg';
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import { subscriptionEngine } from '../../graphql/subscriptionEngine.js';
 import logger from '../../utils/logger.js';
 import { metrics } from '../../observability/metrics.js';
+import EmbeddingService from '../../services/EmbeddingService.js';
+
+const embeddingService = new EmbeddingService();
+
+// Simple text splitter function
+function splitTextIntoChunks(text: string, chunkSize = 1000, overlap = 200) {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += chunkSize - overlap) {
+    chunks.push(text.substring(i, i + chunkSize));
+  }
+  return chunks;
+}
 
 export const ingestionProcessor = async (job: Job) => {
    const { path, tenantId, flags } = job.data;
-   logger.info({ jobId: job.id, path, tenantId }, 'Processing ingestion job');
+   logger.info({ jobId: job.id, path, tenantId, flags }, 'Processing ingestion job');
 
    // 1. Compute Hash (Mocked)
    const hash = `hash-${Date.now()}`;
@@ -28,8 +42,6 @@ export const ingestionProcessor = async (job: Job) => {
          CALL apoc.create.addLabels(n, [e.type]) YIELD node
          RETURN count(node)
       `, { entities, tenantId });
-      // Note: apoc might not be available, fallback to simple labels if needed or assuming strict types.
-      // For simplicity in this prompt, just setting properties and Entity label.
    } catch (error) {
       logger.error('Neo4j write failed', error);
       throw error;
@@ -37,16 +49,46 @@ export const ingestionProcessor = async (job: Job) => {
       await session.close();
    }
 
+   // RAG Ingestion Flow
+   let ragChunkCount = 0;
+   if (flags?.rag) {
+     try {
+       logger.info({ jobId: job.id }, 'Starting RAG ingestion flow');
+       const fileContent = await fs.readFile(path, 'utf-8');
+       const chunks = splitTextIntoChunks(fileContent);
+       const embeddings = await embeddingService.generateEmbeddings(chunks);
+
+       const pgPool = getPostgresPool();
+       const client = await pgPool.connect();
+       try {
+         await client.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]);
+         for (let i = 0; i < chunks.length; i++) {
+           await client.query(
+             'INSERT INTO rag_documents (tenant_id, source_document_id, content, embedding, metadata) VALUES ($1, $2, $3, $4, $5)',
+             [tenantId, path, chunks[i], pgvector.toSql(embeddings[i]), { original_document_hash: hash }]
+           );
+         }
+         ragChunkCount = chunks.length;
+         logger.info({ jobId: job.id, chunkCount: ragChunkCount }, 'RAG ingestion successful');
+       } finally {
+         client.release();
+       }
+     } catch (err) {
+       logger.error({ jobId: job.id, error: err }, 'RAG ingestion flow failed');
+       // Non-blocking for now
+     }
+   }
+
    // 4. Write to Postgres (Provenance)
    const pgPool = getPostgresPool();
    const client = await pgPool.connect();
    try {
-       // Ensure RLS context
        await client.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]);
+       const metadata = { flags, ragChunkCount };
        await client.query(`
           INSERT INTO provenance_records (id, tenant_id, source_type, source_id, user_id, entity_count, metadata)
           VALUES ($1, $2, 'file', $3, 'system', $4, $5)
-       `, [`prov-${Date.now()}`, tenantId, path, entities.length, JSON.stringify({ flags })]);
+       `, [`prov-${Date.now()}`, tenantId, path, entities.length, JSON.stringify(metadata)]);
    } catch (err) {
        logger.error('Failed to write provenance record', err);
        // Non-blocking for now

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { isFeatureEnabled } from '../config/mvp1-features';
+import { FeatureFlags } from '../config/featureFlags';
 import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
 // @ts-ignore
 import { default as pino } from 'pino';
@@ -71,7 +71,7 @@ export class CopilotIntegrationService {
     } = {},
   ): Promise<CopilotNERResponse> {
     // Feature flag check
-    if (!isFeatureEnabled('COPILOT_SERVICE')) {
+    if (!FeatureFlags.isEnabled('copilot.service')) {
       throw new Error('Copilot service is not enabled');
     }
 
@@ -192,7 +192,7 @@ export class CopilotIntegrationService {
     } = {},
   ): Promise<CopilotLinkResponse> {
     // Feature flag check
-    if (!isFeatureEnabled('COPILOT_SERVICE')) {
+    if (!FeatureFlags.isEnabled('copilot.service')) {
       throw new Error('Copilot service is not enabled');
     }
 

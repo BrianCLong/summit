@@ -241,7 +241,29 @@ kubectl -n intelgraph apply -f offline/jobs/seed-aurora-offline.yaml
 
 ---
 
-## H) Stop, Reset, Upgrade
+## H) Safeguards
+
+**Purpose:** keep delivery sustainable and prevent over‑allocation during launch/pilot work.
+
+- **Max review load per person per sprint:** **10 review‑hours** (sum of code review + design review +
+  sign‑off time). For teams, cap at **40 review‑hours** unless staffing is temporarily increased.
+- **Max concurrent lane ownership:** **1 lane per person**, **2 lanes per team** (lane = a sustained
+  delivery stream such as release, platform, or integration).
+- **Recovery buffers:** **2 working days** after GA promotion and **3 working days** after major
+  incident response (P1/P2) before taking on new lane ownership or net‑new scope.
+
+**Enforcement mechanism**
+
+- **Planning checklist:** sprint planning must include a safeguards checklist that totals review hours,
+  enumerates lane owners, and confirms recovery buffers.
+- **PM/EM sign‑off:** PM + EM co‑sign the checklist; exceptions require VP or DRI approval and a dated
+  rollback plan.
+- **Tracking:** review hours logged in the sprint tracker; lane ownership captured in the sprint board
+  swimlanes; buffers visible as “cool‑down” tickets.
+
+---
+
+## I) Stop, Reset, Upgrade
 
 - **Stop local demo:** `docker compose down`.
 - **Reset demo data:** `./scripts/demo_reset.sh`.
@@ -249,7 +271,7 @@ kubectl -n intelgraph apply -f offline/jobs/seed-aurora-offline.yaml
 
 ---
 
-## I) Security & Compliance Reminders
+## J) Security & Compliance Reminders
 
 - Use demo keys only for demos; rotate secrets on pilot.
 - Keep optional connectors off unless license/authority is confirmed.
@@ -257,7 +279,7 @@ kubectl -n intelgraph apply -f offline/jobs/seed-aurora-offline.yaml
 
 ---
 
-## J) Next Steps (Pilot)
+## K) Next Steps (Pilot)
 
 - Confirm **owner**, **datasets**, and **success metrics**.
 - Run the 15‑minute demo (scripts provided) with stakeholders.

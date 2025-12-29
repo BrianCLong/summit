@@ -34,12 +34,12 @@ interface LLMProvider {
   }>;
 }
 
-interface HypothesisGenerationOutput {
+export interface HypothesisGenerationOutput {
   hypotheses: ThreatHypothesis[];
   priorityOrder: string[];
 }
 
-interface QueryGenerationOutput {
+export interface QueryGenerationOutput {
   queries: GeneratedCypherQuery[];
   metadata: {
     templatesCached: number;
@@ -48,7 +48,7 @@ interface QueryGenerationOutput {
   };
 }
 
-interface ResultAnalysisOutput {
+export interface ResultAnalysisOutput {
   findings: HuntFinding[];
   precisionEstimate: number;
   falsePositiveIndicators: string[];

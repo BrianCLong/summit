@@ -2,7 +2,7 @@
 import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
 import { z } from 'zod';
-import { updateFeatureFlags } from '../mvp1-features';
+import { FeatureFlags } from '../featureFlags';
 import {
   ABTestConfig,
   ABTestVariant,
@@ -520,7 +520,7 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     if (this.options.featureFlagAdapter) {
       await this.options.featureFlagAdapter.updateFlags(flags);
     } else {
-      updateFeatureFlags(flags);
+      FeatureFlags.getInstance().update(flags);
     }
   }
 }

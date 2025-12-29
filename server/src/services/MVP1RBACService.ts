@@ -1,6 +1,6 @@
 import { getPostgresPool } from '../db/postgres';
 import { getNeo4jDriver } from '../db/neo4j';
-import { isFeatureEnabled } from '../config/mvp1-features';
+import { FeatureFlags } from '../config/featureFlags';
 // @ts-ignore
 import { default as pino } from 'pino';
 
@@ -200,7 +200,7 @@ export class MVP1RBACService {
   async hasPermission(context: PermissionContext): Promise<boolean> {
     try {
       // Skip RBAC if feature flag is disabled
-      if (!isFeatureEnabled('RBAC_FINE_GRAINED')) {
+      if (!FeatureFlags.isEnabled('rbac.fineGrained')) {
         return true;
       }
 
@@ -398,7 +398,7 @@ export class MVP1RBACService {
   async recordAuditEvent(
     event: Omit<AuditEvent, 'id' | 'timestamp'>,
   ): Promise<void> {
-    if (!isFeatureEnabled('AUDIT_TRAIL')) {
+    if (!FeatureFlags.isEnabled('audit.trail')) {
       return;
     }
 

@@ -12,43 +12,76 @@
  */
 
 import { jest } from '@jest/globals';
+
+// Mock config before any imports to prevent process.exit
+jest.mock('../../config.js', () => ({
+  cfg: {
+    NODE_ENV: 'test',
+    DATABASE_URL: 'postgres://test:test@localhost:5432/test',
+    NEO4J_URI: 'bolt://localhost:7687',
+    NEO4J_USER: 'neo4j',
+    NEO4J_PASSWORD: 'test',
+    REDIS_URL: 'redis://localhost:6379',
+    JWT_SECRET: 'test-secret',
+    JWT_ISSUER: 'test',
+    JWT_REFRESH_SECRET: 'test-refresh-secret-minimum-32-chars',
+  },
+}));
+
+// Mock logger
+jest.mock('../../config/logger.js', () => ({
+  __esModule: true,
+  default: {
+    child: jest.fn<any>().mockReturnValue({
+      info: jest.fn<any>(),
+      warn: jest.fn<any>(),
+      error: jest.fn<any>(),
+      debug: jest.fn<any>(),
+    }),
+    info: jest.fn<any>(),
+    warn: jest.fn<any>(),
+    error: jest.fn<any>(),
+    debug: jest.fn<any>(),
+  },
+}));
+
 import {
   RelationshipRepo,
   type Relationship,
   type RelationshipInput,
 } from '../RelationshipRepo';
-import type { Pool, PoolClient } from 'pg';
+import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
 
 describe('RelationshipRepo', () => {
   let relationshipRepo: RelationshipRepo;
   let mockPgPool: jest.Mocked<Pool>;
-  let mockPgClient: jest.Mocked<PoolClient>;
+  let mockPgClient: any;
   let mockNeo4jDriver: jest.Mocked<Driver>;
   let mockNeo4jSession: jest.Mocked<Session>;
 
   beforeEach(() => {
     // Mock PostgreSQL client
     mockPgClient = {
-      query: jest.fn(),
-      release: jest.fn(),
+      query: jest.fn<any>(),
+      release: jest.fn<any>(),
     } as any;
 
     // Mock PostgreSQL pool
     mockPgPool = {
-      connect: jest.fn().mockResolvedValue(mockPgClient),
-      query: jest.fn(),
+      connect: jest.fn<any>().mockResolvedValue(mockPgClient),
+      query: jest.fn<any>(),
     } as any;
 
     // Mock Neo4j session
     mockNeo4jSession = {
-      executeWrite: jest.fn(),
-      close: jest.fn(),
+      executeWrite: jest.fn<any>(),
+      close: jest.fn<any>(),
     } as any;
 
     // Mock Neo4j driver
     mockNeo4jDriver = {
-      session: jest.fn().mockReturnValue(mockNeo4jSession),
+      session: jest.fn<any>().mockReturnValue(mockNeo4jSession),
     } as any;
 
     relationshipRepo = new RelationshipRepo(mockPgPool, mockNeo4jDriver);

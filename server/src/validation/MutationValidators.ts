@@ -413,6 +413,7 @@ export class SecurityValidator {
       /(\bMATCH\b.*\bRETURN\b)/i,
       /(\bCREATE\b.*\bNODE\b)/i,
       /(\bDELETE\b.*\bNODE\b)/i,
+      /(\bDETACH\s+DELETE\b)/i,
     ];
 
     const xssPatterns = [
@@ -456,6 +457,12 @@ export class SecurityValidator {
   ): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
+    // Check tenant isolation FIRST - this takes precedence over all permissions
+    if (context?.tenantId && context.tenantId !== user.tenantId) {
+      errors.push('Cross-tenant access not allowed');
+      return { valid: false, errors };
+    }
+
     // Check if user has wildcard permission
     if (user.permissions.includes('*')) {
       return { valid: true, errors: [] };
@@ -465,11 +472,6 @@ export class SecurityValidator {
     const requiredPermission = `${resource}:${operation}`;
     if (!user.permissions.includes(requiredPermission)) {
       errors.push(`Missing permission: ${requiredPermission}`);
-    }
-
-    // Check tenant isolation
-    if (context?.tenantId && context.tenantId !== user.tenantId) {
-      errors.push('Cross-tenant access not allowed');
     }
 
     return { valid: errors.length === 0, errors };
@@ -610,7 +612,7 @@ export const IPAddressSchema = z
  */
 export const PhoneNumberSchema = z
   .string()
-  .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format (E.164)');
+  .regex(/^\+?[1-9]\d{6,14}$/, 'Invalid phone number format (E.164, minimum 7 digits)');
 
 /**
  * Date range validation
@@ -816,7 +818,10 @@ export class QueryValidator {
       errors.push('Query exceeds maximum length');
     }
 
-    const placeholderCount = (query.match(/\?/g) || []).length;
+    // Support both MySQL-style (?) and PostgreSQL-style ($1, $2, etc.) placeholders
+    const mysqlPlaceholders = (query.match(/\?/g) || []).length;
+    const pgPlaceholders = (query.match(/\$\d+/g) || []).length;
+    const placeholderCount = mysqlPlaceholders > 0 ? mysqlPlaceholders : pgPlaceholders;
     if (placeholderCount !== params.length) {
       errors.push('Parameter count mismatch');
     }

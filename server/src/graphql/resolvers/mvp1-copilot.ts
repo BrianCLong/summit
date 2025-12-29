@@ -4,7 +4,7 @@ import {
   ForbiddenError,
   UserInputError,
 } from 'apollo-server-express';
-import { isFeatureEnabled } from '../../config/mvp1-features';
+import { FeatureFlags } from '../../config/featureFlags';
 
 const copilotService = new CopilotIntegrationService();
 
@@ -100,7 +100,7 @@ const mvp1CopilotResolvers = {
       context: AuthContext,
     ) => {
       // Feature flag check
-      if (!isFeatureEnabled('COPILOT_SERVICE')) {
+      if (!FeatureFlags.isEnabled('copilot.service')) {
         throw new Error('Copilot service is not enabled');
       }
 
@@ -205,7 +205,7 @@ const mvp1CopilotResolvers = {
       context: AuthContext,
     ) => {
       // Feature flag check
-      if (!isFeatureEnabled('COPILOT_SERVICE')) {
+      if (!FeatureFlags.isEnabled('copilot.service')) {
         throw new Error('Copilot service is not enabled');
       }
 
@@ -293,7 +293,7 @@ const mvp1CopilotResolvers = {
       context: AuthContext,
     ) => {
       // Feature flag check
-      if (!isFeatureEnabled('COPILOT_SERVICE')) {
+      if (!FeatureFlags.isEnabled('copilot.service')) {
         throw new Error('Copilot service is not enabled');
       }
 
