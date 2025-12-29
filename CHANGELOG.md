@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- (New features will be documented here)
+- MVP-4 GA gate documentation and CI enforcement for release readiness.
 
 ### Changed
 - (Changes to existing functionality)

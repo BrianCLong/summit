@@ -12,3 +12,24 @@ jobs:
       run_dast: false # DAST is too slow for a PR check
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
+
+  ga-gate:
+    name: GA Gate (Fast)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (lean)
+        run: |
+          npm install --ignore-scripts --no-fund --no-audit
+
+      - name: Run GA Gate (fast)
+        run: |
+          chmod +x scripts/ga-gate.sh
+          scripts/ga-gate.sh --fast --ci
