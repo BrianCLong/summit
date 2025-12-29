@@ -36,6 +36,7 @@
 - **Sprint N+55 — Portfolio Pruning & Focus Reinforcement** (`PORTFOLIO_SCORECARD.md`): Reduces surface area, eliminates low-ROI work, and consolidates capabilities.
 - **Focus:** Value Density & Pruning.
 - **Key Artifacts:** `PORTFOLIO_SCORECARD.md`, `PORTFOLIO_DECISIONS.md`, `docs/GOVERNANCE.md` (Updated).
+- **Incoming Prompt:** **IntelGraph Disinformation GA “Proof-First” Sprint (10 business days)** — see `sprint/edops-ga-sprint-prompt.md` for the full execution brief, acceptance criteria, KPIs, and quick decision questions.
 
 ### Previous Sprint (N+7)
 
