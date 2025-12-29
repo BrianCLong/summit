@@ -32,6 +32,51 @@ permissions:
   checks: write
 
 jobs:
+  alert-webhook-rollback:
+    name: 🚨 Alert Webhook Rollback
+    needs: [detect-deployment-failure]
+    if: >
+      github.event_name == 'repository_dispatch' &&
+      github.event.action == 'alert-webhook' &&
+      needs.detect-deployment-failure.outputs.should_rollback == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Execute rollback from alert webhook
+        env:
+          ROLLBACK_ENV: ${{ needs.detect-deployment-failure.outputs.environment || 'production' }}
+          ROLLBACK_TARGET: ${{ needs.detect-deployment-failure.outputs.rollback_target }}
+          FAILURE_KIND: ${{ needs.detect-deployment-failure.outputs.failure_type }}
+          SLO_CONTEXT: ${{ needs.detect-deployment-failure.outputs.slo_context }}
+        run: |
+          set -euo pipefail
+
+          env_name="${ROLLBACK_ENV:-production}"
+          target="${ROLLBACK_TARGET:-}"
+
+          if [[ -z "$target" ]]; then
+            echo "::error::Alert webhook did not include a rollback target."
+            exit 1
+          fi
+
+          reason="Alert webhook trigger"
+          if [[ -n "$SLO_CONTEXT" ]]; then
+            reason="SLO breach detected via alert webhook: $SLO_CONTEXT"
+          elif [[ -n "$FAILURE_KIND" ]]; then
+            reason="Alert webhook flagged failure type: $FAILURE_KIND"
+          fi
+
+          echo "🚨 Alert webhook triggered rollback."
+          echo "🌎 Environment: $env_name"
+          echo "🎯 Target: $target"
+          echo "📝 Reason: $reason"
+
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh -e "$env_name" -t "$target"
+
+          echo "✅ Rollback executed for alert webhook payload."
+
   detect-deployment-failure:
     name: 🔍 Detect Deployment Issues
     if: |
@@ -231,7 +276,8 @@ jobs:
     needs: [detect-deployment-failure, health-monitor]
     if: |
       always() && (
-        (needs.detect-deployment-failure.outputs.should_rollback == 'true') ||
+        (needs.detect-deployment-failure.outputs.should_rollback == 'true' &&
+         !(github.event_name == 'repository_dispatch' && github.event.action == 'alert-webhook')) ||
         (needs.health-monitor.outputs.critical_failure == 'true')
       )
     runs-on: ubuntu-latest

@@ -120,8 +120,8 @@ Alerts are configured in Prometheus and routed via Alertmanager to Slack/Teams a
     1. Navigate to GitHub Actions and open **Pipeline - Rollback**.
     2. Use **workflow_dispatch** to choose the environment (`staging` or `production`) and specify the Docker tag/SHA to restore.
     3. Confirm the run and monitor the job output.
-    4. Capture the job URL and verification output as drill evidence (see `post-deploy-verification.yml`).
-    5. If triggered by an alert webhook (from `error-budget-monitoring.yml`), validate that rollback and verification completed; attach links in the drill log.
+    4. Capture the job URL and verification output as drill evidence. Run `post-deploy-verification.yml` for the affected deployment to produce the `deploy_verification.json` artifact, and attach that artifact (or its URL) to the drill log.
+    5. If triggered by an alert webhook (from `error-budget-monitoring.yml`), validate that rollback and verification completed; include the alert payload details, target SHA, and post-deploy verification artifact link in the drill log for traceability.
 
 ## 5. Log & Metric Cribsheet
 
