@@ -1,0 +1,2 @@
+# Licenses explicitly allowlisted for specific dependencies after review
+# Add entries in the form of SPDX identifiers
