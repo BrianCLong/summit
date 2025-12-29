@@ -74,7 +74,7 @@ describe('DistributedConfigService', () => {
       overrides: {
         staging: {
           endpoint: 'https://staging.example.com',
-          features: { enableStreaming: true },
+          features: { enableStreaming: true, enableCaching: true },
         },
       },
       metadata: { actor: 'alice' },
@@ -133,7 +133,7 @@ describe('DistributedConfigService', () => {
       canary: {
         environment: 'production',
         trafficPercent: 50,
-        config: { features: { enableStreaming: true } },
+        config: { features: { enableStreaming: true, enableCaching: true } },
         startAt: new Date('2023-12-31T23:00:00Z'),
       },
       metadata: { actor: 'dan' },
@@ -162,7 +162,7 @@ describe('DistributedConfigService', () => {
           {
             name: 'variant',
             weight: 1,
-            config: { features: { enableStreaming: true } },
+            config: { features: { enableStreaming: true, enableCaching: true } },
           },
         ],
         startAt: new Date('2023-12-31T23:00:00Z'),

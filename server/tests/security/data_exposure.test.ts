@@ -1,15 +1,15 @@
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { Request, Response } from 'express';
 // We import the real function
 import { redactPII } from '../../src/middleware/pii-redaction';
 
 // Mock logger
-vi.mock('../../src/utils/logger', () => ({
+jest.mock('../../src/utils/logger', () => ({
     default: {
-        warn: vi.fn(),
-        error: vi.fn(),
-        info: vi.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        info: jest.fn(),
     },
 }));
 

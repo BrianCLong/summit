@@ -15,9 +15,22 @@
 import AuthService from '../../src/services/AuthService';
 import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
 import { securityTestVectors, createMockRequest, createMockResponse } from '../utils/auth-test-helpers';
-import type { Pool, PoolClient } from 'pg';
+import type { Pool } from 'pg';
 
-jest.mock('../../src/config/database');
+jest.mock('../../src/config/database', () => ({
+    getPostgresPool: jest.fn(() => ({
+        connect: jest.fn(),
+        query: jest.fn(),
+        end: jest.fn(),
+    })),
+    getRedisClient: jest.fn(() => ({
+        get: jest.fn(),
+        set: jest.fn(),
+        on: jest.fn(),
+        quit: jest.fn(),
+        subscribe: jest.fn(),
+    })),
+}));
 jest.mock('../../src/utils/logger', () => ({
   error: jest.fn(),
   warn: jest.fn(),
@@ -111,7 +124,7 @@ describe('Authentication Security Tests', () => {
       ];
 
       roles.forEach(({ role, permission, shouldAllow }) => {
-        const user = { id: 'test', role };
+        const user = { id: 'test', role, email: 'test@test.com', isActive: true, createdAt: new Date() };
         const result = authService.hasPermission(user, permission);
         expect(result).toBe(shouldAllow);
       });

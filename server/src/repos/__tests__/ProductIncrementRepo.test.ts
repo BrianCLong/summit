@@ -109,7 +109,7 @@ describe('ProductIncrementRepo', () => {
         updated_by: null,
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.createIncrement(
         {
@@ -158,7 +158,7 @@ describe('ProductIncrementRepo', () => {
         updated_by: null,
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.createIncrement(
         {
@@ -211,7 +211,7 @@ describe('ProductIncrementRepo', () => {
         updated_by: 'user-2',
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.updateIncrement(
         'test-id',
@@ -255,7 +255,7 @@ describe('ProductIncrementRepo', () => {
         updated_by: null,
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.updateIncrement('test-id', {}, 'user-2');
 
@@ -264,7 +264,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should return null when increment not found', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       const result = await repo.updateIncrement(
         'non-existent',
@@ -340,7 +340,7 @@ describe('ProductIncrementRepo', () => {
         updated_by: null,
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.findIncrementById('test-id');
 
@@ -349,7 +349,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should filter by tenant when provided', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       await repo.findIncrementById('test-id', 'tenant-1');
 
@@ -360,7 +360,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should return null when not found', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       const result = await repo.findIncrementById('non-existent');
 
@@ -421,7 +421,7 @@ describe('ProductIncrementRepo', () => {
         },
       ];
 
-      mockQuery.mockResolvedValueOnce({ rows: mockRows });
+      mockQuery.mockResolvedValueOnce({ rows: mockRows } as any);
 
       const result = await repo.listIncrements({ tenantId: 'tenant-1' });
 
@@ -431,7 +431,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should filter by status', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       await repo.listIncrements({
         tenantId: 'tenant-1',
@@ -445,7 +445,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should filter by multiple statuses', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       await repo.listIncrements({
         tenantId: 'tenant-1',
@@ -459,7 +459,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should apply search filter', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       await repo.listIncrements({
         tenantId: 'tenant-1',
@@ -499,7 +499,7 @@ describe('ProductIncrementRepo', () => {
         created_by: 'user-1',
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.createGoal(
         {
@@ -539,7 +539,7 @@ describe('ProductIncrementRepo', () => {
         created_by: 'user-1',
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.updateGoal('goal-1', {
         status: 'completed',
@@ -585,7 +585,7 @@ describe('ProductIncrementRepo', () => {
         created_by: 'user-1',
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.createDeliverable(
         {
@@ -630,7 +630,7 @@ describe('ProductIncrementRepo', () => {
         created_by: 'user-1',
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.createDeliverable(
         {
@@ -659,7 +659,7 @@ describe('ProductIncrementRepo', () => {
 
   describe('listDeliverables', () => {
     it('should list deliverables with filters', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       await repo.listDeliverables('inc-1', {
         status: ['in_progress', 'in_review'],
@@ -696,7 +696,7 @@ describe('ProductIncrementRepo', () => {
         created_at: new Date(),
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.assignTeamMember({
         incrementId: 'inc-1',
@@ -725,7 +725,7 @@ describe('ProductIncrementRepo', () => {
         created_at: new Date(),
       };
 
-      mockQuery.mockResolvedValueOnce({ rows: [mockRow] });
+      mockQuery.mockResolvedValueOnce({ rows: [mockRow] } as any);
 
       const result = await repo.assignTeamMember({
         incrementId: 'inc-1',
@@ -744,7 +744,7 @@ describe('ProductIncrementRepo', () => {
 
   describe('removeTeamMember', () => {
     it('should remove a team member', async () => {
-      mockQuery.mockResolvedValueOnce({ rowCount: 1 });
+      mockQuery.mockResolvedValueOnce({ rowCount: 1 } as any);
 
       const result = await repo.removeTeamMember('inc-1', 'user-1');
 
@@ -752,7 +752,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should return false when member not found', async () => {
-      mockQuery.mockResolvedValueOnce({ rowCount: 0 });
+      mockQuery.mockResolvedValueOnce({ rowCount: 0 } as any);
 
       const result = await repo.removeTeamMember('inc-1', 'non-existent');
 
@@ -818,8 +818,8 @@ describe('ProductIncrementRepo', () => {
       };
 
       mockQuery
-        .mockResolvedValueOnce({ rows: [summaryRow] }) // v_increment_summary
-        .mockResolvedValueOnce({ rows: [snapshotRow] }); // INSERT
+        .mockResolvedValueOnce({ rows: [summaryRow] } as any) // v_increment_summary
+        .mockResolvedValueOnce({ rows: [snapshotRow] } as any); // INSERT
 
       const result = await repo.recordMetricsSnapshot('inc-1');
 
@@ -830,7 +830,7 @@ describe('ProductIncrementRepo', () => {
     });
 
     it('should throw when increment not found', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] } as any);
 
       await expect(repo.recordMetricsSnapshot('non-existent')).rejects.toThrow(
         'Increment non-existent not found',
@@ -895,7 +895,7 @@ describe('ProductIncrementRepo', () => {
         },
       ];
 
-      mockQuery.mockResolvedValueOnce({ rows: mockRows });
+      mockQuery.mockResolvedValueOnce({ rows: mockRows } as any);
 
       const result = await repo.batchByIds(['inc-1', 'inc-2', 'inc-3']);
 

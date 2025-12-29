@@ -4,133 +4,13 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-// import 'jest-extended/all'; // Attempting import instead of require for ESM compatibility if needed,
-// but since this is setup.js treated as CJS or ESM depending on context...
-// Let's try standard require first, but wrapped in try/catch to avoid hard crash during debug
-try {
-  require('jest-extended');
-} catch (e) {
-  // console.warn("Failed to load jest-extended in setup file, proceeding without it for now.");
-}
+require('jest-extended');
 
+import * as dotenv from 'dotenv';
+dotenv.config({ path: './.env.test' });
 
 // Global test timeout
 jest.setTimeout(30000);
-
-// Use Zero Footprint mode to avoid real DB connections by default
-process.env.ZERO_FOOTPRINT = 'true';
-
-// Mock required environment variables for config.ts validation
-if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = 'postgres://postgres:postgres@localhost:5432/intelgraph_test';
-}
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-  process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only-must-be-32-chars';
-}
-if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 32) {
-  process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret-for-testing-only-32-chars';
-}
-if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
-if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
-if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
-
-// Mock IORedis globally to prevent connection errors
-jest.mock('ioredis', () => {
-  const EventEmitter = require('events');
-  // Shared subscribers map for Pub/Sub simulation
-  const subscribers = new Map();
-
-  class MockRedis extends EventEmitter {
-    constructor() {
-      super();
-      this.status = 'ready';
-      // Simulate ready event on next tick
-      setTimeout(() => this.emit('ready'), 0);
-      setTimeout(() => this.emit('connect'), 0);
-    }
-    async connect() { return Promise.resolve(); }
-    async disconnect() { return Promise.resolve(); }
-    async quit() { return Promise.resolve(); }
-    async get() { return null; }
-    async set() { return 'OK'; }
-    async del() { return 1; }
-
-    // Pub/Sub Implementation
-    async publish(channel, message) {
-      if (subscribers.has(channel)) {
-        subscribers.get(channel).forEach(client => {
-          client.emit('message', channel, message);
-        });
-        return subscribers.get(channel).size;
-      }
-      return 0;
-    }
-
-    async subscribe(...channels) {
-      channels.forEach(channel => {
-        if (!subscribers.has(channel)) {
-          subscribers.set(channel, new Set());
-        }
-        subscribers.get(channel).add(this);
-      });
-      return channels.length;
-    }
-
-    async unsubscribe(...channels) {
-      channels.forEach(channel => {
-        if (subscribers.has(channel)) {
-          subscribers.get(channel).delete(this);
-        }
-      });
-      return channels.length;
-    }
-
-    duplicate() { return new MockRedis(); }
-    defineCommand() { }
-  }
-  return {
-    __esModule: true,
-    default: MockRedis,
-  };
-});
-
-// Mock database config to bypass initialization checks
-jest.mock('../../src/config/database', () => {
-  const mockPool = {
-    connect: jest.fn().mockResolvedValue({
-      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
-      release: jest.fn(),
-    }),
-    query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
-    on: jest.fn(),
-    end: jest.fn(),
-  };
-
-  return {
-    __esModule: true,
-    connectPostgres: jest.fn().mockResolvedValue(mockPool),
-    connectRedis: jest.fn(),
-    connectNeo4j: jest.fn(),
-    getPostgresPool: jest.fn().mockReturnValue(mockPool),
-    getRedisClient: jest.fn().mockReturnValue({
-      get: jest.fn(),
-      set: jest.fn(),
-      del: jest.fn(),
-      keys: jest.fn().mockResolvedValue([]),
-      mget: jest.fn().mockResolvedValue([]),
-      quit: jest.fn(),
-      disconnect: jest.fn(),
-    }),
-    getNeo4jDriver: jest.fn().mockReturnValue({
-      session: () => ({
-        run: jest.fn().mockResolvedValue({ records: [] }),
-        close: jest.fn(),
-      }),
-      close: jest.fn(),
-    }),
-    closeConnections: jest.fn(),
-  };
-});
 
 // Mock console methods to reduce noise in tests unless debugging
 const originalConsole = { ...console };
@@ -142,15 +22,13 @@ beforeAll(() => {
     console.info = jest.fn();
     console.warn = jest.fn();
     console.debug = jest.fn();
+    console.error = jest.fn();
+  } else {
+    // In debug mode, spy on console.error but still log it for easier debugging
+    console.error = jest.fn((...args) => {
+      originalConsoleError(...args);
+    });
   }
-
-  console.error = (...args) => {
-    // Check if error is related to missing mock functionality or console.error during test
-    // originalConsoleError(...args); // Uncomment for debugging
-    // throw new Error(
-    //   '[console.error] used in server tests — replace with assertions or throw',
-    // );
-  };
 });
 
 afterAll(() => {

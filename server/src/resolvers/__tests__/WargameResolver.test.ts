@@ -64,7 +64,7 @@ describe('WargameResolver', () => {
       ];
       mockSessionRun.mockResolvedValueOnce({
         records: mockScenarios.map((s) => createMockRecord(s, 's')),
-      });
+      } as any);
 
       const result = await resolver.getAllCrisisScenarios({}, {}, {} as any);
       expect(result).toEqual(mockScenarios);
@@ -77,7 +77,7 @@ describe('WargameResolver', () => {
       const mockScenario = { id: 'scenario1', crisisType: 'geo' };
       mockSessionRun.mockResolvedValueOnce({
         records: [createMockRecord(mockScenario, 's')],
-      });
+      } as any);
 
       const result = await resolver.getCrisisScenario(
         {},
@@ -92,7 +92,7 @@ describe('WargameResolver', () => {
     });
 
     it('should return undefined if crisis scenario not found', async () => {
-      mockSessionRun.mockResolvedValueOnce({ records: [] });
+      mockSessionRun.mockResolvedValueOnce({ records: [] } as any);
       const result = await resolver.getCrisisScenario(
         {},
         { id: 'nonexistent' },
@@ -105,7 +105,7 @@ describe('WargameResolver', () => {
       const mockTelemetry = [{ id: 'tele1', platform: 'X', content: 'test' }];
       mockSessionRun.mockResolvedValueOnce({
         records: mockTelemetry.map((t) => createMockRecord(t, 't')),
-      });
+      } as any);
 
       const result = await resolver.getCrisisTelemetry(
         {},
@@ -125,7 +125,7 @@ describe('WargameResolver', () => {
       const mockIntent = [{ id: 'intent1', estimatedIntent: 'disinfo' }];
       mockSessionRun.mockResolvedValueOnce({
         records: mockIntent.map((i) => createMockRecord(i, 'i')),
-      });
+      } as any);
 
       const result = await resolver.getAdversaryIntentEstimates(
         {},
@@ -145,7 +145,7 @@ describe('WargameResolver', () => {
       const mockHeatmap = [{ id: 'heatmap1', narrative: 'narrativeA' }];
       mockSessionRun.mockResolvedValueOnce({
         records: mockHeatmap.map((h) => createMockRecord(h, 'h')),
-      });
+      } as any);
 
       const result = await resolver.getNarrativeHeatmapData(
         {},
@@ -165,7 +165,7 @@ describe('WargameResolver', () => {
       const mockPlaybook = [{ id: 'playbook1', name: 'Playbook A' }];
       mockSessionRun.mockResolvedValueOnce({
         records: mockPlaybook.map((p) => createMockRecord(p, 'p')),
-      });
+      } as any);
 
       const result = await resolver.getStrategicResponsePlaybooks(
         {},
@@ -206,11 +206,11 @@ describe('WargameResolver', () => {
               's',
             ),
           ],
-        })
+        } as any)
         .mockResolvedValue({
           // For subsequent MERGE operations
           records: [],
-        });
+        } as any);
 
       mockAxiosPost.mockImplementation((url: string) => {
         if (url.includes('/analyze-telemetry')) {
@@ -285,7 +285,7 @@ describe('WargameResolver', () => {
 
       mockSessionRun.mockResolvedValueOnce({
         records: [createMockRecord(updatedScenario, 's')],
-      });
+      } as any);
 
       const result = await resolver.updateCrisisScenario(
         {},
@@ -309,7 +309,7 @@ describe('WargameResolver', () => {
     it('should delete a crisis scenario', async () => {
       mockSessionRun.mockResolvedValueOnce({
         summary: { counters: { nodesDeleted: 1 } },
-      });
+      } as any);
 
       const result = await resolver.deleteCrisisScenario(
         {},

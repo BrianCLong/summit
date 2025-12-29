@@ -1,4 +1,20 @@
 import { generateKeyPairSync } from 'crypto';
+
+jest.mock('../src/config/database', () => ({
+  getPostgresPool: jest.fn(() => ({
+    connect: jest.fn(),
+    query: jest.fn(),
+    end: jest.fn(),
+  })),
+  getRedisClient: jest.fn(() => ({
+    get: jest.fn(),
+    set: jest.fn(),
+    on: jest.fn(),
+    quit: jest.fn(),
+    subscribe: jest.fn(),
+  })),
+}));
+
 import {
   LegalHoldOrchestrator,
   InMemoryLegalHoldRepository,
