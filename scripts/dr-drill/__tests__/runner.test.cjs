@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { runDrDrill, evaluateCorruption } = require('../runner.cjs');
+const { runDrDrill, evaluateCorruption, assertEnvironment } = require('../runner.cjs');
 
 test('runDrDrill produces passed report on successful flow', () => {
   const executor = (command) => ({ status: 'passed', stdout: `${command} ok`, stderr: '', durationMs: 10 });
@@ -26,4 +26,18 @@ test('corruption detection marks report as failed', () => {
 test('evaluateCorruption detects corrupted markers in output', () => {
   const result = evaluateCorruption({ status: 'passed', stdout: 'corrupt data found', stderr: '', durationMs: 1 });
   assert.equal(result, 'corrupted');
+});
+
+test('assertEnvironment enforces production guardrails', () => {
+  assert.throws(
+    () => assertEnvironment('prod', false, 'true'),
+    /cannot run against production/
+  );
+
+  assert.throws(
+    () => assertEnvironment('production', true, 'false'),
+    /cannot run against production/
+  );
+
+  assert.equal(assertEnvironment('production', true, 'true'), 'production');
 });
