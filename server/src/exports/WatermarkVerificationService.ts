@@ -102,6 +102,10 @@ export class WatermarkVerificationService {
         mismatches.push('manifest-hash-mismatch');
       }
 
+      if (!ledgerEntry.manifestHash.startsWith(observedWatermark.manifestHashPrefix)) {
+        mismatches.push('audit-ledger-manifest-mismatch');
+      }
+
       if (ledgerEntry.policyHash !== observedWatermark.policyHash) {
         mismatches.push('policy-hash-mismatch');
       }
