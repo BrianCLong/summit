@@ -231,6 +231,63 @@ jest.mock('../../src/observability/tracing', () => ({
   })),
 }));
 
+// Mock prom-client to prevent metric registration conflicts
+jest.mock('prom-client', () => {
+  const mockMetric = {
+    inc: jest.fn(),
+    dec: jest.fn(),
+    set: jest.fn(),
+    observe: jest.fn(),
+    reset: jest.fn(),
+    labels: jest.fn().mockReturnThis(),
+    startTimer: jest.fn().mockReturnValue(jest.fn()),
+  };
+
+  class MockCounter {
+    constructor() { Object.assign(this, mockMetric); }
+  }
+  class MockGauge {
+    constructor() { Object.assign(this, mockMetric); }
+  }
+  class MockHistogram {
+    constructor() { Object.assign(this, mockMetric); }
+  }
+  class MockSummary {
+    constructor() { Object.assign(this, mockMetric); }
+  }
+  class MockRegistry {
+    constructor() {
+      this.metrics = {};
+    }
+    registerMetric() {}
+    getSingleMetric() { return null; }
+    getMetricsAsJSON() { return []; }
+    metrics() { return ''; }
+    clear() {}
+    setDefaultLabels() {}
+  }
+
+  return {
+    __esModule: true,
+    Counter: MockCounter,
+    Gauge: MockGauge,
+    Histogram: MockHistogram,
+    Summary: MockSummary,
+    Registry: MockRegistry,
+    register: new MockRegistry(),
+    collectDefaultMetrics: jest.fn(),
+    default: {
+      Counter: MockCounter,
+      Gauge: MockGauge,
+      Histogram: MockHistogram,
+      Summary: MockSummary,
+      Registry: MockRegistry,
+      register: new MockRegistry(),
+      collectDefaultMetrics: jest.fn(),
+    },
+  };
+});
+
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks();
