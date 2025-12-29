@@ -31,6 +31,14 @@ Before starting the migration, ensure you have:
   - Python 3.9+ (if using Python SDK)
   - TLS 1.2+ required for all API connections
 
+### RC Updates Based on Beta Feedback
+
+- Enable the **custom policy remap flag** (`MIGRATION_ENABLE_CUSTOM_POLICY_REMAP=true`) during cutover to avoid the Cohort 2 edge case (BETA-025).
+- Pre-warm the AI suggestion cache with your top 50 policies to eliminate the beta-observed cold-start latency (BETA-003/BETA-002).
+- For evidence uploads >50MB, use the **deterministic checksum uploader** (`/api/v4/compliance/upload?mode=deterministic`) introduced post-beta to satisfy HIPAA/SOX guardrails.
+- Run the **migration smoke tests** (`make migrate:rc-smoke`) immediately after deployment to validate auth scopes, audit ledger writes, and dashboard refresh stability.
+- Capture a snapshot of the audit ledger Merkle root before and after migration; store both in your change ticket for traceability.
+
 ---
 
 ## SDK Upgrade
