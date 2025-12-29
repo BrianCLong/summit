@@ -26,6 +26,9 @@ import {
 } from 'recharts'
 import { useTenant } from '../../../contexts/TenantContext'
 import { useNotification } from '../../../contexts/NotificationContext'
+import { DataIntegrityNotice } from '../../../components/common/DataIntegrityNotice'
+import { useDemoMode } from '../../../components/common/DemoIndicator'
+import { EmptyState } from '../../../components/ui/EmptyState'
 
 // Mock data - in production would come from API
 const mockHealthData = {
@@ -158,11 +161,17 @@ export default function Overview() {
   const { currentTenant, hasPermission } = useTenant()
   const { showNotification } = useNotification()
   const [refreshing, setRefreshing] = useState(false)
+  const isDemoMode = useDemoMode()
+
+  const healthData = isDemoMode ? mockHealthData : null
+  const runsData = isDemoMode ? mockRunsData : []
+  const costData = isDemoMode ? mockCostData : []
 
   const handleRefresh = async () => {
     setRefreshing(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    if (isDemoMode) {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
     setRefreshing(false)
     showNotification({
       type: 'success',
@@ -210,12 +219,19 @@ export default function Overview() {
         </div>
       </div>
 
+      <DataIntegrityNotice
+        mode={isDemoMode ? 'demo' : 'unavailable'}
+        context="Maestro overview"
+      />
+
       {/* Health Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <HealthCard
           title="Active Runs"
-          value={mockHealthData.activeRuns}
-          subtitle={`${mockHealthData.queuedRuns} queued`}
+          value={healthData?.activeRuns ?? '--'}
+          subtitle={
+            healthData ? `${healthData.queuedRuns} queued` : 'No live data'
+          }
           icon={PlayIcon}
           status="info"
           trend="stable"
@@ -224,62 +240,74 @@ export default function Overview() {
 
         <HealthCard
           title="Success Rate"
-          value={`${mockHealthData.successRate}%`}
+          value={healthData ? `${healthData.successRate}%` : '--'}
           subtitle="Last 24 hours"
           icon={CheckCircleIcon}
-          status={mockHealthData.successRate >= 95 ? 'success' : 'warning'}
-          trend={mockHealthData.successRate >= 95 ? 'up' : 'down'}
+          status={
+            healthData && healthData.successRate >= 95 ? 'success' : 'warning'
+          }
+          trend={healthData && healthData.successRate >= 95 ? 'up' : 'down'}
         />
 
         <HealthCard
           title="P95 Latency"
-          value={`${mockHealthData.p95Latency}ms`}
+          value={healthData ? `${healthData.p95Latency}ms` : '--'}
           subtitle="Step completion time"
           icon={ChartBarIcon}
-          status={mockHealthData.p95Latency <= 1000 ? 'success' : 'warning'}
-          trend={mockHealthData.p95Latency <= 1000 ? 'down' : 'up'}
+          status={
+            healthData && healthData.p95Latency <= 1000 ? 'success' : 'warning'
+          }
+          trend={healthData && healthData.p95Latency <= 1000 ? 'down' : 'up'}
         />
 
         <HealthCard
           title="Cost Today"
-          value={`$${mockHealthData.costToday}`}
-          subtitle={`${mockHealthData.budgetRemaining}% budget left`}
+          value={healthData ? `$${healthData.costToday}` : '--'}
+          subtitle={
+            healthData
+              ? `${healthData.budgetRemaining}% budget left`
+              : 'No live data'
+          }
           icon={CurrencyDollarIcon}
-          status={mockHealthData.budgetRemaining > 20 ? 'success' : 'warning'}
+          status={
+            healthData && healthData.budgetRemaining > 20 ? 'success' : 'warning'
+          }
           onClick={() => (window.location.hash = '/maestro/budgets')}
         />
 
         <HealthCard
           title="Error Budget"
-          value={`${mockHealthData.errorBudgetBurn}%/hr`}
+          value={healthData ? `${healthData.errorBudgetBurn}%/hr` : '--'}
           subtitle="Current burn rate"
           icon={ExclamationTriangleIcon}
-          status={mockHealthData.errorBudgetBurn <= 5 ? 'success' : 'error'}
+          status={
+            healthData && healthData.errorBudgetBurn <= 5 ? 'success' : 'error'
+          }
         />
 
         <HealthCard
           title="DLQ Size"
-          value={mockHealthData.dlqSize}
+          value={healthData?.dlqSize ?? '--'}
           subtitle="Failed messages"
           icon={QueueListIcon}
-          status={mockHealthData.dlqSize === 0 ? 'success' : 'warning'}
+          status={healthData?.dlqSize === 0 ? 'success' : 'warning'}
           onClick={() => (window.location.hash = '/maestro/dlq')}
         />
 
         <HealthCard
           title="Open Alerts"
-          value={mockHealthData.alertsOpen}
+          value={healthData?.alertsOpen ?? '--'}
           subtitle="Requiring attention"
           icon={ExclamationTriangleIcon}
-          status={mockHealthData.alertsOpen === 0 ? 'success' : 'error'}
+          status={healthData?.alertsOpen === 0 ? 'success' : 'error'}
         />
 
         <HealthCard
           title="SLO Status"
-          value="Healthy"
-          subtitle="All targets met"
+          value={healthData ? 'Healthy' : '--'}
+          subtitle={healthData ? 'All targets met' : 'No live data'}
           icon={ServerIcon}
-          status="success"
+          status={healthData ? 'success' : 'info'}
           onClick={() => (window.location.hash = '/maestro/observability')}
         />
       </div>
@@ -295,28 +323,36 @@ export default function Overview() {
             <span className="text-sm text-gray-500">Last 24 hours</span>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockRunsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="runs"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="success"
-                  stroke="#10B981"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {runsData.length === 0 ? (
+              <EmptyState
+                icon="chart"
+                title="No live run data"
+                description="Connect Maestro telemetry to visualize run throughput."
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={runsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="time" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="runs"
+                    stroke="#3B82F6"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="success"
+                    stroke="#10B981"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -329,21 +365,29 @@ export default function Overview() {
             <span className="text-sm text-gray-500">This week</span>
           </div>
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockCostData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="day" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value, name) => [
-                    `$${Number(value).toFixed(2)}`,
-                    name === 'cost' ? 'Actual' : 'Budget',
-                  ]}
-                />
-                <Bar dataKey="cost" fill="#3B82F6" />
-                <Bar dataKey="budget" fill="#E5E7EB" opacity={0.5} />
-              </BarChart>
-            </ResponsiveContainer>
+            {costData.length === 0 ? (
+              <EmptyState
+                icon="chart"
+                title="No live cost data"
+                description="Connect billing telemetry to visualize spend."
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={costData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      `$${Number(value).toFixed(2)}`,
+                      name === 'cost' ? 'Actual' : 'Budget',
+                    ]}
+                  />
+                  <Bar dataKey="cost" fill="#3B82F6" />
+                  <Bar dataKey="budget" fill="#E5E7EB" opacity={0.5} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>
@@ -391,79 +435,87 @@ export default function Overview() {
         <h2 className="text-lg font-medium text-gray-900 mb-4">
           Recent Activity
         </h2>
-        <div className="flow-root">
-          <ul className="-mb-8">
-            {[
-              {
-                id: 1,
-                type: 'run',
-                status: 'completed',
-                title: 'Build pipeline completed successfully',
-                time: '2 minutes ago',
-                icon: CheckCircleIcon,
-                color: 'text-green-400',
-              },
-              {
-                id: 2,
-                type: 'alert',
-                status: 'warning',
-                title: 'Budget threshold exceeded (80%)',
-                time: '15 minutes ago',
-                icon: ExclamationTriangleIcon,
-                color: 'text-yellow-400',
-              },
-              {
-                id: 3,
-                type: 'run',
-                status: 'failed',
-                title: 'Deploy pipeline failed on step 3',
-                time: '1 hour ago',
-                icon: XCircleIcon,
-                color: 'text-red-400',
-              },
-              {
-                id: 4,
-                type: 'run',
-                status: 'completed',
-                title: 'Data processing completed',
-                time: '2 hours ago',
-                icon: CheckCircleIcon,
-                color: 'text-green-400',
-              },
-            ].map((item, itemIdx, items) => (
-              <li key={item.id}>
-                <div className="relative pb-8">
-                  {itemIdx !== items.length - 1 ? (
-                    <span
-                      className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
-                      aria-hidden="true"
-                    />
-                  ) : null}
-                  <div className="relative flex space-x-3">
-                    <div>
+        {isDemoMode ? (
+          <div className="flow-root">
+            <ul className="-mb-8">
+              {[
+                {
+                  id: 1,
+                  type: 'run',
+                  status: 'completed',
+                  title: 'Build pipeline completed successfully',
+                  time: '2 minutes ago',
+                  icon: CheckCircleIcon,
+                  color: 'text-green-400',
+                },
+                {
+                  id: 2,
+                  type: 'alert',
+                  status: 'warning',
+                  title: 'Budget threshold exceeded (80%)',
+                  time: '15 minutes ago',
+                  icon: ExclamationTriangleIcon,
+                  color: 'text-yellow-400',
+                },
+                {
+                  id: 3,
+                  type: 'run',
+                  status: 'failed',
+                  title: 'Deploy pipeline failed on step 3',
+                  time: '1 hour ago',
+                  icon: XCircleIcon,
+                  color: 'text-red-400',
+                },
+                {
+                  id: 4,
+                  type: 'run',
+                  status: 'completed',
+                  title: 'Data processing completed',
+                  time: '2 hours ago',
+                  icon: CheckCircleIcon,
+                  color: 'text-green-400',
+                },
+              ].map((item, itemIdx, items) => (
+                <li key={item.id}>
+                  <div className="relative pb-8">
+                    {itemIdx !== items.length - 1 ? (
                       <span
-                        className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${item.color === 'text-green-400' ? 'bg-green-100' : item.color === 'text-yellow-400' ? 'bg-yellow-100' : 'bg-red-100'}`}
-                      >
-                        <item.icon
-                          className={`h-5 w-5 ${item.color}`}
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                        className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                    <div className="relative flex space-x-3">
                       <div>
-                        <p className="text-sm text-gray-900">{item.title}</p>
+                        <span
+                          className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${item.color === 'text-green-400' ? 'bg-green-100' : item.color === 'text-yellow-400' ? 'bg-yellow-100' : 'bg-red-100'}`}
+                        >
+                          <item.icon
+                            className={`h-5 w-5 ${item.color}`}
+                            aria-hidden="true"
+                          />
+                        </span>
                       </div>
-                      <div className="text-right text-sm whitespace-nowrap text-gray-500">
-                        <time>{item.time}</time>
+                      <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                        <div>
+                          <p className="text-sm text-gray-900">{item.title}</p>
+                        </div>
+                        <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                          <time>{item.time}</time>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <EmptyState
+            icon="activity"
+            title="No live activity"
+            description="Connect the activity feed to show recent Maestro events."
+          />
+        )}
       </div>
     </div>
   )

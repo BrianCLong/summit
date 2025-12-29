@@ -45,7 +45,30 @@ export interface Explanation {
   features: Record<string, number>;
   rationale: string[];
   score: number;
+  confidence: number;
+  method: string;
+  threshold: number;
+  featureWeights: Record<string, number>;
+  featureContributions: FeatureContribution[];
 }
+
+export interface FeatureContribution {
+  feature: string;
+  value: number | boolean;
+  weight: number;
+  contribution: number;
+  normalizedContribution: number;
+}
+
+const EXPLAIN_METHOD = 'rules-v2';
+const EXPLAIN_THRESHOLD = 0.7;
+const EXPLAIN_WEIGHTS: Record<string, number> = {
+  phonetic: 0.3,
+  name_exact: 0.5,
+  geo: 0.4,
+  crypto: 0.8,
+  temporal_overlap: 0.1,
+};
 
 export interface MergeRequest {
   masterId: string;
@@ -60,8 +83,25 @@ export interface MergeRequest {
   guardrailOverrideReason?: string;
 }
 
+export interface GuardrailResult {
+  datasetId: string;
+  passed: boolean;
+  checks: Array<{ name: string; passed: boolean; message?: string }>;
+}
+
+export interface EntityResolutionV2Dependencies {
+  dlq?: { enqueue: (payload: unknown) => Promise<unknown> };
+  pool?: ReturnType<typeof getPostgresPool>;
+}
+
 export class EntityResolutionV2Service {
-  private readonly dlq = dlqFactory('er-merge-conflicts');
+  private readonly dlq: { enqueue: (payload: unknown) => Promise<unknown> };
+  private readonly poolProvider: () => ReturnType<typeof getPostgresPool>;
+
+  constructor({ dlq, pool }: EntityResolutionV2Dependencies = {}) {
+    this.dlq = dlq ?? dlqFactory('er-merge-conflicts');
+    this.poolProvider = () => pool ?? getPostgresPool();
+  }
 
   private buildMergeId(masterId: string, mergeIds: string[]): string {
     const hash = createHash('sha256')
@@ -118,7 +158,7 @@ export class EntityResolutionV2Service {
     userContext: any;
     metadata?: Record<string, unknown>;
   }): Promise<string> {
-    const pool = getPostgresPool();
+    const pool = this.poolProvider();
     const snapshotId = randomUUID();
 
     const snapshot = {
@@ -157,7 +197,7 @@ export class EntityResolutionV2Service {
       userContext,
     }: { mergeId: string; reason: string; userContext: any },
   ): Promise<{ success: boolean; snapshotId: string; decisionId: string }> {
-    const pool = getPostgresPool();
+    const pool = this.poolProvider();
     const snapshotResult = await pool.query(
       'SELECT * FROM er_merge_rollback_snapshots WHERE merge_id = $1',
       [mergeId],
@@ -274,13 +314,56 @@ export class EntityResolutionV2Service {
     if (overlap) rationale.push('Temporal validity overlap');
     else if (entityA.properties.validFrom && entityB.properties.validFrom) rationale.push('No temporal overlap');
 
-    const score = (phoneticMatch * 0.3) + (nameMatch * 0.5) + (geoMatch * 0.4) + (cryptoMatch * 0.8) + (overlap ? 0.1 : 0);
+    const score = (phoneticMatch * EXPLAIN_WEIGHTS.phonetic)
+      + (nameMatch * EXPLAIN_WEIGHTS.name_exact)
+      + (geoMatch * EXPLAIN_WEIGHTS.geo)
+      + (cryptoMatch * EXPLAIN_WEIGHTS.crypto)
+      + (overlap ? EXPLAIN_WEIGHTS.temporal_overlap : 0);
+    const clampedScore = Math.min(score, 1.0);
+    const featureContributions = this.buildFeatureContributions(
+      features,
+      EXPLAIN_WEIGHTS,
+    );
 
     return {
       features,
       rationale,
-      score: Math.min(score, 1.0)
+      score: clampedScore,
+      confidence: clampedScore,
+      method: EXPLAIN_METHOD,
+      threshold: EXPLAIN_THRESHOLD,
+      featureWeights: EXPLAIN_WEIGHTS,
+      featureContributions,
     };
+  }
+
+  private buildFeatureContributions(
+    features: Record<string, number>,
+    weights: Record<string, number>,
+  ): FeatureContribution[] {
+    const entries = Object.entries(weights).map(([feature, weight]) => {
+      const rawValue = features[feature] ?? 0;
+      const numericValue =
+        typeof rawValue === 'boolean'
+          ? rawValue
+            ? 1
+            : 0
+          : rawValue;
+      return {
+        feature,
+        value: rawValue,
+        weight,
+        contribution: numericValue * weight,
+        normalizedContribution: 0,
+      };
+    });
+    const total = entries.reduce((sum, entry) => sum + entry.contribution, 0);
+    return entries
+      .map(entry => ({
+        ...entry,
+        normalizedContribution: total > 0 ? entry.contribution / total : 0,
+      }))
+      .sort((a, b) => b.contribution - a.contribution);
   }
 
   private checkTemporalOverlap(t1: Bitemporal, t2: Bitemporal): boolean {

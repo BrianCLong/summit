@@ -259,6 +259,27 @@ export const handlers = [
     return HttpResponse.json(mockData.users[0])
   }),
 
+  // Maestro Runs
+  http.post('*/api/maestro/runs', () => {
+    return HttpResponse.json({
+      run: {
+        id: 'run-mock-123',
+        user: { id: 'mock-user' },
+        createdAt: new Date().toISOString(),
+        requestText: 'Mock request',
+      },
+      tasks: [],
+      results: [],
+      costSummary: {
+        runId: 'run-mock-123',
+        totalCostUSD: 0,
+        totalInputTokens: 0,
+        totalOutputTokens: 0,
+        byModel: {},
+      },
+    })
+  }),
+
   // File upload mock
   http.post('*/upload', () => {
     return HttpResponse.json({

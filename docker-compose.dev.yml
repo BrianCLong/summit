@@ -39,8 +39,6 @@ services:
       - summit
 
   neo4j:
-    image: neo4j:latest
-    image: neo4j:5.24
     image: neo4j:5-community
     container_name: summit-neo4j
     restart: unless-stopped
@@ -229,12 +227,9 @@ services:
 
   websocket-server:
     build:
-      context: .
-      dockerfile: Dockerfile.services
-      args:
-        SERVICE_PATH: services/websocket-server
+      context: ./services/websocket-server
+      dockerfile: Dockerfile
     command: node dist/index.js
-      dockerfile: services/websocket-server/Dockerfile
     container_name: summit-websocket-server
     restart: unless-stopped
     env_file:
@@ -374,12 +369,9 @@ services:
 
   ai-sandbox:
     build:
-      context: .
-      dockerfile: Dockerfile.services
-      args:
-        SERVICE_PATH: services/ai-sandbox
+      context: ./services/ai-sandbox
+      dockerfile: Dockerfile
     command: node dist/index.js
-      dockerfile: services/ai-sandbox/Dockerfile
     container_name: summit-ai-sandbox
     restart: unless-stopped
     environment:

@@ -2,7 +2,7 @@
  * Tests for validation middleware
  */
 
-import { validateRequest } from '../validation';
+import { validateRequestLegacy as validateRequest } from '../validation';
 import { describe, it, test, expect } from '@jest/globals';
 import {
   requestFactory,
