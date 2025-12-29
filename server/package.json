@@ -13,6 +13,7 @@
     "test": "jest --config jest.config.js",
     "test:watch": "jest --config jest.config.js --watch",
     "test:coverage": "jest --coverage",
+    "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
