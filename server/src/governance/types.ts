@@ -1,5 +1,13 @@
 export type PolicyAction = 'ALLOW' | 'DENY' | 'ESCALATE' | 'WARN';
-export type Stage = 'data' | 'train' | 'alignment' | 'runtime';
+export type Stage =
+  | 'data'
+  | 'train'
+  | 'alignment'
+  | 'runtime'
+  | 'ingest'
+  | 'retrieval'
+  | 'tool_use'
+  | 'output';
 
 export interface PolicyRule {
   field: string;

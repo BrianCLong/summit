@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2025-12-29T20:43:25Z",
   "initiatives": [
     {
       "id": "A",
@@ -56,7 +56,7 @@
         {
           "id": "C1",
           "name": "Policy-as-Code Engine",
-          "status": "rc-ready",
+          "status": "ready-to-deploy",
           "owner": "Jules"
         },
         {
