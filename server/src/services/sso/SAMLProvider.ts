@@ -1,6 +1,5 @@
 
-import { SSOProvider, SSOConfig, SSOUser } from './types.js';
-import { SAML, SamlConfig } from '@node-saml/node-saml';
+import { SSOProvider, SSOConfig, SSOUser, SAML, SamlConfig } from './types.js';
 import logger from '../../utils/logger.js';
 
 export class SAMLProvider implements SSOProvider {
@@ -10,17 +9,14 @@ export class SAMLProvider implements SSOProvider {
   constructor(config: SSOConfig) {
     this.config = config;
     this.saml = new SAML({
-      entryPoint: config.entryPoint,
-      issuer: config.issuerString,
-      cert: config.cert,
+      entryPoint: config.entryPoint!,
+      issuer: config.issuerString || config.issuer,
+      cert: config.cert!,
+      callbackUrl: config.callbackUrl || '',
       privateKey: config.privateKey,
       decryptionPvk: config.decryptionPvk,
-      signatureAlgorithm: config.signatureAlgorithm || 'sha256',
-      audience: config.issuerString, // Often used as EntityID
-      disableRequestedAuthnContext: true, // often necessary for compatibility
-      identifierFormat: null,
-      acceptedClockSkewMs: 30000, // 30s skew
-    } as SamlConfig);
+      signatureAlgorithm: config.signatureAlgorithm,
+    });
   }
 
   validateConfig(): void {
@@ -29,22 +25,8 @@ export class SAMLProvider implements SSOProvider {
   }
 
   async generateAuthUrl(callbackUrl: string, relayState?: string): Promise<string> {
-    // node-saml generates the redirect URL
-    return new Promise((resolve, reject) => {
-      this.saml.getAuthorizeUrl(
-        {
-          headers: {},
-          body: {},
-          query: { RelayState: relayState },
-        },
-        { additionalParams: { RelayState: relayState } },
-        (err, url) => {
-          if (err) return reject(err);
-          if (!url) return reject(new Error('Failed to generate auth URL'));
-          resolve(url);
-        }
-      );
-    });
+    // Generate SAML auth redirect URL
+    return this.saml.getAuthorizeUrl({ RelayState: relayState });
   }
 
   async handleCallback(callbackUrl: string, body: any, query: any): Promise<SSOUser> {
@@ -52,7 +34,7 @@ export class SAMLProvider implements SSOProvider {
     const { profile } = validatePostResponse;
 
     if (!profile) {
-        throw new Error('SAML validation failed: No profile returned');
+      throw new Error('SAML validation failed: No profile returned');
     }
 
     const email = profile.email || profile.nameID || profile['urn:oid:0.9.2342.19200300.100.1.3']; // Common email OID
@@ -64,9 +46,9 @@ export class SAMLProvider implements SSOProvider {
     // Map attributes
     const attributes = profile.attributes || {};
     const firstName = attributes[this.config.attributeMap?.firstName || 'firstName'] ||
-                     attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'];
+      attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'];
     const lastName = attributes[this.config.attributeMap?.lastName || 'lastName'] ||
-                    attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'];
+      attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'];
 
     let groups: string[] = [];
     const groupAttr = this.config.attributeMap?.groups || 'groups';
@@ -89,14 +71,14 @@ export class SAMLProvider implements SSOProvider {
     if (roles.length === 0) roles.push('VIEWER');
 
     return {
+      id: String(profile.nameID),
       email: String(email),
       firstName: firstName ? String(firstName) : undefined,
       lastName: lastName ? String(lastName) : undefined,
       groups,
       roles: Array.from(new Set(roles)),
       provider: 'saml',
-      providerId: String(profile.nameID),
-      attributes: profile
+      attributes: profile as Record<string, unknown>
     };
   }
 }

@@ -388,7 +388,7 @@ async function batchLoadEnabledPlugins(
  */
 export function createPluginConfigLoader(
   context: DataLoaderContext
-): DataLoader<string, PluginConfigWithVerdict | null, string> {
+) {
   return new DataLoader(
     (pluginIds) => batchLoadPluginConfigs(pluginIds, context),
     {
@@ -404,7 +404,7 @@ export function createPluginConfigLoader(
  */
 export function createAllPluginsForTenantLoader(
   context: DataLoaderContext
-): DataLoader<string, PluginConfigWithVerdict[], string> {
+) {
   return new DataLoader(
     (tenantIds) => batchLoadAllPluginConfigsForTenant(tenantIds, context),
     {
@@ -420,7 +420,7 @@ export function createAllPluginsForTenantLoader(
  */
 export function createEnabledPluginsLoader(
   context: DataLoaderContext
-): DataLoader<string, PluginConfigWithVerdict[], string> {
+) {
   return new DataLoader(
     (tenantIds) => batchLoadEnabledPlugins(tenantIds, context),
     {

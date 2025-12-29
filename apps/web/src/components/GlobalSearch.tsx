@@ -4,6 +4,7 @@ import { Search, FileText, User, AlertTriangle, Zap } from 'lucide-react'
 import { useSearch } from '@/contexts/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
+import { useDemoMode } from '@/components/common/DemoIndicator'
 
 interface SearchResult {
   id: string
@@ -20,11 +21,16 @@ export function GlobalSearch() {
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const isDemoMode = useDemoMode()
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
     if (!query.trim()) {return []}
     if (!query || !query.trim()) return []
+
+    if (!isDemoMode) {
+      return []
+    }
 
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 200))
@@ -116,7 +122,7 @@ export function GlobalSearch() {
     searchFunction(query)
       .then(setResults)
       .finally(() => setLoading(false))
-  }, [query])
+  }, [query, isDemoMode])
 
   const handleSelect = (result: SearchResult) => {
     if (result.href) {
@@ -176,6 +182,11 @@ export function GlobalSearch() {
           </div>
 
           <Command.List className="max-h-96 overflow-y-auto p-2">
+            {!isDemoMode && (
+              <div className="py-3 text-center text-xs text-muted-foreground">
+                Live search is unavailable until a backend connection is configured.
+              </div>
+            )}
             {loading && (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 Searching...
