@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { ERROR_CODES } from '../../server/src/support/errorCodes.js';
 
 // Script to check for compliance drift
 // 1. Validates that all artifacts referenced in control-map.yaml exist.
@@ -16,7 +17,9 @@ function checkDrift() {
   console.log(`Root Dir: ${ROOT_DIR}`);
 
   if (!fs.existsSync(CONTROL_MAP_PATH)) {
-    console.error(`CRITICAL: Control map not found at ${CONTROL_MAP_PATH}`);
+    console.error(
+      `[${ERROR_CODES.compliance.controlMapMissing.code}] CRITICAL: Control map not found at ${CONTROL_MAP_PATH}`,
+    );
     process.exit(1);
   }
 
@@ -45,7 +48,9 @@ function checkDrift() {
             : artifactPath;
 
           if (!fs.existsSync(cleanPath)) {
-            console.error(`[DRIFT] Mapped artifact not found: ${artifact}`);
+            console.error(
+              `[${ERROR_CODES.compliance.artifactMissing.code}] [DRIFT] Mapped artifact not found: ${artifact}`,
+            );
             errors++;
           }
       }

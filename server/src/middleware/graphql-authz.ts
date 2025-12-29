@@ -3,6 +3,7 @@ import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import axios from 'axios';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+import { ERROR_CODES } from '../support/errorCodes.js';
 
 interface User {
   id: string;
@@ -49,6 +50,15 @@ interface OPAInput {
 interface OPADecision {
   allow: boolean;
   reason?: string;
+}
+
+function addSupportCodeToError<T extends Error>(error: T, code: string) {
+  const graphQLError = error as T & { extensions?: Record<string, unknown> };
+  graphQLError.extensions = {
+    ...graphQLError.extensions,
+    summitErrorCode: code,
+  };
+  return graphQLError;
 }
 
 /**
@@ -106,7 +116,10 @@ export class GraphQLAuthzPlugin {
 
       // Ensure user is authenticated
       if (!context.user) {
-        throw new AuthenticationError('Authentication required');
+        throw addSupportCodeToError(
+          new AuthenticationError('Authentication required'),
+          ERROR_CODES.authz.authenticationRequired.code,
+        );
       }
 
       try {
@@ -128,8 +141,11 @@ export class GraphQLAuthzPlugin {
 
         // Enforce decision
         if (!decision.allow) {
-          throw new ForbiddenError(
-            `Access denied to ${info.fieldName}: ${decision.reason || 'Policy violation'}`,
+          throw addSupportCodeToError(
+            new ForbiddenError(
+              `Access denied to ${info.fieldName}: ${decision.reason || 'Policy violation'}`,
+            ),
+            ERROR_CODES.authz.policyDenied.code,
           );
         }
 
@@ -147,7 +163,10 @@ export class GraphQLAuthzPlugin {
         );
 
         // Fail secure - deny on error
-        throw new ForbiddenError('Authorization check failed');
+        throw addSupportCodeToError(
+          new ForbiddenError('Authorization check failed'),
+          ERROR_CODES.authz.policyEvaluationFailed.code,
+        );
       }
     };
   }
@@ -239,7 +258,10 @@ export class GraphQLAuthzPlugin {
 
       // Fail secure on OPA unavailability
       if (config.env === 'production') {
-        return { allow: false, reason: 'Policy engine unavailable' };
+        return {
+          allow: false,
+          reason: ERROR_CODES.authz.engineUnavailable.message,
+        };
       } else {
         // Allow in development if OPA is down
         logger.warn(

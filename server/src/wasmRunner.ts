@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import { WASI } from 'wasi';
+import { ERROR_CODES, withSupportCode } from './support/errorCodes.js';
 
 type WasmCaps = {
   network?: boolean;
@@ -33,8 +34,16 @@ export async function runWasmStep(
 
   const guard = setInterval(() => {
     const m = inst.exports?.memory as WebAssembly.Memory | undefined;
-    if (m && m.buffer.byteLength > memLimit) throw new Error('wasm OOM');
-    if (Date.now() > deadline) throw new Error('wasm timeout');
+    if (m && m.buffer.byteLength > memLimit)
+      throw withSupportCode(
+        new Error(ERROR_CODES.plugins.wasmOom.message),
+        ERROR_CODES.plugins.wasmOom.code,
+      );
+    if (Date.now() > deadline)
+      throw withSupportCode(
+        new Error(ERROR_CODES.plugins.wasmTimeout.message),
+        ERROR_CODES.plugins.wasmTimeout.code,
+      );
   }, 50);
 
   try {
@@ -43,7 +52,10 @@ export async function runWasmStep(
     // Convention: export_json(ptr) returns a pointer to a NUL-terminated JSON string
     const exportJson = inst.exports?.['export_json'] as Function | undefined;
     if (typeof exportJson !== 'function')
-      throw new Error('missing export_json()');
+      throw withSupportCode(
+        new Error(ERROR_CODES.plugins.exportJsonMissing.message),
+        ERROR_CODES.plugins.exportJsonMissing.code,
+      );
     // Pass input via memory: simple approach, let plugin read from stdin or global if needed.
     const resPtr = exportJson(JSON.stringify(input));
     // @ts-ignore Memory access needs cast

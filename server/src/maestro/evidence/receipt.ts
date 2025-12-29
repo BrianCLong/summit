@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { ERROR_CODES, withSupportCode } from '../../support/errorCodes.js';
 
 type SignerAlg = 'HS256' | 'HMAC-SHA256';
 
@@ -88,7 +89,10 @@ export function resolveSigningSecret(): { secret: string; kid: string; alg: Sign
     (process.env.NODE_ENV !== 'production' ? 'dev-secret' : undefined);
 
   if (!secret) {
-    throw new Error('EVIDENCE_SIGNING_SECRET is required to sign receipts');
+    const error = new Error(
+      ERROR_CODES.receipts.signingSecretMissing.message,
+    );
+    throw withSupportCode(error, ERROR_CODES.receipts.signingSecretMissing.code);
   }
 
   return {
