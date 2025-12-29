@@ -2,16 +2,13 @@ import { Pool } from 'pg';
 import { getPostgresPool } from '../../config/database.js';
 import { userManagementService, ManagedUser } from '../UserManagementService.js';
 import {
-    ScimUser, ScimGroup, ScimListResponse, ScimResource, ScimPatchRequest,
-    ScimBulkRequest, ScimBulkResponse, ScimError
+    ScimUser, ScimGroup, ScimListResponse, ScimPatchRequest,
+    ScimBulkRequest, ScimBulkResponse
 } from './types.js';
 import { randomUUID } from 'crypto';
-import logger from '../../utils/logger.js';
-import { z } from 'zod';
 
 const SCIM_USER_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:User";
 const SCIM_GROUP_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0:Group";
-const SCIM_ENTERPRISE_USER_SCHEMA = "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User";
 
 export class ScimService {
     private pool: Pool;
@@ -21,7 +18,6 @@ export class ScimService {
     }
 
     private mapUserToScim(user: ManagedUser): ScimUser {
-        const now = new Date().toISOString();
         return {
             schemas: [SCIM_USER_SCHEMA],
             id: user.id,
@@ -77,7 +73,7 @@ export class ScimService {
     private parseFilter(filter: string | undefined): { field: string, value: string } | null {
         if (!filter) return null;
         // Simple regex for 'field eq "value"'
-        const match = filter.match(/([\w\.]+)[\s]+eq[\s]+"([^"]+)"/);
+        const match = filter.match(/([\w.]+)[\s]+eq[\s]+"([^"]+)"/);
         if (match) {
             return { field: match[1], value: match[2] };
         }
@@ -425,8 +421,6 @@ export class ScimService {
                          membersToAdd = op.value;
                      } else if (op.value && op.value.members) {
                          membersToAdd = op.value.members;
-                     } else if (op.path === 'members' && Array.isArray(op.value)) {
-                         membersToAdd = op.value;
                      }
 
                      for (const m of membersToAdd) {
