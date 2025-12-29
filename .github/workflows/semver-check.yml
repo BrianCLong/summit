@@ -1,0 +1,22 @@
+name: SemVer Label Check
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize, reopened]
+
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Check for SemVer Labels
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+        run: npx tsx scripts/check-semver-label.ts
