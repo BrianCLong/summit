@@ -76,7 +76,9 @@ jobs:
 
   k6-strict:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' && secrets.STAGING_BASE_URL != '' }}
+    if: ${{ github.event_name != 'pull_request' }}
+    env:
+      BASE_URL: ${{ secrets.STAGING_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
 

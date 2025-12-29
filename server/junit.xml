@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="3" failures="0" errors="0" time="13.932">
-  <testsuite name="DefensivePsyOpsService Decision Context" errors="0" failures="0" skipped="0" timestamp="2025-12-28T04:20:39" time="13.852" tests="3">
+<testsuites name="jest tests" tests="3" failures="0" errors="0" time="14.032">
+  <testsuite name="DefensivePsyOpsService Decision Context" errors="0" failures="0" skipped="0" timestamp="2025-12-29T12:01:42" time="13.953" tests="3">
     <testcase classname="DefensivePsyOpsService Decision Context should generate correct decision context for HIGH threat" name="DefensivePsyOpsService Decision Context should generate correct decision context for HIGH threat" time="0.006">
     </testcase>
     <testcase classname="DefensivePsyOpsService Decision Context should generate correct decision context for CRITICAL threat" name="DefensivePsyOpsService Decision Context should generate correct decision context for CRITICAL threat" time="0.002">
