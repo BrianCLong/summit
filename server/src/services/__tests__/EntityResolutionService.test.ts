@@ -55,37 +55,31 @@ describe('EntityResolutionService', () => {
   });
 
   describe('evaluateMatch', () => {
-    it('should match identical entities with high confidence', () => {
+    it('should return high score for matching emails', async () => {
       const entityA = { name: 'Alice', email: 'alice@example.com' };
       const entityB = { name: 'Alice', email: 'alice@example.com' };
 
-      const result = service.evaluateMatch(entityA, entityB);
+      const score = await service.evaluateMatch(entityA, entityB);
 
-      expect(result.isMatch).toBe(true);
-      expect(result.confidence).toBe('high');
-      expect(result.explanation).toHaveLength(2); // Name and Email match
-      expect(result.explanation.find(e => e.ruleId === 'email_exact')).toBeDefined();
+      expect(score).toBe(1.0); // Email exact match
     });
 
-    it('should not match different entities', () => {
+    it('should return lower score for matching names only', async () => {
+      const entityA = { name: 'Alice', email: 'alice@example.com' };
+      const entityB = { name: 'Alice', email: 'different@example.com' };
+
+      const score = await service.evaluateMatch(entityA, entityB);
+
+      expect(score).toBe(0.8); // Name match only
+    });
+
+    it('should return zero for non-matching entities', async () => {
       const entityA = { name: 'Alice', email: 'alice@example.com' };
       const entityB = { name: 'Bob', email: 'bob@example.com' };
 
-      const result = service.evaluateMatch(entityA, entityB);
+      const score = await service.evaluateMatch(entityA, entityB);
 
-      expect(result.isMatch).toBe(false);
-      expect(result.confidence).toBe('none');
-    });
-
-    it('should return explanation for matches', () => {
-       const entityA = { name: 'Alice', email: 'alice@example.com' };
-       const entityB = { name: 'Alice Cooper', email: 'alice@example.com' };
-
-       const result = service.evaluateMatch(entityA, entityB);
-
-       // Email matches (score 1.0), Name does not match exactly
-       expect(result.isMatch).toBe(true);
-       expect(result.explanation[0].ruleId).toBe('email_exact');
+      expect(score).toBe(0);
     });
   });
 });
