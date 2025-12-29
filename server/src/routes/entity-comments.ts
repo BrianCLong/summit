@@ -191,6 +191,9 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
       id,
       limit,
       offset,
+      {
+        includeDeleted: String(req.query.includeDeleted || '') === 'true',
+      },
     );
 
     res.json(comments);
@@ -201,6 +204,182 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to list entity comments',
+    );
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+entityCommentsRouter.post('/:id/comments/:commentId/delete', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id: entityId, commentId } = req.params;
+    const pg = getPostgresPool();
+    const service = new EntityCommentService(pg);
+    const comment = await service.getCommentById(tenantId, commentId);
+
+    if (!comment || comment.entityId !== entityId) {
+      return res.status(404).json({ error: 'comment_not_found' });
+    }
+
+    const isOwner = comment.authorId === userId;
+    if (!isOwner) {
+      await authorizer({
+        userId,
+        tenantId,
+        entityId,
+        action: 'comment:delete',
+      });
+    }
+
+    const deleted = await service.softDeleteComment(
+      tenantId,
+      commentId,
+      userId,
+      req.body?.reason,
+    );
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'comment_not_found' });
+    }
+
+    await emitAuditEvent(
+      {
+        eventId: randomUUID(),
+        occurredAt: new Date().toISOString(),
+        actor: {
+          type: 'user',
+          id: userId,
+          name: (req.user as any)?.username || (req.user as any)?.email || userId,
+          ipAddress: req.ip,
+        },
+        action: {
+          type: 'comment.deleted',
+          outcome: 'success',
+        },
+        tenantId,
+        target: {
+          type: 'entity_comment',
+          id: commentId,
+          path: `entities/${entityId}`,
+        },
+        metadata: {
+          entityId,
+          commentId,
+          deleteReason: req.body?.reason,
+          purgeAfter: deleted.metadata?.purgeAfter,
+        },
+      },
+      {
+        correlationId: req.headers['x-request-id'] as string,
+        serviceId: 'entities',
+      },
+    ).catch((error) => {
+      routeLogger.warn(
+        { error: (error as Error).message, entityId, commentId },
+        'Failed to emit entity comment delete audit event',
+      );
+    });
+
+    res.json({ status: 'deleted', comment: deleted });
+  } catch (error) {
+    if (error instanceof EntityCommentAccessError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+
+    routeLogger.error(
+      { error: (error as Error).message },
+      'Failed to delete entity comment',
+    );
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+entityCommentsRouter.post('/:id/comments/:commentId/restore', async (req, res) => {
+  try {
+    const { tenantId, userId } = getRequestContext(req);
+    if (!tenantId) {
+      return res.status(400).json({ error: 'tenant_required' });
+    }
+    if (!userId) {
+      return res.status(401).json({ error: 'user_required' });
+    }
+
+    const { id: entityId, commentId } = req.params;
+    const pg = getPostgresPool();
+    const service = new EntityCommentService(pg);
+    const comment = await service.getCommentById(tenantId, commentId);
+
+    if (!comment || comment.entityId !== entityId) {
+      return res.status(404).json({ error: 'comment_not_found' });
+    }
+
+    const isOwner = comment.authorId === userId;
+    if (!isOwner) {
+      await authorizer({
+        userId,
+        tenantId,
+        entityId,
+        action: 'comment:restore',
+      });
+    }
+
+    const restored = await service.restoreComment(tenantId, commentId, userId);
+    if (!restored) {
+      return res.status(404).json({ error: 'comment_not_found' });
+    }
+
+    await emitAuditEvent(
+      {
+        eventId: randomUUID(),
+        occurredAt: new Date().toISOString(),
+        actor: {
+          type: 'user',
+          id: userId,
+          name: (req.user as any)?.username || (req.user as any)?.email || userId,
+          ipAddress: req.ip,
+        },
+        action: {
+          type: 'comment.restored',
+          outcome: 'success',
+        },
+        tenantId,
+        target: {
+          type: 'entity_comment',
+          id: commentId,
+          path: `entities/${entityId}`,
+        },
+        metadata: {
+          entityId,
+          commentId,
+        },
+      },
+      {
+        correlationId: req.headers['x-request-id'] as string,
+        serviceId: 'entities',
+      },
+    ).catch((error) => {
+      routeLogger.warn(
+        { error: (error as Error).message, entityId, commentId },
+        'Failed to emit entity comment restore audit event',
+      );
+    });
+
+    res.json({ status: 'restored', comment: restored });
+  } catch (error) {
+    if (error instanceof EntityCommentAccessError) {
+      return res.status(error.status).json({ error: error.code });
+    }
+
+    routeLogger.error(
+      { error: (error as Error).message },
+      'Failed to restore entity comment',
     );
     res.status(500).json({ error: (error as Error).message });
   }
