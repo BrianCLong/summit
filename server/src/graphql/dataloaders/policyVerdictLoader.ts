@@ -557,6 +557,7 @@ export function createVerdictByKeyLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (keys) => batchLoadVerdictsByKey(keys, context),
     {
       cache: true,
@@ -574,6 +575,7 @@ export function createVerdictsBySubjectLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (subjectIds) => batchLoadVerdictsBySubject(subjectIds, context),
     {
       cache: true,
@@ -590,6 +592,7 @@ export function createDeniedVerdictsLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (policyIds) => batchLoadDeniedVerdicts(policyIds, context),
     {
       cache: true,

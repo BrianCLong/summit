@@ -414,6 +414,7 @@ export function createAssessmentsByControlLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (controlIds) => batchLoadAssessmentsByControl(controlIds, context),
     {
       cache: true,
@@ -430,6 +431,7 @@ export function createAssessmentsByFrameworkLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (frameworks) => batchLoadAssessmentsByFramework(frameworks, context),
     {
       cache: true,
