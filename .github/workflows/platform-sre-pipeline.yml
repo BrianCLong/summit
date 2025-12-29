@@ -208,3 +208,13 @@ jobs:
             --environment canary \
             --service api \
             --verify-only
+
+  sbom:
+    name: SBOM (platform-sre)
+    needs: build
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: platform-sre
+      target: .
+      working-directory: .
+    secrets: inherit

@@ -77,6 +77,7 @@ jobs:
             -o cyclonedx-json \
             --file "$SBOM_PATH" \
             --scope all-layers \
+            # keep service directories in scope; only exclude build caches and VCS metadata
             --exclude '**/node_modules/.cache/**' \
             --exclude '**/dist/**' \
             --exclude '**/.git/**'

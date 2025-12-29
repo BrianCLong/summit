@@ -30,10 +30,8 @@ jobs:
       - name: Build All
         run: just build-all
 
-      - name: SBOM & Scan
-        run: |
-          just sbom
-          just trivy
+      - name: Vulnerability Scan
+        run: just trivy
 
       - name: SLO Burn Check
         run: just slo-check
@@ -56,3 +54,12 @@ jobs:
 
       # Rollback logic usually triggered on failure, here we simulate the happy path.
       # In a real workflow, we might use steps.canary-analyze.outcome == 'failure'
+
+  sbom:
+    needs: maestro-delivery
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: maestro
+      target: .
+      working-directory: .
+    secrets: inherit

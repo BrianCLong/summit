@@ -101,3 +101,12 @@ jobs:
       - name: Roll back
         run: |
           helm rollback ${{ inputs.service }}
+
+  sbom:
+    needs: [build-and-push]
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: ${{ inputs.service }}
+      target: .
+      working-directory: .
+    secrets: inherit

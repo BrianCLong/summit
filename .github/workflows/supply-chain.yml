@@ -112,3 +112,13 @@ jobs:
           path: |
             security/supply-chain/dashboards/
             security/supply-chain/manifests/vuln-burn-down.json
+
+  sbom:
+    name: SBOM (supply-chain)
+    needs: plan
+    uses: ./.github/workflows/reusable/sbom.yml
+    with:
+      service: supply-chain
+      target: security/supply-chain
+      working-directory: .
+    secrets: inherit

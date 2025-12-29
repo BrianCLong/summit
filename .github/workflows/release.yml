@@ -55,6 +55,47 @@ jobs:
         run: pnpm build
       - name: Tests
         run: pnpm test
+      - name: Generate SBOM
+        env:
+          SERVICE_NAME: release
+        run: |
+          set -eo pipefail
+          mkdir -p artifacts/sbom
+          pnpm exec ts-node --esm - <<'TS'
+          import fs from 'node:fs/promises';
+          import { SBOMGenerator } from './.github/scanners/sbom-generator.ts';
+
+          const service = process.env.SERVICE_NAME || 'release';
+          const generator = new SBOMGenerator();
+          const outputPath = `artifacts/sbom/sbom.${service}.json`;
+
+          const result = await generator.generateSBOM({
+            target: '.',
+            format: 'cyclonedx-json',
+            scope: 'all-layers',
+            outputPath,
+          });
+
+          if (!result.success || !result.sbomPath) {
+            console.error('SBOM generation failed', result.errors || []);
+            process.exit(1);
+          }
+
+          if (!process.env.GITHUB_OUTPUT) {
+            throw new Error('GITHUB_OUTPUT not set');
+          }
+
+          await fs.appendFile(
+            process.env.GITHUB_OUTPUT,
+            `sbom-path=${result.sbomPath}\ncomponent-count=${result.componentCount}\nsbom-digest=${result.digest}\n`
+          );
+          TS
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-release
+          path: artifacts/sbom/sbom.release.json*
+          retention-days: 30
       - name: Package deployable bundle
         run: |
           tar -czf summit-bundle.tgz docker-compose.dev.yml docker-compose.ai.yml start.sh Makefile .env.example .env.production.sample observability/

@@ -1,17 +1,37 @@
 name: Reusable SBOM
-on:
-  workflow_call:
-
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Generate SBOM (SPDX)
-name: sbom
 
 on:
   workflow_call:
+    inputs:
+      service:
+        description: Name of the service or artifact to tag the SBOM output.
+        required: true
+        type: string
+      target:
+        description: Filesystem path or container image reference to scan.
+        required: false
+        type: string
+        default: .
+      format:
+        description: SBOM output format supported by Syft.
+        required: false
+        type: string
+        default: cyclonedx-json
+      scope:
+        description: Syft scope to use during generation.
+        required: false
+        type: string
+        default: all-layers
+      working-directory:
+        description: Working directory for the scan (for monorepo packages).
+        required: false
+        type: string
+        default: .
+      sign-with-cosign:
+        description: Sign the generated SBOM with Cosign.
+        required: false
+        type: boolean
+        default: false
     secrets:
       NODE_AUTH_TOKEN:
         required: false
@@ -19,24 +39,95 @@ on:
 permissions:
   contents: read
   id-token: write
+  packages: read
 
 jobs:
   sbom:
-    name: sbom
+    name: SBOM (${{ inputs.service }})
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    outputs:
+      sbom-path: ${{ steps.generate.outputs.sbom-path }}
+      sbom-digest: ${{ steps.generate.outputs.sbom-digest }}
+      component-count: ${{ steps.generate.outputs.component-count }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate SPDX SBOM
-        uses: anchore/sbom-action@v0
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          path: .
-          output-file: sbom.spdx.json
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Install Cosign
+        if: inputs.sign-with-cosign == true
+        uses: sigstore/cosign-installer@v3
+
+      - name: Generate SBOM
+        id: generate
+        env:
+          SERVICE_NAME: ${{ inputs.service }}
+          TARGET: ${{ inputs.target }}
+          FORMAT: ${{ inputs.format }}
+          SCOPE: ${{ inputs.scope }}
+          SIGN_WITH_COSIGN: ${{ inputs.sign-with-cosign }}
+        run: |
+          set -eo pipefail
+          mkdir -p artifacts/sbom
+          pnpm exec ts-node --esm - <<'TS'
+          import fs from 'node:fs/promises';
+          import { SBOMGenerator } from './.github/scanners/sbom-generator.ts';
+
+          const service = process.env.SERVICE_NAME || 'service';
+          const target = process.env.TARGET || '.';
+          const format = (process.env.FORMAT as 'cyclonedx-json' | 'spdx-json' | undefined) || 'cyclonedx-json';
+          const scope = (process.env.SCOPE as 'all-layers' | 'squashed' | undefined) || 'all-layers';
+          const signWithCosign = process.env.SIGN_WITH_COSIGN === 'true';
+
+          const generator = new SBOMGenerator();
+          const outputPath = `artifacts/sbom/sbom.${service}.json`;
+
+          const result = await generator.generateSBOM({
+            target,
+            format,
+            scope,
+            outputPath,
+            signWithCosign,
+          });
+
+          if (!result.success || !result.sbomPath) {
+            console.error('SBOM generation failed', result.errors || []);
+            process.exit(1);
+          }
+
+          const digestLine = `sbom-digest=${result.digest}`;
+          const pathLine = `sbom-path=${result.sbomPath}`;
+          const countLine = `component-count=${result.componentCount}`;
+
+          if (!process.env.GITHUB_OUTPUT) {
+            throw new Error('GITHUB_OUTPUT not set');
+          }
+
+          await fs.appendFile(process.env.GITHUB_OUTPUT, `${pathLine}\n${digestLine}\n${countLine}\n`);
+          TS
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-spdx
-          path: sbom.spdx.json
-          retention-days: 7
+          name: sbom-${{ inputs.service }}
+          path: artifacts/sbom/sbom.${{ inputs.service }}.json*
+          retention-days: 30
