@@ -1,7 +1,7 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts', '.mjs'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
