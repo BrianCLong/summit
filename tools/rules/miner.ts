@@ -1,11 +1,22 @@
 import { Pool } from 'pg';
 import fs from 'fs';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
+
+// Define proper types instead of using 'any'
+type Condition = {
+  [key: string]: any;
+} | string;
+
+type Action = {
+  do: string;
+  with?: Record<string, any>;
+};
+
 type Candidate = {
   id: string;
-  when: any;
+  when: Condition;
   if?: string;
-  then: any[];
+  then: Action[];
   support: number;
   precision: number;
 };
@@ -50,5 +61,6 @@ async function mine(): Promise<Candidate[]> {
 (async () => {
   const out = await mine();
   fs.writeFileSync('rules_proposals.json', JSON.stringify(out, null, 2));
+  // eslint-disable-next-line no-console
   console.log(`proposed ${out.length} rules`);
 })();
