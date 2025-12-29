@@ -538,7 +538,7 @@ async function batchLoadDeniedVerdicts(
  */
 export function createPolicyVerdictLoader(
   context: DataLoaderContext
-): DataLoader<string, PolicyVerdictWithGovernance, string> {
+) {
   return new DataLoader(
     (ids) => batchLoadVerdicts(ids, context),
     {
@@ -554,7 +554,7 @@ export function createPolicyVerdictLoader(
  */
 export function createVerdictByKeyLoader(
   context: DataLoaderContext
-): DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null, string> {
+) {
   return new DataLoader(
     (keys) => batchLoadVerdictsByKey(keys, context),
     {
@@ -571,7 +571,7 @@ export function createVerdictByKeyLoader(
  */
 export function createVerdictsBySubjectLoader(
   context: DataLoaderContext
-): DataLoader<string, PolicyVerdictWithGovernance[], string> {
+) {
   return new DataLoader(
     (subjectIds) => batchLoadVerdictsBySubject(subjectIds, context),
     {
@@ -587,7 +587,7 @@ export function createVerdictsBySubjectLoader(
  */
 export function createDeniedVerdictsLoader(
   context: DataLoaderContext
-): DataLoader<string, PolicyVerdictWithGovernance[], string> {
+) {
   return new DataLoader(
     (policyIds) => batchLoadDeniedVerdicts(policyIds, context),
     {

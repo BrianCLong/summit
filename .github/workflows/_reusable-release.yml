@@ -8,105 +8,75 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
-
 jobs:
+  build-server:
+    name: Build server image
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: ${{ github.repository }}/server
+      dockerfile: ./server/Dockerfile.prod
+      context: ./server
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+
+  build-client:
+    name: Build client image
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: ${{ github.repository }}/client
+      dockerfile: ./client/Dockerfile.prod
+      context: ./client
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+
   release:
-    name: Build and publish release bundle
+    name: Create release bundle
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
+    needs:
+      - build-server
+      - build-client
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build workspace
-        run: pnpm run build
-
-      - name: Generate provenance manifest
-        run: node scripts/provenance/manifest.mjs > provenance.json
-
-      - name: Generate SBOM
-        run: pnpm dlx @cyclonedx/cyclonedx-npm --spec-version 1.5 --output-file sbom.json
-
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
-
-      - name: Generate vulnerability report
-        run: trivy sbom --format json --output vuln-report.json sbom.json
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v2
-
-      - name: Generate policy decision logs
+          name: build-artifacts-${{ github.run_id }}
+          path: build-artifacts
+          merge-multiple: true
+      - name: Prepare release directory
+        run: mkdir -p release-bundle/compliance
+      - name: Move artifacts to compliance bundle
+        run: mv build-artifacts/* release-bundle/compliance/
+      - name: Generate manifest
         run: |
-          mkdir -p policy
-          opa test policies/ -v --format json > policy/opa-decisions.json
-
-      - name: Generate attestation scope record
+          echo '{
+            "version": "${{ inputs.version }}",
+            "releaseDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "serverImage": "${{ needs.build-server.outputs.image_uri }}",
+            "clientImage": "${{ needs.build-client.outputs.image_uri }}",
+            "slsaLevel": "SLSA_3"
+          }' > release-bundle/manifest.json
+      - name: Create compliance bundle archive
         run: |
-          mkdir -p attestations
-          node -e "const fs=require('fs');const crypto=require('crypto');const content=fs.readFileSync('ATTESTATION_SCOPE.md','utf8');const sha=crypto.createHash('sha256').update(content).digest('hex');const output={version:'1.0',release:'${{ inputs.version }}',scopePath:'ATTESTATION_SCOPE.md',scopeSha256:sha,generatedAt:new Date().toISOString(),commit:process.env.GITHUB_SHA};fs.writeFileSync('attestations/attestation-scope.json',JSON.stringify(output,null,2));"
-
-      - name: Capture deploy metadata
-        run: |
-          mkdir -p deploy
-          node -e "const fs=require('fs');const output={release:'${{ inputs.version }}',runId:process.env.GITHUB_RUN_ID,runAttempt:process.env.GITHUB_RUN_ATTEMPT,workflow:process.env.GITHUB_WORKFLOW,job:process.env.GITHUB_JOB,repository:process.env.GITHUB_REPOSITORY,ref:process.env.GITHUB_REF,sha:process.env.GITHUB_SHA,actor:process.env.GITHUB_ACTOR,createdAt:new Date().toISOString()};fs.writeFileSync('deploy/deploy-metadata.json',JSON.stringify(output,null,2));"
-
-      - name: Generate evidence manifest
-        run: |
-          node scripts/ops/generate-evidence-bundle.ts \
-            --artifact=provenance.json \
-            --artifact=attestations/attestation-scope.json \
-            --artifact=policy/opa-decisions.json \
-            --artifact=deploy/deploy-metadata.json \
-            --sbom=sbom.json \
-            --security-report=vuln-report.json
-
-      - name: Collect evidence bundle
-        run: |
-          mkdir -p release evidence
-          cp provenance.json evidence/
-          cp sbom.json evidence/
-          cp vuln-report.json evidence/
-          cp attestations/attestation-scope.json evidence/
-          cp policy/opa-decisions.json evidence/
-          cp deploy/deploy-metadata.json evidence/
-          if [ -d evidence-bundles ]; then cp -r evidence-bundles evidence/manifest; fi
-          if [ -d perf/reports ]; then cp -r perf/reports evidence/perf-reports; fi
-          if [ -d artifacts/sast ]; then cp -r artifacts/sast evidence/sast; fi
-          if [ -d policy/results ]; then cp -r policy/results evidence/policy-results; fi
-          tar -czf "evidence/pack-${{ inputs.version }}.tgz" evidence
-          cp -r evidence release/
-
-      - name: Upload release bundle artifact
+          tar -czf \
+            release-bundle/compliance-bundle-v${{ inputs.version }}.tgz \
+            -C release-bundle/compliance .
+      - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-bundle
-          path: release
-
+          path: release-bundle/
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
-          name: intelgraph v${{ inputs.version }}
-          files: release/**
-          draft: false
-          prerelease: false
+          name: Summit v${{ inputs.version }}
+          body: |
+            **Release v${{ inputs.version }}**
+
+            - Server Image: `${{ needs.build-server.outputs.image_uri }}`
+            - Client Image: `${{ needs.build-client.outputs.image_uri }}`
+          files: |
+            release-bundle/manifest.json
+            release-bundle/compliance-bundle-v${{ inputs.version }}.tgz

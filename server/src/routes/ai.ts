@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * AI API Endpoints for IntelGraph
  * Provides endpoints for link prediction, sentiment analysis, and AI-powered insights
@@ -17,14 +17,14 @@ import {
   ExtractionEngineConfig,
   ExtractionRequest,
   ExtractionResult,
-} from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import types
+} from '../ai/types.js'; // WAR-GAMED SIMULATION - Import types
 import { getNeo4jDriver } from '../db/neo4j.js'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor
 import { getRedisClient } from '../db/redis.js'; // WAR-GAMED SIMULATION - For BullMQ
 import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
 import { randomUUID } from 'crypto'; // Use Node's built-in UUID for job IDs
 import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
 import { MediaType } from '../services/MediaUploadService.js'; // Import MediaType from MediaUploadService
-import { createRateLimitMiddleware } from '../middleware/rateLimit.js';
+import { createRateLimiter, EndpointClass } from '../middleware/rateLimit.js';
 import { cfg } from '../config.js';
 import { rateLimiter } from '../services/RateLimiter.js';
 
@@ -55,15 +55,15 @@ const enforceBackgroundThrottle = async (
   scope: string,
 ): Promise<void> => {
   const key = buildBackgroundKey(req, scope);
-  const result = await rateLimiter.throttle(
+  const result = await rateLimiter.consume(
     key,
+    1,
     cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
     cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
-    { prefix: 'bg' },
   );
 
   if (!result.allowed) {
-    const retryAfterSeconds = Math.max(Math.ceil(result.retryAfterMs / 1000), 0);
+    const retryAfterSeconds = Math.max(Math.ceil((result.reset - Date.now()) / 1000), 0);
     const error = new Error('Background rate limit exceeded') as Error & {
       status?: number;
       retryAfter?: number;
@@ -140,16 +140,7 @@ videoAnalysisWorker.on('failed', (job, err) => {
 });
 
 // Rate limiting for AI endpoints (more restrictive due to computational cost)
-const aiRateLimit = createRateLimitMiddleware({
-  scope: 'ai',
-  windowMs: cfg.AI_RATE_LIMIT_WINDOW_MS,
-  max: cfg.AI_RATE_LIMIT_MAX_REQUESTS,
-  keyGenerator: (req: AuthenticatedRequest) => {
-    const user = req.user;
-    if (user) return `user:${user.id || user.sub}`;
-    return `ip:${req.ip}`;
-  },
-});
+const aiRateLimit = createRateLimiter(EndpointClass.AI);
 
 // Apply rate limiting to all AI routes
 router.use(aiRateLimit);

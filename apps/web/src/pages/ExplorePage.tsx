@@ -12,6 +12,8 @@ import { useEntities, useEntityUpdates } from '@/hooks/useGraphQL'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
 import { SnapshotManager } from '@/components/features/investigation/SnapshotManager'
 import { trackGoldenPathStep } from '@/telemetry/metrics'
+import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
+import { useDemoMode } from '@/components/common/DemoIndicator'
 import mockData from '@/mock/data.json'
 import type {
   Entity,
@@ -47,6 +49,7 @@ export default function ExplorePage(): React.ReactElement {
   const [snapshotsOpen, setSnapshotsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [policyOverlay, setPolicyOverlay] = useState<'none' | 'purpose' | 'retention' | 'residency'>('none')
+  const isDemoMode = useDemoMode()
 
   // Graph state
   const [graphLayout] = useState<GraphLayout>({
@@ -64,7 +67,7 @@ export default function ExplorePage(): React.ReactElement {
     sources: [],
   })
 
-  // Load data - prefer GraphQL over mock data
+  // Load data - prefer GraphQL over mock data in demo mode only
   useEffect(() => {
     trackGoldenPathStep('entities_viewed')
 
@@ -74,7 +77,17 @@ export default function ExplorePage(): React.ReactElement {
       setLoading(entitiesLoading)
       setError(entitiesError)
     } else {
-      // Fallback to mock data for development
+      if (!isDemoMode) {
+        setEntities([])
+        setRelationships([])
+        setTimelineEvents([])
+        setLoading(false)
+        setError(
+          new Error('Live graph data is unavailable without a backend connection.')
+        )
+        return
+      }
+      // Fallback to demo data
       const loadMockData = async () => {
         try {
           setLoading(true)
@@ -92,7 +105,7 @@ export default function ExplorePage(): React.ReactElement {
 
       loadMockData()
     }
-  }, [entitiesData, entitiesLoading, entitiesError])
+  }, [entitiesData, entitiesLoading, entitiesError, isDemoMode])
 
   // Handle real-time entity updates
   useEffect(() => {
@@ -358,6 +371,15 @@ export default function ExplorePage(): React.ReactElement {
           </Button>
         </div>
       </div>
+
+      {!entitiesData && (
+        <div className="px-6 pt-4">
+          <DataIntegrityNotice
+            mode={isDemoMode ? 'demo' : 'unavailable'}
+            context="Graph explorer"
+          />
+        </div>
+      )}
 
       {/* Main Content Grid */}
       <div className="flex-1 flex">

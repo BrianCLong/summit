@@ -53,10 +53,16 @@ export class RollbackEngine {
           }
           await this.performServiceRollback(options.serviceName);
           success = true;
+          span.addEvent('deployment.rollback.completed', {
+            success: true,
+          });
           span.setStatus({ code: SpanStatusCode.OK });
           console.log('Rollback completed successfully.');
         } catch (error) {
           span.recordException(error);
+          span.addEvent('deployment.rollback.completed', {
+            success: false,
+          });
           span.setStatus({
             code: SpanStatusCode.ERROR,
             message: error instanceof Error ? error.message : 'Rollback failed',

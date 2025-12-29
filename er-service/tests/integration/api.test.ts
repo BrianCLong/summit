@@ -263,6 +263,40 @@ describe('ER Service API', () => {
     });
   });
 
+  describe('GET /api/v1/merge/:mergeId/export', () => {
+    it('should export merge bundle with explanation details', async () => {
+      await request(app)
+        .post('/api/v1/entities')
+        .send({ id: 'export-e1', type: 'person', name: 'Jane Roe', tenantId: 'test-tenant', attributes: {} })
+        .expect(201);
+      await request(app)
+        .post('/api/v1/entities')
+        .send({ id: 'export-e2', type: 'person', name: 'Janet Roe', tenantId: 'test-tenant', attributes: {} })
+        .expect(201);
+
+      const mergeResponse = await request(app)
+        .post('/api/v1/merge')
+        .send({
+          tenantId: 'test-tenant',
+          entityIds: ['export-e1', 'export-e2'],
+          actor: 'analyst@example.com',
+          reason: 'Test merge export',
+        })
+        .expect(201);
+
+      const mergeId = mergeResponse.body.mergeId;
+
+      const exportResponse = await request(app)
+        .get(`/api/v1/merge/${mergeId}/export`)
+        .expect(200);
+
+      expect(exportResponse.body).toHaveProperty('merge');
+      expect(exportResponse.body).toHaveProperty('explanation');
+      expect(exportResponse.body.explanation).toHaveProperty('featureContributions');
+      expect(Array.isArray(exportResponse.body.explanation.featureContributions)).toBe(true);
+    });
+  });
+
   describe('GET /api/v1/audit', () => {
     it('should retrieve audit log', async () => {
       // Create some operations

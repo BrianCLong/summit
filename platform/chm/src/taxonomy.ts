@@ -101,3 +101,7 @@ export function parseTaxonomy(input: unknown): TaxonomyEntry[] {
   const schema = z.array(taxonomySchema);
   return schema.parse(input);
 }
+
+export function normalizeCode(code: string): string {
+  return code.toUpperCase().trim();
+}
