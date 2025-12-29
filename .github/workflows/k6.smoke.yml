@@ -3,6 +3,33 @@ name: k6 Smoke
 on:
   pull_request:
     branches: [main]
+  workflow_call:
+    inputs:
+      ui_url:
+        description: Base UI URL to target.
+        required: true
+        type: string
+      api_url:
+        description: Base API URL to target.
+        required: true
+        type: string
+      artifact_name:
+        description: Optional artifact name override.
+        required: false
+        default: ''
+        type: string
+      strict:
+        description: If true, fail the workflow when the smoke test fails.
+        required: false
+        default: false
+        type: boolean
+    outputs:
+      status:
+        description: Result of the smoke test (success/failure/cancelled).
+        value: ${{ jobs.smoke-call.outputs.status }}
+      artifact_name:
+        description: Artifact name containing k6 smoke results.
+        value: ${{ jobs.smoke-call.outputs.artifact_name }}
 
 concurrency:
   group: k6-${{ github.event.pull_request.number || github.sha }}
@@ -10,6 +37,7 @@ concurrency:
 
 jobs:
   detect:
+    if: github.event_name != 'workflow_call'
     runs-on: ubuntu-latest
     outputs:
       run: ${{ steps.decide.outputs.run }}
@@ -38,7 +66,7 @@ jobs:
 
   smoke:
     needs: detect
-    if: needs.detect.outputs.run == 'true'
+    if: github.event_name != 'workflow_call' && needs.detect.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -79,3 +107,41 @@ jobs:
           if [ -f .github/ci/docker-compose.ci.yml ]; then
             docker compose -f .github/ci/docker-compose.ci.yml down -v
           fi
+
+  smoke-call:
+    if: github.event_name == 'workflow_call'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      status: ${{ steps.outcome.outputs.status }}
+      artifact_name: ${{ steps.artifact_name.outputs.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20.14.x' }
+      - uses: grafana/setup-k6-action@v1
+      - name: Run k6 smoke
+        id: k6
+        continue-on-error: ${{ inputs.strict != true }}
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: .github/k6/smoke.js
+        env:
+          UI_URL: ${{ inputs.ui_url }}
+          API_URL: ${{ inputs.api_url }}
+      - id: artifact_name
+        run: |
+          name="${{ inputs.artifact_name }}"
+          if [ -z "$name" ]; then
+            name="k6-smoke-${{ github.run_id }}"
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+      - name: Upload k6 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact_name.outputs.name }}
+          path: .github/k6/*.json
+          retention-days: 7
+      - id: outcome
+        run: echo "status=${{ steps.k6.outcome }}" >> "$GITHUB_OUTPUT"

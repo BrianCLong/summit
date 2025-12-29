@@ -4,9 +4,38 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      api_url:
+        description: API URL to target for synthetic journeys.
+        required: true
+        type: string
+      environment:
+        description: Environment name (dev/staging/prod).
+        required: false
+        default: staging
+        type: string
+      artifact_name:
+        description: Optional artifact name override.
+        required: false
+        default: ''
+        type: string
+    secrets:
+      synthetic_user_email:
+        required: false
+      synthetic_user_password:
+        required: false
+    outputs:
+      status:
+        description: Synthetic journey result.
+        value: ${{ jobs.synthetic-call.outputs.status }}
+      artifact_name:
+        description: Uploaded artifact name.
+        value: ${{ jobs.synthetic-call.outputs.artifact_name }}
 
 jobs:
   synthetic-run:
+    if: github.event_name != 'workflow_call'
     name: Run Synthetic Journeys
     runs-on: ubuntu-latest
     environment: staging
@@ -44,3 +73,54 @@ jobs:
         run: |
           echo "Synthetic monitoring failed! Check logs."
           # Integration with Slack/PagerDuty could go here
+
+  synthetic-call:
+    if: github.event_name == 'workflow_call'
+    name: Run Synthetic Journeys (reusable)
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+    outputs:
+      status: ${{ steps.outcome.outputs.status }}
+      artifact_name: ${{ steps.artifact.outputs.name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install axios ts-node typescript --no-save
+
+      - name: Run Synthetic Journey
+        id: run
+        continue-on-error: true
+        env:
+          API_URL: ${{ inputs.api_url }}
+          SYNTHETIC_USER_EMAIL: ${{ secrets.synthetic_user_email || secrets.SYNTHETIC_USER_EMAIL }}
+          SYNTHETIC_USER_PASSWORD: ${{ secrets.synthetic_user_password || secrets.SYNTHETIC_USER_PASSWORD }}
+        run: npx ts-node scripts/synthetic/run-journey.ts
+
+      - name: Capture outcome
+        id: outcome
+        run: echo "status=${{ steps.run.outcome }}" >> "$GITHUB_OUTPUT"
+
+      - name: Derive artifact name
+        id: artifact
+        run: |
+          name="${{ inputs.artifact_name }}"
+          if [ -z "$name" ]; then
+            name="synthetic-results-${{ github.run_id }}"
+          fi
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: |
+            synthetic-results.json
+            synthetic-latency-histogram.json

@@ -15,10 +15,14 @@ permissions:
   pull-requests: write
 
 jobs:
-  smoke-and-load:
+  resolve-target:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    outputs:
+      target: ${{ steps.target.outputs.target }}
+      ui_url: ${{ steps.endpoints.outputs.ui_url }}
+      api_url: ${{ steps.endpoints.outputs.api_url }}
+      gql_url: ${{ steps.endpoints.outputs.gql_url }}
     env:
       PROD_UI_URL: ${{ secrets.PROD_UI_URL }}
       PROD_API_URL: ${{ secrets.PROD_API_URL }}
@@ -64,49 +68,89 @@ jobs:
           echo "api_url=$api" >> $GITHUB_OUTPUT
           echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+  smoke-tests:
+    needs: resolve-target
+    uses: ./.github/workflows/k6.smoke.yml
+    secrets: inherit
+    with:
+      ui_url: ${{ needs.resolve-target.outputs.ui_url }}
+      api_url: ${{ needs.resolve-target.outputs.api_url }}
+      artifact_name: post-deploy-k6-${{ needs.resolve-target.outputs.target }}-${{ github.run_id }}
+      strict: false
+
+  synthetic-journey:
+    needs: resolve-target
+    uses: ./.github/workflows/synthetic-journeys.yml
+    secrets: inherit
+    with:
+      api_url: ${{ needs.resolve-target.outputs.api_url }}
+      environment: ${{ needs.resolve-target.outputs.target }}
+      artifact_name: synthetic-results-${{ needs.resolve-target.outputs.target }}-${{ github.run_id }}
+
+  load-probe:
+    needs: resolve-target
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      status: ${{ steps.load_outcome.outputs.status }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
-
-      - name: Run smoke test
-        id: smoke
-        continue-on-error: true
-        uses: grafana/k6-action@v0.3.1
-        with:
-          filename: .github/k6/smoke.js
-        env:
-          UI_URL: ${{ steps.endpoints.outputs.ui_url }}
-          API_URL: ${{ steps.endpoints.outputs.api_url }}
 
       - name: Run load probe
         id: load
         continue-on-error: true
         env:
-          COS_GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
+          COS_GQL_URL: ${{ needs.resolve-target.outputs.gql_url }}
         run: k6 run tests/load/graphql_read_p95.js
 
-      - name: Install synthetic dependencies
-        run: npm install axios ts-node typescript --no-save
+      - name: Capture load outcome
+        id: load_outcome
+        run: echo "status=${{ steps.load.outcome }}" >> "$GITHUB_OUTPUT"
 
-      - name: Run synthetic journey
-        id: synthetic
-        continue-on-error: true
-        env:
-          API_URL: ${{ steps.endpoints.outputs.api_url }}
-          SYNTHETIC_USER_EMAIL: ${{ secrets.SYNTHETIC_USER_EMAIL }}
-          SYNTHETIC_USER_PASSWORD: ${{ secrets.SYNTHETIC_USER_PASSWORD }}
-        run: npx ts-node scripts/synthetic/run-journey.ts
+  report:
+    needs: [resolve-target, smoke-tests, synthetic-journey, load-probe]
+    if: always()
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: ${{ needs.resolve-target.outputs.target }}
+      UI_URL: ${{ needs.resolve-target.outputs.ui_url }}
+      API_URL: ${{ needs.resolve-target.outputs.api_url }}
+      GQL_URL: ${{ needs.resolve-target.outputs.gql_url }}
+      SMOKE_OUTCOME: ${{ needs.smoke-tests.outputs.status || needs.smoke-tests.result }}
+      LOAD_OUTCOME: ${{ needs.load-probe.outputs.status || needs.load-probe.result }}
+      SYNTH_OUTCOME: ${{ needs.synthetic-journey.outputs.status || needs.synthetic-journey.result }}
+      SMOKE_ARTIFACT: post-deploy-k6-${{ needs.resolve-target.outputs.target }}-${{ github.run_id }}
+      SYNTH_ARTIFACT: synthetic-results-${{ needs.resolve-target.outputs.target }}-${{ github.run_id }}
+      WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
+      WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+      WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+      WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download synthetic artifacts
+        if: needs.synthetic-journey.outputs.artifact_name
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.synthetic-journey.outputs.artifact_name }}
+          path: synthetic-artifacts
 
       - name: Summarize outcomes
         id: summary
         run: |
-          smoke="${{ steps.smoke.outcome }}"
-          load="${{ steps.load.outcome }}"
-          synthetic="${{ steps.synthetic.outcome }}"
+          smoke="${SMOKE_OUTCOME:-unknown}"
+          load="${LOAD_OUTCOME:-unknown}"
+          synthetic="${SYNTH_OUTCOME:-unknown}"
           status="success"
           if [ "$smoke" != "success" ] || [ "$load" != "success" ] || [ "$synthetic" != "success" ]; then
             status="failure"
@@ -117,15 +161,21 @@ jobs:
           echo "status=$status" >> $GITHUB_OUTPUT
 
       - name: Build deploy verification report
-        if: always()
         run: |
           node - <<'NODE'
           const fs = require('fs');
+          const path = require('path');
 
-          const readJson = (path) => {
-            try { return JSON.parse(fs.readFileSync(path, 'utf8')); }
-            catch (_) { return null; }
+          const readJson = (filePath) => {
+            try {
+              return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            } catch (_) {
+              return null;
+            }
           };
+
+          const syntheticResults = readJson(path.join('synthetic-artifacts', 'synthetic-results.json'));
+          const syntheticLatency = readJson(path.join('synthetic-artifacts', 'synthetic-latency-histogram.json'));
 
           const report = {
             target: process.env.TARGET_ENV,
@@ -140,8 +190,8 @@ jobs:
               synthetic: process.env.SYNTH_OUTCOME,
             },
             synthetic: {
-              results: readJson('synthetic-results.json'),
-              latency: readJson('synthetic-latency-histogram.json'),
+              results: syntheticResults,
+              latency: syntheticLatency,
             },
             workflow_run: {
               id: process.env.WORKFLOW_RUN_ID,
@@ -154,33 +204,19 @@ jobs:
 
           fs.writeFileSync('deploy_verification.json', JSON.stringify(report, null, 2));
           NODE
-        env:
-          TARGET_ENV: ${{ steps.target.outputs.target }}
-          UI_URL: ${{ steps.endpoints.outputs.ui_url }}
-          API_URL: ${{ steps.endpoints.outputs.api_url }}
-          GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
-          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
-          LOAD_OUTCOME: ${{ steps.load.outcome }}
-          SYNTH_OUTCOME: ${{ steps.synthetic.outcome }}
-          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
-          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
-          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
-          WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
 
       - name: Upload deploy verification artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: deploy-verification-${{ steps.target.outputs.target }}-${{ github.run_id }}
+          name: deploy-verification-${{ needs.resolve-target.outputs.target }}-${{ github.run_id }}
           path: |
             deploy_verification.json
-            synthetic-results.json
-            synthetic-latency-histogram.json
+            synthetic-artifacts/synthetic-results.json
+            synthetic-artifacts/synthetic-latency-histogram.json
           if-no-files-found: warn
           retention-days: 14
 
       - name: Locate release for deployment tag
-        if: always()
         id: release_tag
         uses: actions/github-script@v7
         with:
@@ -194,11 +230,27 @@ jobs:
               repo,
               ref: 'tags/',
             });
-            const match = tags.find((tag) => tag.object?.sha === headSha);
+
+            let match;
+            for (const tag of tags) {
+              if (tag.object?.type === 'commit' && tag.object.sha === headSha) {
+                match = tag;
+                break;
+              }
+              if (tag.object?.type === 'tag') {
+                const annotated = await github.rest.git.getTag({ owner, repo, tag_sha: tag.object.sha });
+                if (annotated.data.object?.sha === headSha) {
+                  match = tag;
+                  break;
+                }
+              }
+            }
+
             if (!match) {
               core.info('No tag found for head SHA; skipping release attachment.');
               return;
             }
+
             const tagName = match.ref.replace('refs/tags/', '');
             let release;
             try {
@@ -223,7 +275,7 @@ jobs:
           asset_content_type: application/json
 
       - name: Comment results on PR
-        if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
+        if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -236,7 +288,7 @@ jobs:
             const smoke = '${{ steps.summary.outputs.smoke }}';
             const load = '${{ steps.summary.outputs.load }}';
             const synthetic = '${{ steps.summary.outputs.synthetic }}';
-            const target = '${{ steps.target.outputs.target }}';
+            const target = '${{ needs.resolve-target.outputs.target }}';
             const icon = (value) => (value === 'success' ? '✅' : '❌');
             const runUrl = context.payload.workflow_run.html_url;
             const body = [
