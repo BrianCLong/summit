@@ -39,8 +39,8 @@ describe('OPAEnforcer', () => {
     jest.clearAllMocks();
 
     // Get mocked budget ledger
-    const { getBudgetLedgerManager } = jest.requireMock('../../db/budgetLedger');
-    mockBudgetLedger = getBudgetLedgerManager();
+    const budgetLedgerMock = jest.requireMock('../../db/budgetLedger') as { getBudgetLedgerManager: () => any };
+    mockBudgetLedger = budgetLedgerMock.getBudgetLedgerManager();
 
     // Reset environment variables
     delete process.env.OPA_ENFORCEMENT;
@@ -446,7 +446,7 @@ describe('OPAEnforcer', () => {
   describe('createMiddleware', () => {
     let mockReq: Partial<Request>;
     let mockRes: Partial<Response>;
-    let mockNext: jest.Mock<NextFunction>;
+    let mockNext: NextFunction & jest.Mock;
 
     beforeEach(() => {
       mockReq = {
@@ -464,7 +464,7 @@ describe('OPAEnforcer', () => {
         json: jest.fn(),
       } as any;
 
-      mockNext = jest.fn();
+      mockNext = jest.fn() as NextFunction & jest.Mock;
     });
 
     it('should skip non-POST requests', async () => {

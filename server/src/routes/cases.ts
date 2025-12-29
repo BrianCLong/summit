@@ -3,6 +3,7 @@
  * Implements CRUD operations with integrated audit logging
  */
 
+import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import { getPostgresPool } from '../db/postgres.js';
 import { CaseService } from '../cases/CaseService.js';
@@ -16,6 +17,7 @@ import { AccessControlService } from '../reporting/access-control.js';
 import { INVESTIGATION_SUMMARY_TEMPLATE } from '../cases/reporting/templates.js';
 import { goldenPathStepTotal } from '../monitoring/metrics.js';
 import logger from '../config/logger.js';
+import { emitAuditEvent } from '../audit/emit.js';
 
 const routeLogger = logger.child({ name: 'CaseRoutes' });
 const overviewService = new CaseOverviewService(getPostgresPool(), {
@@ -562,6 +564,44 @@ caseRouter.post('/:id/comments', async (req, res) => {
       },
       tenantId,
     );
+
+    await emitAuditEvent(
+      {
+        eventId: randomUUID(),
+        occurredAt: new Date().toISOString(),
+        actor: {
+          type: 'user',
+          id: userId,
+          name: req.user?.username || req.user?.email || userId,
+          ipAddress: req.ip,
+        },
+        action: {
+          type: 'comment.added',
+          outcome: 'success',
+        },
+        tenantId,
+        target: {
+          type: 'case_comment',
+          id: comment.id,
+          path: `cases/${id}`,
+        },
+        metadata: {
+          caseId: id,
+          commentId: comment.id,
+          messageLength: String(content).length,
+          userAgent: req.headers['user-agent'],
+        },
+      },
+      {
+        correlationId: req.headers['x-request-id'] as string,
+        serviceId: 'cases',
+      },
+    ).catch((error) => {
+      routeLogger.warn(
+        { error: (error as Error).message, caseId: id },
+        'Failed to emit comment audit event',
+      );
+    });
 
     res.status(201).json(comment);
   } catch (error) {

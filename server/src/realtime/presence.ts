@@ -1,5 +1,7 @@
+import { randomUUID } from 'node:crypto';
 import { Socket } from 'socket.io';
 import pino from 'pino';
+import { emitAuditEvent } from '../audit/emit.js';
 
 const logger = (pino as any)();
 
@@ -24,7 +26,56 @@ export function registerPresenceHandlers(socket: Socket): void {
   if (!user?.id || !workspaceId) {
     return;
   }
+  const tenantId =
+    socket.handshake.auth?.tenantId || (user as any)?.tenantId;
   const username = user.username || user.email || 'unknown';
+  const displayName = () => username;
+
+  const emitPresenceAudit = async (
+    actionType: string,
+    status: string,
+  ): Promise<void> => {
+    if (!tenantId) return;
+    try {
+      await emitAuditEvent(
+        {
+          eventId: randomUUID(),
+          occurredAt: new Date().toISOString(),
+          actor: {
+            type: 'user',
+            id: user.id,
+            name: displayName(),
+            ipAddress: socket.handshake.address,
+          },
+          action: {
+            type: actionType,
+            outcome: 'success',
+          },
+          tenantId,
+          target: {
+            type: 'presence',
+            id: user.id,
+            path: `workspaces/${workspaceId}`,
+          },
+          metadata: {
+            workspaceId,
+            status,
+            userAgent: socket.handshake.headers['user-agent'],
+            socketId: socket.id,
+          },
+        },
+        {
+          correlationId: socket.id,
+          serviceId: 'realtime',
+        },
+      );
+    } catch (err) {
+      logger.warn(
+        { err: (err as Error).message, actionType },
+        'Failed to emit presence audit event',
+      );
+    }
+  };
 
   socket.join(`workspace:${workspaceId}`);
   const wsMap = presence.get(workspaceId) || new Map<string, Presence>();
@@ -36,6 +87,7 @@ export function registerPresenceHandlers(socket: Socket): void {
   });
   presence.set(workspaceId, wsMap);
   broadcast(workspaceId, socket);
+  void emitPresenceAudit('presence.join', 'online');
 
   socket.on('presence:update', (status: string): void => {
     const map = presence.get(workspaceId);
@@ -47,6 +99,7 @@ export function registerPresenceHandlers(socket: Socket): void {
       ts: Date.now(),
     });
     broadcast(workspaceId, socket);
+    void emitPresenceAudit('presence.status', status);
   });
 
   socket.on('disconnect', (): void => {
@@ -58,5 +111,6 @@ export function registerPresenceHandlers(socket: Socket): void {
       .to(`workspace:${workspaceId}`)
       .emit('presence:update', Array.from(map.values()));
     logger.info({ userId: user.id, workspaceId }, 'presence:disconnect');
+    void emitPresenceAudit('presence.leave', 'offline');
   });
 }

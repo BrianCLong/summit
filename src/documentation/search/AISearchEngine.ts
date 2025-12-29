@@ -12,7 +12,7 @@
  * - Search analytics and optimization
  */
 
-import { EventEmitter } from 'events';
+import EventEmitter from 'eventemitter3';
 
 export interface SearchConfig {
   indexPath: string;
@@ -25,6 +25,18 @@ export interface SearchConfig {
   enablePersonalization: boolean;
   cacheSize: number;
   rebuildInterval: number;
+  /**
+   * Controls diversity in MMR reranking. 0 favors diversity, 1 favors relevance.
+   */
+  diversityLambda?: number;
+  /**
+   * Days before recency boost halves. Smaller values emphasize fresh documents.
+   */
+  recencyHalfLifeDays?: number;
+  /**
+   * Number of words in semantic snippets around matched query terms.
+   */
+  snippetWindowSize?: number;
 }
 
 export interface SearchDocument {
@@ -112,9 +124,18 @@ export class AISearchEngine extends EventEmitter {
   private userProfiles: Map<string, UserSearchProfile> = new Map();
   private isInitialized = false;
 
+  private readonly defaults = {
+    diversityLambda: 0.3,
+    recencyHalfLifeDays: 30,
+    snippetWindowSize: 30,
+  };
+
   constructor(config: SearchConfig) {
     super();
-    this.config = config;
+    this.config = {
+      ...this.defaults,
+      ...config,
+    };
   }
 
   /**
@@ -231,7 +252,7 @@ export class AISearchEngine extends EventEmitter {
       );
 
       // Get semantic search results
-      const semanticResults = await this.performSemanticSearch(
+      const semanticSearch = await this.performSemanticSearch(
         processedQuery,
         query,
       );
@@ -244,9 +265,10 @@ export class AISearchEngine extends EventEmitter {
 
       // Combine and rank results
       const combinedResults = await this.combineAndRankResults(
-        semanticResults,
+        semanticSearch.results,
         keywordResults,
         query,
+        semanticSearch.queryEmbedding,
       );
 
       // Apply filters and facets
@@ -422,9 +444,12 @@ export class AISearchEngine extends EventEmitter {
     text: string,
     language?: string,
   ): Promise<number[]> {
-    // Placeholder for actual embedding generation
-    // Would use the configured embedding service
-    return new Array(768).fill(0).map(() => Math.random());
+    // Deterministic pseudo-embeddings to keep behavior stable across runs
+    const seed = this.hashToSeed(`${language || 'any'}:${text}`);
+    const random = this.mulberry32(seed);
+    const raw = new Array(768).fill(0).map(() => random());
+
+    return this.normalizeEmbedding(raw);
   }
 
   private async processQuery(
@@ -448,12 +473,12 @@ export class AISearchEngine extends EventEmitter {
   private async performSemanticSearch(
     query: string,
     searchQuery: SearchQuery,
-  ): Promise<SearchResult[]> {
+    queryEmbedding?: number[],
+  ): Promise<{ results: SearchResult[]; queryEmbedding: number[] }> {
     // Generate query embedding
-    const queryEmbedding = await this.generateEmbedding(
-      query,
-      searchQuery.language,
-    );
+    const preparedQueryEmbedding =
+      queryEmbedding ||
+      (await this.generateEmbedding(query, searchQuery.language));
 
     const results: SearchResult[] = [];
 
@@ -470,7 +495,10 @@ export class AISearchEngine extends EventEmitter {
       )
         continue;
 
-      const similarity = this.cosineSimilarity(queryEmbedding, docEmbedding);
+      const similarity = this.cosineSimilarity(
+        preparedQueryEmbedding,
+        docEmbedding,
+      );
 
       if (similarity >= this.config.semanticThreshold) {
         results.push({
@@ -488,7 +516,10 @@ export class AISearchEngine extends EventEmitter {
     }
 
     // Sort by similarity score
-    return results.sort((a, b) => b.score - a.score);
+    return {
+      results: results.sort((a, b) => b.score - a.score),
+      queryEmbedding: preparedQueryEmbedding,
+    };
   }
 
   private async performKeywordSearch(
@@ -546,23 +577,28 @@ export class AISearchEngine extends EventEmitter {
     semanticResults: SearchResult[],
     keywordResults: SearchResult[],
     query: SearchQuery,
+    queryEmbedding: number[],
   ): Promise<SearchResult[]> {
     const combined = new Map<string, SearchResult>();
 
+    const intent = this.detectQueryIntent(query);
+    const semanticWeight = this.getSemanticWeight(intent);
+    const keywordWeight = 1 - semanticWeight;
+
     // Combine results, giving priority to semantic search
     for (const result of semanticResults) {
-      result.score = result.score * 0.7; // Weight semantic results
-      combined.set(result.id, result);
+      const weightedScore = result.score * semanticWeight;
+      combined.set(result.id, { ...result, score: weightedScore });
     }
 
     for (const result of keywordResults) {
       const existing = combined.get(result.id);
       if (existing) {
         // Combine scores
-        existing.score = existing.score + result.score * 0.3;
+        existing.score = existing.score + result.score * keywordWeight;
       } else {
-        result.score = result.score * 0.3; // Weight keyword results
-        combined.set(result.id, result);
+        const weightedScore = result.score * keywordWeight; // Weight keyword results
+        combined.set(result.id, { ...result, score: weightedScore });
       }
     }
 
@@ -575,9 +611,16 @@ export class AISearchEngine extends EventEmitter {
     for (const result of finalResults) {
       const doc = this.searchIndex.get(result.id)!;
       result.score *= doc.priority || 1.0;
+      result.score *= this.computeRecencyBoost(doc.lastModified);
     }
 
-    return finalResults.sort((a, b) => b.score - a.score);
+    const reranked = this.rerankWithMMR(
+      finalResults.sort((a, b) => b.score - a.score),
+      queryEmbedding,
+      query.limit || this.config.maxResults,
+    );
+
+    return reranked;
   }
 
   private applyFilters(
@@ -717,33 +760,38 @@ export class AISearchEngine extends EventEmitter {
     };
   }
 
-  private generateSnippet(
-    content: string,
-    query: string,
-    maxLength: number = 200,
-  ): string {
+  private generateSnippet(content: string, query: string): string {
+    const queryWords = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
     const words = content.split(/\s+/);
-    const queryWords = query.toLowerCase().split(/\s+/);
+    const windowSize =
+      this.config.snippetWindowSize || this.defaults.snippetWindowSize;
 
-    // Find the best snippet by looking for query matches
     let bestSnippet = '';
-    let maxMatches = 0;
+    let bestScore = 0;
 
     for (let i = 0; i < words.length; i++) {
-      const snippet = words.slice(i, i + 30).join(' ');
-      if (snippet.length > maxLength) break;
+      const windowWords = words.slice(i, i + windowSize);
+      const windowText = windowWords.join(' ');
+      const matches = queryWords.reduce((score, word) => {
+        const regex = new RegExp(`\\b${word}\\b`, 'gi');
+        return score + (windowText.match(regex)?.length || 0);
+      }, 0);
 
-      const matches = queryWords.filter((qw) =>
-        snippet.toLowerCase().includes(qw),
-      ).length;
+      const density = matches / Math.max(windowWords.length, 1);
+      const windowScore = matches + density;
 
-      if (matches > maxMatches) {
-        maxMatches = matches;
-        bestSnippet = snippet;
+      if (windowScore > bestScore) {
+        bestScore = windowScore;
+        bestSnippet = windowText;
       }
     }
 
-    return bestSnippet || words.slice(0, 30).join(' ');
+    if (bestSnippet) return bestSnippet;
+
+    return words.slice(0, windowSize).join(' ');
   }
 
   private generateHighlights(content: string, query: string): string[] {
@@ -765,6 +813,8 @@ export class AISearchEngine extends EventEmitter {
     const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
     const magnitudeA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
     const magnitudeB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+
+    if (magnitudeA === 0 || magnitudeB === 0) return 0;
 
     return dotProduct / (magnitudeA * magnitudeB);
   }
@@ -794,8 +844,17 @@ export class AISearchEngine extends EventEmitter {
   }
 
   private async applyStemming(text: string, language: string): Promise<string> {
-    // Implementation for stemming/lemmatization
-    return text;
+    // Minimal stemming/lemmatization to improve recall without external deps
+    if (language !== 'en') return text;
+
+    return text
+      .split(/\s+/)
+      .map((word) =>
+        word
+          .replace(/(ing|ed|ly|es|s)$/i, '')
+          .replace(/(ment|ness|tion)$/i, ''),
+      )
+      .join(' ');
   }
 
   private async generateAutoCompleteSuggestions(
@@ -831,6 +890,135 @@ export class AISearchEngine extends EventEmitter {
     // CSV conversion implementation
     return '';
   }
+
+  private detectQueryIntent(query: SearchQuery): QueryIntent {
+    const normalized = query.query.toLowerCase();
+    const actionKeywords = ['how to', 'deploy', 'configure', 'fix', 'install'];
+    const navigationalKeywords = ['login', 'dashboard', 'api reference', 'home'];
+
+    if (actionKeywords.some((kw) => normalized.includes(kw))) {
+      return 'actionable';
+    }
+
+    if (navigationalKeywords.some((kw) => normalized.includes(kw))) {
+      return 'navigational';
+    }
+
+    if (query.tags && query.tags.includes('investigation')) {
+      return 'investigative';
+    }
+
+    return 'informational';
+  }
+
+  private getSemanticWeight(intent: QueryIntent): number {
+    switch (intent) {
+      case 'navigational':
+        return 0.55;
+      case 'actionable':
+        return 0.68;
+      case 'investigative':
+        return 0.72;
+      default:
+        return 0.7;
+    }
+  }
+
+  private computeRecencyBoost(lastModified: Date): number {
+    const halfLifeDays =
+      this.config.recencyHalfLifeDays || this.defaults.recencyHalfLifeDays;
+    if (!lastModified) return 1;
+    const daysSinceUpdate =
+      (Date.now() - new Date(lastModified).getTime()) /
+      (1000 * 60 * 60 * 24);
+
+    if (Number.isNaN(daysSinceUpdate)) return 1;
+
+    if (daysSinceUpdate <= 0) return 1.1;
+
+    const decay = Math.exp((-Math.log(2) * daysSinceUpdate) / halfLifeDays);
+
+    // Keep boost within a reasonable band
+    return 0.85 + Math.min(decay, 0.4);
+  }
+
+  private rerankWithMMR(
+    results: SearchResult[],
+    queryEmbedding: number[],
+    limit: number,
+  ): SearchResult[] {
+    if (!results.length) return results;
+
+    const lambda = this.config.diversityLambda ?? this.defaults.diversityLambda;
+    const selected: SearchResult[] = [];
+    const candidates = [...results];
+
+    // Seed with the highest scoring result
+    selected.push(candidates.shift()!);
+
+    while (candidates.length && selected.length < limit) {
+      let bestIdx = 0;
+      let bestScore = -Infinity;
+
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        const candidateEmbedding = this.vectorIndex.get(candidate.id);
+
+        const semanticScore = candidateEmbedding
+          ? this.cosineSimilarity(queryEmbedding, candidateEmbedding)
+          : candidate.score;
+
+        const similarityToSelected = selected.reduce((max, chosen) => {
+          const chosenEmbedding = this.vectorIndex.get(chosen.id);
+          if (!chosenEmbedding || !candidateEmbedding) return max;
+          return Math.max(
+            max,
+            this.cosineSimilarity(candidateEmbedding, chosenEmbedding),
+          );
+        }, 0);
+
+        const mmrScore =
+          lambda * (0.6 * candidate.score + 0.4 * semanticScore) -
+          (1 - lambda) * similarityToSelected;
+
+        if (mmrScore > bestScore) {
+          bestScore = mmrScore;
+          bestIdx = i;
+        }
+      }
+
+      selected.push(candidates.splice(bestIdx, 1)[0]);
+    }
+
+    return selected;
+  }
+
+  private normalizeEmbedding(values: number[]): number[] {
+    const magnitude = Math.sqrt(
+      values.reduce((sum, value) => sum + value * value, 0),
+    );
+    if (magnitude === 0) return values;
+    return values.map((value) => value / magnitude);
+  }
+
+  private mulberry32(seed: number): () => number {
+    return () => {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  private hashToSeed(text: string): number {
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = (hash << 5) - hash + text.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash) || 1;
+  }
 }
 
 // Supporting interfaces
@@ -856,3 +1044,9 @@ interface SearchAnalytics {
   popularFilters: { [filter: string]: string[] };
   searchTrends: Array<{ date: Date; queries: number; avgTime: number }>;
 }
+
+type QueryIntent =
+  | 'informational'
+  | 'navigational'
+  | 'investigative'
+  | 'actionable';

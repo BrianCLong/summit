@@ -7,9 +7,11 @@ import express from 'express';
 import { gaCoreMetrics } from '../services/GACoremetricsService';
 import { getPostgresPool } from '../config/database';
 import logger from '../config/logger';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
 
 const router = express.Router();
 const log = logger.child({ name: 'GACoreMetricsAPI' });
+const tracer = trace.getTracer('ga-core-metrics', '1.0.0');
 
 /**
  * Prometheus metrics endpoint for scraping
@@ -251,109 +253,176 @@ router.get('/trends/:metric', async (req, res) => {
  * ER Ops precision/recall trends
  */
 router.get('/er-ops/precision-recall', async (req, res) => {
-  try {
-    const { days = 30, modelType = 'entity_resolution' } = req.query;
-    const pool = getPostgresPool();
+  return tracer.startActiveSpan(
+    'ga_core_metrics.er_ops.precision_recall',
+    async (span) => {
+      try {
+        const { days = 30, modelType = 'entity_resolution' } = req.query;
+        const pool = getPostgresPool();
+        const parsedDays = parseInt(days as string, 10);
 
-    const result = await pool.query(
-      `
-        SELECT
-          DATE(mp.evaluation_date) as date,
-          mv.version as model_version,
-          mp.metric_name,
-          AVG(mp.metric_value) as value
-        FROM ml_model_performance mp
-        JOIN ml_model_versions mv ON mp.model_version_id = mv.id
-        WHERE mv.model_type = $1
-          AND mp.metric_name IN ('precision', 'recall')
-          AND mp.evaluation_date >= NOW() - INTERVAL $2 || ' days'
-        GROUP BY DATE(mp.evaluation_date), mv.version, mp.metric_name
-        ORDER BY date DESC
-      `,
-      [modelType, days],
-    );
+        span.setAttributes({
+          'er.ops.metric': 'precision_recall',
+          'er.ops.days': parsedDays,
+          'er.ops.model_type': modelType as string,
+        });
 
-    res.json({
-      metric: 'precision_recall',
-      days: parseInt(days as string, 10),
-      modelType,
-      data: result.rows,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    log.error({ error: error.message }, 'Failed to get precision/recall trends');
-    res.status(500).json({ error: 'Failed to get precision/recall trends' });
-  }
+        const result = await pool.query(
+          `
+            SELECT
+              DATE(mp.evaluation_date) as date,
+              mv.version as model_version,
+              mp.metric_name,
+              AVG(mp.metric_value) as value
+            FROM ml_model_performance mp
+            JOIN ml_model_versions mv ON mp.model_version_id = mv.id
+            WHERE mv.model_type = $1
+              AND mp.metric_name IN ('precision', 'recall')
+              AND mp.evaluation_date >= NOW() - INTERVAL $2 || ' days'
+            GROUP BY DATE(mp.evaluation_date), mv.version, mp.metric_name
+            ORDER BY date DESC
+          `,
+          [modelType, days],
+        );
+
+        span.setAttributes({ 'er.ops.row_count': result.rowCount || 0 });
+        span.setStatus({ code: SpanStatusCode.OK });
+
+        res.json({
+          metric: 'precision_recall',
+          days: parsedDays,
+          modelType,
+          data: result.rows,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        span.recordException(error);
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error.message,
+        });
+        log.error(
+          { error: error.message },
+          'Failed to get precision/recall trends',
+        );
+        res.status(500).json({ error: 'Failed to get precision/recall trends' });
+      } finally {
+        span.end();
+      }
+    },
+  );
 });
 
 /**
  * ER Ops rollback counts
  */
 router.get('/er-ops/rollbacks', async (req, res) => {
-  try {
-    const { days = 30 } = req.query;
-    const pool = getPostgresPool();
+  return tracer.startActiveSpan(
+    'ga_core_metrics.er_ops.rollbacks',
+    async (span) => {
+      try {
+        const { days = 30 } = req.query;
+        const pool = getPostgresPool();
+        const parsedDays = parseInt(days as string, 10);
 
-    const result = await pool.query(
-      `
-        SELECT
-          DATE(started_at) as date,
-          COUNT(*) FILTER (
-            WHERE status = 'rolled_back' OR rollback_of_deployment_id IS NOT NULL
-          ) as rollbacks,
-          COUNT(*) as total_deployments
-        FROM maestro.deployments
-        WHERE started_at >= NOW() - INTERVAL $1 || ' days'
-        GROUP BY DATE(started_at)
-        ORDER BY date DESC
-      `,
-      [days],
-    );
+        span.setAttributes({
+          'er.ops.metric': 'rollbacks',
+          'er.ops.days': parsedDays,
+        });
 
-    res.json({
-      metric: 'rollbacks',
-      days: parseInt(days as string, 10),
-      data: result.rows,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    log.error({ error: error.message }, 'Failed to get rollback counts');
-    res.status(500).json({ error: 'Failed to get rollback counts' });
-  }
+        const result = await pool.query(
+          `
+            SELECT
+              DATE(started_at) as date,
+              COUNT(*) FILTER (
+                WHERE status = 'rolled_back' OR rollback_of_deployment_id IS NOT NULL
+              ) as rollbacks,
+              COUNT(*) as total_deployments
+            FROM maestro.deployments
+            WHERE started_at >= NOW() - INTERVAL $1 || ' days'
+            GROUP BY DATE(started_at)
+            ORDER BY date DESC
+          `,
+          [days],
+        );
+
+        span.setAttributes({ 'er.ops.row_count': result.rowCount || 0 });
+        span.setStatus({ code: SpanStatusCode.OK });
+
+        res.json({
+          metric: 'rollbacks',
+          days: parsedDays,
+          data: result.rows,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        span.recordException(error);
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error.message,
+        });
+        log.error({ error: error.message }, 'Failed to get rollback counts');
+        res.status(500).json({ error: 'Failed to get rollback counts' });
+      } finally {
+        span.end();
+      }
+    },
+  );
 });
 
 /**
  * ER Ops conflict reasons
  */
 router.get('/er-ops/conflicts', async (req, res) => {
-  try {
-    const { days = 30 } = req.query;
-    const pool = getPostgresPool();
+  return tracer.startActiveSpan(
+    'ga_core_metrics.er_ops.conflicts',
+    async (span) => {
+      try {
+        const { days = 30 } = req.query;
+        const pool = getPostgresPool();
+        const parsedDays = parseInt(days as string, 10);
 
-    const result = await pool.query(
-      `
-        SELECT
-          conflict_reason,
-          COUNT(*) as count
-        FROM contradictions
-        WHERE timestamp >= NOW() - INTERVAL $1 || ' days'
-        GROUP BY conflict_reason
-        ORDER BY count DESC
-        LIMIT 10
-      `,
-      [days],
-    );
+        span.setAttributes({
+          'er.ops.metric': 'conflict_reasons',
+          'er.ops.days': parsedDays,
+        });
 
-    res.json({
-      metric: 'conflict_reasons',
-      days: parseInt(days as string, 10),
-      data: result.rows,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    log.error({ error: error.message }, 'Failed to get conflict reasons');
-    res.status(500).json({ error: 'Failed to get conflict reasons' });
-  }
+        const result = await pool.query(
+          `
+            SELECT
+              conflict_reason,
+              COUNT(*) as count
+            FROM contradictions
+            WHERE timestamp >= NOW() - INTERVAL $1 || ' days'
+            GROUP BY conflict_reason
+            ORDER BY count DESC
+            LIMIT 10
+          `,
+          [days],
+        );
+
+        span.setAttributes({ 'er.ops.row_count': result.rowCount || 0 });
+        span.setStatus({ code: SpanStatusCode.OK });
+
+        res.json({
+          metric: 'conflict_reasons',
+          days: parsedDays,
+          data: result.rows,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        span.recordException(error);
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error.message,
+        });
+        log.error({ error: error.message }, 'Failed to get conflict reasons');
+        res.status(500).json({ error: 'Failed to get conflict reasons' });
+      } finally {
+        span.end();
+      }
+    },
+  );
 });
 
 /**

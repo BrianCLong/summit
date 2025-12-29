@@ -381,11 +381,13 @@ export default function Runbooks() {
                   onChange={e => setRunbookName(e.target.value)}
                   className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm"
                   placeholder="Runbook name"
+                  data-testid="runbook-name-input"
                 />
                 <button
                   onClick={saveRunbook}
                   className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                   disabled={saving}
+                  data-testid="runbook-save-button"
                 >
                   {saving ? 'Saving…' : 'Save'}
                 </button>
@@ -442,6 +444,7 @@ export default function Runbooks() {
               onClick={handleValidate}
               disabled={validating}
               className="mt-3 w-full rounded-md border border-blue-600 px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+              data-testid="runbook-validate-button"
             >
               {validating ? 'Validating…' : 'Validate Runbook'}
             </button>
@@ -483,6 +486,7 @@ export default function Runbooks() {
               onClick={handleSimulate}
               disabled={simulating}
               className="mt-3 w-full rounded-md border border-gray-900 px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 disabled:opacity-50"
+              data-testid="runbook-simulate-button"
             >
               {simulating ? 'Simulating…' : 'Simulate Cost'}
             </button>
@@ -506,6 +510,39 @@ export default function Runbooks() {
                     Tasks: {simulation.estimate.taskNodes}
                   </div>
                 </div>
+                {simulation.explain?.assumptions?.length > 0 && (
+                  <div className="rounded-md border bg-white px-3 py-2 text-xs text-gray-600">
+                    <p className="font-semibold text-gray-700">Assumptions</p>
+                    <ul className="mt-1 list-disc space-y-1 pl-4">
+                      {simulation.explain.assumptions.map(
+                        (assumption: string, index: number) => (
+                          <li key={`${assumption}-${index}`}>{assumption}</li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                )}
+                {simulation.sampledRuns?.length > 0 && (
+                  <div className="rounded-md border bg-white px-3 py-2 text-xs text-gray-600">
+                    <p className="font-semibold text-gray-700">Sampled runs</p>
+                    <div className="mt-2 grid grid-cols-1 gap-2">
+                      {simulation.sampledRuns.map(
+                        (sample: any, index: number) => (
+                          <div
+                            key={`${sample.run}-${index}`}
+                            className="flex items-center justify-between rounded border px-2 py-1"
+                          >
+                            <span>Run {sample.run}</span>
+                            <span>
+                              ${sample.estimatedCostUSD} ·{' '}
+                              {sample.estimatedDurationMs}ms
+                            </span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -519,6 +556,7 @@ export default function Runbooks() {
               onClick={handleRun}
               disabled={running}
               className="mt-3 w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+              data-testid="runbook-run-button"
             >
               {running ? 'Running…' : 'Run Now'}
             </button>
@@ -590,6 +628,7 @@ export default function Runbooks() {
               <button
                 onClick={handleSchedule}
                 className="w-full rounded-md border border-blue-600 px-3 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+                data-testid="runbook-schedule-button"
               >
                 Apply schedule
               </button>
