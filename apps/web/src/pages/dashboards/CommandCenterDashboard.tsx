@@ -3,39 +3,51 @@ import { KPIStrip } from '@/components/panels/KPIStrip'
 import { EROpsPanel } from '@/components/panels/EROpsPanel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
+import { useDemoMode } from '@/components/common/DemoIndicator'
 import mockData from '@/mock/data.json'
 import type { KPIMetric } from '@/types'
 
 export default function CommandCenterDashboard() {
   const [kpiMetrics, setKpiMetrics] = useState<KPIMetric[]>([])
   const [loading, setLoading] = useState(true)
+  const isDemoMode = useDemoMode()
 
   useEffect(() => {
     const loadData = async () => {
+      if (!isDemoMode) {
+        setKpiMetrics([])
+        setLoading(false)
+        return
+      }
+
       await new Promise(resolve => setTimeout(resolve, 1000))
       setKpiMetrics(mockData.kpiMetrics as KPIMetric[])
       setLoading(false)
     }
     loadData()
-  }, [])
+  }, [isDemoMode])
 
   const commandCenterMetrics = [
     ...kpiMetrics,
-    {
-      id: 'live_threats',
-      title: 'Live Threats',
-      value: 7,
-      format: 'number' as const,
-      status: 'warning' as const,
-      change: { value: 25, direction: 'up' as const, period: 'last hour' },
-    },
-    {
-      id: 'response_rate',
-      title: 'Response Rate',
-      value: 94,
-      format: 'percentage' as const,
-      status: 'success' as const,
-    },
+    ...(isDemoMode
+      ? [
+          {
+            id: 'live_threats',
+            title: 'Live Threats',
+            value: 7,
+            format: 'number' as const,
+            status: 'warning' as const,
+          },
+          {
+            id: 'response_rate',
+            title: 'Response Rate',
+            value: 94,
+            format: 'percentage' as const,
+            status: 'success' as const,
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -44,13 +56,20 @@ export default function CommandCenterDashboard() {
         <div>
           <h1 className="text-3xl font-bold">Command Center</h1>
           <p className="text-muted-foreground">
-            Real-time intelligence operations dashboard
+            Intelligence operations dashboard
           </p>
         </div>
-        <Badge variant="success" className="animate-pulse">
-          🟢 LIVE
-        </Badge>
+        {isDemoMode ? (
+          <Badge variant="warning">Demo</Badge>
+        ) : (
+          <Badge variant="secondary">Disconnected</Badge>
+        )}
       </div>
+
+      <DataIntegrityNotice
+        mode={isDemoMode ? 'demo' : 'unavailable'}
+        context="Command center"
+      />
 
       <KPIStrip
         data={commandCenterMetrics}

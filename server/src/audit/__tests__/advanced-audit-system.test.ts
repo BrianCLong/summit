@@ -1,5 +1,10 @@
 import { AdvancedAuditSystem } from '../advanced-audit-system.js';
 
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: jest.fn(() => null),
+  getRedisClient: jest.fn(() => null),
+}));
+
 const buildLogger = () => ({
   info: jest.fn(),
   warn: jest.fn(),

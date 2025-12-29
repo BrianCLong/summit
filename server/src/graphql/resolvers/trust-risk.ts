@@ -1,5 +1,5 @@
 import { redactionService } from '../../redaction/redact.js';
-import { isAgentEnabled } from '../../config/agent-features.js';
+import { FeatureFlags } from '../../config/featureFlags.js';
 import {
   recordTrustScore,
   recordRiskSignal,
@@ -21,7 +21,7 @@ function nowIso() {
 export const trustRiskResolvers = {
   Query: {
     async trustScore(_: any, { subjectId }: any, ctx: any) {
-      if (!isAgentEnabled('ANGLETON')) {
+      if (!FeatureFlags.isEnabled('agent.angleton')) {
         return {
           subjectId,
           score: 0.5,
@@ -131,7 +131,7 @@ export const trustRiskResolvers = {
   },
   Mutation: {
     async raiseRiskSignal(_: any, { input }: any) {
-      if (!isAgentEnabled('HAREL') && !isAgentEnabled('ANGLETON')) {
+      if (!FeatureFlags.isEnabled('agent.harel') && !FeatureFlags.isEnabled('agent.angleton')) {
         throw new Error('risk signaling disabled by feature flags');
       }
       const rec = {

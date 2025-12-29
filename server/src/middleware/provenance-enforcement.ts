@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * Provenance Enforcement Middleware
  *
@@ -9,7 +9,7 @@
  * @module provenance-enforcement
  */
 
-import { Request, Response, NextFunction } from 'express-serve-static-core';
+import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import {
   createDataEnvelope,
@@ -20,12 +20,7 @@ import {
   GovernanceResult,
 } from '../types/data-envelope.js';
 
-// ProvenanceChain type for chain tracking
-interface ProvenanceChain {
-  chainId: string;
-  source?: { sourceId: string };
-}
-import { verifyChain } from '../canonical/provenance.js';
+import { verifyChain, ProvenanceChain } from '../canonical/provenance.js';
 
 /**
  * Protected routes configuration - routes that require provenance
@@ -84,7 +79,7 @@ export function correlationIdMiddleware(
   req: ProvenanceRequest,
   res: ProvenanceResponse,
   next: NextFunction
-): void {
+): void | Response {
   try {
     // Extract or generate correlation ID
     const correlationId =
@@ -125,7 +120,7 @@ export function validateIngressProvenance(
   req: ProvenanceRequest,
   res: ProvenanceResponse,
   next: NextFunction
-): void {
+): void | Response {
   try {
     // Check if this is a protected route
     const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
@@ -221,7 +216,7 @@ export function provenanceEnforcementMiddleware(
   req: ProvenanceRequest,
   res: ProvenanceResponse,
   next: NextFunction
-): void {
+): void | Response {
   try {
     // Check for provenance chain header
     const provenanceChainHeader = req.headers[
