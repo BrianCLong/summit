@@ -16,9 +16,12 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { ActivationProgressTile } from '@/components/activation/ActivationProgressTile'
+import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
+import { useDemoMode } from '@/components/common/DemoIndicator'
 import mockData from '@/mock/data.json'
 import type { KPIMetric, Investigation, Alert, Case } from '@/types'
 
@@ -32,11 +35,20 @@ export default function HomePage() {
   >([])
   const [recentAlerts, setRecentAlerts] = useState<Alert[]>([])
   const [recentCases, setRecentCases] = useState<Case[]>([])
+  const isDemoMode = useDemoMode()
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
         setLoading(true)
+
+        if (!isDemoMode) {
+          setKpiMetrics([])
+          setRecentInvestigations([])
+          setRecentAlerts([])
+          setRecentCases([])
+          return
+        }
 
         // Simulate API calls
         await new Promise(resolve => setTimeout(resolve, 1000))
@@ -55,7 +67,7 @@ export default function HomePage() {
     }
 
     loadDashboardData()
-  }, [])
+  }, [isDemoMode])
 
   const quickActions = [
     {
@@ -67,11 +79,11 @@ export default function HomePage() {
     },
     {
       title: 'Review Alerts',
-      description: '3 alerts require attention',
+      description: 'Review security alerts and triage status',
       icon: AlertTriangle,
       href: '/alerts',
       color: 'bg-red-500',
-      badge: '3',
+      badge: isDemoMode ? '3' : undefined,
     },
     {
       title: 'View Cases',
@@ -141,6 +153,11 @@ export default function HomePage() {
         </div>
       </div>
 
+      <DataIntegrityNotice
+        mode={isDemoMode ? 'demo' : 'unavailable'}
+        context="Home overview"
+      />
+
       <ActivationProgressTile />
 
       {/* KPI Metrics */}
@@ -154,6 +171,15 @@ export default function HomePage() {
             else if (metric.id === 'investigations') {navigate('/explore')}
           }}
         />
+        {!loading && kpiMetrics.length === 0 && (
+          <div className="mt-4">
+            <EmptyState
+              icon="chart"
+              title="No live metrics"
+              description="Connect a data source to populate KPI metrics."
+            />
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}
@@ -247,6 +273,11 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
+            {!loading && recentInvestigations.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No investigations available.
+              </p>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -298,6 +329,11 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
+            {!loading && recentAlerts.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No alerts available.
+              </p>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -352,6 +388,11 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))}
+            {!loading && recentCases.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No cases available.
+              </p>
+            )}
             <Button
               variant="ghost"
               size="sm"

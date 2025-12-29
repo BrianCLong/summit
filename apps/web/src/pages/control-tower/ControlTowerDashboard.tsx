@@ -28,6 +28,8 @@ import { CommandPalette } from '../../components/control-tower/CommandPalette';
 import { EventDetailPanel } from '../../components/control-tower/EventDetailPanel';
 import { useControlTowerData } from '../../hooks/useControlTowerData';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { DataIntegrityNotice } from '../../components/common/DataIntegrityNotice';
+import { useDemoMode } from '../../components/common/DemoIndicator';
 
 export interface ControlTowerDashboardProps {
   /** Initial filter state */
@@ -53,6 +55,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [isCommandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [isFilterPanelOpen, setFilterPanelOpen] = useState(false);
+  const isDemoMode = useDemoMode();
 
   // Data fetching
   const {
@@ -65,6 +68,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
     error,
     refetch,
   } = useControlTowerData(filters);
+  const showPlaceholder = isLoading || !isDemoMode;
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -182,6 +186,15 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
           p: 3,
         }}
       >
+        {!isDemoMode && (
+          <Box mb={3}>
+            <DataIntegrityNotice
+              mode="unavailable"
+              context="Control tower"
+            />
+          </Box>
+        )}
+
         {/* Health Score */}
         <Box mb={3}>
           <HealthScoreCard
@@ -189,7 +202,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
             trend={healthScore?.trend ?? 'STABLE'}
             change={healthScore?.change ?? 0}
             components={healthScore?.components ?? []}
-            isLoading={isLoading}
+            isLoading={showPlaceholder}
           />
         </Box>
 
@@ -199,17 +212,17 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
             <ActiveSituations
               situations={activeSituations}
               onSituationClick={(id) => console.log('Situation clicked:', id)}
-              isLoading={isLoading}
+              isLoading={showPlaceholder}
             />
           </Grid>
 
           <Grid item xs={12} md={7}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <KeyMetricsGrid metrics={keyMetrics} isLoading={isLoading} />
+                <KeyMetricsGrid metrics={keyMetrics} isLoading={showPlaceholder} />
               </Grid>
               <Grid item xs={12}>
-                <TeamPulse members={teamPulse} isLoading={isLoading} />
+                <TeamPulse members={teamPulse} isLoading={showPlaceholder} />
               </Grid>
             </Grid>
           </Grid>
@@ -222,7 +235,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
           onFilterChange={handleFilterChange}
           onEventSelect={handleEventSelect}
           selectedEventId={selectedEventId}
-          isLoading={isLoading}
+          isLoading={showPlaceholder}
         />
       </Box>
 
