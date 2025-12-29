@@ -9,6 +9,8 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { KPIStrip } from '@/components/panels/KPIStrip'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
+import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
+import { useDemoMode } from '@/components/common/DemoIndicator'
 import {
   useAlerts,
   useAlertUpdates,
@@ -34,15 +36,24 @@ export default function AlertsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSeverity, setSelectedSeverity] = useState<string>('')
   const [selectedStatus, setSelectedStatus] = useState<string>('')
+  const isDemoMode = useDemoMode()
 
-  // Load data - prefer GraphQL over mock data
+  // Load data - prefer GraphQL over mock data in demo mode only
   useEffect(() => {
     if (alertsData?.alerts) {
       setAlerts(alertsData.alerts)
       setLoading(alertsLoading)
       setError(alertsError)
     } else {
-      // Fallback to mock data
+      if (!isDemoMode) {
+        setAlerts([])
+        setLoading(false)
+        setError(
+          new Error('Live alerts are unavailable without a backend connection.')
+        )
+        return
+      }
+      // Fallback to demo data
       const loadMockData = async () => {
         try {
           setLoading(true)
@@ -56,7 +67,7 @@ export default function AlertsPage() {
       }
       loadMockData()
     }
-  }, [alertsData, alertsLoading, alertsError])
+  }, [alertsData, alertsLoading, alertsError, isDemoMode])
 
   // Handle real-time alert updates
   useEffect(() => {
@@ -77,7 +88,7 @@ export default function AlertsPage() {
     return true
   })
 
-  // Calculate KPIs
+  // Calculate KPIs (do not show change deltas in demo-only mode)
   const kpiMetrics: KPIMetric[] = [
     {
       id: 'critical',
@@ -88,7 +99,7 @@ export default function AlertsPage() {
         alerts.filter(a => a.severity === 'critical').length > 0
           ? 'error'
           : 'success',
-      change: { value: 12, direction: 'up', period: 'last hour' },
+      ...(alertsData ? { change: { value: 12, direction: 'up', period: 'last hour' } } : {}),
     },
     {
       id: 'active',
@@ -96,7 +107,7 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'open').length,
       format: 'number',
       status: 'warning',
-      change: { value: 5, direction: 'down', period: 'last hour' },
+      ...(alertsData ? { change: { value: 5, direction: 'down', period: 'last hour' } } : {}),
     },
     {
       id: 'resolved',
@@ -104,7 +115,7 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'resolved').length,
       format: 'number',
       status: 'success',
-      change: { value: 23, direction: 'up', period: 'yesterday' },
+      ...(alertsData ? { change: { value: 23, direction: 'up', period: 'yesterday' } } : {}),
     },
     {
       id: 'response',
@@ -112,7 +123,7 @@ export default function AlertsPage() {
       value: 156,
       format: 'duration',
       status: 'neutral',
-      change: { value: 8, direction: 'down', period: 'last week' },
+      ...(alertsData ? { change: { value: 8, direction: 'down', period: 'last week' } } : {}),
     },
   ]
 
@@ -230,6 +241,13 @@ export default function AlertsPage() {
           </Button>
         </div>
       </div>
+
+      {!alertsData && (
+        <DataIntegrityNotice
+          mode={isDemoMode ? 'demo' : 'unavailable'}
+          context="Alerts overview"
+        />
+      )}
 
       {/* KPI Strip */}
       <KPIStrip data={kpiMetrics} loading={loading} columns={4} />
