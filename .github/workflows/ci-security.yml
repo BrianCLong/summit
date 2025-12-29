@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript, python]
+        language: [javascript, python, go]
     steps:
       - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
       - name: Initialize CodeQL
@@ -98,6 +98,31 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
+      - name: Fail on new critical CodeQL alerts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          if [ "${EVENT_REPO}" != "${REPO}" ]; then
+            echo "Skipping CodeQL gating for forked repository context"
+            exit 0
+          fi
+
+          ALERT_COUNT=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${REPO}/code-scanning/alerts \
+            -F ref="${REF}" \
+            --paginate \
+            -q '.[] | select(.rule.severity=="critical" and .state=="open")' | wc -l)
+
+          if [ "${ALERT_COUNT}" -gt 0 ]; then
+            echo "::error::Detected ${ALERT_COUNT} open critical CodeQL alerts on ref ${REF}" >&2
+            exit 1
+          fi
 
   semgrep:
     name: Semgrep policy-as-code (SAST)

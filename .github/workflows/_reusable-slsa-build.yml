@@ -57,6 +57,15 @@ on:
       sbom_digest:
         description: "SBOM digest"
         value: ${{ jobs.build.outputs.sbom-digest }}
+      builder_digest:
+        description: "Buildkit image digest used for the build"
+        value: ${{ jobs.build.outputs.builder-digest }}
+      builder_image:
+        description: "Builder image reference"
+        value: ${{ jobs.build.outputs.builder-image }}
+      build_timestamp:
+        description: "UTC timestamp when the build started"
+        value: ${{ jobs.build.outputs.build-timestamp }}
       slsa_level:
         description: "Achieved SLSA level"
         value: ${{ jobs.build.outputs.slsa-level }}
@@ -76,6 +85,7 @@ env:
   COSIGN_EXPERIMENTAL: "1"
   EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
   EXPECTED_OIDC_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/_reusable-slsa-build.yml@${{ github.ref }}
+  BUILDER_IMAGE: moby/buildkit:v0.12.4
 
 jobs:
   build:
@@ -85,6 +95,9 @@ jobs:
       digest: ${{ steps.build.outputs.digest }}
       image-uri: ${{ steps.image-uri.outputs.uri }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
+      builder-digest: ${{ steps.builder.outputs.digest }}
+      builder-image: ${{ steps.builder.outputs.image }}
+      build-timestamp: ${{ steps.builder.outputs.timestamp }}
       slsa-level: ${{ steps.slsa-check.outputs.level }}
     steps:
       - name: Checkout
@@ -97,7 +110,22 @@ jobs:
         with:
           driver-opts: |
             network=none
-            image=moby/buildkit:v0.12.4
+            image=${{ env.BUILDER_IMAGE }}
+
+      - name: Capture builder metadata
+        id: builder
+        run: |
+          set -euo pipefail
+
+          docker pull "${{ env.BUILDER_IMAGE }}"
+          BUILDER_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${{ env.BUILDER_IMAGE }}")
+          BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          export BUILDER_DIGEST BUILD_TIMESTAMP
+          node -e "const fs=require('fs'); const {BUILDER_DIGEST, BUILD_TIMESTAMP}=process.env; fs.writeFileSync('builder-metadata.json', JSON.stringify({builderImage: '${{ env.BUILDER_IMAGE }}', builderDigest: BUILDER_DIGEST, buildTimestamp: BUILD_TIMESTAMP}, null, 2));"
+
+          echo "digest=$BUILDER_DIGEST" >> "$GITHUB_OUTPUT"
+          echo "image=${{ env.BUILDER_IMAGE }}" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$BUILD_TIMESTAMP" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -169,6 +197,9 @@ jobs:
             -a "sha=${{ github.sha }}" \
             -a "workflow=${{ github.workflow }}" \
             -a "slsa_level=3" \
+            -a "builder_image=${{ steps.builder.outputs.image }}" \
+            -a "builder_digest=${{ steps.builder.outputs.digest }}" \
+            -a "build_timestamp=${{ steps.builder.outputs.timestamp }}" \
             "$IMAGE"
 
       - name: Verify signature identity pins
@@ -200,7 +231,10 @@ jobs:
           fi
 
           SBOM_DIGEST=$(sha256sum sbom.cdx.json | cut -d' ' -f1)
+          export SBOM_DIGEST
           echo "digest=$SBOM_DIGEST" >> "$GITHUB_OUTPUT"
+
+          node -e "const fs=require('fs'); const {SBOM_DIGEST}=process.env; fs.writeFileSync('sbom-metadata.json', JSON.stringify({artifact: '${IMAGE}', sbomDigest: SBOM_DIGEST, generatedAt: '${{ steps.builder.outputs.timestamp }}', builder:{image:'${{ steps.builder.outputs.image }}', digest:'${{ steps.builder.outputs.digest }}'}}, null, 2));"
 
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push
@@ -217,6 +251,23 @@ jobs:
           cosign attest --yes \
             --predicate sbom.spdx.json \
             --type spdx \
+            "$IMAGE"
+
+          cosign attest --yes \
+            --predicate sbom-metadata.json \
+            --type summitsbom.meta \
+            "$IMAGE"
+
+      - name: Attest builder metadata
+        if: inputs.sign && inputs.push
+        run: |
+          set -euo pipefail
+
+          IMAGE="${{ steps.image-uri.outputs.uri }}"
+
+          cosign attest --yes \
+            --predicate builder-metadata.json \
+            --type summit.builder.metadata \
             "$IMAGE"
 
       - name: Determine SLSA level
@@ -243,6 +294,8 @@ jobs:
           path: |
             sbom.cdx.json
             sbom.spdx.json
+            builder-metadata.json
+            sbom-metadata.json
           retention-days: 90
 
   # SLSA provenance generation using official generator

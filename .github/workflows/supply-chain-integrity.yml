@@ -1,0 +1,80 @@
+name: Supply Chain Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  sbom:
+    name: Build assets and generate signed SBOMs
+    runs-on: ubuntu-latest
+    env:
+      COSIGN_EXPERIMENTAL: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application artifacts
+        run: pnpm run build
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.2.4
+
+      - name: Generate SBOMs (CycloneDX)
+        run: |
+          syft dir:client/dist -o cyclonedx-json=sbom-client.cdx.json
+          syft dir:server/dist -o cyclonedx-json=sbom-server.cdx.json
+          syft . -o cyclonedx-json=sbom-monorepo.cdx.json
+          sha256sum sbom-*.cdx.json > sbom-sha256.txt
+
+      - name: Sign SBOM artifacts (OIDC)
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          for file in sbom-client.cdx.json sbom-server.cdx.json sbom-monorepo.cdx.json; do
+            cosign sign-blob --yes "$file" \
+              --output-signature "$file.sig" \
+              --output-certificate "$file.pem"
+          done
+
+      - name: Upload SBOMs and signatures
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx-${{ github.run_id }}
+          path: |
+            sbom-client.cdx.json
+            sbom-client.cdx.json.sig
+            sbom-client.cdx.json.pem
+            sbom-server.cdx.json
+            sbom-server.cdx.json.sig
+            sbom-server.cdx.json.pem
+            sbom-monorepo.cdx.json
+            sbom-monorepo.cdx.json.sig
+            sbom-monorepo.cdx.json.pem
+            sbom-sha256.txt
+          retention-days: 30

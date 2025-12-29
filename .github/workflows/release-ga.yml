@@ -10,6 +10,10 @@ permissions:
   packages: write
   id-token: write # For OIDC/Cosign if needed
 
+env:
+  EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
+  EXPECTED_OIDC_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/_reusable-slsa-build.yml@${{ github.ref }}
+
 jobs:
   test-and-verify:
     name: Verification Gates
@@ -67,9 +71,78 @@ jobs:
       slsa_provenance: true
     secrets: inherit
 
+  verify-provenance:
+    name: Verify signatures and provenance
+    needs: [build-server, build-client]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+      attestations: read
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.2.4
+
+      - name: Verify server signature
+        env:
+          IMAGE: ${{ needs.build-server.outputs.image_uri }}
+        run: cosign verify "$IMAGE" --certificate-identity "${EXPECTED_OIDC_SUBJECT}" --certificate-oidc-issuer "${EXPECTED_OIDC_ISSUER}"
+
+      - name: Verify client signature
+        env:
+          IMAGE: ${{ needs.build-client.outputs.image_uri }}
+        run: cosign verify "$IMAGE" --certificate-identity "${EXPECTED_OIDC_SUBJECT}" --certificate-oidc-issuer "${EXPECTED_OIDC_ISSUER}"
+
+      - name: Verify SLSA provenance for server image
+        uses: slsa-framework/slsa-verifier/actions/verify-image@v2.5.1
+        with:
+          image-ref: ${{ needs.build-server.outputs.image_uri }}
+          certificate-oidc-issuer: ${{ env.EXPECTED_OIDC_ISSUER }}
+          builder-id: https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+          source-uri: https://github.com/${{ github.repository }}
+
+      - name: Verify SLSA provenance for client image
+        uses: slsa-framework/slsa-verifier/actions/verify-image@v2.5.1
+        with:
+          image-ref: ${{ needs.build-client.outputs.image_uri }}
+          certificate-oidc-issuer: ${{ env.EXPECTED_OIDC_ISSUER }}
+          builder-id: https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+          source-uri: https://github.com/${{ github.repository }}
+
+      - name: Enforce builder metadata attestations
+        env:
+          SERVER_IMAGE: ${{ needs.build-server.outputs.image_uri }}
+          CLIENT_IMAGE: ${{ needs.build-client.outputs.image_uri }}
+          SERVER_BUILDER_DIGEST: ${{ needs.build-server.outputs.builder-digest }}
+          CLIENT_BUILDER_DIGEST: ${{ needs.build-client.outputs.builder-digest }}
+          EXPECTED_OIDC_SUBJECT: ${{ env.EXPECTED_OIDC_SUBJECT }}
+          EXPECTED_OIDC_ISSUER: ${{ env.EXPECTED_OIDC_ISSUER }}
+        run: |
+          set -euo pipefail
+
+          verify_attestation() {
+            local image="$1"
+            local name="$2"
+            local expected_digest="$3"
+
+            cosign verify-attestation "$image" \
+              --type summit.builder.metadata \
+              --certificate-identity "${EXPECTED_OIDC_SUBJECT}" \
+              --certificate-oidc-issuer "${EXPECTED_OIDC_ISSUER}" \
+              --output-file "${name}-attestations.jsonl"
+
+            python -c "import base64,json,sys; expected=sys.argv[1]; path=sys.argv[2]; envelopes=[json.loads(line) for line in open(path, encoding='utf-8') if line.strip()]; assert envelopes, 'No attestations returned for target'; valid=any((lambda p: p.get('builderDigest')==expected and p.get('buildTimestamp'))(json.loads(base64.b64decode(env['payload'])).get('predicate', {})) for env in envelopes); sys.exit(0 if valid else 1)" "$expected_digest" "${name}-attestations.jsonl"
+          }
+
+          verify_attestation "${SERVER_IMAGE}" server "${SERVER_BUILDER_DIGEST}"
+          verify_attestation "${CLIENT_IMAGE}" client "${CLIENT_BUILDER_DIGEST}"
+
   release:
     name: Create Release
-    needs: [build-server, build-client]
+    needs: [build-server, build-client, verify-provenance]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -90,10 +163,37 @@ jobs:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
-      - name: Create Evidence Bundle
+      - name: Collect release assets
         run: |
           mkdir -p release-assets
+          cp evidence/server/sbom.cdx.json release-assets/server-sbom.cdx.json
+          cp evidence/client/sbom.cdx.json release-assets/client-sbom.cdx.json
+          cp evidence/server/sbom.spdx.json release-assets/server-sbom.spdx.json
+          cp evidence/client/sbom.spdx.json release-assets/client-sbom.spdx.json
+          cp evidence/server/builder-metadata.json release-assets/server-builder-metadata.json
+          cp evidence/client/builder-metadata.json release-assets/client-builder-metadata.json
+          cp evidence/server/sbom-metadata.json release-assets/server-sbom-metadata.json
+          cp evidence/client/sbom-metadata.json release-assets/client-sbom-metadata.json
+
+      - name: Create Evidence Bundle
+        run: |
           tar -czf release-assets/evidence.tar.gz evidence/
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.2.4
+
+      - name: Sign release assets
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          for file in release-assets/*; do
+            cosign sign-blob --yes "$file" \
+              --output-signature "$file.sig" \
+              --output-certificate "$file.pem"
+          done
 
       - name: Generate Release Notes
         id: notes
@@ -103,7 +203,34 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/evidence.tar.gz
+          files: |
+            release-assets/evidence.tar.gz
+            release-assets/evidence.tar.gz.sig
+            release-assets/evidence.tar.gz.pem
+            release-assets/server-sbom.cdx.json
+            release-assets/server-sbom.cdx.json.sig
+            release-assets/server-sbom.cdx.json.pem
+            release-assets/client-sbom.cdx.json
+            release-assets/client-sbom.cdx.json.sig
+            release-assets/client-sbom.cdx.json.pem
+            release-assets/server-sbom.spdx.json
+            release-assets/server-sbom.spdx.json.sig
+            release-assets/server-sbom.spdx.json.pem
+            release-assets/client-sbom.spdx.json
+            release-assets/client-sbom.spdx.json.sig
+            release-assets/client-sbom.spdx.json.pem
+            release-assets/server-builder-metadata.json
+            release-assets/server-builder-metadata.json.sig
+            release-assets/server-builder-metadata.json.pem
+            release-assets/client-builder-metadata.json
+            release-assets/client-builder-metadata.json.sig
+            release-assets/client-builder-metadata.json.pem
+            release-assets/server-sbom-metadata.json
+            release-assets/server-sbom-metadata.json.sig
+            release-assets/server-sbom-metadata.json.pem
+            release-assets/client-sbom-metadata.json
+            release-assets/client-sbom-metadata.json.sig
+            release-assets/client-sbom-metadata.json.pem
           body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: false
