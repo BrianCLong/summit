@@ -20,6 +20,7 @@ export default {
     '/build/',
     '/coverage/',
     '/playwright-tests/',
+    '/src/connectors/__tests__/gcs-ingest.test.ts', // Missing @intelgraph/connector-sdk dependency
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -86,6 +87,27 @@ export default {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: [
+    // Allow ESM packages to be transformed - handles both npm and pnpm structures
+    '/node_modules/(?!.pnpm)(?!(' +
+      'node-fetch|' +
+      'data-uri-to-buffer|' +
+      'fetch-blob|' +
+      'formdata-polyfill|' +
+      '@exodus|' +
+      'html-encoding-sniffer|' +
+      '.*\\.mjs$' +
+    '))',
+    // For pnpm, we need to match differently
+    '/node_modules/.pnpm/(?!(' +
+      'node-fetch|' +
+      'data-uri-to-buffer|' +
+      'fetch-blob|' +
+      'formdata-polyfill|' +
+      'apollo-server|' +
+      '@exodus|' +
+      'html-encoding-sniffer' +
+    '))',
+  ],
   maxWorkers: process.env.CI ? 2 : '50%',
 };

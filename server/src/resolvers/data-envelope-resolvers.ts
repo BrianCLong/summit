@@ -15,6 +15,7 @@ import {
   ExportBundle,
   PolicyAction,
   RiskLevel,
+  GovernanceResult,
 } from '../types/data-envelope';
 import { randomUUID, createHash } from 'crypto';
 // Stubbed imports for missing services
@@ -51,7 +52,7 @@ export async function generateHypothesesWithEnvelope(
       governanceVerdict: {
         verdictId: randomUUID(),
         policyId: 'policy:hypothesis:auto',
-        result: 'ALLOW',
+        result: GovernanceResult.ALLOW,
         decidedAt: new Date(),
         reason: 'Automated hypothesis generation within safe bounds',
         evaluator: 'hypothesis-generator'
@@ -103,7 +104,7 @@ export async function generateNarrativeWithEnvelope(
     governanceVerdict: {
       verdictId: randomUUID(),
       policyId: 'policy:narrative:auto',
-      result: 'ALLOW',
+      result: GovernanceResult.ALLOW,
       decidedAt: new Date(),
       reason: 'Automated narrative generation enabled',
       evaluator: 'narrative-builder'
@@ -154,7 +155,7 @@ export async function computeRiskWithEnvelope(
     governanceVerdict: {
       verdictId: randomUUID(),
       policyId: 'policy:risk:strict',
-      result: 'ALLOW',
+      result: GovernanceResult.ALLOW,
       decidedAt: new Date(),
       reason: 'Risk computation authorized for user',
       evaluator: 'risk-engine'
@@ -208,7 +209,7 @@ export async function exportWithProvenance(
         governanceVerdict: {
           verdictId: randomUUID(),
           policyId: 'policy:export:check',
-          result: 'ALLOW',
+          result: GovernanceResult.ALLOW,
           decidedAt: new Date(),
           reason: 'Export item allowed',
           evaluator: 'export-service'
