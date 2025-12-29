@@ -1,4 +1,6 @@
 
+import { provenanceLedger } from '../../src/provenance/ledger.js';
+
 // Mock external services for demonstration
 const mockKubernetesClient = {
   rollbackDeployment: async (deploymentName: string): Promise<void> => {
@@ -40,6 +42,8 @@ export interface RollbackOptions {
   serviceName: string;
   migrationSteps?: number;
   reason: string;
+  tenantId: string;
+  actorId: string;
 }
 
 export interface RollbackRecord {
@@ -62,8 +66,57 @@ export class RollbackEngine {
       await this.performServiceRollback(options.serviceName);
       success = true;
       console.log('Rollback completed successfully.');
+
+      // Record evidence in Provenance Ledger
+      try {
+        await provenanceLedger.appendEntry({
+          tenantId: options.tenantId,
+          actorId: options.actorId,
+          actorType: 'system',
+          actionType: 'ROLLBACK_EXECUTED',
+          resourceType: 'Deployment',
+          resourceId: options.serviceName,
+          payload: {
+            reason: options.reason,
+            migrationSteps: options.migrationSteps,
+            success: true
+          },
+          metadata: {
+            purpose: 'Canary Auto-Rollback',
+            component: 'RollbackEngine'
+          }
+        });
+        console.log('Rollback evidence recorded in Provenance Ledger.');
+      } catch (ledgerError) {
+        console.error('Failed to record rollback evidence:', ledgerError);
+        // We don't fail the rollback itself if logging fails, but we log the error.
+      }
+
     } catch (error) {
       console.error('Rollback failed:', error);
+
+      // Record failure evidence
+       try {
+        await provenanceLedger.appendEntry({
+          tenantId: options.tenantId,
+          actorId: options.actorId,
+          actorType: 'system',
+          actionType: 'ROLLBACK_FAILED',
+          resourceType: 'Deployment',
+          resourceId: options.serviceName,
+          payload: {
+            reason: options.reason,
+            error: (error as Error).message,
+            success: false
+          },
+          metadata: {
+             purpose: 'Canary Auto-Rollback',
+             component: 'RollbackEngine'
+          }
+        });
+      } catch (ledgerError) {
+        console.error('Failed to record rollback failure evidence:', ledgerError);
+      }
     } finally {
       this.logRollback(options, success);
     }

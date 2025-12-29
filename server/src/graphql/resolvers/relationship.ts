@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
@@ -9,15 +8,15 @@ import {
   RELATIONSHIP_DELETED,
   tenantEvent,
 } from '../subscriptions.js';
-import { requireTenant } from '../../middleware/withTenant.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
+import { authGuard } from '../utils/auth.js';
 
 const logger = (pino as any)();
 const driver = getNeo4jDriver();
 
 const relationshipResolvers = {
   Mutation: {
-    createRelationship: async (
+    createRelationship: authGuard(async (
       _: unknown,
       {
         input,
@@ -26,7 +25,7 @@ const relationshipResolvers = {
     ) => {
       const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
+        const tenantId = context.user!.tenantId;
         const id = randomUUID();
         const createdAt = new Date().toISOString();
         const props = {
@@ -67,8 +66,8 @@ const relationshipResolvers = {
       } finally {
         await session.close();
       }
-    },
-    updateRelationship: async (
+    }),
+    updateRelationship: authGuard(async (
       _: unknown,
       {
         id,
@@ -83,7 +82,7 @@ const relationshipResolvers = {
     ) => {
       const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
+        const tenantId = context.user!.tenantId;
         const existing = await session.run(
           'MATCH ()-[r:Relationship {id: $id, tenantId: $tenantId}]->() RETURN r',
           { id, tenantId },
@@ -95,7 +94,7 @@ const relationshipResolvers = {
         if (
           current.updatedAt &&
           new Date(current.updatedAt).toISOString() !==
-            new Date(lastSeenTimestamp).toISOString()
+          new Date(lastSeenTimestamp).toISOString()
         ) {
           const err: any = new Error(
             'Conflict: Relationship has been modified',
@@ -147,19 +146,20 @@ const relationshipResolvers = {
         return relationship;
       } catch (error) {
         logger.error({ error, id, input }, 'Error updating relationship');
-        throw new Error(`Failed to update relationship: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to update relationship: ${message}`);
       } finally {
         await session.close();
       }
-    },
-    deleteRelationship: async (
+    }),
+    deleteRelationship: authGuard(async (
       _: any,
       { id }: { id: string },
-      context: any,
+      context: GraphQLContext, // Correctly typed
     ) => {
       const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
+        const tenantId = context.user!.tenantId;
         // Soft delete: set a 'deletedAt' timestamp
         const deletedAt = new Date().toISOString();
         const result = await session.run(
@@ -175,11 +175,12 @@ const relationshipResolvers = {
         return true;
       } catch (error) {
         logger.error({ error, id }, 'Error deleting relationship');
-        throw new Error(`Failed to delete relationship: ${error.message}`);
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to delete relationship: ${message}`);
       } finally {
         await session.close();
       }
-    },
+    }),
   },
 };
 

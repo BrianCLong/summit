@@ -880,12 +880,13 @@ export class GovernanceMetricsService {
         for (const tenantId of tenants) {
           const timeRange: TimeRange = {
             start: Date.now() - 24 * 60 * 60 * 1000,
-          end: Date.now(),
-          label: 'Last 24 hours',
-        };
-        await this.getGovernanceMetrics(tenantId, timeRange).catch((err) =>
-          console.error(`Failed to refresh metrics for ${tenantId}:`, err),
-        );
+            end: Date.now(),
+            label: 'Last 24 hours',
+          };
+          await this.getGovernanceMetrics(tenantId, timeRange).catch((err) =>
+            console.error(`Failed to refresh metrics for ${tenantId}:`, err),
+          );
+        }
       }
     }, this.config.refreshIntervalMs);
   }

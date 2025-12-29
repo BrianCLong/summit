@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Trust Snapshot",
+  "description": "A machine-readable snapshot of Summit's external trust signals, derived from CI artifacts.",
+  "type": "object",
+  "properties": {
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when this snapshot was generated."
+    },
+    "window": {
+      "type": "string",
+      "description": "Time window covered by this snapshot (e.g., 'last_30_days', 'sprint_24')."
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version."
+    },
+    "trust_signals": {
+      "type": "object",
+      "properties": {
+        "build_health": {
+          "type": "object",
+          "properties": {
+            "ci_pass_rate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Percentage of passing CI runs (0.0 to 1.0)."
+            },
+            "median_ci_duration_seconds": {
+              "type": "number",
+              "description": "Median duration of CI runs in seconds."
+            },
+            "ci_duration_variance_pct": {
+              "type": "number",
+              "description": "Variance in CI duration as a percentage."
+            },
+            "failed_builds": {
+              "type": "integer",
+              "description": "Count of failed builds in the window."
+            }
+          },
+          "required": ["ci_pass_rate", "median_ci_duration_seconds"]
+        },
+        "test_integrity": {
+          "type": "object",
+          "properties": {
+            "tests_passed_pct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "known_flakes": {
+              "type": "integer"
+            },
+            "quarantined_tests": {
+              "type": "integer"
+            }
+          },
+          "required": ["tests_passed_pct"]
+        },
+        "policy_compliance": {
+          "type": "object",
+          "properties": {
+            "policy_checks_passed_pct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "unknown_decisions": {
+              "type": "integer"
+            },
+            "policy_surface_version": {
+              "type": "string"
+            }
+          },
+          "required": ["policy_checks_passed_pct"]
+        },
+        "evidence_coverage": {
+          "type": "object",
+          "properties": {
+            "claims_total": {
+              "type": "integer"
+            },
+            "claims_with_evidence": {
+              "type": "integer"
+            },
+            "coverage_pct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": ["coverage_pct"]
+        },
+        "operational_readiness": {
+          "type": "object",
+          "properties": {
+            "deploy_playbook_verified": {
+              "type": "boolean"
+            },
+            "rollback_simulation_verified": {
+              "type": "boolean"
+            },
+            "oncall_roster_defined": {
+              "type": "boolean"
+            }
+          }
+        },
+        "incident_history": {
+          "type": "object",
+          "properties": {
+            "incidents_last_90_days": {
+              "type": "integer"
+            },
+            "sev1": {
+              "type": "integer"
+            },
+            "sev2": {
+              "type": "integer"
+            },
+            "mean_time_to_resolution_minutes": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "required": ["build_health", "policy_compliance", "evidence_coverage"]
+    }
+  },
+  "required": ["generated_at", "version", "trust_signals"]
+}

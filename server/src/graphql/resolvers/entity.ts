@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
 import neo4j from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'node:crypto';
@@ -72,10 +72,10 @@ const entityResolvers = {
           const params: any = { tenantId };
 
           if (type) {
-             // Validating type to prevent injection (simple alphanumeric check)
-             if (/^[a-zA-Z0-9_]+$/.test(type)) {
-                 query += `:${type}`;
-             }
+            // Validating type to prevent injection (simple alphanumeric check)
+            if (/^[a-zA-Z0-9_]+$/.test(type)) {
+              query += `:${type}`;
+            }
           }
 
           query += ') WHERE n.tenantId = $tenantId';
@@ -95,7 +95,7 @@ const entityResolvers = {
 
               // Try to execute fulltext search
               const result = await session.run(fulltextQuery, { ...params, q, type, offset: neo4j.int(offset), limit: neo4j.int(limit) });
-               return result.records.map((record) => {
+              return result.records.map((record) => {
                 const entity = record.get('node');
                 return {
                   id: entity.properties.id,
@@ -107,16 +107,16 @@ const entityResolvers = {
               });
 
             } catch (err) {
-               // Fallback if index doesn't exist or other error
-               logger.warn({ err }, 'Fulltext search failed, falling back to legacy CONTAINS search');
+              // Fallback if index doesn't exist or other error
+              logger.warn({ err }, 'Fulltext search failed, falling back to legacy CONTAINS search');
 
-               // Revert to building the legacy query
-               query += ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
-               params.q = q;
-               query += ' RETURN n SKIP $offset LIMIT $limit';
+              // Revert to building the legacy query
+              query += ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
+              params.q = q;
+              query += ' RETURN n SKIP $offset LIMIT $limit';
             }
           } else {
-             query += ' RETURN n SKIP $offset LIMIT $limit';
+            query += ' RETURN n SKIP $offset LIMIT $limit';
           }
           params.limit = neo4j.int(limit);
           params.offset = neo4j.int(offset);
@@ -144,7 +144,7 @@ const entityResolvers = {
         }
       },
       // Cache options
-      { ttl: 30, tenantId: 'context' } // 30s TTL
+      30 // 30s TTL
     )),
     semanticSearch: authGuard(withCache(
       (_p: any, args: any, ctx: GraphQLContext) => listCacheKey('semanticSearch', { ...args, tenantId: ctx.user!.tenantId }),
@@ -239,7 +239,7 @@ const entityResolvers = {
             limit + offset,
           );
           const sliced = docs.slice(offset);
-          const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
+          const ids = sliced.map((d: any) => d.metadata.graphId).filter(Boolean);
 
           if (ids.length === 0) return [];
 
@@ -262,7 +262,7 @@ const entityResolvers = {
           if (pgClient) pgClient.release();
         }
       },
-      { ttl: 60, tenantId: 'context' }
+      60
     )),
   },
   Mutation: {
@@ -310,7 +310,13 @@ const entityResolvers = {
           resourceId: entity.id,
           actorId: context.user!.id,
           actorType: 'user',
-          payload: entity,
+          timestamp: new Date(),
+          payload: {
+            mutationType: 'CREATE',
+            entityId: entity.id,
+            entityType: 'Entity',
+            newState: entity as any,
+          },
           metadata: {
             correlationId: context.telemetry.traceId,
             timestamp: new Date().toISOString()
@@ -353,7 +359,7 @@ const entityResolvers = {
         if (
           current.updatedAt &&
           new Date(current.updatedAt).toISOString() !==
-            new Date(lastSeenTimestamp).toISOString()
+          new Date(lastSeenTimestamp).toISOString()
         ) {
           const err: any = new Error('Conflict: Entity has been modified');
           err.extensions = { code: 'CONFLICT', server: current };
@@ -403,7 +409,13 @@ const entityResolvers = {
           resourceId: entity.id,
           actorId: context.user!.id,
           actorType: 'user',
-          payload: entity,
+          timestamp: new Date(),
+          payload: {
+            mutationType: 'UPDATE',
+            entityId: entity.id,
+            entityType: 'Entity',
+            newState: entity as any,
+          },
           metadata: {
             correlationId: context.telemetry.traceId,
             timestamp: new Date().toISOString()
@@ -442,7 +454,12 @@ const entityResolvers = {
           resourceId: id,
           actorId: context.user!.id,
           actorType: 'user',
-          payload: { id },
+          timestamp: new Date(),
+          payload: {
+            mutationType: 'DELETE',
+            entityId: id,
+            entityType: 'Entity',
+          },
           metadata: {
             correlationId: context.telemetry.traceId,
             timestamp: new Date().toISOString()
@@ -458,7 +475,7 @@ const entityResolvers = {
         await session.close();
       }
     }),
-    linkEntities: async (_: unknown, { text }: { text: string }) => {
+    linkEntities: authGuard(async (_: unknown, { text }: { text: string }, context: GraphQLContext) => {
       try {
         const mlServiceUrl =
           process.env.ML_SERVICE_URL || 'http://localhost:8081';
@@ -494,8 +511,8 @@ const entityResolvers = {
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to link entities: ${message}`);
       }
-    },
-    extractRelationships: async (
+    }),
+    extractRelationships: authGuard(async (
       _: unknown,
       { text, entities }: { text: string; entities: any[] },
       context: GraphQLContext,
@@ -517,7 +534,7 @@ const entityResolvers = {
           response.data.status === 'completed' &&
           response.data.relationships
         ) {
-          const tenantId = requireTenant(context);
+          const tenantId = context.user!.tenantId;
           const extractedRelationships = response.data.relationships.map(
             (rel: any) => ({
               sourceEntityId: rel.source_entity_id,
@@ -573,7 +590,7 @@ const entityResolvers = {
       } finally {
         await neo4jSession.close(); // Close Neo4j session
       }
-    },
+    }),
   },
 };
 

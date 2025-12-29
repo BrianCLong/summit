@@ -6,44 +6,8 @@
 
 import { GraphQLError } from 'graphql';
 import { getAdminPanelService, UserRole } from '../../services/AdminPanelService.js';
-
-// ============================================================================
-// AUTHORIZATION HELPERS
-// ============================================================================
-
-function requireAdmin(context: any) {
-  if (!context.user) {
-    throw new GraphQLError('Authentication required', {
-      extensions: { code: 'UNAUTHENTICATED' },
-    });
-  }
-
-  const allowedRoles = [UserRole.ADMIN, UserRole.PLATFORM_ADMIN];
-  if (!allowedRoles.includes(context.user.role)) {
-    throw new GraphQLError('Admin privileges required', {
-      extensions: { code: 'FORBIDDEN' },
-    });
-  }
-
-  return context.user;
-}
-
-function requireModerator(context: any) {
-  if (!context.user) {
-    throw new GraphQLError('Authentication required', {
-      extensions: { code: 'UNAUTHENTICATED' },
-    });
-  }
-
-  const allowedRoles = [UserRole.ADMIN, UserRole.PLATFORM_ADMIN, UserRole.MODERATOR];
-  if (!allowedRoles.includes(context.user.role)) {
-    throw new GraphQLError('Moderator privileges required', {
-      extensions: { code: 'FORBIDDEN' },
-    });
-  }
-
-  return context.user;
-}
+import { authGuard } from '../utils/auth.js';
+import type { GraphQLContext } from '../apollo-v5-server.js';
 
 // ============================================================================
 // RESOLVERS
@@ -54,17 +18,22 @@ export const adminPanelResolvers = {
     /**
      * Get admin dashboard statistics
      */
-    adminDashboard: async (_parent: any, _args: any, context: any) => {
-      requireAdmin(context);
+    adminDashboard: authGuard(async (_parent: any, _args: any, context: GraphQLContext) => {
+      // Role check
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
       return await service.getDashboardStats();
-    },
+    }),
 
     /**
      * Search users with filters and pagination
      */
-    users: async (_parent: any, args: any, context: any) => {
-      requireAdmin(context);
+    users: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       const limit = args.first || 50;
@@ -88,13 +57,15 @@ export const adminPanelResolvers = {
         },
         totalCount: total,
       };
-    },
+    }),
 
     /**
      * Get single user by ID
      */
-    user: async (_parent: any, args: any, context: any) => {
-      requireAdmin(context);
+    user: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
       const user = await service.getUserById(args.id);
 
@@ -105,13 +76,15 @@ export const adminPanelResolvers = {
       }
 
       return user;
-    },
+    }),
 
     /**
      * Search users by query string
      */
-    searchUsers: async (_parent: any, args: any, context: any) => {
-      requireAdmin(context);
+    searchUsers: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
       const { users } = await service.searchUsers(
         { query: args.query },
@@ -119,13 +92,15 @@ export const adminPanelResolvers = {
         0
       );
       return users;
-    },
+    }),
 
     /**
      * Get audit logs with filters
      */
-    auditLogs: async (_parent: any, args: any, context: any) => {
-      requireAdmin(context);
+    auditLogs: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       const limit = args.first || 100;
@@ -149,13 +124,16 @@ export const adminPanelResolvers = {
         },
         totalCount: total,
       };
-    },
+    }),
 
     /**
      * Get moderation queue
      */
-    moderationQueue: async (_parent: any, args: any, context: any) => {
-      requireModerator(context);
+    moderationQueue: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      const allowedRoles = [UserRole.ADMIN, UserRole.PLATFORM_ADMIN, UserRole.MODERATOR];
+      if (!context.user!.roles.some(r => allowedRoles.includes(r as UserRole))) {
+        throw new GraphQLError('Moderator privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       const limit = args.first || 50;
@@ -179,217 +157,240 @@ export const adminPanelResolvers = {
         },
         totalCount: total,
       };
-    },
+    }),
 
     /**
      * Get all feature flags
      */
-    featureFlags: async (_parent: any, _args: any, context: any) => {
-      requireAdmin(context);
+    featureFlags: authGuard(async (_parent: any, _args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
       return await service.getFeatureFlags();
-    },
+    }),
   },
 
   Mutation: {
     /**
      * Create new user
      */
-    createUser: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    createUser: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
-      return await service.createUser(args.input, admin.id);
-    },
+      return await service.createUser(args.input, context.user!.id);
+    }),
 
     /**
      * Update user
      */
-    updateUser: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    updateUser: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
-      return await service.updateUser(args.id, args.input, admin.id);
-    },
+      return await service.updateUser(args.id, args.input, context.user!.id);
+    }),
 
     /**
      * Delete user
      */
-    deleteUser: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    deleteUser: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
-      return await service.deleteUser(args.id, admin.id, args.reason);
-    },
+      return await service.deleteUser(args.id, context.user!.id, args.reason);
+    }),
 
     /**
      * Suspend user
      */
-    suspendUser: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    suspendUser: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
       return await service.suspendUser(
         args.input.userId,
-        admin.id,
+        context.user!.id,
         args.input.reason,
         args.input.duration
       );
-    },
+    }),
 
     /**
      * Unsuspend user
      */
-    unsuspendUser: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    unsuspendUser: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
-      return await service.unsuspendUser(args.userId, admin.id);
-    },
+      return await service.unsuspendUser(args.userId, context.user!.id);
+    }),
 
     /**
      * Reset user password
      */
-    resetUserPassword: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    resetUserPassword: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
-      return await service.resetUserPassword(args.userId, admin.id);
-    },
+      return await service.resetUserPassword(args.userId, context.user!.id);
+    }),
 
     /**
      * Start user impersonation
      */
-    startImpersonation: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    startImpersonation: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
       const impersonationId = await service.startImpersonation(
-        admin.id,
+        context.user!.id,
         args.input.targetUserId,
         args.input.reason,
-        context.ip,
-        context.userAgent
+        context.request.ip,
+        context.request.userAgent
       );
 
       return {
         id: impersonationId,
-        adminUser: admin,
+        adminUser: context.user,
         targetUser: await service.getUserById(args.input.targetUserId),
         reason: args.input.reason,
         startedAt: new Date(),
         isActive: true,
       };
-    },
+    }),
 
     /**
      * End user impersonation
      */
-    endImpersonation: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    endImpersonation: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
-      await service.endImpersonation(args.impersonationId, admin.id);
+      await service.endImpersonation(args.impersonationId, context.user!.id);
 
       return {
         id: args.impersonationId,
         endedAt: new Date(),
         isActive: false,
       };
-    },
+    }),
 
     /**
      * Review moderation item
      */
-    reviewModeration: async (_parent: any, args: any, context: any) => {
-      const moderator = requireModerator(context);
+    reviewModeration: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      const allowedRoles = [UserRole.ADMIN, UserRole.PLATFORM_ADMIN, UserRole.MODERATOR];
+      if (!context.user!.roles.some(r => allowedRoles.includes(r as UserRole))) {
+        throw new GraphQLError('Moderator privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
-
       return await service.reviewModerationItem(
         args.input.itemId,
-        moderator.id,
+        context.user!.id,
         args.input.status,
         args.input.actionTaken,
         args.input.resolution,
         args.input.notes
       );
-    },
+    }),
 
     /**
      * Update feature flag
      */
-    updateFeatureFlag: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    updateFeatureFlag: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       return await service.updateFeatureFlag(
         args.id,
         args.input,
-        admin.id,
+        context.user!.id,
         args.input.reason
       );
-    },
+    }),
 
     /**
      * Toggle feature flag
      */
-    toggleFeatureFlag: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    toggleFeatureFlag: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       return await service.updateFeatureFlag(
         args.id,
         { enabled: args.enabled },
-        admin.id,
+        context.user!.id,
         args.reason
       );
-    },
+    }),
 
     /**
      * Bulk suspend users
      */
-    bulkSuspendUsers: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    bulkSuspendUsers: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       const results = [];
       for (const userId of args.userIds) {
-        const user = await service.suspendUser(userId, admin.id, args.reason);
+        const user = await service.suspendUser(userId, context.user!.id, args.reason);
         results.push(user);
       }
 
       return results;
-    },
+    }),
 
     /**
      * Bulk update user role
      */
-    bulkUpdateUserRole: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    bulkUpdateUserRole: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       const results = [];
       for (const userId of args.userIds) {
-        const user = await service.updateUser(userId, { role: args.role }, admin.id);
+        const user = await service.updateUser(userId, { role: args.role }, context.user!.id);
         results.push(user);
       }
 
       return results;
-    },
+    }),
 
     /**
      * Bulk delete users
      */
-    bulkDeleteUsers: async (_parent: any, args: any, context: any) => {
-      const admin = requireAdmin(context);
+    bulkDeleteUsers: authGuard(async (_parent: any, args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       for (const userId of args.userIds) {
-        await service.deleteUser(userId, admin.id, args.reason);
+        await service.deleteUser(userId, context.user!.id, args.reason);
       }
 
       return true;
-    },
+    }),
   },
 
   // Field resolvers
@@ -407,8 +408,10 @@ export const adminPanelResolvers = {
       return await service.getUserById(user.suspendedBy);
     },
 
-    activitySummary: async (user: any, _args: any, context: any) => {
-      requireAdmin(context);
+    activitySummary: authGuard(async (user: any, _args: any, context: GraphQLContext) => {
+      if (!context.user!.roles.includes(UserRole.ADMIN) && !context.user!.roles.includes(UserRole.PLATFORM_ADMIN)) {
+        throw new GraphQLError('Admin privileges required', { extensions: { code: 'FORBIDDEN' } });
+      }
       const service = getAdminPanelService();
 
       // Get user's recent activity from audit logs
@@ -426,7 +429,7 @@ export const adminPanelResolvers = {
         relationshipsCreated: logs.filter(l => l.action === 'relationship.create').length,
         recentActions: logs,
       };
-    },
+    }),
   },
 
   AuditLog: {

@@ -1,8 +1,8 @@
-// @ts-nocheck
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
-import { useServer } from 'graphql-ws/lib/use/ws';
+// @ts-ignore
+import { useServer } from 'graphql-ws/lib/use/ws.js';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
@@ -18,7 +18,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import { initTelemetry } from '@intelgraph/telemetry-config';
+import initTelemetry from '@intelgraph/telemetry-config';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
@@ -28,7 +28,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
-import { logConfigSummary } from './config/index.js';
 import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
 
 const startServer = async () => {
@@ -54,7 +53,7 @@ const startServer = async () => {
   await bootstrapSecrets();
 
   // Log Config
-  logConfigSummary();
+
 
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -160,6 +159,11 @@ const startServer = async () => {
     const backupManager = new BackupManager();
     backupManager.startScheduler();
 
+    // Start Policy Watcher (WS-2)
+    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
+    const policyWatcher = PolicyWatcher.getInstance();
+    policyWatcher.start();
+
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
@@ -189,6 +193,10 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
+    // Stop Policy Watcher
+    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
+    PolicyWatcher.getInstance().stop();
+
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();

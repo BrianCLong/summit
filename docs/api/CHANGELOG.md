@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2025-12-29 "Ironclad Standard"
+
+### Added
+- **Governance Engine**: Real-time policy drift detection (`PolicyWatcher`), comprehensive mutation auditing with `authGuard`.
+- **Supply Chain Security**: SLSA Level 3 compliant build pipeline with Cosign signing and Syft SBOM generation.
+- **Resilience**: Automated "Quarantine" workflow for flaky tests to preserve signal.
+- **Operations**: `make rollback` automation and "Version Health" Grafana dashboards.
+- **Documentation**: "Docs as Contracts" framework; stale docs pruned.
+
+### Appended
+- **Audit**: `provenanceLedger` now tracks `timestamp`, `mutationType`, and `entityId` for all mutations.
+- **Testing**: Negative testing coverage for unauthorized access attempts (`GovernanceCompliance.test.ts`).
+
+### Security
+- **Hardened**: All production artifacts are chemically linked to source commits via `provenance.json`.
+- **Enforced**: "Zero Trust" RBAC and Tenant Isolation enforced at Resolver level.
+
 ### Added
 - Comprehensive OpenAPI 3.0 specification for all REST endpoints
 - Swagger UI integration at `/api/docs` endpoint

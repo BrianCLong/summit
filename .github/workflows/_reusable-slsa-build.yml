@@ -4,65 +4,65 @@ on:
   workflow_call:
     inputs:
       image_name:
-        description: 'Container image name'
+        description: "Container image name"
         required: true
         type: string
       dockerfile:
-        description: 'Path to Dockerfile'
+        description: "Path to Dockerfile"
         required: false
         type: string
-        default: './Dockerfile'
+        default: "./Dockerfile"
       context:
-        description: 'Build context path'
+        description: "Build context path"
         required: false
         type: string
-        default: '.'
+        default: "."
       platforms:
-        description: 'Target platforms (comma-separated)'
+        description: "Target platforms (comma-separated)"
         required: false
         type: string
-        default: 'linux/amd64'
+        default: "linux/amd64"
       push:
-        description: 'Push to registry'
+        description: "Push to registry"
         required: false
         type: boolean
         default: true
       sign:
-        description: 'Sign with cosign'
+        description: "Sign with cosign"
         required: false
         type: boolean
         default: true
       sbom:
-        description: 'Generate SBOM'
+        description: "Generate SBOM"
         required: false
         type: boolean
         default: true
       slsa_provenance:
-        description: 'Generate SLSA provenance'
+        description: "Generate SLSA provenance"
         required: false
         type: boolean
         default: true
       reproducible:
-        description: 'Enable reproducible build settings'
+        description: "Enable reproducible build settings"
         required: false
         type: boolean
         default: true
     outputs:
       image_digest:
-        description: 'Image digest'
+        description: "Image digest"
         value: ${{ jobs.build.outputs.digest }}
       image_uri:
-        description: 'Full image URI with digest'
+        description: "Full image URI with digest"
         value: ${{ jobs.build.outputs.image-uri }}
       sbom_digest:
-        description: 'SBOM digest'
+        description: "SBOM digest"
         value: ${{ jobs.build.outputs.sbom-digest }}
       slsa_level:
-        description: 'Achieved SLSA level'
+        description: "Achieved SLSA level"
         value: ${{ jobs.build.outputs.slsa-level }}
     secrets:
       registry_password:
-        description: 'Container registry password/token'
+        description: "Container registry password/token"
         required: false
 
 permissions:
@@ -73,7 +73,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  COSIGN_EXPERIMENTAL: '1'
+  COSIGN_EXPERIMENTAL: "1"
   EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
   EXPECTED_OIDC_SUBJECT: https://github.com/${{ github.repository }}/.github/workflows/_reusable-slsa-build.yml@${{ github.ref }}
 
@@ -239,7 +239,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_id }}
+          name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |
             sbom.cdx.json
             sbom.spdx.json

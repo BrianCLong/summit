@@ -29,3 +29,24 @@ export const withCache = <TArgs = unknown, TResult = unknown>(
     );
   };
 };
+
+/**
+ * Generates a consistent cache key for lists with filtering, sorting, and pagination.
+ * 
+ * @param prefix - Prefix for the cache key (e.g., 'entities')
+ * @param params - Object containing filter, sort, and pagination parameters
+ * @returns A string cache key
+ */
+export const listCacheKey = (prefix: string, params: Record<string, any>): string => {
+  const sortedParams = Object.keys(params)
+    .sort()
+    .reduce((acc, key) => {
+      // Filter out undefined/null/empty values to keep keys canonical? 
+      // Or keep them valid? Keeping them ensures strict match.
+      // But let's just JSON.stringify the sorted object.
+      acc[key] = params[key];
+      return acc;
+    }, {} as Record<string, any>);
+
+  return `${prefix}:${JSON.stringify(sortedParams)}`;
+};

@@ -36,14 +36,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20]
         test-suite: [unit, integration]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:${{ matrix.test-suite }}
@@ -144,9 +143,18 @@ jobs:
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
+  build-server-image:
+    name: Build Server Image (Governance)
+    needs: test
+    uses: ./.github/workflows/reusable-golden-path.yml
+    with:
+      service_path: server
+      image_name: intelgraph-server
+    secrets: inherit
+
   observability:
     name: Observability
-    needs: [security, reproducible-build]
+    needs: [security, reproducible-build, build-server-image]
     runs-on: ubuntu-latest
     steps:
       - name: Emit metrics

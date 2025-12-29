@@ -28,6 +28,15 @@ export interface Case {
   closedBy?: string;
 }
 
+export interface CaseTab {
+  id: string;
+  caseId: string;
+  name: string;
+  state: Record<string, any>;
+  updatedAt: Date;
+  createdAt: Date;
+}
+
 export interface CaseInput {
   tenantId: string;
   title: string;
@@ -386,6 +395,62 @@ export class CaseRepo {
   /**
    * Map database row to domain object
    */
+  /**
+   * Upsert a case tab
+   */
+  async upsertTab(
+    caseId: string,
+    tab: { id: string; name: string; state: Record<string, any> }
+  ): Promise<CaseTab> {
+    const { rows } = await this.pg.query(
+      `INSERT INTO maestro.case_tabs (id, case_id, name, state, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (id) DO UPDATE SET
+         name = EXCLUDED.name,
+         state = EXCLUDED.state,
+         updated_at = NOW()
+       RETURNING *`,
+      [tab.id, caseId, tab.name, JSON.stringify(tab.state)]
+    );
+
+    return this.mapTabRow(rows[0]);
+  }
+
+  /**
+   * Get all tabs for a case
+   */
+  async getTabs(caseId: string): Promise<CaseTab[]> {
+    const { rows } = await this.pg.query(
+      `SELECT * FROM maestro.case_tabs WHERE case_id = $1 ORDER BY created_at ASC`,
+      [caseId]
+    );
+
+    return rows.map(this.mapTabRow);
+  }
+
+  /**
+   * Delete a case tab
+   */
+  async deleteTab(caseId: string, tabId: string): Promise<boolean> {
+    const { rowCount } = await this.pg.query(
+      `DELETE FROM maestro.case_tabs WHERE case_id = $1 AND id = $2`,
+      [caseId, tabId]
+    );
+
+    return (rowCount || 0) > 0;
+  }
+
+  private mapTabRow(row: any): CaseTab {
+    return {
+      id: row.id,
+      caseId: row.case_id,
+      name: row.name,
+      state: row.state,
+      updatedAt: row.updated_at,
+      createdAt: row.created_at,
+    };
+  }
+
   private mapRow(row: CaseRow): Case {
     return {
       id: row.id,

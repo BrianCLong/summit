@@ -276,7 +276,19 @@
       "Bash(gh pr checks:*)",
       "Bash(git branch:*)",
       "Bash(for pr in 14782 14783 14784 14785)",
-      "Bash(do echo -n \"PR #$pr: \")"
+      "Bash(do echo -n \"PR #$pr: \")",
+      "Bash(timeout 300 pnpm jest:*)",
+      "Bash(timeout 180 pnpm test:*)",
+      "Bash(do echo \"=== PR #$pr ===\")",
+      "Bash(do echo \"=== Processing PR #$pr ===\")",
+      "Bash(jest)",
+      "Bash(babel:*)",
+      "Bash(ts-jest \")",
+      "Bash(gh pr diff:*)",
+      "Bash(registered\" errors that occur when multiple test files import modules\nthat register Prometheus metrics.\n\nMock includes:\n- Counter, Gauge, Histogram, Summary classes\n- Registry class with all required methods\n- collectDefaultMetrics mock\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(gitleaks detect:*)",
+      "Bash(node:*)",
+      "Bash(pnpm why:*)"
     ],
     "deny": [],
     "ask": []

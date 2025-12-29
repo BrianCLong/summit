@@ -16,7 +16,6 @@
     "incremental": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "allowImportMeta": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
     "paths": {

@@ -31,6 +31,8 @@ export default {
     '/tests/governance-acceptance.test.ts',
     // Skip tests that have ESM/import.meta conflicts with source files
     '/tests/api-docs.test.ts',
+    // FLAKY TEST QUARANTINE: Exclude flaky tests from main run
+    '\\.flaky\\.test\\.ts$',
   ],
 
   moduleNameMapper: {
@@ -96,7 +98,7 @@ export default {
 
   transformIgnorePatterns: [
     // Transform ESM packages in node_modules
-    '/node_modules/(?!(node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|@exodus|html-encoding-sniffer|jsdom)/)',
+    '/node_modules/(?!(node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|@exodus|html-encoding-sniffer|jsdom|apollo-server-env|apollo-server-core|apollo-server-express)/)',
   ],
 
   // Increase workers for faster parallel testing

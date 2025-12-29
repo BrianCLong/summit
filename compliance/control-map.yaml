@@ -1,0 +1,51 @@
+framework: SOC-style
+version: "1.0"
+controls:
+  CC1.1:
+    description: "Defined governance and ownership"
+    summit_artifacts:
+      - "AGENTS.md"
+      - "docs/governance/README.md"
+    evidence:
+      - "repo/files/AGENTS.md"
+    status: covered
+    owner: "governance-team"
+
+  CC1.2:
+    description: "Code changes authorized and reviewed"
+    summit_artifacts:
+      - ".github/workflows/ci.yml"
+      - "docs/governance/ci-enforcement.md"
+    evidence:
+      - "ci/pr-approvals"
+    status: covered
+    owner: "devops-team"
+
+  CC6.1:
+    description: "Logical access controls (AuthZ)"
+    summit_artifacts:
+      - "policies/"
+      - "server/src/middleware/auth.ts"
+    evidence:
+      - "ci/opa-decisions"
+    status: covered
+    owner: "security-team"
+
+  CC7.1:
+    description: "Change management procedures"
+    summit_artifacts:
+      - "docs/governance/RULEBOOK.md"
+      - ".github/workflows/ci.yml"
+    evidence:
+      - "ci/test-reports"
+    status: covered
+    owner: "devops-team"
+
+  CC8.1:
+    description: "Tested changes only"
+    summit_artifacts:
+      - ".github/workflows/ci.yml"
+    evidence:
+      - "ci/test-reports"
+    status: covered
+    owner: "qa-team"
