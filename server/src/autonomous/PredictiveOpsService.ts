@@ -59,11 +59,12 @@ export class PredictiveOpsService {
         const currentStats = await rollup(tenantId, oneHourAgo.toISOString(), now.toISOString());
 
         // Forecast usage for next 24 hours
-        // We use a dummy metric 'cpu_usage' for the forecast
+        // We use 'activity' metric as a proxy for capacity usage
         const forecast = await this.predictiveService.forecastRisk({
             entityId: tenantId,
-            metric: 'cpu_usage',
+            metric: 'activity',
             horizon: 24, // 24 hours
+            legalBasis: { purpose: 'Capacity planning', policyId: 'autonomous-ops-forecast' },
         });
 
         // Determine if saturation is likely

@@ -1,4 +1,4 @@
-import { db as defaultDb } from '../../config/database.js';
+import { getPostgresPool } from '../../db/postgres.js';
 import {
   EnterprisePolicy,
   EnterprisePolicySchema,
@@ -6,11 +6,31 @@ import {
   PolicyRecord,
   PolicyVersionRecord
 } from './types.js';
-import { diff } from 'json-diff';
+
+// Simple diff function to compare policy versions
+function diff(oldPolicy: unknown, newPolicy: unknown): Record<string, unknown> {
+  const changes: Record<string, unknown> = {};
+  const oldObj = oldPolicy as Record<string, unknown>;
+  const newObj = newPolicy as Record<string, unknown>;
+
+  for (const key in newObj) {
+    if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
+      changes[key] = { old: oldObj[key], new: newObj[key] };
+    }
+  }
+  return changes;
+}
 
 export interface DbClient {
     query: (text: string, params?: any[]) => Promise<{ rows: any[] }>;
 }
+
+const getDefaultDb = (): DbClient => {
+  const pool = getPostgresPool();
+  return {
+    query: (text: string, params?: any[]) => pool.query(text, params),
+  };
+};
 
 export class PolicyLifecycleService {
   private static instance: PolicyLifecycleService;
@@ -20,12 +40,13 @@ export class PolicyLifecycleService {
       this.db = dbClient;
   }
 
-  public static getInstance(dbClient: DbClient = defaultDb): PolicyLifecycleService {
+  public static getInstance(dbClient?: DbClient): PolicyLifecycleService {
+    const defaultDb = dbClient || getDefaultDb();
     if (!PolicyLifecycleService.instance) {
-      PolicyLifecycleService.instance = new PolicyLifecycleService(dbClient);
+      PolicyLifecycleService.instance = new PolicyLifecycleService(defaultDb);
     }
     // Allow replacing db client for testing if instance already exists (simple approach)
-    if (dbClient !== defaultDb) {
+    if (dbClient) {
         PolicyLifecycleService.instance.db = dbClient;
     }
     return PolicyLifecycleService.instance;
