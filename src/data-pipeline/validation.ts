@@ -1,10 +1,10 @@
-import Ajv, { DefinedError } from 'ajv';
+import Ajv, { DefinedError, ValidateFunction } from 'ajv';
 import addFormats from 'ajv-formats';
 import { DataRecord, DeadLetterEntry, ValidationErrorDetail } from './types.js';
 
 export class SchemaValidator {
   private readonly ajv: Ajv;
-  private readonly validateFn: Ajv.ValidateFunction;
+  private readonly validateFn: ValidateFunction;
 
   constructor(schema: Record<string, unknown>) {
     this.ajv = new Ajv({ allErrors: true, removeAdditional: 'failing' });
