@@ -19,8 +19,8 @@ node scripts/schema-compat/cli.mjs \
 
 The report is human-readable Markdown that can be uploaded as a CI artifact. Breaking changes are permitted only when either:
 
-- The schema's `x-version` has a higher **major** value than the baseline, or
-- The change is explicitly allow-listed in the compatibility map.
+- The specific schema's `x-version` has a higher **major** value than the baseline, or
+- The change is explicitly allow-listed in the compatibility map (optionally scoped by file name).
 
 Run `node scripts/schema-compat/check-fixtures.mjs` to validate the additive and breaking fixtures against their stored reports.
 
@@ -31,12 +31,16 @@ Run `node scripts/schema-compat/check-fixtures.mjs` to validate the additive and
   "allow": [
     {
       "code": "required.removed",
-      "path": "user.required.email",
+      "file": "user.schema.json",
+      "path": "email",
       "rationale": "Removed in v2 with compensating migration"
     }
   ]
 }
 ```
+
+Compatibility entries can optionally omit `file` to apply to any schema, or set it to a specific schema filename to avoid
+collisions when multiple schemas share the same property names.
 
 ## Fixture scenarios
 
