@@ -10,6 +10,9 @@ RETENTION_DAYS=${RETENTION_DAYS:-30}
 ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
 S3_BUCKET=${S3_BUCKET:-}
 NOTIFICATION_WEBHOOK=${NOTIFICATION_WEBHOOK:-}
+DRY_RUN=${DRY_RUN:-false}
+INCLUDE_POSTGRES=${INCLUDE_POSTGRES:-false}
+VERIFY_ONLY=false
 
 # Colors
 GREEN='\033[0;32m'
@@ -373,16 +376,40 @@ verify_backup() {
     fi
 }
 
+print_dry_run_plan() {
+    local timestamp=$(date -u +%Y%m%dT%H%M%SZ)
+    local planned_dir="$BACKUP_BASE/conductor-backup-${timestamp}"
+
+    say "🧪 DRY RUN: no connections or secrets required"
+    cat <<EOF
+- Would initialize backup at: $planned_dir
+- Would capture Neo4j graph export and Redis snapshot.
+- PostgreSQL dump hook: $( [ "$INCLUDE_POSTGRES" = true ] && echo "requested (opt-in)" || echo "skipped by default" ).
+- Would gather configuration, secrets, and audit chain artifacts.
+- Would generate integrity checksums and upload to S3 bucket: ${S3_BUCKET:-<not set>}.
+- Would enforce retention: keep latest ${RETENTION_DAYS} day(s).
+EOF
+}
+
 # Main backup execution
 main() {
     local start_time=$(date +%s)
-    
+
+    if [ "$DRY_RUN" = true ]; then
+        print_dry_run_plan
+        return 0
+    fi
+
     # Initialize backup
     init_backup
     
     # Perform backups
     backup_neo4j || fail "Neo4j backup failed"
-    backup_postgres || fail "PostgreSQL backup failed"
+    if [ "$INCLUDE_POSTGRES" = true ]; then
+        backup_postgres || fail "PostgreSQL backup failed"
+    else
+        warn "PostgreSQL backup skipped (enable with --include-postgres or INCLUDE_POSTGRES=true)"
+    fi
     backup_redis || fail "Redis backup failed"
     backup_audit_chain
     backup_config
@@ -421,57 +448,96 @@ main() {
     fi
 }
 
-# Handle command line arguments
-case "${1:-}" in
-    --help)
-        cat << EOF
+usage() {
+    cat << EOF
 Usage: $0 [options]
 
 Conductor BCDR Backup Script
 
 Options:
-  --verify-only    Only verify existing backup
-  --help           Show this help
+  --dry-run            Preview the backup plan without executing.
+  --include-postgres   Enable PostgreSQL dump hook (opt-in; skipped by default).
+  --output <dir>       Override BACKUP_BASE for backup artifacts.
+  --verify-only        Only verify an existing backup (requires BACKUP_ID).
+  --help               Show this help.
 
 Environment Variables:
   BACKUP_BASE=./backups                   Backup directory
   RETENTION_DAYS=30                       Backup retention period
   ENCRYPTION_KEY=secret                   Encryption key for secrets
-  S3_BUCKET=my-backup-bucket             S3 bucket for remote storage
+  S3_BUCKET=my-backup-bucket              S3 bucket for remote storage
   NOTIFICATION_WEBHOOK=https://hooks...   Webhook for notifications
 
 Database URLs:
-  NEO4J_PASSWORD=password                Neo4j password
-  POSTGRES_URL=postgres://...            PostgreSQL connection
-  REDIS_URL=redis://...                  Redis connection
-  AUDIT_CHAIN_PATH=./data/audit         Audit chain directory
+  NEO4J_PASSWORD=password                 Neo4j password
+  POSTGRES_URL=postgres://...             PostgreSQL connection (opt-in)
+  REDIS_URL=redis://...                   Redis connection
+  AUDIT_CHAIN_PATH=./data/audit           Audit chain directory
 
 Examples:
-  # Basic backup
-  ./scripts/backup.sh
-  
-  # Encrypted backup with S3 upload
-  ENCRYPTION_KEY=mykey S3_BUCKET=backups ./scripts/backup.sh
-  
+  # Dry-run preview
+  ./scripts/backup.sh --dry-run
+
+  # Backup with PostgreSQL dump enabled
+  INCLUDE_POSTGRES=true ./scripts/backup.sh --include-postgres
+
   # Verify existing backup
   BACKUP_ID=conductor-backup-20240315T120000Z ./scripts/backup.sh --verify-only
 
 EOF
-        exit 0
-        ;;
-    --verify-only)
-        if [ -z "${BACKUP_ID:-}" ]; then
-            fail "BACKUP_ID environment variable required for verification"
-            exit 1
-        fi
-        BACKUP_DIR="$BACKUP_BASE/$BACKUP_ID"
-        if [ ! -d "$BACKUP_DIR" ]; then
-            fail "Backup directory not found: $BACKUP_DIR"
-            exit 1
-        fi
-        verify_backup
-        ;;
-    *)
-        main
-        ;;
-esac
+}
+
+parse_args() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            --include-postgres)
+                INCLUDE_POSTGRES=true
+                shift
+                ;;
+            --output)
+                if [ -z "${2:-}" ]; then
+                    fail "--output requires a directory"
+                    usage
+                    exit 1
+                fi
+                BACKUP_BASE="$2"
+                shift 2
+                ;;
+            --verify-only)
+                VERIFY_ONLY=true
+                shift
+                ;;
+            --help)
+                usage
+                exit 0
+                ;;
+            *)
+                fail "Unknown argument: $1"
+                usage
+                exit 1
+                ;;
+        esac
+    done
+}
+
+parse_args "$@"
+
+if [ "$VERIFY_ONLY" = true ]; then
+    if [ -z "${BACKUP_ID:-}" ]; then
+        fail "BACKUP_ID environment variable required for verification"
+        exit 1
+    fi
+    BACKUP_DIR="$BACKUP_BASE/$BACKUP_ID"
+    if [ ! -d "$BACKUP_DIR" ]; then
+        fail "Backup directory not found: $BACKUP_DIR"
+        exit 1
+    fi
+    verify_backup
+    exit $?
+fi
+
+main

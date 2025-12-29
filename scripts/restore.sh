@@ -8,6 +8,8 @@ set -euo pipefail
 BACKUP_BASE=${BACKUP_BASE:-./backups}
 RESTORE_MODE=${RESTORE_MODE:-full}  # full|selective|verify-only
 ENCRYPTION_KEY=${ENCRYPTION_KEY:-}
+DRY_RUN=${DRY_RUN:-false}
+TARGET_BACKUP_ID=""
 
 # Colors
 GREEN='\033[0;32m'
@@ -365,21 +367,59 @@ verify_restore() {
     fi
 }
 
-# Main restore execution
-main() {
+validate_backup_dir() {
     local backup_id="$1"
     local backup_dir="$BACKUP_BASE/$backup_id"
-    
+
+    if [ -z "$backup_id" ]; then
+        fail "Backup ID required"
+        echo "Use --help for usage information"
+        exit 1
+    fi
+
     if [ ! -d "$backup_dir" ]; then
         fail "Backup directory not found: $backup_dir"
         exit 1
     fi
-    
+
+    if [ ! -r "$backup_dir" ]; then
+        fail "Backup directory is not readable: $backup_dir"
+        exit 1
+    fi
+}
+
+print_restore_plan() {
+    local backup_id="$1"
+    local backup_dir="$BACKUP_BASE/$backup_id"
+
+    say "🧪 DRY RUN: validation only"
+    cat <<EOF
+- Validated backup directory: $backup_dir
+- Restore mode: $RESTORE_MODE
+- Would stop application services prior to restoration.
+- Would restore Neo4j, Redis, configuration, secrets, and audit artifacts based on mode toggles.
+- PostgreSQL restore hook remains opt-in via RESTORE_POSTGRES/RESTORE_MODE.
+- Would perform post-restore verification and service restarts.
+EOF
+}
+
+# Main restore execution
+main() {
+    local backup_id="$1"
+    local backup_dir="$BACKUP_BASE/$backup_id"
+
+    validate_backup_dir "$backup_id"
+
+    if [ "$DRY_RUN" = true ]; then
+        print_restore_plan "$backup_id"
+        return 0
+    fi
+
     say "🔄 Starting Conductor Restore"
     say "Backup ID: $backup_id"
     say "Restore Mode: $RESTORE_MODE"
     say "Backup Directory: $backup_dir"
-    
+
     # Verify backup integrity first
     if ! verify_backup_integrity "$backup_dir"; then
         exit 1
@@ -453,32 +493,26 @@ EOF
     fi
 }
 
-# Handle command line arguments
-case "${1:-}" in
-    --help)
-        cat << EOF
-Usage: $0 <backup-id> [options]
+usage() {
+    cat << EOF
+Usage: $0 [options] <backup_id>
 
 Conductor BCDR Restore Script
 
-Arguments:
-  backup-id                 Backup ID to restore from
-
 Options:
-  --mode=MODE              Restore mode: full|selective|verify-only
-  --help                   Show this help
+  --dry-run                    Validate inputs and preview restore steps.
+  --mode=full|selective|verify-only  Restore mode (default: full)
+  --help                       Show this help
 
 Environment Variables:
-  BACKUP_BASE=./backups            Backup directory
-  RESTORE_MODE=full                Restore mode
-  ENCRYPTION_KEY=secret            Encryption key for secrets
-  
-  # Selective restore options (when RESTORE_MODE=selective):
-  RESTORE_NEO4J=true               Restore Neo4j database
-  RESTORE_POSTGRES=true            Restore PostgreSQL database  
-  RESTORE_REDIS=true               Restore Redis data
-  RESTORE_AUDIT=false              Restore audit chain
-  RESTORE_CONFIG=false             Restore configuration
+  BACKUP_BASE=./backups              Backup directory
+  RESTORE_MODE=full                  full|selective|verify-only
+  ENCRYPTION_KEY=secret              Encryption key for secrets
+  RESTORE_NEO4J=true                 Restore Neo4j database
+  RESTORE_POSTGRES=true              Restore PostgreSQL database (opt-in execution)
+  RESTORE_REDIS=true                 Restore Redis data
+  RESTORE_AUDIT=false                Restore audit chain
+  RESTORE_CONFIG=false               Restore configuration
 
 Database Configuration:
   NEO4J_PASSWORD=password          Neo4j password
@@ -491,27 +525,68 @@ Database Configuration:
 Examples:
   # Full restore
   ./scripts/restore.sh conductor-backup-20240315T120000Z
-  
+
+  # Dry-run with validation
+  ./scripts/restore.sh --dry-run conductor-backup-20240315T120000Z
+
   # Verify backup only
   RESTORE_MODE=verify-only ./scripts/restore.sh conductor-backup-20240315T120000Z
-  
+
   # Selective restore (databases only)
   RESTORE_MODE=selective RESTORE_CONFIG=false ./scripts/restore.sh conductor-backup-20240315T120000Z
 
 EOF
-        exit 0
-        ;;
-    --mode=*)
-        export RESTORE_MODE="${1#*=}"
-        shift
-        main "$@"
-        ;;
-    "")
-        fail "Backup ID required"
-        echo "Use --help for usage information"
-        exit 1
-        ;;
-    *)
-        main "$@"
-        ;;
-esac
+}
+
+parse_args() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --dry-run)
+                DRY_RUN=true
+                shift
+                ;;
+            --mode=*)
+                RESTORE_MODE="${1#*=}"
+                shift
+                ;;
+            --mode)
+                if [ -z "${2:-}" ]; then
+                    fail "--mode requires a value"
+                    usage
+                    exit 1
+                fi
+                RESTORE_MODE="$2"
+                shift 2
+                ;;
+            --help)
+                usage
+                exit 0
+                ;;
+            --*)
+                fail "Unknown argument: $1"
+                usage
+                exit 1
+                ;;
+            *)
+                if [ -z "$TARGET_BACKUP_ID" ]; then
+                    TARGET_BACKUP_ID="$1"
+                    shift
+                else
+                    fail "Unexpected argument: $1"
+                    usage
+                    exit 1
+                fi
+                ;;
+        esac
+    done
+}
+
+parse_args "$@"
+
+if [ -z "$TARGET_BACKUP_ID" ]; then
+    fail "Backup ID required"
+    echo "Use --help for usage information"
+    exit 1
+fi
+
+main "$TARGET_BACKUP_ID"
