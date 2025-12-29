@@ -71,6 +71,7 @@ import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+import { createApiDocsRouter } from './routes/api-docs.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -232,6 +233,7 @@ export const createApp = async () => {
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/api/docs', await createApiDocsRouter());
 
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above

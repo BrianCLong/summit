@@ -17,18 +17,23 @@ info:
     - **Administration**: User, tenant, and policy management
 
     ## Authentication
-    All API endpoints require JWT Bearer token authentication via OIDC.
-    Include the token in the `Authorization` header:
-    ```
-    Authorization: Bearer <your-jwt-token>
-    ```
+    The platform supports **JWT bearer**, **API key**, and **OAuth2 client credentials** flows. Choose the
+    mechanism aligned to your deployment:
 
-    ## Rate Limiting
-    API requests are rate-limited based on user role and endpoint sensitivity.
-    Rate limit headers are included in responses:
-    - `X-RateLimit-Limit`: Maximum requests per window
-    - `X-RateLimit-Remaining`: Remaining requests in current window
-    - `X-RateLimit-Reset`: Time when the rate limit resets
+    - **JWT**: Include `Authorization: Bearer <token>` (default for interactive use and the web app).
+    - **API Key**: Include `X-API-Key: <key>` for service-to-service calls.
+    - **OAuth2**: Use the client-credentials grant to obtain a token for scopes such as `api.read` and
+      `api.write`.
+
+    ## Rate Limiting, Pagination, and Filtering
+    All endpoints return rate-limit headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`,
+    `X-RateLimit-Reset`). Collection endpoints consistently support cursor-based pagination (`cursor`,
+    `limit`) and filtering where applicable (e.g., `type`, `q`, `status`).
+
+    ## Versioning & Deprecation
+    The REST API follows semantic versioning. Breaking changes ship only in new major versions and are
+    surfaced via the `/api/versioning/*` endpoints. Deprecated operations include a `Deprecation` header
+    and remain available for at least one minor release before removal.
 
     ## Errors
     The API uses standard HTTP status codes and returns errors in JSON format:
@@ -53,8 +58,14 @@ servers:
     description: Production server
 
 tags:
-  - name: Cases
-    description: Investigation case management operations
+  - name: Investigations
+    description: Investigation and case management operations
+  - name: Entities
+    description: Entity catalog, enrichment, and lifecycle management
+  - name: OSINT
+    description: Open-source intelligence prioritization, scoring, and queue management
+  - name: Reports
+    description: Publication, manifest generation, and compliance packaging
   - name: Evidence
     description: Evidence annotation and export
   - name: Ingest
@@ -74,6 +85,9 @@ tags:
 
 security:
   - BearerAuth: []
+  - ApiKeyAuth: []
+  - OAuth2:
+      - api.read
 
 components:
   securitySchemes:
@@ -82,39 +96,394 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: OIDC JWT token authentication
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Static or rotating API key for server-to-server automation
+    OAuth2:
+      type: oauth2
+      description: Client credentials flow with scope-based authorization
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.intelgraph.example.com/oauth/token
+          scopes:
+            api.read: Read access to Summit APIs
+            api.write: Write access to Summit APIs
+
+  headers:
+    RateLimit-Limit:
+      description: The maximum number of requests available in the current rate-limit window.
+      schema:
+        type: integer
+    RateLimit-Remaining:
+      description: Remaining requests in the current window.
+      schema:
+        type: integer
+    RateLimit-Reset:
+      description: Epoch timestamp in seconds when the current window resets.
+      schema:
+        type: integer
+    Deprecation:
+      description: Indicates when an endpoint will be removed. Present on deprecated operations.
+      schema:
+        type: string
+
+  parameters:
+    Cursor:
+      name: cursor
+      in: query
+      description: Base64-encoded cursor for pagination.
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      description: Page size (defaults to 50, capped at 500 where applicable).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+    Offset:
+      name: offset
+      in: query
+      description: Numeric offset for pagination when cursors are not used.
+      schema:
+        type: integer
+        minimum: 0
+    SearchQuery:
+      name: q
+      in: query
+      description: Full-text search query used to filter results.
+      schema:
+        type: string
+    EntityType:
+      name: type
+      in: query
+      description: Entity type filter (e.g., PERSON, ORG).
+      schema:
+        type: string
+    Stream:
+      name: stream
+      in: query
+      description: When `true`, streams results as Server-Sent Events.
+      schema:
+        type: boolean
 
   schemas:
     Case:
       type: object
       required:
         - id
+        - tenantId
         - title
         - status
-        - evidence
       properties:
         id:
           type: string
           description: Unique case identifier
-          example: "a7b2c3d4"
+          example: "c1d2e3f4"
+        tenantId:
+          type: string
+          description: Tenant that owns the investigation
+          example: "tenant-acme"
         title:
           type: string
           description: Case title
           example: "Suspicious Network Activity Investigation"
         status:
           type: string
-          enum: [draft, open, approved, closed]
+          enum: [open, active, closed, archived]
           description: Current case status
-          example: "draft"
-        evidence:
+          example: "open"
+        description:
+          type: string
+          description: Detailed description of the investigation
+        compartment:
+          type: string
+          description: Compartment/need-to-know boundary for the case
+          example: "TIGERTEAM"
+        policyLabels:
           type: array
           items:
             type: string
-          description: Array of evidence IDs associated with this case
-          example: ["e1", "e2", "e3"]
+          description: Policy labels applied for ABAC/OPA checks
+          example: ["export-controlled", "pii"]
+        metadata:
+          type: object
+          description: Additional structured metadata for the investigation
+          additionalProperties: true
         createdAt:
           type: string
           format: date-time
           description: Case creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        createdBy:
+          type: string
+          description: User ID that created the case
+          example: "user-123"
+
+    Entity:
+      type: object
+      required:
+        - id
+        - type
+        - label
+      properties:
+        id:
+          type: string
+          description: Unique entity identifier
+          example: "entity-123"
+        uuid:
+          type: string
+          description: Stable UUID for the entity
+          example: "a7af5b45-5b32-4d1c-b1b2-1f728f3f8c3d"
+        type:
+          type: string
+          description: Entity type such as PERSON, ORG, or CUSTOM
+          example: "PERSON"
+        label:
+          type: string
+          description: Human-readable name
+          example: "Jane Doe"
+        description:
+          type: string
+          description: Freeform description of the entity
+        properties:
+          type: object
+          additionalProperties: true
+          description: Arbitrary structured properties captured from enrichment
+        verified:
+          type: boolean
+          description: Whether the entity has been human-verified
+          example: false
+        source:
+          type: string
+          description: Origin of the entity (manual, osint, import)
+          example: "manual"
+        position:
+          type: object
+          description: Optional visualization coordinates
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PageInfo:
+      type: object
+      properties:
+        offset:
+          type: integer
+        limit:
+          type: integer
+        nextCursor:
+          type: string
+          nullable: true
+        previousCursor:
+          type: string
+          nullable: true
+        hasMore:
+          type: boolean
+
+    EntityListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
+        count:
+          type: integer
+        pageInfo:
+          $ref: '#/components/schemas/PageInfo'
+
+    EntityCreateRequest:
+      type: object
+      required:
+        - label
+      properties:
+        type:
+          type: string
+          default: CUSTOM
+        label:
+          type: string
+        description:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+        position:
+          type: object
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+
+    EntityUpdateRequest:
+      type: object
+      properties:
+        label:
+          type: string
+        description:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+        position:
+          type: object
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+        verified:
+          type: boolean
+
+    VeracityScore:
+      type: object
+      properties:
+        score:
+          type: integer
+          description: Score between 0-100
+          example: 82
+        confidence:
+          type: string
+          enum: [LOW, MEDIUM, HIGH]
+          example: "MEDIUM"
+        sources:
+          type: integer
+          description: Count of corroborating sources
+          example: 4
+        lastUpdated:
+          type: integer
+          description: Epoch milliseconds when the score was generated
+
+    OSINTQueueCounts:
+      type: object
+      properties:
+        waiting:
+          type: integer
+        active:
+          type: integer
+        completed:
+          type: integer
+        failed:
+          type: integer
+        delayed:
+          type: integer
+        paused:
+          type: integer
+
+    OSINTPrioritizationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+        targets:
+          type: array
+          description: Entity IDs queued for enrichment
+          items:
+            type: string
+
+    ReportSection:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        type:
+          type: string
+          enum: [text, table, citation]
+
+    ReportRequest:
+      type: object
+      required:
+        - title
+        - sections
+        - citations
+      properties:
+        title:
+          type: string
+          example: "Quarterly threat landscape"
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportSection'
+        citations:
+          type: array
+          items:
+            type: object
+            properties:
+              evidenceId:
+                type: string
+              text:
+                type: string
+        coi:
+          type: array
+          items:
+            type: string
+          description: Conflicts of interest declarations
+        ch:
+          type: array
+          items:
+            type: string
+          description: Competing hypotheses
+
+    ReportManifest:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "1.0"
+        timestamp:
+          type: string
+          format: date-time
+        evidenceHashes:
+          type: object
+          additionalProperties:
+            type: string
+        rootHash:
+          type: string
+        transforms:
+          type: array
+          items:
+            type: string
+        rightToReply:
+          type: string
+          format: uri
+
+    ReportResponse:
+      type: object
+      properties:
+        report:
+          type: object
+          properties:
+            title:
+              type: string
+            sections:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReportSection'
+            generatedAt:
+              type: string
+              format: date-time
+        manifest:
+          $ref: '#/components/schemas/ReportManifest'
 
     Annotation:
       type: object
@@ -432,14 +801,64 @@ paths:
                       total:
                         type: number
 
-  # Cases API
+  # Investigations API
   /api/cases:
+    get:
+      summary: List investigations
+      description: Returns paginated investigations for the authenticated tenant with optional filters.
+      operationId: listCases
+      tags:
+        - Investigations
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, active, closed, archived]
+          description: Filter by case status
+        - name: compartment
+          in: query
+          schema:
+            type: string
+          description: Filter by compartment/need-to-know boundary
+        - name: policyLabels
+          in: query
+          schema:
+            type: string
+          description: Comma-separated list of policy labels to match
+      responses:
+        '200':
+          description: List of investigations
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Case'
+        '400':
+          description: Missing tenant identifier
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
     post:
-      summary: Create a new case
-      description: Creates a new investigation case with draft status
+      summary: Create a new investigation
+      description: Creates a case under the caller's tenant. `x-tenant-id` or `x-tenant` header is required.
       operationId: createCase
       tags:
-        - Cases
+        - Investigations
       security:
         - BearerAuth: []
       requestBody:
@@ -452,50 +871,59 @@ paths:
                 title:
                   type: string
                   description: Case title
-                  example: "Financial Fraud Investigation"
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: [open, active, closed, archived]
+                compartment:
+                  type: string
+                policyLabels:
+                  type: array
+                  items:
+                    type: string
+                metadata:
+                  type: object
+                  additionalProperties: true
+              required:
+                - title
             examples:
               newCase:
                 value:
                   title: "Suspicious Transaction Pattern Analysis"
+                  status: "open"
+                  metadata:
+                    origin: "api"
       responses:
-        '200':
+        '201':
           description: Case created successfully
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                    example: true
-                  case:
-                    $ref: '#/components/schemas/Case'
+                $ref: '#/components/schemas/Case'
+        '400':
+          description: Missing tenant or title
         '401':
           description: Unauthorized - invalid or missing JWT token
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         '403':
           description: Forbidden - insufficient permissions
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
   /api/cases/{id}:
     get:
-      summary: Get case by ID
-      description: Retrieves a specific case by its unique identifier
+      summary: Get investigation by ID
+      description: Retrieves a specific case; requires `reason` and `legalBasis` query parameters for auditing.
       operationId: getCaseById
       tags:
-        - Cases
+        - Investigations
       security:
         - BearerAuth: []
       parameters:
@@ -505,40 +933,47 @@ paths:
           schema:
             type: string
           description: Unique case identifier
-          example: "a7b2c3d4"
+        - name: reason
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Why the record is being accessed (captured in audit log)
+        - name: legalBasis
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Legal basis for access (e.g., consent, contract, warrant)
       responses:
         '200':
           description: Case found
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                    example: true
-                  case:
-                    $ref: '#/components/schemas/Case'
+                $ref: '#/components/schemas/Case'
+        '400':
+          description: Missing reason or legal basis
         '404':
           description: Case not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                ok: false
         '401':
           description: Unauthorized
         '500':
           description: Internal server error
 
-  /api/cases/{id}/approve:
-    post:
-      summary: Approve a case
-      description: Changes case status to 'approved' and logs the action for audit
-      operationId: approveCase
+    put:
+      summary: Update an investigation
+      description: Updates metadata for a case. Requires audit fields in the payload.
+      operationId: updateCase
       tags:
-        - Cases
+        - Investigations
       security:
         - BearerAuth: []
       parameters:
@@ -547,36 +982,116 @@ paths:
           required: true
           schema:
             type: string
-          description: Case identifier to approve
+          description: Case identifier to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: [open, active, closed, archived]
+                compartment:
+                  type: string
+                policyLabels:
+                  type: array
+                  items:
+                    type: string
+                metadata:
+                  type: object
+                  additionalProperties: true
+                reason:
+                  type: string
+                legalBasis:
+                  type: string
+              required:
+                - reason
+                - legalBasis
       responses:
         '200':
-          description: Case approved successfully
+          description: Case updated
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                    example: true
-                  case:
-                    $ref: '#/components/schemas/Case'
+                $ref: '#/components/schemas/Case'
+        '400':
+          description: Missing reason or legal basis
         '404':
           description: Case not found
         '401':
           description: Unauthorized
-        '403':
-          description: Forbidden - requires investigation:update permission
+        '500':
+          description: Internal server error
+
+  /api/cases/{id}/archive:
+    post:
+      summary: Archive an investigation
+      description: Archives a case after validating audit context.
+      operationId: archiveCase
+      tags:
+        - Investigations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+                - legalBasis
+              properties:
+                reason:
+                  type: string
+                legalBasis:
+                  type: string
+                warrantId:
+                  type: string
+                authorityReference:
+                  type: string
+      responses:
+        '200':
+          description: Case archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '400':
+          description: Missing reason or legal basis
+        '404':
+          description: Case not found
+        '401':
+          description: Unauthorized
         '500':
           description: Internal server error
 
   /api/cases/{id}/export:
-    get:
+    post:
       summary: Export case data
-      description: Exports complete case bundle including evidence with watermark
+      description: Exports a case bundle; audit metadata is required to authorize the export.
       operationId: exportCase
       tags:
-        - Cases
+        - Investigations
       security:
         - BearerAuth: []
       parameters:
@@ -586,42 +1101,340 @@ paths:
           schema:
             type: string
           description: Case identifier to export
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+                - legalBasis
+              properties:
+                reason:
+                  type: string
+                legalBasis:
+                  type: string
+                warrantId:
+                  type: string
+                authorityReference:
+                  type: string
       responses:
         '200':
           description: Case exported successfully
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '400':
+          description: Missing reason or legal basis
+        '404':
+          description: Case not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  # Entities API
+  /api/entities:
+    get:
+      summary: List entities
+      description: Returns entities with cursor pagination, filtering by type or full-text search via `q`.
+      operationId: listEntities
+      tags:
+        - Entities
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/EntityType'
+        - $ref: '#/components/parameters/SearchQuery'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Stream'
+      responses:
+        '200':
+          description: Entities retrieved
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityListResponse'
+        '400':
+          description: Invalid cursor or parameters
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    post:
+      summary: Create an entity
+      description: Creates a new graph entity and returns the created node.
+      operationId: createEntity
+      tags:
+        - Entities
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityCreateRequest'
+      responses:
+        '201':
+          description: Entity created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          description: Missing label or invalid payload
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - requires graph write permission
+        '500':
+          description: Internal server error
+
+  /api/entities/{id}:
+    get:
+      summary: Get entity by ID
+      operationId: getEntityById
+      tags:
+        - Entities
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entity found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '404':
+          description: Entity not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    patch:
+      summary: Update entity
+      operationId: updateEntity
+      tags:
+        - Entities
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityUpdateRequest'
+      responses:
+        '200':
+          description: Entity updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '404':
+          description: Entity not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete entity
+      operationId: deleteEntity
+      tags:
+        - Entities
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Entity deleted
+        '404':
+          description: Entity not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  # OSINT API
+  /api/osint/prioritize:
+    post:
+      summary: Run OSINT prioritization
+      description: Scans the graph for enrichment candidates and enqueues them for OSINT ingestion.
+      operationId: prioritizeOsint
+      tags:
+        - OSINT
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Prioritization completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OSINTPrioritizationResponse'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /api/osint/score/{id}:
+    post:
+      summary: Score entity veracity
+      description: Calculates and persists a veracity score for the specified entity.
+      operationId: scoreOsintEntity
+      tags:
+        - OSINT
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Entity identifier to score
+      responses:
+        '200':
+          description: Score computed
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  ok:
+                  success:
                     type: boolean
                     example: true
-                  bundle:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      title:
-                        type: string
-                      status:
-                        type: string
-                      evidence:
-                        type: array
-                        items:
-                          type: string
-                      watermark:
-                        type: object
-                        properties:
-                          ts:
-                            type: string
-                            format: date-time
+                  score:
+                    $ref: '#/components/schemas/VeracityScore'
         '404':
-          description: Case not found
+          description: Entity not found
         '401':
           description: Unauthorized
-        '403':
-          description: Forbidden - requires data:export permission
+        '500':
+          description: Internal server error
+
+  /api/osint/queue:
+    get:
+      summary: Get OSINT queue status
+      description: Returns counts for pending, active, and failed OSINT enrichment jobs.
+      operationId: getOsintQueue
+      tags:
+        - OSINT
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Queue metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  counts:
+                    $ref: '#/components/schemas/OSINTQueueCounts'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  # Reports API
+  /api/reporting/publish:
+    post:
+      summary: Publish an intelligence report
+      description: Generates a report with a signed disclosure manifest. Citations are required or the request is blocked.
+      operationId: publishReport
+      tags:
+        - Reports
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequest'
+      responses:
+        '200':
+          description: Report generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '400':
+          description: Missing citations or validation failure
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
+  /api/reports/generate:
+    post:
+      summary: Generate a report draft
+      description: Generates a report draft using the legacy ReportController route.
+      operationId: generateReportDraft
+      tags:
+        - Reports
+      deprecated: true
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Controller-specific payload for report generation
+      responses:
+        '200':
+          description: Report generation enqueued
+          headers:
+            Deprecation:
+              $ref: '#/components/headers/Deprecation'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
 
   # Evidence API
   /api/evidence/{id}/annotations:

@@ -121,13 +121,13 @@ See `/api/docs/graphql-docs` for full GraphQL documentation with examples.
 
 ## Authentication
 
-All API endpoints (except health and documentation) require JWT Bearer token authentication:
+All API endpoints (except health and documentation) require one of the supported auth mechanisms:
 
-```
-Authorization: Bearer <your-jwt-token>
-```
+- **JWT Bearer** (default): `Authorization: Bearer <your-jwt-token>`
+- **API Key**: `X-API-Key: <key>`
+- **OAuth2 client credentials**: obtain a token for scopes such as `api.read` and `api.write`
 
-Tokens must include appropriate permissions for the requested operations:
+Tokens/keys must include appropriate permissions for the requested operations:
 
 - `investigation:read`, `investigation:create`, `investigation:update`
 - `relationship:create`
@@ -135,6 +135,12 @@ Tokens must include appropriate permissions for the requested operations:
 - `data:export`
 - `audit:read`
 - `user:read`
+
+## Postman collections
+
+A ready-to-use Postman collection for OSINT, Investigations, Entities, and Reports is available at
+`docs/postman/summit-api.postman_collection.json`. Import it and set `baseUrl`, `jwt`, and `apiKey`
+environment variables to exercise the endpoints documented in `openapi/spec.yaml`.
 
 ## Rate Limiting
 

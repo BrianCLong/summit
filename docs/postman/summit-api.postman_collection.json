@@ -1,0 +1,267 @@
+{
+  "info": {
+    "_postman_id": "c0f66ad0-6d7c-4d0e-8f59-86d0c17c1c5e",
+    "name": "Summit REST APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection covering OSINT, Investigations, Entities, and Reports APIs documented in openapi/spec.yaml. Configure the environment variables baseUrl, jwt, and apiKey before sending requests."
+  },
+  "item": [
+    {
+      "name": "OSINT",
+      "item": [
+        {
+          "name": "Run prioritization",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/osint/prioritize", "host": ["{{baseUrl}}"], "path": ["api", "osint", "prioritize"] }
+          }
+        },
+        {
+          "name": "Score entity",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/osint/score/{{entityId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "osint", "score", "{{entityId}}"]
+            }
+          }
+        },
+        {
+          "name": "Queue status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/osint/queue", "host": ["{{baseUrl}}"], "path": ["api", "osint", "queue"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Investigations",
+      "item": [
+        {
+          "name": "List cases",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "x-tenant-id", "value": "demo-tenant" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cases?limit=25&status=open",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cases"],
+              "query": [
+                { "key": "limit", "value": "25" },
+                { "key": "status", "value": "open" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create case",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "demo-tenant" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Suspicious Transaction Pattern Analysis\",\n  \"description\": \"Flagged by AML model\",\n  \"status\": \"open\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/cases", "host": ["{{baseUrl}}"], "path": ["api", "cases"] }
+          }
+        },
+        {
+          "name": "Get case",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "x-tenant-id", "value": "demo-tenant" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/cases/{{caseId}}?reason=audit&legalBasis=consent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cases", "{{caseId}}"],
+              "query": [
+                { "key": "reason", "value": "audit" },
+                { "key": "legalBasis", "value": "consent" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update case",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "demo-tenant" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated title\",\n  \"reason\": \"data correction\",\n  \"legalBasis\": \"contract\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/cases/{{caseId}}", "host": ["{{baseUrl}}"], "path": ["api", "cases", "{{caseId}}"] }
+          }
+        },
+        {
+          "name": "Archive case",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "demo-tenant" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"case complete\",\n  \"legalBasis\": \"policy\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/cases/{{caseId}}/archive", "host": ["{{baseUrl}}"], "path": ["api", "cases", "{{caseId}}", "archive"] }
+          }
+        },
+        {
+          "name": "Export case",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "demo-tenant" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"data export\",\n  \"legalBasis\": \"warrant\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/cases/{{caseId}}/export", "host": ["{{baseUrl}}"], "path": ["api", "cases", "{{caseId}}", "export"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entities",
+      "item": [
+        {
+          "name": "List entities",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/entities?limit=50&type=CUSTOM",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "entities"],
+              "query": [
+                { "key": "limit", "value": "50" },
+                { "key": "type", "value": "CUSTOM" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create entity",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Person of Interest\",\n  \"type\": \"PERSON\",\n  \"properties\": {\n    \"source\": \"manual\"\n  }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/entities", "host": ["{{baseUrl}}"], "path": ["api", "entities"] }
+          }
+        },
+        {
+          "name": "Get entity",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/entities/{{entityId}}", "host": ["{{baseUrl}}"], "path": ["api", "entities", "{{entityId}}"] }
+          }
+        },
+        {
+          "name": "Update entity",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Updated entity label\",\n  \"verified\": true\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/entities/{{entityId}}", "host": ["{{baseUrl}}"], "path": ["api", "entities", "{{entityId}}"] }
+          }
+        },
+        {
+          "name": "Delete entity",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/entities/{{entityId}}", "host": ["{{baseUrl}}"], "path": ["api", "entities", "{{entityId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Publish report",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Quarterly threat landscape\",\n  \"sections\": [\n    { \"title\": \"Summary\", \"type\": \"text\", \"content\": \"Key findings...\" }\n  ],\n  \"citations\": [\n    { \"evidenceId\": \"e1\", \"text\": \"Source detail\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/reporting/publish", "host": ["{{baseUrl}}"], "path": ["api", "reporting", "publish"] }
+          }
+        },
+        {
+          "name": "Generate report (legacy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/reports/generate", "host": ["{{baseUrl}}"], "path": ["api", "reports", "generate"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "jwt", "value": "" },
+    { "key": "apiKey", "value": "" },
+    { "key": "caseId", "value": "demo-case" },
+    { "key": "entityId", "value": "demo-entity" }
+  ]
+}
