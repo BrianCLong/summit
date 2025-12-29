@@ -45,8 +45,7 @@ jobs:
       run: |
         npx license-checker --json --out licenses.json
         npx license-checker --summary
-      continue-on-error: false
-    
+      continue-on-error: false    
     - name: Check for non-compliant licenses
       run: |
         # Define non-compliant licenses
