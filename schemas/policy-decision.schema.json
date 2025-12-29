@@ -1,15 +1,8 @@
 {
   "$id": "https://summit.dev/schemas/policy-decision",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Policy Decision",
   "type": "object",
-  "required": [
-    "id",
-    "timestamp",
-    "policy",
-    "input",
-    "result"
-  ],
   "properties": {
     "id": {
       "type": "string",
@@ -21,10 +14,6 @@
     },
     "policy": {
       "type": "object",
-      "required": [
-        "package",
-        "version"
-      ],
       "properties": {
         "package": {
           "type": "string"
@@ -36,17 +25,20 @@
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "required": [
+        "package",
+        "version"
+      ],
+      "additionalProperties": false,
+      "description": "Policy information"
     },
     "input": {
       "type": "object",
-      "additionalProperties": true
+      "properties": {},
+      "additionalProperties": {}
     },
     "result": {
       "type": "object",
-      "required": [
-        "allow"
-      ],
       "properties": {
         "allow": {
           "type": "boolean"
@@ -59,11 +51,23 @@
         },
         "metadata": {
           "type": "object",
-          "additionalProperties": true
+          "properties": {},
+          "additionalProperties": {}
         }
       },
+      "required": [
+        "allow"
+      ],
       "additionalProperties": false
     }
   },
-  "additionalProperties": false
+  "required": [
+    "id",
+    "timestamp",
+    "policy",
+    "input",
+    "result"
+  ],
+  "additionalProperties": false,
+  "description": "Policy Decision"
 }

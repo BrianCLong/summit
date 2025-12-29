@@ -1,0 +1,42 @@
+name: Schema Drift Check
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'schemas/**'
+      - 'packages/provenance/schema/**'
+      - 'server/src/schemas/v1/**'
+      - 'scripts/gen-schemas.ts'
+      - 'scripts/check-schema-drift.ts'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'schemas/**'
+      - 'packages/provenance/schema/**'
+      - 'server/src/schemas/v1/**'
+      - 'scripts/gen-schemas.ts'
+      - 'scripts/check-schema-drift.ts'
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Schema Drift Check
+        run: npx ts-node --esm scripts/check-schema-drift.ts

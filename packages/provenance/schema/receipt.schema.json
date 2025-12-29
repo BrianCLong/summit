@@ -1,47 +1,51 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://intelgraph.dev/schemas/provenance/receipt.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ProvenanceReceipt",
   "type": "object",
-  "required": ["id", "payload", "payloadHash", "issuedAt", "signature", "signer"],
   "properties": {
     "id": {
       "type": "string",
-      "description": "Stable identifier for the receipt",
+      "minLength": 3,
       "pattern": "^[A-Za-z0-9._:-]+$",
-      "minLength": 3
+      "description": "Stable identifier for the receipt"
     },
     "payload": {
       "type": "object",
-      "description": "Canonical payload the receipt covers",
-      "additionalProperties": true
+      "properties": {},
+      "additionalProperties": {},
+      "description": "Canonical payload the receipt covers"
     },
     "payloadHash": {
       "type": "string",
-      "description": "Hex-encoded SHA-256 hash of the canonical payload",
-      "pattern": "^[a-f0-9]{64}$"
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Hex-encoded SHA-256 hash of the canonical payload"
     },
     "issuedAt": {
       "type": "string",
-      "description": "RFC3339 timestamp when the receipt was produced",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "RFC3339 timestamp when the receipt was produced"
     },
     "metadata": {
       "type": "object",
-      "description": "Optional contextual metadata attached to the receipt",
+      "properties": {},
       "additionalProperties": {
-        "type": ["string", "number", "boolean", "null"]
-      }
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
+      },
+      "description": "Optional contextual metadata attached to the receipt"
     },
     "signature": {
       "type": "string",
-      "description": "Base64-encoded signature produced by the signer",
-      "minLength": 16
+      "minLength": 16,
+      "description": "Base64-encoded signature produced by the signer"
     },
     "signer": {
       "type": "object",
-      "description": "Information about the key material that produced the receipt",
-      "required": ["keyId", "algorithm"],
       "properties": {
         "keyId": {
           "type": "string",
@@ -60,8 +64,22 @@
           "description": "Optional PEM-encoded public key when available"
         }
       },
-      "additionalProperties": false
+      "required": [
+        "keyId",
+        "algorithm"
+      ],
+      "additionalProperties": false,
+      "description": "Information about the key material that produced the receipt"
     }
   },
-  "additionalProperties": false
+  "required": [
+    "id",
+    "payload",
+    "payloadHash",
+    "issuedAt",
+    "signature",
+    "signer"
+  ],
+  "additionalProperties": false,
+  "description": "ProvenanceReceipt"
 }

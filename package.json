@@ -48,6 +48,8 @@
     "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
     "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
     "install:pm": "node scripts/select-pm.js",
+    "schema:gen": "npx ts-node --esm scripts/gen-schemas.ts",
+    "schema:check-drift": "npx ts-node --esm scripts/check-schema-drift.ts",
     "schema:diff": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json",
     "schema:diff:text": "npx ts-node scripts/schema-diff.ts --version=v1 --output=text",
     "schema:diff:strict": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json --strict",
@@ -124,10 +126,12 @@
     "prettier": "^3.6.2",
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.50.1",
     "uuid": "^13.0.0",
-    "zod": "^4.2.1"
+    "zod": "^4.2.1",
+    "zod-to-json-schema": "^3.25.0"
   },
   "lint-staged": {
     "server/**/*.{ts,js}": [
@@ -170,10 +174,10 @@
     ]
   },
   "dependencies": {
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
     "@mui/material": "^7.3.6",
     "@radix-ui/react-slider": "^1.3.6",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "axios": "^1.11.0",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
