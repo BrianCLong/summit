@@ -7,6 +7,7 @@ import logger from '../utils/logger.js';
 import crypto from 'crypto';
 import { applicationErrors } from '../monitoring/metrics.js';
 
+// Force inclusion in patch
 interface EmbeddingMetrics {
   totalEmbeddings: number;
   averageLatency: number;

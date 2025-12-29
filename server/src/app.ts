@@ -126,6 +126,7 @@ import supportCenterRouter from './routes/support-center.js';
 import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
+import vectorStoreRouter from './routes/vector-store.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -436,6 +437,9 @@ export const createApp = async () => {
 
   // Summit v4 API Routes (AI Governance, Compliance, Zero-Trust)
   app.use('/api/v4', v4Router);
+
+  // Vector Store Routes
+  app.use('/api/vector-store', vectorStoreRouter);
 
   app.get('/metrics', metricsRoute);
 
