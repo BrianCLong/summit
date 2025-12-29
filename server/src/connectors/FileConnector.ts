@@ -1,6 +1,7 @@
 import { BaseConnector } from './BaseConnector.js';
 import { SourceConnector } from './base.js';
 import { ConnectorContext } from '../data-model/types.js';
+import { DataEnvelope } from '../types/data-envelope.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -17,11 +18,11 @@ export class FileConnector extends BaseConnector implements SourceConnector {
     this.config = config;
   }
 
-  async fetchBatch(ctx: ConnectorContext, cursor?: string | null): Promise<{
+  async fetchBatch(ctx: ConnectorContext, cursor?: string | null): Promise<DataEnvelope<{
     records: any[];
     nextCursor?: string | null;
-  }> {
-    const envelope = await this.withResilience(async () => {
+  }>> {
+    return this.withResilience(async () => {
       // Simple implementation: Read full file if cursor is null/start, else return empty
       // In a real impl, this would support reading large files in chunks or listing directory
 
@@ -60,6 +61,5 @@ export class FileConnector extends BaseConnector implements SourceConnector {
         throw err;
       }
     }, ctx);
-    return envelope.data;
   }
 }
