@@ -14,9 +14,19 @@ import {
   RunEventRow,
   RunRow,
 } from '../../maestro/evidence/receipt.js';
+import { createStructuredLogger } from '../../logging/structuredJsonLogger.js';
 
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
+const receiptLogger = createStructuredLogger('maestro-evidence-receipt');
+
+const resolveCorrelationId = (req: express.Request): string =>
+  req.correlationId || req.headers['x-correlation-id']?.toString() || 'unknown';
+
+const serializeError = (error: any) => ({
+  message: error?.message,
+  stack: error?.stack,
+});
 
 const inlineContentKey = (artifactId: string) =>
   `inline://evidence_artifact_content/${artifactId}`;
@@ -57,6 +67,9 @@ router.post(
   requirePermission('evidence:create'),
   express.json(),
   async (req, res) => {
+    const correlationId = resolveCorrelationId(req);
+    const tenantId = req.tenantId;
+
     try {
       const { runId } = req.body || {};
       if (!runId) {
@@ -94,10 +107,24 @@ router.post(
         [artifactId, receiptBuffer, 'application/json'],
       );
 
+      receiptLogger.info('provenance_receipt_generated', {
+        correlationId,
+        tenantId,
+        runId,
+        artifactId,
+        receiptId: receipt.receiptId,
+      });
+
       return res.json({ success: true, data: { receipt, artifactId } });
     } catch (error: any) {
       const message =
         error?.message || 'Failed to generate provenance receipt';
+      receiptLogger.error('provenance_receipt_generation_failed', {
+        correlationId,
+        tenantId,
+        runId: req.body?.runId,
+        error: serializeError(error),
+      });
       return res.status(500).json({ success: false, error: message });
     }
   },
