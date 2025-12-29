@@ -39,10 +39,18 @@ describe('POST /exports/:id/verify-watermark', () => {
     expect(response.status).toBe(200);
     expect(response.body.valid).toBe(false);
     expect(response.body.mismatches).toEqual(
-      expect.arrayContaining(['manifest-hash-mismatch', 'policy-hash-mismatch']),
+      expect.arrayContaining([
+        'manifest-hash-mismatch',
+        'audit-ledger-manifest-mismatch',
+        'policy-hash-mismatch',
+      ]),
     );
     expect(response.body.reasonCodes).toEqual(
-      expect.arrayContaining(['manifest-hash-mismatch', 'policy-hash-mismatch']),
+      expect.arrayContaining([
+        'manifest-hash-mismatch',
+        'audit-ledger-manifest-mismatch',
+        'policy-hash-mismatch',
+      ]),
     );
     expect(response.body.observedWatermark.policyHash).toBe('policy-tampered');
   });
