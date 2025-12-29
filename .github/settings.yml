@@ -1,0 +1,17 @@
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - intelgraph-ci / lint
+          - intelgraph-ci / typecheck
+          - intelgraph-ci / unit
+          - intelgraph-ci / e2e
+          - intelgraph-ci / perf-budget
+          - intelgraph-ci / sbom
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        require_code_owner_reviews: true
+      restrictions: null

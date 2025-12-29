@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: policy-lac }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: policy-lac } }
+  template:
+    metadata: { labels: { app: policy-lac } }
+    spec:
+      containers:
+        - name: policy-lac
+          image: {{ .Values.services.policyLac.image }}
+          ports: [{ containerPort: {{ .Values.services.policyLac.port }} }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: policy-lac }
+spec:
+  selector: { app: policy-lac }
+  ports: [{ port: 80, targetPort: {{ .Values.services.policyLac.port }} }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: prov-ledger }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: prov-ledger } }
+  template:
+    metadata: { labels: { app: prov-ledger } }
+    spec:
+      containers:
+        - name: prov-ledger
+          image: {{ .Values.services.provLedger.image }}
+          ports: [{ containerPort: {{ .Values.services.provLedger.port }} }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: prov-ledger }
+spec:
+  selector: { app: prov-ledger }
+  ports: [{ port: 80, targetPort: {{ .Values.services.provLedger.port }} }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: nl2cypher }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: nl2cypher } }
+  template:
+    metadata: { labels: { app: nl2cypher } }
+    spec:
+      containers:
+        - name: nl2cypher
+          image: {{ .Values.services.nl2cypher.image }}
+          ports: [{ containerPort: {{ .Values.services.nl2cypher.port }} }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: nl2cypher }
+spec:
+  selector: { app: nl2cypher }
+  ports: [{ port: 80, targetPort: {{ .Values.services.nl2cypher.port }} }]

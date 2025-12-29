@@ -1,0 +1,6 @@
+{
+  "policies": [
+    { "id": "deny-dangerous", "deny": ["drop", "truncate", "dangerousOp"], "reason": "Denied by default (no matching policy)" },
+    { "id": "allow-read", "allow": ["query", "explain"], "reason": "Read-only operations allowed" }
+  ]
+}
