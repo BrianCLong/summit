@@ -18,8 +18,11 @@ describe('graph guardrail fuzzing', () => {
         scenario.authorities,
       );
 
-      coverage.set(scenario.expected.reason, (coverage.get(scenario.expected.reason) || 0) + 1);
       coverage.set('TOTAL', (coverage.get('TOTAL') || 0) + 1);
+
+      for (const reasonCode of result.reasonCodes ?? []) {
+        coverage.set(reasonCode, (coverage.get(reasonCode) || 0) + 1);
+      }
 
       expect(result.allowed).toBe(scenario.expected.allowed);
 
@@ -32,6 +35,19 @@ describe('graph guardrail fuzzing', () => {
 
     for (const scenario of baseScenarios) {
       expect(coverage.has(scenario.expected.reason)).toBe(true);
+      expect(coverage.get(scenario.expected.reason)).toBeGreaterThan(0);
+    }
+
+    const criticalReasons = [
+      'TENANT_FILTER_MISSING',
+      'WRITE_OPERATION',
+      'CARTESIAN_PRODUCT',
+      'DEEP_TRAVERSAL',
+      'SAFE_READ',
+    ];
+
+    for (const reason of criticalReasons) {
+      expect(coverage.get(reason)).toBeGreaterThan(0);
     }
   });
 });

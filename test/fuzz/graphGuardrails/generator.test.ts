@@ -25,4 +25,14 @@ describe('graph guardrail corpus generator', () => {
     expect(mutated.toLowerCase()).toContain('match');
     expect(mutated.toLowerCase()).toContain('return');
   });
+
+  it('never accidentally inserts tenant filters into missing-tenant scenarios', () => {
+    const corpus = buildCorpus(2025, baseScenarios.length * 3);
+    const missingTenant = corpus.filter((item) => item.id === 'missing-tenant-filter');
+
+    expect(missingTenant.length).toBeGreaterThan(0);
+    for (const scenario of missingTenant) {
+      expect(scenario.mutatedQuery.toLowerCase()).not.toContain('tenantid');
+    }
+  });
 });

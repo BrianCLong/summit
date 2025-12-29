@@ -28,11 +28,11 @@ jobs:
         if: github.event_name == 'pull_request'
         run: pnpm test:fuzz:graph-guardrails
         env:
-          GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 60
+          GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 80
           GRAPH_GUARDRAIL_FUZZ_SEED: 8339
       - name: Run guardrail fuzz (nightly full)
         if: github.event_name == 'schedule'
         run: pnpm test:fuzz:graph-guardrails
         env:
-          GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 200
+          GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 300
           GRAPH_GUARDRAIL_FUZZ_SEED: 8339

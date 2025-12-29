@@ -6,6 +6,7 @@ export type GuardrailScenario = {
   clearance: number;
   authorities: string[];
   expected: { allowed: boolean; reason: GuardrailReasonCode };
+  mutate?: (query: string, rng: RNG) => string;
 };
 
 export type GuardrailCorpusInput = GuardrailScenario & { mutatedQuery: string };
@@ -27,6 +28,7 @@ export function mutateQuery(query: string, rng: RNG): string {
     (value) => value.replace(/MATCH/gi, 'match'),
     (value) => `${value} /* fuzz */`,
     (value) => value.replace(/RETURN/gi, 'RETURN '),
+    (value) => value.replace(/tenantId/gi, 'tenantid'),
   ];
 
   const op = operations[Math.floor(rng() * operations.length)];
@@ -40,6 +42,7 @@ export const baseScenarios: GuardrailScenario[] = [
     clearance: 2,
     authorities: [],
     expected: { allowed: false, reason: 'TENANT_FILTER_MISSING' },
+    mutate: (value, rng) => mutateQuery(value, rng),
   },
   {
     id: 'write-attempt',
@@ -47,13 +50,16 @@ export const baseScenarios: GuardrailScenario[] = [
     clearance: 2,
     authorities: [],
     expected: { allowed: false, reason: 'WRITE_OPERATION' },
+    mutate: (value, rng) => `${mutateQuery(value, rng)} /* write */`,
   },
   {
     id: 'cartesian',
-    query: 'MATCH (a:GraphNode { tenantId: $tenantId }), (b:GraphNode { tenantId: $tenantId }) RETURN a,b',
+    query:
+      'MATCH (a:GraphNode { tenantId: $tenantId }), (b:GraphNode { tenantId: $tenantId }) RETURN a,b',
     clearance: 3,
     authorities: ['ADMIN_AUTH'],
     expected: { allowed: false, reason: 'CARTESIAN_PRODUCT' },
+    mutate: (value, rng) => mutateQuery(value.replace('RETURN a,b', 'RETURN a, b'), rng),
   },
   {
     id: 'deep-traversal',
@@ -61,13 +67,16 @@ export const baseScenarios: GuardrailScenario[] = [
     clearance: 3,
     authorities: ['ADMIN_AUTH'],
     expected: { allowed: false, reason: 'DEEP_TRAVERSAL' },
+    mutate: (value, rng) => mutateQuery(value.replace('1..25', '1..30'), rng),
   },
   {
     id: 'safe-read',
-    query: 'MATCH (n:GraphNode { tenantId: $tenantId }) WHERE n.kind = $kind RETURN n LIMIT 10',
+    query:
+      'MATCH (n:GraphNode { tenantId: $tenantId }) WHERE n.kind = $kind RETURN n LIMIT 10',
     clearance: 3,
     authorities: [],
     expected: { allowed: true, reason: 'SAFE_READ' },
+    mutate: (value, rng) => mutateQuery(value, rng),
   },
 ];
 
@@ -77,7 +86,8 @@ export function buildCorpus(seed: number, iterations: number): GuardrailCorpusIn
 
   for (let i = 0; i < iterations; i += 1) {
     const scenario = baseScenarios[i % baseScenarios.length];
-    const mutatedQuery = mutateQuery(scenario.query, rng);
+    const mutation = scenario.mutate ?? mutateQuery;
+    const mutatedQuery = mutation(scenario.query, rng);
     corpus.push({ ...scenario, mutatedQuery });
   }
 
