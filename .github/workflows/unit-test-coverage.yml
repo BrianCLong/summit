@@ -1,0 +1,57 @@
+name: Unit Tests & Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+
+    - name: Install Dependencies
+      run: pnpm install
+
+    - name: Run Server Unit Tests with Coverage (Security Focus)
+      working-directory: ./server
+      run: |
+        npm install --no-save ts-jest @types/jest
+        npx jest --coverage --collectCoverageFrom="src/security/**/*.ts" --testMatch="**/security/__tests__/**/*.test.ts" --reporters=default --reporters=jest-junit
+      env:
+        CI: true
+        NODE_ENV: test
+        JWT_SECRET: test-secret-at-least-32-chars-long-for-safety
+        JWT_REFRESH_SECRET: test-refresh-secret-at-least-32-chars-long
+        DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-report
+        path: server/coverage/
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: server/junit.xml
