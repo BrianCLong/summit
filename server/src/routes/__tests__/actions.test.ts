@@ -18,7 +18,14 @@ const mockGetPostgresPool = getPostgresPool as jest.MockedFunction<
   typeof getPostgresPool
 >;
 
-const buildApp = () => {
+interface TestUser {
+  id?: string;
+  role?: string;
+  tenantId?: string;
+  permissions?: string[];
+}
+
+const buildApp = (userOverrides: TestUser = {}) => {
   const app = express();
   app.use((req, _res, next) => {
     // Inject a deterministic correlation ID for assertions.
@@ -28,6 +35,8 @@ const buildApp = () => {
       id: 'user-1',
       role: 'ADMIN',
       tenantId: 'tenant-1',
+      permissions: [],
+      ...userOverrides,
     };
     next();
   });
@@ -102,7 +111,7 @@ describe('actions router', () => {
     const query = jest.fn();
     const preflightRequest: PreflightRequest = {
       action: 'ROTATE_KEYS',
-      actor: { id: 'user-1', tenantId: 'tenant-1' },
+      actor: { id: 'user-1', tenantId: 'tenant-1', role: 'ADMIN' },
       payload: { scope: 'tenant' },
       approvers: ['approver-a', 'approver-b'],
     };
@@ -140,17 +149,23 @@ describe('actions router', () => {
   });
 
   it('rejects execution when the preflight window has expired', async () => {
-    const query = jest.fn().mockResolvedValue({
+    const query = jest.fn();
+    const preflightRequest: PreflightRequest = {
+      action: 'EXPORT_CASE',
+      actor: { id: 'user-1', tenantId: 'tenant-1', role: 'ADMIN' },
+    };
+    const requestHash = calculateRequestHash(preflightRequest);
+    query.mockResolvedValue({
       rows: [
         {
           decision_id: 'pf-expired',
           policy_name: 'actions',
           decision: 'ALLOW',
-          resource_id: 'stale-hash',
+          resource_id: requestHash,
           reason: JSON.stringify({
             reason: 'dual_control_satisfied',
             obligations: [{ type: 'dual_control', satisfied: true }],
-            requestHash: 'stale-hash',
+            requestHash,
             expiresAt: '2000-01-01T00:00:00Z',
           }),
         },
@@ -200,5 +215,65 @@ describe('actions router', () => {
 
     expect(res.status).toBe(409);
     expect(res.body.error).toMatch(/hash/);
+  });
+
+  describe('RBAC permission matrix enforcement', () => {
+    const originalFlag = process.env.RBAC_PERMISSION_MATRIX_ENABLED;
+
+    afterEach(() => {
+      process.env.RBAC_PERMISSION_MATRIX_ENABLED = originalFlag;
+    });
+
+    it('blocks execution when the role lacks policy override permission', async () => {
+      process.env.RBAC_PERMISSION_MATRIX_ENABLED = 'true';
+      const app = buildApp({ role: 'ANALYST' });
+
+      const res = await request(app)
+        .post('/api/actions/execute')
+        .send({ preflight_id: 'pf-deny', action: 'EXPORT_CASE' });
+
+      expect(res.status).toBe(403);
+      expect(res.body.code).toBe('AUTHZ_ROLE_FORBIDDEN');
+      expect(res.body.required_permission).toBe('policy:override');
+    });
+
+    it('allows execution for admin role when the matrix flag is enabled', async () => {
+      process.env.RBAC_PERMISSION_MATRIX_ENABLED = 'true';
+
+      const query = jest.fn();
+      const preflightRequest: PreflightRequest = {
+        action: 'EXPORT_CASE',
+        actor: { id: 'user-1', tenantId: 'tenant-1', role: 'ADMIN' },
+        payload: { id: 'case-1' },
+      };
+      const requestHash = calculateRequestHash(preflightRequest);
+      query.mockResolvedValueOnce({
+        rows: [
+          {
+            decision_id: 'pf-allow',
+            policy_name: 'actions',
+            decision: 'ALLOW',
+            resource_id: requestHash,
+            reason: JSON.stringify({
+              reason: 'dual_control_satisfied',
+              obligations: [{ type: 'dual_control', satisfied: true }],
+              requestHash,
+              expiresAt: '2099-01-01T00:00:00Z',
+            }),
+          },
+        ],
+      });
+      mockGetPostgresPool.mockReturnValue({ query } as any);
+
+      const app = buildApp({ role: 'ADMIN' });
+
+      const res = await request(app)
+        .post('/api/actions/execute')
+        .send({ preflight_id: 'pf-allow', action: 'EXPORT_CASE', payload: { id: 'case-1' } });
+
+      expect(res.status).toBe(200);
+      expect(res.body.code).toBeUndefined();
+      expect(res.body.request_hash).toBe(requestHash);
+    });
   });
 });

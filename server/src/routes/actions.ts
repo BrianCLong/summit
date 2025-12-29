@@ -5,6 +5,56 @@ import {
   calculateRequestHash,
 } from '../services/ActionPolicyService.js';
 import type { PreflightRequest } from '../../../packages/policy-audit/src/types';
+import {
+  AuthorizationContext,
+  Permission,
+  Role,
+  can,
+  normalizeRole,
+} from '../authz/permissions.js';
+
+const RBAC_PERMISSION_MATRIX_FLAG = 'RBAC_PERMISSION_MATRIX_ENABLED';
+const RBAC_FORBIDDEN_CODE = 'AUTHZ_ROLE_FORBIDDEN';
+
+const isRbacMatrixEnabled = () =>
+  (process.env[RBAC_PERMISSION_MATRIX_FLAG] || '').toLowerCase() === 'true';
+
+const buildAuthorizationContext = (req: express.Request): AuthorizationContext => {
+  const user = (req as any).user || {};
+  const rawPermissions = Array.isArray(user.permissions)
+    ? user.permissions.map((permission: unknown) => String(permission))
+    : undefined;
+
+  return {
+    role: normalizeRole(user.role as string | undefined),
+    permissions: rawPermissions,
+    userId: user.sub || user.id,
+    tenantId: user.tenantId || user.tenant_id,
+  };
+};
+
+const enforcePolicyOverridePermission: express.RequestHandler = (
+  req,
+  res,
+  next,
+) => {
+  if (!isRbacMatrixEnabled()) {
+    return next();
+  }
+
+  const context = buildAuthorizationContext(req);
+
+  if (can(Permission.POLICY_OVERRIDE, context)) {
+    return next();
+  }
+
+  return res.status(403).json({
+    error: 'forbidden',
+    code: RBAC_FORBIDDEN_CODE,
+    required_permission: Permission.POLICY_OVERRIDE,
+    role: context.role || 'UNKNOWN',
+  });
+};
 
 const router = express.Router();
 const actionPolicyService = new ActionPolicyService();
@@ -57,7 +107,11 @@ router.post('/preflight', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
-router.post('/execute', ensureAuthenticated, async (req, res, next) => {
+router.post(
+  '/execute',
+  ensureAuthenticated,
+  enforcePolicyOverridePermission,
+  async (req, res, next) => {
   try {
     const preflightId = req.body.preflight_id as string | undefined;
     if (!preflightId) {
@@ -108,7 +162,8 @@ router.post('/execute', ensureAuthenticated, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+  },
+);
 
 router.get('/hash', ensureAuthenticated, (req, res) => {
   const request = buildRequest(req);
