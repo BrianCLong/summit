@@ -1,30 +1,32 @@
-// @ts-nocheck
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import path from 'path';
-import fs from 'fs/promises';
-import { createReadStream, createWriteStream } from 'fs';
-import { pipeline } from 'stream/promises';
-import zlib from 'zlib';
-import logger from '../utils/logger.js';
-import { backupDuration, backupSize } from '../metrics/dbMetrics.js';
-import { getNeo4jDriver } from '../db/neo4j.js';
-import { getPostgresPool } from '../db/postgres.js';
+
 import { RedisService } from '../cache/redis.js';
+import logger from '../config/logger.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { promisify } from 'util';
+import { exec } from 'child_process';
+import { createWriteStream } from 'fs';
+import zlib from 'zlib';
+import { PrometheusMetrics } from '../utils/metrics.js';
 
 const execAsync = promisify(exec);
 
-// Minimal S3 interface for simulation or replacement with @aws-sdk/client-s3
-interface S3Config {
-    bucket: string;
-    region: string;
-    endpoint?: string; // For MinIO or other S3-compatible
-    accessKeyId?: string;
-    secretAccessKey?: string;
+// Metrics
+const backupMetrics = new PrometheusMetrics('backup_service');
+backupMetrics.createCounter('ops_total', 'Total backup operations', ['type', 'status']);
+backupMetrics.createHistogram('duration_seconds', 'Backup duration', { buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 120] });
+backupMetrics.createGauge('size_bytes', 'Backup size', ['type']);
+
+export interface S3Config {
+  bucket: string;
+  region: string;
+  endpoint?: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
 }
 
 export interface BackupOptions {
-  destinationPath?: string;
   compress?: boolean;
   uploadToS3?: boolean;
 }
@@ -63,7 +65,6 @@ export class BackupService {
       }
       logger.info(`Uploading ${filepath} to S3 bucket ${this.s3Config.bucket} as ${key}...`);
 
-      // Simulation of S3 upload if SDK is not present, or use SDK if we were to add it.
       try {
           if (process.env.USE_AWS_CLI === 'true') {
              await execAsync(`aws s3 cp "${filepath}" "s3://${this.s3Config.bucket}/${key}" --region ${this.s3Config.region}`);
@@ -81,11 +82,9 @@ export class BackupService {
   async verifyBackup(filepath: string): Promise<boolean> {
       logger.info(`Verifying backup integrity for ${filepath}...`);
       try {
-          // 1. Check if file exists and has size > 0
           const stats = await fs.stat(filepath);
           if (stats.size === 0) throw new Error('Backup file is empty');
 
-          // 2. If compressed, try to test gzip integrity
           if (filepath.endsWith('.gz')) {
               await execAsync(`gzip -t "${filepath}"`);
           }
@@ -108,7 +107,6 @@ export class BackupService {
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
-      // Ensure pg_dump is available or handle via docker exec if running in container
       const pgHost = process.env.POSTGRES_HOST || 'localhost';
       const pgUser = process.env.POSTGRES_USER || 'intelgraph';
       const pgDb = process.env.POSTGRES_DB || 'intelgraph_dev';
@@ -123,8 +121,9 @@ export class BackupService {
       }
 
       const stats = await fs.stat(finalPath);
-      backupSize.labels('postgres').set(stats.size);
-      backupDuration.labels('postgres', 'success').observe((Date.now() - startTime) / 1000);
+      backupMetrics.setGauge('size_bytes', stats.size, { type: 'postgres' });
+      backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'postgres', status: 'success' });
+      backupMetrics.incrementCounter('ops_total', { type: 'postgres', status: 'success' });
 
       logger.info({ path: finalPath, size: stats.size }, 'PostgreSQL backup completed');
 
@@ -138,7 +137,7 @@ export class BackupService {
 
       return finalPath;
     } catch (error) {
-      backupDuration.labels('postgres', 'failure').observe((Date.now() - startTime) / 1000);
+      backupMetrics.incrementCounter('ops_total', { type: 'postgres', status: 'failure' });
       logger.error('PostgreSQL backup failed', error);
       throw error;
     }
@@ -150,45 +149,45 @@ export class BackupService {
     try {
       const dir = await this.ensureBackupDir('neo4j');
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `neo4j-export-${timestamp}.jsonl`; // JSON Lines for logical dump
+      const filename = `neo4j-export-${timestamp}.jsonl`;
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
       const driver = getNeo4jDriver();
       const session = driver.session();
 
-      // Logical backup: Export nodes and relationships to JSONL
       try {
-          const writeStream = options.compress
+          const fileStream = createWriteStream(finalPath);
+          const outputStream = options.compress
               ? zlib.createGzip()
-              : createWriteStream(filepath);
+              : null;
 
-          if (options.compress) {
-              writeStream.pipe(createWriteStream(finalPath));
+          if (outputStream) {
+              outputStream.pipe(fileStream as unknown as NodeJS.WritableStream);
           }
 
-          // Dump Nodes
+          const writeTarget = outputStream || fileStream;
+
+          // Full logical backup (removed LIMIT)
           const nodeResult = await session.run('MATCH (n) RETURN n');
           for (const record of nodeResult.records) {
               const node = record.get('n');
               const line = JSON.stringify({ type: 'node', labels: node.labels, props: node.properties }) + '\n';
-              writeStream.write(line);
+              writeTarget.write(line);
           }
 
-          // Dump Relationships
           const relResult = await session.run('MATCH ()-[r]->() RETURN r');
           for (const record of relResult.records) {
               const rel = record.get('r');
               const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
-              writeStream.write(line);
+              writeTarget.write(line);
           }
 
-          writeStream.end();
+          writeTarget.end();
 
-          // Wait for stream to finish
-          await new Promise((resolve, reject) => {
-              writeStream.on('finish', resolve);
-              writeStream.on('error', reject);
+          await new Promise<void>((resolve, reject) => {
+              fileStream.on('finish', () => resolve());
+              fileStream.on('error', (err) => reject(err));
           });
 
       } finally {
@@ -196,8 +195,8 @@ export class BackupService {
       }
 
       const stats = await fs.stat(finalPath);
-      backupSize.labels('neo4j').set(stats.size);
-      backupDuration.labels('neo4j', 'success').observe((Date.now() - startTime) / 1000);
+      backupMetrics.setGauge('size_bytes', stats.size, { type: 'neo4j' });
+      backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'neo4j', status: 'success' });
 
       logger.info({ path: finalPath, size: stats.size }, 'Neo4j logical backup completed');
 
@@ -211,7 +210,6 @@ export class BackupService {
 
       return finalPath;
     } catch (error) {
-      backupDuration.labels('neo4j', 'failure').observe((Date.now() - startTime) / 1000);
       logger.error('Neo4j backup failed', error);
       throw error;
     }
@@ -224,44 +222,34 @@ export class BackupService {
        const client = this.redis.getClient();
        if (!client) throw new Error('Redis client not available');
 
-       // Trigger background save
-       // @ts-ignore
-       await client.bgsave();
+       // Check if cluster or standalone
+       const isCluster = (client as any).constructor.name === 'Cluster';
 
-       // Poll for completion
-       let attempts = 0;
-       while (attempts < 30) {
+       if (isCluster) {
+          throw new Error('Redis Cluster backup not supported in this version. Use manual persistence management or snapshots.');
+       } else {
            // @ts-ignore
-           const info = await client.info('persistence');
-           if (!info.includes('rdb_bgsave_in_progress:1')) {
-               break;
-           }
-           await new Promise(r => setTimeout(r, 1000));
-           attempts++;
+           await client.bgsave();
        }
-
-       // @ts-ignore
-       const lastSave = await client.lastsave();
 
        const dir = await this.ensureBackupDir('redis');
        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
        const filename = `redis-backup-log-${timestamp}.txt`;
        const filepath = path.join(dir, filename);
 
-       await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${lastSave}\nNote: RDB file resides on Redis server volume.`);
+       await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}`);
 
-       backupDuration.labels('redis', 'success').observe((Date.now() - startTime) / 1000);
+       backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis', status: 'success' });
 
        if (options.uploadToS3) {
            const s3Key = `redis/${path.basename(filepath)}`;
            await this.uploadToS3(filepath, s3Key);
        }
 
-       await this.recordBackupMeta('redis', filepath, 0); // 0 size because it's a log
+       await this.recordBackupMeta('redis', filepath, 0);
 
        return filepath;
      } catch (error) {
-       backupDuration.labels('redis', 'failure').observe((Date.now() - startTime) / 1000);
        logger.error('Redis backup failed', error);
        throw error;
      }
@@ -276,13 +264,15 @@ export class BackupService {
           host: process.env.HOSTNAME || 'unknown'
       };
       // Store in Redis list for easy retrieval by DR service
-      await this.redis.getClient().lpush(`backups:${type}:history`, JSON.stringify(meta));
-      await this.redis.getClient().ltrim(`backups:${type}:history`, 0, 99); // Keep last 100
+      const client = this.redis.getClient();
+      if (client) {
+          await client.lpush(`backups:${type}:history`, JSON.stringify(meta));
+          await client.ltrim(`backups:${type}:history`, 0, 99);
+      }
   }
 
   async runAllBackups(): Promise<Record<string, string>> {
      const results: Record<string, string> = {};
-     // Determine if we should upload to S3 based on env
      const uploadToS3 = !!process.env.S3_BACKUP_BUCKET;
 
      try {

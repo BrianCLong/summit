@@ -1,7 +1,7 @@
 
 import { BackupService } from '../backup/BackupService.js';
 import { RedisService } from '../cache/redis.js';
-import logger from '../utils/logger.js';
+import logger from '../config/logger.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import fs from 'fs/promises';

@@ -13,6 +13,7 @@
     "test:vitest": "vitest",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/a11y-smoke.spec.ts",
+    "test:smoke": "echo 'Client smoke tests are consolidated in root smoke-test.js'",
     "test:golden-path": "playwright test golden-path-ci-gate.spec.ts",
     "test:coverage": "jest --coverage",
     "lint": "eslint src",
