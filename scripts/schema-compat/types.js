@@ -45,6 +45,7 @@
 /**
  * @typedef {Object} CompatibilityEntry
  * @property {SchemaChangeCode} code
+ * @property {string} [file]
  * @property {string} path
  * @property {string} [rationale]
  */
