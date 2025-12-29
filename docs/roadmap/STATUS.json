@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2025-12-29T22:15:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,42 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
+          "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Runtime Moat Expansion",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "Continual Policy Learning (Bandits)",
+          "status": "in-design",
+          "owner": "Jules"
+        },
+        {
+          "id": "D2",
+          "name": "Dynamic KV Cache Sharing",
+          "status": "in-design",
+          "owner": "Jules"
+        },
+        {
+          "id": "D3",
+          "name": "Hardware-Aware Placement",
+          "status": "in-design",
+          "owner": "Jules"
+        },
+        {
+          "id": "D4",
+          "name": "Adaptive Speculative Depth",
+          "status": "in-design",
+          "owner": "Jules"
+        },
+        {
+          "id": "D5",
+          "name": "Streaming Constrained Decoding",
+          "status": "in-design",
           "owner": "Jules"
         }
       ]
