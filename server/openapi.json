@@ -112,6 +112,85 @@
           "scheme": "bearer",
           "bearerFormat": "JWT"
         }
+      },
+      "ReasoningPalette": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "injectionKind": {
+            "type": "string",
+            "enum": ["text_prefix", "soft_prefix"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "safeDefault": {
+            "type": "boolean"
+          },
+          "decoding": {
+            "type": "object",
+            "properties": {
+              "temperature": {
+                "type": "number"
+              },
+              "topP": {
+                "type": "number"
+              }
+            }
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "label", "injectionKind"]
+      },
+      "PaletteRuntimeConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "defaultPaletteId": {
+            "type": "string"
+          },
+          "allowExploration": {
+            "type": "boolean"
+          },
+          "maxK": {
+            "type": "integer"
+          },
+          "allowedPaletteIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PaletteListResponse": {
+        "type": "object",
+        "properties": {
+          "palettes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReasoningPalette"
+            }
+          },
+          "runtime": {
+            "$ref": "#/components/schemas/PaletteRuntimeConfig"
+          }
+        }
       }
     }
   },
@@ -124,9 +203,7 @@
     "/api/abyss/state": {
       "get": {
         "summary": "Get the current state of the Final Protocol",
-        "tags": [
-          "Project ABYSS"
-        ],
+        "tags": ["Project ABYSS"],
         "description": "Retrieves the current status of the self-destruction and mirroring protocol. Requires extreme authorization.",
         "security": [
           {
@@ -153,9 +230,7 @@
     "/api/abyss/arm": {
       "post": {
         "summary": "Arm the Final Protocol",
-        "tags": [
-          "Project ABYSS"
-        ],
+        "tags": ["Project ABYSS"],
         "description": "Arms the self-destruction and mirroring protocol. This is the final step before a trigger event can activate it. THIS IS NOT A DRILL.",
         "security": [
           {
@@ -184,9 +259,7 @@
     },
     "/api/ai/predict-links": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Predict potential links",
         "description": "Predict potential links between entities using GNN model.",
         "requestBody": {
@@ -195,9 +268,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "entityId"
-                ],
+                "required": ["entityId"],
                 "properties": {
                   "entityId": {
                     "type": "string"
@@ -229,9 +300,7 @@
     },
     "/api/ai/analyze-sentiment": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Analyze sentiment",
         "description": "Analyze sentiment of text content or entity data.",
         "requestBody": {
@@ -270,9 +339,7 @@
     },
     "/api/ai/generate-summary": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Generate summary",
         "description": "Generate AI-powered insights and summary for an entity.",
         "requestBody": {
@@ -281,9 +348,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "entityId"
-                ],
+                "required": ["entityId"],
                 "properties": {
                   "entityId": {
                     "type": "string"
@@ -315,9 +380,7 @@
     },
     "/api/ai/models/status": {
       "get": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "AI models status",
         "description": "Get status and health of AI models.",
         "responses": {
@@ -332,9 +395,7 @@
     },
     "/api/ai/capabilities": {
       "get": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "AI capabilities",
         "description": "Get available AI capabilities and their parameters.",
         "responses": {
@@ -349,9 +410,7 @@
     },
     "/api/ai/extract-video": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Extract video content",
         "description": "Submits a video for frame-by-frame AI extraction.",
         "requestBody": {
@@ -360,20 +419,14 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "mediaPath",
-                  "mediaType",
-                  "extractionMethods"
-                ],
+                "required": ["mediaPath", "mediaType", "extractionMethods"],
                 "properties": {
                   "mediaPath": {
                     "type": "string"
                   },
                   "mediaType": {
                     "type": "string",
-                    "enum": [
-                      "VIDEO"
-                    ]
+                    "enum": ["VIDEO"]
                   },
                   "extractionMethods": {
                     "type": "array",
@@ -404,9 +457,7 @@
     },
     "/api/ai/job-status/{jobId}": {
       "get": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Job status",
         "description": "Get the status of an AI extraction job.",
         "parameters": [
@@ -434,9 +485,7 @@
     },
     "/api/ai/feedback": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Submit feedback",
         "description": "Logs user feedback on AI-generated insights for training signals.",
         "requestBody": {
@@ -445,24 +494,14 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "insight",
-                  "feedbackType",
-                  "user",
-                  "timestamp",
-                  "originalPrediction"
-                ],
+                "required": ["insight", "feedbackType", "user", "timestamp", "originalPrediction"],
                 "properties": {
                   "insight": {
                     "type": "object"
                   },
                   "feedbackType": {
                     "type": "string",
-                    "enum": [
-                      "accept",
-                      "reject",
-                      "flag"
-                    ]
+                    "enum": ["accept", "reject", "flag"]
                   },
                   "user": {
                     "type": "string"
@@ -491,9 +530,7 @@
     },
     "/api/ai/feedback/deception": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Submit deception feedback",
         "description": "Logs user feedback on deception detection for training signals.",
         "requestBody": {
@@ -502,22 +539,14 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "text",
-                  "label",
-                  "user",
-                  "timestamp"
-                ],
+                "required": ["text", "label", "user", "timestamp"],
                 "properties": {
                   "text": {
                     "type": "string"
                   },
                   "label": {
                     "type": "string",
-                    "enum": [
-                      "false_positive",
-                      "false_negative"
-                    ]
+                    "enum": ["false_positive", "false_negative"]
                   },
                   "user": {
                     "type": "string"
@@ -546,9 +575,7 @@
     },
     "/api/ai/adversary/generate": {
       "post": {
-        "tags": [
-          "AI"
-        ],
+        "tags": ["AI"],
         "summary": "Generate adversary chain",
         "description": "Generates an adversary chain based on the provided context.",
         "requestBody": {
@@ -557,9 +584,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "context"
-                ],
+                "required": ["context"],
                 "properties": {
                   "context": {
                     "type": "string"
@@ -591,9 +616,7 @@
     "/api/aurora/implants": {
       "get": {
         "summary": "Get status of all neural implants",
-        "tags": [
-          "Project AURORA"
-        ],
+        "tags": ["Project AURORA"],
         "responses": {
           "200": {
             "description": "A list of all registered neural implants and their current status.",
@@ -614,9 +637,7 @@
     "/api/aurora/handshake/{implantId}": {
       "post": {
         "summary": "Initiate a handshake with a neural implant",
-        "tags": [
-          "Project AURORA"
-        ],
+        "tags": ["Project AURORA"],
         "parameters": [
           {
             "in": "path",
@@ -648,9 +669,7 @@
     "/api/aurora/cortex-overlay": {
       "post": {
         "summary": "Push a data overlay to an analyst's visual cortex",
-        "tags": [
-          "Project AURORA"
-        ],
+        "tags": ["Project AURORA"],
         "requestBody": {
           "required": true,
           "content": {
@@ -673,9 +692,7 @@
     },
     "/auth/register": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Register a new user",
         "description": "Creates a new user account with the provided details.",
         "requestBody": {
@@ -684,12 +701,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password",
-                  "firstName",
-                  "lastName"
-                ],
+                "required": ["email", "password", "firstName", "lastName"],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -744,9 +756,7 @@
     },
     "/auth/login": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Login user",
         "description": "Authenticates a user and returns JWT tokens.",
         "requestBody": {
@@ -755,10 +765,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -800,9 +807,7 @@
     },
     "/auth/refresh": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Refresh access token",
         "description": "Uses a refresh token to obtain a new access token.",
         "requestBody": {
@@ -811,9 +816,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "refreshToken"
-                ],
+                "required": ["refreshToken"],
                 "properties": {
                   "refreshToken": {
                     "type": "string"
@@ -835,9 +838,7 @@
     },
     "/auth/logout": {
       "post": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Logout user",
         "description": "Invalidates the user's current session and tokens.",
         "security": [
@@ -857,9 +858,7 @@
     },
     "/auth/me": {
       "get": {
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "summary": "Get current user",
         "description": "Returns the profile of the currently authenticated user.",
         "security": [
@@ -880,9 +879,7 @@
     "/api/echelon2/ingest": {
       "post": {
         "summary": "Ingest a new environmental DNA (eDNA) sample",
-        "tags": [
-          "Project ECHELON-2"
-        ],
+        "tags": ["Project ECHELON-2"],
         "description": "Submits a raw eDNA reading from a collector for processing and matching against the target genome database.",
         "requestBody": {
           "required": true,
@@ -917,9 +914,7 @@
     "/api/echelon2/confirmations": {
       "get": {
         "summary": "Get all physical presence confirmations",
-        "tags": [
-          "Project ECHELON-2"
-        ],
+        "tags": ["Project ECHELON-2"],
         "responses": {
           "200": {
             "description": "A list of all confirmed target presences.",
@@ -940,9 +935,7 @@
     "/api/echelon2/confirmations/{targetId}": {
       "get": {
         "summary": "Get all presence confirmations for a specific target",
-        "tags": [
-          "Project ECHELON-2"
-        ],
+        "tags": ["Project ECHELON-2"],
         "parameters": [
           {
             "in": "path",
@@ -973,9 +966,7 @@
     },
     "/health": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Basic health check endpoint",
         "description": "Returns 200 OK if the service is running.",
         "responses": {
@@ -1010,9 +1001,7 @@
     },
     "/health/detailed": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Detailed health check",
         "description": "Detailed health check with dependency status.",
         "responses": {
@@ -1054,9 +1043,7 @@
     },
     "/health/ready": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Readiness probe for Kubernetes",
         "description": "Returns 200 when the service is ready to accept traffic.",
         "responses": {
@@ -1084,9 +1071,7 @@
     },
     "/health/live": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Liveness probe for Kubernetes",
         "description": "Kubernetes liveness probe.",
         "responses": {
@@ -1112,9 +1097,7 @@
     "/intel-graph/entities": {
       "post": {
         "summary": "Create a new Entity",
-        "tags": [
-          "IntelGraph"
-        ],
+        "tags": ["IntelGraph"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1143,9 +1126,7 @@
     "/intel-graph/claims": {
       "post": {
         "summary": "Create a new Claim",
-        "tags": [
-          "IntelGraph"
-        ],
+        "tags": ["IntelGraph"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1177,9 +1158,7 @@
     "/intel-graph/evidence": {
       "post": {
         "summary": "Attach new Evidence to a Claim",
-        "tags": [
-          "IntelGraph"
-        ],
+        "tags": ["IntelGraph"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1214,9 +1193,7 @@
     "/intel-graph/policies": {
       "post": {
         "summary": "Attach a new PolicyLabel to any node",
-        "tags": [
-          "IntelGraph"
-        ],
+        "tags": ["IntelGraph"],
         "requestBody": {
           "required": true,
           "content": {
@@ -1248,9 +1225,7 @@
     "/intel-graph/decisions/{id}/provenance": {
       "get": {
         "summary": "Get the provenance for a Decision",
-        "tags": [
-          "IntelGraph"
-        ],
+        "tags": ["IntelGraph"],
         "parameters": [
           {
             "in": "path",
@@ -1271,9 +1246,7 @@
     "/intel-graph/entities/{id}/claims": {
       "get": {
         "summary": "Get all claims for an Entity",
-        "tags": [
-          "IntelGraph"
-        ],
+        "tags": ["IntelGraph"],
         "parameters": [
           {
             "in": "path",
@@ -1293,9 +1266,7 @@
     },
     "/maestro/runs": {
       "post": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "Create run",
         "description": "Create and start a new workflow run.",
         "security": [
@@ -1309,10 +1280,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "pipeline_id",
-                  "pipeline_name"
-                ],
+                "required": ["pipeline_id", "pipeline_name"],
                 "properties": {
                   "userId": {
                     "type": "string"
@@ -1389,9 +1357,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "List runs",
         "description": "Retrieve a paginated list of Maestro workflow runs.",
         "security": [
@@ -1441,13 +1407,7 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": [
-                              "queued",
-                              "running",
-                              "succeeded",
-                              "failed",
-                              "cancelled"
-                            ]
+                            "enum": ["queued", "running", "succeeded", "failed", "cancelled"]
                           },
                           "durationMs": {
                             "type": "integer"
@@ -1471,9 +1431,7 @@
     },
     "/maestro/runs/{runId}": {
       "get": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "Get run state",
         "description": "Retrieves the current state of a run.",
         "security": [
@@ -1503,9 +1461,7 @@
     },
     "/maestro/runs/{runId}/tasks": {
       "get": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "List run tasks",
         "description": "Retrieves tasks associated with a run.",
         "security": [
@@ -1535,9 +1491,7 @@
     },
     "/maestro/tasks/{taskId}": {
       "get": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "Get task details",
         "description": "Retrieves detailed information about a task.",
         "security": [
@@ -1568,9 +1522,7 @@
     "/api/mnemosyne/fabricate": {
       "post": {
         "summary": "Create and deploy a new false memory fabrication job",
-        "tags": [
-          "Project MNEMOSYNE"
-        ],
+        "tags": ["Project MNEMOSYNE"],
         "description": "Initiates a 21-day (simulated) process to implant a false memory in a target.",
         "requestBody": {
           "required": true,
@@ -1602,9 +1554,7 @@
     "/api/mnemosyne/job/{jobId}": {
       "get": {
         "summary": "Get the status and report of a memory fabrication job",
-        "tags": [
-          "Project MNEMOSYNE"
-        ],
+        "tags": ["Project MNEMOSYNE"],
         "parameters": [
           {
             "in": "path",
@@ -1635,9 +1585,7 @@
     },
     "/monitoring/metrics": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Prometheus metrics endpoint",
         "description": "Returns Prometheus metrics for the application.",
         "responses": {
@@ -1675,9 +1623,7 @@
     },
     "/monitoring/health": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Comprehensive health check",
         "description": "Performs a full health check of the system including dependencies.",
         "responses": {
@@ -1690,10 +1636,7 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "healthy",
-                        "unhealthy"
-                      ]
+                      "enum": ["healthy", "unhealthy"]
                     }
                   }
                 }
@@ -1708,9 +1651,7 @@
     },
     "/monitoring/health/quick": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Quick health check (cached)",
         "description": "Returns the cached health status of the system.",
         "responses": {
@@ -1723,10 +1664,7 @@
                   "properties": {
                     "status": {
                       "type": "string",
-                      "enum": [
-                        "healthy",
-                        "unhealthy"
-                      ]
+                      "enum": ["healthy", "unhealthy"]
                     }
                   }
                 }
@@ -1741,9 +1679,7 @@
     },
     "/monitoring/health/live": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Kubernetes liveness probe",
         "description": "Checks if the application is alive.",
         "responses": {
@@ -1758,9 +1694,7 @@
     },
     "/monitoring/health/ready": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Kubernetes readiness probe",
         "description": "Checks if the application is ready to serve traffic.",
         "responses": {
@@ -1775,9 +1709,7 @@
     },
     "/monitoring/health/info": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "System information endpoint",
         "description": "Returns information about the system environment and resources.",
         "responses": {
@@ -1810,9 +1742,7 @@
     },
     "/monitoring/metrics/business": {
       "post": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Record business metrics",
         "description": "Records a business-related metric event.",
         "requestBody": {
@@ -1821,17 +1751,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "type"
-                ],
+                "required": ["type"],
                 "properties": {
                   "type": {
                     "type": "string",
-                    "enum": [
-                      "user_signup",
-                      "api_call",
-                      "revenue"
-                    ]
+                    "enum": ["user_signup", "api_call", "revenue"]
                   },
                   "tenant": {
                     "type": "string"
@@ -1874,9 +1798,7 @@
     },
     "/monitoring/web-vitals": {
       "post": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Collect Web Vitals metrics",
         "description": "Endpoint for collecting Web Vitals metrics from frontend clients.",
         "requestBody": {
@@ -1915,9 +1837,7 @@
     },
     "/monitoring/telemetry/events": {
       "post": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "Record telemetry events",
         "description": "Endpoint for recording general telemetry events.",
         "parameters": [
@@ -1936,9 +1856,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "event"
-                ],
+                "required": ["event"],
                 "properties": {
                   "event": {
                     "type": "string"
@@ -1966,9 +1884,7 @@
     },
     "/monitoring/telemetry/dora": {
       "post": {
-        "tags": [
-          "Monitoring"
-        ],
+        "tags": ["Monitoring"],
         "summary": "DORA Metrics Webhook",
         "description": "Allows external CI/CD systems to push DORA metrics.",
         "parameters": [
@@ -1987,18 +1903,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "metric"
-                ],
+                "required": ["metric"],
                 "properties": {
                   "metric": {
                     "type": "string",
-                    "enum": [
-                      "deployment",
-                      "lead_time",
-                      "change_failure_rate",
-                      "mttr"
-                    ]
+                    "enum": ["deployment", "lead_time", "change_failure_rate", "mttr"]
                   },
                   "value": {
                     "type": "number"
@@ -2035,9 +1944,7 @@
     "/api/necromancer/synthetics": {
       "get": {
         "summary": "Get a list of all active synthetic identities",
-        "tags": [
-          "Project NECROMANCER"
-        ],
+        "tags": ["Project NECROMANCER"],
         "responses": {
           "200": {
             "description": "An array of all currently operating synthetic identities.",
@@ -2058,9 +1965,7 @@
     "/api/necromancer/initiate": {
       "post": {
         "summary": "Initiate a digital afterlife for a deceased target",
-        "tags": [
-          "Project NECROMANCER"
-        ],
+        "tags": ["Project NECROMANCER"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2091,9 +1996,7 @@
     "/api/necromancer/synthetics/{syntheticId}/activity": {
       "get": {
         "summary": "Get a log of a synthetic identity's recent activity",
-        "tags": [
-          "Project NECROMANCER"
-        ],
+        "tags": ["Project NECROMANCER"],
         "parameters": [
           {
             "in": "path",
@@ -2128,9 +2031,7 @@
     "/api/oracle/run-simulation": {
       "post": {
         "summary": "Initiate a new forecasting simulation",
-        "tags": [
-          "Project ORACLE"
-        ],
+        "tags": ["Project ORACLE"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2161,9 +2062,7 @@
     "/api/oracle/timeline/{runId}": {
       "get": {
         "summary": "Get the status and results of a forecasting run",
-        "tags": [
-          "Project ORACLE"
-        ],
+        "tags": ["Project ORACLE"],
         "parameters": [
           {
             "in": "path",
@@ -2195,9 +2094,7 @@
     "/api/phantom-limb/analysts": {
       "get": {
         "summary": "Get all currently resurrected and online analysts",
-        "tags": [
-          "Project PHANTOM LIMB"
-        ],
+        "tags": ["Project PHANTOM LIMB"],
         "responses": {
           "200": {
             "description": "A list of all active Digital Ghost agents.",
@@ -2218,9 +2115,7 @@
     "/api/phantom-limb/reconstitute": {
       "post": {
         "summary": "Resurrect a new analyst from their digital artifacts",
-        "tags": [
-          "Project PHANTOM LIMB"
-        ],
+        "tags": ["Project PHANTOM LIMB"],
         "requestBody": {
           "required": true,
           "content": {
@@ -2251,9 +2146,7 @@
     "/api/phantom-limb/query/{ghostId}": {
       "post": {
         "summary": "Pose a query to a specific resurrected analyst",
-        "tags": [
-          "Project PHANTOM LIMB"
-        ],
+        "tags": ["Project PHANTOM LIMB"],
         "parameters": [
           {
             "in": "path",
@@ -2277,9 +2170,7 @@
                     "description": "The analytical question to ask the ghost."
                   }
                 },
-                "required": [
-                  "query"
-                ]
+                "required": ["query"]
               }
             }
           }
@@ -2305,21 +2196,14 @@
       "get": {
         "summary": "Get resource cost analysis with service breakdown",
         "description": "Returns a detailed cost breakdown per service and optimization suggestions for the authenticated tenant.",
-        "tags": [
-          "Costs"
-        ],
+        "tags": ["Costs"],
         "parameters": [
           {
             "in": "query",
             "name": "period",
             "schema": {
               "type": "string",
-              "enum": [
-                "hour",
-                "day",
-                "week",
-                "month"
-              ],
+              "enum": ["hour", "day", "week", "month"],
               "default": "day"
             },
             "description": "Time period for the analysis"
@@ -2380,9 +2264,7 @@
     },
     "/api/webhooks": {
       "post": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Create webhook",
         "description": "Create a new webhook.",
         "requestBody": {
@@ -2391,10 +2273,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "url",
-                  "events"
-                ],
+                "required": ["url", "events"],
                 "properties": {
                   "url": {
                     "type": "string"
@@ -2423,9 +2302,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "List webhooks",
         "description": "List all webhooks for the tenant.",
         "responses": {
@@ -2440,9 +2317,7 @@
     },
     "/api/webhooks/{id}": {
       "get": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Get webhook",
         "description": "Get a webhook by ID.",
         "parameters": [
@@ -2468,9 +2343,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Update webhook",
         "description": "Update a webhook by ID.",
         "parameters": [
@@ -2520,9 +2393,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Delete webhook",
         "description": "Delete a webhook by ID.",
         "parameters": [
@@ -2550,9 +2421,7 @@
     },
     "/api/webhooks/{id}/deliveries": {
       "get": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Get webhook deliveries",
         "description": "Get delivery history for a webhook.",
         "parameters": [
@@ -2591,9 +2460,7 @@
     },
     "/api/webhooks/trigger-test": {
       "post": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Trigger test event",
         "description": "Trigger a test webhook event.",
         "requestBody": {
@@ -2602,10 +2469,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "eventType",
-                  "payload"
-                ],
+                "required": ["eventType", "payload"],
                 "properties": {
                   "eventType": {
                     "type": "string"
@@ -2633,9 +2497,7 @@
     },
     "/api/webhooks/github": {
       "post": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "GitHub webhook",
         "description": "Handle GitHub webhook events.",
         "responses": {
@@ -2653,9 +2515,7 @@
     },
     "/api/webhooks/jira": {
       "post": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Jira webhook",
         "description": "Handle Jira webhook events.",
         "responses": {
@@ -2673,9 +2533,7 @@
     },
     "/api/webhooks/lifecycle": {
       "post": {
-        "tags": [
-          "Webhooks"
-        ],
+        "tags": ["Webhooks"],
         "summary": "Lifecycle webhook",
         "description": "Handle run/deployment lifecycle events.",
         "requestBody": {
@@ -2684,10 +2542,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "event_type",
-                  "id"
-                ],
+                "required": ["event_type", "id"],
                 "properties": {
                   "event_type": {
                     "type": "string",
@@ -2727,9 +2582,7 @@
     "/api/zero-day/designate-threat": {
       "post": {
         "summary": "Designate a new existential threat",
-        "tags": [
-          "Project ZERO DAY"
-        ],
+        "tags": ["Project ZERO DAY"],
         "description": "Informs the system of a new existential threat, creating a pending kill chain log that awaits authority delegation.",
         "requestBody": {
           "required": true,
@@ -2743,9 +2596,7 @@
                     "description": "A detailed analysis of the existential threat."
                   }
                 },
-                "required": [
-                  "threatAnalysis"
-                ]
+                "required": ["threatAnalysis"]
               }
             }
           }
@@ -2767,9 +2618,7 @@
     "/api/zero-day/delegate-authority": {
       "post": {
         "summary": "Delegate autonomous authority to the Zero Day protocol",
-        "tags": [
-          "Project ZERO DAY"
-        ],
+        "tags": ["Project ZERO DAY"],
         "description": "This is the final human step. It activates the autonomous kill chain for a designated threat. This action is irreversible.",
         "requestBody": {
           "required": true,
@@ -2787,10 +2636,7 @@
                     "description": "The ID of the human operator authorizing the delegation."
                   }
                 },
-                "required": [
-                  "threatId",
-                  "humanOperatorId"
-                ]
+                "required": ["threatId", "humanOperatorId"]
               }
             }
           }
@@ -2818,9 +2664,7 @@
     "/api/zero-day/status/{threatId}": {
       "get": {
         "summary": "Get the status and full log of a kill chain",
-        "tags": [
-          "Project ZERO DAY"
-        ],
+        "tags": ["Project ZERO DAY"],
         "parameters": [
           {
             "in": "path",
@@ -2851,9 +2695,7 @@
     },
     "/maestro/runs/{id}": {
       "get": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "Get run details",
         "description": "Retrieve details for a specific workflow run.",
         "security": [
@@ -2886,9 +2728,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "Update run",
         "description": "Update the status or details of a run.",
         "security": [
@@ -2916,13 +2756,7 @@
                 "properties": {
                   "status": {
                     "type": "string",
-                    "enum": [
-                      "queued",
-                      "running",
-                      "succeeded",
-                      "failed",
-                      "cancelled"
-                    ]
+                    "enum": ["queued", "running", "succeeded", "failed", "cancelled"]
                   },
                   "output_data": {
                     "type": "object"
@@ -2948,9 +2782,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "Delete run",
         "description": "Delete a specific run.",
         "security": [
@@ -2984,9 +2816,7 @@
     },
     "/maestro/pipelines/{id}/runs": {
       "get": {
-        "tags": [
-          "Maestro"
-        ],
+        "tags": ["Maestro"],
         "summary": "List pipeline runs",
         "description": "Get runs associated with a specific pipeline.",
         "security": [
@@ -3042,6 +2872,86 @@
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/v1/palettes": {
+      "get": {
+        "summary": "List available reasoning palettes",
+        "tags": ["LLM"],
+        "description": "Returns the configured reasoning palettes and the current runtime settings.",
+        "responses": {
+          "200": {
+            "description": "Palette list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaletteListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{id}/palette": {
+      "post": {
+        "summary": "Attach or override a palette for a run template",
+        "tags": ["LLM"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paletteId": {
+                    "type": "string"
+                  }
+                },
+                "required": ["paletteId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Palette recorded for run template context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "runId": {
+                      "type": "string"
+                    },
+                    "palette": {
+                      "$ref": "#/components/schemas/ReasoningPalette"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown palette id"
+          },
+          "403": {
+            "description": "Feature disabled"
           }
         }
       }

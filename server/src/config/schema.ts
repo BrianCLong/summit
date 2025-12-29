@@ -16,7 +16,7 @@ export const ConfigSchema = (z as any).object({
     username: (z as any).string().default('neo4j'),
     password: (z as any).string().default('devpassword'),
     database: (z as any).string().default('neo4j'),
-  }),
+  }).default({}),
 
   postgres: (z as any).object({
     host: (z as any).string().default('localhost'),
@@ -24,39 +24,39 @@ export const ConfigSchema = (z as any).object({
     database: (z as any).string().default('intelgraph_dev'),
     username: (z as any).string().default('intelgraph'),
     password: (z as any).string().default('devpassword'),
-  }),
+  }).default({}),
 
   redis: (z as any).object({
     host: (z as any).string().default('localhost'),
     port: (z as any).coerce.number().default(6379),
     password: (z as any).string().default('devpassword'),
     db: (z as any).coerce.number().default(0),
-  }),
+  }).default({}),
 
   jwt: (z as any).object({
     secret: (z as any).string().min(10).default('dev_jwt_secret_12345'),
     expiresIn: (z as any).string().default('24h'),
     refreshSecret: (z as any).string().min(10).default('dev_refresh_secret_67890'),
     refreshExpiresIn: (z as any).string().default('7d'),
-  }),
+  }).default({}),
 
   bcrypt: (z as any).object({
     rounds: (z as any).coerce.number().default(12),
-  }),
+  }).default({}),
 
   rateLimit: (z as any).object({
     windowMs: (z as any).coerce.number().default(15 * 60 * 1000),
     maxRequests: (z as any).coerce.number().default(100),
-  }),
+  }).default({}),
 
   cors: (z as any).object({
     origin: (z as any).string().default('http://localhost:3000'),
-  }),
+  }).default({}),
 
   features: (z as any).object({
     GRAPH_EXPAND_CACHE: (z as any).coerce.boolean().default(true),
     AI_REQUEST_ENABLED: (z as any).coerce.boolean().default(true),
-  }),
+  }).default({}),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

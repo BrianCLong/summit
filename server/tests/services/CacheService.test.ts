@@ -1,14 +1,17 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { CacheService } from '../../src/services/CacheService.js';
 
-const mockRedis = {
-  get: jest.fn<(key: string) => Promise<string | null>>(),
-  setex: jest.fn<(key: string, ttl: number, value: string) => Promise<void>>(),
-  del: jest.fn<(key: string) => Promise<number>>(),
+// Create mock cache manager
+const mockCacheManager = {
+  get: jest.fn<(key: string) => Promise<any>>(),
+  set: jest.fn<(key: string, value: any, options?: any) => Promise<void>>(),
+  delete: jest.fn<(key: string) => Promise<void>>(),
+  invalidateByPattern: jest.fn<(pattern: string) => Promise<void>>(),
+  getOrSet: jest.fn<(key: string, factory: () => Promise<any>, options?: any) => Promise<any>>(),
 };
 
-jest.mock('../../src/config/database.js', () => ({
-  getRedisClient: () => mockRedis,
+jest.mock('../../src/cache/factory.js', () => ({
+  getCacheManager: () => mockCacheManager,
+  _resetCacheManagerForTesting: jest.fn(),
 }));
 
 jest.mock('../../src/config.js', () => ({
@@ -27,81 +30,94 @@ jest.mock('../../src/config/logger.js', () => ({
   },
 }));
 
+jest.mock('../../src/utils/metrics.js', () => ({
+  PrometheusMetrics: class {
+    createCounter() {}
+    incrementCounter() {}
+  },
+}));
+
+// Import after mocks are set up
+import { CacheService } from '../../src/services/CacheService.js';
+
 describe('CacheService', () => {
   let cache: CacheService;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCacheManager.get.mockResolvedValue(null);
     cache = new CacheService();
-    mockRedis.get.mockResolvedValue(null);
   });
 
   it('returns null when key not in cache', async () => {
-    mockRedis.get.mockResolvedValue(null);
+    mockCacheManager.get.mockResolvedValue(null);
 
     const result = await cache.get<{ from: string }>('test');
 
     expect(result).toBeNull();
-    expect(mockRedis.get).toHaveBeenCalledWith('cache:test');
+    expect(mockCacheManager.get).toHaveBeenCalledWith('cache:test');
   });
 
-  it('returns parsed value from redis', async () => {
-    mockRedis.get.mockResolvedValue(JSON.stringify({ payload: true }));
+  it('returns value from cache manager', async () => {
+    mockCacheManager.get.mockResolvedValue({ payload: true });
 
     const result = await cache.get<{ payload: boolean }>('redis-key');
 
     expect(result).toEqual({ payload: true });
-    expect(mockRedis.get).toHaveBeenCalledWith('cache:redis-key');
+    expect(mockCacheManager.get).toHaveBeenCalledWith('cache:redis-key');
   });
 
-  it('writes to redis on set', async () => {
+  it('writes to cache manager on set', async () => {
     await cache.set('write-key', { foo: 'bar' }, 45);
 
-    expect(mockRedis.setex).toHaveBeenCalledWith(
+    expect(mockCacheManager.set).toHaveBeenCalledWith(
       'cache:write-key',
-      45,
-      JSON.stringify({ foo: 'bar' }),
+      { foo: 'bar' },
+      { ttl: 45 },
     );
   });
 
   it('uses default TTL when not specified', async () => {
     await cache.set('default-ttl-key', { data: 123 });
 
-    expect(mockRedis.setex).toHaveBeenCalledWith(
+    expect(mockCacheManager.set).toHaveBeenCalledWith(
       'cache:default-ttl-key',
-      300, // default TTL from config
-      JSON.stringify({ data: 123 }),
+      { data: 123 },
+      { ttl: 300 }, // default TTL from config
     );
   });
 
   it('getOrSet returns cached value and skips factory', async () => {
-    mockRedis.get.mockResolvedValue(JSON.stringify({ cached: true }));
+    mockCacheManager.getOrSet.mockResolvedValue({ cached: true });
     const factory = jest.fn<() => Promise<{ cached: boolean }>>();
 
     const result = await cache.getOrSet('hydrate', factory);
 
     expect(result).toEqual({ cached: true });
-    expect(factory).not.toHaveBeenCalled();
+    expect(mockCacheManager.getOrSet).toHaveBeenCalledWith(
+      'cache:hydrate',
+      factory,
+      { ttl: 300 },
+    );
   });
 
-  it('getOrSet calls factory and populates cache when missing', async () => {
-    mockRedis.get.mockResolvedValue(null);
+  it('getOrSet calls cache manager with custom TTL', async () => {
+    mockCacheManager.getOrSet.mockResolvedValue({ fresh: true });
     const factory = jest.fn<() => Promise<{ fresh: boolean }>>().mockResolvedValue({ fresh: true });
 
     const result = await cache.getOrSet('hydrate', factory, 25);
 
     expect(result).toEqual({ fresh: true });
-    expect(factory).toHaveBeenCalled();
-    expect(mockRedis.setex).toHaveBeenCalledWith(
+    expect(mockCacheManager.getOrSet).toHaveBeenCalledWith(
       'cache:hydrate',
-      25,
-      JSON.stringify({ fresh: true }),
+      factory,
+      { ttl: 25 },
     );
   });
 
-  it('del removes key from redis', async () => {
+  it('del removes key via cache manager', async () => {
     await cache.del('temp');
 
-    expect(mockRedis.del).toHaveBeenCalledWith('cache:temp');
+    expect(mockCacheManager.delete).toHaveBeenCalledWith('cache:temp');
   });
 });

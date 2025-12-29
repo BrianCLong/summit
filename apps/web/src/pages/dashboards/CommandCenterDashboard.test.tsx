@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { render, screen, waitFor, act } from '../../test-utils';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import CommandCenterDashboard from './CommandCenterDashboard'
 
@@ -16,6 +16,15 @@ const rollbackResponse = {
 
 const conflictResponse = {
   data: [{ conflict_reason: 'Conflicting metric values', count: 3 }],
+}
+
+const guardrailResponse = {
+  datasetId: 'baseline',
+  passed: true,
+  metrics: { precision: 0.92, recall: 0.88, totalPairs: 10 },
+  thresholds: { minPrecision: 0.9, minRecall: 0.85, matchThreshold: 0.8 },
+  evaluatedAt: '2025-01-01T00:00:00Z',
+  latestOverride: null,
 }
 
 const mockFetch = vi.fn((url: RequestInfo | URL) => {
@@ -38,11 +47,16 @@ const mockFetch = vi.fn((url: RequestInfo | URL) => {
       json: () => Promise.resolve(conflictResponse),
     })
   }
+  if (target.includes('/api/er/guardrails/status')) {
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(guardrailResponse),
+    })
+  }
   return Promise.resolve({ ok: false })
 })
 
 beforeEach(() => {
-  vi.useFakeTimers()
   global.fetch = mockFetch as any
   global.ResizeObserver = class {
     observe() {}
@@ -52,7 +66,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  vi.useRealTimers()
   vi.resetAllMocks()
 })
 
@@ -60,14 +73,11 @@ describe('CommandCenterDashboard', () => {
   it('renders ER ops panel with charts', async () => {
     render(<CommandCenterDashboard />)
 
-    await act(async () => {
-      vi.runAllTimers()
-    })
-
     await waitFor(() => {
       expect(screen.getByText('ER Ops')).toBeInTheDocument()
       expect(screen.getByText('Precision vs Recall')).toBeInTheDocument()
       expect(screen.getByText('Conflict Reasons')).toBeInTheDocument()
+      expect(screen.getByText(/Rollback rate: 20\.0%/)).toBeInTheDocument()
     })
   })
 })

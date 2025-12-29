@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Server,
   Zap,
+  ShieldCheck,
 } from 'lucide-react'
 import { useConductorMetrics, useConductorAlerts } from '@/hooks/useConductorMetrics'
 import {
@@ -13,8 +14,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/Popover'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/Dialog'
 import { Badge } from '@/components/ui/Badge'
 import { Separator } from '@/components/ui/separator'
+import { TrustHealthDashboard } from '@/components/trust/TrustHealthDashboard'
 
 export function SystemHUD() {
   console.log('SystemHUD rendering...');
@@ -26,6 +29,7 @@ export function SystemHUD() {
 
   const { unacknowledgedCount } = useConductorAlerts()
   const [isOpen, setIsOpen] = useState(false)
+  const [isTrustDashboardOpen, setIsTrustDashboardOpen] = useState(false)
 
   if (isLoading && !metrics) {
     console.log('SystemHUD: loading state');
@@ -141,6 +145,21 @@ export function SystemHUD() {
                 <span>Last synced: {metrics?.routing ? new Date().toLocaleTimeString() : '-'}</span>
               </div>
             </div>
+
+            <Dialog open={isTrustDashboardOpen} onOpenChange={setIsTrustDashboardOpen}>
+              <DialogTrigger asChild>
+                <button className="w-full flex items-center justify-between p-2 rounded-md hover:bg-accent transition-colors border mt-2">
+                  <div className="flex items-center space-x-2">
+                    <ShieldCheck className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-medium">Trust Health</span>
+                  </div>
+                  <Badge variant="outline" className="text-green-600 bg-green-50">94/100</Badge>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl h-[80vh] overflow-y-auto">
+                <TrustHealthDashboard />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </PopoverContent>

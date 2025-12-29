@@ -13,11 +13,13 @@ This memo outlines our "Public Assurance" strategy: **a defined, governed set of
 ## 2. What We Share and Why
 
 We share metrics that are:
-*   **Automated:** Derived directly from our monitoring and compliance systems.
-*   **Aggregated:** Summarized to protect specific tenant data and system internals.
-*   **Actionable:** Useful for assessing our reliability and governance posture.
+
+- **Automated:** Derived directly from our monitoring and compliance systems.
+- **Aggregated:** Summarized to protect specific tenant data and system internals.
+- **Actionable:** Useful for assessing our reliability and governance posture.
 
 ### Key Signals:
+
 1.  **Compliance Status:** Real-time certification validity (SOC 2, GDPR, etc.).
 2.  **Reliability Metrics:** Availability and latency performance against published SLOs.
 3.  **Incident Transparency:** Counts of customer-impacting incidents, severity-classified.
@@ -26,16 +28,17 @@ We share metrics that are:
 ## 3. What We Do Not Share
 
 To maintain security and operational focus, we explicitly exclude:
-*   **Vulnerability Details:** Specifics of unpatched or recently patched vulnerabilities.
-*   **Raw Logs:** Detailed system or access logs.
-*   **Internal Debates:** Pre-decision discussions or design trade-offs.
-*   **Leading Indicators:** Speculative signals that have not yet manifested as customer impact.
+
+- **Vulnerability Details:** Specifics of unpatched or recently patched vulnerabilities.
+- **Raw Logs:** Detailed system or access logs.
+- **Internal Debates:** Pre-decision discussions or design trade-offs.
+- **Leading Indicators:** Speculative signals that have not yet manifested as customer impact.
 
 ## 4. Disclaimers and Limitations
 
-*   **No Absolute Guarantees:** Past performance is not a guarantee of future results. Systems are complex and subject to failure.
-*   **Metric Lag:** Public metrics may trail real-time internal dashboards by up to 15 minutes.
-*   **Scope:** Metrics cover the Summit core platform and do not extend to customer-managed integrations or on-premise deployments unless specified.
+- **No Absolute Guarantees:** Past performance is not a guarantee of future results. Systems are complex and subject to failure.
+- **Metric Lag:** Public metrics may trail real-time internal dashboards by up to 15 minutes.
+- **Scope:** Metrics cover the Summit core platform and do not extend to customer-managed integrations or on-premise deployments unless specified.
 
 ## 5. Governance
 
@@ -43,4 +46,4 @@ This assurance framework is treated as a product feature. Changes to the metrics
 
 ---
 
-*Verified by Summit Trust Center*
+_Verified by Summit Trust Center_

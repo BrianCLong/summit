@@ -51,6 +51,10 @@ if ! run_cmd run typecheck; then
   run_cmd exec tsc -b tsconfig.build.json
 fi
 
+# Run marketplace sandbox tests
+log "Running marketplace sandbox tests"
+run_cmd --filter intelgraph-server run test:marketplace
+
 run_targeted_tests() {
   if command -v pnpm >/dev/null 2>&1 && pnpm dlx turbo --version >/dev/null 2>&1; then
     log "Running targeted tests for changes since ${TARGET_REF}"
