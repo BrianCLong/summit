@@ -6,9 +6,11 @@
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
+.PHONY: dev:prereqs dev:up dev:down dev:smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
 VENV_BIN = $(VENV_DIR)/bin
@@ -35,7 +37,32 @@ up:     ## Run dev stack
 	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
 
 down:   ## Stop dev stack
+        docker compose -f $(COMPOSE_DEV_FILE) down -v
+
+dev:prereqs:
+	@command -v docker >/dev/null 2>&1 || { echo "Docker CLI not found. Install Docker Desktop/Engine."; exit 1; }
+	@docker info >/dev/null 2>&1 || { echo "Docker daemon is not running or accessible."; exit 1; }
+	@docker compose version >/dev/null 2>&1 || { echo "Docker Compose plugin (v2) is missing. Install it to continue."; exit 1; }
+	@[ -f "$(COMPOSE_DEV_FILE)" ] || { echo "$(COMPOSE_DEV_FILE) not found. Run from repo root or set COMPOSE_DEV_FILE."; exit 1; }
+	@[ -f "$(DEV_ENV_FILE)" ] || { echo "$(DEV_ENV_FILE) missing. Copy from .env.example before starting (cp .env.example $(DEV_ENV_FILE))."; exit 1; }
+	@command -v curl >/dev/null 2>&1 || { echo "curl not found. Install curl for smoke checks."; exit 1; }
+
+dev:up: dev:prereqs ## Validate prereqs then start dev stack
+	@echo "Starting dev stack with $(COMPOSE_DEV_FILE)..."
+	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
+
+dev:down: dev:prereqs ## Stop dev stack and remove volumes
+	@echo "Stopping dev stack defined in $(COMPOSE_DEV_FILE)..."
 	docker compose -f $(COMPOSE_DEV_FILE) down -v
+
+dev:smoke: dev:prereqs ## Minimal smoke checks for local dev
+	@echo "Running dev smoke checks..."
+	@docker compose -f $(COMPOSE_DEV_FILE) ps
+	@echo "Checking UI at http://localhost:3000 ..."
+	@curl -sSf http://localhost:3000 > /dev/null || { echo "UI not responding on port 3000."; exit 1; }
+	@echo "Checking Gateway health at http://localhost:8080/health ..."
+	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
+	@echo "Dev smoke checks passed."
 
 restart: down up
 
