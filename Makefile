@@ -5,26 +5,16 @@
 .PHONY: dev test lint build format ci
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
-.PHONY: bootstrap
+.PHONY: bootstrap bootstrap-js bootstrap-python bootstrap-rust bootstrap-go test-js test-python test-rust test-go
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 SHELL_SERVICE ?= gateway
+CI_SCRIPTS ?= ./scripts/ci
 VENV_DIR ?= .venv
 VENV_BIN = $(VENV_DIR)/bin
 PYTHON ?= python3
-PACKAGE_VERSION ?= $(shell $(PYTHON) - <<'PY'
-import tomllib
-from pathlib import Path
-
-pyproject = Path("pyproject.toml")
-try:
-    with pyproject.open('rb') as f:
-	data = tomllib.load(f)
-    print(data.get("project", {}).get("version", "latest"))
-except FileNotFoundError:
-    print("latest")
-PY)
+PACKAGE_VERSION ?= $(shell $(PYTHON) -c "import tomllib, pathlib; p=pathlib.Path('pyproject.toml'); print(tomllib.load(p.open('rb')).get('project',{}).get('version','latest') if p.exists() else 'latest')")
 IMAGE_NAME ?= intelgraph-platform
 IMAGE_TAG ?= $(PACKAGE_VERSION)
 IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
@@ -53,19 +43,37 @@ clean:
 
 # --- Development Workflow ---
 
-bootstrap: ## Install dev dependencies
-	python3 -m venv $(VENV_DIR)
-	$(VENV_BIN)/pip install -U pip
-	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
-	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
-	$(VENV_BIN)/pre-commit install || true
-	pnpm install
+bootstrap: bootstrap-python bootstrap-js bootstrap-rust bootstrap-go ## Install dev dependencies across languages
+	$(CI_SCRIPTS)/bootstrap.sh all
+
+bootstrap-js:
+	$(CI_SCRIPTS)/bootstrap.sh js
+
+bootstrap-python:
+	$(CI_SCRIPTS)/bootstrap.sh python
+
+bootstrap-rust:
+	$(CI_SCRIPTS)/bootstrap.sh rust
+
+bootstrap-go:
+	$(CI_SCRIPTS)/bootstrap.sh go
 
 dev:
 	pnpm run dev
 
-test:   ## Run unit tests (node+python)
-	pnpm -w run test:unit || true && $(VENV_BIN)/pytest || true
+test: test-js test-python test-rust test-go ## Run unit tests across all supported languages
+
+test-js:
+	$(CI_SCRIPTS)/test-js.sh
+
+test-python:
+	$(CI_SCRIPTS)/test-python.sh
+
+test-rust:
+	$(CI_SCRIPTS)/test-rust.sh
+
+test-go:
+	$(CI_SCRIPTS)/test-go.sh
 
 lint:   ## Lint js/ts + python
 	pnpm -w exec eslint . || true

@@ -2,6 +2,18 @@
 
 [What/why]
 
+## Test Plan (required)
+
+- [ ] `make bootstrap && make test`
+- [ ] Attach or link coverage artifacts (client/coverage, backend/coverage.xml, airflow/coverage.xml, target/lcov.info, sdk/go/abac/coverage.txt)
+- [ ] Additional context (playwright/e2e/smoke) if applicable
+
+## Risk & Mitigation (required)
+
+- Expected blast radius:
+- Rollback/kill switch:
+- On-call owner for deployment:
+
 ## M&A / Integration Readiness (DD Signal)
 
 _If this PR involves integrating an external system or library:_

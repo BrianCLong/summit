@@ -15,14 +15,34 @@ Whether you are a human developer or an AI agent, this guide will help you contr
 If you are new here, please start with our **[Developer Onboarding Guide](docs/ONBOARDING.md)**. It will get you from `git clone` to a running stack in under 30 minutes.
 
 ### The "Golden Path" Command
+
 ```bash
 make bootstrap && make up && make smoke
 ```
+
 This sequence is our contract. If it passes, your environment is healthy.
+
+### One-command Build & Test (Hermetic)
+
+All contributions **must** keep the monorepo green with:
+
+```bash
+make bootstrap && make test
+```
+
+Behind the scenes, this dispatches language-specific runners:
+
+- `make test-js` → Jest with coverage thresholds (≥80% lines/branches)
+- `make test-python` → Pytest + `pytest-cov` with fail-under 80% for backend and Airflow
+- `make test-rust` → `cargo llvm-cov` with fail-under 70% lines across the Rust workspace
+- `make test-go` → `go test` with atomic coverage and ≥70% total coverage for curated modules
+
+Coverage reports are written to `client/coverage/`, `backend/coverage.xml`, `airflow/coverage.xml`, `target/lcov.info`, and `sdk/go/abac/coverage.txt`. Upload these artifacts when filing PRs if CI is unavailable.
 
 ## 🛠 Development Workflow
 
 ### 1. Issue & Branching
+
 - **Pick an Issue**: Check our [Roadmap](docs/roadmap.md) or [Issues](https://github.com/BrianCLong/summit/issues).
 - **Branch Naming**: Use the format `type/scope/description`.
   - `feat/ingest/add-rss-connector`
@@ -30,15 +50,18 @@ This sequence is our contract. If it passes, your environment is healthy.
   - `docs/api/update-schema`
 
 ### 2. Making Changes
+
 - **Atomic PRs**: One feature or fix per PR. Avoid "kitchen sink" PRs.
 - **Conventional Commits**: We strictly enforce [Conventional Commits](https://www.conventionalcommits.org/).
   - `feat: ...`, `fix: ...`, `docs: ...`, `test: ...`, `chore: ...`
 - **Testing**:
-  - **Unit**: `pnpm test` (Jest)
+  - **Bootstrap**: `make bootstrap` (installs per-language toolchains idempotently)
+  - **Unit**: `make test` (JS/TS + Python + Rust + Go with coverage gating)
   - **E2E**: `pnpm e2e` (Playwright)
   - **Smoke**: `make smoke` (Core integration loop)
 
 ### 3. Submission
+
 - Open a Pull Request against `main`.
 - Fill out the PR template completely.
 - Ensure all CI checks pass (Lint, Unit, Golden Path).
@@ -48,12 +71,14 @@ This sequence is our contract. If it passes, your environment is healthy.
 We welcome contributions from AI agents and automated systems. To reduce friction and ensure safety, please follow these rules:
 
 ### For AI Agents & Bots
+
 1.  **Read the Instructions**: You **MUST** read and adhere to [`AGENTS.md`](AGENTS.md). It contains specific directives for code generation, architectural boundaries, and prohibited actions.
 2.  **Sign Your Work**: All commits must be signed.
 3.  **Context Awareness**: Do not hallucinate dependencies or APIs. Verify existence before importing.
 4.  **No-Op Changes**: If you need to force a review on an existing file without functional changes, add a non-breaking comment or whitespace change to trigger the diff.
 
 ### Co-authoring
+
 When collaborating with an AI or another human, use the `Co-authored-by` trailer in your commit message to give credit.
 
 ```text
@@ -66,6 +91,7 @@ Co-authored-by: Alice Smith <alice@example.com>
 ```
 
 ### The "Council of Solvers"
+
 Major architectural changes are reviewed by our internal "Council of Solvers" (a set of specialized AI agents). If your PR receives automated feedback from "Jules" or "Amp", treat it as you would a human code review.
 
 ## 📦 Release Cadence & CI/CD
