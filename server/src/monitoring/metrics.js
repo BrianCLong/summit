@@ -471,6 +471,43 @@ const intelgraphJobQueueDepth = new client.Gauge({
   labelNames: ['queue_name', 'status'],
 });
 
+// Golden Path Metrics
+const goldenPathStepTotal = new client.Counter({
+  name: 'golden_path_step_total',
+  help: 'Total number of golden path steps executed',
+  labelNames: ['step', 'status', 'tenant_id'],
+});
+
+const uiErrorBoundaryCatchTotal = new client.Counter({
+  name: 'ui_error_boundary_catch_total',
+  help: 'Total number of UI errors caught by boundary',
+  labelNames: ['component', 'tenant_id'],
+});
+
+// DORA Metrics
+const maestroDeploymentsTotal = new client.Counter({
+  name: 'maestro_deployments_total',
+  help: 'Total number of deployments',
+  labelNames: ['environment', 'status'],
+});
+
+const maestroPrLeadTimeHours = new client.Histogram({
+  name: 'maestro_pr_lead_time_hours',
+  help: 'Lead time for changes in hours',
+  buckets: [1, 4, 12, 24, 48, 168],
+});
+
+const maestroChangeFailureRate = new client.Gauge({
+  name: 'maestro_change_failure_rate',
+  help: 'Change failure rate (0-1)',
+});
+
+const maestroMttrHours = new client.Histogram({
+  name: 'maestro_mttr_hours',
+  help: 'Mean time to restore in hours',
+  buckets: [0.1, 0.5, 1, 4, 24],
+});
+
 // Auto-remediation execution tracking
 const serviceAutoRemediationsTotal = new client.Counter({
   name: 'service_auto_remediations_total',
@@ -563,7 +600,13 @@ const metrics = {
   llmRequestDuration,
   rateLimitExceededTotal,
   breakerState,
-  intelgraphJobQueueDepth
+  intelgraphJobQueueDepth,
+  goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours
 };
 
 // Update memory usage periodically
