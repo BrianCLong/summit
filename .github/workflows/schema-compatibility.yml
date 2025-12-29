@@ -1,0 +1,23 @@
+name: Schema Compatibility
+
+on:
+  pull_request:
+    paths:
+      - "schemas/**"
+      - "scripts/check_schema_compatibility.py"
+      - ".github/workflows/schema-compatibility.yml"
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Run schema compatibility checks
+        run: python scripts/check_schema_compatibility.py

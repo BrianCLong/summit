@@ -1,0 +1,12 @@
+dataset: customer_profile
+version: v1
+classification: confidential
+pii_fields:
+  - full_name
+  - email
+residency: us
+retention_days: 730
+owner: data-platform
+schema_hash: "b3fda660309fce7648c46cc5f1f866fdd6a9bba8c2a3a56896379977c7c162b4"
+notes: |
+  Baseline profile envelope used by the simulated ingestion pipeline and graph analytics.

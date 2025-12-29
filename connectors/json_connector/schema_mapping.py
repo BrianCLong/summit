@@ -18,6 +18,7 @@ def map_json_to_intelgraph(json_file_path):
                 entities.append(
                     {
                         "type": "Person",
+                        "source_record_id": person_id,
                         "properties": {
                             "id": person_id,
                             "name": item["name"],
@@ -32,12 +33,14 @@ def map_json_to_intelgraph(json_file_path):
                     entities.append(
                         {
                             "type": "Organization",
+                            "source_record_id": org_id,
                             "properties": {"id": org_id, "name": item["works_at"]["name"]},
                         }
                     )
                     relationships.append(
                         {
                             "type": "WORKS_AT",
+                            "source_record_id": person_id,
                             "source_id": person_id,
                             "source_type": "Person",
                             "target_id": org_id,
@@ -53,6 +56,7 @@ def map_json_to_intelgraph(json_file_path):
                         entities.append(
                             {
                                 "type": "Project",
+                                "source_record_id": project_id,
                                 "properties": {
                                     "id": project_id,
                                     "name": project_data["name"],
@@ -63,6 +67,7 @@ def map_json_to_intelgraph(json_file_path):
                         relationships.append(
                             {
                                 "type": "WORKS_ON",
+                                "source_record_id": person_id,
                                 "source_id": person_id,
                                 "source_type": "Person",
                                 "target_id": project_id,
@@ -83,3 +88,4 @@ if __name__ == "__main__":
     print("\nRelationships:")
     for rel in relationships:
         print(rel)
+

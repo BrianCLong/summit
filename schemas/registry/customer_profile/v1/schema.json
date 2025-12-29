@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Customer Profile",
+  "description": "Normalized person/customer profile used for graph enrichment and downstream modeling.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable profile identifier scoped to the tenant."
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Preferred display name."
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Primary contact email when available."
+    },
+    "country": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-2 country of residence."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Free-form business tags applied to the profile."
+    }
+  },
+  "required": ["id", "full_name"],
+  "additionalProperties": false
+}

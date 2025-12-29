@@ -1,0 +1,21 @@
+id: person_project_assignment
+version: v1
+schema: schemas/registry/person_project_assignment/v1/schema.json
+classification: confidential
+residency: us
+retention:
+  days: 365
+  policy: archive_on_expiry
+pii:
+  contains_pii: true
+  fields:
+    - person_id
+business_owner: data-platform
+purpose: "Track project staffing relationships generated during ingestion"
+quality_controls:
+  - required_fields: [assignment_id, person_id, project_id]
+  - unique_key: assignment_id
+lineage:
+  produced_by: simulated_ingestion.pipeline
+  consumed_by:
+    - analytics.shortest_path_demo

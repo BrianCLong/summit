@@ -14,6 +14,7 @@ def map_csv_to_intelgraph(csv_file_path):
                 entities.append(
                     {
                         "type": "Person",
+                        "source_record_id": row["id"],
                         "properties": {
                             "id": row["id"],
                             "name": row["name"],
@@ -25,6 +26,7 @@ def map_csv_to_intelgraph(csv_file_path):
                 entities.append(
                     {
                         "type": "Project",
+                        "source_record_id": row["id"],
                         "properties": {
                             "id": row["id"],
                             "name": row["name"],

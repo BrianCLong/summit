@@ -1,0 +1,22 @@
+id: customer_profile
+version: v1
+schema: schemas/registry/customer_profile/v1/schema.json
+classification: confidential
+residency: us
+retention:
+  days: 730
+  policy: delete_or_archive
+pii:
+  contains_pii: true
+  fields:
+    - full_name
+    - email
+business_owner: data-platform
+purpose: "Graph enrichment for user and contact analytics"
+quality_controls:
+  - required_fields: [id, full_name]
+  - unique_key: id
+lineage:
+  produced_by: simulated_ingestion.pipeline
+  consumed_by:
+    - analytics.shortest_path_demo

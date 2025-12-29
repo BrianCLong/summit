@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Lineage Event v1",
+  "description": "Describes a single transform linking one or more input records to a derived output record.",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Stable identifier for the emitted lineage event."
+    },
+    "operator": {
+      "type": "string",
+      "description": "Logical name of the job/service emitting the event."
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp when the transform executed."
+    },
+    "dataset": {
+      "type": "string",
+      "description": "Dataset identifier for the output payload."
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "required": ["id", "type"],
+      "additionalProperties": true
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "dataset": { "type": "string" }
+        },
+        "required": ["id"],
+        "additionalProperties": true
+      }
+    },
+    "transform": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "code_reference": { "type": "string" }
+      },
+      "required": ["name"],
+      "additionalProperties": true
+    }
+  },
+  "required": ["event_id", "operator", "occurred_at", "dataset", "output", "inputs", "transform"],
+  "additionalProperties": false
+}

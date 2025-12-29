@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Person Project Assignment",
+  "description": "Relationship edges capturing which people contribute to which projects.",
+  "type": "object",
+  "properties": {
+    "assignment_id": {
+      "type": "string",
+      "description": "Deterministic identifier for the edge (person->project)."
+    },
+    "person_id": {
+      "type": "string",
+      "description": "Identifier for the person node."
+    },
+    "project_id": {
+      "type": "string",
+      "description": "Identifier for the project node."
+    },
+    "role": {
+      "type": "string",
+      "description": "Optional role or responsibility description."
+    },
+    "source_system": {
+      "type": "string",
+      "description": "System of record that produced the assignment."
+    }
+  },
+  "required": ["assignment_id", "person_id", "project_id"],
+  "additionalProperties": false
+}

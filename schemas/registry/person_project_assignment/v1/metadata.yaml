@@ -1,0 +1,11 @@
+dataset: person_project_assignment
+version: v1
+classification: confidential
+pii_fields:
+  - person_id
+residency: us
+retention_days: 365
+owner: data-platform
+schema_hash: "2bc3722e22efac763feb7e1ffe57193693ad3af6839880679de801917c819961"
+notes: |
+  Represents WORKS_ON edges emitted by the simulated ingestion pipeline when linking people and projects.

@@ -10,6 +10,8 @@ from typing import Any
 # (It should be if project root is added to sys.path)
 from intelgraph.graph_analytics.core_analytics import Graph, find_shortest_path
 
+from simulated_ingestion.lineage_emitter import LineageEmitter
+
 
 class MockGraphDBClient:
     """
@@ -124,10 +126,40 @@ def run_ingestion_pipeline(connector_path: str, mock_db_client: MockGraphDBClien
 
     # 4. Send to Mock Graph DB
     mock_db_client.clear_db()  # Clear previous data for a clean run
+    lineage_emitter_entities = LineageEmitter(
+        sink_path=os.path.join(os.path.dirname(__file__), "lineage_events.log"),
+        operator="simulated_ingestion.pipeline",
+        dataset="customer_profile",
+    )
+    lineage_emitter_relationships = LineageEmitter(
+        sink_path=os.path.join(os.path.dirname(__file__), "lineage_events.log"),
+        operator="simulated_ingestion.pipeline",
+        dataset="person_project_assignment",
+    )
+
     for entity in entities_to_ingest:
         mock_db_client.create_node(entity)
+        lineage_emitter_entities.emit(
+            output_id=str(entity.get("properties", {}).get("id")),
+            output_type=str(entity.get("type")),
+            input_ids=[
+                str(entity.get("source_record_id", entity.get("properties", {}).get("id")))
+            ],
+            transform_name="mapping_to_graph_entity",
+            code_reference=connector_path,
+        )
     for rel in relationships_to_ingest:
         mock_db_client.create_relationship(rel)
+        lineage_emitter_relationships.emit(
+            output_id=f"{rel.get('source_id')}->{rel.get('target_id')}:{rel.get('type')}",
+            output_type=str(rel.get("type")),
+            input_ids=[
+                str(rel.get("source_record_id", rel.get("source_id"))),
+                str(rel.get("target_id")),
+            ],
+            transform_name="mapping_to_graph_relationship",
+            code_reference=connector_path,
+        )
 
     print("Ingestion pipeline completed successfully.")
 
