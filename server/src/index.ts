@@ -18,7 +18,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import { initializeTracing } from './observability/tracer.js';
+import { initTelemetry } from '@intelgraph/telemetry-config';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
@@ -32,8 +32,7 @@ import { logConfigSummary } from './config/index.js';
 import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
 
 const startServer = async () => {
-  const tracer = initializeTracing();
-  await tracer.initialize();
+  const sdk = initTelemetry('intelgraph-server');
 
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
@@ -190,15 +189,12 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
-    try {
-        await tracer.shutdown();
-    } catch (err) {
-        logger.error(`Error shutting down Tracer: ${err}`);
-    }
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
-    if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
+    if (stopKafkaConsumer) {
+      await stopKafkaConsumer();
+    } // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),
       closePostgresPool(),
