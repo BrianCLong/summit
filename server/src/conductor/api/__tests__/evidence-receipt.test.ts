@@ -7,6 +7,7 @@ import {
   signReceiptPayload,
 } from '../../../maestro/evidence/receipt.js';
 import { evidenceRoutes } from '../evidence-routes.js';
+import { errorCounter, requestCounter, resetRegistryMetrics } from '../../../metrics/registry.js';
 
 jest.mock('../../auth/rbac-middleware.js', () => {
   const allow = (permission: string) => (req: any, res: any, next: any) => {
@@ -38,11 +39,43 @@ describe('evidence receipt routes', () => {
     jest.useFakeTimers().setSystemTime(new Date('2024-01-02T00:00:00Z'));
     process.env.EVIDENCE_SIGNING_SECRET = 'test-secret';
     queryMock.mockReset();
+    resetRegistryMetrics();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
     jest.useRealTimers();
+  });
+
+  test('increments request counters for receipt webhook', async () => {
+    queryMock
+      .mockResolvedValueOnce({ rows: [{ id: 'run-1' }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValue({ rows: [] });
+
+    jest.spyOn(crypto, 'randomUUID').mockReturnValue('artifact-uuid');
+
+    await request(app)
+      .post('/api/conductor/evidence/receipt')
+      .set('x-allow-evidence:create', '1')
+      .send({ runId: 'run-1' });
+
+    const requestMetrics = requestCounter.get().values;
+    expect(requestMetrics[0].value).toBe(1);
+    expect(requestMetrics[0].labels.status).toBe('200');
+    expect(requestMetrics[0].labels.route).toBe('conductor_evidence_receipt');
+  });
+
+  test('increments error counter on client failure', async () => {
+    await request(app)
+      .post('/api/conductor/evidence/receipt')
+      .set('x-allow-evidence:create', '1')
+      .send({});
+
+    const errorMetrics = errorCounter.get().values;
+    expect(errorMetrics[0].labels.error_type).toBe('client');
+    expect(errorMetrics[0].value).toBe(1);
   });
 
   test('canonical hashing is deterministic', () => {

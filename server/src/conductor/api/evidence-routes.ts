@@ -14,6 +14,7 @@ import {
   RunEventRow,
   RunRow,
 } from '../../maestro/evidence/receipt.js';
+import { incrementError, incrementRequest } from '../../metrics/registry.js';
 
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
@@ -57,9 +58,28 @@ router.post(
   requirePermission('evidence:create'),
   express.json(),
   async (req, res) => {
+    const tenantId = (req as any).user?.tenantId || (req as any).user?.tenant_id;
+    const recordRequest = (status: number, errorType?: 'client' | 'server') => {
+      incrementRequest({
+        route: 'conductor_evidence_receipt',
+        method: 'POST',
+        status,
+        tenant: tenantId,
+      });
+
+      if (errorType) {
+        incrementError({
+          route: 'conductor_evidence_receipt',
+          error_type: errorType,
+          tenant: tenantId,
+        });
+      }
+    };
+
     try {
       const { runId } = req.body || {};
       if (!runId) {
+        recordRequest(400, 'client');
         return res
           .status(400)
           .json({ success: false, error: 'runId is required' });
@@ -68,6 +88,7 @@ router.post(
       const { run, events, artifacts } = await loadRunContext(runId);
 
       if (!run) {
+        recordRequest(404, 'client');
         return res.status(404).json({ success: false, error: 'Run not found' });
       }
 
@@ -94,10 +115,12 @@ router.post(
         [artifactId, receiptBuffer, 'application/json'],
       );
 
+      recordRequest(200);
       return res.json({ success: true, data: { receipt, artifactId } });
     } catch (error: any) {
       const message =
         error?.message || 'Failed to generate provenance receipt';
+      recordRequest(500, 'server');
       return res.status(500).json({ success: false, error: message });
     }
   },
