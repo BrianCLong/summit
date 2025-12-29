@@ -1,0 +1,28 @@
+name: Repo Hygiene
+
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  check-meta-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check for CODEOWNERS
+        run: |
+          if [ ! -f .github/CODEOWNERS ]; then
+            echo "::error::Missing .github/CODEOWNERS"
+            exit 1
+          fi
+      - name: Check for PULL_REQUEST_TEMPLATE
+        run: |
+          if [ ! -f .github/PULL_REQUEST_TEMPLATE.md ]; then
+            echo "::error::Missing .github/PULL_REQUEST_TEMPLATE.md"
+            exit 1
+          fi
