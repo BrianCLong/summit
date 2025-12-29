@@ -180,6 +180,7 @@ export default [
       'no-console': 'off', // Allow console in tests
       'no-unused-vars': 'off', // Disable base rule in favor of @typescript-eslint version
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'off', // Tests often need flexibility with any types
     },
   },
   // Legacy files exemption (gradual migration)
