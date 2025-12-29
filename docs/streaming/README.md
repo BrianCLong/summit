@@ -37,6 +37,12 @@ pnpm dev
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.
 
+## Current Gaps & Remediation
+
+- 🟡 **Real-time streaming ingestion (Kafka/Kinesis)**: Define dual-source connectors with EOS + DLQ handling and IaC for stream provisioning. See [REALTIME_GAPS_REMEDIATION.md](./REALTIME_GAPS_REMEDIATION.md).
+- 🟡 **Data quality validation**: Add synchronous and asynchronous validation gates with quarantine flows, SLOs, and alerting. Details in the remediation plan.
+- 🟡 **Data lineage tracking**: Emit OpenLineage events from ingest → transform → load and persist to the provenance ledger; track rollout in the remediation plan.
+
 ## Packages
 
 - **@intelgraph/kafka-integration**: Kafka producer/consumer with EOS
@@ -84,6 +90,7 @@ PORT=3003
 Access Kafka UI at http://localhost:8080
 
 Monitor stream metrics:
+
 - Consumer lag
 - Throughput (events/sec)
 - Processing latency
