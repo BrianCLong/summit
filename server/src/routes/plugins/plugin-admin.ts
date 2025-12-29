@@ -16,6 +16,7 @@ import { PluginManager } from '../../plugins/PluginManager.js';
 import { PluginRegistry } from '../../plugins/PluginRegistry.js';
 import { Principal } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
+import { requireStepUpGuard } from '../../middleware/step-up-guard.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
@@ -340,6 +341,7 @@ router.delete(
   ensureAuthenticated,
   buildPrincipal,
   requirePluginAdmin,
+  requireStepUpGuard,
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
