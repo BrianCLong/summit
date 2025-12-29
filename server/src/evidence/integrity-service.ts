@@ -16,6 +16,7 @@ export interface EvidenceIntegrityMismatch {
   artifactType: string;
   expectedHash: string;
   computedHash: string | null;
+  fileHash?: string | null;
   storagePath: string;
   mismatchType: EvidenceMismatchType;
   remediation: string;
@@ -59,8 +60,14 @@ export class EvidenceIntegrityService {
   async verifyAll(
     options: VerifyOptions = {},
   ): Promise<EvidenceVerificationResult> {
-    const chunkSize = Math.max(1, options.chunkSize ?? 50);
-    const rateLimitPerSecond = Math.max(1, options.rateLimitPerSecond ?? 5);
+    const chunkSize = Math.max(
+      1,
+      options.chunkSize ?? Number(process.env.EVIDENCE_INTEGRITY_CHUNK ?? 50),
+    );
+    const rateLimitPerSecond = Math.max(
+      1,
+      options.rateLimitPerSecond ?? Number(process.env.EVIDENCE_INTEGRITY_RPS ?? 5),
+    );
     const emitIncidents = options.emitIncidents ?? false;
     const minIntervalMs = Math.ceil(1000 / rateLimitPerSecond);
 
@@ -160,6 +167,7 @@ export class EvidenceIntegrityService {
         artifactType: artifact.artifact_type,
         expectedHash: artifact.sha256_hash,
         computedHash: null,
+        fileHash: null,
         storagePath,
         mismatchType: 'missing_content',
         remediation:
@@ -179,6 +187,7 @@ export class EvidenceIntegrityService {
         artifactType: artifact.artifact_type,
         expectedHash: artifact.sha256_hash,
         computedHash,
+        fileHash: computedHash,
         storagePath,
         mismatchType: 'hash_mismatch',
         remediation:
