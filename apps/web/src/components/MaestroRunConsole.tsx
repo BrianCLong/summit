@@ -139,6 +139,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                         key={prompt}
                         type="button"
                         onClick={() => setInput(prompt)}
+                        aria-label={`Use prompt: ${prompt}`}
                         className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
                       >
                         {prompt}
@@ -166,7 +167,9 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                     </Button>
                   )}
                   <span className="text-[10px] text-slate-500 hidden sm:inline-block mr-1">
-                    ⌘+Enter
+                    <kbd className="font-sans border border-slate-700 rounded px-1.5 py-0.5 text-[10px] bg-slate-900/50 text-slate-400 shadow-sm">
+                      ⌘+Enter
+                    </kbd>
                   </span>
                   <Button
                     type="submit"
@@ -387,7 +390,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                           </pre>
                           <CopyButton
                             text={formatArtifactData(result.artifact.data)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
+                            className="absolute top-2 right-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
                           />
                         </div>
                       ) : (
