@@ -24,15 +24,12 @@ export class FileConnector extends BaseConnector implements SourceConnector {
   }>> {
     return this.withResilience(async () => {
       // Simple implementation: Read full file if cursor is null/start, else return empty
-      // In a real impl, this would support reading large files in chunks or listing directory
 
       if (cursor === 'DONE') {
         return { records: [], nextCursor: 'DONE' };
       }
 
       const filePath = this.config.path;
-      // Safety check to prevent reading arbitrary files outside allowed dirs in production
-      // For this task, we assume local file access is permitted for ingestion
 
       try {
         const stats = await fs.stat(filePath);
@@ -41,18 +38,35 @@ export class FileConnector extends BaseConnector implements SourceConnector {
            return { records: [], nextCursor: 'DONE' };
         }
 
-        const content = await fs.readFile(filePath, 'utf-8');
+        // Determine if binary or text
+        const ext = path.extname(filePath).toLowerCase();
+        const isBinary = ['.pdf', '.png', '.jpg', '.jpeg', '.zip'].includes(ext);
+
         let records: any[] = [];
 
-        if (filePath.endsWith('.json')) {
-          const parsed = JSON.parse(content);
-          records = Array.isArray(parsed) ? parsed : [parsed];
-        } else if (filePath.endsWith('.csv')) {
-           // CSV parsing logic would go here
-           // For MVP, just treating as raw text lines or similar
-           records = content.split('\n').filter(line => line.trim().length > 0).map(line => ({ raw: line }));
+        if (isBinary) {
+            // Read as buffer
+            const buffer = await fs.readFile(filePath);
+            records = [{
+                path: filePath,
+                content: buffer, // Raw buffer
+                metadata: { size: stats.size, created: stats.birthtime }
+            }];
         } else {
-           records = [{ text: content, path: filePath }];
+            // Read as text
+            const content = await fs.readFile(filePath, 'utf-8');
+            if (filePath.endsWith('.json')) {
+              try {
+                  const parsed = JSON.parse(content);
+                  records = Array.isArray(parsed) ? parsed : [parsed];
+              } catch (e) {
+                  records = [{ text: content, path: filePath, error: 'JSON parse failed' }];
+              }
+            } else if (filePath.endsWith('.csv')) {
+               records = content.split('\n').filter(line => line.trim().length > 0).map(line => ({ raw: line }));
+            } else {
+               records = [{ text: content, path: filePath }];
+            }
         }
 
         return { records, nextCursor: 'DONE' };
