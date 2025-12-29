@@ -1,6 +1,10 @@
 export interface SubjectAttributes {
   id: string;
   tenantId: string;
+  org?: string;
+  role?: string;
+  region?: string;
+  auth_strength?: string;
   roles: string[];
   entitlements: string[];
   residency: string;
@@ -18,6 +22,8 @@ export interface ResourceAttributes {
   tenantId: string;
   residency: string;
   classification: string;
+  owner?: string;
+  customer_id?: string;
   tags: string[];
 }
 
@@ -62,6 +68,9 @@ export interface AuthorizationDecision {
   allowed: boolean;
   reason: string;
   obligations: DecisionObligation[];
+  decisionId?: string;
+  policyVersion?: string;
+  inputsHash?: string;
 }
 
 export interface BreakGlassMetadata {

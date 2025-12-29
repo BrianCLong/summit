@@ -1,0 +1,39 @@
+{
+  "classification": {
+    "levels": {
+      "public": 0,
+      "internal": 1,
+      "confidential": 2,
+      "secret": 3,
+      "top-secret": 4
+    }
+  },
+  "residency": {
+    "default": "match",
+    "allowed_global": ["global", "any"],
+    "regions": ["us", "eu", "apac"]
+  },
+  "step_up": {
+    "actions": ["export"],
+    "min_auth_strength": "loa2",
+    "obligation": {
+      "type": "step_up",
+      "requirement": "loa2",
+      "target": "subject.auth_strength"
+    }
+  },
+  "actions": {
+    "read": {
+      "roles": ["analyst", "reader", "admin"]
+    },
+    "write": {
+      "roles": ["analyst", "contributor", "admin"]
+    },
+    "export": {
+      "roles": ["analyst", "admin"]
+    },
+    "admin": {
+      "roles": ["admin"]
+    }
+  }
+}
