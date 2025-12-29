@@ -2,11 +2,15 @@ import axios from 'axios';
 
 type EventName =
   | 'rate_limit_block'
+  | 'rate_limit_tenant_block'
   | 'rate_limit_redis_error'
   | 'drop_validation_failed'
   | 'drop_submission'
   | 'vault_error'
-  | 'session_warning';
+  | 'session_warning'
+  | 'csrf_violation'
+  | 'waf_block'
+  | 'surface_inventory_access';
 
 interface SecurityEvent {
   level?: 'info' | 'warn' | 'error';

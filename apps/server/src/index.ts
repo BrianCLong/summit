@@ -12,6 +12,10 @@ import { securityHeaders, extraSecurityHeaders } from './config/security.js';
 import { dropResolvers } from './graphql/resolvers/drop.js';
 import { fetchSecret } from './security/vault.js';
 import { securityLogger } from './observability/securityLogger.js';
+import { issueCsrfToken, csrfProtector } from './security/csrf.js';
+import { wafShield } from './security/waf.js';
+import { surfaceRegistry } from './security/surfaceInventory.js';
+import { tenantResolver } from './security/tenant.js';
 
 const typeDefs = readFileSync(
   new URL('./graphql/schemas/drop.graphql', import.meta.url),
@@ -30,18 +34,28 @@ const server = new ApolloServer({
   },
 });
 
-const startServer = async () => {
-  await server.start();
+let serverStarted = false;
+
+export const createApp = async () => {
+  if (!serverStarted) {
+    await server.start();
+    serverStarted = true;
+  }
 
   const app = express();
   app.set('trust proxy', 1);
 
+  const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   app.use(
     cors({
-      origin: (process.env.CORS_ORIGIN || 'http://localhost:3000')
-        .split(',')
-        .map((o) => o.trim()),
+      origin: allowedOrigins,
       credentials: true,
+      methods: ['GET', 'POST', 'HEAD', 'OPTIONS'],
+      allowedHeaders: ['content-type', 'authorization', 'x-tenant-id', 'x-csrf-token'],
     }),
   );
 
@@ -50,6 +64,7 @@ const startServer = async () => {
   app.use(createRateLimiter());
   app.use(bodyParser.json({ limit: '2mb' }));
   app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }));
+  app.use(wafShield);
 
   const redisUrl = process.env.REDIS_URL;
   const redisClient = redisUrl
@@ -82,7 +97,49 @@ const startServer = async () => {
     }),
   );
 
+  app.use(tenantResolver);
+  app.use('/security/csrf-token', issueCsrfToken);
+  app.use(csrfProtector);
+
   app.use('/healthz', (_req, res) => res.json({ status: 'ok' }));
+
+  surfaceRegistry.register({
+    method: 'GET',
+    path: '/healthz',
+    category: 'public',
+    description: 'Health probe',
+  });
+  surfaceRegistry.register({
+    method: 'POST',
+    path: '/graphql',
+    category: 'public',
+    description: 'GraphQL endpoint',
+  });
+  surfaceRegistry.register({
+    method: 'GET',
+    path: '/security/csrf-token',
+    category: 'admin',
+    description: 'Issue CSRF tokens for session',
+  });
+
+  const surfaceToken = process.env.SURFACE_INVENTORY_TOKEN;
+  surfaceRegistry.register({
+    method: 'GET',
+    path: '/security/surface',
+    category: 'admin',
+    description: 'Surface inventory',
+  });
+  app.get('/security/surface', surfaceRegistry.handler(surfaceToken));
+
+  app.post('/actions/ping', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
+  surfaceRegistry.register({
+    method: 'POST',
+    path: '/actions/ping',
+    category: 'admin',
+    description: 'Authenticated liveness check for CSRF and session validation',
+  });
 
   app.use(
     '/graphql',
@@ -90,16 +147,28 @@ const startServer = async () => {
       context: async ({ req }) => ({
         ip: req.ip,
         sessionId: (req as any).sessionID,
+        tenantId: (req as any).tenantId,
       }),
     }),
   );
 
+  return app;
+};
+
+export const startServer = async () => {
+  const app = await createApp();
   const port = Number(process.env.PORT) || 4001;
   app.listen(port, () => {
     console.log(`🚀 Drop Gateway ready at http://localhost:${port}/graphql`);
   });
 };
 
-startServer().catch((error) => {
-  console.error('Failed to start Drop Gateway server', error);
-});
+if (
+  process.argv[1] &&
+  import.meta.url === new URL(process.argv[1], 'file://').href &&
+  process.env.NODE_ENV !== 'test'
+) {
+  startServer().catch((error) => {
+    console.error('Failed to start Drop Gateway server', error);
+  });
+}
