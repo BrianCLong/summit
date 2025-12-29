@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, jest } from '@jest/globals';
 import {
   createEntityCommentAuthorizer,
   EntityCommentAccessError,
@@ -6,8 +6,9 @@ import {
 
 describe('entity comment ABAC authorizer', () => {
   it('allows access when OPA approves', async () => {
+    const checkDataAccess = jest.fn(async () => true);
     const authorizer = createEntityCommentAuthorizer({
-      checkDataAccess: async () => true,
+      checkDataAccess,
     });
 
     await expect(
@@ -18,6 +19,13 @@ describe('entity comment ABAC authorizer', () => {
         action: 'comment:read',
       }),
     ).resolves.toBeUndefined();
+
+    expect(checkDataAccess).toHaveBeenCalledWith(
+      'user-1',
+      'tenant-1',
+      'entity_comment',
+      'comment:read',
+    );
   });
 
   it('denies access when OPA rejects', async () => {

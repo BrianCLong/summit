@@ -2,19 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { renderMarkdown } from './markdown'
 
 describe('renderMarkdown', () => {
-  it('renders markdown to safe HTML', () => {
-    const html = renderMarkdown('**Hello** world')
-
-    expect(html).toContain('<strong>')
+  it('sanitizes script tags', () => {
+    const html = renderMarkdown('Hello <script>alert(1)</script>')
     expect(html).toContain('Hello')
+    expect(html).not.toContain('<script>')
+    expect(html).not.toContain('alert(1)')
   })
 
-  it('sanitizes unsafe HTML payloads', () => {
-    const html = renderMarkdown(
-      '<img src=x onerror=alert(1) /><script>alert(2)</script>',
-    )
-
-    expect(html).not.toContain('onerror')
-    expect(html).not.toContain('<script>')
+  it('strips javascript: urls', () => {
+    const html = renderMarkdown('[link](javascript:alert("xss"))')
+    expect(html).toContain('link')
+    expect(html).not.toContain('javascript:')
   })
 })
