@@ -129,6 +129,7 @@ import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
+import { payloadLimits } from './config/payloadLimits.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -224,7 +225,7 @@ export const createApp = async () => {
 
   app.use(
     express.json({
-      limit: '1mb',
+      limit: payloadLimits.defaultJson,
       verify: (req: any, _res, buf) => {
         req.rawBody = buf;
       },

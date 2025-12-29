@@ -4,6 +4,7 @@ import express from 'express';
 import * as crypto from 'crypto';
 import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
+import bytes from 'bytes';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import { getPostgresPool } from '../../db/postgres.js';
 import { requirePermission } from '../auth/rbac-middleware.js';
@@ -14,9 +15,57 @@ import {
   RunEventRow,
   RunRow,
 } from '../../maestro/evidence/receipt.js';
+import {
+  PAYLOAD_TOO_LARGE_CODE,
+  payloadLimitFlags,
+  resolvePayloadLimit,
+} from '../../config/payloadLimits.js';
 
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
+const receiptPayloadLimit = resolvePayloadLimit('receiptWebhook');
+const receiptByteLimit = bytes.parse(receiptPayloadLimit) || 0;
+const receiptBodyParser = express.json({ limit: receiptPayloadLimit });
+
+const enforceReceiptContentLength = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
+  if (!payloadLimitFlags.enforceWebhookLimits) return next();
+
+  const declaredSize = req.headers['content-length'];
+  const contentLength = typeof declaredSize === 'string' ? Number(declaredSize) : undefined;
+
+  if (contentLength && receiptByteLimit && contentLength > receiptByteLimit) {
+    return res.status(413).json({
+      success: false,
+      error: 'Request payload too large',
+      code: PAYLOAD_TOO_LARGE_CODE,
+      enforced: payloadLimitFlags.enforceWebhookLimits,
+    });
+  }
+
+  return next();
+};
+
+const handleReceiptPayloadTooLarge = (
+  err: any,
+  _req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({
+      success: false,
+      error: 'Request payload too large',
+      code: PAYLOAD_TOO_LARGE_CODE,
+      enforced: payloadLimitFlags.enforceWebhookLimits,
+    });
+  }
+
+  return next(err);
+};
 
 const inlineContentKey = (artifactId: string) =>
   `inline://evidence_artifact_content/${artifactId}`;
@@ -55,7 +104,9 @@ async function loadRunContext(runId: string): Promise<{
 router.post(
   '/receipt',
   requirePermission('evidence:create'),
-  express.json(),
+  enforceReceiptContentLength,
+  receiptBodyParser,
+  handleReceiptPayloadTooLarge,
   async (req, res) => {
     try {
       const { runId } = req.body || {};

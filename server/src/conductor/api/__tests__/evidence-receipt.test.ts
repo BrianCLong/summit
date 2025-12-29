@@ -10,7 +10,9 @@ import { evidenceRoutes } from '../evidence-routes.js';
 
 jest.mock('../../auth/rbac-middleware.js', () => {
   const allow = (permission: string) => (req: any, res: any, next: any) => {
-    if (req.headers[`x-allow-${permission}`]) {
+    const headerKey = `x-allow-${permission}`;
+    const safeHeaderKey = headerKey.replace(/:/g, '-');
+    if (req.headers[headerKey] || req.headers[safeHeaderKey]) {
       req.user = { userId: 'user-1', permissions: [permission] };
       return next();
     }
@@ -105,7 +107,7 @@ describe('evidence receipt routes', () => {
 
     const res = await request(app)
       .post('/api/conductor/evidence/receipt')
-      .set('x-allow-evidence:create', '1')
+      .set('x-allow-evidence-create', '1')
       .send({ runId: 'run-1' });
 
     expect(res.status).toBe(200);
@@ -129,6 +131,21 @@ describe('evidence receipt routes', () => {
     );
   });
 
+  test('POST /receipt rejects oversized payloads with stable error code', async () => {
+    const res = await request(app)
+      .post('/api/conductor/evidence/receipt')
+      .set('x-allow-evidence-create', '1')
+      .send({ runId: 'run-1', filler: 'a'.repeat(300 * 1024) });
+
+    expect(res.status).toBe(413);
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        success: false,
+        code: 'PAYLOAD_TOO_LARGE',
+      }),
+    );
+  });
+
   test('GET /receipt/:runId returns stored receipt', async () => {
     const receipt = { hello: 'world' };
     queryMock
@@ -137,7 +154,7 @@ describe('evidence receipt routes', () => {
 
     const res = await request(app)
       .get('/api/conductor/evidence/receipt/run-1')
-      .set('x-allow-evidence:read', '1');
+      .set('x-allow-evidence-read', '1');
 
     expect(res.status).toBe(200);
     expect(res.body.data.receipt).toEqual(receipt);
@@ -148,7 +165,7 @@ describe('evidence receipt routes', () => {
 
     const res = await request(app)
       .get('/api/conductor/evidence/receipt/run-unknown')
-      .set('x-allow-evidence:read', '1');
+      .set('x-allow-evidence-read', '1');
 
     expect(res.status).toBe(404);
   });
