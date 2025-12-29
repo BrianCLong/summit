@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-26T00:00:00Z",
+  "last_updated": "2026-02-23T00:00:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,42 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "pending",
+          "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Sprint 2026-02-23 Analytics v2 + Federation v0.9",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "Analytics Pack v2",
+          "status": "in_progress",
+          "owner": "Jules"
+        },
+        {
+          "id": "D2",
+          "name": "Caseboard Publish & Embed",
+          "status": "in_progress",
+          "owner": "Jules"
+        },
+        {
+          "id": "D3",
+          "name": "Federation v0.9",
+          "status": "in_progress",
+          "owner": "Jules"
+        },
+        {
+          "id": "D4",
+          "name": "Mobile Preview PWA",
+          "status": "in_progress",
+          "owner": "Jules"
+        },
+        {
+          "id": "D5",
+          "name": "RBAC/ABAC Policy Packs",
+          "status": "in_progress",
           "owner": "Jules"
         }
       ]

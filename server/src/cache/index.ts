@@ -12,6 +12,10 @@ function getRedis(): ReturnType<typeof createClient> {
   return redisClient;
 }
 
+export function getRedisClient(): ReturnType<typeof createClient> {
+  return getRedis();
+}
+
 const inflight = new Map<string, Promise<unknown>>();
 
 export async function cached<T>(

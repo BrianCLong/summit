@@ -36,6 +36,10 @@ const ewTypeDefs = fs.readFileSync(ewSchemaPath, 'utf8');
 const collabSchemaPath = path.join(__dirname, './collaboration.graphql');
 const collabTypeDefs = fs.readFileSync(collabSchemaPath, 'utf8');
 
+// Load Federation schema
+const federationSchemaPath = path.join(__dirname, './federation.graphql');
+const federationTypeDefs = fs.readFileSync(federationSchemaPath, 'utf8');
+
 const base = gql`
   scalar JSON
   scalar DateTime
@@ -70,6 +74,7 @@ export const typeDefs = [
   ingestionTypeDefs,
   ewTypeDefs,
   collabTypeDefs,
+  federationTypeDefs,
 ];
 
 export default typeDefs;

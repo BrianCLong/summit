@@ -1,0 +1,18 @@
+"""Metadata for federated shard responses."""
+type FederatedShardInfo {
+  id: ID!
+  latencyMs: Int!
+  partial: Boolean!
+  requestId: ID!
+}
+
+"""Row data annotated with shard provenance."""
+type FederatedRow {
+  data: JSON!
+  shard: FederatedShardInfo!
+}
+
+extend type Query {
+  """Run a federated search across configured clusters."""
+  federatedSearch(q: String!, budgetMs: Int = 2000): [FederatedRow!]!
+}

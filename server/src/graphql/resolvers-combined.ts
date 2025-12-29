@@ -10,6 +10,7 @@ import { geoIntResolvers } from './resolvers/geoint.js';
 import { documentResolvers } from './resolvers.document.js';
 import { ingestionResolvers } from './resolvers/ingestionResolvers.js';
 import { randomUUID } from 'node:crypto';
+import { federationResolvers } from './resolvers/federation.js';
 
 interface User {
   id: string;
@@ -63,6 +64,7 @@ export const resolvers = {
     ...(copilotResolvers.Query || {}),
     ...(aiResolvers.Query || {}),
     ...(annotationsResolvers.Query || {}),
+    ...(federationResolvers.Query || {}),
     ...(v040Resolvers.Query || {}),
     ...(activityResolvers.Query || {}),
     ...(geoIntResolvers.Query || {}),
