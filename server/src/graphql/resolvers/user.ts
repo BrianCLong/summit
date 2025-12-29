@@ -20,6 +20,8 @@ import { cache } from '../../lib/cache/index.js';
 import { cfg } from '../../config.js';
 import { getPostgresPool } from '../../config/database.js';
 import argon2 from 'argon2';
+import { ReceiptService } from '../../services/receipt.service.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const logger = pino();
 
@@ -299,6 +301,35 @@ const userResolvers = {
 
         // Invalidate cache
         await cache.invalidate(`user:${id}`);
+
+        // Generate and store a signed receipt for this privileged action
+        const receiptData = {
+          actionId: uuidv4(),
+          tenantId: context.user.tenant_id,
+          actorId: context.user.id,
+          actionType: 'UPDATE_USER',
+          resourceType: 'user',
+          resourceId: id,
+          signedData: {
+            userId: id,
+            changes: input,
+          },
+        };
+        const { signature, signedData } = await ReceiptService.generateReceipt(receiptData);
+        await pool.query(
+          `INSERT INTO signed_receipts (action_id, tenant_id, actor_id, action_type, resource_type, resource_id, signature, signed_data)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            receiptData.actionId,
+            receiptData.tenantId,
+            receiptData.actorId,
+            receiptData.actionType,
+            receiptData.resourceType,
+            receiptData.resourceId,
+            signature,
+            signedData,
+          ]
+        );
 
         logger.info({ userId: id }, 'User updated via GraphQL');
 

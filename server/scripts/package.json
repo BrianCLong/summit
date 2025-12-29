@@ -1,0 +1,22 @@
+{
+  "name": "temp-receipt-verifier",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify": "ts-node verify_signed_receipt.ts"
+  },
+  "dependencies": {
+    "graphql": "^16.8.0",
+    "pino": "^9.9.0",
+    "pg": "^8.16.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/pg": "^8.15.5",
+    "@types/uuid": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
