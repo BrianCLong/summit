@@ -2,10 +2,11 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { pubsub } from '../realtime/pubsub.js';
 import { randomUUID as uuid } from 'node:crypto';
-import { logger } from '../logger.js';
+import logger from '../utils/logger.js';
 
 const router = Router();
 const SECRET = process.env.ML_WEBHOOK_SECRET;
+const MAX_WEBHOOK_PAYLOAD_BYTES = 512 * 1024; // 512KB safeguard for inbound ML webhooks
 
 function verifySignature(body: Buffer, sig: string): boolean {
   if (!SECRET) {
@@ -42,6 +43,15 @@ router.post('/ai/webhook', async (req, res) => {
   if (!raw) {
     logger.error('Webhook received without rawBody. Ensure express.json() is configured with verify hook.');
     return res.status(500).json({ error: 'System configuration error' });
+  }
+
+  if (raw.length > MAX_WEBHOOK_PAYLOAD_BYTES) {
+    logger.warn('Webhook payload exceeded maximum allowed size', {
+      path: req.path,
+      receivedBytes: raw.length,
+      limitBytes: MAX_WEBHOOK_PAYLOAD_BYTES,
+    });
+    return res.status(413).json({ error: 'Payload too large' });
   }
 
   if (!verifySignature(raw, sig)) {
