@@ -1,7 +1,7 @@
 import express from 'express';
-import { SplunkSIEMSink } from '../../integrations/splunk/exporter';
-import { requireAuth } from '../../middleware/auth';
-import { requireRole } from '../../middleware/roles';
+import { SplunkSIEMSink } from '../../integrations/splunk/exporter.js';
+import { requireAuth } from '../../middleware/unifiedAuth.js';
+import { requireRole } from '../../middleware/rbac.js';
 
 const router = express.Router();
 

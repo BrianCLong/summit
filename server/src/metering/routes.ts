@@ -4,20 +4,22 @@ import { quotaManager } from './quotas';
 import { planService } from '../usage/plans';
 import { ensureAuthenticated } from '../middleware/auth';
 
+import { User } from '../lib/auth.js';
+
 export const meteringRouter = express.Router();
 
 // Middleware to ensure admin access
 const ensureAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const user = req.user;
+  const user = req.user as unknown as User;
   if (!user) {
-     res.status(401).json({ error: 'Unauthorized' });
-     return;
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
   }
 
   // Check for admin role
   if (user.role !== 'admin') {
-      res.status(403).json({ error: 'Forbidden: Admin access required' });
-      return;
+    res.status(403).json({ error: 'Forbidden: Admin access required' });
+    return;
   }
 
   next();
@@ -31,17 +33,18 @@ meteringRouter.get('/summary', ensureAuthenticated, async (req, res) => {
     const targetTenantId = (tenantId as string) || req.user?.tenantId;
 
     if (!targetTenantId) {
-       res.status(400).json({ error: 'Tenant ID required' });
-       return;
+      res.status(400).json({ error: 'Tenant ID required' });
+      return;
     }
 
     // Tenant Isolation
-    if (req.user?.tenantId && req.user.tenantId !== targetTenantId) {
-         // Unless admin
-         if (req.user.role !== 'admin') {
-             res.status(403).json({ error: 'Forbidden' });
-             return;
-         }
+    const currentUser = req.user as unknown as User;
+    if (currentUser?.tenantId && currentUser.tenantId !== targetTenantId) {
+      // Unless admin
+      if (currentUser.role !== 'admin') {
+        res.status(403).json({ error: 'Forbidden' });
+        return;
+      }
     }
 
     const usage = await persistentUsageRepository.list(
@@ -55,13 +58,13 @@ meteringRouter.get('/summary', ensureAuthenticated, async (req, res) => {
     const limits = await quotaManager.getEffectiveQuota(targetTenantId);
 
     res.json({
-        plan: {
-            id: plan.id,
-            name: plan.name,
-            limits: plan.limits
-        },
-        effectiveQuotas: limits,
-        usage: usage
+      plan: {
+        id: plan.id,
+        name: plan.name,
+        limits: plan.limits
+      },
+      effectiveQuotas: limits,
+      usage: usage
     });
   } catch (error) {
     res.status(500).json({ error: (error as Error).message });
@@ -74,8 +77,8 @@ meteringRouter.post('/quotas', ensureAuthenticated, ensureAdmin, async (req, res
     const { tenantId, config } = req.body;
 
     if (!tenantId || !config) {
-       res.status(400).json({ error: 'Missing tenantId or config' });
-       return;
+      res.status(400).json({ error: 'Missing tenantId or config' });
+      return;
     }
 
     await quotaManager.setQuotaOverride(tenantId, config);
@@ -92,8 +95,8 @@ meteringRouter.post('/plans/assign', ensureAuthenticated, ensureAdmin, async (re
     const { tenantId, planId } = req.body;
 
     if (!tenantId || !planId) {
-        res.status(400).json({ error: 'Missing tenantId or planId' });
-        return;
+      res.status(400).json({ error: 'Missing tenantId or planId' });
+      return;
     }
 
     await planService.setPlanForTenant(tenantId, planId);

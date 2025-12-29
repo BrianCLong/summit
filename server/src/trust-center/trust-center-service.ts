@@ -705,6 +705,61 @@ export class TrustCenterService {
     }
   }
 
+  /**
+   * Generates the "Tenant Trust Pack" v1.
+   * Aggregates Residency, Retention, and Export/Erase activity.
+   */
+  async generateTenantTrustPack(tenantId: string): Promise<any> {
+      const span = otelService.createSpan('trust-center.generate_trust_pack');
+      try {
+          const pool = getPostgresPool();
+          const { DataResidencyService } = await import('../data-residency/residency-service.js');
+          const residencyService = new DataResidencyService();
+
+          // 1. Residency Report
+          const residencyReport = await residencyService.generateResidencyReport(tenantId);
+
+          // 2. Erase/Export Activity
+          // (Mocking this query for now or we need to import EraseService)
+          const eraseRequests = await pool.query(
+              'SELECT * FROM erase_requests WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 50',
+              [tenantId]
+          );
+
+          // 3. Retention Policy Summary
+          const retentionConfig = await pool.query(
+              'SELECT retention_policy_days FROM data_residency_configs WHERE tenant_id = $1',
+              [tenantId]
+          );
+
+          const pack = {
+              generatedAt: new Date().toISOString(),
+              tenantId,
+              residency: residencyReport,
+              retention: {
+                  defaultDays: retentionConfig.rows[0]?.retention_policy_days || 'Default',
+                  policyLock: 'Strict (Simulated)'
+              },
+              dataRights: {
+                  eraseRequests: eraseRequests.rows.map(r => ({
+                      id: r.id,
+                      scope: r.scope,
+                      status: r.status,
+                      date: r.created_at
+                  }))
+              },
+              verification: {
+                  issuer: 'IntelGraph Trust Center',
+                  signature: 'SIMULATED_SIGNATURE_XYZ'
+              }
+          };
+
+          return pack;
+      } finally {
+          span?.end();
+      }
+  }
+
   async generateComprehensiveAuditReport(
     tenantId: string,
     options: {

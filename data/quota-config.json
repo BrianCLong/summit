@@ -1,0 +1,16 @@
+{
+  "tenantPlans": {
+    "demo-tenant": "starter",
+    "acme-corp": "standard",
+    "massive-dynamic": "premium"
+  },
+  "tenantOverrides": {
+    "acme-corp": {
+      "api_rpm": 8000
+    }
+  },
+  "featureAllowlist": {
+    "write_aware_sharding": ["massive-dynamic", "acme-corp"],
+    "entity_resolution_v1": ["massive-dynamic"]
+  }
+}

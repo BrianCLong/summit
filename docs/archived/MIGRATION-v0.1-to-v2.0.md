@@ -1,6 +1,7 @@
 # Migration Guide: v0.1.0 → v2.0.0
 
 ## Overview
+
 Summit v2.0.0 introduces significant infrastructure and feature enhancements. This guide covers the upgrade path.
 
 ## Pre-Migration Checklist (validated)
@@ -25,6 +26,7 @@ vim .env
 ```
 
 **Critical new variables**:
+
 - `LB_ALGORITHM`, `CACHE_L1_MAX_SIZE`, `OTEL_EXPORTER_ENDPOINT`
 - `NARRATIVE_SIM_ENABLED`, `BLACK_PROJECTS_ENABLED`
 
@@ -75,31 +77,37 @@ make smoke
 ### API Changes
 
 #### New Endpoints
+
 - `POST /api/narrative-sim/simulations` - Create narrative simulation
 - `GET /api/black-projects/*` - Access Black Projects modules
 
 #### Modified Endpoints
+
 - All GraphQL queries now include `X-RateLimit-*` headers
 - Persisted queries required in production mode
 
 ### Database Schema Changes
 
 #### New Tables
+
 - `narrative_simulations` - Simulation state storage
 - `narrative_events` - Event history
 - `black_projects_*` - Eight new tables for Black Projects
 
 #### Modified Tables
+
 - `entities` - New indexes for performance
 - `relationships` - Foreign key constraints tightened
 
 ### Configuration Changes
 
 #### Removed (deprecated)
+
 - `CACHE_ENABLED` → Use `CACHE_L1_MAX_SIZE=0` to disable
 - `SIMPLE_RATE_LIMIT` → Now Redis-backed only
 
 #### Renamed
+
 - `JWT_EXPIRY` → `JWT_ACCESS_EXPIRY`
 - `REDIS_URL` → `REDIS_HOST` + `REDIS_PORT`
 
@@ -152,4 +160,3 @@ For internal rollout sequencing, see `docs/ops/MIGRATION-COMMS-v0.1-to-v2.0.md` 
 - **Issues**: https://github.com/BrianCLong/summit/issues
 - **Discussions**: https://github.com/BrianCLong/summit/discussions
 - **Email**: support@summit.com
-

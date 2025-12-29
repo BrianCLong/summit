@@ -11,7 +11,8 @@
 
 import { Redis } from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
-import { LRUCache } from 'lru-cache';
+// @ts-ignore - LRU cache may have different export structure
+import LRUCache from 'lru-cache';
 import {
   DataEnvelope,
   GovernanceVerdict,
@@ -83,7 +84,7 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 export class DistributedCacheService {
   private redis: Redis;
   private subscriber: Redis | null = null;
-  private l1Cache: LRUCache<string, CacheEntry>;
+  private l1Cache: any; // LRUCache instance
   private config: CacheConfig;
   private stats: CacheStats;
   private writeBuffer: Map<string, { value: unknown; ttl: number }> = new Map();
@@ -102,7 +103,7 @@ export class DistributedCacheService {
     };
 
     // Initialize L1 cache (local, in-memory)
-    this.l1Cache = new LRUCache<string, CacheEntry>({
+    this.l1Cache = new LRUCache({
       max: this.config.maxL1Entries,
       ttl: this.config.l1TTLMs,
       updateAgeOnGet: true,

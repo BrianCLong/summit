@@ -1,6 +1,8 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'sdk/*'
+  - 'sdk/*'
   - 'services/*'
   - 'companyos/services/*'
   - 'libs/*/node'

@@ -20,47 +20,37 @@ import {
   clearFailedLogins,
 } from '../../middleware/authRateLimit.js';
 import logger from '../../utils/logger.js';
+import {
+  registerSchema,
+  loginSchema,
+  requestPasswordResetSchema,
+  resetPasswordSchema,
+  changePasswordSchema
+} from '../validation/auth.schema.js';
 
 const authService = new AuthService();
 const passwordResetService = new PasswordResetService();
 
-// Input validation helpers
-function validateEmail(email: string): void {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    throw new GraphQLError('Invalid email address', {
-      extensions: { code: 'VALIDATION_ERROR', field: 'email' },
-    });
+// Helper to handle Zod Errors
+function validateInput<T>(schema: { parse: (data: unknown) => T }, input: unknown): T {
+  try {
+    return schema.parse(input);
+  } catch (error: unknown) {
+    const zodError = error as { errors?: Array<{ message: string; path: (string | number)[] }> };
+    if (zodError.errors && Array.isArray(zodError.errors) && zodError.errors.length > 0) {
+      const firstError = zodError.errors[0];
+      throw new GraphQLError(firstError.message, {
+        extensions: {
+          code: 'GRAPHQL_VALIDATION_FAILED', // Use standard code we allow in production
+          field: firstError.path.join('.'),
+          issues: zodError.errors
+        },
+      });
+    }
+    throw error;
   }
 }
 
-function validatePassword(password: string): void {
-  if (password.length < 8) {
-    throw new GraphQLError('Password must be at least 8 characters', {
-      extensions: { code: 'VALIDATION_ERROR', field: 'password' },
-    });
-  }
-  if (!/[A-Z]/.test(password)) {
-    throw new GraphQLError('Password must contain at least one uppercase letter', {
-      extensions: { code: 'VALIDATION_ERROR', field: 'password' },
-    });
-  }
-  if (!/[a-z]/.test(password)) {
-    throw new GraphQLError('Password must contain at least one lowercase letter', {
-      extensions: { code: 'VALIDATION_ERROR', field: 'password' },
-    });
-  }
-  if (!/[0-9]/.test(password)) {
-    throw new GraphQLError('Password must contain at least one number', {
-      extensions: { code: 'VALIDATION_ERROR', field: 'password' },
-    });
-  }
-  if (!/[^A-Za-z0-9]/.test(password)) {
-    throw new GraphQLError('Password must contain at least one special character', {
-      extensions: { code: 'VALIDATION_ERROR', field: 'password' },
-    });
-  }
-}
 
 const authResolvers = {
   Query: {
@@ -99,10 +89,10 @@ const authResolvers = {
           valid: !!user,
           user: user
             ? {
-                id: user.id,
-                email: user.email,
-                role: user.role,
-              }
+              id: user.id,
+              email: user.email,
+              role: user.role,
+            }
             : null,
         };
       } catch (error) {
@@ -141,8 +131,7 @@ const authResolvers = {
       const { email, password, username, firstName, lastName } = input;
 
       // Validate input
-      validateEmail(email);
-      validatePassword(password);
+      validateInput(registerSchema, input);
 
       if (!firstName || firstName.length < 1) {
         throw new GraphQLError('First name is required', {
@@ -217,7 +206,7 @@ const authResolvers = {
       { email, password }: { email: string; password: string },
       context: any
     ) => {
-      validateEmail(email);
+      validateInput(loginSchema, { email, password });
 
       const ip = context.req?.ip || 'unknown';
       const userAgent = context.req?.get?.('User-Agent') || '';
@@ -355,7 +344,7 @@ const authResolvers = {
       { email }: { email: string },
       context: any
     ) => {
-      validateEmail(email);
+      validateInput(requestPasswordResetSchema, { email });
 
       try {
         await passwordResetService.requestPasswordReset(
@@ -393,7 +382,7 @@ const authResolvers = {
       { token, newPassword }: { token: string; newPassword: string },
       context: any
     ) => {
-      validatePassword(newPassword);
+      validateInput(resetPasswordSchema, { token, newPassword });
 
       try {
         await passwordResetService.resetPassword(token, newPassword);
@@ -443,7 +432,7 @@ const authResolvers = {
         });
       }
 
-      validatePassword(newPassword);
+      validateInput(changePasswordSchema, { currentPassword, newPassword });
 
       try {
         await passwordResetService.changePassword(

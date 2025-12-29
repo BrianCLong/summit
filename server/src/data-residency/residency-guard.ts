@@ -3,7 +3,7 @@ import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 export interface ResidencyContext {
-    operation: 'storage' | 'compute' | 'logs' | 'backup';
+    operation: 'storage' | 'compute' | 'logs' | 'backup' | 'export';
     targetRegion: string;
     dataClassification?: 'public' | 'internal' | 'confidential' | 'restricted' | 'top-secret';
 }
@@ -50,7 +50,7 @@ export class ResidencyGuard {
                  // For now, if no config, we assume the tenant is native to the current region and block cross-region.
                  if (context.targetRegion !== this.currentRegion) {
                      throw new ResidencyViolationError(
-                         `No residency policy found. strictly blocking cross-region access to ${context.targetRegion}.`,
+                         `No residency policy found. Strictly blocking cross-region access to ${context.targetRegion}.`,
                          tenantId,
                          context
                      );
@@ -58,16 +58,25 @@ export class ResidencyGuard {
                  return;
             }
 
+            const isStrict = config.residencyMode === 'strict';
+
             // 1. Check if target region is allowed globally for the tenant
-            if (!config.allowedRegions.includes(context.targetRegion) && config.primaryRegion !== context.targetRegion) {
+            const isPrimary = config.primaryRegion === context.targetRegion;
+            const isAllowed = config.allowedRegions.includes(context.targetRegion);
+
+            if (!isPrimary && !isAllowed) {
                 // Check exceptions
                 const activeException = await this.checkExceptions(tenantId, context.targetRegion, context.operation);
                 if (!activeException) {
-                    throw new ResidencyViolationError(
-                        `Region ${context.targetRegion} is not allowed for tenant ${tenantId}.`,
-                        tenantId,
-                        context
-                    );
+                    const errorMsg = `Region ${context.targetRegion} is not allowed for tenant ${tenantId}.`;
+
+                    if (isStrict) {
+                         throw new ResidencyViolationError(errorMsg, tenantId, context);
+                    } else {
+                        // In preferred mode, we might log a warning but allow if it's a critical operation?
+                        console.warn(`[Residency Warning] ${errorMsg} (Mode: Preferred)`);
+                        otelService.addSpanAttributes({ 'residency.warning': errorMsg });
+                    }
                 }
             }
 
@@ -77,23 +86,22 @@ export class ResidencyGuard {
                 if (classificationRules) {
                     const allowedForScope = classificationRules[context.operation]; // e.g. storage: ['us-east-1']
                     if (allowedForScope && !allowedForScope.includes(context.targetRegion)) {
-                         // Check exceptions again specific to classification?
-                         // For now, classification rules are strict.
-                         throw new ResidencyViolationError(
-                            `Data classification ${context.dataClassification} prohibits ${context.operation} in ${context.targetRegion}.`,
-                            tenantId,
-                            context
-                        );
+                         const errorMsg = `Data classification ${context.dataClassification} prohibits ${context.operation} in ${context.targetRegion}.`;
+                         if (isStrict) {
+                             throw new ResidencyViolationError(errorMsg, tenantId, context);
+                         } else {
+                             console.warn(`[Residency Classification Warning] ${errorMsg}`);
+                         }
                     }
                 }
             }
 
-            // 3. Log success (audit handled by caller or generic audit middleware usually, but generic enforcement log is good)
-            // We don't want to spam logs for every read, relying on metrics/spans.
+            // 3. Log success
             otelService.addSpanAttributes({
                 'residency.status': 'allowed',
                 'residency.tenant': tenantId,
-                'residency.target_region': context.targetRegion
+                'residency.target_region': context.targetRegion,
+                'residency.mode': config.residencyMode
             });
 
         } catch (error) {
@@ -118,12 +126,19 @@ export class ResidencyGuard {
         });
     }
 
+    /**
+     * Checks if export to a target region is allowed.
+     */
+    async checkExportCompliance(tenantId: string, targetRegion: string, classification?: string): Promise<void> {
+        return this.enforce(tenantId, {
+            operation: 'export',
+            targetRegion: targetRegion,
+            dataClassification: classification as any
+        });
+    }
+
     private async getResidencyConfig(tenantId: string): Promise<any> {
         const pool = getPostgresPool();
-        // We reuse the existing table but might need to expand the schema or map it.
-        // The existing service uses `data_residency_configs`.
-        // row.region is likely the "primaryRegion".
-        // row.allowed_transfers might map to "allowedRegions".
 
         const result = await pool.query(
             'SELECT * FROM data_residency_configs WHERE tenant_id = $1',
@@ -133,20 +148,27 @@ export class ResidencyGuard {
         if (result.rows.length === 0) return null;
         const row = result.rows[0];
 
-        const allowedTransfers = JSON.parse(row.allowed_transfers || '[]');
-        const allowedRegions = [row.region, ...allowedTransfers]; // Primary + Transfers
+        const allowedRegions = row.allowed_regions ? JSON.parse(row.allowed_regions) : (row.allowed_transfers ? JSON.parse(row.allowed_transfers) : []);
+        // Ensure primary region is in allowed list if not explicitly there
+        if (!allowedRegions.includes(row.region)) {
+            allowedRegions.push(row.region);
+        }
 
-        // Mocking the full policy structure from the simpler existing DB schema for now
-        // In a real migration we'd migrate the DB.
         return {
             primaryRegion: row.region,
             allowedRegions: allowedRegions,
+            residencyMode: row.residency_mode || 'strict',
             dataClassifications: {
                 'confidential': {
                     'storage': [row.region], // Strict default
                     'compute': [row.region],
                     'logs': [row.region],
-                    'backups': [row.region]
+                    'backups': [row.region],
+                    'export': [row.region]
+                },
+                'restricted': {
+                     'storage': [row.region],
+                     'export': [row.region]
                 }
             }
         };
@@ -159,8 +181,8 @@ export class ResidencyGuard {
                 `SELECT * FROM residency_exceptions
                  WHERE tenant_id = $1
                  AND target_region = $2
-                 AND scope = $3
-                 AND expires_at > NOW()`,
+                 AND (scope = $3 OR scope = '*')
+                 AND (expires_at IS NULL OR expires_at > NOW())`,
                 [tenantId, region, operation]
             );
             return result.rows.length > 0;

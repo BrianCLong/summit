@@ -17,6 +17,7 @@ export interface User {
   username?: string;
   role?: string;
   token_version?: number;
+  tenantId?: string;
 }
 
 export interface AuthContext {

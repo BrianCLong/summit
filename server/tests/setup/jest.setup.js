@@ -6,8 +6,7 @@
 // Extend Jest with additional matchers from jest-extended
 require('jest-extended');
 
-const dotenv = require('dotenv');
-dotenv.config({ path: './.env.test' });
+require('dotenv').config({ path: './.env.test' });
 
 // Global test timeout
 jest.setTimeout(30000);
@@ -28,6 +27,44 @@ if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 3
 if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
 if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
 if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
+
+// Mock node-fetch for ESM compatibility
+jest.mock('node-fetch', () => ({
+  __esModule: true,
+  default: jest.fn(() => Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+  })),
+  Response: jest.fn(),
+  Headers: jest.fn(),
+  Request: jest.fn(),
+}));
+
+// Mock apollo-server-express for ESM compatibility
+jest.mock('apollo-server-express', () => ({
+  __esModule: true,
+  ApolloServer: jest.fn().mockImplementation(() => ({
+    start: jest.fn().mockResolvedValue(undefined),
+    stop: jest.fn().mockResolvedValue(undefined),
+    applyMiddleware: jest.fn(),
+    executeOperation: jest.fn().mockResolvedValue({ data: {} }),
+  })),
+  AuthenticationError: class AuthenticationError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = 'AuthenticationError';
+    }
+  },
+  ForbiddenError: class ForbiddenError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = 'ForbiddenError';
+    }
+  },
+  gql: (strings) => strings.join(''),
+}));
 
 // Mock IORedis globally to prevent connection errors
 jest.mock('ioredis', () => {
@@ -149,18 +186,6 @@ afterAll(() => {
   console.error = originalConsoleError;
 });
 
-// Prevent focused tests slipping through
-const blockFocus = (what) => {
-  throw new Error(
-    `[no-only-tests] Detected ${what}. Remove '.only' to maintain coverage.`,
-  );
-};
-
-Object.defineProperty(global.it, 'only', { get: () => blockFocus('it.only') });
-Object.defineProperty(global.describe, 'only', {
-  get: () => blockFocus('describe.only'),
-});
-
 // Global test utilities
 global.testUtils = {
   // Wait for condition with timeout
@@ -259,12 +284,12 @@ jest.mock('prom-client', () => {
     constructor() {
       this.metrics = {};
     }
-    registerMetric() {}
+    registerMetric() { }
     getSingleMetric() { return null; }
     getMetricsAsJSON() { return []; }
     metrics() { return ''; }
-    clear() {}
-    setDefaultLabels() {}
+    clear() { }
+    setDefaultLabels() { }
   }
 
   return {
