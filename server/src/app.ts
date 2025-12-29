@@ -78,6 +78,7 @@ import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
+import palettesRouter from './routes/palettes.js';
 import edgeOpsRouter from './routes/edge-ops.js';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
@@ -434,6 +435,7 @@ export const createApp = async () => {
   app.use('/api/v1/support', supportCenterRouter);
   app.use('/api/v1/i18n', i18nRouter);
   app.use('/api/v1/experiments', experimentationRouter);
+  app.use('/api/v1/palettes', palettesRouter);
 
   // Summit v4 API Routes (AI Governance, Compliance, Zero-Trust)
   app.use('/api/v4', v4Router);
