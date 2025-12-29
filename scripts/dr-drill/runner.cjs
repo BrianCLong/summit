@@ -3,6 +3,7 @@ const fs = require('fs');
 const { spawnSync } = require('child_process');
 
 const DEFAULT_ALLOWED_ENVS = ['dev', 'development', 'staging', 'qa', 'test'];
+const PROD_ALLOW_VALUES = ['true', '1', true];
 
 const defaultInvariantCommands = {
   tenancyIsolation: process.env.DR_DRILL_TENANCY_CMD,
@@ -48,10 +49,13 @@ function runCommand(command, label) {
   };
 }
 
-function assertEnvironment(env, allowProd) {
+function assertEnvironment(env, allowProdFlag, allowProdEnvValue) {
   const normalized = (env || '').toLowerCase();
   if (normalized === 'prod' || normalized === 'production') {
-    if (!allowProd) {
+    const envGateEnabled = PROD_ALLOW_VALUES.includes(allowProdEnvValue);
+    const flagGateEnabled = allowProdFlag === true;
+
+    if (!(envGateEnabled && flagGateEnabled)) {
       throw new Error('DR drill cannot run against production without --allow-prod and DR_DRILL_ALLOW_PROD=true');
     }
     return 'production';
@@ -98,8 +102,9 @@ function aggregateStatus(stages) {
 function runDrDrill(options = {}, executor = runCommand) {
   const config = {
     env: options.env || process.env.DR_DRILL_ENV || 'dev',
-    allowProd:
-      options.allowProd || process.env.DR_DRILL_ALLOW_PROD === 'true' || process.env.DR_DRILL_ALLOW_PROD === '1',
+    allowProdFlag:
+      options.allowProd === true || process.env.DR_DRILL_ALLOW_PROD_FLAG === 'true' ||
+      process.env.DR_DRILL_ALLOW_PROD_FLAG === '1',
     backupCommand: options.backupCommand || process.env.DR_DRILL_BACKUP_CMD || './scripts/backup.sh',
     wipeCommand: options.wipeCommand || process.env.DR_DRILL_WIPE_CMD || './scripts/backup-drill.sh --wipe-only',
     restoreCommand: options.restoreCommand || process.env.DR_DRILL_RESTORE_CMD || './scripts/restore.sh',
@@ -112,22 +117,22 @@ function runDrDrill(options = {}, executor = runCommand) {
   };
 
   const startTime = new Date();
-  const normalizedEnv = assertEnvironment(config.env, config.allowProd);
+  const normalizedEnv = assertEnvironment(config.env, config.allowProdFlag, process.env.DR_DRILL_ALLOW_PROD);
 
   const backup = executor(config.backupCommand, 'backup');
   const wipe = executor(config.wipeCommand, 'wipe');
   const restore = executor(config.restoreCommand, 'restore');
 
+  const invariantResults = runInvariantChecks(config.invariants, executor);
+
   const corruptionCheckRaw = executor(config.corruptionCheckCommand, 'corruption check');
   const corruptionStatus = evaluateCorruption(corruptionCheckRaw);
   const corruptionCheck = { ...corruptionCheckRaw, status: corruptionStatus };
 
-  const invariantResults = runInvariantChecks(config.invariants, executor);
-
   const endTime = new Date();
   const durationMs = endTime.getTime() - startTime.getTime();
 
-  const allStages = [backup, wipe, restore, corruptionCheck, ...invariantResults];
+  const allStages = [backup, wipe, restore, ...invariantResults, corruptionCheck];
   const overallStatus = aggregateStatus(allStages);
 
   return {
