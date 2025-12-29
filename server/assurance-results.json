@@ -1,46 +1,46 @@
 {
-  "timestamp": "2025-12-28T04:17:37.288Z",
+  "timestamp": "2025-12-29T11:43:51.963Z",
   "overallStatus": "AT_RISK",
   "signals": [
     {
       "id": "SIG-SAFE-001",
       "name": "Agent Budget Adherence",
       "status": "PASS",
-      "lastVerified": "2025-12-28T04:17:37.288Z",
+      "lastVerified": "2025-12-29T11:43:51.963Z",
       "owner": "AI Safety Team",
-      "reason": "All agents within 95% of allocated budget."
+      "reason": "All agents within 95% of allocated budget. (SIMULATED)"
     },
     {
       "id": "SIG-ISO-001",
       "name": "Tenant Isolation",
       "status": "PASS",
-      "lastVerified": "2025-12-28T04:17:37.288Z",
+      "lastVerified": "2025-12-29T11:43:51.963Z",
       "owner": "Platform Team",
-      "reason": "Cross-tenant access tests passed (0 failures)."
+      "reason": "Cross-tenant access tests passed (0 failures). (SIMULATED)"
     },
     {
       "id": "SIG-POL-001",
       "name": "OPA Policy Compliance",
       "status": "PASS",
-      "lastVerified": "2025-12-28T04:17:37.288Z",
+      "lastVerified": "2025-12-29T11:43:51.963Z",
       "owner": "Security Team",
-      "reason": "100% of API requests authorized via OPA."
+      "reason": "100% of API requests authorized via OPA. (SIMULATED)"
     },
     {
       "id": "SIG-AUD-001",
       "name": "Audit Log Integrity",
       "status": "PASS",
-      "lastVerified": "2025-12-28T04:17:37.289Z",
+      "lastVerified": "2025-12-29T11:43:51.963Z",
       "owner": "Compliance Team",
-      "reason": "Merkle tree verification successful. No tampering detected."
+      "reason": "Merkle tree verification successful. No tampering detected. (SIMULATED)"
     },
     {
       "id": "SIG-SLO-001",
       "name": "API Latency SLO",
       "status": "AT_RISK",
-      "lastVerified": "2025-12-28T04:17:37.289Z",
+      "lastVerified": "2025-12-29T11:43:51.963Z",
       "owner": "SRE Team",
-      "reason": "p95 latency at 340ms (Target: <350ms). Approaching threshold."
+      "reason": "p95 latency at 340ms (Target: <350ms). Approaching threshold. (SIMULATED)"
     }
   ]
 }

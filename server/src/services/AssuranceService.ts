@@ -52,6 +52,14 @@ export class AssuranceService {
     return 'PASS';
   }
 
+  // NOTE: The following check methods are currently SIMULATIONS.
+  // In a future iteration, these will be connected to real data sources:
+  // - Agent Budget: Prometheus/Grafana metrics
+  // - Tenant Isolation: Dedicated E2E isolation test suite execution results
+  // - OPA Policy: OPA decision logs/metrics
+  // - Audit Integrity: Merkle tree verification service
+  // - SLO Compliance: Prometheus/SLO Exporter data
+
   private async checkAgentBudget(): Promise<AssuranceSignal> {
     // Simulation: Check runtime metrics for budget overruns
     return {
@@ -60,7 +68,7 @@ export class AssuranceService {
       status: 'PASS',
       lastVerified: new Date().toISOString(),
       owner: 'AI Safety Team',
-      reason: 'All agents within 95% of allocated budget.'
+      reason: 'All agents within 95% of allocated budget. (SIMULATED)'
     };
   }
 
@@ -72,7 +80,7 @@ export class AssuranceService {
       status: 'PASS',
       lastVerified: new Date().toISOString(),
       owner: 'Platform Team',
-      reason: 'Cross-tenant access tests passed (0 failures).'
+      reason: 'Cross-tenant access tests passed (0 failures). (SIMULATED)'
     };
   }
 
@@ -84,7 +92,7 @@ export class AssuranceService {
       status: 'PASS',
       lastVerified: new Date().toISOString(),
       owner: 'Security Team',
-      reason: '100% of API requests authorized via OPA.'
+      reason: '100% of API requests authorized via OPA. (SIMULATED)'
     };
   }
 
@@ -96,7 +104,7 @@ export class AssuranceService {
       status: 'PASS',
       lastVerified: new Date().toISOString(),
       owner: 'Compliance Team',
-      reason: 'Merkle tree verification successful. No tampering detected.'
+      reason: 'Merkle tree verification successful. No tampering detected. (SIMULATED)'
     };
   }
 
@@ -109,7 +117,7 @@ export class AssuranceService {
       status: 'AT_RISK',
       lastVerified: new Date().toISOString(),
       owner: 'SRE Team',
-      reason: 'p95 latency at 340ms (Target: <350ms). Approaching threshold.'
+      reason: 'p95 latency at 340ms (Target: <350ms). Approaching threshold. (SIMULATED)'
     };
   }
 }
