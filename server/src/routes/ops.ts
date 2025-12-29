@@ -3,12 +3,17 @@ import { Router } from 'express';
 import { runMaintenance } from '../scripts/maintenance.js';
 import { BackupService } from '../backup/BackupService.js';
 import { DisasterRecoveryService } from '../dr/DisasterRecoveryService.js';
-import { ensureRole } from '../middleware/auth.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import logger from '../config/logger.js';
+import { policyHotReloadService } from '../policy/hotReloadService.js';
+import { policyBundleStore } from '../policy/bundleStore.js';
 
 const router = Router();
 const backupService = new BackupService();
 const drService = new DisasterRecoveryService();
+
+const isHotReloadEnabled = () =>
+  (process.env.POLICY_HOT_RELOAD || '').toLowerCase() === 'true';
 
 // Protected by 'admin' role (assuming ensureRole middleware checks for this)
 // For now, we'll keep it open or assume the caller handles auth if not strictly enforced here in the prototype
@@ -28,6 +33,63 @@ router.post('/maintenance', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.post(
+  '/ops/policy/reload',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin']),
+  async (req, res) => {
+    if (!isHotReloadEnabled()) {
+      return res.status(403).json({ error: 'POLICY_HOT_RELOAD is disabled' });
+    }
+
+    const { bundlePath, signaturePath } = req.body || {};
+    if (!bundlePath) {
+      return res.status(400).json({ error: 'bundlePath is required' });
+    }
+
+    try {
+      const version = await policyHotReloadService.reload(bundlePath, signaturePath);
+      res.json({
+        ok: true,
+        currentPolicyVersionId: policyBundleStore.currentPolicyVersionId,
+        version,
+      });
+    } catch (error: any) {
+      logger.error('Failed to reload policy bundle', error);
+      res.status(500).json({ error: error?.message || 'reload failed' });
+    }
+  },
+);
+
+router.post(
+  '/ops/policy/rollback',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin']),
+  async (req, res) => {
+    if (!isHotReloadEnabled()) {
+      return res.status(403).json({ error: 'POLICY_HOT_RELOAD is disabled' });
+    }
+
+    const toVersion = (req.query.toVersion as string) || req.body?.toVersion;
+    if (!toVersion) {
+      return res.status(400).json({ error: 'toVersion is required' });
+    }
+
+    try {
+      const version = await policyHotReloadService.rollback(toVersion);
+      res.json({
+        ok: true,
+        currentPolicyVersionId: policyBundleStore.currentPolicyVersionId,
+        version,
+      });
+    } catch (error: any) {
+      const status = /not found/.test(error?.message || '') ? 404 : 500;
+      logger.error('Failed to rollback policy bundle', error);
+      res.status(status).json({ error: error?.message || 'rollback failed' });
+    }
+  },
+);
 
 /**
  * @route POST /ops/backup/:type

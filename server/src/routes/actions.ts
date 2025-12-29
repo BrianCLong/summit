@@ -14,6 +14,7 @@ router.use(express.json());
 const buildRequest = (req: express.Request): PreflightRequest => {
   const user = (req as any).user || {};
   const action = String(req.body.action || '').toUpperCase();
+  const policyVersion = req.body.policyVersion || req.body.context?.policyVersion;
 
   return {
     action,
@@ -27,6 +28,8 @@ const buildRequest = (req: express.Request): PreflightRequest => {
     approvers: Array.isArray(req.body.approvers)
       ? req.body.approvers.map((id: unknown) => String(id))
       : undefined,
+    policyVersion,
+    context: { ...(req.body.context || {}), policyVersion },
   };
 };
 
