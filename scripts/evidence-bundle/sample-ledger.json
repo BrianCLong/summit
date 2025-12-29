@@ -1,0 +1,59 @@
+{
+  "datasetVersion": "2025.01.0",
+  "receipts": [
+    {
+      "id": "receipt-001",
+      "createdAt": "2024-11-10T15:04:00Z",
+      "recordIds": ["ingest-billing-v1", "policy-decision-allow-17"],
+      "ledgerEntries": [
+        {
+          "id": "ledger-9f1",
+          "ref": "prov-ledger://ledger-9f1",
+          "type": "Receipt",
+          "schema": "Receipt v0.1"
+        },
+        {
+          "id": "ledger-9f2",
+          "ref": "prov-ledger://policy-88",
+          "type": "PolicyDecision",
+          "schema": "PolicyDecision v0.1"
+        }
+      ],
+      "redactions": ["subject.email"]
+    },
+    {
+      "id": "receipt-002",
+      "createdAt": "2024-12-01T09:30:00Z",
+      "recordIds": ["ingest-curated-v2"],
+      "ledgerEntries": [
+        {
+          "id": "ledger-100",
+          "ref": "prov-ledger://ledger-100",
+          "type": "Receipt",
+          "schema": "Receipt v0.1"
+        }
+      ],
+      "redactions": []
+    },
+    {
+      "id": "receipt-003",
+      "createdAt": "2025-01-05T19:00:00Z",
+      "recordIds": ["policy-eval-commit"],
+      "ledgerEntries": [
+        {
+          "id": "ledger-110",
+          "ref": "prov-ledger://ledger-110",
+          "type": "PolicyDecision",
+          "schema": "PolicyDecision v0.1"
+        },
+        {
+          "id": "ledger-111",
+          "ref": "prov-ledger://ledger-111",
+          "type": "Receipt",
+          "schema": "Receipt v0.1"
+        }
+      ],
+      "redactions": ["decision.rationale", "input.prompt"]
+    }
+  ]
+}

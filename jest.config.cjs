@@ -1,9 +1,9 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts', '.mjs'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
-    '^.+\\.[cm]?[tj]sx?$': [
+    '^.+\\.[cm]?tsx?$': [
       'ts-jest',
       {
         useESM: true,
@@ -87,6 +87,6 @@ module.exports = {
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.js'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

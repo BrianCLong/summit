@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`export-evidence-bundle manifest is deterministic for identical inputs 1`] = `
+"{
+  "manifestVersion": "evidence-bundle/0.1",
+  "generatedAt": "2024-12-01T09:30:00.000Z",
+  "input": {
+    "timeRange": {
+      "from": "2024-11-01T00:00:00Z",
+      "to": "2024-12-31T23:59:59Z"
+    }
+  },
+  "schemaVersions": [
+    "PolicyDecision v0.1",
+    "Receipt v0.1"
+  ],
+  "receipts": [
+    {
+      "receiptId": "receipt-001",
+      "recordIds": [
+        "ingest-billing-v1",
+        "policy-decision-allow-17"
+      ],
+      "ledgerEntries": [
+        {
+          "id": "ledger-9f1",
+          "ref": "prov-ledger://ledger-9f1",
+          "type": "Receipt",
+          "schema": "Receipt v0.1"
+        },
+        {
+          "id": "ledger-9f2",
+          "ref": "prov-ledger://policy-88",
+          "type": "PolicyDecision",
+          "schema": "PolicyDecision v0.1"
+        }
+      ],
+      "redactions": {
+        "hasRedactions": true,
+        "fields": [
+          "subject.email"
+        ]
+      }
+    },
+    {
+      "receiptId": "receipt-002",
+      "recordIds": [
+        "ingest-curated-v2"
+      ],
+      "ledgerEntries": [
+        {
+          "id": "ledger-100",
+          "ref": "prov-ledger://ledger-100",
+          "type": "Receipt",
+          "schema": "Receipt v0.1"
+        }
+      ],
+      "redactions": {
+        "hasRedactions": false,
+        "fields": []
+      }
+    }
+  ]
+}"
+`;
