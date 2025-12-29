@@ -37,6 +37,7 @@
     "@bull-board/api": "6.12.0",
     "@bull-board/express": "5.23.0",
     "@graphql-tools/schema": "10.0.30",
+    "@node-saml/node-saml": "^5.1.0",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.39.0",
     "@opentelemetry/exporter-jaeger": "1.30.1",
