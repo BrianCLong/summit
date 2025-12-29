@@ -52,15 +52,15 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
   // Must be ADMIN role
   // Must be associated with the tenant ID (or be a system-wide admin if that concept exists, here we stick to tenant admin)
 
-  if (req.user!.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Unauthorized: Admin role required' });
+  if ((req.user as any)!.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Unauthorized: Admin role required' });
   }
 
   // Check if user belongs to this tenant
-  if (req.user!.tenantId !== id) {
-      // In a real system, we might check if user is a "Super Admin" across tenants.
-      // For now, strict tenant isolation.
-      return res.status(403).json({ error: 'Unauthorized: Access restricted to tenant members' });
+  if ((req.user as any)!.tenantId !== id) {
+    // In a real system, we might check if user is a "Super Admin" across tenants.
+    // For now, strict tenant isolation.
+    return res.status(403).json({ error: 'Unauthorized: Access restricted to tenant members' });
   }
 
   const validated = ssoConfigSchema.parse(req.body);
@@ -97,10 +97,10 @@ router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async 
 
     // Set state cookie for CSRF protection
     res.cookie('sso_state', state, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 300 * 1000 // 5 minutes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 300 * 1000 // 5 minutes
     });
 
     return res.redirect(url);
@@ -128,8 +128,8 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
   // but for SP-initiated (which /login is), it is required for security.
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
-      logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
-      return res.status(403).send('Authentication failed: State mismatch (CSRF protection)');
+    logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
+    return res.status(403).send('Authentication failed: State mismatch (CSRF protection)');
   }
 
   // Clear state cookie
@@ -147,10 +147,10 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
     });
 
     res.cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
-        sameSite: 'lax'
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+      sameSite: 'lax'
     });
 
     return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`);
@@ -170,8 +170,8 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
   const stateParam = req.query.state || req.query.RelayState;
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
-      logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
-      return res.status(403).send('Authentication failed: State mismatch (CSRF protection)');
+    logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
+    return res.status(403).send('Authentication failed: State mismatch (CSRF protection)');
   }
 
   res.clearCookie('sso_state');
@@ -179,18 +179,18 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
   try {
     const { user, token, refreshToken } = await ssoService.handleCallback(tenantId, config.baseUrl || baseUrl, req.body, req.query);
 
-     res.cookie('access_token', token, {
+    res.cookie('access_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'lax'
     });
 
-     res.cookie('refresh_token', refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'lax'
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax'
     });
 
     return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard`);

@@ -73,7 +73,7 @@ export class ChunkingService {
                    // Let's just reset if it's too small to meaningfully overlap?
                    // Or just keep it all.
                    if (overlap > 0) {
-                       chunkStartOffset = chunkStartOffset; // Keep start? No.
+                       // Handle overlap edge case
                        // If overlap is huge, just keep it.
                        // But effectively we just advanced by (length - overlap)
                        chunkStartOffset = chunkStartOffset + (currentChunkText.length - overlap);
