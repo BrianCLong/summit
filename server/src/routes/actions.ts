@@ -28,7 +28,6 @@ const buildRequest = (req: express.Request): PreflightRequest => {
     approvers: Array.isArray(req.body.approvers)
       ? req.body.approvers.map((id: unknown) => String(id))
       : undefined,
-    policyVersion,
     context: { ...(req.body.context || {}), policyVersion },
   };
 };
