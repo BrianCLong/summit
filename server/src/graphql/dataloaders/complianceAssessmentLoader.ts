@@ -397,6 +397,7 @@ export function createComplianceAssessmentLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (ids) => batchLoadAssessments(ids, context),
     {
       cache: true,

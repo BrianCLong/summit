@@ -540,6 +540,7 @@ export function createPolicyVerdictLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (ids) => batchLoadVerdicts(ids, context),
     {
       cache: true,

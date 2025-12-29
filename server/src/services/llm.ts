@@ -22,13 +22,13 @@ export class MockLLM implements LLMClient {
   }
 
   // Wrapped stream with circuit breaker
-  stream = wrapStream(this._stream);
+  stream = wrapStream(this._stream.bind(this));
 }
 
 // Helper: turn generator -> Node Readable (for tests or piping)
 export function generatorToReadable(gen: AsyncGenerator<string>): Readable {
   const r = new Readable({
-    read() {},
+    read() { },
     encoding: 'utf8',
   });
   (async () => {

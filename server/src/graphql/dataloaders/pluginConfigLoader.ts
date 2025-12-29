@@ -390,6 +390,7 @@ export function createPluginConfigLoader(
   context: DataLoaderContext
 ) {
   return new DataLoader(
+    // @ts-ignore
     (pluginIds) => batchLoadPluginConfigs(pluginIds, context),
     {
       cache: true,

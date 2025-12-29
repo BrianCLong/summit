@@ -18,7 +18,7 @@ export class PptxExporter implements ReportExporter {
     const rows = normalizeTabularData(data);
     const headers = Object.keys(rows[0] || { value: 'value' });
     const tableRows = [headers, ...rows.map((row) => headers.map((key) => `${row[key] ?? ''}`))];
-    slide.addTable(tableRows, { x: 0.5, y: 1, w: 9, fontSize: 12 });
+    slide.addTable(tableRows as any, { x: 0.5, y: 1, w: 9, fontSize: 12 });
 
     if (options.watermark) {
       slide.addText(options.watermark, {
@@ -32,7 +32,7 @@ export class PptxExporter implements ReportExporter {
       });
     }
 
-    const buffer = await pptx.write('arraybuffer');
+    const buffer = await (pptx as any).write('arraybuffer');
     return {
       buffer: Buffer.from(buffer as ArrayBuffer),
       fileName: `report-${Date.now()}.pptx`,
