@@ -1,3 +1,16 @@
+# Migration Guide (Index)
+
+## v2.0.0 Release
+
+**For the full migration guide to v2.0.0, please see:**
+[docs/MIGRATION-v0.1-to-v2.0.md](./MIGRATION-v0.1-to-v2.0.md)
+
+This release includes significant infrastructure and feature enhancements.
+
+## Database Optimization
+
+The section below describes specific steps for database optimization.
+
 # Database Optimization Migration Guide
 
 This guide will help you migrate your application to use the new database optimization features.
