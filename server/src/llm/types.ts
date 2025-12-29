@@ -1,4 +1,6 @@
 
+import type { PaletteCandidateSet, PaletteRequestOptions, PaletteUsageRecord } from './palette/types.js';
+
 export type ProviderId = "openai" | "anthropic" | "mock" | "groq" | "openrouter" | "other";
 export type ModelId = string;
 export type Role = "system" | "user" | "assistant" | "tool";
@@ -99,12 +101,14 @@ export interface LLMRequest {
   model?: string;
   maxTokens?: number;
   temperature?: number;
+  tenantId?: string;
   tags?: string[];
   budget?: {
     maxCost?: number;
   };
   tools?: unknown;
   toolChoice?: unknown;
+  palette?: PaletteRequestOptions;
 }
 
 export interface LLMResponse {
@@ -122,6 +126,10 @@ export interface LLMResponse {
   latencyMs: number;
   cached: boolean;
   toolCalls?: unknown;
+  paletteUsage?: PaletteUsageRecord;
+  paletteCandidates?: PaletteCandidateSet[];
+  selectedCandidateIndex?: number;
+  paletteVerifierScores?: Array<number | null>;
 }
 
 export interface ModelCapability {

@@ -28,9 +28,9 @@ jobs:
         with:
           scan-type: fs
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: "CRITICAL,HIGH"
           format: table
-          exit-code: '1'
+          exit-code: "1"
 
       - name: CycloneDX SBOM
         run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json
@@ -41,30 +41,30 @@ jobs:
           name: sbom
           path: sbom.json
 
-              - name: License compliance check
-      run: |
-        npx license-checker --json --out licenses.json
-        npx license-checker --summary
-      continue-on-error: false
-    
-    - name: Check for non-compliant licenses
-      run: |
-        # Define non-compliant licenses
-        NON_COMPLIANT="GPL|AGPL|LGPL"
-        
-        # Check if any non-compliant licenses are found
-        if npx license-checker --json | grep -iE "$NON_COMPLIANT"; then
-          echo "Error: Non-compliant licenses detected!"
-          echo "The following licenses are not permitted: GPL, AGPL, LGPL"
-          exit 1
-        else
-          echo "All dependencies use compliant licenses"
-        fi
-    
-    - name: Upload license report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: license-report
-        path: licenses.json
-        retention-days: 90
+      - name: License compliance check
+        run: |
+          npx license-checker --json --out licenses.json
+          npx license-checker --summary
+        continue-on-error: false
+
+      - name: Check for non-compliant licenses
+        run: |
+          # Define non-compliant licenses
+          NON_COMPLIANT="GPL|AGPL|LGPL"
+
+          # Check if any non-compliant licenses are found
+          if npx license-checker --json | grep -iE "$NON_COMPLIANT"; then
+            echo "Error: Non-compliant licenses detected!"
+            echo "The following licenses are not permitted: GPL, AGPL, LGPL"
+            exit 1
+          else
+            echo "All dependencies use compliant licenses"
+          fi
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: license-report
+          path: licenses.json
+          retention-days: 90

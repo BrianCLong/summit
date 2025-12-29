@@ -19,6 +19,9 @@ import {
 } from '@heroicons/react/24/outline'
 import { useTenant } from '../../../contexts/TenantContext'
 import { useNotification } from '../../../contexts/NotificationContext'
+import { DataIntegrityNotice } from '../../../components/common/DataIntegrityNotice'
+import { useDemoMode } from '../../../components/common/DemoIndicator'
+import { EmptyState } from '../../../components/ui/EmptyState'
 
 // Mock data types
 interface RunStep {
@@ -109,7 +112,8 @@ function RunsTable() {
   const navigate = useNavigate()
   const { hasPermission } = useTenant()
   const { showNotification } = useNotification()
-  const [runs, setRuns] = useState<Run[]>(mockRuns)
+  const isDemoMode = useDemoMode()
+  const [runs, setRuns] = useState<Run[]>(isDemoMode ? mockRuns : [])
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedRuns, setSelectedRuns] = useState<string[]>([])
@@ -164,6 +168,14 @@ function RunsTable() {
     runId: string,
     action: 'pause' | 'resume' | 'cancel' | 'retry'
   ) => {
+    if (!isDemoMode) {
+      showNotification({
+        type: 'warning',
+        title: 'Live control unavailable',
+        message: 'Connect the Maestro backend to control runs.',
+      })
+      return
+    }
     if (!hasPermission('runs.control')) {
       showNotification({
         type: 'warning',
@@ -233,6 +245,19 @@ function RunsTable() {
         </div>
       </div>
 
+      <DataIntegrityNotice
+        mode={isDemoMode ? 'demo' : 'unavailable'}
+        context="Maestro runs"
+      />
+
+      {!isDemoMode && runs.length === 0 ? (
+        <EmptyState
+          icon="activity"
+          title="No live runs"
+          description="Connect the Maestro runtime to display pipeline executions."
+        />
+      ) : (
+        <>
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
         <div className="flex-1">
@@ -435,20 +460,25 @@ function RunsTable() {
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </div>
   )
 }
 
 function RunDetail() {
   const { runId } = useParams<{ runId: string }>()
-  const run = mockRuns.find(r => r.id === runId)
+  const isDemoMode = useDemoMode()
+  const run = isDemoMode ? mockRuns.find(r => r.id === runId) : undefined
 
   if (!run) {
     return (
       <div className="text-center py-12">
         <h3 className="text-lg font-medium text-gray-900">Run not found</h3>
         <p className="mt-1 text-sm text-gray-500">
-          The run you're looking for doesn't exist or has been deleted.
+          {isDemoMode
+            ? "The run you're looking for doesn't exist or has been deleted."
+            : 'Connect the Maestro backend to view run details.'}
         </p>
       </div>
     )

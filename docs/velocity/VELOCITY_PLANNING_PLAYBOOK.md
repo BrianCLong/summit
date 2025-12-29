@@ -1,65 +1,81 @@
-# Velocity & Planning Playbook
+# Velocity Planning Playbook
 
-## Purpose
+## How work is planned
 
-Provide a concise, repeatable planning process that makes delivery capacity explicit,
-prevents overcommitment, and handles reality with auditability.
+### Inputs
 
-## Planning Cadence (Per Sprint)
+- **Roadmap + strategy:** `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`, `docs/roadmap/STATUS.json`.
+- **Governance:** `docs/governance/CONSTITUTION.md`, `docs/governance/META_GOVERNANCE.md`,
+  `docs/governance/RULEBOOK.md`.
+- **Delivery signals:** incident reviews, customer commitments, and platform metrics.
+- **Graduation work:** readiness criteria, hardening, and compliance sign-offs.
 
-1. **Capacity intake** (EW + RH) using `docs/velocity/CAPACITY_MODEL.md`.
-2. **Dependency mapping** (see `docs/velocity/DEPENDENCY_RULES.md`).
-3. **Lane allocation** by rule-based split (GA / GA-adjacent / EXP).
-4. **WIP validation** against `docs/velocity/LANE_WIP_POLICY.md`.
-5. **Commitment labeling** (Committed vs Stretch).
-6. **Leadership review** and sign-off.
+### Dependency mapping
 
-## Work Intake Rules
+- Maintain a dependency map (initiative → epic → work items) with explicit blockers and owning
+  teams.
+- Flag cross-zone dependencies and document the coupling decision before scoping.
+- Require a clearly defined “critical path” for each sprint plan.
 
-- Every initiative must have:
-  - Lane assignment (EXP, GA-adjacent, GA)
-  - Capacity allocation (EW + RH)
-  - Explicit dependencies (FE↔BE, shared reviewers, CI)
-  - Graduation requirements (if applicable)
+### Governance steps
 
-## Commitment Levels
+1. Validate work aligns with mandated roadmaps and governance artifacts.
+2. Confirm regulatory logic is expressed as policy-as-code where applicable.
+3. Document compliance review decisions and log owners.
+4. Only plan items that can satisfy the Golden Path and production-readiness constraints.
 
-- **Committed:** capacity and dependencies are fully funded, WIP slots available, and
-  graduation requirements budgeted.
-- **Stretch:** capacity exists but dependencies or governance constraints are at risk.
-- **Exploratory:** bounded spikes only; must remain within EXP WIP limits.
+## How priorities are tracked and remembered
 
-## Graduation & Governance Handling
+### Single source of truth
 
-- Graduation evidence, audits, and contract updates are **first-class work**.
-- Graduation tasks **must** be capacity-reserved and cannot be deferred to “make room.”
-- All compliance-relevant decisions must be logged and expressed as policy-as-code.
+- `docs/roadmap/STATUS.json` is the canonical record of epic status and ownership.
+- Sprint artifacts (boards, tickets) must reference the IDs in `STATUS.json`.
 
-## Reality Handling (Reforecasting)
+### Cadence
 
-Reforecasting is mandatory when any of the following occurs:
+- Weekly: update priorities, dependencies, and confidence levels.
+- Mid-sprint: checkpoint progress and risk re-evaluation.
+- Sprint close: reconcile delivery vs. commitments and update the next plan.
 
-- GA incident load exceeds reserved capacity.
-- Review-hour utilization exceeds 90% of budget.
-- CI queue times exceed agreed thresholds for 3 consecutive days.
-- Graduation backlog grows > 2× baseline.
+## How overcommitment is prevented
 
-**Process:**
+### Capacity gate
 
-1. Freeze new intake for affected lane.
-2. Recompute remaining EW/RH.
-3. Re-label commitments as needed (Committed → Stretch).
-4. Update sprint plan with justification.
+- Lock capacity before sprint start: available hours minus planned maintenance, support, and
+  **graduation work** reserve.
+- Require explicit approval for any scope exceeding available capacity.
 
-## Preventing Overcommitment
+### WIP enforcement
 
-- WIP limits are enforced at intake.
-- Capacity is validated **before** work starts.
-- Review-hours are tracked and capped per reviewer.
-- Unplanned work requires explicit de-scoping elsewhere.
+- Limit work-in-progress per team (e.g., max 1–2 concurrent epics or features).
+- Block new work intake when WIP limits are exceeded unless a swap is approved.
 
-## Memory & Traceability
+## How plans are revised when reality changes
 
-- Sprint plans must link to capacity calculations.
-- Decisions that affect governance or compliance require audit logs.
-- Changes to commitments are documented in sprint notes.
+### Reforecasting triggers
+
+- New critical incidents or security findings.
+- Dependency delays that impact the critical path.
+- Graduation work expanding due to compliance or quality gaps.
+- Missed milestones or materially changed estimates (>20%).
+
+### Reforecasting actions
+
+- Re-estimate impacted work, adjust scope, and update confidence levels.
+- Re-validate capacity gates and WIP limits.
+- Update `docs/roadmap/STATUS.json` and notify stakeholders.
+
+## Commitment confidence levels
+
+| Level           | Definition                                    | Criteria                                                                                         |
+| --------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Committed**   | Delivery is expected within the sprint.       | Dependencies cleared, owners assigned, capacity reserved, and tests/acceptance criteria defined. |
+| **Stretch**     | Delivery is possible but not guaranteed.      | At least one dependency unresolved, partial capacity reserved, or estimates have high variance.  |
+| **Exploratory** | Discovery-only work with no delivery promise. | Scope or feasibility unknown; used for spikes or prototyping.                                    |
+
+## Graduation work impact
+
+- Graduation work (hardening, compliance, documentation, release readiness) must be explicitly
+  reserved as capacity before feature planning.
+- Treat graduation tasks as critical-path items with their own confidence level.
+- Graduation overruns trigger reforecasting and may preempt feature scope to protect release dates.

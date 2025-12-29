@@ -3,6 +3,9 @@ export enum MeterEventKind {
   QUERY_CREDITS = 'query.credits',
   STORAGE_BYTES_ESTIMATE = 'storage.bytes_estimate',
   USER_SEAT_ACTIVE = 'user.seat.active',
+  LLM_TOKENS = 'llm.tokens',
+  MAESTRO_COMPUTE_MS = 'maestro.compute.ms',
+  API_REQUEST = 'api.request',
 }
 
 export interface MeterEventBase {
@@ -35,11 +38,34 @@ export interface SeatMeterEvent extends MeterEventBase {
   userId?: string;
 }
 
+export interface LlmMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.LLM_TOKENS;
+  tokens: number;
+  model: string;
+  provider: string;
+}
+
+export interface ComputeMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.MAESTRO_COMPUTE_MS;
+  durationMs: number;
+  taskId?: string;
+}
+
+export interface RequestMeterEvent extends MeterEventBase {
+  kind: MeterEventKind.API_REQUEST;
+  endpoint?: string;
+  method?: string;
+  statusCode?: number;
+}
+
 export type MeterEvent =
   | IngestMeterEvent
   | QueryMeterEvent
   | StorageMeterEvent
-  | SeatMeterEvent;
+  | SeatMeterEvent
+  | LlmMeterEvent
+  | ComputeMeterEvent
+  | RequestMeterEvent;
 
 export interface TenantUsageDailyRow {
   tenantId: string;
@@ -48,6 +74,9 @@ export interface TenantUsageDailyRow {
   queryCredits: number;
   storageBytesEstimate: number;
   activeSeats: number;
+  llmTokens: number;
+  computeMs: number;
+  apiRequests: number;
   lastEventAt: string;
   correlationIds: string[];
   // Additional quota tracking fields

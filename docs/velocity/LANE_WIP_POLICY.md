@@ -1,50 +1,61 @@
-# Lane Capacity & WIP Policy
+# Lane WIP Policy (Initiative Concurrency)
 
 ## Purpose
 
-Define explicit Work-In-Progress (WIP) limits for EXP, GA-adjacent, and GA lanes to
-prevent hidden overcommitment and reduce systemic risk.
+This policy sets explicit work-in-progress (WIP) limits for initiative intake across delivery lanes
+and defines enforcement, escalation, and arbitration when limits are reached.
 
-## Lane Types
+## Scope
 
-- **EXP (Experimental):** exploratory work, prototypes, research spikes.
-- **GA-adjacent:** work that is near GA readiness, validation, or hardening.
-- **GA:** production-critical work, stability, and contractual deliverables.
+Applies to all product and engineering initiatives entering delivery, including cross-functional
+workstreams. These limits are enforced at intake, planning, and ongoing execution.
 
-## WIP Limits (Per Team)
+## Lanes
 
-| Lane        | Max Concurrent Initiatives | Notes                                     |
-| ----------- | -------------------------- | ----------------------------------------- |
-| EXP         | 1                          | EXP must remain small and reversible.     |
-| GA-adjacent | 2                          | Protects graduation throughput.           |
-| GA          | 1                          | Focused delivery for stability and trust. |
+- **EXP (Experimental):** Time-boxed discovery, spikes, prototypes.
+- **GA-adjacent:** Pre-GA hardening, enablement, performance, and readiness work.
+- **GA:** Customer-committed, production-grade delivery.
 
-## WIP Limits (Global)
+## Max Concurrent Initiatives
 
-| Lane        | Global Cap | Notes                                       |
-| ----------- | ---------- | ------------------------------------------- |
-| EXP         | 6          | Prevents EXP from crowding out GA.          |
-| GA-adjacent | 8          | Balances graduation and hardening.          |
-| GA          | 4          | Preserves focus on quality and reliability. |
+Limits apply simultaneously **per team** and **globally** across all teams.
 
-## Enforcement Rules
+| Lane        | Per-Team Cap | Global Cap | Notes                                      |
+| ----------- | ------------ | ---------- | ------------------------------------------ |
+| EXP         | 2            | 8          | Short cycles; stop if exit criteria unmet. |
+| GA-adjacent | 2            | 6          | Must map to GA readiness outcomes.         |
+| GA          | 1            | 4          | Highest priority, lowest parallelism.      |
 
-- Work **cannot start** without available capacity **and** WIP slots.
-- All initiatives must be tied to an approved lane and recorded in the sprint plan.
-- Review-hour budgets (RH) must be available before any initiative is accepted.
+### Counting Rules
+
+- An initiative is counted once it has a named owner, scope, and a scheduled sprint.
+- If an initiative spans multiple teams, it counts against each team involved **and** the global cap.
+- Paused initiatives remain counted unless formally removed from the plan.
 
 ## When Limits Are Reached
 
-1. **Pause intake** for that lane.
-2. **Swap out** lower-priority work if necessary.
-3. **Escalate** to Engineering Director + PM Lead if priority conflicts persist.
+- **Pause intake:** New initiatives wait until capacity frees.
+- **Swap out:** Replace lower-impact initiatives with higher-priority work (documented in the plan).
+- **Formal escalation:** If business-critical work must proceed, escalate per the path below.
 
-## Escalation Path
+## Enforcement Rules
 
-- **Primary:** Engineering Director + Program Management Lead
-- **Secondary:** Governance Council for capacity exceptions
+- **Planning gate:** Sprint planning must confirm lane caps before work starts.
+- **Capacity tracking required:** Initiatives must have updated capacity status to start or continue.
+- **No silent overrides:** Any exception requires a written waiver and escalation approval.
+- **Weekly audit:** Program ops validates counts against the caps.
 
-## Compliance Note
+## Escalation & Arbitration
 
-Starting work without capacity violates the Law of Consistency and is treated as a
-planning defect, not a delivery issue.
+- **First stop:** Engineering Director + PM Lead for the affected domain.
+- **Second stop (tie-break):** VP Engineering + Head of Product.
+- **Recordkeeping:** Decisions are logged in the roadmap status tracker with rationale.
+
+## Review Cadence
+
+- Re-evaluate caps quarterly or after major delivery changes.
+
+## Ownership
+
+- **Process owner:** Engineering Director
+- **Policy steward:** Program Operations

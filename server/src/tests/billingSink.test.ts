@@ -2,13 +2,18 @@ import { BillingAdapter } from '../billing/sink';
 import { createHmac } from 'crypto';
 
 // Mock S3
+// Mock S3
+jest.mock('@aws-sdk/client-s3');
+import { S3Client } from '@aws-sdk/client-s3';
+
 const mockSend = jest.fn();
-jest.mock('@aws-sdk/client-s3', () => ({
-  S3Client: jest.fn(() => ({
-    send: mockSend
-  })),
-  PutObjectCommand: jest.fn((args) => args)
+
+(S3Client as unknown as jest.Mock).mockImplementation(() => ({
+  send: mockSend,
 }));
+// @ts-ignore
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+(PutObjectCommand as unknown as jest.Mock).mockImplementation((args) => args);
 
 describe('BillingAdapter', () => {
   beforeEach(() => {
@@ -22,7 +27,7 @@ describe('BillingAdapter', () => {
     if (field === null || field === undefined) return '';
     const stringField = String(field);
     if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
-        return `"${stringField.replace(/"/g, '""')}"`;
+      return `"${stringField.replace(/"/g, '""')}"`;
     }
     return stringField;
   }
@@ -57,14 +62,14 @@ describe('BillingAdapter', () => {
     // Verify signature
     // Reconstruct payload exactly as implementation does
     const fields = [
-        record.tenant_id,
-        record.period_start,
-        record.period_end,
-        record.api_calls,
-        record.ingest_events,
-        record.egress_gb,
-        record.plan,
-        record.quota_overrides
+      record.tenant_id,
+      record.period_start,
+      record.period_end,
+      record.api_calls,
+      record.ingest_events,
+      record.egress_gb,
+      record.plan,
+      record.quota_overrides
     ];
     const payloadToSign = fields.map(escapeCsv).join(',');
 
@@ -81,15 +86,15 @@ describe('BillingAdapter', () => {
 
     const adapter = new BillingAdapter();
     const record = {
-        tenant_id: 't1',
-        period_start: '2026-03-20T00:00:00Z',
-        period_end: '2026-03-20T23:59:59Z',
-        api_calls: 100,
-        ingest_events: 50,
-        egress_gb: 1.5,
-        plan: 'standard',
-        quota_overrides: false
-      };
+      tenant_id: 't1',
+      period_start: '2026-03-20T00:00:00Z',
+      period_end: '2026-03-20T23:59:59Z',
+      api_calls: 100,
+      ingest_events: 50,
+      egress_gb: 1.5,
+      plan: 'standard',
+      quota_overrides: false
+    };
 
     await adapter.exportUsage(record);
     expect(mockSend).toHaveBeenCalledTimes(2);

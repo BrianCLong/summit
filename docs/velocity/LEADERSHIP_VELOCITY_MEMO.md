@@ -1,27 +1,24 @@
 # Leadership Velocity Memo
 
-## What Summit Can Reliably Deliver
+**Purpose:** Set clear delivery expectations for Summit sprints based on the capacity model
+(see `docs/CAPACITY_PLANNING.md` and velocity plans).
 
-- Delivery velocity is now modeled using a shared **engineer-week + review-hour**
-  capacity system.
-- Fixed reservations protect GA stability, graduation, and governance work before any
-  discretionary scope is planned.
-- Commitments are capacity-constrained, lane-bound, and WIP-limited, ensuring realistic
-  delivery without burnout.
+## What Summit can reliably deliver per sprint
 
-## What Summit Does Not Promise
+- A committed, capacity-backed increment of prioritized scope aligned to the sprint goal.
+- A stable, test-backed release candidate that meets the golden-path standard.
+- Clear acceptance evidence for the committed increment (demo, release notes, and status
+  updates tied to the capacity model).
 
-- We do **not** promise delivery beyond documented capacity or outside WIP limits.
-- We do **not** absorb governance or graduation work “for free.”
-- We do **not** trade GA stability for experimental acceleration.
+## What Summit intentionally does **not** promise
 
-## Why This Protects Trust and Quality
+- Open-ended or speculative scope outside the committed sprint goal.
+- Cross-zone changes that violate boundary rules or lack explicit coordination.
+- Delivery dates for work not sized, staffed, or accepted into the capacity model.
+- Exceptions that bypass quality gates, security requirements, or governance policy-as-code.
 
-- Velocity is now explicit, auditable, and resistant to optimism bias.
-- Review and governance work are first-class capacity items, not hidden overhead.
-- The model prevents silent risk accumulation and preserves sustainable execution.
+## Why this model protects trust, quality, and execution integrity
 
-## Bottom Line
-
-We know how fast we can go—and why. This protects trust, quality, and long-term delivery
-capacity while keeping Summit’s commitments credible under scrutiny.
+- **Trust:** Commitments are grounded in demonstrated capacity and are consistently met.
+- **Quality:** Every deliverable respects golden-path tests and policy-as-code guardrails.
+- **Integrity:** Scope changes are explicit, logged, and governed—no silent trade-offs.

@@ -82,3 +82,24 @@ export function filterByTemporal<T extends CanonicalEntity>(entities: T[], point
     return pit >= from && pit <= to;
   });
 }
+
+// Bitemporal fields for tracking valid time and knowledge time
+export interface BitemporalFields {
+  validFrom: Date;
+  validTo: Date | null;
+  observedAt: Date;
+  recordedAt: Date;
+}
+
+// Check if entity was valid at a specific point in time
+export function isValidAt(entity: BitemporalFields, pointInTime: Date): boolean {
+  const pit = pointInTime.getTime();
+  const from = entity.validFrom.getTime();
+  const to = entity.validTo ? entity.validTo.getTime() : Infinity;
+  return pit >= from && pit <= to;
+}
+
+// Check if entity was known/recorded at a specific point in time
+export function wasKnownAt(entity: BitemporalFields, pointInTime: Date): boolean {
+  return pointInTime.getTime() >= entity.recordedAt.getTime();
+}

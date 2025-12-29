@@ -2,7 +2,7 @@
 
 **Release Version:** v3.0.0-ga
 **Release Date:** December 2024
-**Release Captain:** ******\_******
+**Release Captain:** **\*\***\_**\*\***
 
 ## Pre-Release Verification
 

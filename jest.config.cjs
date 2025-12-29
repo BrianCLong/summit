@@ -77,7 +77,7 @@ module.exports = {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))',
+    'node_modules/(?!(uuid|.*\\.mjs$))',
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',

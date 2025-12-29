@@ -1,86 +1,87 @@
-# Organization-Wide Capacity Model
+# Capacity Model (Engineer-Weeks + Review-Hours Hybrid)
 
 ## Purpose
 
-Establish a shared, auditable model for delivery capacity that is explicit, forecastable,
-and protected from scope creep. This model treats velocity as infrastructure and ensures
-commitments are realistic, risk-aware, and sustainable.
+This document defines a repeatable capacity model for Summit/IntelGraph delivery planning.
+The model is intentionally mechanical: capacity is measured in **engineer-weeks (EW)** for
+execution and **review-hours (RH)** for compliance, approvals, and governance checks.
 
-## Capacity Unit (Hybrid)
+## Unit of Capacity
 
-**Unit:** _Engineer-week + review-hour hybrid_
+- **Engineer-Week (EW):** 1 engineer working 40 hours in a sprint week on delivery work.
+- **Review-Hour (RH):** 1 hour of formal review/approval time (design reviews, code reviews,
+  compliance checks, governance sign-off).
 
-- **Engineer-week (EW):** 1 engineer × 1 week of focused delivery time.
-- **Review-hour (RH):** 1 hour of review/approval, governance, or audit work.
+**Hybrid Capacity Formula (per sprint):**
 
-**Conversion rule:** 1 EW = 30 delivery hours (net) and **excludes** review/approval load.
-Review-hours are **budgeted separately** to avoid hidden governance debt.
+```
+Total Capacity = (Team Engineers × Sprint Weeks × 1.0 EW) + Review Pool (RH)
+```
 
-## Capacity Accounting Flow
+- Review Pool is tracked separately to avoid masking delivery bandwidth.
+- Review work is **not** convertible to EW unless explicitly approved by governance.
 
-1. **Start with total team EW** (based on headcount × sprint duration).
-2. **Subtract fixed reservations** (non-negotiable).
-3. **Allocate remaining EW** across lanes using rule-based allocation.
-4. **Apply WIP limits** (see `docs/velocity/LANE_WIP_POLICY.md`).
-5. **Validate review-hour budget** before commitments are accepted.
+## Fixed Capacity Reservations (Mandatory)
 
-## Fixed Capacity Reservations (Non-Optional)
+The following reservations are **always applied** before any allocation to lanes.
+Each is expressed as a percentage of EW and a minimum RH reservation.
 
-These reservations are protected capacity and **cannot** be reallocated without an
-explicit escalation.
+| Reservation                               | EW (%) | RH (min) | Notes                                                       |
+| ----------------------------------------- | ------ | -------- | ----------------------------------------------------------- |
+| GA stability & incident response          | 20%    | 12 RH    | On-call rotation, hotfixes, regression triage.              |
+| Contract maintenance (frontend + backend) | 15%    | 8 RH     | SLA-bound obligations, contract regressions.                |
+| Graduation pipeline work                  | 10%    | 6 RH     | Graduation readiness, audits, certifications.               |
+| Review/approval duties                    | 0%     | 16 RH    | Architecture, security, governance, policy-as-code reviews. |
 
-| Reservation Type                                  | Default Allocation            | Notes                                              |
-| ------------------------------------------------- | ----------------------------- | -------------------------------------------------- |
-| GA stability & incident response                  | 20% of EW                     | Covers on-call, hotfixes, and reliability work.    |
-| Contract maintenance (FE + BE)                    | 10% of EW                     | Keeps GA contracts, schemas, and policies aligned. |
-| Graduation pipeline (evidence, audits, contracts) | 15% of EW                     | Includes evidence creation and audits.             |
-| Review & approval duties                          | **Review-hours:** 6 RH per EW | Separate RH budget to prevent hidden load.         |
-| CI/testing/ops drag                               | 10% of EW                     | Accounts for build/test/ops overhead.              |
+**Fixed Reservation Rule:**
 
-**Result:** By default, **55% of EW** is reserved before lane allocation. Remaining EW is
-variable capacity.
+1. Deduct EW percentage reservations from total EW.
+2. Reserve RH minimums from the review pool before any discretionary reviews.
 
-## Variable Capacity Allocation (Rule-Based)
+## Variable Capacity Allocation Rules (Lane Distribution)
 
-Remaining capacity is allocated by lane type using fixed ratios that are reviewed quarterly.
+After fixed reservations are applied, remaining EW is distributed **by rule**:
 
-**Default split of remaining EW:**
+1. **EXP Lane (Exploration): 20% of remaining EW**
+2. **GA-Adjacent Lane: 30% of remaining EW**
+3. **GA Lane (Production/GA roadmap): 50% of remaining EW**
 
-- **GA lane:** 50%
-- **GA-adjacent lane:** 35%
-- **Experimental lane:** 15%
+**Rounding Rule:**
 
-**Adjustments:**
+- Round to the nearest 0.25 EW.
+- If rounding creates a remainder, allocate remainder to GA lane.
 
-- If GA incident rate exceeds SLO thresholds for two consecutive weeks, shift **+10% EW**
-  from Experimental to GA for the next sprint.
-- If graduation backlog exceeds 2× baseline (see graduation queue metrics), shift **+5% EW**
-  from GA-adjacent to Graduation reservations in the next sprint.
+**Review Allocation Rule:**
+
+- Remaining RH after fixed reservations is split **40% GA**, **35% GA-adjacent**, **25% EXP**.
+- If RH is constrained, GA lane receives priority for approval queues.
 
 ## Assumptions & Constraints
 
-- Delivery time per EW is capped at **30 hours** to preserve review, recovery, and sustainability.
-- Review hours are **first-class capacity** and cannot be implicitly borrowed.
-- CI and operational drag are assumed **structural**, not incidental.
-- Capacity model is team-agnostic but requires local calibration for new teams.
+- **Team size baseline:** 10 engineers (adjustable per sprint).
+- **Sprint cadence:** 2-week sprints.
+- **Historical throughput:** 0.8 EW of usable delivery per engineer-week after context switching.
+- **CI drag:** average 6% of EW lost to pipeline retries and flaky tests.
+- **Governance overhead:** minimum 16 RH per sprint for mandated reviews.
+- **Policy-as-code requirement:** all compliance decisions must map to policy-as-code artifacts.
+- **No hidden capacity:** ad-hoc work must be tagged into one of the fixed reservations.
 
-## Data Inputs (Required)
+## Appendix: Updating Assumptions Each Sprint
 
-- Sprint headcount and allocation map
-- On-call and incident hours (last 2 sprints)
-- Review-hour utilization (per reviewer)
-- Graduation queue size and age
-- CI queue times and build failure rates
+**Owner:** Delivery Ops (primary) with Governance Council co-sign.
 
-## Update Cadence & Ownership
+**Update Cadence:** Every sprint planning meeting.
 
-- **Update cadence:** Each sprint planning cycle.
-- **Owners:** Engineering Director + Program Management Lead.
-- **Update rules:** Changes require a documented rationale and must be recorded in the
-  sprint planning notes.
+**Update Steps:**
 
-## Governance Notes
+1. Pull latest team roster and confirm active engineers.
+2. Validate prior sprint EW burn and RH usage.
+3. Recalculate CI drag using pipeline metrics.
+4. Adjust governance overhead based on review queue backlog.
+5. Record updates in this document and log the change in sprint notes.
 
-This model is subject to the Constitution of the Ecosystem and the Law of Consistency.
-Any regulatory or compliance requirement must be expressed as policy-as-code or it is
-considered incomplete.
+**Change Log Requirements:**
+
+- Update the assumptions in-place.
+- Add a short entry in the sprint planning notes linking to this file.
+- Notify governance if any assumption changes by more than 10%.

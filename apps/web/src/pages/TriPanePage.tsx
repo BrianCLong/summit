@@ -22,6 +22,8 @@ import type {
 } from '@/types'
 import type { TriPaneSyncState } from '@/features/triPane'
 import { Loader2 } from 'lucide-react'
+import { DataIntegrityNotice } from '@/components/common/DataIntegrityNotice'
+import { useDemoMode } from '@/components/common/DemoIndicator'
 
 /**
  * TriPanePage component
@@ -40,12 +42,21 @@ export default function TriPanePage() {
   const [geospatialEvents, setGeospatialEvents] = useState<GeospatialEvent[]>(
     []
   )
+  const isDemoMode = useDemoMode()
 
-  // Load mock data on mount
+  // Load mock data on mount (demo only)
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true)
+
+        if (!isDemoMode) {
+          setEntities([])
+          setRelationships([])
+          setTimelineEvents([])
+          setGeospatialEvents([])
+          return
+        }
 
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500))
@@ -70,7 +81,7 @@ export default function TriPanePage() {
     }
 
     loadData()
-  }, [])
+  }, [isDemoMode])
 
   // Handle entity selection
   const handleEntitySelect = (entity: Entity) => {
@@ -98,6 +109,11 @@ export default function TriPanePage() {
 
   // Handle export
   const handleExport = () => {
+    if (!isDemoMode) {
+      alert('Export is unavailable until live data is connected.')
+      return
+    }
+
     console.log('Exporting data...')
 
     // Create export data
@@ -162,6 +178,14 @@ export default function TriPanePage() {
   // Main render
   return (
     <div className="h-full p-6">
+      {!isDemoMode && (
+        <div className="mb-4">
+          <DataIntegrityNotice
+            mode="unavailable"
+            context="Tri-pane analysis"
+          />
+        </div>
+      )}
       <TriPaneShell
         entities={entities}
         relationships={relationships}
