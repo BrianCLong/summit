@@ -19,6 +19,6 @@ export default defineConfig({
       reporter: ['json-summary'],
     },
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', 'tests/**'],
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'ui-tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },
 })

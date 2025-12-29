@@ -22,6 +22,7 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "ui:test": "vitest run ui-tests/regression",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
