@@ -28,6 +28,44 @@ if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
 if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
 if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
 
+// Mock node-fetch for ESM compatibility
+jest.mock('node-fetch', () => ({
+  __esModule: true,
+  default: jest.fn(() => Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({}),
+    text: () => Promise.resolve(''),
+  })),
+  Response: jest.fn(),
+  Headers: jest.fn(),
+  Request: jest.fn(),
+}));
+
+// Mock apollo-server-express for ESM compatibility
+jest.mock('apollo-server-express', () => ({
+  __esModule: true,
+  ApolloServer: jest.fn().mockImplementation(() => ({
+    start: jest.fn().mockResolvedValue(undefined),
+    stop: jest.fn().mockResolvedValue(undefined),
+    applyMiddleware: jest.fn(),
+    executeOperation: jest.fn().mockResolvedValue({ data: {} }),
+  })),
+  AuthenticationError: class AuthenticationError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = 'AuthenticationError';
+    }
+  },
+  ForbiddenError: class ForbiddenError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = 'ForbiddenError';
+    }
+  },
+  gql: (strings) => strings.join(''),
+}));
+
 // Mock IORedis globally to prevent connection errors
 jest.mock('ioredis', () => {
   const EventEmitter = require('events');
