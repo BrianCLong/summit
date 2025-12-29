@@ -102,6 +102,10 @@ import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
 import { assuranceRoutes } from './routes/assurance.js';
+// Manually resolving potential conflict by including routers requested by the user
+import opsRouter from './routes/ops.js';
+// Note: featureFlagsRouter file not found in tree, assuming internal resolution or handled via other mechanism if it exists
+// If it existed, it would be: import featureFlagsRouter from './routes/feature-flags.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -383,6 +387,11 @@ export const createApp = async () => {
   app.use('/api/demo', demoRouter);
   app.use('/api/claims', claimsRouter);
   app.use('/api/assurance', assuranceRoutes);
+
+  // Register conflict-resolved routes
+  app.use('/api/ops', opsRouter);
+  // app.use('/api/feature-flags', featureFlagsRouter); // Placeholder for if it existed
+
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
