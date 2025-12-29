@@ -34,6 +34,104 @@ if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
 if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
 if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
 
+// Mock IORedis globally to prevent connection errors
+jest.mock('ioredis', () => {
+  const EventEmitter = require('events');
+  // Shared subscribers map for Pub/Sub simulation
+  const subscribers = new Map();
+
+  class MockRedis extends EventEmitter {
+    constructor() {
+      super();
+      this.status = 'ready';
+      // Simulate ready event on next tick
+      setTimeout(() => this.emit('ready'), 0);
+      setTimeout(() => this.emit('connect'), 0);
+    }
+    async connect() { return Promise.resolve(); }
+    async disconnect() { return Promise.resolve(); }
+    async quit() { return Promise.resolve(); }
+    async get() { return null; }
+    async set() { return 'OK'; }
+    async del() { return 1; }
+
+    // Pub/Sub Implementation
+    async publish(channel, message) {
+      if (subscribers.has(channel)) {
+        subscribers.get(channel).forEach(client => {
+          client.emit('message', channel, message);
+        });
+        return subscribers.get(channel).size;
+      }
+      return 0;
+    }
+
+    async subscribe(...channels) {
+      channels.forEach(channel => {
+        if (!subscribers.has(channel)) {
+          subscribers.set(channel, new Set());
+        }
+        subscribers.get(channel).add(this);
+      });
+      return channels.length;
+    }
+
+    async unsubscribe(...channels) {
+      channels.forEach(channel => {
+        if (subscribers.has(channel)) {
+          subscribers.get(channel).delete(this);
+        }
+      });
+      return channels.length;
+    }
+
+    duplicate() { return new MockRedis(); }
+    defineCommand() { }
+  }
+  return {
+    __esModule: true,
+    default: MockRedis,
+  };
+});
+
+// Mock database config to bypass initialization checks
+jest.mock('../../src/config/database', () => {
+  const mockPool = {
+    connect: jest.fn().mockResolvedValue({
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+      release: jest.fn(),
+    }),
+    query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+    on: jest.fn(),
+    end: jest.fn(),
+  };
+
+  return {
+    __esModule: true,
+    connectPostgres: jest.fn().mockResolvedValue(mockPool),
+    connectRedis: jest.fn(),
+    connectNeo4j: jest.fn(),
+    getPostgresPool: jest.fn().mockReturnValue(mockPool),
+    getRedisClient: jest.fn().mockReturnValue({
+      get: jest.fn(),
+      set: jest.fn(),
+      del: jest.fn(),
+      keys: jest.fn().mockResolvedValue([]),
+      mget: jest.fn().mockResolvedValue([]),
+      quit: jest.fn(),
+      disconnect: jest.fn(),
+    }),
+    getNeo4jDriver: jest.fn().mockReturnValue({
+      session: () => ({
+        run: jest.fn().mockResolvedValue({ records: [] }),
+        close: jest.fn(),
+      }),
+      close: jest.fn(),
+    }),
+    closeConnections: jest.fn(),
+  };
+});
+
 // Mock console methods to reduce noise in tests unless debugging
 const originalConsole = { ...console };
 const originalConsoleError = console.error;

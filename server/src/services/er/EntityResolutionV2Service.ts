@@ -83,12 +83,6 @@ export interface MergeRequest {
   guardrailOverrideReason?: string;
 }
 
-export interface GuardrailResult {
-  datasetId: string;
-  passed: boolean;
-  checks: Array<{ name: string; passed: boolean; message?: string }>;
-}
-
 export interface EntityResolutionV2Dependencies {
   dlq?: { enqueue: (payload: unknown) => Promise<unknown> };
   pool?: ReturnType<typeof getPostgresPool>;
@@ -421,6 +415,23 @@ export class EntityResolutionV2Service {
     );
   }
 
+  /**
+   * Record guardrail evaluation for audit purposes
+   */
+  public async recordGuardrailEvaluation(
+    result: GuardrailResult,
+    context: { userId?: string; tenantId?: string },
+  ): Promise<void> {
+    log.info({
+      event: 'guardrail_evaluation_recorded',
+      datasetId: result.datasetId,
+      passed: result.passed,
+      userId: context.userId,
+      tenantId: context.tenantId,
+      evaluatedAt: result.evaluatedAt,
+    });
+  }
+
   public async merge(
     session: Session,
     req: MergeRequest,
@@ -498,7 +509,11 @@ export class EntityResolutionV2Service {
         resourceId: mergeId,
         actorId: userContext?.userId || 'unknown',
         actorType: 'user',
+        timestamp: new Date(),
         payload: {
+          mutationType: 'MERGE' as const,
+          entityId: masterId,
+          entityType: 'Entity',
           mergeId,
           masterId,
           mergeIds: uniqueMergeIds,

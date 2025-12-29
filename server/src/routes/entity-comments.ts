@@ -81,7 +81,7 @@ entityCommentsRouter.post('/:id/comments', async (req, res) => {
         actor: {
           type: 'user',
           id: userId,
-          name: req.user?.username || req.user?.email || userId,
+          name: (req.user as any)?.username || (req.user as any)?.email || userId,
           ipAddress: req.ip,
         },
         action: {
