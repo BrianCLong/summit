@@ -1,0 +1,109 @@
+{
+  "case_id": "r3-disinfo-baltic-shield",
+  "summary": "Baltic maritime fuel-price distortion narrative amplified across fringe blogs, Telegram, and X accounts to erode confidence in port security.",
+  "seed_narratives": [
+    {
+      "id": "narr-01",
+      "text": "Port authorities manipulate fuel prices to hide naval staging",
+      "source": "https://blog.example.net/post/port-fuel-exposé",
+      "timestamp": "2025-12-08T10:15:00Z"
+    },
+    {
+      "id": "narr-02",
+      "text": "Baltic fuel shortage was fabricated to mask troop movement",
+      "source": "https://t.me/baltic_watch/145",
+      "timestamp": "2025-12-09T07:42:00Z"
+    }
+  ],
+  "truth_anchors": [
+    {
+      "id": "fact-01",
+      "text": "Fuel pricing at Baltic ports tracked market swings; no naval staging detected",
+      "source": "https://port-authority.example.org/report/2025-q4",
+      "hash": "f4c8b9e1227bf3a3d7b6d2fd0c1e0c7a"
+    }
+  ],
+  "entities": [
+    { "id": "acct-a1", "type": "account", "platform": "x", "handle": "PortWatch_A" },
+    { "id": "acct-a2", "type": "account", "platform": "x", "handle": "MaritimePulse" },
+    { "id": "acct-t1", "type": "account", "platform": "telegram", "handle": "baltic_watch" },
+    { "id": "site-1", "type": "site", "platform": "blog", "domain": "blog.example.net" },
+    {
+      "id": "url-1",
+      "type": "url",
+      "platform": "blog",
+      "href": "https://blog.example.net/post/port-fuel-exposé"
+    },
+    {
+      "id": "url-2",
+      "type": "url",
+      "platform": "telegram",
+      "href": "https://t.me/baltic_watch/145"
+    },
+    {
+      "id": "url-3",
+      "type": "url",
+      "platform": "x",
+      "href": "https://x.com/PortWatch_A/status/1800123456789"
+    }
+  ],
+  "edges": [
+    { "source": "site-1", "target": "url-1", "type": "hosts", "timestamp": "2025-12-08T10:15:00Z" },
+    {
+      "source": "acct-a1",
+      "target": "url-1",
+      "type": "shares",
+      "timestamp": "2025-12-08T11:00:00Z",
+      "saliency": 0.78
+    },
+    {
+      "source": "acct-a2",
+      "target": "url-1",
+      "type": "quotes",
+      "timestamp": "2025-12-08T12:30:00Z",
+      "saliency": 0.66
+    },
+    {
+      "source": "acct-t1",
+      "target": "url-2",
+      "type": "posts",
+      "timestamp": "2025-12-09T07:42:00Z",
+      "saliency": 0.72
+    },
+    {
+      "source": "acct-a1",
+      "target": "url-2",
+      "type": "amplifies",
+      "timestamp": "2025-12-09T08:05:00Z",
+      "saliency": 0.61
+    },
+    {
+      "source": "acct-a2",
+      "target": "url-3",
+      "type": "posts",
+      "timestamp": "2025-12-09T09:10:00Z",
+      "saliency": 0.64
+    },
+    {
+      "source": "url-3",
+      "target": "url-1",
+      "type": "references",
+      "timestamp": "2025-12-09T09:11:00Z"
+    }
+  ],
+  "evaluation": {
+    "kpis": {
+      "networkCoverageTarget": 0.8,
+      "coordinationPatternsRequired": 3
+    },
+    "pcq_expected": true,
+    "prov_ledger": {
+      "required": true,
+      "expected_hash_chain": [
+        "b57c96c06a4c4de19bb4d918ba3a7b51",
+        "20f862a9840be42395a88ddf2c184e7e",
+        "6f397b93f2c5d47987ed10816b469a1f"
+      ]
+    }
+  }
+}
