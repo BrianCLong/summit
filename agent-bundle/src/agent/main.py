@@ -8,16 +8,19 @@ from .modules.verifier import Verifier
 from .modules.documenter import Documenter
 from .modules.devops import DevOps
 from .modules.pr_manager import PRManager
+from .runtime_adapter import run_request
 
 
-def run(request: str) -> None:
+def run(request: str, backend: str | None = None) -> None:
     cfg = load_config()
     prompt = load_prompt_from_config(cfg)
+    backend = backend or cfg.get("backend", "qwen")
 
     print("=== Ultra-Maximal Dev Agent ===")
     print("Mode:", cfg.get("mode"))
     print("Using prompt (first 120 chars):")
     print(prompt[:120], "...\n")
+    print("Unified Runtime Backend:", backend)
 
     # 1) Interpret
     interpreter = Interpreter()
@@ -50,12 +53,16 @@ def run(request: str) -> None:
     print("[Verifier] Lint passed:", ver_result.lint_passed)
     print("[Verifier] Notes:", ver_result.notes)
 
-    # 6) Document
+    # 6) Unified Runtime round-trip for deterministic output
+    runtime_response = run_request(request, backend=backend)
+    print("[AgentRuntime] Response:", runtime_response)
+
+    # 7) Document
     documenter = Documenter()
     doc_result = documenter.document()
     print("[Documenter] Docs:", doc_result.files)
 
-    # 7) PR
+    # 8) PR
     pr_cfg = cfg.get("pr", {})
     pr_manager = PRManager()
     pr_title = f"Auto-generated implementation: {request[:60]}"

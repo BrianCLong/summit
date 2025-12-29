@@ -13,18 +13,7 @@ SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
 VENV_BIN = $(VENV_DIR)/bin
 PYTHON ?= python3
-PACKAGE_VERSION ?= $(shell $(PYTHON) - <<'PY'
-import tomllib
-from pathlib import Path
-
-pyproject = Path("pyproject.toml")
-try:
-    with pyproject.open('rb') as f:
-	data = tomllib.load(f)
-    print(data.get("project", {}).get("version", "latest"))
-except FileNotFoundError:
-    print("latest")
-PY)
+PACKAGE_VERSION ?= $(shell $(PYTHON) -c "import tomllib, pathlib; path = pathlib.Path('pyproject.toml'); print(tomllib.load(path.open('rb')).get('project', {}).get('version', 'latest') if path.exists() else 'latest')")
 IMAGE_NAME ?= intelgraph-platform
 IMAGE_TAG ?= $(PACKAGE_VERSION)
 IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
@@ -232,3 +221,7 @@ demo-seed: ## Seed demo data
 
 demo-smoke: ## Run demo smoke tests
 	@./scripts/demo-smoke-test.sh
+
+.PHONY: agent-evals
+agent-evals: ## Run unified agent runtime evaluations against golden datasets
+	@python -m agent_runtime.evals run --suite core --backend qwen --out artifacts/agent-evals

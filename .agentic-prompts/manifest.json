@@ -1,0 +1,8 @@
+{
+  "default_family": "core",
+  "versions": {
+    "core": {
+      "runtime": "v1"
+    }
+  }
+}
