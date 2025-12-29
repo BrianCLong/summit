@@ -118,6 +118,12 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.50.1
         version: 8.50.1(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.17.1)
       body-parser:
         specifier: ^2.2.1
         version: 2.2.1
