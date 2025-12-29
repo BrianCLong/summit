@@ -13,12 +13,12 @@ Any operation not explicitly allowed here is **strictly prohibited**.
 
 The following actions are permitted for autonomous execution, subject to policy checks:
 
-| Action Category | Specific Actions | Constraints |
-| :--- | :--- | :--- |
-| **Traffic Shaping** | `throttle_tenant`, `prioritize_traffic` | Must operate within defined quotas/caps. |
-| **Resilience** | `auto_retry`, `circuit_reset` | Must use exponential backoff. |
-| **Scaling** | `suggest_scale_up`, `suggest_scale_down` | "Suggest" only; execution requires approval if beyond presets. |
-| **Notification** | `send_alert`, `create_ticket` | No constraints. |
+| Action Category     | Specific Actions                         | Constraints                                                    |
+| :------------------ | :--------------------------------------- | :------------------------------------------------------------- |
+| **Traffic Shaping** | `throttle_tenant`, `prioritize_traffic`  | Must operate within defined quotas/caps.                       |
+| **Resilience**      | `auto_retry`, `circuit_reset`            | Must use exponential backoff.                                  |
+| **Scaling**         | `suggest_scale_up`, `suggest_scale_down` | "Suggest" only; execution requires approval if beyond presets. |
+| **Notification**    | `send_alert`, `create_ticket`            | No constraints.                                                |
 
 ## Prohibited Actions (Strict)
 
