@@ -1,0 +1,11 @@
+name: Reusable Security Scan
+
+on:
+  workflow_call:
+
+jobs:
+  security-scan:
+    name: Security Scan
+    uses: ./.github/workflows/ci-security.yml
+    secrets:
+      snyk_token: ${{ secrets.SNYK_TOKEN }}

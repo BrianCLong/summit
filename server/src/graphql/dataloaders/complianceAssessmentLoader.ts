@@ -395,7 +395,7 @@ async function batchLoadAssessmentsByFramework(
  */
 export function createComplianceAssessmentLoader(
   context: DataLoaderContext
-): DataLoader<string, ComplianceAssessmentWithVerdict, string> {
+) {
   return new DataLoader(
     (ids) => batchLoadAssessments(ids, context),
     {
@@ -411,7 +411,7 @@ export function createComplianceAssessmentLoader(
  */
 export function createAssessmentsByControlLoader(
   context: DataLoaderContext
-): DataLoader<string, ComplianceAssessmentWithVerdict[], string> {
+) {
   return new DataLoader(
     (controlIds) => batchLoadAssessmentsByControl(controlIds, context),
     {
@@ -427,7 +427,7 @@ export function createAssessmentsByControlLoader(
  */
 export function createAssessmentsByFrameworkLoader(
   context: DataLoaderContext
-): DataLoader<string, ComplianceAssessmentWithVerdict[], string> {
+) {
   return new DataLoader(
     (frameworks) => batchLoadAssessmentsByFramework(frameworks, context),
     {

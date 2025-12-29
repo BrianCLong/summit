@@ -13,6 +13,9 @@ import {
   DollarSign,
   Copy,
   Check,
+  XCircle,
+  CheckCircle2,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -31,6 +34,12 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
 }) => {
   const [input, setInput] = useState('');
   const { state, run, reset } = useMaestroRun(userId);
+
+  const QUICK_PROMPTS = [
+    'Analyze the last 3 PRs for security risks',
+    'Summarize recent deployment failures',
+    'Draft a release note for the latest commit',
+  ];
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
@@ -58,27 +67,37 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
     let variant: 'default' | 'secondary' | 'destructive' | 'outline' =
       'secondary';
     let text = status;
+    let icon = null;
 
     switch (status) {
       case 'queued':
         variant = 'outline';
         text = 'Queued';
+        icon = <Clock className="mr-1.5 h-3 w-3" />;
         break;
       case 'running':
         variant = 'secondary';
         text = 'Running';
+        icon = <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />;
         break;
       case 'succeeded':
         variant = 'default';
         text = 'Succeeded';
+        icon = <CheckCircle2 className="mr-1.5 h-3 w-3" />;
         break;
       case 'failed':
         variant = 'destructive';
         text = 'Failed';
+        icon = <XCircle className="mr-1.5 h-3 w-3" />;
         break;
     }
 
-    return <Badge variant={variant}>{text}</Badge>;
+    return (
+      <Badge variant={variant} className="pl-2 pr-2.5">
+        {icon}
+        {text}
+      </Badge>
+    );
   };
 
   const selectedRun: MaestroRunResponse | null = state.data;
@@ -109,6 +128,25 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                   placeholder="Describe what you want Maestro to do. Example: 'Review the last 5 PRs, summarize risk, and propose a follow-up CI improvement.'"
                   className="min-h-[120px] resize-none text-sm"
                 />
+
+                {!input && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <span className="text-[10px] font-medium text-slate-500">
+                      Try:
+                    </span>
+                    {QUICK_PROMPTS.map(prompt => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        onClick={() => setInput(prompt)}
+                        aria-label={`Use prompt: ${prompt}`}
+                        className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -129,7 +167,9 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                     </Button>
                   )}
                   <span className="text-[10px] text-slate-500 hidden sm:inline-block mr-1">
-                    ⌘+Enter
+                    <kbd className="font-sans border border-slate-700 rounded px-1.5 py-0.5 text-[10px] bg-slate-900/50 text-slate-400 shadow-sm">
+                      ⌘+Enter
+                    </kbd>
                   </span>
                   <Button
                     type="submit"
@@ -350,7 +390,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                           </pre>
                           <CopyButton
                             text={formatArtifactData(result.artifact.data)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
+                            className="absolute top-2 right-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
                           />
                         </div>
                       ) : (

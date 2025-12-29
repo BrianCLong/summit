@@ -1,16 +1,11 @@
 // @ts-nocheck
 import config from './index.js';
 import logger from '../utils/logger.js';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
+// @ts-ignore
+import ioredis from 'ioredis';
 
 // Handle optional Redis dependency gracefully
-let Redis: any;
-try {
-  Redis = require('ioredis');
-} catch (e) {
-  logger.warn('Redis (ioredis) not found. Caching will be disabled.');
-}
+let Redis = ioredis;
 import {
   getPostgresPool as getManagedPostgresPool,
   closePostgresPool as closeManagedPostgresPool,

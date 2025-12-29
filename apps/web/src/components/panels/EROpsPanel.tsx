@@ -35,6 +35,29 @@ interface ConflictPoint {
   count: number
 }
 
+interface GuardrailStatus {
+  datasetId: string
+  passed: boolean
+  metrics: {
+    precision: number
+    recall: number
+    totalPairs: number
+  }
+  thresholds: {
+    minPrecision: number
+    minRecall: number
+    matchThreshold: number
+  }
+  evaluatedAt: string
+  latestOverride?: {
+    datasetId: string
+    reason: string
+    actorId?: string
+    mergeId?: string
+    createdAt: string
+  } | null
+}
+
 const COLORS = ['#6366f1', '#f97316', '#14b8a6', '#eab308', '#ec4899']
 
 const formatPercent = (value?: number) =>
@@ -44,6 +67,9 @@ export function EROpsPanel() {
   const [precisionData, setPrecisionData] = useState<PrecisionRecallPoint[]>([])
   const [rollbackData, setRollbackData] = useState<RollbackPoint[]>([])
   const [conflictData, setConflictData] = useState<ConflictPoint[]>([])
+  const [guardrailStatus, setGuardrailStatus] = useState<GuardrailStatus | null>(
+    null,
+  )
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -54,11 +80,17 @@ export function EROpsPanel() {
       setLoading(true)
       setError(null)
       try {
-        const [precisionResponse, rollbackResponse, conflictResponse] =
+        const [
+          precisionResponse,
+          rollbackResponse,
+          conflictResponse,
+          guardrailResponse,
+        ] =
           await Promise.all([
             fetch('/api/ga-core-metrics/er-ops/precision-recall?days=30'),
             fetch('/api/ga-core-metrics/er-ops/rollbacks?days=30'),
             fetch('/api/ga-core-metrics/er-ops/conflicts?days=30'),
+            fetch('/api/er/guardrails/status'),
           ])
 
         if (!precisionResponse.ok) {
@@ -70,16 +102,21 @@ export function EROpsPanel() {
         if (!conflictResponse.ok) {
           throw new Error('Failed to load conflict metrics')
         }
+        if (!guardrailResponse.ok) {
+          throw new Error('Failed to load guardrail status')
+        }
 
         const precisionJson = await precisionResponse.json()
         const rollbackJson = await rollbackResponse.json()
         const conflictJson = await conflictResponse.json()
+        const guardrailJson = await guardrailResponse.json()
 
         if (!active) return
 
         setPrecisionData(precisionJson.data || [])
         setRollbackData(rollbackJson.data || [])
         setConflictData(conflictJson.data || [])
+        setGuardrailStatus(guardrailJson || null)
       } catch (err) {
         if (!active) return
         setError(err instanceof Error ? err.message : 'Failed to load metrics')
@@ -136,14 +173,9 @@ export function EROpsPanel() {
     (sum, point) => sum + point.rollbacks,
     0,
   )
-  const totalDeployments = rollbackTrend.reduce(
-    (sum, point) => sum + point.total,
-    0,
-  )
-  const rollbackRate =
-    totalDeployments > 0 ? totalRollbacks / totalDeployments : undefined
   const topConflict = conflictSummary[0]?.name
-  const topConflictCount = conflictSummary[0]?.count
+  const guardrailOverride = guardrailStatus?.latestOverride
+  const guardrailBadge = guardrailStatus?.passed ? 'PASS' : 'FAIL'
 
   return (
     <Card className="border-primary/20">
@@ -170,6 +202,39 @@ export function EROpsPanel() {
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="space-y-4">
               <div className="rounded-lg border p-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    Guardrails
+                  </h4>
+                  <Badge
+                    variant={guardrailStatus?.passed ? 'secondary' : 'destructive'}
+                  >
+                    {guardrailStatus ? guardrailBadge : '---'}
+                  </Badge>
+                </div>
+                <div className="mt-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Precision</span>
+                    <span>{formatPercent(guardrailStatus?.metrics?.precision)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Recall</span>
+                    <span>{formatPercent(guardrailStatus?.metrics?.recall)}</span>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Dataset: {guardrailStatus?.datasetId || '--'} · Thresholds{' '}
+                  {formatPercent(guardrailStatus?.thresholds?.minPrecision)}/
+                  {formatPercent(guardrailStatus?.thresholds?.minRecall)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Override:{' '}
+                  {guardrailOverride
+                    ? `${guardrailOverride.reason} (${guardrailOverride.actorId || 'unknown'})`
+                    : 'None'}
+                </p>
+              </div>
+              <div className="rounded-lg border p-4">
                 <h4 className="text-sm font-semibold text-muted-foreground">
                   Latest Precision
                 </h4>
@@ -193,11 +258,7 @@ export function EROpsPanel() {
                 </h4>
                 <div className="text-2xl font-semibold">{totalRollbacks}</div>
                 <p className="text-xs text-muted-foreground">
-                  Rollback rate: {formatPercent(rollbackRate)}
-                </p>
-                <p className="text-xs text-muted-foreground">
                   Latest conflict: {topConflict || 'None'}
-                  {topConflictCount ? ` (${topConflictCount})` : ''}
                 </p>
               </div>
             </div>

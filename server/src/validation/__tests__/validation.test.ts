@@ -2,6 +2,20 @@
  * Comprehensive Validation and Security Tests
  */
 
+// Mock htmlSanitizer to avoid jsdom ESM issues
+// Simulate HTML entity escaping like DOMPurify would
+jest.mock('../../utils/htmlSanitizer', () => ({
+  sanitizeHtml: (input: string) => {
+    return input
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  },
+}));
+
 import { describe, it, expect } from '@jest/globals';
 import {
   EntityIdSchema,
@@ -482,9 +496,7 @@ describe('Helper Functions', () => {
     it('should return error for invalid input', () => {
       const result = validateInputSafe(EmailSchema, 'not-an-email');
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.errors).toBeDefined();
-      }
+      expect((result as { success: false; errors: unknown }).errors).toBeDefined();
     });
   });
 });

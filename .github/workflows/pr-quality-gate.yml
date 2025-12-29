@@ -1,0 +1,14 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  security-scan:
+    name: Vulnerability and Security Scan
+    uses: ./.github/workflows/ci-security.yml
+    with:
+      run_dast: false # DAST is too slow for a PR check
+    secrets:
+      snyk_token: ${{ secrets.SNYK_TOKEN }}

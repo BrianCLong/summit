@@ -11,15 +11,16 @@ import {
 } from './types.js';
 import logger from '../config/logger.js';
 import { ConnectorContext } from '../data-model/types.js';
+import { DataEnvelope } from '../types/data-envelope.js';
 
 export interface SourceConnector {
   fetchBatch(
     ctx: ConnectorContext,
     cursor?: string | null
-  ): Promise<{
+  ): Promise<DataEnvelope<{
     records: any[];
     nextCursor?: string | null;
-  }>;
+  }>>;
 }
 
 export abstract class BaseSourceConnector {

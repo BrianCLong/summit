@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { useDemoMode } from '@/components/common/DemoIndicator';
 import type { EventFilterState } from '../pages/control-tower/ControlTowerDashboard';
 import type {
   HealthScoreComponent,
@@ -242,6 +243,7 @@ const mockEvents: OperationalEvent[] = [
 export function useControlTowerData(filters: EventFilterState): ControlTowerData {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isDemoMode = useDemoMode();
   const [data, setData] = useState<{
     healthScore: HealthScoreData | null;
     keyMetrics: KeyMetric[];
@@ -261,6 +263,17 @@ export function useControlTowerData(filters: EventFilterState): ControlTowerData
     setError(null);
 
     try {
+      if (!isDemoMode) {
+        setData({
+          healthScore: null,
+          keyMetrics: [],
+          teamPulse: [],
+          activeSituations: [],
+          events: [],
+        });
+        return;
+      }
+
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -297,7 +310,7 @@ export function useControlTowerData(filters: EventFilterState): ControlTowerData
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, isDemoMode]);
 
   useEffect(() => {
     fetchData();

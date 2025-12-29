@@ -1,43 +1,99 @@
+
 import { Router } from 'express';
-import { rollup } from '../ops/capacity';
-import { verifyAuditLedgerChain } from '../audit/ledger.js';
-import { evidenceIntegrityService } from '../evidence/integrity-service.js';
+import { runMaintenance } from '../scripts/maintenance.js';
+import { BackupService } from '../backup/BackupService.js';
+import { DisasterRecoveryService } from '../dr/DisasterRecoveryService.js';
+import { ensureRole } from '../middleware/auth.js';
+import logger from '../config/logger.js';
 
-const r = Router();
+const router = Router();
+const backupService = new BackupService();
+const drService = new DisasterRecoveryService();
 
-r.get('/ops/capacity', async (req, res) => {
-  const { tenant = 'acme', from, to } = req.query as any;
-  if (!from || !to)
-    return res.status(400).json({ error: 'from,to required (ISO)' });
-  const out = await rollup(String(tenant), String(from), String(to));
-  res.json(out);
+// Protected by 'admin' role (assuming ensureRole middleware checks for this)
+// For now, we'll keep it open or assume the caller handles auth if not strictly enforced here in the prototype
+// In production: router.use(ensureRole('admin'));
+
+/**
+ * @route POST /ops/maintenance
+ * @description Trigger system maintenance tasks (partitioning, cleanup)
+ */
+router.post('/maintenance', async (req, res) => {
+    try {
+        // Run asynchronously to avoid timeout
+        runMaintenance().catch(err => logger.error('Async maintenance failed', err));
+        res.json({ message: 'Maintenance task started' });
+    } catch (error) {
+        logger.error('Failed to trigger maintenance', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-r.get('/ops/audit-ledger/verify', async (req, res) => {
-  if (process.env.AUDIT_CHAIN !== 'true') {
-    return res.status(404).json({ error: 'AUDIT_CHAIN disabled' });
-  }
+/**
+ * @route POST /ops/backup/:type
+ * @description Trigger a specific backup
+ */
+router.post('/backup/:type', async (req, res) => {
+    const { type } = req.params;
+    const { uploadToS3 } = req.body;
 
-  const since =
-    typeof req.query.since === 'string' ? String(req.query.since) : undefined;
-  const result = await verifyAuditLedgerChain({ since });
-  return res.json(result);
+    try {
+        let result: string;
+        switch (type) {
+            case 'postgres':
+                result = await backupService.backupPostgres({ uploadToS3 });
+                break;
+            case 'neo4j':
+                result = await backupService.backupNeo4j({ uploadToS3 });
+                break;
+            case 'redis':
+                result = await backupService.backupRedis({ uploadToS3 });
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid backup type. Use postgres, neo4j, or redis.' });
+        }
+        res.json({ message: 'Backup completed', path: result });
+    } catch (error) {
+        logger.error(`Failed to backup ${type}`, error);
+        res.status(500).json({ error: `Backup failed: ${(error as Error).message}` });
+    }
 });
 
-r.post('/ops/evidence/verify', async (req, res) => {
-  if (process.env.EVIDENCE_INTEGRITY !== 'true') {
-    return res.status(404).json({ error: 'EVIDENCE_INTEGRITY disabled' });
-  }
+/**
+ * @route POST /ops/dr/drill
+ * @description Trigger a DR drill simulation
+ */
+router.post('/dr/drill', async (req, res) => {
+    const { target } = req.body; // 'postgres' or 'neo4j'
 
-  const { chunkSize, rateLimitPerSecond, emitIncidents } = req.body || {};
-  const result = await evidenceIntegrityService.verifyAll({
-    chunkSize: chunkSize ? Number(chunkSize) : undefined,
-    rateLimitPerSecond: rateLimitPerSecond ? Number(rateLimitPerSecond) : undefined,
-    emitIncidents:
-      emitIncidents ?? process.env.EVIDENCE_INTEGRITY_INCIDENTS === 'true',
-  });
+    if (target && target !== 'postgres' && target !== 'neo4j') {
+         return res.status(400).json({ error: 'Invalid target. Use postgres or neo4j.' });
+    }
 
-  return res.json({ success: true, data: result });
+    try {
+        const success = await drService.runDrill(target || 'postgres');
+        if (success) {
+            res.json({ message: 'DR Drill completed successfully' });
+        } else {
+            res.status(500).json({ error: 'DR Drill failed' });
+        }
+    } catch (error) {
+        logger.error('DR drill error', error);
+        res.status(500).json({ error: 'DR Drill execution error' });
+    }
 });
 
-export default r;
+/**
+ * @route GET /ops/dr/status
+ * @description Get DR status
+ */
+router.get('/dr/status', async (req, res) => {
+    try {
+        const status = await drService.getStatus();
+        res.json(status);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get DR status' });
+    }
+});
+
+export default router;

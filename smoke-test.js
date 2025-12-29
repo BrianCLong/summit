@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const http = require('http');
-const https = require('https');
-const { URL } = require('url');
+import http from 'http';
+import https from 'https';
+import { URL } from 'url';
 
 const isCi = process.argv.includes('--ci');
 const timeoutMs = 5000;
@@ -101,7 +101,7 @@ async function runSmokeTests() {
 
   let passed = 0;
   for (const check of checks) {
-     
+
     if (await check()) {
       passed += 1;
     }

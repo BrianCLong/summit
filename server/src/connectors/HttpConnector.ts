@@ -1,6 +1,7 @@
 import { BaseConnector } from './BaseConnector.js';
 import { SourceConnector } from './base.js';
 import { ConnectorContext } from '../data-model/types.js';
+import { DataEnvelope } from '../types/data-envelope.js';
 import axios, { AxiosInstance } from 'axios';
 
 export interface HttpSourceConfig {
@@ -31,11 +32,11 @@ export class HttpConnector extends BaseConnector implements SourceConnector {
     });
   }
 
-  async fetchBatch(ctx: ConnectorContext, cursor?: string | null): Promise<{
+  async fetchBatch(ctx: ConnectorContext, cursor?: string | null): Promise<DataEnvelope<{
     records: any[];
     nextCursor?: string | null;
-  }> {
-    const envelope = await this.withResilience(async () => {
+  }>> {
+    return this.withResilience(async () => {
       const params: any = {};
 
       if (this.config.pagination) {
@@ -80,7 +81,6 @@ export class HttpConnector extends BaseConnector implements SourceConnector {
 
       return { records, nextCursor };
     }, ctx);
-    return envelope.data;
   }
 
   private resolvePath(obj: any, path: string): any[] {

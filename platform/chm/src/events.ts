@@ -20,3 +20,10 @@ export class ChmEventBus extends EventEmitter<ChmEvents> {
     this.emit('chm.tag.violated', { tag, context, message });
   }
 }
+
+export const bus = new ChmEventBus();
+
+export const emitEvent = (event: string, payload: any) => {
+  // @ts-ignore
+  bus.emit(event, payload);
+}
