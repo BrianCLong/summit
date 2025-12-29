@@ -306,6 +306,12 @@ export const erResolvers: IResolvers = {
             method: result.method || 'hybrid',
           });
 
+          span.addEvent('er.merge_outcome', {
+            decision,
+            entity_type: entityType,
+            method: result.method || 'hybrid',
+          });
+
           span.setAttributes({
             'er.decision': decision,
             'er.score': result.score,
@@ -415,6 +421,12 @@ export const erResolvers: IResolvers = {
           );
 
           erMergeOutcomesTotal.inc({
+            decision,
+            entity_type: input.entityType,
+            method: 'hybrid',
+          });
+
+          span.addEvent('er.merge_outcome', {
             decision,
             entity_type: input.entityType,
             method: 'hybrid',

@@ -57,7 +57,6 @@ const mockFetch = vi.fn((url: RequestInfo | URL) => {
 })
 
 beforeEach(() => {
-  vi.useFakeTimers()
   global.fetch = mockFetch as any
   global.ResizeObserver = class {
     observe() {}
@@ -67,7 +66,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  vi.useRealTimers()
   vi.resetAllMocks()
 })
 
@@ -75,14 +73,11 @@ describe('CommandCenterDashboard', () => {
   it('renders ER ops panel with charts', async () => {
     render(<CommandCenterDashboard />)
 
-    await act(async () => {
-      vi.runAllTimers()
-    })
-
     await waitFor(() => {
       expect(screen.getByText('ER Ops')).toBeInTheDocument()
       expect(screen.getByText('Precision vs Recall')).toBeInTheDocument()
       expect(screen.getByText('Conflict Reasons')).toBeInTheDocument()
+      expect(screen.getByText(/Rollback rate: 20\.0%/)).toBeInTheDocument()
     })
   })
 })
