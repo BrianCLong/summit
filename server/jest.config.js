@@ -2,12 +2,12 @@
  * Jest Configuration for IntelGraph Server
  */
 export default {
-  preset: 'ts-jest/presets/default-esm', // Use ESM preset
+  // preset: 'ts-jest/presets/default-esm', // Removed due to resolution issues
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.js',
-    'jest-extended/all',
+    // 'jest-extended/all', // Removed from config, will add to setup file directly
   ],
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
@@ -40,19 +40,19 @@ export default {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        useESM: true,
-        tsconfig: {
-          module: 'esnext',
-          target: 'es2020',
-          allowJs: true // Allow JS files to be processed if needed
-        },
-      },
-    ],
-    // Transform JS files as well using ts-jest or babel-jest if needed
-    '^.+\\.js$': 'babel-jest',
+    // '^.+\\.tsx?$': [
+    //   'ts-jest',
+    //   {
+    //     useESM: true,
+    //     tsconfig: {
+    //       module: 'nodenext',
+    //       target: 'es2020',
+    //       allowJs: true
+    //     },
+    //   },
+    // ],
+    // Fallback to babel-jest which might be installed
+    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
   },
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -78,20 +78,20 @@ export default {
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.js',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.js',
-  testResultsProcessor: 'jest-junit',
+  // testResultsProcessor: 'jest-junit', // Removed missing dependency
   reporters: [
     'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: '<rootDir>/test-results',
-        outputName: 'junit.xml',
-        classNameTemplate: '{classname}',
-        titleTemplate: '{title}',
-        ancestorSeparator: ' › ',
-        usePathForSuiteName: true,
-      },
-    ],
+    // [
+    //   'jest-junit',
+    //   {
+    //     outputDirectory: '<rootDir>/test-results',
+    //     outputName: 'junit.xml',
+    //     classNameTemplate: '{classname}',
+    //     titleTemplate: '{title}',
+    //     ancestorSeparator: ' › ',
+    //     usePathForSuiteName: true,
+    //   },
+    // ],
   ],
   verbose: true,
   clearMocks: true,
