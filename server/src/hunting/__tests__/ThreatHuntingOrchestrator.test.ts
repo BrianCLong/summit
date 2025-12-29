@@ -11,10 +11,16 @@ import type {
   HuntConfiguration,
   ThreatHypothesis,
   EnrichedFinding,
+  HuntFinding,
   LLMChainResult,
   QueryValidationStatus,
   RemediationPlan,
 } from '../types';
+import type {
+  HypothesisGenerationOutput,
+  QueryGenerationOutput,
+  ResultAnalysisOutput,
+} from '../LLMChainExecutor';
 
 
 
@@ -223,7 +229,7 @@ jest.mock('../LLMChainExecutor', () => {
             hypothesisId: 'hypothesis-1',
             severity: 'HIGH',
             confidence: 0.9,
-            classification: 'TEST',
+            classification: 'UNKNOWN',
             entitiesInvolved: [],
             iocsIdentified: [],
             ttpsMatched: [],
@@ -324,7 +330,7 @@ jest.mock('../LLMChainExecutor.js', () => {
             hypothesisId: 'hypothesis-1',
             severity: 'HIGH',
             confidence: 0.9,
-            classification: 'TEST',
+            classification: 'UNKNOWN',
             entitiesInvolved: [],
             iocsIdentified: [],
             ttpsMatched: [],

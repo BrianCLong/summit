@@ -11,9 +11,9 @@
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock the pg module
-const mockQuery = jest.fn();
-const mockConnect = jest.fn();
-const mockRelease = jest.fn();
+const mockQuery = jest.fn<any>();
+const mockConnect = jest.fn<any>();
+const mockRelease = jest.fn<any>();
 
 jest.mock('pg', () => ({
   Pool: jest.fn().mockImplementation(() => ({
@@ -25,19 +25,24 @@ jest.mock('pg', () => ({
 // Mock provenance ledger
 jest.mock('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn().mockResolvedValue(undefined),
+    appendEntry: jest.fn<any>().mockResolvedValue(undefined),
   },
 }));
 
-// Mock logger
-jest.mock('../../config/logger.js', () => ({
+// Mock logger - must match the import path used by ProductIncrementRepo
+jest.mock('../../config/logger', () => ({
+  __esModule: true,
   default: {
-    child: jest.fn().mockReturnValue({
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
+    child: jest.fn<any>().mockReturnValue({
+      info: jest.fn<any>(),
+      warn: jest.fn<any>(),
+      error: jest.fn<any>(),
+      debug: jest.fn<any>(),
     }),
+    info: jest.fn<any>(),
+    warn: jest.fn<any>(),
+    error: jest.fn<any>(),
+    debug: jest.fn<any>(),
   },
 }));
 
@@ -57,7 +62,7 @@ describe('ProductIncrementRepo', () => {
 
   beforeEach(() => {
     mockClient = {
-      query: jest.fn(),
+      query: jest.fn<any>(),
       release: mockRelease,
     };
     mockConnect.mockResolvedValue(mockClient);
