@@ -2,6 +2,7 @@
 import { pool } from '../../db/pg';
 import { provenanceLedger } from '../../provenance/ledger';
 import { BillableEvent, MeteringReceipt, UsagePreview } from '../../lib/billing/types';
+import { AppError } from '../../lib/errors';
 import QuotaManager from '../../lib/resources/quota-manager';
 import { PrometheusMetrics } from '../../utils/metrics';
 import { randomUUID } from 'crypto';
@@ -73,14 +74,11 @@ export class MeteringService {
             'SELECT id FROM usage_events WHERE tenant_id = $1 AND idempotency_key = $2',
             [event.tenantId, event.idempotencyKey]
           );
+          const duplicateError = new AppError('Duplicate receipt', 409, 'DUPLICATE_RECEIPT');
           if (existing.rows.length > 0) {
-            return {
-              eventId: existing.rows[0].id,
-              status: 'duplicate',
-              timestamp: new Date(),
-            };
+            (duplicateError as any).eventId = existing.rows[0].id;
           }
-          throw err;
+          throw duplicateError;
         }
         throw err;
       }

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, jest, beforeAll, afterAll } from '@jest/globals';
 import { MeteringService } from '../MeteringService';
+import { AppError } from '../../../lib/errors';
 import { pool } from '../../../db/pg';
 import { provenanceLedger } from '../../../provenance/ledger';
 import { BillableEventType } from '../../../lib/billing/types';
@@ -73,7 +74,7 @@ describe('MeteringService', () => {
     expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
   });
 
-  it('should handle duplicates idempotently', async () => {
+  it('maps unique violations to a deterministic 409', async () => {
     const event = {
       tenantId: 'tenant-123',
       eventType: BillableEventType.READ_QUERY,
@@ -83,15 +84,19 @@ describe('MeteringService', () => {
       idempotencyKey: 'key-1',
     };
 
-    // Mock DB insert unique violation
-    mockClient.query.mockImplementationOnce(() => Promise.reject({ code: '23505' }));
+    // BEGIN succeeds, INSERT fails with unique violation
+    mockClient.query
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce({ code: '23505' })
+      .mockResolvedValue({});
     // Mock fetch existing
     (pool.query as jest.Mock).mockResolvedValue({ rows: [{ id: 'evt-existing' }] });
 
-    const receipt = await meteringService.recordUsage(event);
+    const error = await meteringService.recordUsage(event).catch((err) => err);
 
-    expect(receipt.eventId).toBe('evt-existing');
-    expect(receipt.status).toBe('duplicate');
+    expect(error).toBeInstanceOf(AppError);
+    expect(error).toEqual(expect.objectContaining({ statusCode: 409, code: 'DUPLICATE_RECEIPT' }));
+    expect((error as any).eventId).toBe('evt-existing');
     expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
     // Should NOT log to provenance again for duplicate
     expect(provenanceLedger.appendEntry).not.toHaveBeenCalled();
