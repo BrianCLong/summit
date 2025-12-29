@@ -1,0 +1,946 @@
+# ============================================================================
+# Cognitive Security Operations GraphQL Schema
+# ============================================================================
+# Defensive cognitive security system for detecting and responding to
+# mis/disinformation campaigns and influence operations.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Enumerations
+# ----------------------------------------------------------------------------
+
+enum ClaimVerdict {
+  VERIFIED
+  REFUTED
+  UNVERIFIED
+  DISPUTED
+  INCONCLUSIVE
+}
+
+enum ClaimSource {
+  SOCIAL_MEDIA
+  NEWS_OUTLET
+  OFFICIAL_STATEMENT
+  DOCUMENT
+  VIDEO
+  IMAGE
+  AUDIO
+  WEBSITE
+  MESSAGING_PLATFORM
+  OTHER
+}
+
+enum EvidenceType {
+  DOCUMENT
+  VIDEO_FRAME
+  IMAGE
+  AUDIO_CLIP
+  OFFICIAL_STATEMENT
+  STRUCTURED_DATA
+  GEOLOCATION
+  TIMESTAMP
+  METADATA
+  WITNESS_ACCOUNT
+}
+
+enum NarrativeStatus {
+  EMERGING
+  ACTIVE
+  VIRAL
+  DECLINING
+  DORMANT
+  MUTATING
+}
+
+enum CampaignThreatLevel {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFORMATIONAL
+}
+
+enum CampaignStatus {
+  ACTIVE
+  SUSPECTED
+  CONFIRMED
+  MITIGATED
+  ARCHIVED
+}
+
+enum CoordinationSignalType {
+  TEMPORAL_SYNCHRONY
+  CROSS_ACCOUNT_REUSE
+  PHRASING_FINGERPRINT
+  ASSET_REUPLOAD
+  NETWORK_ANOMALY
+  CONTENT_LAUNDERING
+  AMPLIFICATION_BURST
+  HASHTAG_HIJACKING
+  BOT_NETWORK
+}
+
+enum ResponseActionType {
+  BRIEFING
+  STAKEHOLDER_MESSAGE
+  TAKEDOWN_PACKET
+  INTERNAL_COMMS
+  PRESS_STATEMENT
+  ESCALATION
+  MONITORING
+  DEBUNK
+}
+
+enum PlaybookStatus {
+  DRAFT
+  ACTIVE
+  EXECUTING
+  COMPLETED
+  SUSPENDED
+}
+
+enum IncidentStatus {
+  OPEN
+  INVESTIGATING
+  RESPONDING
+  MONITORING
+  RESOLVED
+  CLOSED
+}
+
+enum AppealStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  DENIED
+  ESCALATED
+}
+
+# ----------------------------------------------------------------------------
+# C2PA / Content Credentials Types
+# ----------------------------------------------------------------------------
+
+type C2PAManifest {
+  manifestId: ID!
+  specVersion: String!
+  claimGenerator: String!
+  signedAt: DateTime!
+  certificateChain: [C2PACertificate!]!
+  actions: [C2PAAction!]!
+  assertions: [C2PAAssertion!]!
+  parentManifests: [String!]
+  verificationStatus: C2PAVerificationStatus!
+}
+
+type C2PACertificate {
+  issuer: String!
+  subject: String!
+  serialNumber: String!
+  validFrom: DateTime!
+  validTo: DateTime!
+  isTrustedRoot: Boolean!
+}
+
+type C2PAAction {
+  actionType: String!
+  softwareAgent: String
+  when: DateTime
+  parameters: JSON
+}
+
+type C2PAAssertion {
+  assertionType: String!
+  label: String!
+  data: JSON!
+  hash: String!
+}
+
+type C2PAVerificationStatus {
+  valid: Boolean!
+  signatureVerified: Boolean!
+  certificateChainValid: Boolean!
+  contentIntegrityValid: Boolean!
+  timestampValid: Boolean!
+  errors: [String!]!
+  warnings: [String!]!
+}
+
+type ContentCredential {
+  id: ID!
+  assetId: String!
+  assetHash: String!
+  mimeType: String!
+  hasC2PA: Boolean!
+  c2paManifest: C2PAManifest
+  provenanceConfidence: Float!
+  createdAt: DateTime!
+  lastVerifiedAt: DateTime
+  provenanceChain: [ProvenanceLink!]!
+}
+
+type ProvenanceLink {
+  id: ID!
+  source: String!
+  observedAt: DateTime!
+  platform: String
+  observer: String!
+  confidence: Float!
+  metadata: JSON
+}
+
+# ----------------------------------------------------------------------------
+# Claim Graph Types
+# ----------------------------------------------------------------------------
+
+type CogSecClaim {
+  id: ID!
+  canonicalText: String!
+  originalText: String
+  language: String!
+  sourceType: ClaimSource!
+  sourceUrl: String
+  firstObservedAt: DateTime!
+  lastObservedAt: DateTime!
+  verdict: ClaimVerdict!
+  verdictConfidence: Float!
+  evidenceIds: [ID!]!
+  relatedClaimIds: [ID!]!
+  narrativeIds: [ID!]!
+  actorIds: [ID!]!
+  channelIds: [ID!]!
+  entities: [ClaimEntity!]!
+  metadata: JSON!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Resolved relations
+  evidence: [CogSecEvidence!]!
+  relatedClaims: [CogSecClaim!]!
+  narratives: [CogSecNarrative!]!
+  actors: [CogSecActor!]!
+  channels: [CogSecChannel!]!
+}
+
+type ClaimEntity {
+  text: String!
+  type: String!
+  startOffset: Int!
+  endOffset: Int!
+  linkedEntityId: ID
+  confidence: Float!
+}
+
+type CogSecEvidence {
+  id: ID!
+  type: EvidenceType!
+  title: String!
+  content: String!
+  sourceUrl: String
+  sourceCredibility: Float!
+  contentCredentialId: ID
+  claimIds: [ID!]!
+  supportsVerdict: ClaimVerdict!
+  verified: Boolean!
+  verifiedBy: ID
+  verifiedAt: DateTime
+  verificationNotes: String
+  capturedAt: DateTime!
+  createdAt: DateTime!
+  metadata: JSON!
+
+  # Resolved relations
+  contentCredential: ContentCredential
+  claims: [CogSecClaim!]!
+}
+
+type CogSecNarrative {
+  id: ID!
+  name: String!
+  description: String!
+  summary: String!
+  status: NarrativeStatus!
+  firstDetectedAt: DateTime!
+  peakAt: DateTime
+  claimIds: [ID!]!
+  parentNarrativeId: ID
+  childNarrativeIds: [ID!]!
+  actorIds: [ID!]!
+  channelIds: [ID!]!
+  audienceIds: [ID!]!
+  keywords: [String!]!
+  velocity: NarrativeVelocity!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Resolved relations
+  claims: [CogSecClaim!]!
+  parentNarrative: CogSecNarrative
+  childNarratives: [CogSecNarrative!]!
+  actors: [CogSecActor!]!
+  channels: [CogSecChannel!]!
+}
+
+type NarrativeVelocity {
+  spreadRate: Float!
+  acceleration: Float!
+  estimatedReach: Int!
+  platformCount: Int!
+  languageCount: Int!
+  regions: [String!]!
+}
+
+type CogSecActor {
+  id: ID!
+  name: String!
+  type: String!
+  accounts: [ActorAccount!]!
+  credibilityScore: Float!
+  influenceScore: Float!
+  coordinationScore: Float!
+  claimIds: [ID!]!
+  narrativeIds: [ID!]!
+  affiliations: [String!]!
+  firstActivityAt: DateTime!
+  lastActivityAt: DateTime!
+  createdAt: DateTime!
+  metadata: JSON!
+
+  # Resolved relations
+  claims: [CogSecClaim!]!
+  narratives: [CogSecNarrative!]!
+}
+
+type ActorAccount {
+  platform: String!
+  platformAccountId: String!
+  username: String!
+  profileUrl: String
+  followerCount: Int
+  accountCreatedAt: DateTime
+  isVerified: Boolean!
+  lastObservedAt: DateTime!
+}
+
+type CogSecChannel {
+  id: ID!
+  name: String!
+  platform: String!
+  type: String!
+  url: String
+  audienceSize: Int
+  credibilityScore: Float!
+  claimIds: [ID!]!
+  narrativeIds: [ID!]!
+  actorIds: [ID!]!
+  isLaunderingNode: Boolean!
+  createdAt: DateTime!
+  metadata: JSON!
+}
+
+# ----------------------------------------------------------------------------
+# Campaign Detection Types
+# ----------------------------------------------------------------------------
+
+type CoordinationSignal {
+  id: ID!
+  type: CoordinationSignalType!
+  detectedAt: DateTime!
+  confidence: Float!
+  description: String!
+  actorIds: [ID!]!
+  claimIds: [ID!]!
+  channelIds: [ID!]!
+  evidence: CoordinationEvidence!
+  campaignId: ID
+}
+
+type CoordinationEvidence {
+  temporalPattern: TemporalPattern
+  contentFingerprint: ContentFingerprint
+  networkAnomaly: NetworkAnomaly
+  launderingPath: LaunderingPath
+}
+
+type TemporalPattern {
+  timestamps: [DateTime!]!
+  synchronyScore: Float!
+  avgDelayMs: Float!
+}
+
+type ContentFingerprint {
+  contentHash: String!
+  similarityScores: [Float!]!
+  ngramOverlap: Float!
+}
+
+type NetworkAnomaly {
+  clusteringCoefficient: Float!
+  betweennessCentrality: Float!
+  anomalyScore: Float!
+}
+
+type LaunderingPath {
+  channelPath: [ID!]!
+  timeToMainstream: Int!
+}
+
+type CogSecCampaign {
+  id: ID!
+  name: String!
+  description: String!
+  threatLevel: CampaignThreatLevel!
+  status: CampaignStatus!
+  firstDetectedAt: DateTime!
+  lastActivityAt: DateTime!
+  narrativeIds: [ID!]!
+  actorIds: [ID!]!
+  channelIds: [ID!]!
+  coordinationSignalIds: [ID!]!
+  claimIds: [ID!]!
+  targetAudienceIds: [ID!]!
+  ttps: [String!]!
+  attributionConfidence: Float!
+  suspectedOrigin: String
+  responsePlaybookIds: [ID!]!
+  incidentId: ID
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  metrics: CampaignMetrics!
+
+  # Resolved relations
+  narratives: [CogSecNarrative!]!
+  actors: [CogSecActor!]!
+  channels: [CogSecChannel!]!
+  signals: [CoordinationSignal!]!
+  claims: [CogSecClaim!]!
+  playbooks: [ResponsePlaybook!]!
+  incident: CogSecIncident
+}
+
+type CampaignMetrics {
+  totalClaims: Int!
+  totalActors: Int!
+  totalChannels: Int!
+  estimatedReach: Int!
+  platformSpread: Int!
+  languageCount: Int!
+  coordinationScore: Float!
+  velocity: Float!
+  engagementRate: Float!
+}
+
+# ----------------------------------------------------------------------------
+# Response Operations Types
+# ----------------------------------------------------------------------------
+
+type ResponsePlaybook {
+  id: ID!
+  name: String!
+  description: String!
+  status: PlaybookStatus!
+  campaignId: ID!
+  incidentId: ID
+  assigneeId: ID
+  actions: [ResponseAction!]!
+  priority: Int!
+  dueAt: DateTime
+  createdBy: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Resolved relations
+  campaign: CogSecCampaign!
+  incident: CogSecIncident
+  assignee: User
+}
+
+type ResponseAction {
+  id: ID!
+  type: ResponseActionType!
+  title: String!
+  description: String!
+  status: String!
+  artifact: ResponseArtifact
+  assigneeId: ID
+  completedAt: DateTime
+  completedBy: ID
+  notes: String
+}
+
+type ResponseArtifact {
+  id: ID!
+  type: ResponseActionType!
+  title: String!
+  content: String!
+  targetAudience: String!
+  citations: [ArtifactCitation!]!
+  confidenceScore: Float!
+  generatedBy: ID!
+  generatedAt: DateTime!
+  approvedBy: ID
+  approvedAt: DateTime
+  exportFormats: [String!]!
+}
+
+type ArtifactCitation {
+  id: ID!
+  referenceText: String!
+  sourceType: String!
+  sourceId: ID
+  externalUrl: String
+  confidence: Float!
+}
+
+type VerifiedBriefing {
+  id: ID!
+  type: ResponseActionType!
+  title: String!
+  content: String!
+  targetAudience: String!
+  citations: [ArtifactCitation!]!
+  confidenceScore: Float!
+  generatedBy: ID!
+  generatedAt: DateTime!
+  exportFormats: [String!]!
+  executiveSummary: String!
+  keyFindings: [String!]!
+  claimVerdicts: [ClaimVerdictSummary!]!
+  recommendedActions: [String!]!
+  riskAssessment: RiskAssessment!
+}
+
+type ClaimVerdictSummary {
+  claimId: ID!
+  claimText: String!
+  verdict: ClaimVerdict!
+  confidence: Float!
+}
+
+type RiskAssessment {
+  level: CampaignThreatLevel!
+  factors: [String!]!
+  mitigations: [String!]!
+}
+
+type TakedownPacket {
+  id: ID!
+  type: ResponseActionType!
+  title: String!
+  content: String!
+  targetAudience: String!
+  citations: [ArtifactCitation!]!
+  confidenceScore: Float!
+  generatedBy: ID!
+  generatedAt: DateTime!
+  exportFormats: [String!]!
+  platform: String!
+  violationType: String!
+  urls: [String!]!
+  accountIds: [String!]!
+  evidenceBundleId: ID!
+  legalBasis: String
+  contactInfo: String
+}
+
+# ----------------------------------------------------------------------------
+# Incident Management Types
+# ----------------------------------------------------------------------------
+
+type CogSecIncident {
+  id: ID!
+  name: String!
+  description: String!
+  status: IncidentStatus!
+  severity: Int!
+  campaignIds: [ID!]!
+  playbookIds: [ID!]!
+  leadAnalystId: ID
+  teamMemberIds: [ID!]!
+  investigationId: ID
+  timeline: [IncidentTimelineEvent!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  resolvedAt: DateTime
+
+  # Resolved relations
+  campaigns: [CogSecCampaign!]!
+  playbooks: [ResponsePlaybook!]!
+  leadAnalyst: User
+  investigation: Investigation
+}
+
+type IncidentTimelineEvent {
+  id: ID!
+  type: String!
+  description: String!
+  actorId: ID
+  timestamp: DateTime!
+  relatedEntityIds: [ID!]
+}
+
+# ----------------------------------------------------------------------------
+# Governance Types
+# ----------------------------------------------------------------------------
+
+type CogSecAuditLog {
+  id: ID!
+  action: String!
+  resourceType: String!
+  resourceId: ID!
+  userId: ID!
+  tenantId: ID
+  previousState: JSON
+  newState: JSON
+  justification: String
+  timestamp: DateTime!
+  ipAddress: String
+  userAgent: String
+}
+
+type VerificationAppeal {
+  id: ID!
+  claimId: ID!
+  currentVerdict: ClaimVerdict!
+  requestedVerdict: ClaimVerdict!
+  appellantId: ID!
+  reason: String!
+  supportingEvidence: [String!]!
+  status: AppealStatus!
+  reviewerId: ID
+  reviewNotes: String
+  resolution: String
+  createdAt: DateTime!
+  resolvedAt: DateTime
+
+  # Resolved relations
+  claim: CogSecClaim!
+  appellant: User!
+  reviewer: User
+}
+
+type GovernancePolicy {
+  id: ID!
+  name: String!
+  description: String!
+  type: String!
+  rules: JSON!
+  isActive: Boolean!
+  version: Int!
+  createdBy: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type TransparencyReport {
+  period: DateRange!
+  claims: ClaimStats!
+  appeals: AppealStats!
+  actions: ActionStats!
+  policies: PolicyStats!
+}
+
+type DateRange {
+  start: DateTime!
+  end: DateTime!
+}
+
+type ClaimStats {
+  total: Int!
+  verified: Int!
+  refuted: Int!
+  disputed: Int!
+  unverified: Int!
+}
+
+type AppealStats {
+  total: Int!
+  approved: Int!
+  denied: Int!
+  pending: Int!
+}
+
+type ActionStats {
+  takedownsRequested: Int!
+  takedownsExecuted: Int!
+  briefingsGenerated: Int!
+}
+
+type PolicyStats {
+  version: Int!
+  lastUpdated: DateTime!
+}
+
+# ----------------------------------------------------------------------------
+# Evaluation & Metrics Types
+# ----------------------------------------------------------------------------
+
+type CogSecMetrics {
+  id: ID!
+  periodStart: DateTime!
+  periodEnd: DateTime!
+  detection: DetectionMetrics!
+  verification: VerificationMetrics!
+  response: ResponseMetrics!
+  operatorEfficiency: OperatorMetrics!
+  generatedAt: DateTime!
+}
+
+type DetectionMetrics {
+  timeToDetectP50: Float!
+  timeToDetectP95: Float!
+  campaignsDetected: Int!
+  signalsDetected: Int!
+  falsePositiveRate: Float!
+}
+
+type VerificationMetrics {
+  claimPrecision: Float!
+  claimRecall: Float!
+  citationCorrectness: Float!
+  falseAttributionRate: Float!
+  avgVerificationTimeMs: Float!
+  claimsVerified: Int!
+}
+
+type ResponseMetrics {
+  narrativeContainmentRate: Float!
+  avgGrowthRateReduction: Float!
+  crossChannelSpreadReduction: Float!
+  playbooksExecuted: Int!
+  takedownsSubmitted: Int!
+  takedownSuccessRate: Float!
+}
+
+type OperatorMetrics {
+  minutesPerIncident: Float!
+  claimsPerAnalystHour: Float!
+  playbooksPerIncident: Float!
+  avgResolutionTimeMs: Float!
+}
+
+type BenchmarkComparison {
+  detection: JSON!
+  verification: JSON!
+  response: JSON!
+  operator: JSON!
+  overallScore: Float!
+}
+
+type RiskAssessmentReport {
+  governanceRisks: [String!]!
+  mapRisks: [String!]!
+  measureRisks: [String!]!
+  manageRisks: [String!]!
+  overallRiskLevel: String!
+}
+
+# ----------------------------------------------------------------------------
+# Input Types
+# ----------------------------------------------------------------------------
+
+input ClaimInput {
+  text: String!
+  sourceType: ClaimSource!
+  sourceUrl: String
+  language: String
+  actorId: ID
+  channelId: ID
+}
+
+input EvidenceInput {
+  type: EvidenceType!
+  title: String!
+  content: String!
+  sourceUrl: String
+  sourceCredibility: Float
+  claimIds: [ID!]
+  supportsVerdict: ClaimVerdict
+}
+
+input NarrativeInput {
+  name: String!
+  description: String!
+  claimIds: [ID!]!
+  keywords: [String!]
+}
+
+input VerdictInput {
+  claimId: ID!
+  verdict: ClaimVerdict!
+  confidence: Float!
+  evidenceIds: [ID!]!
+}
+
+input AppealInput {
+  claimId: ID!
+  requestedVerdict: ClaimVerdict!
+  reason: String!
+  supportingEvidence: [String!]
+}
+
+input PlaybookInput {
+  campaignId: ID!
+  priority: Int
+  assigneeId: ID
+  dueAt: DateTime
+}
+
+input TakedownInput {
+  campaignId: ID!
+  platform: String!
+  urls: [String!]!
+  accountIds: [String!]!
+  violationType: String!
+  legalBasis: String
+  contactInfo: String
+}
+
+input IncidentInput {
+  campaignId: ID!
+  name: String!
+  description: String!
+  leadAnalystId: ID!
+  severity: Int
+}
+
+input ClaimFilter {
+  verdict: ClaimVerdict
+  sourceType: ClaimSource
+  dateFrom: DateTime
+  dateTo: DateTime
+  narrativeId: ID
+  query: String
+}
+
+input CampaignFilter {
+  status: CampaignStatus
+  threatLevel: CampaignThreatLevel
+  dateFrom: DateTime
+  dateTo: DateTime
+}
+
+# ----------------------------------------------------------------------------
+# Queries
+# ----------------------------------------------------------------------------
+
+extend type Query {
+  # Claims
+  cogSecClaim(id: ID!): CogSecClaim
+  cogSecClaims(filter: ClaimFilter, limit: Int, offset: Int): [CogSecClaim!]!
+  searchCogSecClaims(query: String!, limit: Int): [CogSecClaim!]!
+  similarClaims(claimId: ID!, threshold: Float): [CogSecClaim!]!
+
+  # Evidence
+  cogSecEvidence(id: ID!): CogSecEvidence
+
+  # Narratives
+  cogSecNarrative(id: ID!): CogSecNarrative
+  cogSecNarratives(status: NarrativeStatus, limit: Int): [CogSecNarrative!]!
+  narrativeGraph(narrativeId: ID!): NarrativeGraph!
+
+  # Campaigns
+  cogSecCampaign(id: ID!): CogSecCampaign
+  cogSecCampaigns(filter: CampaignFilter, limit: Int): [CogSecCampaign!]!
+  activeCampaigns(limit: Int): [CogSecCampaign!]!
+  campaignSignals(campaignId: ID!): [CoordinationSignal!]!
+
+  # Incidents
+  cogSecIncident(id: ID!): CogSecIncident
+  cogSecIncidents(status: IncidentStatus, limit: Int): [CogSecIncident!]!
+
+  # Playbooks
+  responsePlaybook(id: ID!): ResponsePlaybook
+  campaignPlaybooks(campaignId: ID!): [ResponsePlaybook!]!
+
+  # Governance
+  cogSecAuditLogs(resourceType: String, resourceId: ID, limit: Int): [CogSecAuditLog!]!
+  verificationAppeal(id: ID!): VerificationAppeal
+  pendingAppeals(limit: Int): [VerificationAppeal!]!
+  governancePolicies: [GovernancePolicy!]!
+  transparencyReport(startDate: DateTime!, endDate: DateTime!): TransparencyReport!
+
+  # Metrics
+  cogSecMetrics(startDate: DateTime!, endDate: DateTime!): CogSecMetrics!
+  benchmarkComparison(startDate: DateTime!, endDate: DateTime!): BenchmarkComparison!
+  riskAssessment: RiskAssessmentReport!
+
+  # Content Credentials
+  contentCredential(id: ID!): ContentCredential
+  verifyC2PAManifest(assetId: ID!): C2PAVerificationStatus!
+}
+
+type NarrativeGraph {
+  narrative: CogSecNarrative!
+  claims: [CogSecClaim!]!
+  evidence: [CogSecEvidence!]!
+  actors: [CogSecActor!]!
+  channels: [CogSecChannel!]!
+}
+
+# ----------------------------------------------------------------------------
+# Mutations
+# ----------------------------------------------------------------------------
+
+extend type Mutation {
+  # Claims
+  extractClaim(input: ClaimInput!): CogSecClaim!
+  updateClaimVerdict(input: VerdictInput!): CogSecClaim!
+  linkRelatedClaims(claimId1: ID!, claimId2: ID!, relationType: String!): Boolean!
+
+  # Evidence
+  createEvidence(input: EvidenceInput!): CogSecEvidence!
+  verifyEvidence(evidenceId: ID!, notes: String): CogSecEvidence!
+  linkEvidenceToClaims(evidenceId: ID!, claimIds: [ID!]!): Boolean!
+
+  # Narratives
+  createNarrative(input: NarrativeInput!): CogSecNarrative!
+  updateNarrativeStatus(narrativeId: ID!, status: NarrativeStatus!): CogSecNarrative!
+  linkClaimsToNarrative(claimIds: [ID!]!, narrativeId: ID!): Boolean!
+
+  # Campaigns
+  runDetectionPipeline: [CoordinationSignal!]!
+  clusterIntoCampaigns: [CogSecCampaign!]!
+  updateCampaignStatus(campaignId: ID!, status: CampaignStatus!): CogSecCampaign!
+
+  # Incidents
+  createIncident(input: IncidentInput!): CogSecIncident!
+  updateIncidentStatus(incidentId: ID!, status: IncidentStatus!): CogSecIncident!
+  addIncidentTimelineEvent(incidentId: ID!, type: String!, description: String!): IncidentTimelineEvent!
+
+  # Playbooks
+  generatePlaybook(input: PlaybookInput!): ResponsePlaybook!
+  executePlaybookAction(playbookId: ID!, actionId: ID!): ResponseAction!
+  updatePlaybookStatus(playbookId: ID!, status: PlaybookStatus!): ResponsePlaybook!
+
+  # Artifacts
+  generateBriefing(campaignId: ID!): VerifiedBriefing!
+  generateStakeholderMessage(campaignId: ID!, stakeholder: String!): ResponseArtifact!
+  generateTakedownPacket(input: TakedownInput!): TakedownPacket!
+
+  # Appeals
+  createAppeal(input: AppealInput!): VerificationAppeal!
+  reviewAppeal(appealId: ID!, decision: String!, notes: String!): VerificationAppeal!
+
+  # Content Credentials
+  createContentCredential(assetId: ID!, mimeType: String!, sourceUrl: String): ContentCredential!
+  addProvenanceLink(credentialId: ID!, source: String!, platform: String): ProvenanceLink!
+}
+
+# ----------------------------------------------------------------------------
+# Subscriptions
+# ----------------------------------------------------------------------------
+
+extend type Subscription {
+  # Real-time campaign detection
+  campaignDetected: CogSecCampaign!
+  coordinationSignalDetected: CoordinationSignal!
+
+  # Incident updates
+  incidentUpdated(incidentId: ID!): CogSecIncident!
+
+  # Claim verdicts
+  claimVerdictUpdated(narrativeId: ID): CogSecClaim!
+
+  # Playbook execution
+  playbookActionCompleted(playbookId: ID!): ResponseAction!
+}
