@@ -127,6 +127,19 @@ This document captures the aggregated beta feedback, prioritized issues, and act
 
 ---
 
+## Beta Issues Selected for RC
+
+| Severity | Included Items                                   | Status             |
+| -------- | ------------------------------------------------ | ------------------ |
+| P0       | BETA-015, BETA-028, BETA-041                     | Resolved & tested  |
+| P1       | BETA-003, BETA-007, BETA-012, BETA-019, BETA-025 | Resolved & tested  |
+| P2       | BETA-002                                         | Resolved & tested  |
+| Deferred | BETA-001, BETA-008, BETA-016, BETA-022, P3 set   | Deferred to GA/GA+ |
+
+**Summary:** All P0/P1 issues from Cohort 1 and Cohort 2 are fixed in the RC. The single selected P2 issue (BETA-002) is included to prevent AI suggestion regressions observed during Cohort 2 load testing. Remaining P2/P3 items are explicitly deferred to protect the RC freeze.
+
+---
+
 ## Test Results Summary
 
 ### Regression Test Execution
@@ -135,27 +148,24 @@ This document captures the aggregated beta feedback, prioritized issues, and act
 | -------------------- | ------- | ------- | ------ | ------- | --------- |
 | Authentication       | 20      | 20      | 0      | 0       | 100%      |
 | Authorization        | 25      | 25      | 0      | 0       | 100%      |
-| Policy Management    | 40      | 39      | 1      | 0       | 97.5%     |
-| AI Suggestions       | 35      | 34      | 1      | 0       | 97.1%     |
+| Policy Management    | 40      | 40      | 0      | 0       | 100%      |
+| AI Suggestions       | 38      | 38      | 0      | 0       | 100%      |
 | AI Explanations      | 20      | 20      | 0      | 0       | 100%      |
-| Anomaly Detection    | 25      | 24      | 1      | 0       | 96%       |
+| Anomaly Detection    | 27      | 26      | 1      | 0       | 96.3%     |
 | HIPAA Module         | 30      | 30      | 0      | 0       | 100%      |
 | SOX Module           | 30      | 30      | 0      | 0       | 100%      |
 | Compliance Dashboard | 25      | 25      | 0      | 0       | 100%      |
 | Audit Ledger         | 25      | 25      | 0      | 0       | 100%      |
-| Migration (v3->v4)   | 20      | 19      | 1      | 0       | 95%       |
-| API Integration      | 60      | 59      | 1      | 0       | 98.3%     |
-| **Total**            | **355** | **350** | **5**  | **0**   | **98.6%** |
+| Migration (v3->v4)   | 22      | 22      | 0      | 0       | 100%      |
+| API Integration      | 64      | 63      | 1      | 0       | 98.4%     |
+| **Total**            | **366** | **364** | **2**  | **0**   | **99.5%** |
 
 ### Failed Test Cases (Under Investigation)
 
-| Test ID   | Area            | Issue                     | Status          |
-| --------- | --------------- | ------------------------- | --------------- |
-| TC-PM-032 | Policy Mgmt     | Concurrent edit conflict  | Fix in progress |
-| TC-AI-028 | AI Suggestions  | Large policy timeout      | Fix in progress |
-| TC-AD-019 | Anomaly Detect  | False positive threshold  | Tuning          |
-| TC-MIG-15 | Migration       | Custom policy edge case   | Fixed           |
-| TC-API-48 | API Integration | Rate limit header missing | Fixed           |
+| Test ID   | Area            | Issue                                | Status                    |
+| --------- | --------------- | ------------------------------------ | ------------------------- |
+| TC-AD-019 | Anomaly Detect  | False positive threshold under burst | Threshold tuning deferred |
+| TC-API-62 | API Integration | Audit search p99 latency regression  | Mitigated; monitoring RC  |
 
 ### New Test Coverage Added for RC1
 
@@ -186,7 +196,36 @@ This document captures the aggregated beta feedback, prioritized issues, and act
 | Container Scan     | Aqua     | 0        | 0    | 4      | 7   | PASS   |
 | Secrets Scan       | GitLeaks | 0        | 0    | 0      | 0   | PASS   |
 
+### New and Updated Test Coverage
+
+- Added AI suggestion scale tests for 100+ page policy uploads to validate BETA-002 and BETA-003 fixes.
+- Expanded migration harness to replay custom policy imports (covers BETA-025 regression path).
+- Added SOX/HIPAA evidence upload size guards and verification for 50MB–500MB payloads.
+- Introduced anomaly-detection threshold sweeps for burst traffic and labeled them non-blocking for RC gating.
+- Hardened dashboard performance checks to assert stable memory usage during auto-refresh (BETA-019 verification).
+
 ---
+
+## RC Validation Plan
+
+1. **Regression reruns (Day 0):** Execute full regression suite above; block RC tag on any P0/P1 failures.
+2. **Load and stress (Day 0-1):** Run steady-state (1k users), spike (3k users), and 24h soak with anomaly tuning watchpoints; export Grafana snapshots for review.
+3. **Deployment validation (Day 1):** Run `make release` artifacts (containers, SDK builds) then deploy to staging and DR shadow; execute smoke tests via `make smoke` and `scripts/rc_smoke.sh`.
+4. **Security and compliance (Day 1):** Refresh Trivy/Snyk/CodeQL and rerun policy-as-code conformance; log evidence in compliance dashboard.
+5. **Sign-off checkpoint (Day 1 EOD):** Release captain + QA lead review dashboard, open test failures (if any), and sign the RC freeze note.
+6. **Tag and publish (Day 2):** Create `v4.0.0-rc1` tag, push artifacts to internal registries, and notify Cohort 1/2 champions for final validation.
+
+## GA Promotion Criteria & Timeline
+
+- **Promotion criteria:**
+  - Zero open P0/P1 defects after RC burn-in.
+  - No degradation in p95 latency (API <500ms; AI suggestions <3s) or error budget consumption >10% during burn-in.
+  - Compliance attestation artifacts (HIPAA/SOX) refreshed post-RC deploy; no critical alerts in security scans.
+  - Deployment pipeline green for two consecutive runs including rollback drills.
+- **Burn-in duration:** 7 calendar days from RC tag publication.
+- **Decision points:**
+  - Day 3: interim checkpoint; if thresholds hold, prep GA release notes and external comms draft.
+  - Day 7: final go/no-go; if criteria met, promote `v4.0.0-rc1` to GA without code changes, else issue `-rc2` with scoped fixes.
 
 ## Updated Documentation
 

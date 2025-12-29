@@ -35,9 +35,11 @@ Before starting the migration, ensure you have:
 
 - Enable the **custom policy remap flag** (`MIGRATION_ENABLE_CUSTOM_POLICY_REMAP=true`) during cutover to avoid the Cohort 2 edge case (BETA-025).
 - Pre-warm the AI suggestion cache with your top 50 policies to eliminate the beta-observed cold-start latency (BETA-003/BETA-002).
-- For evidence uploads >50MB, use the **deterministic checksum uploader** (`/api/v4/compliance/upload?mode=deterministic`) introduced post-beta to satisfy HIPAA/SOX guardrails.
+- For evidence uploads >50MB, use resumable uploads with `Content-Range` headers or the **deterministic checksum uploader** (`/api/v4/compliance/upload?mode=deterministic`) introduced post-beta to satisfy HIPAA/SOX guardrails.
+- Enable dual JWT parsing (snake_case + camelCase `tenantId`) during the cutover window to prevent authorization drops while SDKs roll forward.
 - Run the **migration smoke tests** (`make migrate:rc-smoke`) immediately after deployment to validate auth scopes, audit ledger writes, and dashboard refresh stability.
-- Capture a snapshot of the audit ledger Merkle root before and after migration; store both in your change ticket for traceability.
+- Capture a snapshot of the audit ledger Merkle root before and after migration; store both in your change ticket for traceability and validate with `/api/v4/zero-trust/audit/verify`.
+- Run a smoke load of 100 concurrent AI suggestion requests (large documents) after enabling v4 to confirm the BETA-002/003 fixes hold in your environment.
 
 ---
 
@@ -599,6 +601,18 @@ await client.admin.updateTenantConfig({
 ### Q: What happens to my v3 audit logs?
 
 **A:** v3 audit logs remain accessible. New v4 audit events use the immutable ledger with enhanced integrity verification.
+
+### Q: How should we handle large evidence uploads during the cutover?
+
+**A:** Use resumable uploads with `Content-Range` headers and keep individual chunks under 25MB. The RC build validates chunk ordering and integrity; failed parts can be retried without restarting the upload.
+
+### Q: Can tenants still send snake_case JWT claims during rollout?
+
+**A:** Yes. The RC build accepts both `tenant_id` and `tenantId` to support staggered SDK upgrades. Enable the compatibility flag for one release cycle, then lock to camelCase once all services are upgraded.
+
+### Q: How do we validate AI suggestion performance after migrating?
+
+**A:** Run the `tests/ai/suggestion-scale.spec.ts` suite or issue 100 concurrent requests with 100+ page documents. p95 should remain under 3s; if exceeded, enable caching and batching options in the SDK client and contact support.
 
 ---
 

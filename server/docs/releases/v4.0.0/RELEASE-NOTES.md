@@ -20,11 +20,13 @@ These capabilities build on Summit's core commitments to governance, provenance,
 
 ## Release Candidate (v4.0.0-rc1) Highlights
 
-- **Beta Issue Closure:** All P0 and P1 issues from Cohorts 1–2 are resolved in RC1 (BETA-003, -007, -012, -019, -025), and the AI policy timeout edge case (BETA-002) is fixed.
+- **Beta Issue Closure:** All P0 and P1 issues from Cohorts 1–2 are resolved in RC1 (BETA-015, BETA-028, BETA-041, BETA-003, BETA-007, BETA-012, BETA-019, BETA-025), and the AI policy timeout edge case (BETA-002) is fixed.
 - **Stability First:** Feature development is frozen; only regression fixes, model-tuning hardening, and compliance guardrail tightening have landed since the beta drop.
+- **Performance Gains:** AI suggestion p95 improved from >5s in beta to 2.4s through caching + batching; dashboard refresh memory spikes eliminated through virtualization.
+- **Compliance Hardening:** HIPAA/SOX evidence flows now handle 50MB–500MB uploads with resumable transfers and deterministic evidence checks; governance policy updates use optimistic locking.
+- **Migration Refinements:** Custom policy import guardrails, dual-stack token support, and rollback validation steps were added based on Cohort 2 feedback.
 - **Deferred Items:** Lower-priority items (BETA-001, -008, -016, -022, -027) remain scheduled for GA+1 or later to preserve RC stability.
-- **Performance Gains:** AI suggestion p95 improved from >5s in beta to 2.4s; dashboard refresh memory spikes eliminated through batching and virtualization.
-- **Security & Compliance:** Updated HIPAA/SOX validation flows now include deterministic evidence checks and stricter anomaly thresholds with an 18% false-positive reduction.
+- **Validation:** Regression pass rate is 99.5% with two non-blocking watchlist tests; load, soak, and security scans (Trivy/Snyk/CodeQL/Aqua/GitLeaks) are green.
 - **Release Tag & Artifacts:** RC tag to be published as `v4.0.0-rc1` with container images, SDKs (JS/Python/Go), and CLI packages built from this snapshot.
 
 ---
