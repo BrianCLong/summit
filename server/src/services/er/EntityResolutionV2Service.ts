@@ -1,9 +1,13 @@
 import { Session } from 'neo4j-driver';
 import pino from 'pino';
 import { createHash, randomUUID } from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import { soundex } from './soundex.js';
 import { getPostgresPool } from '../../config/database.js';
 import { dlqFactory } from '../../lib/dlq/index.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
+import { writeAudit } from '../../utils/audit.js';
 
 const log = (pino as any)({ name: 'EntityResolutionV2Service' });
 
@@ -55,14 +59,49 @@ export interface MergeRequest {
   guardrailOverrideReason?: string;
 }
 
+export interface GuardrailMetrics {
+  totalPairs: number;
+  truePositives: number;
+  falsePositives: number;
+  falseNegatives: number;
+  precision: number;
+  recall: number;
+}
+
+export interface GuardrailThresholds {
+  minPrecision: number;
+  minRecall: number;
+  matchThreshold: number;
+}
+
 export interface GuardrailResult {
   datasetId: string;
   passed: boolean;
   checks: Array<{ name: string; passed: boolean; message?: string }>;
+  metrics: GuardrailMetrics;
+  thresholds: GuardrailThresholds;
+  evaluatedAt: string;
 }
 
 export class EntityResolutionV2Service {
   private readonly dlq = dlqFactory('er-merge-conflicts');
+  private readonly guardrailFixturesPath =
+    process.env.ER_GUARDRAIL_FIXTURES_PATH ||
+    path.resolve(
+      process.cwd(),
+      'server',
+      'tests',
+      'fixtures',
+      'er',
+      'evaluation-fixtures.json',
+    );
+  private readonly guardrailDefaults: GuardrailThresholds = {
+    minPrecision: Number(process.env.ER_GUARDRAIL_MIN_PRECISION || 0.9),
+    minRecall: Number(process.env.ER_GUARDRAIL_MIN_RECALL || 0.9),
+    matchThreshold: Number(process.env.ER_GUARDRAIL_MATCH_THRESHOLD || 0.85),
+  };
+  private readonly guardrailDefaultDatasetId =
+    process.env.ER_GUARDRAIL_DATASET_ID || 'baseline';
 
   private buildMergeId(masterId: string, mergeIds: string[]): string {
     const hash = createHash('sha256')
@@ -310,18 +349,224 @@ export class EntityResolutionV2Service {
     return true;
   }
 
+  private loadGuardrailFixtures(): {
+    datasets: Array<{
+      datasetId: string;
+      description?: string;
+      pairs: Array<{
+        id: string;
+        entityA: EntityV2;
+        entityB: EntityV2;
+        isMatch: boolean;
+      }>;
+    }>;
+  } {
+    const candidatePaths = [
+      this.guardrailFixturesPath,
+      path.resolve(
+        process.cwd(),
+        'tests',
+        'fixtures',
+        'er',
+        'evaluation-fixtures.json',
+      ),
+    ];
+    const fixturesPath = candidatePaths.find((p) => fs.existsSync(p));
+
+    if (!fixturesPath) {
+      throw new Error('ER guardrail fixtures not found.');
+    }
+
+    const raw = fs.readFileSync(fixturesPath, 'utf-8');
+    return JSON.parse(raw);
+  }
+
+  private computeGuardrailMetrics(
+    pairs: Array<{
+      entityA: EntityV2;
+      entityB: EntityV2;
+      isMatch: boolean;
+    }>,
+    matchThreshold: number,
+  ): GuardrailMetrics {
+    let truePositives = 0;
+    let falsePositives = 0;
+    let falseNegatives = 0;
+
+    for (const pair of pairs) {
+      const score = this.explain(pair.entityA, pair.entityB).score;
+      const predictedMatch = score >= matchThreshold;
+
+      if (predictedMatch && pair.isMatch) truePositives += 1;
+      if (predictedMatch && !pair.isMatch) falsePositives += 1;
+      if (!predictedMatch && pair.isMatch) falseNegatives += 1;
+    }
+
+    const precisionDenominator = truePositives + falsePositives;
+    const recallDenominator = truePositives + falseNegatives;
+
+    return {
+      totalPairs: pairs.length,
+      truePositives,
+      falsePositives,
+      falseNegatives,
+      precision:
+        precisionDenominator > 0 ? truePositives / precisionDenominator : 0,
+      recall: recallDenominator > 0 ? truePositives / recallDenominator : 0,
+    };
+  }
+
+  public async recordGuardrailEvaluation(
+    result: GuardrailResult,
+    userContext?: any,
+  ): Promise<void> {
+    const pool = getPostgresPool();
+    await pool.query(
+      `
+        INSERT INTO er_guardrail_evaluations (
+          dataset_id,
+          precision,
+          recall,
+          min_precision,
+          min_recall,
+          match_threshold,
+          total_pairs,
+          passed,
+          evaluated_at,
+          evaluated_by,
+          details
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      `,
+      [
+        result.datasetId,
+        result.metrics.precision,
+        result.metrics.recall,
+        result.thresholds.minPrecision,
+        result.thresholds.minRecall,
+        result.thresholds.matchThreshold,
+        result.metrics.totalPairs,
+        result.passed,
+        result.evaluatedAt,
+        userContext?.userId || null,
+        JSON.stringify({
+          checks: result.checks,
+          metrics: result.metrics,
+        }),
+      ],
+    );
+  }
+
+  private async recordGuardrailOverride({
+    datasetId,
+    reason,
+    mergeId,
+    userContext,
+    guardrails,
+  }: {
+    datasetId: string;
+    reason: string;
+    mergeId: string;
+    userContext: any;
+    guardrails: GuardrailResult;
+  }): Promise<void> {
+    const pool = getPostgresPool();
+    await pool.query(
+      `
+        INSERT INTO er_guardrail_overrides (
+          dataset_id,
+          reason,
+          merge_id,
+          actor_id,
+          tenant_id,
+          context
+        ) VALUES ($1,$2,$3,$4,$5,$6)
+      `,
+      [
+        datasetId,
+        reason,
+        mergeId,
+        userContext?.userId || null,
+        userContext?.tenantId || null,
+        JSON.stringify({
+          guardrails,
+        }),
+      ],
+    );
+
+    await provenanceLedger.appendEntry({
+      tenantId: userContext?.tenantId || 'unknown',
+      actionType: 'ER_GUARDRAIL_OVERRIDE',
+      resourceType: 'er_guardrail',
+      resourceId: mergeId,
+      actorId: userContext?.userId || 'unknown',
+      actorType: 'user',
+      payload: {
+        datasetId,
+        reason,
+        guardrails,
+      },
+      metadata: {
+        purpose: 'ER guardrail override',
+      },
+    });
+
+    await writeAudit({
+      userId: userContext?.userId,
+      action: 'ER_GUARDRAIL_OVERRIDE',
+      resourceType: 'er_guardrail',
+      resourceId: mergeId,
+      details: {
+        datasetId,
+        reason,
+        guardrails,
+      },
+    });
+  }
+
   /**
    * Evaluate guardrails for merge operations
    */
   public evaluateGuardrails(datasetId?: string): GuardrailResult {
-    // Stub implementation for guardrail evaluation
+    const fixtures = this.loadGuardrailFixtures();
+    const selectedDatasetId = datasetId || this.guardrailDefaultDatasetId;
+    const dataset = fixtures.datasets.find(
+      (entry) => entry.datasetId === selectedDatasetId,
+    );
+
+    if (!dataset) {
+      throw new Error(`Unknown ER guardrail dataset: ${selectedDatasetId}`);
+    }
+
+    const thresholds: GuardrailThresholds = {
+      minPrecision: this.guardrailDefaults.minPrecision,
+      minRecall: this.guardrailDefaults.minRecall,
+      matchThreshold: this.guardrailDefaults.matchThreshold,
+    };
+
+    const metrics = this.computeGuardrailMetrics(
+      dataset.pairs,
+      thresholds.matchThreshold,
+    );
+    const precisionPass = metrics.precision >= thresholds.minPrecision;
+    const recallPass = metrics.recall >= thresholds.minRecall;
+
     return {
-      datasetId: datasetId || 'default',
-      passed: true,
+      datasetId: dataset.datasetId,
+      passed: precisionPass && recallPass,
+      metrics,
+      thresholds,
+      evaluatedAt: new Date().toISOString(),
       checks: [
-        { name: 'cardinality', passed: true },
-        { name: 'conflict_detection', passed: true },
-        { name: 'data_quality', passed: true },
+        {
+          name: 'precision',
+          passed: precisionPass,
+          message: `Precision ${metrics.precision.toFixed(3)} >= ${thresholds.minPrecision}`,
+        },
+        {
+          name: 'recall',
+          passed: recallPass,
+          message: `Recall ${metrics.recall.toFixed(3)} >= ${thresholds.minRecall}`,
+        },
       ],
     };
   }
@@ -341,6 +586,8 @@ export class EntityResolutionV2Service {
     const uniqueMergeIds = Array.from(new Set(mergeIds));
     const mergeId = req.mergeId || this.buildMergeId(masterId, uniqueMergeIds);
     const idempotencyKey = req.idempotencyKey || mergeId;
+    let guardrails: GuardrailResult | undefined;
+    let overrideUsed = false;
 
     if (uniqueMergeIds.length !== mergeIds.length) {
       await this.recordMergeConflict({
@@ -413,6 +660,35 @@ export class EntityResolutionV2Service {
       throw new Error("Policy violation: Insufficient authority to merge these entities.");
     }
 
+    guardrails = this.evaluateGuardrails(req.guardrailDatasetId);
+    await this.recordGuardrailEvaluation(guardrails, userContext);
+
+    if (!guardrails.passed) {
+      const overrideReason = req.guardrailOverrideReason?.trim();
+      if (!overrideReason) {
+        await this.recordMergeConflict({
+          mergeId,
+          masterId,
+          mergeIds: uniqueMergeIds,
+          reason: 'ER guardrails failed',
+          userContext,
+          metadata: {
+            guardrails,
+          },
+        });
+        throw new Error('ER guardrails failed; override required to proceed.');
+      }
+
+      overrideUsed = true;
+      await this.recordGuardrailOverride({
+        datasetId: guardrails.datasetId,
+        reason: overrideReason,
+        mergeId,
+        userContext,
+        guardrails,
+      });
+    }
+
     const tx = session.beginTransaction();
     try {
       const existingDecision = await tx.run(
@@ -435,8 +711,8 @@ export class EntityResolutionV2Service {
           decisionId,
           mergeId,
           idempotent: true,
-          guardrails: req.guardrailDatasetId ? this.evaluateGuardrails(req.guardrailDatasetId) : undefined,
-          overrideUsed: !!req.guardrailOverrideReason,
+          guardrails,
+          overrideUsed,
         };
       }
 
@@ -598,8 +874,8 @@ export class EntityResolutionV2Service {
         mergeId,
         snapshotId,
         idempotent: false,
-        guardrails: req.guardrailDatasetId ? this.evaluateGuardrails(req.guardrailDatasetId) : undefined,
-        overrideUsed: !!req.guardrailOverrideReason,
+        guardrails,
+        overrideUsed,
       };
     } catch (e) {
       await tx.rollback();

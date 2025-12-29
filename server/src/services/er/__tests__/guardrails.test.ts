@@ -1,5 +1,16 @@
 import { EntityResolutionV2Service } from '../EntityResolutionV2Service';
 import { provenanceLedger } from '../../../provenance/ledger';
+import { writeAudit } from '../../../utils/audit.js';
+
+jest.mock('../../../config/database.js', () => ({
+  getPostgresPool: jest.fn(() => ({
+    query: jest.fn().mockResolvedValue({ rows: [] }),
+  })),
+}));
+
+jest.mock('../../../utils/audit.js', () => ({
+  writeAudit: jest.fn(),
+}));
 
 jest.mock('../../../provenance/ledger', () => ({
   provenanceLedger: {
@@ -119,6 +130,14 @@ describe('EntityResolutionV2Service guardrails', () => {
           reason: 'Approved by lead analyst.',
         }),
       })
+    );
+    expect(writeAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'ER_GUARDRAIL_OVERRIDE',
+        details: expect.objectContaining({
+          reason: 'Approved by lead analyst.',
+        }),
+      }),
     );
   });
 });
