@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '../../../test-utils'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { AnalystConsole } from '../AnalystConsole'
@@ -32,19 +32,19 @@ describe('AnalystConsole', () => {
     render(<AnalystConsole {...defaultProps} />)
 
     // Should show entity count
-    expect(screen.getByText(/entities/i)).toBeInTheDocument()
+    expect(screen.getByText(/9 entities/i)).toBeInTheDocument();
   })
 
   it('displays event count badge', () => {
     render(<AnalystConsole {...defaultProps} />)
 
-    expect(screen.getByText(/events/i)).toBeInTheDocument()
+    expect(screen.getByText(/20 events/i)).toBeInTheDocument();
   })
 
   it('displays location count badge', () => {
     render(<AnalystConsole {...defaultProps} />)
 
-    expect(screen.getByText(/locations/i)).toBeInTheDocument()
+    expect(screen.getByText(/5 locations/i)).toBeInTheDocument();
   })
 
   it('renders graph pane', () => {

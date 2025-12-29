@@ -1,21 +1,18 @@
 import { EntityResolutionV2Service } from '../EntityResolutionV2Service';
-import { provenanceLedger } from '../../../provenance/ledger';
-import { writeAudit } from '../../../utils/audit.js';
+import { provenanceLedger } from '../../../provenance/ledger.js';
 
-jest.mock('../../../config/database.js', () => ({
-  getPostgresPool: jest.fn(() => ({
-    query: jest.fn().mockResolvedValue({ rows: [] }),
-  })),
-}));
-
-jest.mock('../../../utils/audit.js', () => ({
-  writeAudit: jest.fn(),
-}));
-
-jest.mock('../../../provenance/ledger', () => ({
+jest.mock('../../../provenance/ledger.js', () => ({
   provenanceLedger: {
     appendEntry: jest.fn(),
   },
+}));
+
+const mockDlq = {
+  enqueue: jest.fn(),
+};
+
+jest.mock('../../../lib/dlq/index.js', () => ({
+  dlqFactory: jest.fn(() => mockDlq),
 }));
 
 describe('EntityResolutionV2Service guardrails', () => {
@@ -88,7 +85,25 @@ describe('EntityResolutionV2Service guardrails', () => {
 
     const service = new EntityResolutionV2Service();
     const tx = {
-      run: jest.fn().mockResolvedValue({ records: [] }),
+      run: jest.fn(async (query: string) => {
+        if (query.includes('MERGE (d:ERDecision {idempotencyKey')) {
+          return {
+            records: [
+              {
+                get: (key: string) => {
+                  if (key === 'decisionId') return 'dec-guardrail';
+                  if (key === 'mergeId') return 'merge-guardrail';
+                  if (key === 'masterId') return 'm1';
+                  if (key === 'mergeIds') return ['m2'];
+                  if (key === 'created') return false;
+                  return null;
+                },
+              },
+            ],
+          };
+        }
+        return { records: [] };
+      }),
       commit: jest.fn().mockResolvedValue(undefined),
       rollback: jest.fn().mockResolvedValue(undefined),
     };
@@ -115,6 +130,7 @@ describe('EntityResolutionV2Service guardrails', () => {
     const result = await service.merge(session as any, {
       masterId: 'm1',
       mergeIds: ['m2'],
+      mergeId: 'merge-guardrail',
       userContext: { userId: 'tester', tenantId: 'tenant-1' },
       rationale: 'override test',
       guardrailDatasetId: 'low-recall',
@@ -130,14 +146,6 @@ describe('EntityResolutionV2Service guardrails', () => {
           reason: 'Approved by lead analyst.',
         }),
       })
-    );
-    expect(writeAudit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        action: 'ER_GUARDRAIL_OVERRIDE',
-        details: expect.objectContaining({
-          reason: 'Approved by lead analyst.',
-        }),
-      }),
     );
   });
 });

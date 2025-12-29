@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
-import { getPostgresPool } from '../config/database';
+import { getPostgresPool } from '../config/database.js';
 import { createHash } from 'crypto';
 
 export class AuditCompactor {

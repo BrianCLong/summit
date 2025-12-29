@@ -67,11 +67,17 @@ describe('<MaestroRunConsole />', () => {
     vi.spyOn(api, 'runMaestroRequest').mockResolvedValue(mockRunResponse);
   });
 
-  it('renders initial state and runs Maestro pipeline on submit', async () => {
+  it('renders quick prompts and runs Maestro pipeline on submit', async () => {
     render(<MaestroRunConsole userId="user-123" />);
 
     expect(
       screen.getByText(/Maestro Run Console/i),
+    ).toBeInTheDocument();
+
+    // Verify quick prompts
+    expect(screen.getByText('Try:')).toBeInTheDocument();
+    expect(
+      screen.getByText('Analyze the last 3 PRs for security risks'),
     ).toBeInTheDocument();
 
     const textarea = screen.getByPlaceholderText(/describe what you want/i);

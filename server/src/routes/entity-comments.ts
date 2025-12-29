@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import logger from '../config/logger.js';
 import { getPostgresPool } from '../db/postgres.js';
@@ -11,6 +12,7 @@ import {
 } from '../entities/comments/access.js';
 import { opaClient } from '../services/opa-client.js';
 import { NotificationChannel } from '../notifications/types.js';
+import { emitAuditEvent } from '../audit/emit.js';
 
 const routeLogger = logger.child({ name: 'EntityCommentRoutes' });
 const entityCommentsRouter = Router();
@@ -70,6 +72,47 @@ entityCommentsRouter.post('/:id/comments', async (req, res) => {
       content,
       metadata,
       attachments: (attachments || []) as EntityCommentAttachmentInput[],
+    });
+
+    await emitAuditEvent(
+      {
+        eventId: randomUUID(),
+        occurredAt: new Date().toISOString(),
+        actor: {
+          type: 'user',
+          id: userId,
+          name: req.user?.username || req.user?.email || userId,
+          ipAddress: req.ip,
+        },
+        action: {
+          type: 'comment.added',
+          outcome: 'success',
+        },
+        tenantId,
+        target: {
+          type: 'entity_comment',
+          id: comment.id,
+          path: `entities/${id}`,
+        },
+        metadata: {
+          entityId: id,
+          entityType,
+          commentId: comment.id,
+          mentionCount: comment.mentions.length,
+          attachmentCount: comment.attachments.length,
+          messageLength: String(content).length,
+          userAgent: req.headers['user-agent'],
+        },
+      },
+      {
+        correlationId: req.headers['x-request-id'] as string,
+        serviceId: 'entities',
+      },
+    ).catch((error) => {
+      routeLogger.warn(
+        { error: (error as Error).message, entityId: id },
+        'Failed to emit entity comment audit event',
+      );
     });
 
     const notificationService = req.app?.locals?.notificationService;

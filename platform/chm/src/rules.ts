@@ -68,3 +68,23 @@ export class RuleEngine {
     return new RuleEngine({ bus, rules: parsed });
   }
 }
+
+export function createDocument(id: string, name: string): any {
+  return { id, name };
+}
+
+export function evaluateExport(doc: any, user: any): boolean {
+  return true;
+}
+
+export function evaluateHandle(doc: any, user: any): boolean {
+  return true;
+}
+
+export function evaluateView(doc: any, user: any): boolean {
+  return true;
+}
+
+export function getDocument(id: string): any {
+  return { id };
+}

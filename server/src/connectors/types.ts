@@ -1,15 +1,16 @@
 
 import { Readable } from 'stream';
 import { ConnectorContext } from '../data-model/types';
+import { DataEnvelope } from '../types/data-envelope';
 
 export interface SourceConnector {
   fetchBatch(
     ctx: ConnectorContext,
     cursor?: string | null
-  ): Promise<{
+  ): Promise<DataEnvelope<{
     records: any[];
     nextCursor?: string | null;
-  }>;
+  }>>;
 }
 
 export interface ConsentMetadata {
