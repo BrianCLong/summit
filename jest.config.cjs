@@ -1,13 +1,14 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts', '.mjs'],
   transform: {
-    '^.+\\.[tj]sx?$': [
+    '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
       {
         useESM: true,
         tsconfig: 'tsconfig.test.json',
+        isolatedModules: true,
       },
     ],
   },
@@ -83,6 +84,9 @@ module.exports = {
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
   testTimeout: 30000,
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons', 'default'],
+  },
   setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
