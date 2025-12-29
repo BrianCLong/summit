@@ -1,12 +1,11 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { fileURLToPath } from 'url';
 import request from 'supertest';
 import { createApiDocsRouter } from '../src/routes/api-docs.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Jest provides __dirname in CommonJS mode via ts-jest transform
+const testDir = path.resolve(__dirname);
 
 const fixtureSpecPath = path.join(__dirname, '../../openapi/spec.yaml');
 

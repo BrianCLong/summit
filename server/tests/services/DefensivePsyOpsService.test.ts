@@ -1,6 +1,5 @@
 import { DefensivePsyOpsService } from '../../src/services/DefensivePsyOpsService';
 import { EventEmitter } from 'events';
-import { createRequire } from 'module';
 import { describe, it, expect, jest, afterEach, beforeEach } from '@jest/globals';
 
 // Mock dependencies
@@ -18,8 +17,7 @@ jest.mock('../../src/config/database', () => ({
   getPostgresPool: jest.fn(() => mockPool),
 }));
 
-// Mock EventBus
-const require = createRequire(import.meta.url);
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const eventBus = require('../../src/workers/eventBus.js') as EventEmitter;
 
 describe('DefensivePsyOpsService', () => {

@@ -1,9 +1,8 @@
 import { RedTeamSimulator } from '../../src/services/RedTeamSimulator';
 import { EventEmitter } from 'events';
-import { createRequire } from 'module';
 import { describe, it, expect, jest, afterEach } from '@jest/globals';
 
-const require = createRequire(import.meta.url);
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const eventBus = require('../../src/workers/eventBus.js') as EventEmitter;
 
 describe('RedTeamSimulator', () => {

@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   BulkScanner,
   ClassificationEngine,
@@ -12,8 +11,7 @@ import {
 import type { ClassifiedEntity } from '../../src/pii/types.js';
 import { describe, it, test, expect } from '@jest/globals';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// __dirname is provided by ts-jest CommonJS transform
 
 const loadDataset = () => {
   const datasetPath = path.resolve(__dirname, '../../data/pii/benchmark.json');

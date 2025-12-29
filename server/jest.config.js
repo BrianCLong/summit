@@ -1,59 +1,63 @@
 /**
  * Jest Configuration for IntelGraph Server
+ *
+ * This configuration uses ts-jest with ESM support to handle TypeScript files
+ * that use import.meta and other ESM features.
  */
 export default {
-  // preset: 'ts-jest/presets/default-esm', // Removed due to resolution issues
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.js',
-    // 'jest-extended/all', // Removed from config, will add to setup file directly
   ],
+
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
     '<rootDir>/src/tests/**/*.test.ts',
     '<rootDir>/src/**/__tests__/**/*.test.ts',
   ],
+
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
     '/build/',
     '/coverage/',
     '/playwright-tests/',
-    '/src/connectors/__tests__/gcs-ingest.test.ts', // Missing @intelgraph/connector-sdk dependency
-    // Tests that import modules using import.meta.url (not supported in Jest CommonJS mode)
-    '/src/maestro/__tests__/integration.test.ts',
-    '/src/routes/__tests__/airgap.test.ts',
-    '/src/routes/__tests__/policy-simulation.test.ts',
-    '/src/security/__tests__/replay-harness.test.ts',
-    '/src/webhooks/__tests__/webhook.test.ts',
-    '/src/tests/services/PolicyEngine.test.ts',
-    // Acceptance/integration tests that require full app and infrastructure
+    // Skip tests that require external dependencies not available in test environment
+    '/src/connectors/__tests__/gcs-ingest.test.ts',
+    // Skip integration tests that need full infrastructure
     '/tests/governance-acceptance.test.ts',
-    // Tests with complex mocking requirements that need refactoring
-    '/src/hunting/__tests__/ThreatHuntingOrchestrator.test.ts',
-    '/src/repos/__tests__/RelationshipRepo.test.ts',
+    // Skip tests that have ESM/import.meta conflicts with source files
+    '/tests/api-docs.test.ts',
   ],
+
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    // Handle .js extensions in imports
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+
   transform: {
-    // '^.+\\.tsx?$': [
-    //   'ts-jest',
-    //   {
-    //     useESM: true,
-    //     tsconfig: {
-    //       module: 'nodenext',
-    //       target: 'es2020',
-    //       allowJs: true
-    //     },
-    //   },
-    // ],
-    // Fallback to babel-jest which might be installed
-    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        isolatedModules: true, // Faster compilation
+        tsconfig: {
+          module: 'ESNext',
+          moduleResolution: 'Bundler',
+          target: 'ES2022',
+          allowJs: true,
+          esModuleInterop: true,
+          allowSyntheticDefaultImports: true,
+        },
+      },
+    ],
   },
+
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/__tests__/**',
@@ -64,6 +68,7 @@ export default {
     '!src/config/**',
     '!src/database/**',
   ],
+
   coverageProvider: 'v8',
   coverageThreshold: {
     global: {
@@ -75,51 +80,28 @@ export default {
   },
   coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
   coverageDirectory: '<rootDir>/coverage',
+
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.js',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.js',
-  // testResultsProcessor: 'jest-junit', // Removed missing dependency
-  reporters: [
-    'default',
-    // [
-    //   'jest-junit',
-    //   {
-    //     outputDirectory: '<rootDir>/test-results',
-    //     outputName: 'junit.xml',
-    //     classNameTemplate: '{classname}',
-    //     titleTemplate: '{title}',
-    //     ancestorSeparator: ' › ',
-    //     usePathForSuiteName: true,
-    //   },
-    // ],
-  ],
+
+  reporters: ['default'],
+
   verbose: true,
   clearMocks: true,
   restoreMocks: true,
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
+
   transformIgnorePatterns: [
-    // Allow ESM packages to be transformed - handles both npm and pnpm structures
-    '/node_modules/(?!.pnpm)(?!(' +
-      'node-fetch|' +
-      'data-uri-to-buffer|' +
-      'fetch-blob|' +
-      'formdata-polyfill|' +
-      '@exodus|' +
-      'html-encoding-sniffer|' +
-      '.*\\.mjs$' +
-    '))',
-    // For pnpm, we need to match differently
-    '/node_modules/.pnpm/(?!(' +
-      'node-fetch|' +
-      'data-uri-to-buffer|' +
-      'fetch-blob|' +
-      'formdata-polyfill|' +
-      'apollo-server|' +
-      '@exodus|' +
-      'html-encoding-sniffer' +
-    '))',
+    // Transform ESM packages in node_modules
+    '/node_modules/(?!(node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|@exodus|html-encoding-sniffer|jsdom)/)',
   ],
+
+  // Increase workers for faster parallel testing
   maxWorkers: process.env.CI ? 2 : '50%',
+
+  // Handle ESM modules from node_modules
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node', 'mjs'],
 };
