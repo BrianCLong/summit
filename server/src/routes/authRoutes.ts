@@ -22,6 +22,7 @@ import { authRateLimiter, loginRateLimiter, registerRateLimiter, passwordResetRa
 import { ensureAuthenticated } from '../middleware/auth.js';
 import * as z from 'zod';
 import logger from '../utils/logger.js';
+import { CanonicalError } from '../errors/canonical.js';
 
 const router = Router();
 const authService = new AuthService();
@@ -247,10 +248,7 @@ router.post(
       const result = await authService.refreshAccessToken(refreshToken);
 
       if (!result) {
-        return res.status(401).json({
-          error: 'Invalid or expired refresh token',
-          code: 'INVALID_REFRESH_TOKEN',
-        });
+        throw new CanonicalError('AUTH_EXPIRED_TOKEN');
       }
 
       logger.info({

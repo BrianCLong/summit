@@ -29,6 +29,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
   test:
     name: Test
