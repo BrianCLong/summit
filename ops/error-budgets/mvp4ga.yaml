@@ -1,0 +1,29 @@
+service: mvp4ga
+version: 2025-01-01
+owner: sre-team@example.com
+summary: "GA readiness error budgets for the MVP4 service tier"
+slo_policy: "error-budget"
+slos:
+  - name: api-availability
+    description: "99.5% of API calls succeed across the rolling window"
+    indicator: availability
+    objective: 0.995
+    window_days: 28
+    alert_windows:
+      - window: 1h
+        burn_rate: 2
+      - window: 6h
+        burn_rate: 4
+  - name: api-latency
+    description: "97.5% of requests complete under 300ms (P95)"
+    indicator: latency
+    objective: 0.975
+    window_days: 28
+    threshold:
+      percentile: 95
+      target_ms: 300
+    alert_windows:
+      - window: 1h
+        burn_rate: 3
+      - window: 24h
+        burn_rate: 5
