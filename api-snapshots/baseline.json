@@ -1,0 +1,577 @@
+{
+  "components": {
+    "schemas": {
+      "BudgetsResponse": {
+        "properties": {
+          "burndown": {
+            "items": {
+              "properties": {
+                "t": {
+                  "type": "string"
+                },
+                "tokens": {
+                  "type": "number"
+                },
+                "usd": {
+                  "type": "number"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "remaining": {
+            "properties": {
+              "tokens": {
+                "type": "number"
+              },
+              "usd": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "tier": {
+            "enum": [
+              "bronze",
+              "silver",
+              "gold"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Candidate": {
+        "properties": {
+          "cost_est": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "latency_est_ms": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "type": {
+            "enum": [
+              "model",
+              "web"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HealthStatus": {
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "healthy",
+              "unhealthy"
+            ],
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OrchestrateWebResponse": {
+        "properties": {
+          "responses": {
+            "items": {
+              "properties": {
+                "citations": {
+                  "items": {
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "interface": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "synthesized": {
+            "properties": {
+              "citations": {
+                "items": {
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "PolicyCheckResponse": {
+        "properties": {
+          "allowed": {
+            "type": "boolean"
+          },
+          "elevation": {
+            "properties": {
+              "contact": {
+                "type": "string"
+              },
+              "sla_hours": {
+                "type": "number"
+              }
+            },
+            "type": "object"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RouteExecuteResponse": {
+        "properties": {
+          "runId": {
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/RouteExecuteStep"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RouteExecuteStep": {
+        "properties": {
+          "citations": {
+            "items": {
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "elapsed_ms": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "fail"
+            ],
+            "type": "string"
+          },
+          "tokens": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "RoutePreviewResponse": {
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "WebInterface": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "cost_hint": {
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reliability": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "WebInterfacesResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WebInterface"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "API for IntelGraph Summit, including Maestro orchestration and monitoring.",
+    "title": "IntelGraph Summit API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/maestro/budgets": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetsResponse"
+                }
+              }
+            },
+            "description": "Budget info"
+          }
+        },
+        "summary": "Get budget and usage information",
+        "tags": [
+          "Maestro"
+        ]
+      }
+    },
+    "/api/maestro/policy/check": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action": {
+                    "type": "string"
+                  },
+                  "payload": {
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PolicyCheckResponse"
+                }
+              }
+            },
+            "description": "Policy check result"
+          }
+        },
+        "summary": "Check policy for an action",
+        "tags": [
+          "Maestro"
+        ]
+      }
+    },
+    "/api/maestro/route/execute": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "selection": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "task": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteExecuteResponse"
+                }
+              }
+            },
+            "description": "Execution results"
+          }
+        },
+        "summary": "Execute a task with selected candidates",
+        "tags": [
+          "Maestro"
+        ]
+      }
+    },
+    "/api/maestro/route/preview": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "context": {
+                    "type": "object"
+                  },
+                  "task": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutePreviewResponse"
+                }
+              }
+            },
+            "description": "List of candidates"
+          }
+        },
+        "summary": "Preview routing candidates for a task",
+        "tags": [
+          "Maestro"
+        ]
+      }
+    },
+    "/api/maestro/runs": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "requestText": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Run created"
+          }
+        },
+        "summary": "Create and run a new pipeline",
+        "tags": [
+          "Maestro"
+        ]
+      }
+    },
+    "/api/maestro/web/interfaces": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebInterfacesResponse"
+                }
+              }
+            },
+            "description": "List of web interfaces"
+          }
+        },
+        "summary": "Get available web interfaces",
+        "tags": [
+          "Maestro"
+        ]
+      }
+    },
+    "/api/maestro/web/run": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "interfaces": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "task": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrchestrateWebResponse"
+                }
+              }
+            },
+            "description": "Orchestration results"
+          }
+        },
+        "summary": "Orchestrate web search/content tasks",
+        "tags": [
+          "Maestro"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            },
+            "description": "Healthy"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            },
+            "description": "Unhealthy"
+          }
+        },
+        "summary": "System health check",
+        "tags": [
+          "Observability"
+        ]
+      }
+    },
+    "/monitoring/metrics": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Prometheus metrics text"
+          }
+        },
+        "summary": "Prometheus metrics",
+        "tags": [
+          "Observability"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "Base API path for most endpoints",
+      "url": "/api"
+    },
+    {
+      "description": "Root path for monitoring and health",
+      "url": "/"
+    }
+  ]
+}
