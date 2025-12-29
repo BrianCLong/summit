@@ -39,6 +39,7 @@ export interface EntityComment {
   id: string;
   tenantId: string;
   entityId: string;
+  entityRefId?: string | null;
   entityType?: string | null;
   entityLabel?: string | null;
   authorId: string;
@@ -51,6 +52,8 @@ export interface EntityComment {
 }
 
 const MENTION_REGEX = /@([a-zA-Z0-9._-]{2,50})/g;
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export class EntityCommentService {
   constructor(private pool: Pool) {}
@@ -66,18 +69,20 @@ export class EntityCommentService {
           INSERT INTO maestro.entity_comments (
             tenant_id,
             entity_id,
+            entity_ref_id,
             entity_type,
             entity_label,
             author_id,
             content_markdown,
             metadata
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           RETURNING *
         `,
         [
           input.tenantId,
           input.entityId,
+          UUID_REGEX.test(input.entityId) ? input.entityId : null,
           input.entityType || null,
           input.entityLabel || null,
           input.authorId,
@@ -295,6 +300,7 @@ export class EntityCommentService {
       id: row.id,
       tenantId: row.tenant_id,
       entityId: row.entity_id,
+      entityRefId: row.entity_ref_id,
       entityType: row.entity_type,
       entityLabel: row.entity_label,
       authorId: row.author_id,
