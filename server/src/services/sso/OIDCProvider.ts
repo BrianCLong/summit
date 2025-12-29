@@ -106,13 +106,13 @@ export class OIDCProvider implements SSOProvider {
     if (roles.length === 0) roles.push('VIEWER');
 
     return {
+      id: decoded.sub,
       email,
       firstName,
       lastName,
       groups,
       roles: Array.from(new Set(roles)),
       provider: 'oidc',
-      providerId: decoded.sub,
       attributes: { ...decoded, ...userInfo }
     };
   }

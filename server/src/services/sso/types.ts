@@ -72,4 +72,8 @@ export class SAML {
   validatePostResponse(_body: { SAMLResponse: string }): Promise<{ profile: Record<string, unknown> }> {
     throw new Error('SAML library not implemented');
   }
+
+  validatePostResponseAsync(_request: { body: unknown }): Promise<{ profile: Record<string, unknown> }> {
+    throw new Error('SAML library not implemented');
+  }
 }

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 // -- Primitive Schemas --
 
@@ -51,7 +51,7 @@ export const ApprovalConditionSchema = z.object({
 export const CapabilityRuleSchema = z.object({
   resourceType: ResourceTypeSchema,
   allowedActions: z.array(CapabilitySchema),
-  conditions: z.record(z.any()).optional(), // e.g. { "classification": "CONFIDENTIAL" }
+  conditions: z.record(z.string(), z.any()).optional(), // e.g. { "classification": "CONFIDENTIAL" }
 });
 
 // -- The Master Policy Schema --
