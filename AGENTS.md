@@ -13,6 +13,14 @@ This document defines the technical standards mandated by the **Law of Consisten
 - **Mandates:** See [Agent Mandates](docs/governance/AGENT_MANDATES.md) for role-specific powers and limits.
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 
+## Post-GA Velocity Mandates
+All agents must adhere to the [Post-GA Velocity Governance](docs/governance/change-classes.md) framework.
+
+1.  **Change Classes:** You must classify your work as Patch, Minor, or Breaking.
+2.  **Velocity Lanes:** Respect the lane requirements (Fast, Standard, Guarded).
+3.  **Agent Policy:** You must declare your identity and prompt source. See [Agent Change Policy](docs/governance/agent-change-policy.md).
+4.  **Metadata:** Every agent-generated PR must include the "Agent Metadata" section filled out in the PR body.
+
 ## Agent Roles & Permissions
 
 ### Role: Jules (Release Captain)

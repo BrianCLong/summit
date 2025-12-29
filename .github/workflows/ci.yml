@@ -17,6 +17,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lane-detection:
+    name: "Lane Detection"
+    runs-on: ubuntu-latest
+    outputs:
+      is_fast_lane: ${{ steps.check_lane.outputs.is_fast_lane }}
+    steps:
+      - name: Check Lane
+        id: check_lane
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let isFast = false;
+            // Default to false (Standard/Guarded) for safety.
+            // Only enable Fast Lane if explicitly checked in PR body.
+            if (context.eventName === 'pull_request') {
+              const body = context.payload.pull_request.body || "";
+              if (/- \[x\] 🏎️ \*\*Fast Lane\*\*/i.test(body)) {
+                isFast = true;
+              }
+            }
+            console.log(`Detected Fast Lane: ${isFast}`);
+            core.setOutput("is_fast_lane", isFast);
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -50,7 +73,8 @@ jobs:
 
   golden-path:
     name: Golden Path
-    needs: test
+    needs: [test, lane-detection]
+    if: needs.lane-detection.outputs.is_fast_lane != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +91,8 @@ jobs:
 
   reproducible-build:
     name: Reproducible Build
-    needs: test
+    needs: [test, lane-detection]
+    if: needs.lane-detection.outputs.is_fast_lane != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -125,7 +150,8 @@ jobs:
 
   schema-diff:
     name: Schema Diff
-    needs: test
+    needs: [test, lane-detection]
+    if: needs.lane-detection.outputs.is_fast_lane != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -147,6 +173,7 @@ jobs:
   observability:
     name: Observability
     needs: [security, reproducible-build]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Emit metrics

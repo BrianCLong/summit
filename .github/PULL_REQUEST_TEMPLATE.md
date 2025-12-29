@@ -1,3 +1,17 @@
+## Change Classification & Velocity Lane (Required)
+
+**Change Class:**
+- [ ] 🟢 **Patch**: No behavior/API change (Docs, Refactor, CI)
+- [ ] 🟡 **Minor**: Backward-compatible new features
+- [ ] 🔴 **Breaking**: Incompatible API/Schema/Behavior change
+
+**Velocity Lane:**
+- [ ] 🏎️ **Fast Lane**: Patch only (Fast checks)
+- [ ] 🚗 **Standard Lane**: Minor changes (Full suite)
+- [ ] 🛡️ **Guarded Lane**: Breaking/High Risk (Full suite + Canary + Security)
+
+---
+
 ## Summary
 
 [What/why]
