@@ -13,6 +13,7 @@ servers:
 paths:
   /monitoring/metrics:
     get:
+      operationId: getMonitoringMetrics
       summary: Prometheus metrics
       tags: [Observability]
       responses:
@@ -25,6 +26,7 @@ paths:
 
   /health:
     get:
+      operationId: getHealth
       summary: System health check
       tags: [Observability]
       responses:
@@ -43,6 +45,7 @@ paths:
 
   /api/maestro/route/preview:
     post:
+      operationId: previewRoute
       summary: Preview routing candidates for a task
       tags: [Maestro]
       requestBody:
@@ -66,6 +69,7 @@ paths:
 
   /api/maestro/route/execute:
     post:
+      operationId: executeRoute
       summary: Execute a task with selected candidates
       tags: [Maestro]
       requestBody:
@@ -91,6 +95,7 @@ paths:
 
   /api/maestro/web/interfaces:
     get:
+      operationId: getWebInterfaces
       summary: Get available web interfaces
       tags: [Maestro]
       responses:
@@ -103,6 +108,7 @@ paths:
 
   /api/maestro/web/run:
     post:
+      operationId: runWebOrchestration
       summary: Orchestrate web search/content tasks
       tags: [Maestro]
       requestBody:
@@ -128,6 +134,7 @@ paths:
 
   /api/maestro/budgets:
     get:
+      operationId: getBudgets
       summary: Get budget and usage information
       tags: [Maestro]
       responses:
@@ -140,6 +147,7 @@ paths:
 
   /api/maestro/policy/check:
     post:
+      operationId: checkPolicy
       summary: Check policy for an action
       tags: [Maestro]
       requestBody:
@@ -163,6 +171,7 @@ paths:
 
   /api/maestro/runs:
     post:
+      operationId: createRun
       summary: Create and run a new pipeline
       tags: [Maestro]
       requestBody:
