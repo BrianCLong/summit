@@ -2,7 +2,7 @@ import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
 // @ts-ignore
-import { useServer } from 'graphql-ws/lib/use/ws.js';
+import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import pino from 'pino';
@@ -18,7 +18,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import initTelemetry from '@intelgraph/telemetry-config';
+import { initTelemetry } from '@intelgraph/telemetry-config';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';

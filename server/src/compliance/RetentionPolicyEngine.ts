@@ -71,6 +71,19 @@ export class RetentionPolicyEngine {
     }
   }
 
+  public async getRetentionRules(tenantId: string, type: 'all' | 'user'): Promise<RetentionPolicy[]> {
+    // For MVP, we ignore tenantId filtering for global policies, but could add it.
+    const policies = await this.pool.query(`SELECT * FROM retention_policies WHERE is_active = TRUE`);
+
+    return policies.rows.map(row => ({
+      id: row.id,
+      targetType: row.target_type,
+      retentionDays: row.retention_days,
+      action: row.action,
+      isActive: row.is_active
+    }));
+  }
+
   private async applyPolicy(policy: RetentionPolicy): Promise<void> {
     console.log(`Applying retention policy for ${policy.targetType}: ${policy.action} older than ${policy.retentionDays} days`);
 
@@ -99,18 +112,18 @@ export class RetentionPolicyEngine {
     }
 
     if (tableName) {
-    if (tableName) {
-      if (policy.action === 'DELETE') {
-        const res = await this.pool.query(
-          `DELETE FROM ${tableName} WHERE ${dateColumn} < $1`,
-          [cutoffDate],
-        );
-        console.log(`Deleted ${res.rowCount} rows from ${tableName}`);
-      } else if (policy.action === 'ARCHIVE') {
-        // Implement archive logic (e.g. move to cold storage table or export to S3)
-        console.log(`Archiving not yet implemented for ${tableName}`);
+      if (tableName) {
+        if (policy.action === 'DELETE') {
+          const res = await this.pool.query(
+            `DELETE FROM ${tableName} WHERE ${dateColumn} < $1`,
+            [cutoffDate],
+          );
+          console.log(`Deleted ${res.rowCount} rows from ${tableName}`);
+        } else if (policy.action === 'ARCHIVE') {
+          // Implement archive logic (e.g. move to cold storage table or export to S3)
+          console.log(`Archiving not yet implemented for ${tableName}`);
+        }
       }
     }
   }
-}
 }

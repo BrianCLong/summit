@@ -1,8 +1,13 @@
 
+// @ts-ignore
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+// @ts-ignore
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+// @ts-ignore
 import { Resource } from '@opentelemetry/resources';
+// @ts-ignore
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+// @ts-ignore
 import { NodeSDK } from '@opentelemetry/sdk-node';
 
 export const initTelemetry = (serviceName: string) => {

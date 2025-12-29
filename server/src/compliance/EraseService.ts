@@ -93,7 +93,7 @@ export class EraseService {
             };
 
             const updatedApprovals = [...request.approvals, newApproval];
-            let newStatus = request.status;
+            let newStatus: EraseRequest['status'] = request.status;
 
             if (decision === 'reject') {
                 newStatus = 'rejected';
