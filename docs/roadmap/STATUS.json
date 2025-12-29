@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2025-12-29T21:15:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,12 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
+          "owner": "Jules"
+        },
+        {
+          "id": "C3",
+          "name": "Migration Safety Linter",
+          "status": "in-progress",
           "owner": "Jules"
         }
       ]
