@@ -1,7 +1,45 @@
 import { quotaGuards, quotaMiddleware } from '../middleware';
-import { QuotaService } from '../service';
+import { QuotaService, quotaService } from '../service';
 import { resetTenantQuotaCache } from '../config';
-import httpMocks from 'node-mocks-http';
+import type { Request, Response } from 'express';
+
+const createMockReq = (init?: Partial<Request>): Request => {
+  return ({
+    headers: {},
+    method: 'GET',
+    url: '/api/test',
+    ...init,
+  } as unknown) as Request;
+};
+
+const createMockRes = (): Response & { body?: any } => {
+  const headers: Record<string, unknown> = {};
+  let statusCode = 200;
+  let body: any;
+
+  return ({
+    status(code: number) {
+      statusCode = code;
+      return this;
+    },
+    json(payload: any) {
+      body = payload;
+      return this;
+    },
+    setHeader(key: string, value: unknown) {
+      headers[key.toLowerCase()] = value;
+    },
+    getHeader(key: string) {
+      return headers[key.toLowerCase()];
+    },
+    get statusCode() {
+      return statusCode;
+    },
+    get body() {
+      return body;
+    },
+  } as unknown) as Response & { body?: any };
+};
 
 describe('QuotaService integration', () => {
   const quotaJson = JSON.stringify({
@@ -19,6 +57,7 @@ describe('QuotaService integration', () => {
   beforeEach(() => {
     process.env.TENANT_QUOTAS = quotaJson;
     resetTenantQuotaCache();
+    quotaService.reset();
     service = new QuotaService();
   });
 
@@ -65,12 +104,8 @@ describe('QuotaService integration', () => {
   });
 
   test('middleware blocks API rate and returns retry metadata', async () => {
-    const request = httpMocks.createRequest({
-      method: 'GET',
-      url: '/api/test',
-      headers: { 'x-tenant-id': 'alpha' },
-    });
-    const response = httpMocks.createResponse();
+    const request = createMockReq({ headers: { 'x-tenant-id': 'alpha' } });
+    const response = createMockRes();
     const next = jest.fn();
 
     const middleware = quotaMiddleware as any;
@@ -80,8 +115,37 @@ describe('QuotaService integration', () => {
 
     expect(next).toHaveBeenCalledTimes(2);
     expect(response.statusCode).toBe(429);
-    const data = response._getJSONData();
+    const data = response.body;
     expect(data.reason).toBe('api_rate_exceeded');
+    expect(data.limit).toBe(2);
+    expect(data.used).toBe(3);
+    expect(data.remaining).toBe(0);
     expect(data.retryAfterMs).toBeGreaterThan(0);
+  });
+
+  test('middleware no-ops when TENANT_QUOTAS is empty', async () => {
+    delete process.env.TENANT_QUOTAS;
+    resetTenantQuotaCache();
+    const request = createMockReq();
+    const response = createMockRes();
+    const next = jest.fn();
+
+    const middleware = quotaMiddleware as any;
+    await middleware(request, response, next);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(response.statusCode).toBe(200);
+    expect(response.getHeader('X-Ratelimit-Limit')).toBeUndefined();
+  });
+
+  test('deterministic counters do not double count repeated evidence', () => {
+    const first = service.checkEvidence('alpha', 'evidence-dup', 100);
+    const second = service.checkEvidence('alpha', 'evidence-dup', 200);
+    expect(first.allowed).toBe(true);
+    expect(second.allowed).toBe(true);
+    expect(second.used).toBe(1);
+    const third = service.checkEvidence('alpha', 'evidence-new', 900);
+    expect(third.allowed).toBe(false);
+    expect(third.reason).toBe('evidence_exceeded');
   });
 });
