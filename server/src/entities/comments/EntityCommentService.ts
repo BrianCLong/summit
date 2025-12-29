@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 
 export interface EntityCommentAttachmentInput {
@@ -47,6 +48,9 @@ export interface EntityComment {
   metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
+  deletedBy?: string | null;
+  deleteReason?: string | null;
   attachments: EntityCommentAttachment[];
   mentions: EntityCommentMention[];
 }
@@ -54,6 +58,11 @@ export interface EntityComment {
 const MENTION_REGEX = /@([a-zA-Z0-9._-]{2,50})/g;
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const isSafeDeleteEnabled = () => process.env.SAFE_DELETE !== 'false';
+
+export interface ListCommentsOptions {
+  includeDeleted?: boolean;
+}
 
 export class EntityCommentService {
   constructor(private pool: Pool) {}
@@ -118,12 +127,18 @@ export class EntityCommentService {
     entityId: string,
     limit = 50,
     offset = 0,
+    options: ListCommentsOptions = {},
   ): Promise<EntityComment[]> {
+    const conditions = ['tenant_id = $1', 'entity_id = $2'];
+    if (isSafeDeleteEnabled() && !options.includeDeleted) {
+      conditions.push('deleted_at IS NULL');
+    }
+
     const result = await this.pool.query(
       `
         SELECT *
         FROM maestro.entity_comments
-        WHERE tenant_id = $1 AND entity_id = $2
+        WHERE ${conditions.join(' AND ')}
         ORDER BY created_at ASC
         LIMIT $3 OFFSET $4
       `,
@@ -149,6 +164,109 @@ export class EntityCommentService {
         mentions.get(row.id) || [],
       ),
     );
+  }
+
+  async getCommentById(
+    tenantId: string,
+    commentId: string,
+  ): Promise<EntityComment | null> {
+    const result = await this.pool.query(
+      `
+        SELECT *
+        FROM maestro.entity_comments
+        WHERE tenant_id = $1 AND id = $2
+        LIMIT 1
+      `,
+      [tenantId, commentId],
+    );
+
+    const row = result.rows?.[0];
+    if (!row) {
+      return null;
+    }
+
+    const [attachments, mentions] = await Promise.all([
+      this.fetchAttachments([row.id]).then((map) => map.get(row.id) || []),
+      this.fetchMentions([row.id]).then((map) => map.get(row.id) || []),
+    ]);
+
+    return this.mapCommentRow(row, attachments, mentions);
+  }
+
+  async softDeleteComment(
+    tenantId: string,
+    commentId: string,
+    actorId: string,
+    reason?: string,
+  ): Promise<EntityComment | null> {
+    const retentionDays = Number(
+      process.env.ENTITY_COMMENT_RETENTION_DAYS || process.env.SUPPORT_COMMENT_RETENTION_DAYS || '30',
+    );
+    const purgeAfter = Number.isFinite(retentionDays)
+      ? new Date(Date.now() + retentionDays * 24 * 60 * 60 * 1000)
+      : null;
+
+    const result = await this.pool.query(
+      `
+        UPDATE maestro.entity_comments
+        SET deleted_at = NOW(), deleted_by = $3, delete_reason = $4, updated_at = NOW()
+        WHERE tenant_id = $1 AND id = $2
+        RETURNING *
+      `,
+      [tenantId, commentId, actorId, reason || null],
+    );
+
+    const row = result.rows?.[0];
+    if (!row) {
+      return null;
+    }
+
+    const [attachments, mentions] = await Promise.all([
+      this.fetchAttachments([row.id]).then((map) => map.get(row.id) || []),
+      this.fetchMentions([row.id]).then((map) => map.get(row.id) || []),
+    ]);
+
+    const comment = this.mapCommentRow(row, attachments, mentions);
+    await this.recordAudit(commentId, tenantId, 'delete', actorId, reason, {
+      purgeAfter: purgeAfter?.toISOString?.(),
+    });
+    return {
+      ...comment,
+      metadata: {
+        ...comment.metadata,
+        purgeAfter: purgeAfter?.toISOString?.(),
+      },
+    };
+  }
+
+  async restoreComment(
+    tenantId: string,
+    commentId: string,
+    actorId: string,
+  ): Promise<EntityComment | null> {
+    const result = await this.pool.query(
+      `
+        UPDATE maestro.entity_comments
+        SET deleted_at = NULL, deleted_by = NULL, delete_reason = NULL, updated_at = NOW()
+        WHERE tenant_id = $1 AND id = $2
+        RETURNING *
+      `,
+      [tenantId, commentId],
+    );
+
+    const row = result.rows?.[0];
+    if (!row) {
+      return null;
+    }
+
+    const [attachments, mentions] = await Promise.all([
+      this.fetchAttachments([row.id]).then((map) => map.get(row.id) || []),
+      this.fetchMentions([row.id]).then((map) => map.get(row.id) || []),
+    ]);
+
+    const comment = this.mapCommentRow(row, attachments, mentions);
+    await this.recordAudit(commentId, tenantId, 'restore', actorId);
+    return comment;
   }
 
   private async insertAttachments(
@@ -308,6 +426,9 @@ export class EntityCommentService {
       metadata: row.metadata || {},
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      deletedAt: row.deleted_at,
+      deletedBy: row.deleted_by,
+      deleteReason: row.delete_reason,
       attachments,
       mentions,
     };
@@ -323,5 +444,38 @@ export class EntityCommentService {
       metadata: row.metadata || {},
       createdAt: row.created_at,
     };
+  }
+
+  private async recordAudit(
+    commentId: string,
+    tenantId: string,
+    action: string,
+    actorId: string,
+    reason?: string,
+    metadata?: Record<string, unknown>,
+  ): Promise<void> {
+    await this.pool.query(
+      `
+        INSERT INTO maestro.entity_comment_audits (
+          id,
+          comment_id,
+          tenant_id,
+          action,
+          actor_id,
+          reason,
+          metadata
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `,
+      [
+        randomUUID(),
+        commentId,
+        tenantId,
+        action,
+        actorId,
+        reason || null,
+        JSON.stringify(metadata || {}),
+      ],
+    );
   }
 }

@@ -13,7 +13,7 @@ export interface EntityCommentAccessRequest {
   userId: string;
   tenantId: string;
   entityId: string;
-  action: 'comment:read' | 'comment:write';
+  action: 'comment:read' | 'comment:write' | 'comment:delete' | 'comment:restore';
 }
 
 export class EntityCommentAccessError extends Error {
