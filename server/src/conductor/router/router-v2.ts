@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 // Router v2: Adaptive Expert Selection with Online Learning
 // Integrates bandit algorithms with production routing logic
 
@@ -204,7 +204,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
         `router_v2_selected_${selectedExpert}`,
-        true,
+        { success: true },
       );
       prometheusConductorMetrics.recordOperationalMetric(
         'router_v2_decision_time',
@@ -226,9 +226,9 @@ export class AdaptiveExpertRouter extends EventEmitter {
     } catch (error) {
       console.error('Routing error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
-      'router_v2_error',
-      { success: false },
-    );
+        'router_v2_error',
+        { success: false },
+      );
 
       // Fallback to safe default
       return this.createFallbackResponse(query, error.message, startTime);
@@ -296,8 +296,6 @@ export class AdaptiveExpertRouter extends EventEmitter {
           latency: outcome.latency,
           cost: outcome.cost,
           userSatisfaction: outcome.userSatisfaction,
-          quality: outcome.quality,
-          errorType: outcome.errorType,
         },
       });
     }
@@ -316,7 +314,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
     // Record metrics
     prometheusConductorMetrics.recordOperationalEvent(
       'router_v2_outcome',
-      outcome.success,
+      { success: outcome.success },
     );
     prometheusConductorMetrics.recordOperationalMetric(
       'router_v2_actual_latency',

@@ -270,7 +270,13 @@
       "Bash(pnpm lint:*)",
       "Bash(pnpm jest:*)",
       "Bash(pnpm build:server:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: launch Summit v4.0 Beta program with cloud infrastructure\n\nBeta Program Launch:\n- Complete beta cohort selection (12 customers across 4 segments)\n- Beta onboarding kit with email templates and agreements\n- 4-week beta test plan with 265+ test cases\n- Triage process with SLAs and escalation guidelines\n- Feedback analysis framework with survey templates\n- Beta-to-RC transition plan with exit criteria\n- Live status dashboard and Week 1 execution tracking\n- All Cohort 1 kickoffs completed (4 customers active)\n\nCloud Infrastructure:\n- Terraform configuration for AWS (EKS, RDS, ElastiCache, CloudHSM)\n- Kubernetes manifests (deployments, services, HPA, PDB, ingress)\n- CI/CD pipelines (GitHub Actions for build, test, deploy)\n- Production deployment scripts with health verification\n- Multi-stage Dockerfile with security hardening\n\nRollout Documentation:\n- Release notes, migration guide, and documentation TOC\n- Marketing collateral and training materials\n- Operational readiness checklist\n- Alpha and beta phase tracking documents\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git clean:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(git branch:*)",
+      "Bash(for pr in 14782 14783 14784 14785)",
+      "Bash(do echo -n \"PR #$pr: \")"
     ],
     "deny": [],
     "ask": []
