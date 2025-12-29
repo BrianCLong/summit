@@ -136,7 +136,14 @@ export function EROpsPanel() {
     (sum, point) => sum + point.rollbacks,
     0,
   )
+  const totalDeployments = rollbackTrend.reduce(
+    (sum, point) => sum + point.total,
+    0,
+  )
+  const rollbackRate =
+    totalDeployments > 0 ? totalRollbacks / totalDeployments : undefined
   const topConflict = conflictSummary[0]?.name
+  const topConflictCount = conflictSummary[0]?.count
 
   return (
     <Card className="border-primary/20">
@@ -186,7 +193,11 @@ export function EROpsPanel() {
                 </h4>
                 <div className="text-2xl font-semibold">{totalRollbacks}</div>
                 <p className="text-xs text-muted-foreground">
+                  Rollback rate: {formatPercent(rollbackRate)}
+                </p>
+                <p className="text-xs text-muted-foreground">
                   Latest conflict: {topConflict || 'None'}
+                  {topConflictCount ? ` (${topConflictCount})` : ''}
                 </p>
               </div>
             </div>
