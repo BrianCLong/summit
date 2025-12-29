@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
-import { getPostgresPool } from '../config/database';
+import { getPostgresPool } from '../config/database.js';
 import { RetentionPolicy } from './types';
 
 export interface RetentionStrategy {
@@ -82,30 +82,35 @@ export class RetentionPolicyEngine {
     let dateColumn = 'created_at'; // Default
 
     if (policy.targetType === 'audit_logs') {
-        // Assuming audit logs are in a table or managed by WORM service.
-        // If managed by WORM, we might need to call WORM service.
-        // For this MVP, we assume a hypothetical table or skip if not directly accessible via SQL.
-        console.warn('Audit log retention requiring WORM storage interface - skipping SQL delete');
-        return;
+      // Assuming audit logs are in a table or managed by WORM service.
+      // If managed by WORM, we might need to call WORM service.
+      // For this MVP, we assume a hypothetical table or skip if not directly accessible via SQL.
+      console.warn('Audit log retention requiring WORM storage interface - skipping SQL delete');
+      return;
+    } else if (policy.targetType === 'audit_events') {
+      tableName = 'audit_events';
+      dateColumn = 'timestamp';
     } else if (policy.targetType === 'provenance_entries') {
-        tableName = 'provenance_ledger_v2';
-        dateColumn = 'timestamp';
+      tableName = 'provenance_ledger_v2';
+      dateColumn = 'timestamp';
     } else {
-        console.warn(`Unknown target type for retention: ${policy.targetType}`);
-        return;
+      console.warn(`Unknown target type for retention: ${policy.targetType}`);
+      return;
     }
 
     if (tableName) {
-        if (policy.action === 'DELETE') {
-            const res = await this.pool.query(
-                `DELETE FROM ${tableName} WHERE ${dateColumn} < $1`,
-                [cutoffDate]
-            );
-            console.log(`Deleted ${res.rowCount} rows from ${tableName}`);
-        } else if (policy.action === 'ARCHIVE') {
-            // Implement archive logic (e.g. move to cold storage table or export to S3)
-            console.log(`Archiving not yet implemented for ${tableName}`);
-        }
+    if (tableName) {
+      if (policy.action === 'DELETE') {
+        const res = await this.pool.query(
+          `DELETE FROM ${tableName} WHERE ${dateColumn} < $1`,
+          [cutoffDate],
+        );
+        console.log(`Deleted ${res.rowCount} rows from ${tableName}`);
+      } else if (policy.action === 'ARCHIVE') {
+        // Implement archive logic (e.g. move to cold storage table or export to S3)
+        console.log(`Archiving not yet implemented for ${tableName}`);
+      }
     }
   }
+}
 }
