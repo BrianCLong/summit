@@ -72,7 +72,8 @@ export class LLMCache {
       model: (request as any).model,
       messages: (request as any).messages,
       temperature: (request as any).temperature,
-      tools: (request as any).tools
+      tools: (request as any).tools,
+      palette: (request as any).palette
     };
     return crypto.createHash('sha256').update(JSON.stringify(relevant)).digest('hex');
   }
