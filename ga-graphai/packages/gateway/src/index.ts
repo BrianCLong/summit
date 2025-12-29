@@ -1,4 +1,4 @@
-import { createHash, createHmac } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import type {
   EvidenceBundle,
@@ -16,6 +16,7 @@ import type {
   PolicyMetadata,
   PolicyTag,
   ProvenanceRecord as CoopProvenanceRecord,
+  AuditSeverity,
 } from 'common-types';
 import {
   buildLedgerUri,
@@ -97,7 +98,7 @@ import type {
   WorkcellToolDefinition,
 } from '../../common-types/src/index.js';
 import { PolicyEngine, buildDefaultPolicyEngine } from 'policy';
-import { ProvenanceLedger } from 'prov-ledger';
+import { AppendOnlyAuditLog, ProvenanceLedger } from 'prov-ledger';
 import { WorkcellRuntime } from 'workcell-runtime';
 import type { GraphQLRateLimiterOptions } from './graphql-cost.js';
 import { GraphQLRateLimiter } from './graphql-cost.js';
@@ -105,6 +106,7 @@ import type {
   GraphNode,
   OrchestrationKnowledgeGraph,
 } from '@ga-graphai/knowledge-graph';
+import type { CostGuardDecision } from '@ga-graphai/cost-guard';
 
 function parseJsonLiteral(ast: ValueNode): unknown {
   switch (ast.kind) {
@@ -668,6 +670,7 @@ export interface GatewayCostGuardOptions extends GraphQLRateLimiterOptions {
 
 export interface GatewayExecutionOptions {
   tenantId?: string;
+  actorId?: string;
 }
 
 export interface GatewayOptions {
@@ -676,6 +679,13 @@ export interface GatewayOptions {
   workcell?: GatewayWorkcellOptions;
   costGuard?: GatewayCostGuardOptions;
   knowledgeGraph?: KnowledgeGraphOptions;
+  audit?: GatewayAuditOptions;
+}
+
+export interface GatewayAuditOptions {
+  enabled?: boolean;
+  system?: string;
+  log?: AppendOnlyAuditLog;
 }
 
 export class GatewayRuntime {
@@ -689,6 +699,10 @@ export class GatewayRuntime {
   private readonly knowledgeGraphOptions?: KnowledgeGraphOptions;
   private readonly cacheClient?: CacheClientLike;
   private readonly cacheTtlSeconds: number;
+  private readonly auditOptions?: GatewayAuditOptions;
+  private readonly auditLog?: AppendOnlyAuditLog;
+  private readonly auditSystem: string;
+  private readonly auditEnabled: boolean;
 
   constructor(options: GatewayOptions = {}) {
     this.policy = options.rules
@@ -711,6 +725,12 @@ export class GatewayRuntime {
     this.knowledgeGraphOptions = options.knowledgeGraph;
     this.cacheClient = this.knowledgeGraphOptions?.cacheClient;
     this.cacheTtlSeconds = this.knowledgeGraphOptions?.cacheTtlSeconds ?? 300;
+    this.auditOptions = options.audit;
+    this.auditEnabled = this.auditOptions?.enabled !== false;
+    this.auditLog = this.auditEnabled
+      ? this.auditOptions?.log ?? new AppendOnlyAuditLog()
+      : undefined;
+    this.auditSystem = this.auditOptions?.system ?? 'intelgraph-gateway';
     if (!options.workcell?.tools || options.workcell.tools.length === 0) {
       this.workcell.registerTool({
         name: 'analysis',
@@ -806,12 +826,13 @@ export class GatewayRuntime {
     options?: GatewayExecutionOptions,
   ) {
     const tenantId = options?.tenantId ?? this.defaultTenantId;
+    const actorId = options?.actorId ?? tenantId;
     const loaders = this.buildKnowledgeGraphLoaders();
     const guard = this.rateLimiter;
     if (guard) {
       const evaluation = guard.beginExecution(source, tenantId);
       if (evaluation.decision.action === 'kill' || evaluation.decision.action === 'throttle') {
-        return {
+        const blockedResult = {
           data: null,
           errors: [
             new GraphQLError(evaluation.decision.reason, {
@@ -827,10 +848,19 @@ export class GatewayRuntime {
             }),
           ],
         };
+        this.appendAuditEvent({
+          source,
+          tenantId,
+          actorId,
+          decision: evaluation.decision,
+          errors: blockedResult.errors,
+          durationMs: 0,
+        });
+        return blockedResult;
       }
       const startedAt = performance.now();
       try {
-        return await graphql({
+        const result = await graphql({
           schema: this.schema,
           source,
           variableValues,
@@ -842,12 +872,22 @@ export class GatewayRuntime {
             loaders,
           },
         });
+        this.appendAuditEvent({
+          source,
+          tenantId,
+          actorId,
+          decision: evaluation.decision,
+          errors: result.errors,
+          durationMs: performance.now() - startedAt,
+        });
+        return result;
       } finally {
         evaluation.release?.(performance.now() - startedAt);
       }
     }
 
-    return graphql({
+    const startedAt = performance.now();
+    const result = await graphql({
       schema: this.schema,
       source,
       variableValues,
@@ -857,6 +897,56 @@ export class GatewayRuntime {
         workcell: this.workcell,
         knowledgeGraph: this.knowledgeGraphOptions?.knowledgeGraph,
         loaders,
+      },
+    });
+    this.appendAuditEvent({
+      source,
+      tenantId,
+      actorId,
+      errors: result.errors,
+      durationMs: performance.now() - startedAt,
+    });
+    return result;
+  }
+
+  private appendAuditEvent(params: {
+    source: string;
+    tenantId: string;
+    actorId: string;
+    decision?: CostGuardDecision;
+    errors?: readonly GraphQLError[];
+    durationMs?: number;
+  }): void {
+    if (!this.auditLog || !this.auditEnabled) {
+      return;
+    }
+    const severity: AuditSeverity = params.errors?.length
+      ? 'high'
+      : params.decision?.action === 'throttle'
+        ? 'medium'
+        : 'info';
+    const action =
+      params.decision && params.decision.action !== 'allow'
+        ? `graphql.${params.decision.action}`
+        : 'graphql.execute';
+
+    this.auditLog.append({
+      id: randomUUID(),
+      timestamp: new Date().toISOString(),
+      actor: params.actorId,
+      action,
+      resource: 'intelgraph.gateway.graphql',
+      system: this.auditSystem,
+      category: 'access',
+      severity,
+      metadata: {
+        tenantId: params.tenantId,
+        actorId: params.actorId,
+        rateLimit: params.decision?.action ?? 'allow',
+        reason: params.decision?.reason,
+        decisionMetrics: params.decision?.metrics,
+        durationMs: params.durationMs,
+        operationHash: createHash('sha256').update(params.source).digest('hex'),
       },
     });
   }
