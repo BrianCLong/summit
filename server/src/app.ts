@@ -1,4 +1,3 @@
-
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
@@ -129,6 +128,7 @@ import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
+import intelGraphRouter from './routes/intel-graph.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -446,6 +446,7 @@ export const createApp = async () => {
   // Vector Store Routes
   app.use('/api/vector-store', vectorStoreRouter);
 
+  app.use('/api/intel-graph', intelGraphRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes

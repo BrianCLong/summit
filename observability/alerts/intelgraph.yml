@@ -1,0 +1,33 @@
+# observability/alerts/intelgraph.yml
+groups:
+  - name: IntelGraphAlerts
+    rules:
+      - alert: IntelGraphHighErrorRate
+        expr: |
+          sum(rate(intelgraph_service_operations_total{status="error"}[5m])) by (method) /
+          sum(rate(intelgraph_service_operations_total[5m])) by (method)
+          > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate on IntelGraph service method {{ $labels.method }}
+          description: |
+            The error rate for the {{ $labels.method }} method has exceeded 1% over the last 5 minutes.
+            Current value: {{ $value | printf "%.2f" }}%
+            Please consult the IntelGraph runbook to diagnose and resolve this issue.
+
+      - alert: IntelGraphHighP99Latency
+        expr: |
+          histogram_quantile(0.99, sum(rate(intelgraph_service_request_latency_seconds_bucket[5m])) by (le, method))
+          > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: High p99 latency on IntelGraph service method {{ $labels.method }}
+          description: |
+            The p99 latency for the {{ $labels.method }} method has exceeded 500ms over the last 10 minutes.
+            Current value: {{ $value | printf "%.2f" }}s
+            This indicates a performance degradation that could impact user experience.
+            Please consult the IntelGraph runbook to investigate slow queries.
