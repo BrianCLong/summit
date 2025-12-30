@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:summit:Receipt:v0.1",
+  "title": "Receipt v0.1",
+  "type": "object",
+  "required": ["schemaVersion", "receiptId", "ts", "actor", "action", "inputs", "outputs", "hashes"],
+  "properties": {
+    "schemaVersion": { "const": "urn:summit:Receipt:v0.1" },
+    "receiptId": { "type": "string" },
+    "ts": { "type": "string", "format": "date-time" },
+    "actor": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["user", "service"] }
+      }
+    },
+    "action": { "type": "string" },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "ref"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["text", "url", "file", "record"] },
+          "ref": { "type": "string" },
+          "meta": { "type": "object" }
+        }
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "ref"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["doc", "node", "edge", "policyDecision"] },
+          "ref": { "type": "string" },
+          "meta": { "type": "object" }
+        }
+      }
+    },
+    "hashes": {
+      "type": "object",
+      "required": ["inputSha256"],
+      "properties": {
+        "inputSha256": { "type": "string" },
+        "outputSha256": { "type": "string" }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}
