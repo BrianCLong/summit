@@ -22,6 +22,11 @@ const IGNORE = [
   '.venv/**',
   'venv/**',
   '**/v24_modules/**',
+  '**/.archive/**',
+  '**/legacy/**',
+  '**/templates/**',
+  '**/docs/**',
+  '**/scripts/**',
 ];
 
 export default [
