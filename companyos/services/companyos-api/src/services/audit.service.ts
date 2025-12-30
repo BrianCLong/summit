@@ -2,9 +2,11 @@
  * CompanyOS Audit Service
  *
  * Implements A3: Tenant & Role-Aware Audit Log Viewer
+ * FIXED: Now uses PostgreSQL for persistent audit storage
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { Pool } from 'pg';
 import {
   AuditEvent,
   AuditEventCategory,
@@ -53,9 +55,40 @@ export interface TenantEventInput {
   };
 }
 
+// ============================================================================
+// POSTGRESQL DATABASE INTERFACE
+// ============================================================================
+
+export interface AuditDatabase {
+  query(text: string, params: any[]): Promise<{ rows: any[]; rowCount: number }>;
+}
+
+let auditDb: AuditDatabase | null = null;
+
+/**
+ * Set the audit database connection
+ * MUST be called during application initialization
+ */
+export function setAuditDatabase(db: AuditDatabase): void {
+  auditDb = db;
+  logger.info('Audit database connection initialized');
+}
+
+function getAuditDatabase(): AuditDatabase {
+  if (!auditDb) {
+    throw new Error(
+      'FATAL: Audit database not initialized. Call setAuditDatabase() with a ' +
+      'PostgreSQL connection pool before using AuditService.'
+    );
+  }
+  return auditDb;
+}
+
+// ============================================================================
+// AUDIT SERVICE (PostgreSQL-backed)
+// ============================================================================
+
 export class AuditService {
-  // In-memory store for demo (replace with actual DB in production)
-  private events: AuditEvent[] = [];
   private retentionDays: number;
 
   constructor(retentionDays = 365) {
@@ -69,6 +102,7 @@ export class AuditService {
 
   async logEvent(input: AuditEventInput): Promise<AuditEvent> {
     const now = new Date();
+    const db = getAuditDatabase();
 
     // Parse event type to extract category and action
     const [category, action] = this.parseEventType(input.eventType);
@@ -99,14 +133,60 @@ export class AuditService {
       retentionDays: this.retentionDays,
     };
 
-    this.events.push(event);
+    try {
+      // Insert into PostgreSQL
+      await db.query(
+        `INSERT INTO companyos_audit_events (
+          id, event_type, event_category, event_action,
+          actor_id, actor_email, actor_type, actor_roles,
+          tenant_id, resource_type, resource_id, resource_name,
+          description, details, ip_address, user_agent,
+          request_id, correlation_id, outcome, error_message,
+          occurred_at, recorded_at, retention_days
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
+        [
+          event.id,
+          event.eventType,
+          event.eventCategory,
+          event.eventAction,
+          event.actorId,
+          event.actorEmail,
+          event.actorType,
+          event.actorRoles,
+          event.tenantId,
+          event.resourceType,
+          event.resourceId,
+          event.resourceName,
+          event.description,
+          JSON.stringify(event.details),
+          event.ipAddress,
+          event.userAgent,
+          event.requestId,
+          event.correlationId,
+          event.outcome,
+          event.errorMessage,
+          event.occurredAt,
+          event.recordedAt,
+          event.retentionDays,
+        ]
+      );
 
-    logger.debug('Audit event recorded', {
-      eventType: event.eventType,
-      actorId: event.actorId,
-      tenantId: event.tenantId,
-      resourceType: event.resourceType,
-    });
+      logger.debug('Audit event recorded to PostgreSQL', {
+        eventType: event.eventType,
+        actorId: event.actorId,
+        tenantId: event.tenantId,
+        resourceType: event.resourceType,
+      });
+    } catch (error) {
+      logger.error('CRITICAL: Failed to write audit event to database', {
+        error: (error as Error).message,
+        eventType: event.eventType,
+        actorId: event.actorId,
+        tenantId: event.tenantId,
+      });
+      // Re-throw to ensure audit failures are noticed
+      throw new Error(`Audit logging failed: ${(error as Error).message}`);
+    }
 
     return event;
   }
@@ -171,55 +251,109 @@ export class AuditService {
     limit = 50,
     offset = 0
   ): Promise<PaginatedAuditEvents> {
-    let filteredEvents = [...this.events];
+    const db = getAuditDatabase();
 
-    // Apply filters
+    let query = 'SELECT * FROM companyos_audit_events WHERE 1=1';
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    // Build dynamic WHERE clause
     if (filter.tenantId) {
-      filteredEvents = filteredEvents.filter((e) => e.tenantId === filter.tenantId);
+      query += ` AND tenant_id = $${paramIndex}`;
+      params.push(filter.tenantId);
+      paramIndex++;
     }
     if (filter.actorId) {
-      filteredEvents = filteredEvents.filter((e) => e.actorId === filter.actorId);
+      query += ` AND actor_id = $${paramIndex}`;
+      params.push(filter.actorId);
+      paramIndex++;
     }
     if (filter.eventType) {
-      filteredEvents = filteredEvents.filter((e) => e.eventType === filter.eventType);
+      query += ` AND event_type = $${paramIndex}`;
+      params.push(filter.eventType);
+      paramIndex++;
     }
     if (filter.eventCategory) {
-      filteredEvents = filteredEvents.filter((e) => e.eventCategory === filter.eventCategory);
+      query += ` AND event_category = $${paramIndex}`;
+      params.push(filter.eventCategory);
+      paramIndex++;
     }
     if (filter.resourceType) {
-      filteredEvents = filteredEvents.filter((e) => e.resourceType === filter.resourceType);
+      query += ` AND resource_type = $${paramIndex}`;
+      params.push(filter.resourceType);
+      paramIndex++;
     }
     if (filter.resourceId) {
-      filteredEvents = filteredEvents.filter((e) => e.resourceId === filter.resourceId);
+      query += ` AND resource_id = $${paramIndex}`;
+      params.push(filter.resourceId);
+      paramIndex++;
     }
     if (filter.outcome) {
-      filteredEvents = filteredEvents.filter((e) => e.outcome === filter.outcome);
+      query += ` AND outcome = $${paramIndex}`;
+      params.push(filter.outcome);
+      paramIndex++;
     }
     if (filter.fromDate) {
-      filteredEvents = filteredEvents.filter((e) => e.occurredAt >= filter.fromDate!);
+      query += ` AND occurred_at >= $${paramIndex}`;
+      params.push(filter.fromDate);
+      paramIndex++;
     }
     if (filter.toDate) {
-      filteredEvents = filteredEvents.filter((e) => e.occurredAt <= filter.toDate!);
+      query += ` AND occurred_at <= $${paramIndex}`;
+      params.push(filter.toDate);
+      paramIndex++;
     }
     if (filter.searchQuery) {
-      const query = filter.searchQuery.toLowerCase();
-      filteredEvents = filteredEvents.filter(
-        (e) =>
-          e.eventType.toLowerCase().includes(query) ||
-          e.description?.toLowerCase().includes(query) ||
-          e.resourceName?.toLowerCase().includes(query) ||
-          e.actorId?.toLowerCase().includes(query)
-      );
+      query += ` AND (
+        event_type ILIKE $${paramIndex} OR
+        description ILIKE $${paramIndex} OR
+        resource_name ILIKE $${paramIndex} OR
+        actor_id ILIKE $${paramIndex}
+      )`;
+      params.push(`%${filter.searchQuery}%`);
+      paramIndex++;
     }
 
-    // Sort by occurredAt descending (most recent first)
-    filteredEvents.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+    // Get total count
+    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
+    const countResult = await db.query(countQuery, params);
+    const totalCount = parseInt(countResult.rows[0].total, 10);
 
-    const totalCount = filteredEvents.length;
-    const paginatedEvents = filteredEvents.slice(offset, offset + limit);
+    // Add pagination and ordering
+    query += ` ORDER BY occurred_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    params.push(limit, offset);
+
+    const result = await db.query(query, params);
+
+    // Map database rows to AuditEvent objects
+    const events: AuditEvent[] = result.rows.map((row) => ({
+      id: row.id,
+      eventType: row.event_type,
+      eventCategory: row.event_category,
+      eventAction: row.event_action,
+      actorId: row.actor_id,
+      actorEmail: row.actor_email,
+      actorType: row.actor_type,
+      actorRoles: row.actor_roles,
+      tenantId: row.tenant_id,
+      resourceType: row.resource_type,
+      resourceId: row.resource_id,
+      resourceName: row.resource_name,
+      description: row.description,
+      details: typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
+      ipAddress: row.ip_address,
+      userAgent: row.user_agent,
+      requestId: row.request_id,
+      correlationId: row.correlation_id,
+      outcome: row.outcome,
+      errorMessage: row.error_message,
+      occurredAt: new Date(row.occurred_at),
+      recordedAt: new Date(row.recorded_at),
+      retentionDays: row.retention_days,
+    }));
 
     return {
-      events: paginatedEvents,
+      events,
       totalCount,
       hasNextPage: offset + limit < totalCount,
       hasPreviousPage: offset > 0,
@@ -227,21 +361,56 @@ export class AuditService {
   }
 
   async getEvent(eventId: string): Promise<AuditEvent | null> {
-    return this.events.find((e) => e.id === eventId) || null;
+    const db = getAuditDatabase();
+
+    const result = await db.query(
+      'SELECT * FROM companyos_audit_events WHERE id = $1',
+      [eventId]
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      eventType: row.event_type,
+      eventCategory: row.event_category,
+      eventAction: row.event_action,
+      actorId: row.actor_id,
+      actorEmail: row.actor_email,
+      actorType: row.actor_type,
+      actorRoles: row.actor_roles,
+      tenantId: row.tenant_id,
+      resourceType: row.resource_type,
+      resourceId: row.resource_id,
+      resourceName: row.resource_name,
+      description: row.description,
+      details: typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
+      ipAddress: row.ip_address,
+      userAgent: row.user_agent,
+      requestId: row.request_id,
+      correlationId: row.correlation_id,
+      outcome: row.outcome,
+      errorMessage: row.error_message,
+      occurredAt: new Date(row.occurred_at),
+      recordedAt: new Date(row.recorded_at),
+      retentionDays: row.retention_days,
+    };
   }
 
   async getEventsByCorrelation(correlationId: string): Promise<AuditEvent[]> {
-    return this.events.filter((e) => e.correlationId === correlationId);
+    const result = await this.queryEvents({ correlationId }, 1000);
+    return result.events;
   }
 
   async getRecentEventsByTenant(
     tenantId: string,
     limit = 100
   ): Promise<AuditEvent[]> {
-    return this.events
-      .filter((e) => e.tenantId === tenantId)
-      .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
-      .slice(0, limit);
+    const result = await this.queryEvents({ tenantId }, limit);
+    return result.events;
   }
 
   async getEventsByActor(
@@ -249,16 +418,8 @@ export class AuditService {
     fromDate?: Date,
     toDate?: Date
   ): Promise<AuditEvent[]> {
-    let events = this.events.filter((e) => e.actorId === actorId);
-
-    if (fromDate) {
-      events = events.filter((e) => e.occurredAt >= fromDate);
-    }
-    if (toDate) {
-      events = events.filter((e) => e.occurredAt <= toDate);
-    }
-
-    return events.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+    const result = await this.queryEvents({ actorId, fromDate, toDate }, 1000);
+    return result.events;
   }
 
   // ============================================================================
@@ -270,21 +431,35 @@ export class AuditService {
     fromDate?: Date,
     toDate?: Date
   ): Promise<Record<string, number>> {
-    let events = [...this.events];
+    const db = getAuditDatabase();
+
+    let query = 'SELECT event_type, COUNT(*) as count FROM companyos_audit_events WHERE 1=1';
+    const params: any[] = [];
+    let paramIndex = 1;
 
     if (tenantId) {
-      events = events.filter((e) => e.tenantId === tenantId);
+      query += ` AND tenant_id = $${paramIndex}`;
+      params.push(tenantId);
+      paramIndex++;
     }
     if (fromDate) {
-      events = events.filter((e) => e.occurredAt >= fromDate);
+      query += ` AND occurred_at >= $${paramIndex}`;
+      params.push(fromDate);
+      paramIndex++;
     }
     if (toDate) {
-      events = events.filter((e) => e.occurredAt <= toDate);
+      query += ` AND occurred_at <= $${paramIndex}`;
+      params.push(toDate);
+      paramIndex++;
     }
 
+    query += ' GROUP BY event_type';
+
+    const result = await db.query(query, params);
+
     const counts: Record<string, number> = {};
-    for (const event of events) {
-      counts[event.eventType] = (counts[event.eventType] || 0) + 1;
+    for (const row of result.rows) {
+      counts[row.event_type] = parseInt(row.count, 10);
     }
 
     return counts;
@@ -293,15 +468,23 @@ export class AuditService {
   async getCategoryBreakdown(
     tenantId?: string
   ): Promise<Record<AuditEventCategory, number>> {
-    let events = [...this.events];
+    const db = getAuditDatabase();
+
+    let query = 'SELECT event_category, COUNT(*) as count FROM companyos_audit_events WHERE 1=1';
+    const params: any[] = [];
 
     if (tenantId) {
-      events = events.filter((e) => e.tenantId === tenantId);
+      query += ' AND tenant_id = $1';
+      params.push(tenantId);
     }
 
+    query += ' GROUP BY event_category';
+
+    const result = await db.query(query, params);
+
     const breakdown: Record<string, number> = {};
-    for (const event of events) {
-      breakdown[event.eventCategory] = (breakdown[event.eventCategory] || 0) + 1;
+    for (const row of result.rows) {
+      breakdown[row.event_category] = parseInt(row.count, 10);
     }
 
     return breakdown as Record<AuditEventCategory, number>;
@@ -354,16 +537,16 @@ export class AuditService {
   // ============================================================================
 
   async cleanupExpiredEvents(): Promise<number> {
-    const now = new Date();
-    const initialCount = this.events.length;
+    const db = getAuditDatabase();
 
-    this.events = this.events.filter((event) => {
-      const expirationDate = new Date(event.recordedAt);
-      expirationDate.setDate(expirationDate.getDate() + event.retentionDays);
-      return expirationDate > now;
-    });
+    const result = await db.query(
+      `DELETE FROM companyos_audit_events
+       WHERE recorded_at + (retention_days || ' days')::interval < NOW()
+       RETURNING id`,
+      []
+    );
 
-    const deletedCount = initialCount - this.events.length;
+    const deletedCount = result.rowCount || 0;
     if (deletedCount > 0) {
       logger.info('Cleaned up expired audit events', { deletedCount });
     }
@@ -381,3 +564,6 @@ export function getAuditService(retentionDays?: number): AuditService {
   }
   return auditServiceInstance;
 }
+
+// Export database setter
+export { setAuditDatabase };
