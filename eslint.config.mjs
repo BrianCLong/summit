@@ -130,5 +130,22 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    files: ['ui/components/Switchboard.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXText[value=/\\S/]',
+          message: 'Use t() for user-facing text in Switchboard (i18n).',
+        },
+        {
+          selector:
+            'JSXAttribute Literal[value=/\\S/]:matches([parent.name.name="placeholder"], [parent.name.name="title"], [parent.name.name="aria-label"], [parent.name.name="ariaLabel"])',
+          message: 'Use t() for user-facing attribute strings in Switchboard (i18n).',
+        },
+      ],
+    },
   }
 );
