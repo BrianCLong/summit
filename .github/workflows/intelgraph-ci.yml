@@ -33,7 +33,7 @@ jobs:
       - name: Lint and Format Check
         run: |
           pnpm --filter intelgraph-server run lint
-          pnpm --filter intelgraph-server run format -- --check
+          pnpm --filter intelgraph-server run format:check
 
       - name: Set up OPA
         uses: open-policy-agent/setup-opa@v2
