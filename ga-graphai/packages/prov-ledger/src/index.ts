@@ -50,6 +50,90 @@ export * from './bundle-utils';
 export * from './bundle-verifier';
 
 // ============================================================================
+// SIMPLE IN-MEMORY LEDGER (Gateway usage)
+// ============================================================================
+
+export interface EvidencePayloadInput {
+  tenant: string;
+  caseId: string;
+  environment: string;
+  operation: string;
+  request: unknown;
+  policy: unknown;
+  decision: unknown;
+  model: unknown;
+  cost: unknown;
+  output: unknown;
+  correlationId?: string;
+  id?: string;
+  timestamp?: string;
+  signature?: string;
+}
+
+export interface EvidencePayload extends EvidencePayloadInput {
+  id: string;
+  timestamp: string;
+  signature: string;
+}
+
+export function buildEvidencePayload(input: EvidencePayloadInput): EvidencePayload {
+  const timestamp = input.timestamp ?? new Date().toISOString();
+  const base = {
+    tenant: input.tenant,
+    caseId: input.caseId,
+    environment: input.environment,
+    operation: input.operation,
+    request: input.request,
+    policy: input.policy,
+    decision: input.decision,
+    model: input.model,
+    cost: input.cost,
+    output: input.output,
+    correlationId: input.correlationId,
+  } satisfies EvidencePayloadInput;
+
+  const signature =
+    input.signature ??
+    `stub-signature:${createHash('sha256')
+      .update(JSON.stringify({
+        tenant: base.tenant,
+        caseId: base.caseId,
+        operation: base.operation,
+        correlationId: base.correlationId,
+      }))
+      .digest('hex')}`;
+
+  return {
+    ...base,
+    id: input.id ?? randomUUID(),
+    timestamp,
+    signature,
+  };
+}
+
+export class InMemoryLedger {
+  private readonly entries = new Map<string, EvidencePayload>();
+
+  record(payload: EvidencePayloadInput): EvidencePayload {
+    const entry = buildEvidencePayload(payload);
+    this.entries.set(entry.id, entry);
+    return entry;
+  }
+
+  get(id: string): EvidencePayload | undefined {
+    return this.entries.get(id);
+  }
+
+  list(limit?: number): EvidencePayload[] {
+    const values = Array.from(this.entries.values());
+    if (limit && limit > 0) {
+      return values.slice(-limit);
+    }
+    return values;
+  }
+}
+
+// ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD
 // ============================================================================
 

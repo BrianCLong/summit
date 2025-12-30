@@ -19,6 +19,7 @@ import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 import { ChaosEngine, ChaosError } from './chaos.js';
 import { buildSearchService, handleSearchRoute } from './search/unified.js';
 import { buildPrivacyEnforcement } from './privacy/privacyBudget.js';
+import { correlationIdMiddleware } from './middleware/correlationId.js';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -95,6 +96,7 @@ function createContextMiddleware(options = {}) {
     const acceptanceBlocked =
       acceptanceBlockedHeader === 'true' || acceptanceBlockedHeader === '1';
     const gpuBusy = Number.parseFloat(req.header('x-gpu-busy') ?? '0');
+    const correlationId = req.correlationId;
     const caps = {};
     const costCapHeader = req.header('x-cost-cap-usd');
     if (costCapHeader && !Number.isNaN(Number(costCapHeader))) {
@@ -110,6 +112,7 @@ function createContextMiddleware(options = {}) {
       acceptanceBlocked,
       gpuBusyRatio: Number.isFinite(gpuBusy) ? Math.max(0, gpuBusy) : 0,
       caps,
+      correlationId,
     };
     next();
   };
@@ -174,6 +177,7 @@ export function createApp(options = {}) {
   }
 
   const app = express();
+  app.use(correlationIdMiddleware());
   app.use(express.json({ limit: '1mb' }));
   app.use(createContextMiddleware(options));
   app.use(chaos.middleware());
@@ -282,6 +286,7 @@ export function createApp(options = {}) {
             latencyMs: adapterResult.latencyMs,
           },
           output: planArtifacts,
+          correlationId: req.correlationId,
         }),
       ),
     );
@@ -374,6 +379,7 @@ export function createApp(options = {}) {
             latencyMs: adapterResult.latencyMs,
           },
           output: artifacts,
+          correlationId: req.correlationId,
         }),
       ),
     );
