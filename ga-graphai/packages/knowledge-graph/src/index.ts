@@ -186,6 +186,43 @@ export interface GraphSnapshot {
   };
 }
 
+export interface AgentTrigger {
+  agent: string;
+  reason: string;
+  priority?: 'low' | 'normal' | 'high';
+  payload?: Record<string, unknown>;
+  correlationId?: string;
+}
+
+export interface GraphUpdate {
+  source?: string;
+  ingress?: string;
+  topic?: string;
+  correlationId?: string;
+  traceId?: string;
+  observedAt?: string;
+  namespace?: string;
+  services?: ServiceRecord[];
+  environments?: EnvironmentRecord[];
+  pipelines?: PipelineRecord[];
+  incidents?: IncidentRecord[];
+  policies?: PolicyRule[];
+  costSignals?: CostSignalRecord[];
+  nodes?: GraphNode[];
+  edges?: GraphEdge[];
+  deletions?: {
+    services?: string[];
+    environments?: string[];
+    pipelines?: string[];
+    incidents?: string[];
+    policies?: string[];
+    costSignals?: string[];
+    nodes?: string[];
+    edges?: string[];
+  };
+  agentTriggers?: AgentTrigger[];
+}
+
 export interface StructuredLogger {
   info?(event: string, payload?: Record<string, unknown>): void;
   warn?(event: string, payload?: Record<string, unknown>): void;
@@ -220,6 +257,8 @@ export interface KnowledgeGraphOptions {
 interface GraphState {
   nodes: Map<string, GraphNode>;
   edges: Map<string, GraphEdge>;
+  streamNodes: Map<string, GraphNode>;
+  streamEdges: Map<string, GraphEdge>;
   pipelines: Map<string, PipelineRecord>;
   services: Map<string, ServiceRecord>;
   environments: Map<string, EnvironmentRecord>;
@@ -251,6 +290,8 @@ export class OrchestrationKnowledgeGraph {
   private readonly state: GraphState = {
     nodes: new Map(),
     edges: new Map(),
+    streamNodes: new Map(),
+    streamEdges: new Map(),
     pipelines: new Map(),
     services: new Map(),
     environments: new Map(),
@@ -368,6 +409,16 @@ export class OrchestrationKnowledgeGraph {
       nodeCount: snapshot.nodes.length,
       edgeCount: snapshot.edges.length,
       sandbox: snapshot.sandbox,
+    });
+    this.events.emitEvent('summit.intelgraph.graph.updated', {
+      source: 'connector-refresh',
+      ingress: 'ingestion',
+      namespace: snapshot.namespace,
+      trigger: 'refresh',
+      version: this.version,
+      nodeCount: snapshot.nodes.length,
+      edgeCount: snapshot.edges.length,
+      durationMs,
     });
     span?.end({
       durationMs,
@@ -497,6 +548,138 @@ export class OrchestrationKnowledgeGraph {
     return snapshot;
   }
 
+  applyUpdate(update: GraphUpdate): GraphSnapshot {
+    if (this.options.requireConfirmation && !this.options.confirmationProvided) {
+      throw new Error('Graph refresh confirmation required but not provided');
+    }
+
+    const previousState = this.cloneState();
+    const startedAt = Date.now();
+    const source = update.source ?? 'intelgraph.stream';
+    const namespace = update.namespace ?? this.namespace();
+    const span = this.startSpan('intelgraph.kg.stream.update', {
+      source,
+      topic: update.topic,
+      namespace,
+    });
+
+    const serviceDelta = this.mergeRecords(
+      this.state.services,
+      update.services,
+      update,
+      'service',
+    );
+    const environmentDelta = this.mergeRecords(
+      this.state.environments,
+      update.environments,
+      update,
+      'environment',
+    );
+    const pipelineDelta = this.mergePipelineRecords(
+      this.state.pipelines,
+      update.pipelines,
+      update,
+    );
+    const incidentDelta = this.mergeRecords(
+      this.state.incidents,
+      update.incidents,
+      update,
+      'incident',
+    );
+    const policyDelta = this.mergeRecords(
+      this.state.policies,
+      update.policies,
+      update,
+      'policy',
+    );
+    const costSignalDelta = this.mergeRecords(
+      this.state.costSignals,
+      update.costSignals,
+      update,
+      'cost-signal',
+      (record) => `${record.serviceId}:${record.timeBucket}`,
+    );
+
+    this.mergeStreamNodes(update.nodes, update);
+    this.mergeStreamEdges(update.edges, update);
+    this.applyDeletions(update.deletions);
+
+    this.rebuildGraph();
+
+    const durationMs = Date.now() - startedAt;
+    this.version += 1;
+    const snapshot = this.snapshot(durationMs);
+    const mutationDelta =
+      Math.abs(snapshot.nodes.length - previousState.nodes.size) +
+      Math.abs(snapshot.edges.length - previousState.edges.size);
+
+    if (this.options.mutationThreshold !== undefined && mutationDelta > this.options.mutationThreshold) {
+      this.restoreState(previousState);
+      const error = new Error(
+        `Refusing to mutate graph by ${mutationDelta} elements without confirmation`,
+      );
+      this.logWarn('intelgraph.kg.stream.blocked', {
+        namespace,
+        mutationDelta,
+        threshold: this.options.mutationThreshold,
+      });
+      span?.recordException?.(error);
+      span?.end({ error: error.message });
+      throw error;
+    }
+
+    this.metricsObserve('intelgraph_kg_stream_update_ms', durationMs, {
+      source,
+    });
+    this.metricsIncrement('intelgraph_kg_stream_updates_total', 1, {
+      source,
+      topic: update.topic ?? 'unspecified',
+    });
+    this.events.emitEvent('summit.intelgraph.graph.updated', {
+      source,
+      ingress: update.ingress ?? 'message-broker',
+      namespace,
+      trigger: 'stream',
+      version: this.version,
+      nodeCount: snapshot.nodes.length,
+      edgeCount: snapshot.edges.length,
+      durationMs,
+      topic: update.topic,
+      correlationId: update.correlationId,
+    });
+
+    if (update.agentTriggers) {
+      for (const trigger of update.agentTriggers) {
+        this.events.emitEvent('summit.intelgraph.agent.triggered', {
+          agent: trigger.agent,
+          reason: trigger.reason,
+          priority: trigger.priority ?? 'normal',
+          namespace,
+          graphVersion: this.version,
+          correlationId: trigger.correlationId ?? update.correlationId,
+          payload: trigger.payload,
+        });
+      }
+    }
+
+    this.logInfo('intelgraph.kg.stream.update', {
+      namespace,
+      source,
+      topic: update.topic,
+      durationMs,
+      services: serviceDelta.added + serviceDelta.updated,
+      environments: environmentDelta.added + environmentDelta.updated,
+      pipelines: pipelineDelta.added + pipelineDelta.updated,
+      incidents: incidentDelta.added + incidentDelta.updated,
+      policies: policyDelta.added + policyDelta.updated,
+      costSignals: costSignalDelta.added + costSignalDelta.updated,
+      nodes: update.nodes?.length ?? 0,
+      edges: update.edges?.length ?? 0,
+    });
+    span?.end({ durationMs, mutationDelta, nodeCount: snapshot.nodes.length });
+    return snapshot;
+  }
+
   private namespace(): string {
     if (this.options.namespace) {
       return this.options.namespace;
@@ -504,10 +687,129 @@ export class OrchestrationKnowledgeGraph {
     return this.options.sandboxMode ? 'intelgraph-sandbox' : 'intelgraph';
   }
 
+  private mergeRecords<T extends { provenance?: GraphProvenance }>(
+    map: Map<string, T>,
+    records: T[] | undefined,
+    update: GraphUpdate,
+    type: string,
+    idSelector: (record: T) => string = (record) =>
+      (record as unknown as { id: string }).id,
+  ): { added: number; updated: number } {
+    if (!records || records.length === 0) {
+      return { added: 0, updated: 0 };
+    }
+
+    let added = 0;
+    let updated = 0;
+    for (const record of records) {
+      const id = idSelector(record);
+      const provenance =
+        record.provenance ?? this.defaultStreamProvenance(update, `${type}:${id}`);
+      const enrichedRecord = { ...record, provenance } as T;
+      if (map.has(id)) {
+        updated += 1;
+      } else {
+        added += 1;
+      }
+      map.set(id, enrichedRecord);
+    }
+    return { added, updated };
+  }
+
+  private mergePipelineRecords(
+    map: Map<string, PipelineRecord>,
+    records: PipelineRecord[] | undefined,
+    update: GraphUpdate,
+  ): { added: number; updated: number } {
+    if (!records || records.length === 0) {
+      return { added: 0, updated: 0 };
+    }
+
+    let added = 0;
+    let updated = 0;
+    for (const record of records) {
+      const provenance =
+        record.provenance ?? this.defaultStreamProvenance(update, `pipeline:${record.id}`);
+      const stages = record.stages.map((stage) => ({
+        ...stage,
+        provenance:
+          stage.provenance ??
+          this.defaultStreamProvenance(update, `stage:${stage.id}:${record.id}`),
+      }));
+      const pipeline: PipelineRecord = { ...record, provenance, stages };
+      if (map.has(record.id)) {
+        updated += 1;
+      } else {
+        added += 1;
+      }
+      map.set(record.id, pipeline);
+    }
+    return { added, updated };
+  }
+
+  private mergeStreamNodes(nodes: GraphNode[] | undefined, update: GraphUpdate): void {
+    if (!nodes) {
+      return;
+    }
+    for (const node of nodes) {
+      const provenance = node.provenance ?? this.defaultStreamProvenance(update, node.id);
+      this.state.streamNodes.set(node.id, { ...node, provenance });
+    }
+  }
+
+  private mergeStreamEdges(edges: GraphEdge[] | undefined, update: GraphUpdate): void {
+    if (!edges) {
+      return;
+    }
+    for (const edge of edges) {
+      const provenance = edge.provenance ?? this.defaultStreamProvenance(update, edge.id);
+      this.state.streamEdges.set(edge.id, { ...edge, provenance });
+    }
+  }
+
+  private applyDeletions(deletions: GraphUpdate['deletions']): void {
+    if (!deletions) {
+      return;
+    }
+    deletions.services?.forEach((id) => this.state.services.delete(id));
+    deletions.environments?.forEach((id) => this.state.environments.delete(id));
+    deletions.pipelines?.forEach((id) => this.state.pipelines.delete(id));
+    deletions.incidents?.forEach((id) => this.state.incidents.delete(id));
+    deletions.policies?.forEach((id) => this.state.policies.delete(id));
+    deletions.costSignals?.forEach((id) => this.state.costSignals.delete(id));
+    deletions.nodes?.forEach((id) => {
+      this.state.streamNodes.delete(id);
+      this.state.nodes.delete(id);
+    });
+    deletions.edges?.forEach((id) => {
+      this.state.streamEdges.delete(id);
+      this.state.edges.delete(id);
+    });
+  }
+
+  private defaultStreamProvenance(update: GraphUpdate, seed: string): GraphProvenance {
+    const observedAt = update.observedAt ?? new Date().toISOString();
+    const lineage = new Set<string>();
+    if (update.correlationId) {
+      lineage.add(update.correlationId);
+    }
+    return {
+      source: update.source ?? 'intelgraph.stream',
+      ingress: update.ingress ?? 'message-broker',
+      observedAt,
+      traceId: update.traceId,
+      checksum: stableHash({ seed, observedAt, topic: update.topic, source: update.source }),
+      lineage: Array.from(lineage),
+      attributes: update.topic ? { topic: update.topic } : undefined,
+    } satisfies GraphProvenance;
+  }
+
   private cloneState(): GraphState {
     return {
       nodes: new Map(this.state.nodes),
       edges: new Map(this.state.edges),
+      streamNodes: new Map(this.state.streamNodes),
+      streamEdges: new Map(this.state.streamEdges),
       pipelines: new Map(this.state.pipelines),
       services: new Map(this.state.services),
       environments: new Map(this.state.environments),
@@ -520,6 +822,8 @@ export class OrchestrationKnowledgeGraph {
   private restoreState(snapshot: GraphState): void {
     this.state.nodes.clear();
     this.state.edges.clear();
+    this.state.streamNodes.clear();
+    this.state.streamEdges.clear();
     this.state.pipelines.clear();
     this.state.services.clear();
     this.state.environments.clear();
@@ -529,6 +833,8 @@ export class OrchestrationKnowledgeGraph {
 
     snapshot.nodes.forEach((value, key) => this.state.nodes.set(key, value));
     snapshot.edges.forEach((value, key) => this.state.edges.set(key, value));
+    snapshot.streamNodes.forEach((value, key) => this.state.streamNodes.set(key, value));
+    snapshot.streamEdges.forEach((value, key) => this.state.streamEdges.set(key, value));
     snapshot.pipelines.forEach((value, key) => this.state.pipelines.set(key, value));
     snapshot.services.forEach((value, key) => this.state.services.set(key, value));
     snapshot.environments.forEach((value, key) => this.state.environments.set(key, value));
@@ -944,6 +1250,13 @@ export class OrchestrationKnowledgeGraph {
       };
       this.state.edges.set(edge.id, edge);
     }
+
+    for (const node of this.state.streamNodes.values()) {
+      this.state.nodes.set(node.id, node);
+    }
+    for (const edge of this.state.streamEdges.values()) {
+      this.state.edges.set(edge.id, edge);
+    }
   }
 
   private calculateServiceRisk(): Record<string, ServiceRiskProfile> {
@@ -1030,12 +1343,14 @@ export class OrchestrationKnowledgeGraph {
 }
 
 export type {
+  AgentTrigger,
   CostSignalConnector,
   CostSignalRecord,
   EnvironmentConnector,
   EnvironmentRecord,
   GraphEdge,
   GraphNode,
+  GraphUpdate,
   GraphSnapshot,
   IncidentConnector,
   IncidentRecord,
@@ -1049,3 +1364,10 @@ export type {
 };
 
 export * from './osint.js';
+export {
+  KafkaGraphUpdateStream,
+  type KafkaLikeConsumer,
+  type KafkaLikeEachMessagePayload,
+  type KafkaLikeMessage,
+  type KafkaStreamConfig,
+} from './streams.js';
