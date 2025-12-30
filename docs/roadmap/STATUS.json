@@ -88,6 +88,18 @@
           "target_completion": "Sprint N+1 (CRITICAL for GA)"
         }
       ]
+    },
+    {
+      "id": "D",
+      "name": "Serialization & Context Efficiency",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "KTOON core libraries",
+          "status": "in-progress",
+          "owner": "Amp"
+        }
+      ]
     }
   ],
   "summary": {
