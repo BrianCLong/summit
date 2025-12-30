@@ -23,7 +23,7 @@
     "migrate:persistence": "node scripts/migrate-persistence.js",
     "verify:policies": "tsx scripts/verify_policy_lifecycle.ts && tsx scripts/verify_policy_simulation.ts",
     "worker:outbox": "node scripts/outbox-worker.js",
-    "test:smoke": "echo 'Server smoke tests are consolidated in root smoke-test.js'",
+    "test:smoke": "node scripts/smoke-test.cjs",
     "codegen": "graphql-codegen --config codegen.yml",
     "codegen:watch": "graphql-codegen --config codegen.yml --watch",
     "seed": "ts-node scripts/seed-data.ts",
