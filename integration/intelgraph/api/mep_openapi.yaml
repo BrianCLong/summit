@@ -1,0 +1,46 @@
+openapi: 3.0.3
+title: MEP Evidence Partitioning API
+version: 0.1.0
+paths:
+  /mep/partition:
+    post:
+      summary: Partition OSINT scan results into scoped evidence shards.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scanId:
+                  type: string
+                policySpecification:
+                  type: object
+                recipients:
+                  type: array
+                  items:
+                    type: string
+                egressBudget:
+                  type: object
+                  properties:
+                    maxBytes:
+                      type: integer
+                    maxEntities:
+                      type: integer
+              required: [scanId, policySpecification]
+      responses:
+        '200':
+          description: Evidence shards and manifest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shardManifest:
+                    type: object
+                  shards:
+                    type: array
+                    items:
+                      type: object
+                  replayToken:
+                    type: object

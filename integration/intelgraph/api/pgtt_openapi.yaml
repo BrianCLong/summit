@@ -1,0 +1,44 @@
+openapi: 3.0.3
+title: PGTT Governance Regression API
+version: 0.1.0
+paths:
+  /pgtt/run:
+    post:
+      summary: Generate fixtures, execute access tests, and detect governance regressions.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policyVersion:
+                  type: string
+                ontologyVersion:
+                  type: string
+                executionBudget:
+                  type: object
+                  properties:
+                    maxTests:
+                      type: integer
+                    maxRuntimeMs:
+                      type: integer
+                seed:
+                  type: integer
+              required: [policyVersion, ontologyVersion]
+      responses:
+        '200':
+          description: Governance test report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  regressions:
+                    type: array
+                    items:
+                      type: object
+                  explanation:
+                    type: object
+                  replayToken:
+                    type: object

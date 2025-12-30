@@ -1,0 +1,48 @@
+openapi: 3.0.3
+title: SASA Source Attribution API
+version: 0.1.0
+paths:
+  /sasa/attribute:
+    post:
+      summary: Compute source marginal contributions for an intel decision.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entityId:
+                  type: string
+                decisionFunction:
+                  type: string
+                sources:
+                  type: array
+                  items:
+                    type: string
+                samplingBudget:
+                  type: integer
+                replayToken:
+                  type: object
+                  additionalProperties: true
+              required: [entityId, decisionFunction]
+      responses:
+        '200':
+          description: Attribution artifact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decisionOutput:
+                    type: object
+                  marginalContributions:
+                    type: array
+                    items:
+                      type: object
+                  counterfactuals:
+                    type: array
+                    items:
+                      type: object
+                  replayToken:
+                    type: object

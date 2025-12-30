@@ -1,0 +1,50 @@
+openapi: 3.0.3
+title: RIT Transform Inversion API
+version: 0.1.0
+paths:
+  /rit/invert:
+    post:
+      summary: Infer minimal generating transform plan for a target result set.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targetResultSet:
+                  type: array
+                  items:
+                    type: object
+                searchBudget:
+                  type: object
+                  properties:
+                    maxDepth:
+                      type: integer
+                    maxPlans:
+                      type: integer
+                determinismToken:
+                  type: string
+              required: [targetResultSet]
+      responses:
+        '200':
+          description: Inversion artifact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan:
+                    type: array
+                    items:
+                      type: object
+                  minimalInputs:
+                    type: array
+                    items:
+                      type: object
+                  witnessChain:
+                    type: array
+                    items:
+                      type: object
+                  replayToken:
+                    type: object
