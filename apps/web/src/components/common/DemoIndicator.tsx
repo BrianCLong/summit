@@ -4,17 +4,17 @@
  * Provides clear visual feedback that the application is running in demo mode.
  */
 
-import React from 'react';
-
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === '1' ||
-                  import.meta.env.VITE_DEMO_MODE === 'true';
+import React from 'react'
+import { useDemoMode as useDemoModeFlag } from '@/lib/demoMode'
 
 /**
  * Demo mode indicator component
  * Only renders when DEMO_MODE is enabled
  */
 export function DemoIndicator(): React.ReactElement | null {
-  if (!DEMO_MODE) {
+  const isDemoMode = useDemoModeFlag()
+
+  if (!isDemoMode) {
     return null;
   }
 
@@ -47,7 +47,7 @@ export function DemoIndicator(): React.ReactElement | null {
  * Hook to check if demo mode is enabled
  */
 export function useDemoMode(): boolean {
-  return DEMO_MODE;
+  return useDemoModeFlag()
 }
 
 /**
@@ -55,7 +55,9 @@ export function useDemoMode(): boolean {
  * Can be placed anywhere in the UI
  */
 export function DemoBadge({ className = '' }: { className?: string }): React.ReactElement | null {
-  if (!DEMO_MODE) {
+  const isDemoMode = useDemoModeFlag()
+
+  if (!isDemoMode) {
     return null;
   }
 

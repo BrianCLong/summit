@@ -61,10 +61,13 @@ import { ErrorBoundary, NotFound } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
+import { DemoModeGate } from '@/components/common/DemoModeGate'
+import { isDemoModeEnabled } from '@/lib/demoMode'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
   const [showExplain, setShowExplain] = React.useState(false);
+  const demoModeEnabled = isDemoModeEnabled()
 
   React.useEffect(()=>{
     const onKey=(e:KeyboardEvent)=>{
@@ -194,7 +197,16 @@ function App() {
                       <Route path="help" element={<HelpPage />} />
                       <Route path="changelog" element={<ChangelogPage />} />
 
-                      <Route path="demo" element={<DemoControlPage />} />
+                      {demoModeEnabled && (
+                        <Route
+                          path="demo"
+                          element={
+                            <DemoModeGate>
+                              <DemoControlPage />
+                            </DemoModeGate>
+                          }
+                        />
+                      )}
                       {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
 
                       {/* Catch all */}
