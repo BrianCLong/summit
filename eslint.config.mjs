@@ -9,7 +9,7 @@ import importPlugin from 'eslint-plugin-import-x';
 import jestPlugin from 'eslint-plugin-jest';
 
 export default tseslint.config(
-  { ignores: ['dist', 'build', 'coverage', 'node_modules', '*.min.js'] },
+  { ignores: ['dist', 'build', 'coverage', 'node_modules', '*.min.js', '.archive/**', '_salvage_from_refs/**', 'templates/**', '.ci/**'] },
   {
     extends: [
       js.configs.recommended,
