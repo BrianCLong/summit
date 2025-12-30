@@ -1,4 +1,10 @@
-import { z } from 'zod';
+import {
+  PluginManifestSchema,
+  PluginSignatureSchema,
+  type PluginManifest,
+  type PluginSignature,
+} from '../manifest/schema.js';
+import { PluginPermission } from './permissions.js';
 
 /**
  * Plugin lifecycle states
@@ -14,103 +20,8 @@ export enum PluginState {
   UNLOADING = 'unloading',
 }
 
-/**
- * Plugin permission types
- */
-export enum PluginPermission {
-  READ_DATA = 'read:data',
-  WRITE_DATA = 'write:data',
-  EXECUTE_QUERIES = 'execute:queries',
-  ACCESS_GRAPH = 'access:graph',
-  NETWORK_ACCESS = 'network:access',
-  FILE_SYSTEM = 'filesystem:access',
-  DATABASE_ACCESS = 'database:access',
-  API_ENDPOINTS = 'api:endpoints',
-  UI_EXTENSIONS = 'ui:extensions',
-  ANALYTICS = 'analytics:access',
-  ML_MODELS = 'ml:models',
-  WEBHOOKS = 'webhooks:manage',
-  SCHEDULED_TASKS = 'tasks:schedule',
-}
-
-/**
- * Plugin manifest schema validator
- */
-export const PluginManifestSchema = z.object({
-  id: z.string().min(3).max(100).regex(/^[a-z0-9-]+$/),
-  name: z.string().min(1).max(200),
-  version: z.string().regex(/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$/),
-  description: z.string().max(1000),
-  author: z.object({
-    name: z.string(),
-    email: z.string().email().optional(),
-    url: z.string().url().optional(),
-  }),
-  homepage: z.string().url().optional(),
-  repository: z.string().url().optional(),
-  license: z.string(),
-
-  // Plugin metadata
-  category: z.enum([
-    'data-source',
-    'analyzer',
-    'visualization',
-    'export',
-    'authentication',
-    'search',
-    'ml-model',
-    'workflow',
-    'ui-theme',
-    'api-extension',
-    'integration',
-    'utility',
-  ]),
-
-  // Entry points
-  main: z.string(),
-  icon: z.string().optional(),
-
-  // Dependencies
-  dependencies: z.record(z.string()).optional(),
-  peerDependencies: z.record(z.string()).optional(),
-  engineVersion: z.string(), // Required Summit platform version
-
-  // Permissions required by plugin
-  permissions: z.array(z.nativeEnum(PluginPermission)),
-
-  // Resource limits
-  resources: z.object({
-    maxMemoryMB: z.number().int().positive().max(2048).default(256),
-    maxCpuPercent: z.number().int().positive().max(100).default(50),
-    maxStorageMB: z.number().int().positive().max(1024).default(100),
-    maxNetworkMbps: z.number().int().positive().max(1000).default(10),
-  }).optional(),
-
-  // Extension points this plugin provides
-  extensionPoints: z.array(z.object({
-    id: z.string(),
-    type: z.string(),
-    config: z.record(z.any()).optional(),
-  })).optional(),
-
-  // Configuration schema
-  configSchema: z.record(z.any()).optional(),
-
-  // Webhooks
-  webhooks: z.array(z.object({
-    event: z.string(),
-    handler: z.string(),
-  })).optional(),
-
-  // API endpoints
-  apiEndpoints: z.array(z.object({
-    method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
-    path: z.string(),
-    handler: z.string(),
-  })).optional(),
-});
-
-export type PluginManifest = z.infer<typeof PluginManifestSchema>;
+export { PluginManifestSchema, PluginSignatureSchema, PluginPermission };
+export type { PluginManifest, PluginSignature };
 
 /**
  * Plugin context provided to plugins at runtime

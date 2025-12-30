@@ -10,6 +10,9 @@ import {
   PluginMetadata,
   DependencyResolver,
 } from '../types/plugin.js';
+import { PluginManifestSchema } from '../manifest/schema.js';
+import { PluginManifestValidationError } from '../errors/PluginManifestValidationError.js';
+import { verifySignature } from '../security/verifySignature.js';
 
 /**
  * Central plugin manager implementing microkernel pattern
@@ -37,18 +40,31 @@ export class PluginManager extends EventEmitter {
   /**
    * Install a plugin
    */
-  async install(manifest: PluginManifest, source: PluginSource): Promise<void> {
-    const { id, version } = manifest;
+  async install(manifest: PluginManifest, _source: PluginSource): Promise<void> {
+    const verificationEnabled = this.shouldVerify();
+    const manifestToInstall = verificationEnabled
+      ? this.validateManifest(manifest)
+      : manifest;
+    const { id, version } = manifestToInstall;
 
     // Check if already installed
     if (this.plugins.has(id)) {
       throw new Error(`Plugin ${id} is already installed`);
     }
 
+    if (verificationEnabled) {
+      await verifySignature({
+        manifest: manifestToInstall,
+        signature: manifestToInstall.signature?.signature,
+        publicKey: manifestToInstall.signature?.publicKey,
+        algorithm: manifestToInstall.signature?.algorithm,
+      });
+    }
+
     // Check platform compatibility
-    if (!semver.satisfies(this.platformVersion, manifest.engineVersion)) {
+    if (!semver.satisfies(this.platformVersion, manifestToInstall.engineVersion)) {
       throw new Error(
-        `Plugin ${id} requires platform version ${manifest.engineVersion}, but current version is ${this.platformVersion}`
+        `Plugin ${id} requires platform version ${manifestToInstall.engineVersion}, but current version is ${this.platformVersion}`
       );
     }
 
@@ -63,7 +79,7 @@ export class PluginManager extends EventEmitter {
 
     // Create plugin metadata
     const metadata: PluginMetadata = {
-      manifest,
+      manifest: manifestToInstall,
       state: PluginState.UNLOADED,
       installedAt: new Date(),
       updatedAt: new Date(),
@@ -236,7 +252,7 @@ export class PluginManager extends EventEmitter {
   /**
    * List all installed plugins
    */
-  async listInstalled(): Promise<PluginMetadata[]> {
+  listInstalled(): Promise<PluginMetadata[]> {
     return this.registry.list();
   }
 
@@ -282,6 +298,7 @@ export class PluginManager extends EventEmitter {
     };
   }
 
+  /* eslint-disable no-console */
   private createLogger(pluginId: string): any {
     return {
       debug: (msg: string, meta?: any) => console.debug(`[${pluginId}]`, msg, meta),
@@ -291,39 +308,64 @@ export class PluginManager extends EventEmitter {
         console.error(`[${pluginId}]`, msg, error, meta),
     };
   }
+  /* eslint-enable no-console */
 
-  private createStorage(pluginId: string): any {
+  private createStorage(_pluginId: string): any {
     // Simplified storage - would use actual storage service
     const store = new Map();
     return {
-      get: async (key: string) => store.get(key) ?? null,
-      set: async (key: string, value: any) => store.set(key, value),
-      delete: async (key: string) => store.delete(key),
-      has: async (key: string) => store.has(key),
-      keys: async () => Array.from(store.keys()),
-      clear: async () => store.clear(),
+      get: (key: string) => Promise.resolve(store.get(key) ?? null),
+      set: (key: string, value: any) => {
+        store.set(key, value);
+        return Promise.resolve();
+      },
+      delete: (key: string) => {
+        store.delete(key);
+        return Promise.resolve();
+      },
+      has: (key: string) => Promise.resolve(store.has(key)),
+      keys: () => Promise.resolve(Array.from(store.keys())),
+      clear: () => {
+        store.clear();
+        return Promise.resolve();
+      },
     };
   }
 
-  private createAPI(pluginId: string): any {
+  private createAPI(_pluginId: string): any {
     return {
-      request: async (endpoint: string, options?: any) => {
-        throw new Error('Not implemented');
-      },
-      graphql: async (query: string, variables?: any) => {
-        throw new Error('Not implemented');
-      },
+      request: (_endpoint: string, _options?: any) =>
+        Promise.reject(new Error('Not implemented')),
+      graphql: (_query: string, _variables?: any) =>
+        Promise.reject(new Error('Not implemented')),
     };
   }
 
-  private createEventBus(pluginId: string): any {
+  private createEventBus(_pluginId: string): any {
     const emitter = new EventEmitter();
     return {
       on: (event: string, handler: any) => emitter.on(event, handler),
       off: (event: string, handler: any) => emitter.off(event, handler),
-      emit: async (event: string, ...args: any[]) => emitter.emit(event, ...args),
+      emit: (event: string, ...args: any[]) => {
+        emitter.emit(event, ...args);
+        return Promise.resolve();
+      },
       once: (event: string, handler: any) => emitter.once(event, handler),
     };
+  }
+
+  private shouldVerify(): boolean {
+    return String(process.env.PLUGIN_VERIFY_ENABLED).toLowerCase() === 'true';
+  }
+
+  private validateManifest(manifest: PluginManifest): PluginManifest {
+    const result = PluginManifestSchema.safeParse(manifest);
+
+    if (!result.success) {
+      throw new PluginManifestValidationError(result.error);
+    }
+
+    return result.data;
   }
 }
 
