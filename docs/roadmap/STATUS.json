@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2025-12-30T00:00:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -8,19 +8,19 @@
         {
           "id": "A1",
           "name": "Local Vector Store",
-          "status": "rc-ready",
+          "status": "shipped-v2.0.0",
           "owner": "Jules"
         },
         {
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
-          "status": "rc-ready",
+          "status": "stabilizing",
           "owner": "Jules"
         },
         {
           "id": "A3",
           "name": "Copilot Query Service",
-          "status": "rc-ready",
+          "status": "stabilizing",
           "owner": "Jules"
         }
       ]
@@ -32,19 +32,19 @@
         {
           "id": "B1",
           "name": "Connector SDK & Registry",
-          "status": "in-validation",
+          "status": "in-dev-sprint25",
           "owner": "Jules"
         },
         {
           "id": "B2",
           "name": "RSS/Atom Connector",
-          "status": "in-validation",
+          "status": "in-dev-sprint26",
           "owner": "Jules"
         },
         {
           "id": "B3",
           "name": "STIX/TAXII Connector",
-          "status": "in-validation",
+          "status": "ready-for-dev",
           "owner": "Jules"
         }
       ]
@@ -56,13 +56,13 @@
         {
           "id": "C1",
           "name": "Policy-as-Code Engine",
-          "status": "rc-ready",
+          "status": "stabilizing",
           "owner": "Jules"
         },
         {
           "id": "C2",
           "name": "Immutable Audit Log",
-          "status": "rc-ready",
+          "status": "stabilizing",
           "owner": "Jules"
         }
       ]

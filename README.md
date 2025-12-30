@@ -77,11 +77,12 @@ Summit is built on a modern, distributed stack designed for scalability and audi
 
 ## 📦 Release Cadence
 
-We operate on a **2-week sprint cycle** managed by our automated Release Captain, **Jules**.
+Summit (IntelGraph) operates on a **2-week sprint cycle** managed by our automated Release Captain, **Jules**.
 
 - **Current Status**: Q4 2025 Strategic Sprints (Sprint 25+).
 - **Process**: Merge Train -> Golden Path CI -> Automated Release.
 - **Versioning**: Semantic Versioning (vX.Y.Z).
+- **Roadmap Link**: The Summit (IntelGraph) [roadmap](docs/roadmap.md) is aligned to this cadence so sprint timelines and themes stay current.
 
 👉 **[View Release Cadence & Process](docs/RELEASE_CADENCE.md)**
 
