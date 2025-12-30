@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/metrics/agent-metrics.schema.json",
+  "title": "Agent Throughput & Safety Metrics",
+  "type": "object",
+  "required": ["generated_at", "agents"],
+  "properties": {
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "agent_id",
+          "tasks_completed",
+          "merge_success_rate",
+          "debt_retired",
+          "debt_created",
+          "policy_violations",
+          "mean_time_to_merge_hours"
+        ],
+        "properties": {
+          "agent_id": { "type": "string" },
+          "tasks_completed": { "type": "integer", "minimum": 0 },
+          "merge_success_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+          "debt_retired": { "type": "integer" },
+          "debt_created": { "type": "integer" },
+          "policy_violations": { "type": "integer", "minimum": 0 },
+          "mean_time_to_merge_hours": { "type": "number", "minimum": 0 },
+          "verification_mix": {
+            "type": "object",
+            "properties": {
+              "tier_a": { "type": "integer", "minimum": 0 },
+              "tier_b": { "type": "integer", "minimum": 0 },
+              "tier_c": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

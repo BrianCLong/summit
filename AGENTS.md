@@ -522,6 +522,14 @@ instructions for full script). Ensure binaries/large files are sanitized before 
 
 **Remember**: The golden path is sacred. Keep it green!
 
+## Agent-Native Development Loop (Prompt N+4)
+
+- **Immutable Prompts:** Every agent task must reference a prompt registered in `prompts/registry.yaml` by its SHA-256 hash. Prompt hashes are authoritative; any mismatch fails CI.
+- **Task Contracts:** Agent tasks must conform to `agents/task-spec.schema.json`; store concrete specs under `agents/examples/` or task-specific folders.
+- **PR Metadata:** PRs MUST include the fenced JSON block between `<!-- AGENT-METADATA:START -->` and `<!-- AGENT-METADATA:END -->` following the template in `.github/PULL_REQUEST_TEMPLATE.md`. The metadata must align with the registered prompt scope and allowed operations.
+- **CI Enforcement:** Use `scripts/ci/verify-prompt-integrity.ts` to validate prompt hashes/scopes against the diff and `scripts/ci/validate-pr-metadata.ts` to validate PR metadata and emit execution records.
+- **Artifacts & Archives:** Successful runs emit `artifacts/agent-runs/{task_id}.json` and the CI metrics artifact `agent-metrics.json`; failures must be classified per `docs/ga/AGENT-FAILURE-MODES.md`.
+
 ## Agent & Partner Responsibility Boundaries
 
 To maintain clear accountability and human oversight, the following boundaries are strictly enforced:
