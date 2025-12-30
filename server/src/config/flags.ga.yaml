@@ -1,0 +1,6 @@
+detector_v3: true
+attribution_conf_bands: true
+counter_safe_gate: true
+ephemeral_frame_detector: false
+nonce_phrase_traps: true
+pii_gate_strict: true
