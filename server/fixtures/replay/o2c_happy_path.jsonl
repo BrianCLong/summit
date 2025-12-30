@@ -1,0 +1,3 @@
+{"type": "ORDER_CREATED", "timestamp": "2023-01-01T10:00:00Z", "payload": {"orderId": "ord_1", "amount": 100, "items": ["item_a", "item_b"]}, "actor": "user_1", "tenantId": "tenant_A"}
+{"type": "PAYMENT_RECEIVED", "timestamp": "2023-01-01T10:05:00Z", "payload": {"orderId": "ord_1", "paymentId": "pay_1", "status": "success"}, "actor": "system_payment", "tenantId": "tenant_A"}
+{"type": "ORDER_FULFILLED", "timestamp": "2023-01-01T10:30:00Z", "payload": {"orderId": "ord_1", "trackingId": "track_123"}, "actor": "warehouse_bot", "tenantId": "tenant_A"}
