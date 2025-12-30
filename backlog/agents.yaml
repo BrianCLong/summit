@@ -1,0 +1,26 @@
+version: 1
+agents:
+  - id: Jules
+    categories: [governance, risk, reliability, security, debt]
+    domains: [ci, release-engineering, security, policy-engine, crypto, analytics_layer, testing]
+    verification_tiers: [ga, audit]
+    risk_budget: 0.5
+    debt_budget: 0.4
+  - id: ReliabilityOps
+    categories: [reliability, debt]
+    domains: [ci, release-engineering, analytics_layer, testing]
+    verification_tiers: [qa, ga]
+    risk_budget: 0.35
+    debt_budget: 0.25
+  - id: Governance
+    categories: [governance, security]
+    domains: [policy-engine, security, crypto]
+    verification_tiers: [ga, audit]
+    risk_budget: 0.45
+    debt_budget: 0.3
+  - id: Amp
+    categories: [feature, debt, reliability]
+    domains: [analytics_layer, testing]
+    verification_tiers: [qa, ga]
+    risk_budget: 0.25
+    debt_budget: 0.2

@@ -1,0 +1,11 @@
+{
+  "item_id": "BL-0002",
+  "agent_id": "Jules",
+  "approved": true,
+  "reason": "Validated within scope, budget, and verification tier",
+  "verification_tier": "audit",
+  "risk_budget_used": 0.4,
+  "debt_budget_used": 0.35,
+  "generated_at": "2025-12-30T06:14:54.893Z",
+  "snapshot_ref": "artifacts/backlog/backlog-snapshot.json"
+}

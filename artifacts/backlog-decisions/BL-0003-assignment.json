@@ -1,0 +1,11 @@
+{
+  "item_id": "BL-0003",
+  "agent_id": "Amp",
+  "approved": true,
+  "reason": "Validated within scope, budget, and verification tier",
+  "verification_tier": "qa",
+  "risk_budget_used": 0.2,
+  "debt_budget_used": 0.15,
+  "generated_at": "2025-12-30T06:14:54.894Z",
+  "snapshot_ref": "artifacts/backlog/backlog-snapshot.json"
+}

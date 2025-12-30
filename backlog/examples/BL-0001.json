@@ -1,0 +1,40 @@
+{
+  "item_id": "BL-0001",
+  "title": "Stabilize GA pipelines after flake spike",
+  "description": "Recent GA pipeline flakiness exceeded SLO; enforce retry guardrails and capture remediation evidence.",
+  "source_signals": [
+    {
+      "id": "ci:ga-flake",
+      "type": "ci-flaky",
+      "severity": "high",
+      "evidence": "reports/ci/flakes/ga-latest.json",
+      "detected_at": "2025-12-29T11:00:00Z"
+    }
+  ],
+  "category": "reliability",
+  "affected_domains": ["ci", "release-engineering"],
+  "estimated_effort": 2.5,
+  "estimated_risk_reduction": 0.62,
+  "urgency": {
+    "time_criticality": 0.8,
+    "due_date": "2026-01-05T00:00:00Z",
+    "rationale": "Flake rate breaching GA readiness gate"
+  },
+  "dependencies": [],
+  "verification_requirements": {
+    "required_tier": "ga",
+    "tests": ["npm run test:server", "npm run lint"],
+    "evidence": ["ci-green", "flake-rate<5%", "audit-log"]
+  },
+  "eligible_agents": ["Jules", "ReliabilityOps"],
+  "suggested_playbook": "playbooks/ci/flake-response.md",
+  "metadata": {
+    "debt_severity": 3,
+    "debt_age_days": 45,
+    "governance_impact": 3,
+    "blast_radius": 4,
+    "strategic_alignment": ["Reliability", "GA"],
+    "residual_risk": 0.38,
+    "budget_impact": { "risk": 0.25, "debt": 0.2 }
+  }
+}

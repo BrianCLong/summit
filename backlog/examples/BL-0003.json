@@ -1,0 +1,46 @@
+{
+  "item_id": "BL-0003",
+  "title": "Increase analytics_layer coverage and remove flaky tests",
+  "description": "Coverage dropped below 80% after recent refactors and a flaky test masks regression risk.",
+  "source_signals": [
+    {
+      "id": "coverage:analytics-gap",
+      "type": "coverage-gap",
+      "severity": "medium",
+      "evidence": "coverage/analytics_layer/lcov.info",
+      "detected_at": "2025-12-29T08:00:00Z"
+    },
+    {
+      "id": "reliability:flaky-analytics-report",
+      "type": "flaky-test",
+      "severity": "high",
+      "evidence": "reports/flaky/analytics-report.json",
+      "detected_at": "2025-12-29T08:15:00Z"
+    }
+  ],
+  "category": "debt",
+  "affected_domains": ["analytics_layer", "testing"],
+  "estimated_effort": 1.5,
+  "estimated_risk_reduction": 0.45,
+  "urgency": {
+    "time_criticality": 0.5,
+    "rationale": "Coverage debt is aging and flake blocks deterministic baselines"
+  },
+  "dependencies": [],
+  "verification_requirements": {
+    "required_tier": "qa",
+    "tests": ["npm run test:unit", "npm run test:server"],
+    "evidence": ["coverage>85%", "flake-rate<2%", "ci-green"]
+  },
+  "eligible_agents": ["Jules", "ReliabilityOps", "Amp"],
+  "suggested_playbook": "playbooks/qa/coverage-hardening.md",
+  "metadata": {
+    "debt_severity": 4,
+    "debt_age_days": 120,
+    "governance_impact": 2,
+    "blast_radius": 3,
+    "strategic_alignment": ["Reliability", "Quality"],
+    "residual_risk": 0.3,
+    "budget_impact": { "risk": 0.2, "debt": 0.15 }
+  }
+}
