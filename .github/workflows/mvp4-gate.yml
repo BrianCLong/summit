@@ -25,7 +25,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Strict Lint
-        run: pnpm lint --max-warnings 0
+        run: pnpm lint:strict
       - name: Typecheck
         run: pnpm typecheck
 
