@@ -1,0 +1,60 @@
+# Canonical risk taxonomy for predictive governance
+# Every signal maps to a deterministic check in the scoring engine.
+---
+version: 1
+updated: 2025-12-30
+risk_domains:
+  code:
+    description: Code-level changes that can introduce regressions or undermine GA expectations.
+    signals:
+      - id: ga_critical_path
+        description: Modifies GA-critical paths or production launch gates.
+      - id: schema_or_migration
+        description: Alters database schemas, migrations, or backward-compatibility contracts.
+      - id: security_sensitive
+        description: Touches security surfaces (authz/authn, secrets, cryptography, data handling).
+      - id: high_churn_file
+        description: Modifies files with sustained churn or recent incident association.
+      - id: large_diff
+        description: Large code delta that increases review burden and risk surface.
+      - id: test_coverage_drop
+        description: Reduces or bypasses required coverage on touched modules.
+  ci:
+    description: Signals derived from the CI system and historical reliability.
+    signals:
+      - id: flaky_suite
+        description: Interacts with suites or jobs marked flaky or unstable.
+      - id: near_failure
+        description: Recent runs with narrow margins (e.g., timeouts within SLA, retries).
+      - id: long_running_job
+        description: Jobs exceeding baseline runtime, indicating fragility or resource contention.
+      - id: policy_edge_case
+        description: CI policy engine exercised uncommon or exception code paths.
+  agent:
+    description: Behaviors of automated agents contributing to the change.
+    signals:
+      - id: scope_expansion
+        description: Attempted to modify files outside declared scope or boundaries.
+      - id: prior_policy_violations
+        description: History of governance or safety violations by the actor/agent.
+      - id: debt_ratio_negative
+        description: Debt creation exceeds debt retirement for the effort or agent.
+      - id: prompt_reuse_anomaly
+        description: Unusual prompt reuse or pattern drift indicating potential misuse.
+  governance:
+    description: Organizational and policy-drift signals.
+    signals:
+      - id: exception_load
+        description: Accumulation of policy exceptions or waivers without closure.
+      - id: legacy_mode_stagnation
+        description: Prolonged operation in legacy/compatibility modes delaying hardening.
+      - id: invariant_erosion
+        description: Signals that guardrails (invariants) are weakening or being bypassed.
+      - id: evidence_gap
+        description: Missing or stale audit evidence for required controls.
+
+bands:
+  low: 0-24
+  medium: 25-49
+  high: 50-74
+  critical: 75-100
