@@ -25,9 +25,9 @@ jobs:
     name: Build + sign + attest reference artifact
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
-      image_name: ${{ env.IMAGE_NAME }}
-      context: ${{ env.DOCKER_CONTEXT }}
-      dockerfile: ${{ env.DOCKERFILE }}
+      image_name: ${{ github.repository_owner }}/summit-authz-gateway
+      context: services/authz-gateway
+      dockerfile: services/authz-gateway/Dockerfile
       push: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
       sign: true
       sbom: true
@@ -43,7 +43,7 @@ jobs:
     with:
       image_uri: ${{ needs.build-reference.outputs.image_uri }}
       image_digest: ${{ needs.build-reference.outputs.image_digest }}
-      sbom_artifact_name: build-artifacts-${{ env.IMAGE_NAME }}-${{ github.run_id }}
+      sbom_artifact_name: build-artifacts-summit-authz-gateway-${{ github.run_id }}
       severity_threshold: HIGH
 
   publish-evidence:
@@ -58,7 +58,7 @@ jobs:
       - name: Download SBOM bundle
         uses: actions/download-artifact@v4
         with:
-          name: build-artifacts-${{ env.IMAGE_NAME }}-${{ github.run_id }}
+          name: build-artifacts-summit-authz-gateway-${{ github.run_id }}
           path: artifacts
 
       - name: Summarize evidence bundle
