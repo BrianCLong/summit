@@ -58,7 +58,7 @@ deny contains msg if {
 deny contains msg if {
 	input.kind == "Pod"
 	container := input.spec.containers[_]
-	"ALL" not in container.securityContext.capabilities.drop
+	not "ALL" in container.securityContext.capabilities.drop
 	msg := "Containers must drop ALL capabilities"
 }
 

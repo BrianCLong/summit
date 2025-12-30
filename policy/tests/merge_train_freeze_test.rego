@@ -2,13 +2,14 @@ package summit.merge_train_test
 
 import data.summit.merge_train
 import future.keywords.if
+import future.keywords.contains
 
 valid_token := {
   "id": "freeze-override-123",
   "scope": "merge-train",
   "reason": "incident hotfix",
   "approved_by": ["release-manager", "sre-oncall"],
-  "expires_at": time.now_ns() + 60000000000,
+  "expires_at": "2099-12-31T23:59:59Z",
 }
 
 winter_window := [{
@@ -46,13 +47,7 @@ test_denies_missing_token if {
 }
 
 test_denies_unapproved_role if {
-  bad_token := {
-    "id": valid_token.id,
-    "scope": valid_token.scope,
-    "reason": valid_token.reason,
-    "approved_by": ["random"],
-    "expires_at": valid_token.expires_at,
-  }
+  bad_token := object.union(valid_token, {"approved_by": ["random"]})
 
   decision := merge_train.result with input as {
     "token": bad_token,
@@ -64,16 +59,11 @@ test_denies_unapproved_role if {
 }
 
 test_requires_incident_for_after_hours if {
-  maintenance_token := {
-    "id": valid_token.id,
-    "scope": valid_token.scope,
-    "reason": "maintenance",
-    "approved_by": valid_token.approved_by,
-    "expires_at": valid_token.expires_at,
-  }
+  maintenance_token := object.union(valid_token, {"reason": "maintenance"})
+
   decision := merge_train.result with input as {
     "token": maintenance_token,
-    "reasons": weekend_window ++ [{"type": "after-hours", "name": "After hours"}],
+    "reasons": array.concat(weekend_window, [{"type": "after-hours", "name": "After hours"}]),
     "now": "2025-12-20T03:00:00Z",
   }
   not decision.allow_override

@@ -27,21 +27,28 @@ policy_bundle_version := "unknown" if {
   not config.bundle_version
 }
 
+derive_reason(allowed) := "compliant" if {
+  allowed
+}
+
+derive_reason(allowed) := "violations_present" if {
+  not allowed
+}
+
 decision := out if {
   tenant_id := input.tenant.id
   segment := derive_segment
 
   naming := naming_summary
   violations := collect_violations(segment, tenant_id)
-  sla_breaches := compute_sla_breaches(segment, tenant_id)
+  sla_breaches := sla_breach
   all_flags := concat_arrays([naming.flags, violation_flag_list(violations), sla_flags(sla_breaches)])
   actions := recommended_actions(violations, sla_breaches)
   risk := compute_risk(segment, violations, sla_breaches)
   forecast := forecast_category(segment)
 
   allowed := count(violations) == 0
-  reason := "violations_present"
-  reason := "compliant" if allowed
+  reason := derive_reason(allowed)
 
   out := {
     "allowed": allowed,
@@ -97,12 +104,12 @@ concat_arrays(arrs) := out if {
 
 collect_violations(segment, tenant_id) := out if {
   sor := system_of_record_violations
-  locked := locked_definition_violations(segment)
-  hygiene := hygiene_violations(segment, tenant_id)
+  locked := locked_definition_violation
+  hygiene := get_hygiene_violations(segment, tenant_id)
   naming := naming_summary.flags
-  routing := routing_violations(tenant_id)
-  q2c := quote_to_cash_violations(segment)
-  forecast := forecast_violations(segment)
+  routing := routing_violation
+  q2c := get_quote_to_cash_violations(segment)
+  forecast := forecast_violation
   lifecycle := lifecycle_violations
   governance := governance_violations
   permissions := permission_violations
@@ -147,59 +154,64 @@ system_of_record_violations contains v if {
   not input.telemetry.system_of_record
 }
 
-locked_definition_violations(segment) contains v if {
+locked_definition_violation contains "account_missing_domain" if {
   input.account
   input.account.domain == ""
-  v := "account_missing_domain"
 }
 
-locked_definition_violations(segment) contains v if {
+locked_definition_violation contains "account_missing_billing_link" if {
   input.account
   not input.account.billing_account_id
-  v := "account_missing_billing_link"
 }
 
-locked_definition_violations(segment) contains v if {
+locked_definition_violation contains "closed_won_without_contract" if {
   input.opportunity
   input.opportunity.stage == "closed_won"
-  not (input.contract.status == "signed" and input.opportunity.stage_evidence["contract_signed"])
-  v := "closed_won_without_contract"
+  not closed_won_has_contract
 }
 
-locked_definition_violations(segment) contains v if {
+closed_won_has_contract if {
+  input.contract.status == "signed"
+  input.opportunity.stage_evidence["contract_signed"]
+}
+
+locked_definition_violation contains "closed_lost_without_reason" if {
   input.opportunity
   input.opportunity.stage == "closed_lost"
   not input.opportunity.stage_evidence["loss_reason"]
-  v := "closed_lost_without_reason"
 }
 
-hygiene_violations(segment, tenant_id) contains v if {
+get_hygiene_violations(segment, tenant_id) := concat_arrays([stage_exit_violations(segment), hygiene_violation]) if {
+  true
+}
+
+stage_exit_violations(segment) := [v |
   input.opportunity
   cfg := config.governance.stage_exit[segment][input.opportunity.stage]
   some req
   req := cfg[_]
   not input.opportunity.stage_evidence[req]
   v := sprintf("stage_exit_missing_%s", [req])
-}
+]
 
-hygiene_violations(segment, tenant_id) contains "next_step_missing" if {
+hygiene_violation contains "next_step_missing" if {
   input.opportunity
   input.opportunity.next_step == ""
 }
 
-hygiene_violations(segment, tenant_id) contains "next_step_date_missing" if {
+hygiene_violation contains "next_step_date_missing" if {
   input.opportunity
   input.opportunity.next_step_date == ""
 }
 
-hygiene_violations(segment, tenant_id) contains "mandatory_fields_missing" if {
+hygiene_violation contains "mandatory_fields_missing" if {
   input.opportunity
   cfg := config.governance.data_quality.mandatory_fields
   missing := {f | f := cfg[_]; not mandatory_field_present(f)}
   count(missing) > 0
 }
 
-hygiene_violations(segment, tenant_id) contains "stale_deal" if {
+hygiene_violation contains "stale_deal" if {
   input.opportunity
   input.context.now
   last_touch := input.opportunity.last_activity_at
@@ -207,7 +219,7 @@ hygiene_violations(segment, tenant_id) contains "stale_deal" if {
   days > config.governance.sla.stale_days
 }
 
-hygiene_violations(segment, tenant_id) contains v if {
+hygiene_violation contains v if {
   input.opportunity
   input.opportunity.stage_entered_at
   stage_limit := config.governance.sla.stage_aging_days[input.opportunity.stage]
@@ -217,18 +229,18 @@ hygiene_violations(segment, tenant_id) contains v if {
   v := sprintf("stage_aging_breach_%s", [input.opportunity.stage])
 }
 
-hygiene_violations(segment, tenant_id) contains "dedupe_violation" if {
+hygiene_violation contains "dedupe_violation" if {
   config.governance.data_quality.dedupe
   input.account
   count(input.account.duplicates) > 0
 }
 
-hygiene_violations(segment, tenant_id) contains "exception_without_expiry" if {
+hygiene_violation contains "exception_without_expiry" if {
   input.exception_registry.open[_]
   not input.exception_registry.open[_].expires_at
 }
 
-hygiene_violations(segment, tenant_id) contains "exception_expired" if {
+hygiene_violation contains "exception_expired" if {
   ex := input.exception_registry.open[_]
   ex.expires_at
   time_diff_minutes(ex.expires_at, input.context.now) < 0
@@ -238,9 +250,16 @@ marketing_violations contains v if {
   input.marketing
   required := ["utm_source", "utm_medium", "utm_campaign", "lead_source"]
   some r in required
-  missing := input.marketing[r] == "" or not input.marketing[r]
-  missing
+  marketing_field_missing(r)
   v := sprintf("marketing_%s_missing", [r])
+}
+
+marketing_field_missing(r) if {
+  input.marketing[r] == ""
+}
+
+marketing_field_missing(r) if {
+  not input.marketing[r]
 }
 
 marketing_violations contains "lead_source_unknown" if {
@@ -250,19 +269,50 @@ marketing_violations contains "lead_source_unknown" if {
 marketing_violations contains "marketing_mql_sql_incomplete" if {
   input.marketing
   not input.marketing.mql_status
-  or not input.marketing.sql_acceptance
+}
+
+marketing_violations contains "marketing_mql_sql_incomplete" if {
+  input.marketing
+  not input.marketing.sql_acceptance
 }
 
 naming_summary := {
-  "summary": {
-    "deal": input.opportunity.name,
-    "campaign": input.opportunity.campaign_name if input.opportunity.campaign_name,
-    "territory": input.account.territory if input.account,
-    "skus": input.quote.skus if input.quote
-  },
+  "summary": naming_summary_obj,
   "flags": naming_flag_list
 } if {
   true
+}
+
+naming_summary_obj := object.union(
+  object.union(
+    object.union({"deal": input.opportunity.name}, campaign_obj),
+    territory_obj
+  ),
+  skus_obj
+)
+
+campaign_obj := {"campaign": input.opportunity.campaign_name} if {
+  input.opportunity.campaign_name
+}
+
+campaign_obj := {} if {
+  not input.opportunity.campaign_name
+}
+
+territory_obj := {"territory": input.account.territory} if {
+  input.account
+}
+
+territory_obj := {} if {
+  not input.account
+}
+
+skus_obj := {"skus": input.quote.skus} if {
+  input.quote
+}
+
+skus_obj := {} if {
+  not input.quote
 }
 
 naming_flag_list := [f | naming_flags[f]]
@@ -287,18 +337,18 @@ naming_flags contains "sku_naming_invalid" if {
   not re_match(config.governance.naming.sku_pattern, input.quote.skus[_])
 }
 
-routing_violations(tenant_id) contains "manual_routing_blocked" if {
+routing_violation contains "manual_routing_blocked" if {
   input.opportunity.manual_routing_channel
   config.governance.routing.manual_channels_blocked[_] == input.opportunity.manual_routing_channel
 }
 
-routing_violations(tenant_id) contains "tie_breaker_missing" if {
+routing_violation contains "tie_breaker_missing" if {
   expected := config.governance.routing.tie_breakers
   route_trace := input.opportunity.route_trace
   not equal_prefix(expected, route_trace)
 }
 
-routing_violations(tenant_id) contains "round_robin_out_of_order" if {
+routing_violation contains "round_robin_out_of_order" if {
   input.routing
   expected := input.routing.expected_position
   actual := input.routing.round_robin_position
@@ -306,50 +356,55 @@ routing_violations(tenant_id) contains "round_robin_out_of_order" if {
   actual != expected
 }
 
-routing_violations(tenant_id) contains "wip_limit_exceeded" if {
+routing_violation contains "wip_limit_exceeded" if {
   input.routing
   limit := input.routing.wip_limit
   limit > 0
   input.routing.queue_wip > limit
 }
 
-routing_violations(tenant_id) contains "partner_registration_missing" if {
+routing_violation contains "partner_registration_missing" if {
   input.routing
   input.marketing
   input.marketing.lead_source == "partner"
   not input.routing.partner_registered
 }
 
-quote_to_cash_violations(segment) contains "sku_below_floor" if {
+get_quote_to_cash_violations(segment) := concat_arrays([segment_q2c_violations(segment), q2c_violation]) if {
+  true
+}
+
+segment_q2c_violations(segment) := result if {
   input.quote
   floor := config.governance.quote_to_cash.floors[segment]
-  input.quote.total_value < floor
-}
-
-quote_to_cash_violations(segment) contains "quote_above_ceiling" if {
-  input.quote
   ceil := config.governance.quote_to_cash.ceilings[segment]
-  input.quote.total_value > ceil
+  below_floor := ["sku_below_floor" | input.quote.total_value < floor]
+  above_ceiling := ["quote_above_ceiling" | input.quote.total_value > ceil]
+  result := array.concat(below_floor, above_ceiling)
 }
 
-quote_to_cash_violations(segment) contains "discount_approval_missing" if {
+segment_q2c_violations(segment) := [] if {
+  not input.quote
+}
+
+q2c_violation contains "discount_approval_missing" if {
   input.quote
   required := approval_chain_for_discount(input.quote.discount_percentage)
   not approvals_superset(input.quote.required_approvals, required)
 }
 
-quote_to_cash_violations(segment) contains "renewal_not_created" if {
+q2c_violation contains "renewal_not_created" if {
   input.contract
   input.contract.status == "signed"
   not input.contract.renewal_created
 }
 
-quote_to_cash_violations(segment) contains "order_form_not_ready" if {
+q2c_violation contains "order_form_not_ready" if {
   input.quote
   count([s | s := input.quote.skus[_]; re_match(config.governance.naming.sku_pattern, s)]) == 0
 }
 
-forecast_violations(segment) contains "forecast_category_not_allowed" if {
+forecast_violation contains "forecast_category_not_allowed" if {
   input.opportunity
   category := input.opportunity.forecast_category
   rule := config.governance.forecast.categories[category]
@@ -357,7 +412,7 @@ forecast_violations(segment) contains "forecast_category_not_allowed" if {
   not stage_at_least(input.opportunity.stage, min_stage)
 }
 
-forecast_violations(segment) contains "forecast_evidence_missing" if {
+forecast_violation contains "forecast_evidence_missing" if {
   input.opportunity
   category := input.opportunity.forecast_category
   rule := config.governance.forecast.categories[category]
@@ -378,7 +433,13 @@ lifecycle_violations contains "commitment_registry_missing" if {
 
 governance_violations contains "access_review_missing" if {
   config.governance.governance_controls.access_review_quarterly
-  not input.governance_reviews or not input.governance_reviews.access_review_complete
+  not input.governance_reviews
+}
+
+governance_violations contains "access_review_missing" if {
+  config.governance.governance_controls.access_review_quarterly
+  input.governance_reviews
+  not input.governance_reviews.access_review_complete
 }
 
 governance_violations contains "audit_log_missing" if {
@@ -400,28 +461,34 @@ change_control_violations contains "change_control_missing" if {
 change_control_violations contains "change_control_not_approved" if {
   input.change_control
   input.context.change_targets[_]
-  (not input.change_control.rfc_submitted) or (not input.change_control.approved)
+  not input.change_control.rfc_submitted
+}
+
+change_control_violations contains "change_control_not_approved" if {
+  input.change_control
+  input.context.change_targets[_]
+  not input.change_control.approved
 }
 
 ################################################################################
 # SLA logic
 ################################################################################
 
-compute_sla_breaches(segment, tenant_id) contains "speed_to_lead_breach" if {
+sla_breach contains "speed_to_lead_breach" if {
   input.lead.received_at
   input.lead.first_touch_at
   mins := time_diff_minutes(input.lead.received_at, input.lead.first_touch_at)
   mins > config.governance.sla.speed_to_lead_minutes
 }
 
-compute_sla_breaches(segment, tenant_id) contains "speed_to_meeting_breach" if {
+sla_breach contains "speed_to_meeting_breach" if {
   input.lead.first_touch_at
   input.lead.first_meeting_at
   hours := time_diff_hours(input.lead.first_touch_at, input.lead.first_meeting_at)
   hours > config.governance.sla.speed_to_first_meeting_hours
 }
 
-compute_sla_breaches(segment, tenant_id) contains "stage_aging_sla_breach" if {
+sla_breach contains "stage_aging_sla_breach" if {
   input.opportunity.stage_entered_at
   limit := config.governance.sla.stage_aging_days[input.opportunity.stage]
   days := time_diff_days(input.opportunity.stage_entered_at, input.context.now)
@@ -539,42 +606,18 @@ procurement_signal := 0 if {
 # Actions & helpers
 ################################################################################
 
-recommended_actions(violations, sla_breaches) contains "auto_nudge_owner" if {
-  violations[_] == "stale_deal"
-}
-
-recommended_actions(violations, sla_breaches) contains "auto_close_pending" if {
-  violations[_] == "stage_aging_breach_negotiation"
-}
-
-recommended_actions(violations, sla_breaches) contains "require_manager_review" if {
-  violations[_] == "discount_approval_missing"
-}
-
-recommended_actions(violations, sla_breaches) contains "block_manual_routing" if {
-  violations[_] == "manual_routing_blocked"
-}
-
-recommended_actions(violations, sla_breaches) contains "refresh_forecast" if {
-  forecast_violations := {v | forecast_violations(segment)[_]; v := forecast_violations(segment)[_]}
-  count(forecast_violations) > 0
-}
-
-recommended_actions(violations, sla_breaches) contains "sla_page_manager" if {
-  count(sla_breaches) > 0
-}
-
-recommended_actions(violations, sla_breaches) contains "rebalance_round_robin" if {
-  violations[_] == "round_robin_out_of_order"
-}
-
-recommended_actions(violations, sla_breaches) contains "shed_wip" if {
-  violations[_] == "wip_limit_exceeded"
-}
-
-recommended_actions(violations, sla_breaches) contains "enforce_change_control" if {
-  violations[_] == "change_control_not_approved"
-  or violations[_] == "change_control_missing"
+recommended_actions(violations, sla_breaches) := result if {
+  auto_nudge := {"auto_nudge_owner" | violations[_] == "stale_deal"}
+  auto_close := {"auto_close_pending" | violations[_] == "stage_aging_breach_negotiation"}
+  manager_review := {"require_manager_review" | violations[_] == "discount_approval_missing"}
+  block_routing := {"block_manual_routing" | violations[_] == "manual_routing_blocked"}
+  refresh_fc := {"refresh_forecast" | count(forecast_violation) > 0}
+  sla_page := {"sla_page_manager" | count(sla_breaches) > 0}
+  rebalance := {"rebalance_round_robin" | violations[_] == "round_robin_out_of_order"}
+  shed := {"shed_wip" | violations[_] == "wip_limit_exceeded"}
+  enforce_cc1 := {"enforce_change_control" | violations[_] == "change_control_not_approved"}
+  enforce_cc2 := {"enforce_change_control" | violations[_] == "change_control_missing"}
+  result := auto_nudge | auto_close | manager_review | block_routing | refresh_fc | sla_page | rebalance | shed | enforce_cc1 | enforce_cc2
 }
 
 violation_flag_list(vs) := [violation | violation := vs[_]]
@@ -618,9 +661,18 @@ equal_prefix(expected, actual) if {
 
 equal_prefix(expected, actual) if {
   expected[0] == actual[0]
-  remainder_expected := expected[1:]
-  remainder_actual := actual[1:]
-  (count(remainder_expected) == 0) or equal_prefix(remainder_expected, remainder_actual)
+  remainder_expected := array.slice(expected, 1, count(expected))
+  remainder_actual := array.slice(actual, 1, count(actual))
+  equal_prefix_continue(remainder_expected, remainder_actual)
+}
+
+equal_prefix_continue(remainder_expected, remainder_actual) if {
+  count(remainder_expected) == 0
+}
+
+equal_prefix_continue(remainder_expected, remainder_actual) if {
+  count(remainder_expected) > 0
+  equal_prefix(remainder_expected, remainder_actual)
 }
 
 mandatory_field_present("buying_role") if {
@@ -642,14 +694,18 @@ mandatory_field_present(field) if {
 
 role_can_edit("revops", _) if { true }
 
-role_can_edit("sdr", target) if { target == "lead" or target == "contact" }
+role_can_edit("sdr", "lead") if { true }
+role_can_edit("sdr", "contact") if { true }
 
-role_can_edit("ae", target) if { target == "opportunity" }
+role_can_edit("ae", "opportunity") if { true }
 
-role_can_edit("manager", target) if { target == "opportunity" or target == "forecast" }
+role_can_edit("manager", "opportunity") if { true }
+role_can_edit("manager", "forecast") if { true }
 
-role_can_edit("finance", target) if { target == "contract" or target == "concession" }
+role_can_edit("finance", "contract") if { true }
+role_can_edit("finance", "concession") if { true }
 
-role_can_edit("legal", target) if { target == "contract" }
+role_can_edit("legal", "contract") if { true }
 
-role_can_edit("cs", target) if { target == "handoff" or target == "renewal" }
+role_can_edit("cs", "handoff") if { true }
+role_can_edit("cs", "renewal") if { true }

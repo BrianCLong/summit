@@ -1,5 +1,7 @@
 package revops.discount_approvals
 
+import future.keywords.if
+import future.keywords.contains
 import data.revops.config as rcfg
 import data.revops.invariants
 
@@ -36,17 +38,26 @@ approvals_chain(q, conf) := approvals if {
   approvals := [a | threshold := conf.approvals.thresholds[_]; q.discount_percentage <= threshold.max_discount; a := threshold.approvers[_]]
 }
 
-flags(q, conf) := out if {
-  default out := []
+# Flags for short term
+flags(q, conf) := ["short_term"] if {
   q.term_months < conf.min_term_months
-  out := ["short_term"]
 }
 
-flags(q, _) := out if {
-  default out := []
+# Flags for non-standard terms
+flags(q, _) := ["non_standard_term"] if {
   q.non_standard_terms
   count(q.non_standard_terms) > 0
-  out := ["non_standard_term"]
+}
+
+# Default flags - no conditions met
+flags(q, conf) := [] if {
+  not q.term_months < conf.min_term_months
+  not has_non_standard_terms(q)
+}
+
+has_non_standard_terms(q) if {
+  q.non_standard_terms
+  count(q.non_standard_terms) > 0
 }
 
 cond_reason(over) := reason if {

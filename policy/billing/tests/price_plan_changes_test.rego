@@ -20,28 +20,28 @@ high_risk_after := {
 }
 
 test_low_risk_change_allowed if {
-  input := {
+  test_input := {
     "subject": base_subject,
     "plan_before": pricing.before,
     "plan_after": low_risk_after,
     "tenant": {"id": "tenant-123"},
     "context": {"reason": "tier alignment", "requested_at": "2025-01-15T12:00:00Z"}
   }
-  decision := price_plan_changes.decision with input as input
+  decision := price_plan_changes.decision with input as test_input
   decision.allowed
   decision.reason == "change_risk_low"
   decision.required_approvals == []
 }
 
 test_high_risk_change_requires_cfo if {
-  input := {
+  test_input := {
     "subject": base_subject,
     "plan_before": pricing.before,
     "plan_after": high_risk_after,
     "tenant": {"id": "tenant-123"},
     "context": {"reason": "strategic price change", "requested_at": "2025-01-15T12:00:00Z"}
   }
-  decision := price_plan_changes.decision with input as input
+  decision := price_plan_changes.decision with input as test_input
   decision.allowed
   decision.reason == "change_risk_high"
   decision.required_approvals == ["finance_manager", "cfo"]
@@ -49,13 +49,13 @@ test_high_risk_change_requires_cfo if {
 }
 
 test_floor_price_violation_blocked if {
-  input := {
+  test_input := {
     "subject": base_subject,
     "plan_before": pricing.before,
     "plan_after": pricing.after_risky,
     "tenant": {"id": "tenant-123"},
     "context": {"reason": "aggressive discount", "requested_at": "2025-01-15T12:00:00Z"}
   }
-  decision := price_plan_changes.decision with input as input
+  decision := price_plan_changes.decision with input as test_input
   not decision.allowed
 }

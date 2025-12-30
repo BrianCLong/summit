@@ -77,7 +77,7 @@ is_critical_action if {
 
 is_critical_action if {
     input.decision.action.type in ["EXECUTE_PROCEDURE", "TRIGGER_WORKFLOW"]
-    not input.subject.capabilities contains "automation:execute"
+    not "automation:execute" in input.subject.capabilities
 }
 
 # =============================================================================
@@ -140,7 +140,7 @@ valid_tenant_scope if {
 }
 
 valid_tenant_scope if {
-    input.subject.tenantScopes contains input.decision.tenantId
+    input.decision.tenantId in input.subject.tenantScopes
 }
 
 # Cross-tenant decisions are blocked
@@ -288,8 +288,9 @@ abs(x) := x if {
     x >= 0
 }
 
-abs(x) := -x if {
+abs(x) := result if {
     x < 0
+    result := x * -1
 }
 
 # =============================================================================

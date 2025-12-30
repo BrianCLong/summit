@@ -6,12 +6,12 @@ import data.revops_fixtures
 # Contracts with required signatures and approvals pass activation.
 test_contract_activation_ok if {
   contract := revops_fixtures.contracts[0]
-  input := {
+  test_input := {
     "contract": contract,
     "tenant": {"id": "tenant-default"}
   }
 
-  decision := revops.contract_activation.decision with input as input
+  decision := revops.contract_activation.decision with input as test_input
   decision.allowed
   decision.required_actions == []
 }
@@ -19,11 +19,11 @@ test_contract_activation_ok if {
 # Contracts missing signature are blocked by invariants.
 test_contract_missing_signature_denied if {
   contract := revops_fixtures.contracts[1]
-  input := {
+  test_input := {
     "contract": contract,
     "tenant": {"id": "tenant-default"}
   }
 
-  decision := revops.contract_activation.decision with input as input
+  decision := revops.contract_activation.decision with input as test_input
   decision.allowed == false
 }

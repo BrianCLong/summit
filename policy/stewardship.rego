@@ -47,10 +47,10 @@ deny contains msg if {
 }
 
 # Helper to identify allow-listed operations during maintenance
-is_export_operation(input) if {
-    input.path == "/api/export"
+is_export_operation(req) if {
+    req.path == "/api/export"
 }
 
-is_export_operation(input) if {
-    input.path == "/api/audit"
+is_export_operation(req) if {
+    req.path == "/api/audit"
 }

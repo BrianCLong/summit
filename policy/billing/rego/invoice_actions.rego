@@ -36,9 +36,9 @@ risk_band(amount) := "high" if {
 
 approvals_for("generate", _, _) := []
 approvals_for("mark_sent", _, _) := []
-approvals_for("mark_paid", "low", input) := approvals if {
+approvals_for("mark_paid", "low", req) := approvals if {
   approvals := []
-  input.context.source == "psp"
+  req.context.source == "psp"
 }
 approvals_for("mark_paid", _, _) := ["finance_manager"]
 approvals_for("cancel", "high", _) := ["finance_manager", "cfo"]

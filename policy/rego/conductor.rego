@@ -10,8 +10,8 @@ allow if {
 }
 
 # Block if PII detected and user lacks pii:handle
-blocks_pii(input) if {
-  input.context.sensitivity == "pii"
+blocks_pii(req) if {
+  req.context.sensitivity == "pii"
   not user_can_handle_pii
 }
 user_can_handle_pii if {

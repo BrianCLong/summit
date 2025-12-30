@@ -22,43 +22,43 @@ price_floor(sku) := floor if {
   floor := price_floors[sku]
 } else := price_floors["default"]
 
-plan_change_blocked(input) if {
+plan_change_blocked(req) if {
   some sku
-  new_price := input.plan_after.prices[sku]
+  new_price := req.plan_after.prices[sku]
   floor := price_floor(sku)
   new_price < floor
 }
 
-plan_change_blocked(input) if {
-  before := input.plan_before.effective_at
-  after := input.plan_after.effective_at
+plan_change_blocked(req) if {
+  before := req.plan_before.effective_at
+  after := req.plan_after.effective_at
   before != ""; after != ""
   # Prevent retroactive plan changes.
   before > after
 }
 
-invoice_action_blocked(input) if {
-  input.action == "cancel"
-  input.invoice.status == "paid"
+invoice_action_blocked(req) if {
+  req.action == "cancel"
+  req.invoice.status == "paid"
 }
 
-invoice_action_blocked(input) if {
-  input.action == "mark_paid"
-  input.context.source == "manual"
-  not input.context.evidence
+invoice_action_blocked(req) if {
+  req.action == "mark_paid"
+  req.context.source == "manual"
+  not req.context.evidence
 }
 
-credit_blocked(input) if {
-  input.credit_memo.amount < 0
+credit_blocked(req) if {
+  req.credit_memo.amount < 0
 }
 
-credit_blocked(input) if {
-  input.credit_memo.type == "write_off"
-  input.context.reason == ""
+credit_blocked(req) if {
+  req.credit_memo.type == "write_off"
+  req.context.reason == ""
 }
 
-cost_model_blocked(input) if {
+cost_model_blocked(req) if {
   some period
-  period := input.model_before.effective_at
+  period := req.model_before.effective_at
   closed_periods[_] == substr(period, 0, 7)
 }

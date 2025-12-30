@@ -148,11 +148,22 @@ evolution_application_checks if {
     input.evolution_proposal.approved_by != ""
 
     # Additional safety validations for high-risk proposals
-    high_risk_additional_checks if input.evolution_proposal.risk_assessment.overall_risk == "HIGH"
+    high_risk_check_ok
 
     # Rollback readiness
     input.rollback_plan.prepared == true
     input.rollback_plan.estimated_time_seconds <= 300
+}
+
+# High risk check passes if not high risk
+high_risk_check_ok if {
+    input.evolution_proposal.risk_assessment.overall_risk != "HIGH"
+}
+
+# High risk check passes if high risk and additional checks pass
+high_risk_check_ok if {
+    input.evolution_proposal.risk_assessment.overall_risk == "HIGH"
+    high_risk_additional_checks
 }
 
 emergency_rollback_checks if {
@@ -251,7 +262,18 @@ residency_check if {
     input.operation.data_residency_compliant == true
 
     # Enhanced for transcendent operations
-    transcendent_residency_check if input.operation.isTranscendent
+    transcendent_residency_ok
+}
+
+# Transcendent residency passes if not transcendent
+transcendent_residency_ok if {
+    not input.operation.isTranscendent
+}
+
+# Transcendent residency passes if transcendent and checks pass
+transcendent_residency_ok if {
+    input.operation.isTranscendent
+    transcendent_residency_check
 }
 
 transcendent_residency_check if {
@@ -266,7 +288,18 @@ purpose_check if {
     input.operation.purpose in input.tenant.allowed_purposes
 
     # Enhanced purpose tracking for transcendent operations
-    transcendent_purpose_check if input.operation.isTranscendent
+    transcendent_purpose_ok
+}
+
+# Transcendent purpose passes if not transcendent
+transcendent_purpose_ok if {
+    not input.operation.isTranscendent
+}
+
+# Transcendent purpose passes if transcendent and checks pass
+transcendent_purpose_ok if {
+    input.operation.isTranscendent
+    transcendent_purpose_check
 }
 
 transcendent_purpose_check if {

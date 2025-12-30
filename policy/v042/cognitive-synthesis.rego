@@ -940,20 +940,40 @@ objective_conflicts_resolved if {
 
 accuracy_vs_creativity_balanced if {
     accuracy_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "ACCURACY_MAXIMIZATION"]
-    creativity_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "CREATIVITY_ENHANCEMENT"]
+    count(accuracy_objectives) == 0
+}
 
+accuracy_vs_creativity_balanced if {
+    creativity_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "CREATIVITY_ENHANCEMENT"]
+    count(creativity_objectives) == 0
+}
+
+accuracy_vs_creativity_balanced if {
+    accuracy_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "ACCURACY_MAXIMIZATION"]
+    creativity_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "CREATIVITY_ENHANCEMENT"]
+    count(accuracy_objectives) > 0
+    count(creativity_objectives) > 0
     # If both present, priorities should be balanced
-    count(accuracy_objectives) == 0 or count(creativity_objectives) == 0 or
-    (abs(accuracy_objectives[0].priority - creativity_objectives[0].priority) <= 0.3)
+    abs(accuracy_objectives[0].priority - creativity_objectives[0].priority) <= 0.3
+}
+
+efficiency_vs_quality_balanced if {
+    efficiency_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "EFFICIENCY_IMPROVEMENT"]
+    count(efficiency_objectives) == 0
+}
+
+efficiency_vs_quality_balanced if {
+    quality_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type in ["ACCURACY_MAXIMIZATION", "COHERENCE_OPTIMIZATION"]]
+    count(quality_objectives) == 0
 }
 
 efficiency_vs_quality_balanced if {
     efficiency_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type == "EFFICIENCY_IMPROVEMENT"]
     quality_objectives := [obj | obj := input.cognitive_synthesis.objectives[_]; obj.objective_type in ["ACCURACY_MAXIMIZATION", "COHERENCE_OPTIMIZATION"]]
-
+    count(efficiency_objectives) > 0
+    count(quality_objectives) > 0
     # If both present, ensure reasonable balance
-    count(efficiency_objectives) == 0 or count(quality_objectives) == 0 or
-    (efficiency_objectives[0].priority <= max([q.priority | q := quality_objectives[_]]) + 0.2)
+    efficiency_objectives[0].priority <= max([q.priority | q := quality_objectives[_]]) + 0.2
 }
 
 synthesis_constraints_respected if {
@@ -1062,9 +1082,16 @@ explanation_requirements_reasonable if {
     input.cognitive_synthesis.explanation.depth in [
         "MINIMAL", "SUMMARY", "DETAILED", "COMPREHENSIVE", "FULL_TRACE"
     ]
-
     # Full trace only for research grade
-    input.cognitive_synthesis.explanation.depth != "FULL_TRACE" or
+    input.cognitive_synthesis.explanation.depth != "FULL_TRACE"
+}
+
+explanation_requirements_reasonable if {
+    input.cognitive_synthesis.explanation.depth in [
+        "MINIMAL", "SUMMARY", "DETAILED", "COMPREHENSIVE", "FULL_TRACE"
+    ]
+    # Full trace only for research grade
+    input.cognitive_synthesis.explanation.depth == "FULL_TRACE"
     input.cognitive_synthesis.quality == "RESEARCH_GRADE"
 }
 

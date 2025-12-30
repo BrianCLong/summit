@@ -17,26 +17,26 @@ model_after := {
 }
 
 test_cost_model_change_requires_dual_approval if {
-  input := {
+  test_input := {
     "subject": base_subject,
     "model_before": model_before,
     "model_after": model_after,
     "context": {"reason": "reflect infra mix shift", "requested_at": "2025-02-10T12:00:00Z", "impact_analysis": "+2% gross margin"}
   }
-  decision := cost_model_changes.decision with input as input
+  decision := cost_model_changes.decision with input as test_input
   decision.allowed
   decision.required_approvals == ["finops_owner", "cfo"]
   decision.flags[_] == "unit_economics"
 }
 
 test_cost_model_missing_analysis_flagged if {
-  input := {
+  test_input := {
     "subject": base_subject,
     "model_before": model_before,
     "model_after": model_after,
     "context": {"reason": "quick tweak", "requested_at": "2025-02-10T12:00:00Z", "impact_analysis": ""}
   }
-  decision := cost_model_changes.decision with input as input
+  decision := cost_model_changes.decision with input as test_input
   decision.allowed
   decision.flags[_] == "missing_impact_analysis"
 }

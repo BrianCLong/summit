@@ -6,7 +6,7 @@ import rego.v1
 
 test_deny_root_user if {
 	# Test that root user is denied
-	input := {
+	test_input := {
 		"Stage": [{
 			"Commands": [{
 				"Cmd": "user",
@@ -15,12 +15,13 @@ test_deny_root_user if {
 		}]
 	}
 
-	count(deny) > 0
+	denials := deny with input as test_input
+	count(denials) > 0
 }
 
 test_allow_non_root_user if {
 	# Test that non-root user is allowed
-	input := {
+	test_input := {
 		"Stage": [{
 			"Commands": [{
 				"Cmd": "user",
@@ -30,12 +31,13 @@ test_allow_non_root_user if {
 	}
 
 	# Should not have deny rules triggered
-	count([d | d := deny[_]; contains(d, "root")]) == 0
+	denials := deny with input as test_input
+	count([d | d := denials[_]; contains(d, "root")]) == 0
 }
 
 test_deny_latest_tag if {
 	# Test that latest tag is denied
-	input := {
+	test_input := {
 		"Stage": [{
 			"Commands": [{
 				"Cmd": "from",
@@ -44,13 +46,14 @@ test_deny_latest_tag if {
 		}]
 	}
 
-	violations := [d | d := deny[_]; contains(d, "latest")]
+	denials := deny with input as test_input
+	violations := [d | d := denials[_]; contains(d, "latest")]
 	count(violations) > 0
 }
 
 test_allow_specific_tag if {
 	# Test that specific version tags are allowed
-	input := {
+	test_input := {
 		"Stage": [{
 			"Commands": [{
 				"Cmd": "from",
@@ -60,13 +63,14 @@ test_allow_specific_tag if {
 	}
 
 	# Should not trigger latest tag violation
-	violations := [d | d := deny[_]; contains(d, "latest")]
+	denials := deny with input as test_input
+	violations := [d | d := denials[_]; contains(d, "latest")]
 	count(violations) == 0
 }
 
 test_require_approved_registry if {
 	# Test that unapproved registries are denied
-	input := {
+	test_input := {
 		"Stage": [{
 			"Commands": [{
 				"Cmd": "from",
@@ -75,13 +79,14 @@ test_require_approved_registry if {
 		}]
 	}
 
-	violations := [d | d := deny[_]; contains(d, "approved registry")]
+	denials := deny with input as test_input
+	violations := [d | d := denials[_]; contains(d, "approved registry")]
 	count(violations) > 0
 }
 
 test_warn_missing_healthcheck if {
 	# Test that missing healthcheck generates warning
-	input := {
+	test_input := {
 		"Stage": [{
 			"Commands": [{
 				"Cmd": "from",
@@ -90,13 +95,14 @@ test_warn_missing_healthcheck if {
 		}]
 	}
 
-	warnings := [w | w := warn[_]; contains(w, "HEALTHCHECK")]
+	warns := warn with input as test_input
+	warnings := [w | w := warns[_]; contains(w, "HEALTHCHECK")]
 	count(warnings) > 0
 }
 
 test_allow_with_healthcheck if {
 	# Test that healthcheck instruction satisfies requirement
-	input := {
+	test_input := {
 		"Stage": [{
 			"Commands": [
 				{
@@ -112,6 +118,7 @@ test_allow_with_healthcheck if {
 	}
 
 	# Should not generate healthcheck warning
-	warnings := [w | w := warn[_]; contains(w, "HEALTHCHECK")]
+	warns := warn with input as test_input
+	warnings := [w | w := warns[_]; contains(w, "HEALTHCHECK")]
 	count(warnings) == 0
 }
