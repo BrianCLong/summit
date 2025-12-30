@@ -36,7 +36,7 @@ import type {
   RevokeAssetResponse,
 } from './types.js';
 
-const logger = pino({ name: 'ContentSigningService' });
+const logger = (pino as any)({ name: 'ContentSigningService' });
 
 // =============================================================================
 // Metrics

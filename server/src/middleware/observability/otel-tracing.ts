@@ -103,8 +103,16 @@ export class OTelTracingService {
   }
 
   // Committee requirement: Manual span creation for business operations
-  createSpan(name: string, attributes?: Record<string, any>, parentSpan?: any) {
-    return null;
+  createSpan(name: string, attributes?: Record<string, any>, parentSpan?: any): any {
+    if (!this.config.enabled) {
+      return null;
+    }
+    try {
+      const span = this.tracer.startSpan(name, { attributes });
+      return span;
+    } catch {
+      return null;
+    }
   }
 
   // Committee requirement: Database operation tracing

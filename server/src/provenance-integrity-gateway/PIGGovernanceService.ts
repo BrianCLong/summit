@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import { EventEmitter } from 'events';
 import { Counter, Gauge, Histogram } from 'prom-client';
-import { default as pino } from 'pino';
+import pino from 'pino';
 import { pool } from '../db/pg.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
@@ -27,7 +27,7 @@ import type {
   DSARiskType,
 } from './types.js';
 
-const logger = pino({ name: 'PIGGovernanceService' });
+const logger = (pino as any)({ name: 'PIGGovernanceService' });
 
 // =============================================================================
 // Metrics
@@ -262,6 +262,7 @@ export class PIGGovernanceService extends EventEmitter {
         submittedAt: new Date(),
         resolvedAt: new Date(),
         approvals: [],
+        requiredApprovals: 0,
       };
     }
 
@@ -1194,8 +1195,8 @@ Overall Risk Level: ${riskLevel.toUpperCase()}
 Overall Risk Score: ${report.riskAssessment.overallScore}/100
 
 ${Object.entries(report.frameworks).map(([name, status]: [string, any]) =>
-  `${name.toUpperCase()} Compliance Score: ${status.overallScore}/100`
-).join('\n')}
+      `${name.toUpperCase()} Compliance Score: ${status.overallScore}/100`
+    ).join('\n')}
 
 Key Recommendations:
 ${report.riskAssessment.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n')}`;

@@ -9,7 +9,7 @@
 import * as crypto from 'crypto';
 import { EventEmitter } from 'events';
 import { Counter, Gauge, Histogram } from 'prom-client';
-import { default as pino } from 'pino';
+import pino from 'pino';
 import { pool } from '../db/pg.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import type {
@@ -22,7 +22,7 @@ import type {
   SourceAnalysis,
 } from './types.js';
 
-const logger = pino({ name: 'NarrativeConflictService' });
+const logger = (pino as any)({ name: 'NarrativeConflictService' });
 
 // =============================================================================
 // Metrics

@@ -11,7 +11,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { default as pino } from 'pino';
+import pino from 'pino';
 import { C2PAValidationService, c2paValidationService, type C2PAValidationServiceConfig } from './C2PAValidationService.js';
 import { ContentSigningService, contentSigningService, type ContentSigningServiceConfig } from './ContentSigningService.js';
 import { DeepfakeDetectionService, deepfakeDetectionService, type DeepfakeDetectionConfig } from './DeepfakeDetectionService.js';
@@ -34,7 +34,7 @@ import type {
   PIGEvents,
 } from './types.js';
 
-const logger = pino({ name: 'ProvenanceIntegrityGateway' });
+const logger = (pino as any)({ name: 'ProvenanceIntegrityGateway' });
 
 // =============================================================================
 // Configuration

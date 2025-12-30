@@ -32,7 +32,7 @@ import type {
   TamperingIndicator,
 } from './types.js';
 
-const logger = pino({ name: 'C2PAValidationService' });
+const logger = (pino as any)({ name: 'C2PAValidationService' });
 
 // =============================================================================
 // Metrics
@@ -1212,7 +1212,7 @@ export class C2PAValidationService extends EventEmitter {
   private looksLikeReplacedC2PA(freeBox: Buffer): boolean {
     // Check for remnants of C2PA structure
     return freeBox.includes(Buffer.from('c2pa')) ||
-           freeBox.includes(Buffer.from('jumb'));
+      freeBox.includes(Buffer.from('jumb'));
   }
 
   /**

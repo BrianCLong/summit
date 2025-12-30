@@ -1019,7 +1019,7 @@ export class HIPAAComplianceService {
     const nonCompliant = results.filter((r) => r.status === 'non_compliant');
     const partiallyCompliant = results.filter((r) => r.status === 'partially_compliant');
 
-    const items: HIPAAComplianceReport['remediationPlan'] extends { items: infer T } ? T : never = [];
+    const items: Array<{ controlId: string; action: string; deadline?: string }> = [];
 
     for (const result of nonCompliant) {
       items.push({

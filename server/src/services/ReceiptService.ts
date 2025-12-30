@@ -50,7 +50,7 @@ export class ReceiptService {
     const inputHash = createHash('sha256').update(inputStr).digest('hex');
 
     // 2. Append to Ledger (this is the "truth" store)
-    const entryId = await this.ledger.appendEntry({
+    const entry = await this.ledger.appendEntry({
       action,
       actorId: actor.id,
       tenantId: actor.tenantId,
@@ -58,6 +58,7 @@ export class ReceiptService {
       details: { inputHash, policyDecisionId }, // stored in 'details' which maps to metadata or payload
       timestamp: new Date().toISOString()
     } as any);
+    const entryId = entry.id;
 
     // 3. Create the canonical receipt string to sign
     const timestamp = new Date().toISOString();

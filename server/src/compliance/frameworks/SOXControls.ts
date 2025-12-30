@@ -1038,7 +1038,7 @@ export class SOXComplianceService {
     const significantDeficiencies = results.filter((r) => r.deficiencyLevel === 'significant_deficiency');
     const deficiencies = results.filter((r) => r.deficiencyLevel === 'deficiency');
 
-    const items: SOXComplianceReport['remediationPlan'] extends { items: infer T } ? T : never = [];
+    const items: Array<{ controlId: string; action: string; deadline?: string; responsible?: string }> = [];
 
     // Material weaknesses - immediate priority
     for (const result of materialWeaknesses) {
