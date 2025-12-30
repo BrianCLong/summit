@@ -6,7 +6,6 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 // import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
-import helmet from 'helmet';
 import pino from 'pino';
 import pinoHttpModule from 'pino-http';
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
@@ -28,6 +27,7 @@ import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
+import { securityHeaders } from './middleware/securityHeaders.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
@@ -152,6 +152,9 @@ export const createApp = async () => {
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
+  const securityHeadersEnabled = process.env.SECURITY_HEADERS_ENABLED !== 'false';
+  const cspReportOnly = process.env.SECURITY_HEADERS_CSP_REPORT_ONLY === 'true';
+  const cspEnabledFlag = process.env.SECURITY_HEADERS_CSP_ENABLED === 'true';
 
   const safetyState = await resolveSafetyState();
   if (safetyState.killSwitch || safetyState.safeMode) {
@@ -166,27 +169,11 @@ export const createApp = async () => {
   app.use(overloadProtection);
 
   app.use(
-    helmet({
-      contentSecurityPolicy: isProduction
-        ? {
-          useDefaults: true,
-          directives: {
-            defaultSrc: ["'self'"],
-            objectSrc: ["'none'"],
-            imgSrc: ["'self'", 'data:'],
-            scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            connectSrc: ["'self'", ...allowedOrigins, 'https://api.intelgraph.example'],
-          },
-        }
-        : false,
-      referrerPolicy: { policy: 'no-referrer' },
-      hsts: isProduction
-        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
-        : false,
-      crossOriginOpenerPolicy: { policy: 'same-origin' },
-      crossOriginResourcePolicy: { policy: 'same-origin' },
-      crossOriginEmbedderPolicy: false,
+    securityHeaders({
+      enabled: securityHeadersEnabled,
+      allowedOrigins,
+      enableCsp: cspEnabledFlag || isProduction,
+      cspReportOnly,
     }),
   );
   app.use(
