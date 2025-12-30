@@ -1,0 +1,69 @@
+openapi: 3.1.0
+info:
+  title: IntelGraph Evidence & Witness API
+  version: 0.1.0
+paths:
+  /v1/evidence/verify:
+    post:
+      summary: Verify evidence bundle integrity and policy tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bundle:
+                  type: object
+                  description: Evidence capsule including redacted bytes and commitments
+      responses:
+        '200':
+          description: Verification result with witness append token
+  /v1/witness/append:
+    post:
+      summary: Append step commitment to witness chain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sessionId:
+                  type: string
+                commitment:
+                  type: string
+      responses:
+        '200':
+          description: Updated witness session anchor
+  /v1/witness/session/{id}:
+    get:
+      summary: Retrieve witness chain session
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Witness chain details
+  /v1/policy/check:
+    post:
+      summary: Evaluate policy decision for requested effect signature
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  type: string
+                purpose:
+                  type: string
+                effect:
+                  type: string
+      responses:
+        '200':
+          description: Policy decision token

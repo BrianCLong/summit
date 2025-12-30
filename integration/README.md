@@ -1,32 +1,18 @@
-# SRE Integration Guide
+# Integration Package
 
-This directory contains resources for integrating the Summit Reasoning Evaluator (SRE) into the broader Summit/IntelGraph ecosystem.
+This directory now contains both the legacy SRE integration notes and the patent-style integration contract for the five wedges. The contract defines endpoints, services, tools, guardrails, and UI specs aligned with IntelGraph and MC orchestration.
 
-## Architecture
-SRE is designed as a **sidecar** or **post-processing** step for Summit runs.
-The integration pattern is:
-1.  **Summit** executes a workflow and emits a `RunTrace` (events).
-2.  **Adapter** converts `RunTrace` -> `SRE Episode`.
-3.  **Evaluator** computes metrics on the `Episode`.
-4.  **Telemetry** pushes results to Grafana/Prometheus.
+## IntelGraph Endpoints (minimal contract)
 
-## Quick Start
-See `summit_example.py` for a runnable reference implementation of the adapter pattern.
+- `POST /v1/evidence/verify`
+- `POST /v1/witness/append`
+- `GET  /v1/witness/session/{id}`
+- `POST /v1/policy/check`
 
-```bash
-python integration/summit_example.py
-```
+## Layout
 
-## API Hook
-To register SRE as a callback in Summit:
+- `intelgraph/`: API contract and service notes for evidence, policy, and witness ledger plus connectors.
+- `mc/`: Tool surfaces and guardrails (verify-first, budget enforcer).
+- `summit/`: UI specs for evidence, witness, replay, and wedge-specific views.
 
-```python
-from summit.core import events
-from sre.sdk import Evaluator
-
-@events.on_run_complete
-def run_eval(run_context):
-    evaluator = Evaluator(config_path="sre_config.yaml")
-    report = evaluator.evaluate(run_context.trace)
-    events.emit("eval_complete", report)
-```
+Golden rule: never pass unverified evidence to the LLM (`mc/guardrails/verify_first.md`).
