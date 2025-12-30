@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: PTC API
+  version: 0.1.0
+paths:
+  /ptc/transform:
+    post:
+      summary: Execute provenance-typed transform with disclosure controls
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transformSpec:
+                  type: object
+                inputEntity:
+                  type: object
+                policyContext:
+                  type: object
+      responses:
+        '200':
+          description: Transform artifact with witness and provenance records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artifact:
+                    type: object
+                  replayToken:
+                    type: string

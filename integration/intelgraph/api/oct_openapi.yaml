@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: OCT API
+  version: 0.1.0
+paths:
+  /oct/portfolio:
+    post:
+      summary: Generate outcome-calibrated threat signal portfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entityId:
+                  type: string
+                policyContext:
+                  type: object
+      responses:
+        '200':
+          description: Risk portfolio artifact with backtest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  portfolio:
+                    type: object
+                  backtest:
+                    type: object
+                  replayToken:
+                    type: string

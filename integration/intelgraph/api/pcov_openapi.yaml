@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: PCOV API
+  version: 0.1.0
+paths:
+  /pcov/view:
+    post:
+      summary: Compile policy-scoped ontology view and ABI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policySpec:
+                  type: object
+                ontology:
+                  type: object
+      responses:
+        '200':
+          description: View artifact with ABI and replay token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  viewArtifact:
+                    type: object
+                  replayToken:
+                    type: string

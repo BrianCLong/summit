@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: SDOC API
+  version: 0.1.0
+paths:
+  /sdoc/scan:
+    post:
+      summary: Run selective-disclosure OSINT scan with sensitivity budgets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targets:
+                  type: array
+                  items:
+                    type: string
+                purpose:
+                  type: string
+                policyContext:
+                  type: object
+      responses:
+        '200':
+          description: Selective-disclosure capsule with ledger and replay token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  capsule:
+                    type: object
+                  replayToken:
+                    type: string

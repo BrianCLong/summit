@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: CNLS API
+  version: 0.1.0
+paths:
+  /cnls/lineage:
+    post:
+      summary: Construct lineage capsule with stance drift detection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeWindow:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+                policyContext:
+                  type: object
+      responses:
+        '200':
+          description: Lineage capsule with replay token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  capsule:
+                    type: object
+                  replayToken:
+                    type: string
