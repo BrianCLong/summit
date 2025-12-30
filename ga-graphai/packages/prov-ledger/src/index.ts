@@ -853,7 +853,7 @@ export class AppendOnlyAuditLog {
 
     const verification = {
       chain: verifyEvidenceChain(slice, anchor),
-      manifest: verifyManifest(manifest, slice, evidence),
+      manifest: verifyManifest(manifest, slice, { evidence }),
     };
 
     const nextCursor = cursor + slice.length < total ? cursor + slice.length : undefined;
@@ -912,7 +912,9 @@ export async function runAuditVerifierCli(
   logger: { log: (...args: unknown[]) => void; error: (...args: unknown[]) => void } = console,
 ): Promise<number> {
   const chain = verifyEvidenceChain(evidence.entries);
-  const manifestReport = verifyManifest(manifest, evidence.entries, evidence);
+  const manifestReport = verifyManifest(manifest, evidence.entries, {
+    evidence,
+  });
 
   if (chain.ok && manifestReport.valid) {
     logger.log('Audit chain verified');
