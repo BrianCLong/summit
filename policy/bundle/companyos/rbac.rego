@@ -1,5 +1,9 @@
 package companyos.rbac
 
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+
 default allow := false
 
 # input:
@@ -17,18 +21,36 @@ is_am if { some r in input.subject.roles; r == "AM" }
 internal if { input.resource.classification == "internal" }
 public if { input.resource.classification == "public" }
 
+# Present deck - Presenter with webauthn
 allow if {
   input.action == "present"
   input.resource.type == "deck"
-  ( is_presenter or is_exec )
+  is_presenter
   internal
   input.subject.webauthn_verified == true
 }
 
+# Present deck - Exec with webauthn
+allow if {
+  input.action == "present"
+  input.resource.type == "deck"
+  is_exec
+  internal
+  input.subject.webauthn_verified == true
+}
+
+# Read email - Exec
 allow if {
   input.action == "read"
   input.resource.type == "email"
-  (is_exec or is_am)
+  is_exec
+}
+
+# Read email - AM
+allow if {
+  input.action == "read"
+  input.resource.type == "email"
+  is_am
 }
 
 allow if {
@@ -44,15 +66,47 @@ allow if {
   is_exec
 }
 
+# Read non-confidential RAG snippet - Exec
 allow if {
   input.action == "read_snippet"
   input.resource.type == "rag_snippet"
   not input.resource.tags[_] == "confidential"
-  (is_exec or is_am or is_presenter)
+  is_exec
 }
 
+# Read non-confidential RAG snippet - AM
+allow if {
+  input.action == "read_snippet"
+  input.resource.type == "rag_snippet"
+  not input.resource.tags[_] == "confidential"
+  is_am
+}
+
+# Read non-confidential RAG snippet - Presenter
+allow if {
+  input.action == "read_snippet"
+  input.resource.type == "rag_snippet"
+  not input.resource.tags[_] == "confidential"
+  is_presenter
+}
+
+# Answer question - Exec
 allow if {
   input.action == "answer_question"
   input.resource.type == "rag_answer"
-  (is_exec or is_am or is_presenter)
+  is_exec
+}
+
+# Answer question - AM
+allow if {
+  input.action == "answer_question"
+  input.resource.type == "rag_answer"
+  is_am
+}
+
+# Answer question - Presenter
+allow if {
+  input.action == "answer_question"
+  input.resource.type == "rag_answer"
+  is_presenter
 }
