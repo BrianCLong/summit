@@ -32,7 +32,7 @@ jobs:
         run: corepack enable
 
       - name: Install deps
-        run: pnpm i --no-frozen-lockfile
+        run: pnpm i --frozen-lockfile
 
       - name: Run fast lane
         run: ${{ inputs.test-command }}

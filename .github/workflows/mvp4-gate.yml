@@ -59,7 +59,7 @@ jobs:
       - name: Dependency Check
         run: |
           echo "Scanning for Critical CVEs..."
-          # pnpm audit --audit-level critical # Uncomment when baseline clean
+          pnpm audit --audit-level critical
 
   # 3. Policy Compliance
   policy-check:
@@ -85,10 +85,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Bootstrap & Smoke
         run: |
-          # Mocking the smoke test execution for the workflow file
-          # In real execution this calls 'make smoke'
           echo "Executing Golden Path Smoke Test..."
-          # make smoke
+          make smoke
 
   # 5. Final GA Gate
   mvp4-ga-gate:
