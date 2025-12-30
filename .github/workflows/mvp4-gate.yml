@@ -72,7 +72,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          version: v0.45.0 # Pin to version supporting legacy Rego syntax
       - name: Verify Policies
         run: |
           opa check policies/
