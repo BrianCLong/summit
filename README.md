@@ -17,7 +17,7 @@
 - ✅ **Security Hardening**: Rate limiting, GraphQL complexity limits, IDOR fixes
 - ✅ **Real-Time Systems**: Narrative simulation engine with REST API
 
-**[View Release Notes](CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/MIGRATION-v0.1-to-v2.0.md)** | **[Roadmap](docs/roadmap.md)**
+**[View Release Notes](CHANGELOG.md)** | **[Migration Guide](docs/MIGRATION_GUIDE.md)** | **[Roadmap](docs/roadmap.md)**
 
 ---
 
@@ -29,7 +29,7 @@
 
 We follow a **"Golden Path"** philosophy. If the build breaks, we stop and fix it.
 
-**Prerequisites:** Docker Desktop ≥ 4.x, Node 18+, pnpm 9, Python 3.11+.
+**Prerequisites:** Docker Desktop ≥ 4.x, Node 20.11.x (LTS), pnpm 9, Python 3.11+.
 
 ```bash
 # 1. Clone & Bootstrap
