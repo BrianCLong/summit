@@ -74,3 +74,17 @@ export {
 
 // Generated API client exports
 export * from './generated/index.js';
+
+// Governance helpers
+export {
+  ReceiptsClient,
+  type ProvenanceReceipt,
+  type ReceiptStatus,
+  type ReceiptSubmissionResponse,
+} from './receipts.js';
+
+export {
+  PolicyDecisionsClient,
+  type PolicyDecision,
+  type PolicyDecisionRequest,
+} from './policyDecisions.js';
