@@ -1,8 +1,9 @@
 package summit.sbom
 
 import data.summit.sbom
+import future.keywords.if
 
-test_sbom_ok_no_criticals {
+test_sbom_ok_no_criticals if {
   sbom.acceptable with input as {
     "components": [
       {
@@ -18,7 +19,7 @@ test_sbom_ok_no_criticals {
   }
 }
 
-test_sbom_deny_criticals {
+test_sbom_deny_criticals if {
   not sbom.acceptable with input as {
     "components": [
       {

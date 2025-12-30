@@ -1,30 +1,33 @@
 package summit.pr
 
-default allow_merge = false
+import future.keywords.if
+import future.keywords.contains
 
-allow_merge {
+default allow_merge := false
+
+allow_merge if {
   required_approvals
   required_status_checks
   required_labels
 }
 
-required_approvals {
+required_approvals if {
   input.pr.approvals >= 1
 }
 
-required_status_checks {
+required_status_checks if {
   not failed_checks
 }
 
-failed_checks {
+failed_checks if {
   some c
   input.pr.checks[c].status == "failed"
 }
 
-required_labels {
+required_labels if {
   some l
   input.pr.labels[l] == "governance-approved"
-} else {
+} else if {
   some l
   input.pr.labels[l] == "security-reviewed"
 }

@@ -1,15 +1,17 @@
-
 package intelgraph.authz
 
-default allow = false
+import future.keywords.if
+import future.keywords.contains
 
-allow {
+default allow := false
+
+allow if {
     input.method == "GET"
     input.path = ["data", "read"]
     input.user.roles[_] == "reader"
 }
 
-allow {
+allow if {
     input.method == "POST"
     input.path = ["data", "write"]
     input.user.roles[_] == "writer"

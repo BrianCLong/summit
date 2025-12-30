@@ -1,11 +1,12 @@
 package summit.merge_train_test
 
 import data.summit.merge_train
+import future.keywords.if
 
 valid_token := {
   "id": "freeze-override-123",
   "scope": "merge-train",
-  "reason": "incident hotfix", 
+  "reason": "incident hotfix",
   "approved_by": ["release-manager", "sre-oncall"],
   "expires_at": time.now_ns() + 60000000000,
 }
@@ -24,7 +25,7 @@ weekend_window := [{
   "name": "Weekend freeze",
 }]
 
-test_allows_valid_token_during_holiday {
+test_allows_valid_token_during_holiday if {
   decision := merge_train.result with input as {
     "token": valid_token,
     "reasons": winter_window,
@@ -34,7 +35,7 @@ test_allows_valid_token_during_holiday {
   count(decision.denies) == 0
 }
 
-test_denies_missing_token {
+test_denies_missing_token if {
   decision := merge_train.result with input as {
     "reasons": winter_window,
     "now": "2025-12-20T10:00:00Z",
@@ -44,7 +45,7 @@ test_denies_missing_token {
   decision.denies[msg] == "missing override token"
 }
 
-test_denies_unapproved_role {
+test_denies_unapproved_role if {
   bad_token := {
     "id": valid_token.id,
     "scope": valid_token.scope,
@@ -62,7 +63,7 @@ test_denies_unapproved_role {
   not decision.allow_override
 }
 
-test_requires_incident_for_after_hours {
+test_requires_incident_for_after_hours if {
   maintenance_token := {
     "id": valid_token.id,
     "scope": valid_token.scope,

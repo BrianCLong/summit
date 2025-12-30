@@ -1,8 +1,11 @@
 package authz
 
-default allow = false
+import future.keywords.if
+import future.keywords.contains
 
-allow {
+default allow := false
+
+allow if {
   input.user.authenticated
   input.action in allowed_actions[input.user.role]
   input.tenant == input.user.tenant
@@ -15,7 +18,7 @@ allowed_actions := {
 }
 
 violation_reason := reason if not allow
-reason = {
+reason := {
   "message": "Access denied by policy.",
   "tenant": input.tenant,
   "role": input.user.role,

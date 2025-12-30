@@ -1,22 +1,24 @@
 package intelgraph.authz
 
-default allow = false
+import future.keywords.if
 
-allow {
+default allow := false
+
+allow if {
     input.subject.role == "admin"
 }
 
-allow {
+allow if {
     input.subject.role == "analyst"
     input.action == "read"
     input.resource.type == "entity"
 }
 
 # Reason for access
-reason = "Access denied: Insufficient role or unauthorized action/resource type." {
+reason := "Access denied: Insufficient role or unauthorized action/resource type." if {
     not allow
 }
 
-reason = "Access granted: Subject has required role and permissions." {
+reason := "Access granted: Subject has required role and permissions." if {
     allow
 }
