@@ -1,5 +1,6 @@
 {
-  "last_updated": "2025-12-30T06:00:00Z",
+  "last_updated": "2025-12-30T18:00:00Z",
+  "revision_note": "Updated to reflect actual code implementation status per Critical Needs Audit 2025-12-30",
   "initiatives": [
     {
       "id": "A",
@@ -8,20 +9,27 @@
         {
           "id": "A1",
           "name": "Local Vector Store",
-          "status": "rc-ready",
-          "owner": "Jules"
+          "status": "incomplete",
+          "owner": "Jules",
+          "evidence": "No dedicated vector store service found in /server/src/services/",
+          "blockers": ["Need to implement vector store service", "No storage backend configured"],
+          "target_completion": "Sprint N+1"
         },
         {
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
-          "status": "rc-ready",
-          "owner": "Jules"
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "GraphRAGService.ts exists; ingestion incomplete",
+          "blockers": ["Missing source connectors", "Incomplete processing pipeline"],
+          "target_completion": "Sprint N+1"
         },
         {
           "id": "A3",
           "name": "Copilot Query Service",
           "status": "rc-ready",
-          "owner": "Jules"
+          "owner": "Jules",
+          "evidence": "CopilotIntegrationService.ts and CopilotNLQueryService.ts exist and functional"
         }
       ]
     },
@@ -32,20 +40,29 @@
         {
           "id": "B1",
           "name": "Connector SDK & Registry",
-          "status": "in-validation",
-          "owner": "Jules"
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "target_completion": "Sprint N+2"
         },
         {
           "id": "B2",
           "name": "RSS/Atom Connector",
-          "status": "in-validation",
-          "owner": "Jules"
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "No RSS/Atom connector implementation found",
+          "blockers": ["No implementation exists"],
+          "target_completion": "Sprint N+3"
         },
         {
           "id": "B3",
           "name": "STIX/TAXII Connector",
-          "status": "in-validation",
-          "owner": "Jules"
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "No STIX/TAXII connector implementation found",
+          "blockers": ["No implementation exists"],
+          "target_completion": "Sprint N+3"
         }
       ]
     },
@@ -57,15 +74,28 @@
           "id": "C1",
           "name": "Policy-as-Code Engine",
           "status": "rc-ready",
-          "owner": "Jules"
+          "owner": "Jules",
+          "evidence": "PolicyEngine.ts, PolicyManagementService.ts, PolicySimulatorService.ts exist and functional; OPA integration verified",
+          "notes": "Policy re-evaluation at execute time added 2025-12-30"
         },
         {
           "id": "C2",
           "name": "Immutable Audit Log",
-          "status": "rc-ready",
-          "owner": "Jules"
+          "status": "incomplete",
+          "owner": "Jules",
+          "evidence": "Audit services exist but logging is console-only (BaseAgentArchetype.ts:343-352)",
+          "blockers": ["Need persistent append-only storage", "No tamper-proof verification", "No centralized log aggregation"],
+          "target_completion": "Sprint N+1 (CRITICAL for GA)"
         }
       ]
     }
-  ]
+  ],
+  "summary": {
+    "rc_ready": 2,
+    "partial": 2,
+    "incomplete": 2,
+    "not_started": 2,
+    "total": 8,
+    "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
+  }
 }
