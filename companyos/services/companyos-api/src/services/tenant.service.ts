@@ -3,9 +3,11 @@
  *
  * Implements A1: Tenant Lifecycle Management (Activate/Suspend/Delete)
  * Implements A2: Tenant Onboarding Flow
+ * FIXED: Now uses PostgreSQL for persistent tenant storage
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { Pool } from 'pg';
 import {
   Tenant,
   TenantStatus,
@@ -42,16 +44,43 @@ export interface TenantServiceConfig {
   softDeleteOnly: boolean;
 }
 
+// ============================================================================
+// POSTGRESQL DATABASE INTERFACE
+// ============================================================================
+
+export interface TenantDatabase {
+  query(text: string, params: any[]): Promise<{ rows: any[]; rowCount: number }>;
+}
+
+let tenantDb: TenantDatabase | null = null;
+
+/**
+ * Set the tenant database connection
+ * MUST be called during application initialization
+ */
+export function setTenantDatabase(db: TenantDatabase): void {
+  tenantDb = db;
+  logger.info('Tenant database connection initialized');
+}
+
+function getTenantDatabase(): TenantDatabase {
+  if (!tenantDb) {
+    throw new Error(
+      'FATAL: Tenant database not initialized. Call setTenantDatabase() with a ' +
+      'PostgreSQL connection pool before using TenantService.'
+    );
+  }
+  return tenantDb;
+}
+
+// ============================================================================
+// TENANT SERVICE (PostgreSQL-backed)
+// ============================================================================
+
 export class TenantService {
   private config: TenantServiceConfig;
   private auditService: AuditService;
   private opaService: OPAService;
-
-  // In-memory store for demo (replace with actual DB in production)
-  private tenants: Map<string, Tenant> = new Map();
-  private transitions: Map<string, TenantStatusTransition[]> = new Map();
-  private admins: Map<string, TenantAdmin[]> = new Map();
-  private onboardings: Map<string, TenantOnboarding> = new Map();
 
   constructor(
     config: Partial<TenantServiceConfig> = {},
@@ -81,15 +110,17 @@ export class TenantService {
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
     logger.info('Creating tenant', { externalId: input.externalId, actorId });
+    const db = getTenantDatabase();
 
     // Check OPA authorization
     await this.opaService.checkPermission('tenant:create', actorId, context);
 
     // Validate external ID uniqueness
-    const existing = Array.from(this.tenants.values()).find(
-      (t) => t.externalId === input.externalId
+    const existingCheck = await db.query(
+      'SELECT id FROM tenants WHERE external_id = $1',
+      [input.externalId]
     );
-    if (existing) {
+    if (existingCheck.rows.length > 0) {
       throw new Error(`Tenant with external ID ${input.externalId} already exists`);
     }
 
@@ -118,9 +149,35 @@ export class TenantService {
       createdBy: actorId,
     };
 
-    this.tenants.set(tenant.id, tenant);
-    this.transitions.set(tenant.id, []);
-    this.admins.set(tenant.id, []);
+    // Insert tenant into PostgreSQL
+    await db.query(
+      `INSERT INTO tenants (
+        id, external_id, name, display_name, status, tier, region, residency_class,
+        allowed_regions, features, quotas, primary_contact_email, primary_contact_name,
+        billing_email, metadata, tags, created_at, updated_at, created_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+      [
+        tenant.id,
+        tenant.externalId,
+        tenant.name,
+        tenant.displayName,
+        tenant.status,
+        tenant.tier,
+        tenant.region,
+        tenant.residencyClass,
+        tenant.allowedRegions,
+        JSON.stringify(tenant.features),
+        JSON.stringify(tenant.quotas),
+        tenant.primaryContactEmail,
+        tenant.primaryContactName,
+        tenant.billingEmail,
+        JSON.stringify(tenant.metadata),
+        tenant.tags,
+        tenant.createdAt,
+        tenant.updatedAt,
+        tenant.createdBy,
+      ]
+    );
 
     // Create initial onboarding record
     const onboarding: TenantOnboarding = {
@@ -138,7 +195,29 @@ export class TenantService {
       startedAt: now,
       onboardingBundle: this.generateOnboardingBundle(tenant, []),
     };
-    this.onboardings.set(tenant.id, onboarding);
+
+    await db.query(
+      `INSERT INTO tenant_onboardings (
+        id, tenant_id, step_metadata_complete, step_admin_assigned,
+        step_features_configured, step_quotas_set, step_welcome_sent, step_verified,
+        metadata_completed_at, features_configured_at, quotas_set_at, started_at, onboarding_bundle
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      [
+        onboarding.id,
+        onboarding.tenantId,
+        onboarding.stepMetadataComplete,
+        onboarding.stepAdminAssigned,
+        onboarding.stepFeaturesConfigured,
+        onboarding.stepQuotasSet,
+        onboarding.stepWelcomeSent,
+        onboarding.stepVerified,
+        onboarding.metadataCompletedAt,
+        onboarding.featuresConfiguredAt,
+        onboarding.quotasSetAt,
+        onboarding.startedAt,
+        JSON.stringify(onboarding.onboardingBundle),
+      ]
+    );
 
     // Record initial transition
     const transition = await this.recordTransition(
@@ -170,12 +249,20 @@ export class TenantService {
   }
 
   async getTenant(tenantId: string, actorId: string, context: RequestContext): Promise<Tenant | null> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:read', actorId, context, { tenantId });
 
-    const tenant = this.tenants.get(tenantId);
-    if (!tenant) {
+    const result = await db.query(
+      'SELECT * FROM tenants WHERE id = $1',
+      [tenantId]
+    );
+
+    if (result.rows.length === 0) {
       return null;
     }
+
+    const tenant = this.mapRowToTenant(result.rows[0]);
 
     // Block access to DELETED tenants except for admins
     if (tenant.status === TenantStatus.DELETED) {
@@ -195,40 +282,59 @@ export class TenantService {
     limit = 25,
     offset = 0
   ): Promise<PaginatedTenants> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:list', actorId, context);
 
-    let tenants = Array.from(this.tenants.values());
+    let query = 'SELECT * FROM tenants WHERE 1=1';
+    const params: any[] = [];
+    let paramIndex = 1;
 
     // Apply filters
     if (filter.status) {
-      tenants = tenants.filter((t) => t.status === filter.status);
+      query += ` AND status = $${paramIndex}`;
+      params.push(filter.status);
+      paramIndex++;
     }
     if (filter.tier) {
-      tenants = tenants.filter((t) => t.tier === filter.tier);
+      query += ` AND tier = $${paramIndex}`;
+      params.push(filter.tier);
+      paramIndex++;
     }
     if (filter.region) {
-      tenants = tenants.filter((t) => t.region === filter.region);
+      query += ` AND region = $${paramIndex}`;
+      params.push(filter.region);
+      paramIndex++;
     }
     if (filter.searchQuery) {
-      const query = filter.searchQuery.toLowerCase();
-      tenants = tenants.filter(
-        (t) =>
-          t.name.toLowerCase().includes(query) ||
-          t.externalId.toLowerCase().includes(query) ||
-          t.displayName?.toLowerCase().includes(query)
-      );
+      query += ` AND (
+        name ILIKE $${paramIndex} OR
+        external_id ILIKE $${paramIndex} OR
+        display_name ILIKE $${paramIndex}
+      )`;
+      params.push(`%${filter.searchQuery}%`);
+      paramIndex++;
     }
 
     // Exclude DELETED tenants by default unless specifically requested
     if (!filter.status) {
-      tenants = tenants.filter((t) => t.status !== TenantStatus.DELETED);
+      query += ` AND status != '${TenantStatus.DELETED}'`;
     }
 
-    const totalCount = tenants.length;
-    const paginatedTenants = tenants.slice(offset, offset + limit);
+    // Get total count
+    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as total');
+    const countResult = await db.query(countQuery, params);
+    const totalCount = parseInt(countResult.rows[0].total, 10);
+
+    // Add pagination
+    query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    params.push(limit, offset);
+
+    const result = await db.query(query, params);
+    const tenants = result.rows.map(row => this.mapRowToTenant(row));
 
     return {
-      tenants: paginatedTenants,
+      tenants,
       totalCount,
       hasNextPage: offset + limit < totalCount,
       hasPreviousPage: offset > 0,
@@ -241,6 +347,8 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<Tenant> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:update', actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
@@ -265,7 +373,27 @@ export class TenantService {
       updatedAt: new Date(),
     };
 
-    this.tenants.set(tenantId, updatedTenant);
+    await db.query(
+      `UPDATE tenants SET
+        name = $1, display_name = $2, tier = $3, features = $4, quotas = $5,
+        primary_contact_email = $6, primary_contact_name = $7, billing_email = $8,
+        metadata = $9, tags = $10, updated_at = $11
+       WHERE id = $12`,
+      [
+        updatedTenant.name,
+        updatedTenant.displayName,
+        updatedTenant.tier,
+        JSON.stringify(updatedTenant.features),
+        JSON.stringify(updatedTenant.quotas),
+        updatedTenant.primaryContactEmail,
+        updatedTenant.primaryContactName,
+        updatedTenant.billingEmail,
+        JSON.stringify(updatedTenant.metadata),
+        updatedTenant.tags,
+        updatedTenant.updatedAt,
+        tenantId,
+      ]
+    );
 
     await this.auditService.logTenantEvent({
       eventType: 'tenant.updated',
@@ -290,6 +418,8 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:activate', actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
@@ -297,14 +427,14 @@ export class TenantService {
     // Validate transition
     this.validateStatusTransition(tenant.status, TenantStatus.ACTIVE);
 
-    const updatedTenant: Tenant = {
-      ...tenant,
-      status: TenantStatus.ACTIVE,
-      activatedAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const now = new Date();
 
-    this.tenants.set(tenantId, updatedTenant);
+    await db.query(
+      `UPDATE tenants SET status = $1, activated_at = $2, updated_at = $3 WHERE id = $4`,
+      [TenantStatus.ACTIVE, now, now, tenantId]
+    );
+
+    const updatedTenant = { ...tenant, status: TenantStatus.ACTIVE, activatedAt: now, updatedAt: now };
 
     const transition = await this.recordTransition(
       tenantId,
@@ -339,6 +469,8 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:suspend', actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
@@ -346,14 +478,14 @@ export class TenantService {
     // Validate transition
     this.validateStatusTransition(tenant.status, TenantStatus.SUSPENDED);
 
-    const updatedTenant: Tenant = {
-      ...tenant,
-      status: TenantStatus.SUSPENDED,
-      suspendedAt: new Date(),
-      updatedAt: new Date(),
-    };
+    const now = new Date();
 
-    this.tenants.set(tenantId, updatedTenant);
+    await db.query(
+      `UPDATE tenants SET status = $1, suspended_at = $2, updated_at = $3 WHERE id = $4`,
+      [TenantStatus.SUSPENDED, now, now, tenantId]
+    );
+
+    const updatedTenant = { ...tenant, status: TenantStatus.SUSPENDED, suspendedAt: now, updatedAt: now };
 
     const transition = await this.recordTransition(
       tenantId,
@@ -388,6 +520,8 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:delete', actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
@@ -395,14 +529,19 @@ export class TenantService {
     // Validate transition
     this.validateStatusTransition(tenant.status, TenantStatus.DELETION_REQUESTED);
 
-    const updatedTenant: Tenant = {
+    const now = new Date();
+
+    await db.query(
+      `UPDATE tenants SET status = $1, deletion_requested_at = $2, updated_at = $3 WHERE id = $4`,
+      [TenantStatus.DELETION_REQUESTED, now, now, tenantId]
+    );
+
+    const updatedTenant = {
       ...tenant,
       status: TenantStatus.DELETION_REQUESTED,
-      deletionRequestedAt: new Date(),
-      updatedAt: new Date(),
+      deletionRequestedAt: now,
+      updatedAt: now,
     };
-
-    this.tenants.set(tenantId, updatedTenant);
 
     const transition = await this.recordTransition(
       tenantId,
@@ -436,6 +575,8 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantLifecycleResult> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:delete:confirm', actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
@@ -445,15 +586,14 @@ export class TenantService {
     }
 
     if (this.config.softDeleteOnly) {
-      // Soft delete - mark as deleted but keep data
-      const updatedTenant: Tenant = {
-        ...tenant,
-        status: TenantStatus.DELETED,
-        deletedAt: new Date(),
-        updatedAt: new Date(),
-      };
+      const now = new Date();
 
-      this.tenants.set(tenantId, updatedTenant);
+      await db.query(
+        `UPDATE tenants SET status = $1, deleted_at = $2, updated_at = $3 WHERE id = $4`,
+        [TenantStatus.DELETED, now, now, tenantId]
+      );
+
+      const updatedTenant = { ...tenant, status: TenantStatus.DELETED, deletedAt: now, updatedAt: now };
 
       const transition = await this.recordTransition(
         tenantId,
@@ -510,12 +650,20 @@ export class TenantService {
     }
 
     // Step 3: Update onboarding record
-    const onboarding = this.onboardings.get(tenant.id)!;
-    onboarding.stepAdminAssigned = assignedAdmins.length > 0;
-    onboarding.adminAssignedAt = assignedAdmins.length > 0 ? new Date() : undefined;
-    onboarding.onboardingBundle = this.generateOnboardingBundle(tenant, assignedAdmins);
+    const db = getTenantDatabase();
+    const now = new Date();
+    const onboardingBundle = this.generateOnboardingBundle(tenant, assignedAdmins);
 
-    this.onboardings.set(tenant.id, onboarding);
+    await db.query(
+      `UPDATE tenant_onboardings SET
+        step_admin_assigned = $1,
+        admin_assigned_at = $2,
+        onboarding_bundle = $3
+       WHERE tenant_id = $4`,
+      [assignedAdmins.length > 0, now, JSON.stringify(onboardingBundle), tenant.id]
+    );
+
+    const onboarding = await this.getOnboardingStatus(tenant.id, actorId, context);
 
     await this.auditService.logTenantEvent({
       eventType: 'tenant.onboarding_started',
@@ -525,13 +673,13 @@ export class TenantService {
       context,
     });
 
-    const nextSteps = this.getOnboardingNextSteps(onboarding);
+    const nextSteps = this.getOnboardingNextSteps(onboarding!);
 
     return {
       success: true,
       tenant,
-      onboarding,
-      bundle: onboarding.onboardingBundle,
+      onboarding: onboarding!,
+      bundle: onboardingBundle,
       nextSteps,
     };
   }
@@ -541,22 +689,28 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<OnboardingResult> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:onboarding:complete', actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
-    const onboarding = this.onboardings.get(tenantId);
+    const onboarding = await this.getOnboardingStatus(tenantId, actorId, context);
 
     if (!onboarding) {
       throw new Error('Onboarding record not found');
     }
 
     // Mark all steps complete
-    onboarding.stepVerified = true;
-    onboarding.verifiedAt = new Date();
-    onboarding.completedAt = new Date();
-    onboarding.completedBy = actorId;
-
-    this.onboardings.set(tenantId, onboarding);
+    const now = new Date();
+    await db.query(
+      `UPDATE tenant_onboardings SET
+        step_verified = $1,
+        verified_at = $2,
+        completed_at = $3,
+        completed_by = $4
+       WHERE tenant_id = $5`,
+      [true, now, now, actorId, tenantId]
+    );
 
     // Activate tenant if still pending
     let activatedTenant = tenant;
@@ -580,11 +734,13 @@ export class TenantService {
 
     logger.info('Tenant onboarding completed', { tenantId });
 
+    const updatedOnboarding = await this.getOnboardingStatus(tenantId, actorId, context);
+
     return {
       success: true,
       tenant: activatedTenant,
-      onboarding,
-      bundle: onboarding.onboardingBundle,
+      onboarding: updatedOnboarding!,
+      bundle: updatedOnboarding!.onboardingBundle,
       nextSteps: [],
     };
   }
@@ -594,9 +750,20 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantOnboarding | null> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:onboarding:read', actorId, context, { tenantId });
 
-    return this.onboardings.get(tenantId) || null;
+    const result = await db.query(
+      'SELECT * FROM tenant_onboardings WHERE tenant_id = $1',
+      [tenantId]
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return this.mapRowToOnboarding(result.rows[0]);
   }
 
   // ============================================================================
@@ -609,6 +776,8 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantAdmin> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:admin:assign', actorId, context, { tenantId });
 
     const tenant = await this.getTenantOrThrow(tenantId);
@@ -626,9 +795,23 @@ export class TenantService {
       metadata: {},
     };
 
-    const existingAdmins = this.admins.get(tenantId) || [];
-    existingAdmins.push(admin);
-    this.admins.set(tenantId, existingAdmins);
+    await db.query(
+      `INSERT INTO tenant_admins (
+        id, tenant_id, user_id, email, display_name, role, status, invited_at, invited_by, metadata
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        admin.id,
+        admin.tenantId,
+        admin.userId,
+        admin.email,
+        admin.displayName,
+        admin.role,
+        admin.status,
+        admin.invitedAt,
+        admin.invitedBy,
+        JSON.stringify(admin.metadata),
+      ]
+    );
 
     await this.auditService.logTenantEvent({
       eventType: 'tenant.admin_assigned',
@@ -648,9 +831,16 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantAdmin[]> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:admin:list', actorId, context, { tenantId });
 
-    return this.admins.get(tenantId) || [];
+    const result = await db.query(
+      'SELECT * FROM tenant_admins WHERE tenant_id = $1 ORDER BY invited_at DESC',
+      [tenantId]
+    );
+
+    return result.rows.map(row => this.mapRowToAdmin(row));
   }
 
   // ============================================================================
@@ -662,9 +852,16 @@ export class TenantService {
     actorId: string,
     context: RequestContext
   ): Promise<TenantStatusTransition[]> {
+    const db = getTenantDatabase();
+
     await this.opaService.checkPermission('tenant:transitions:read', actorId, context, { tenantId });
 
-    return this.transitions.get(tenantId) || [];
+    const result = await db.query(
+      'SELECT * FROM tenant_status_transitions WHERE tenant_id = $1 ORDER BY performed_at ASC',
+      [tenantId]
+    );
+
+    return result.rows.map(row => this.mapRowToTransition(row));
   }
 
   // ============================================================================
@@ -672,11 +869,18 @@ export class TenantService {
   // ============================================================================
 
   private async getTenantOrThrow(tenantId: string): Promise<Tenant> {
-    const tenant = this.tenants.get(tenantId);
-    if (!tenant) {
+    const db = getTenantDatabase();
+
+    const result = await db.query(
+      'SELECT * FROM tenants WHERE id = $1',
+      [tenantId]
+    );
+
+    if (result.rows.length === 0) {
       throw new Error(`Tenant not found: ${tenantId}`);
     }
-    return tenant;
+
+    return this.mapRowToTenant(result.rows[0]);
   }
 
   private validateStatusTransition(fromStatus: TenantStatus, toStatus: TenantStatus): void {
@@ -697,6 +901,8 @@ export class TenantService {
     performedBy: string,
     context: RequestContext
   ): Promise<TenantStatusTransition> {
+    const db = getTenantDatabase();
+
     const transition: TenantStatusTransition = {
       id: uuidv4(),
       tenantId,
@@ -711,9 +917,25 @@ export class TenantService {
       correlationId: context.correlationId,
     };
 
-    const transitions = this.transitions.get(tenantId) || [];
-    transitions.push(transition);
-    this.transitions.set(tenantId, transitions);
+    await db.query(
+      `INSERT INTO tenant_status_transitions (
+        id, tenant_id, from_status, to_status, reason, performed_by,
+        performed_at, metadata, ip_address, user_agent, correlation_id
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [
+        transition.id,
+        transition.tenantId,
+        transition.fromStatus,
+        transition.toStatus,
+        transition.reason,
+        transition.performedBy,
+        transition.performedAt,
+        JSON.stringify(transition.metadata),
+        transition.ipAddress,
+        transition.userAgent,
+        transition.correlationId,
+      ]
+    );
 
     return transition;
   }
@@ -765,6 +987,93 @@ export class TenantService {
 
     return steps;
   }
+
+  // Database row mapping helpers
+  private mapRowToTenant(row: any): Tenant {
+    return {
+      id: row.id,
+      externalId: row.external_id,
+      name: row.name,
+      displayName: row.display_name,
+      status: row.status,
+      tier: row.tier,
+      region: row.region,
+      residencyClass: row.residency_class,
+      allowedRegions: row.allowed_regions,
+      features: typeof row.features === 'string' ? JSON.parse(row.features) : row.features,
+      quotas: typeof row.quotas === 'string' ? JSON.parse(row.quotas) : row.quotas,
+      primaryContactEmail: row.primary_contact_email,
+      primaryContactName: row.primary_contact_name,
+      billingEmail: row.billing_email,
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+      tags: row.tags,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+      createdBy: row.created_by,
+      activatedAt: row.activated_at ? new Date(row.activated_at) : undefined,
+      suspendedAt: row.suspended_at ? new Date(row.suspended_at) : undefined,
+      deletionRequestedAt: row.deletion_requested_at ? new Date(row.deletion_requested_at) : undefined,
+      deletedAt: row.deleted_at ? new Date(row.deleted_at) : undefined,
+    };
+  }
+
+  private mapRowToOnboarding(row: any): TenantOnboarding {
+    return {
+      id: row.id,
+      tenantId: row.tenant_id,
+      stepMetadataComplete: row.step_metadata_complete,
+      stepAdminAssigned: row.step_admin_assigned,
+      stepFeaturesConfigured: row.step_features_configured,
+      stepQuotasSet: row.step_quotas_set,
+      stepWelcomeSent: row.step_welcome_sent,
+      stepVerified: row.step_verified,
+      metadataCompletedAt: row.metadata_completed_at ? new Date(row.metadata_completed_at) : undefined,
+      adminAssignedAt: row.admin_assigned_at ? new Date(row.admin_assigned_at) : undefined,
+      featuresConfiguredAt: row.features_configured_at ? new Date(row.features_configured_at) : undefined,
+      quotasSetAt: row.quotas_set_at ? new Date(row.quotas_set_at) : undefined,
+      welcomeSentAt: row.welcome_sent_at ? new Date(row.welcome_sent_at) : undefined,
+      verifiedAt: row.verified_at ? new Date(row.verified_at) : undefined,
+      startedAt: new Date(row.started_at),
+      completedAt: row.completed_at ? new Date(row.completed_at) : undefined,
+      completedBy: row.completed_by,
+      onboardingBundle: typeof row.onboarding_bundle === 'string'
+        ? JSON.parse(row.onboarding_bundle)
+        : row.onboarding_bundle,
+    };
+  }
+
+  private mapRowToAdmin(row: any): TenantAdmin {
+    return {
+      id: row.id,
+      tenantId: row.tenant_id,
+      userId: row.user_id,
+      email: row.email,
+      displayName: row.display_name,
+      role: row.role,
+      status: row.status,
+      invitedAt: new Date(row.invited_at),
+      invitedBy: row.invited_by,
+      acceptedAt: row.accepted_at ? new Date(row.accepted_at) : undefined,
+      revokedAt: row.revoked_at ? new Date(row.revoked_at) : undefined,
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+    };
+  }
+
+  private mapRowToTransition(row: any): TenantStatusTransition {
+    return {
+      id: row.id,
+      tenantId: row.tenant_id,
+      fromStatus: row.from_status,
+      toStatus: row.to_status,
+      reason: row.reason,
+      performedBy: row.performed_by,
+      performedAt: new Date(row.performed_at),
+      metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+      ipAddress: row.ip_address,
+      userAgent: row.user_agent,
+      correlationId: row.correlation_id,
+    };
+  }
 }
 
 // Request context interface
@@ -791,3 +1100,6 @@ export function getTenantService(
   }
   return tenantServiceInstance;
 }
+
+// Export database setter
+export { setTenantDatabase };
