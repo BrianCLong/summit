@@ -44,7 +44,7 @@ export interface DecisionAnalysisResult {
     decision_summary: object;
     claims_referenced: object;
     sources_manifest: object;
-    cost_and_latency: object;
+    cost_and_latency: { latency_ms: number; cost_units: number };
   };
 }
 

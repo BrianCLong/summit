@@ -555,8 +555,8 @@ export function createPolicyVerdictLoader(
  */
 export function createVerdictByKeyLoader(
   context: DataLoaderContext
-): DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null> {
-  return new DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null>(
+): DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null, string> {
+  return new DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null, string>(
     (keys) => batchLoadVerdictsByKey(keys, context),
     {
       cache: true,

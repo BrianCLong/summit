@@ -59,7 +59,7 @@ export class IntelGraphService {
    * @param {Function} fn - The function to execute.
    * @returns {Promise<T>} The result of the function.
    */
-  private async measure<T>(methodName: string, fn: (session: Neo4jSession) => Promise<T>): Promise<T> {
+  private async measure<T>(methodName: string, fn: (session: Session) => Promise<T>): Promise<T> {
     const end = intelGraphRequestLatency.startTimer({ method: methodName });
     const session = this.driver.session();
     try {
@@ -88,7 +88,7 @@ export class IntelGraphService {
       const result = await session.run('CREATE (e:Entity $props) RETURN e', { props: { ...newEntity, tenantId } });
       const createdEntity = result.records[0]?.get('e').properties as Entity;
 
-      await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Entity', resourceId: createdEntity.id, actorId: owner, actorType: 'user', payload: { name, description }, metadata: {} });
+      await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Entity', resourceId: createdEntity.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: createdEntity.id, entityType: 'Entity', name, description }, metadata: {} });
       return createdEntity;
     });
   }
@@ -110,7 +110,7 @@ export class IntelGraphService {
         if (result.records.length === 0) throw new NotFoundError(`Entity with ID ${entityId} not found for this tenant.`);
         const createdClaim = result.records[0].get('c').properties as Claim;
 
-        await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Claim', resourceId: createdClaim.id, actorId: owner, actorType: 'user', payload: { statement, confidence, entityId }, metadata: {} });
+        await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Claim', resourceId: createdClaim.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: createdClaim.id, entityType: 'Claim', statement, confidence, parentEntityId: entityId }, metadata: {} });
         return createdClaim;
     });
   }
@@ -132,7 +132,7 @@ export class IntelGraphService {
           if (result.records.length === 0) throw new NotFoundError(`Claim with ID ${claimId} not found for this tenant.`);
           const attachedEvidence = result.records[0].get('ev').properties as Evidence;
 
-          await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'ATTACH', resourceType: 'Evidence', resourceId: attachedEvidence.id, actorId: owner, actorType: 'user', payload: { claimId, sourceURI, hash }, metadata: {} });
+          await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'ATTACH', resourceType: 'Evidence', resourceId: attachedEvidence.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: attachedEvidence.id, entityType: 'Evidence', claimId, sourceURI, hash }, metadata: {} });
           return attachedEvidence;
       });
   }
@@ -154,7 +154,7 @@ export class IntelGraphService {
           if (result.records.length === 0) throw new NotFoundError(`Node with ID ${targetNodeId} not found for this tenant.`);
           const taggedPolicy = result.records[0].get('p').properties as PolicyLabel;
 
-          await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'TAG', resourceType: 'PolicyLabel', resourceId: taggedPolicy.id, actorId: owner, actorType: 'user', payload: { targetNodeId, label, sensitivity }, metadata: {} });
+          await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'TAG', resourceType: 'PolicyLabel', resourceId: taggedPolicy.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: taggedPolicy.id, entityType: 'PolicyLabel', targetNodeId, label, sensitivity }, metadata: {} });
           return taggedPolicy;
       });
   }
@@ -216,7 +216,7 @@ export class IntelGraphService {
           const createdDecision = result.records[0]?.get('d').properties as Decision;
           if (!createdDecision) throw new DatabaseError(`Failed to create decision.`);
 
-          await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Decision', resourceId: createdDecision.id, actorId: owner, actorType: 'user', payload: { question, recommendation, informedByClaimIds }, metadata: {} });
+          await this.ledger.appendEntry({ tenantId, timestamp: new Date(now), actionType: 'CREATE', resourceType: 'Decision', resourceId: createdDecision.id, actorId: owner, actorType: 'user', payload: { mutationType: 'CREATE', entityId: createdDecision.id, entityType: 'Decision', question, recommendation, informedByClaimIds }, metadata: {} });
           return createdDecision;
       });
   }
