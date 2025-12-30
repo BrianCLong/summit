@@ -1,0 +1,80 @@
+name: Golden Path Supply Chain
+
+on:
+  push:
+    branches: ["main", "develop", "release/**"]
+  pull_request:
+    branches: ["main", "develop", "release/**"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+env:
+  REFERENCE_SERVICE: authz-gateway
+  IMAGE_OWNER: ${{ github.repository_owner }}
+  IMAGE_NAME: ${{ github.repository_owner }}/summit-authz-gateway
+  DOCKER_CONTEXT: services/authz-gateway
+  DOCKERFILE: services/authz-gateway/Dockerfile
+
+jobs:
+  build-reference:
+    name: Build + sign + attest reference artifact
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: ${{ env.IMAGE_NAME }}
+      context: ${{ env.DOCKER_CONTEXT }}
+      dockerfile: ${{ env.DOCKERFILE }}
+      push: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+      sign: true
+      sbom: true
+      slsa_provenance: true
+    secrets:
+      registry_password: ${{ secrets.GITHUB_TOKEN }}
+
+  policy-gate:
+    name: Enforce supply chain policy gate
+    needs: build-reference
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    uses: ./.github/workflows/reusable/supply-chain-policy.yml
+    with:
+      image_uri: ${{ needs.build-reference.outputs.image_uri }}
+      image_digest: ${{ needs.build-reference.outputs.image_digest }}
+      sbom_artifact_name: build-artifacts-${{ env.IMAGE_NAME }}-${{ github.run_id }}
+      severity_threshold: HIGH
+
+  publish-evidence:
+    name: Publish bundle
+    runs-on: ubuntu-latest
+    needs: [build-reference, policy-gate]
+    if: ${{ needs.build-reference.result == 'success' && needs.policy-gate.result == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download SBOM bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ env.IMAGE_NAME }}-${{ github.run_id }}
+          path: artifacts
+
+      - name: Summarize evidence bundle
+        run: |
+          set -euo pipefail
+          echo "artifact_uri=${{ needs.build-reference.outputs.image_uri }}" >> $GITHUB_OUTPUT
+          echo "sbom_cdx=artifacts/sbom.cdx.json" >> $GITHUB_OUTPUT
+          echo "sbom_spdx=artifacts/sbom.spdx.json" >> $GITHUB_OUTPUT
+          sha256sum artifacts/sbom.cdx.json | awk '{print "sbom_cdx_digest=" $1}' >> $GITHUB_OUTPUT
+          sha256sum artifacts/sbom.spdx.json | awk '{print "sbom_spdx_digest=" $1}' >> $GITHUB_OUTPUT
+
+      - name: Upload evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-path-bundle-${{ github.run_id }}
+          path: |
+            artifacts/sbom.cdx.json
+            artifacts/sbom.spdx.json
+        retention-days: 30

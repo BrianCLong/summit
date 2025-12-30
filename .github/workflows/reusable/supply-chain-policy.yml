@@ -1,0 +1,91 @@
+name: Supply Chain Policy Gate
+
+on:
+  workflow_call:
+    inputs:
+      image_uri:
+        required: true
+        type: string
+      image_digest:
+        required: true
+        type: string
+      sbom_artifact_name:
+        required: true
+        type: string
+      severity_threshold:
+        required: false
+        type: string
+        default: HIGH
+    secrets: {}
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+  attestations: read
+
+jobs:
+  gate:
+    name: Verify signatures, SBOM, provenance, and policy
+    runs-on: ubuntu-latest
+    env:
+      COSIGN_EXPERIMENTAL: "1"
+      EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
+      EXPECTED_IDENTITY_REGEX: ^https://github.com/.+/\.github/workflows/_reusable-slsa-build.yml@.*$
+      GRYPE_DB_CACHE_DIR: /tmp/grype/db
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.sbom_artifact_name }}
+          path: artifacts
+
+      - name: Ensure SBOMs are present
+        run: |
+          set -euo pipefail
+          test -f artifacts/sbom.cdx.json
+          test -f artifacts/sbom.spdx.json
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Verify container signature
+        run: |
+          set -euo pipefail
+          cosign verify "${{ inputs.image_uri }}" \
+            --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" \
+            --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
+
+      - name: Verify SBOM attestations
+        run: |
+          set -euo pipefail
+          cosign verify-attestation "${{ inputs.image_uri }}" --type cyclonedx --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation "${{ inputs.image_uri }}" --type spdxjson --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+
+      - name: Verify SLSA provenance attestation
+        run: |
+          set -euo pipefail
+          cosign verify-attestation "${{ inputs.image_uri }}" --type slsaprovenance --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+
+      - name: Install grype
+        uses: anchore/scan-action/download-grype@v3
+
+      - name: Scan SBOM for vulnerabilities
+        run: |
+          set -euo pipefail
+          mkdir -p ${GRYPE_DB_CACHE_DIR}
+          grype sbom:artifacts/sbom.spdx.json -o json > artifacts/grype.json
+
+      - name: Enforce license and CVE policy
+        run: |
+          set -euo pipefail
+          python scripts/supply_chain/gate.py \
+            --sbom artifacts/sbom.cdx.json \
+            --grype artifacts/grype.json \
+            --license-allowlist security/supply-chain/license-allowlist.txt \
+            --license-overrides security/supply-chain/license-overrides.txt \
+            --cve-allowlist security/supply-chain/cve-allowlist.txt \
+            --severity-threshold "${{ inputs.severity_threshold }}"
