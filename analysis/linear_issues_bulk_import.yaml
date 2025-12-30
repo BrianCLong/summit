@@ -1,0 +1,864 @@
+# Linear Bulk Import File
+# Generated: 2025-12-30
+# Total Issues: 645 (showing P0/P1 critical path)
+# Usage: Import via Linear API or bulk create script
+
+metadata:
+  version: "1.0.0"
+  generated_at: "2025-12-30T00:00:00Z"
+  total_issues: 645
+  critical_path_issues: 89
+
+initiatives:
+  - id: INIT-001
+    title: "Governance & Compliance Hardening"
+    description: "Establish complete governance and compliance infrastructure"
+    owner: "@intelgraph/security-team"
+    priority: P0
+    labels: ["initiative", "ga-critical", "compliance"]
+
+  - id: INIT-002
+    title: "Core Graph & Provenance"
+    description: "Build robust graph infrastructure with provenance tracking"
+    owner: "@intelgraph/data-team"
+    priority: P0
+    labels: ["initiative", "ga-critical", "infrastructure"]
+
+  - id: INIT-003
+    title: "Connectors & Ingestion"
+    description: "Complete connector ecosystem and ingestion pipelines"
+    owner: "@intelgraph/integrations-team"
+    priority: P1
+    labels: ["initiative", "integrations"]
+
+  - id: INIT-004
+    title: "AI Copilot & RAG"
+    description: "AI-powered intelligence features with RAG capabilities"
+    owner: "@intelgraph/platform-core"
+    priority: P1
+    labels: ["initiative", "ai", "copilot"]
+
+  - id: INIT-005
+    title: "Observability & Operations"
+    description: "Production-grade observability and operational excellence"
+    owner: "@intelgraph/ops-team"
+    priority: P0
+    labels: ["initiative", "ga-critical", "observability"]
+
+  - id: INIT-006
+    title: "UX & Enablement"
+    description: "User experience and developer enablement"
+    owner: "@intelgraph/frontend-team"
+    priority: P1
+    labels: ["initiative", "ux", "enablement"]
+
+epics:
+  # Initiative: Governance & Compliance
+  - id: EPIC-001
+    title: "Policy-as-Code Engine Completeness"
+    parent: INIT-001
+    owner: "@intelgraph/security-team"
+    priority: P0
+    points: 34
+    milestone: "Sprint N+56"
+    labels: ["epic", "ga-critical", "zone/security"]
+
+  - id: EPIC-002
+    title: "Immutable Audit Log"
+    parent: INIT-001
+    owner: "@intelgraph/security-team"
+    priority: P0
+    points: 21
+    milestone: "Sprint N+56"
+    labels: ["epic", "ga-critical", "zone/security"]
+
+  - id: EPIC-003
+    title: "OPA Strict Mode Enforcement"
+    parent: INIT-001
+    owner: "@intelgraph/security-team"
+    priority: P0
+    points: 13
+    milestone: "Sprint N+55"
+    labels: ["epic", "ga-critical", "zone/security", "overdue"]
+
+  - id: EPIC-004
+    title: "Warrant Lifecycle Management"
+    parent: INIT-001
+    owner: "@intelgraph/security-team"
+    priority: P1
+    points: 21
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/security"]
+
+  # Initiative: Core Graph & Provenance
+  - id: EPIC-005
+    title: "Local Vector Store & Embeddings"
+    parent: INIT-002
+    owner: "@intelgraph/data-team"
+    priority: P0
+    points: 34
+    milestone: "Sprint N+56"
+    labels: ["epic", "ga-critical", "zone/data"]
+
+  - id: EPIC-006
+    title: "Graph Query Optimization"
+    parent: INIT-002
+    owner: "@intelgraph/data-team"
+    priority: P1
+    points: 21
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/data", "performance"]
+
+  - id: EPIC-007
+    title: "Neo4j Schema Evolution"
+    parent: INIT-002
+    owner: "@intelgraph/data-team"
+    priority: P1
+    points: 13
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/data"]
+
+  - id: EPIC-008
+    title: "Provenance Ledger Integration"
+    parent: INIT-002
+    owner: "@intelgraph/provenance-team"
+    priority: P0
+    points: 21
+    milestone: "Sprint N+56"
+    labels: ["epic", "ga-critical", "zone/provenance"]
+
+  # Initiative: Connectors & Ingestion
+  - id: EPIC-009
+    title: "Connector Registry"
+    parent: INIT-003
+    owner: "@intelgraph/integrations-team"
+    priority: P0
+    points: 21
+    milestone: "Sprint N+56"
+    labels: ["epic", "zone/integrations"]
+
+  - id: EPIC-010
+    title: "STIX/TAXII Integration"
+    parent: INIT-003
+    owner: "@intelgraph/integrations-team"
+    priority: P0
+    points: 13
+    milestone: "Sprint N+56"
+    labels: ["epic", "zone/integrations"]
+
+  - id: EPIC-011
+    title: "Streaming Ingest Pipeline"
+    parent: INIT-003
+    owner: "@intelgraph/integrations-team"
+    priority: P1
+    points: 21
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/integrations"]
+
+  - id: EPIC-012
+    title: "Data Quality Framework"
+    parent: INIT-003
+    owner: "@intelgraph/data-team"
+    priority: P1
+    points: 13
+    milestone: "Sprint N+58"
+    labels: ["epic", "zone/data"]
+
+  # Initiative: AI Copilot & RAG
+  - id: EPIC-013
+    title: "Copilot Query Service"
+    parent: INIT-004
+    owner: "@intelgraph/platform-core"
+    priority: P0
+    points: 34
+    milestone: "Sprint N+56"
+    labels: ["epic", "ga-critical", "zone/ai"]
+
+  - id: EPIC-014
+    title: "LLM Provider Integration"
+    parent: INIT-004
+    owner: "@intelgraph/platform-core"
+    priority: P0
+    points: 21
+    milestone: "Sprint N+56"
+    labels: ["epic", "ga-critical", "zone/ai"]
+
+  - id: EPIC-015
+    title: "Hallucination Mitigation"
+    parent: INIT-004
+    owner: "@intelgraph/platform-core"
+    priority: P0
+    points: 34
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/ai", "safety"]
+
+  - id: EPIC-016
+    title: "Safety Guardrails"
+    parent: INIT-004
+    owner: "@intelgraph/platform-core"
+    priority: P0
+    points: 21
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/ai", "safety"]
+
+  # Initiative: Observability & Operations
+  - id: EPIC-017
+    title: "SLO Dashboard & Alerting"
+    parent: INIT-005
+    owner: "@intelgraph/ops-team"
+    priority: P0
+    points: 21
+    milestone: "Sprint N+55"
+    labels: ["epic", "ga-critical", "zone/ops", "overdue"]
+
+  - id: EPIC-018
+    title: "Cost Attribution & FinOps"
+    parent: INIT-005
+    owner: "@intelgraph/finops-team"
+    priority: P1
+    points: 13
+    milestone: "Sprint N+56"
+    labels: ["epic", "zone/ops", "finops"]
+
+  - id: EPIC-019
+    title: "Synthetic Monitoring (k6)"
+    parent: INIT-005
+    owner: "@intelgraph/ops-team"
+    priority: P1
+    points: 8
+    milestone: "Sprint N+56"
+    labels: ["epic", "zone/ops"]
+
+  - id: EPIC-020
+    title: "OpenTelemetry Coverage"
+    parent: INIT-005
+    owner: "@intelgraph/ops-team"
+    priority: P1
+    points: 13
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/ops"]
+
+  # Initiative: UX & Enablement
+  - id: EPIC-021
+    title: "Developer Documentation"
+    parent: INIT-006
+    owner: "@intelgraph/platform-core"
+    priority: P0
+    points: 34
+    milestone: "Sprint N+56"
+    labels: ["epic", "zone/docs"]
+
+  - id: EPIC-022
+    title: "Onboarding Experience"
+    parent: INIT-006
+    owner: "@intelgraph/frontend-team"
+    priority: P1
+    points: 13
+    milestone: "Sprint N+57"
+    labels: ["epic", "zone/frontend"]
+
+  - id: EPIC-023
+    title: "Tri-Pane View Completion"
+    parent: INIT-006
+    owner: "@intelgraph/frontend-team"
+    priority: P0
+    points: 21
+    milestone: "Sprint N+56"
+    labels: ["epic", "zone/frontend"]
+
+  - id: EPIC-024
+    title: "Graph Visualization Polish"
+    parent: INIT-006
+    owner: "@intelgraph/frontend-team"
+    priority: P2
+    points: 13
+    milestone: "Sprint N+58"
+    labels: ["epic", "zone/frontend"]
+
+issues:
+  # ============================================
+  # P0 CRITICAL - Sprint N+55 (Current)
+  # ============================================
+  - id: ISS-001
+    title: "[P0] Enable OPA Strict Mode (FEATURE_WARRANT_ENFORCEMENT=true)"
+    epic: EPIC-003
+    priority: P0
+    points: 5
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+55"
+    labels: ["priority/p0", "zone/security", "ga-critical"]
+    acceptance_criteria:
+      - "OPA strict mode enabled in all environments"
+      - "All policy violations logged and blocked"
+      - "Rollback procedure documented"
+      - "Monitoring dashboard updated"
+
+  - id: ISS-002
+    title: "[P0] Deploy Grafana SLO Dashboards (OVERDUE)"
+    epic: EPIC-017
+    priority: P0
+    points: 8
+    owner: "@intelgraph/ops-team"
+    milestone: "Sprint N+55"
+    labels: ["priority/p0", "zone/ops", "ga-critical", "overdue"]
+    acceptance_criteria:
+      - "Grafana dashboards deployed for Tier 0/1 services"
+      - "Error budget burn alerts configured"
+      - "SLO targets visible per service"
+      - "Weekly SLO report automation enabled"
+
+  - id: ISS-003
+    title: "[P0] Fix Jest/ESM import.meta Test Failures"
+    epic: EPIC-001
+    priority: P0
+    points: 13
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+55"
+    labels: ["priority/p0", "zone/testing", "ga-critical"]
+    acceptance_criteria:
+      - "All 688 test suites passing"
+      - "import.meta.url polyfill working"
+      - "crypto.randomUUID polyfill working"
+      - "No quarantined tests remaining"
+
+  - id: ISS-004
+    title: "[P0] Archive Legacy Artifacts per Portfolio Decisions"
+    epic: null
+    priority: P0
+    points: 3
+    owner: "Codex"
+    milestone: "Sprint N+55"
+    labels: ["priority/p0", "maintenance"]
+    acceptance_criteria:
+      - "Legacy Client v0.3.9 moved to .archive/"
+      - "Legacy Server v0.3.9 moved to .archive/"
+      - "Legacy folder contents archived"
+      - "@deprecated added to SmartCityConnector.ts"
+
+  # ============================================
+  # P0 CRITICAL - Sprint N+56
+  # ============================================
+  - id: ISS-005
+    title: "[P0] Complete LLM Provider Integration (OpenAI/Claude/Gemini)"
+    epic: EPIC-014
+    priority: P0
+    points: 21
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+56"
+    labels: ["priority/p0", "zone/ai", "ga-critical"]
+    source_todos:
+      - "server/src/routes/ai.ts:428 - TODO: Replace with actual LLM integration"
+      - "server/src/routes/ai.ts:480 - TODO: Replace with actual model health checks"
+    acceptance_criteria:
+      - "OpenAI provider fully implemented"
+      - "Claude provider implemented"
+      - "Gemini provider implemented"
+      - "Provider failover working"
+      - "Streaming responses supported"
+      - "Health checks for all providers"
+
+  - id: ISS-006
+    title: "[P0] Implement STIX/TAXII Bi-directional Connectors"
+    epic: EPIC-010
+    priority: P0
+    points: 13
+    owner: "@intelgraph/integrations-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p0", "zone/integrations"]
+    acceptance_criteria:
+      - "STIX 2.1 import working"
+      - "STIX 2.1 export working"
+      - "TAXII 2.1 client implemented"
+      - "TAXII 2.1 server implemented"
+      - "MISP integration tested"
+      - "Documentation complete"
+
+  - id: ISS-007
+    title: "[P0] Complete Vector Store Configuration and Validation"
+    epic: EPIC-005
+    priority: P0
+    points: 13
+    owner: "@intelgraph/data-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p0", "zone/data", "ga-critical"]
+    source_todos:
+      - "services/knowledge-service/src/index.ts:24 - TODO: Query vector store"
+    acceptance_criteria:
+      - "pgvector HNSW index configured"
+      - "Embedding generation pipeline working"
+      - "Vector similarity search <100ms p95"
+      - "Performance benchmarks documented"
+      - "Fallback replicas configured"
+
+  - id: ISS-008
+    title: "[P0] Validate Immutable Audit Log Guarantees"
+    epic: EPIC-002
+    priority: P0
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p0", "zone/security", "ga-critical"]
+    source_todos:
+      - "server/src/pii/redactionMiddleware.ts:537 - TODO: Log audit entry to hash chain"
+      - "server/src/middleware/provenance-enforcement.ts:535 - TODO: Send to audit ledger"
+    acceptance_criteria:
+      - "Append-only guarantees verified"
+      - "Tamper detection implemented"
+      - "Audit log retention configured"
+      - "Integration with observability pipeline"
+
+  - id: ISS-009
+    title: "[P0] Complete SSO/MFA Rollout (100% Coverage)"
+    epic: EPIC-003
+    priority: P0
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p0", "zone/security", "ga-critical"]
+    acceptance_criteria:
+      - "All admin accounts on SSO"
+      - "All staff accounts on SSO"
+      - "MFA enforced for all privileged access"
+      - "Backup authentication method documented"
+
+  - id: ISS-010
+    title: "[P0] Create Architecture Diagrams (5 Required)"
+    epic: EPIC-021
+    priority: P0
+    points: 13
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+56"
+    labels: ["priority/p0", "zone/docs", "documentation"]
+    acceptance_criteria:
+      - "System Topology diagram created"
+      - "Data Flow diagram created"
+      - "Security Architecture diagram created"
+      - "Deployment Architecture diagram created"
+      - "Network Architecture diagram created"
+      - "All diagrams in docs/architecture/"
+
+  # ============================================
+  # P1 HIGH - Sprint N+56
+  # ============================================
+  - id: ISS-011
+    title: "[P1] Implement Safety Guardrails for LLM Responses"
+    epic: EPIC-016
+    priority: P1
+    points: 13
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/ai", "safety"]
+    acceptance_criteria:
+      - "PII detection in LLM responses"
+      - "Harmful content filtering"
+      - "Output validation pipeline"
+      - "Guardrail bypass logging"
+
+  - id: ISS-012
+    title: "[P1] Wire OPA Policy Engine for Production ABAC"
+    epic: EPIC-001
+    priority: P1
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/security"]
+    source_todos:
+      - "companyos/services/tenant-api/src/middleware/authContext.ts:5 - TODO: Wire in OPA"
+      - "companyos/services/tenant-api/src/middleware/authContext.ts:49 - TODO: Replace with OPA"
+    acceptance_criteria:
+      - "OPA policy evaluation in all routes"
+      - "Mock auth removed"
+      - "Policy decision caching enabled"
+      - "Decision logging to audit"
+
+  - id: ISS-013
+    title: "[P1] Implement Prometheus Metrics Export"
+    epic: EPIC-019
+    priority: P1
+    points: 5
+    owner: "@intelgraph/ops-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/ops"]
+    source_todos:
+      - "companyos/services/tenant-api/src/middleware/metrics.ts:10 - TODO: Replace with prom-client"
+      - "services/streaming-ingest/src/server.ts:136 - TODO: Implement Prometheus metrics"
+      - "services/ingest-adapters/src/index.ts:223 - TODO: Implement Prometheus metrics export"
+    acceptance_criteria:
+      - "prom-client integrated"
+      - "Standard metrics exposed"
+      - "Custom business metrics defined"
+      - "Scrape endpoints verified"
+
+  - id: ISS-014
+    title: "[P1] Complete Connector Registry Inventory"
+    epic: EPIC-009
+    priority: P1
+    points: 8
+    owner: "@intelgraph/integrations-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/integrations"]
+    acceptance_criteria:
+      - "All existing connectors inventoried"
+      - "Connector metadata schema defined"
+      - "Registry API implemented"
+      - "Health check for each connector"
+
+  - id: ISS-015
+    title: "[P1] Configure k6 Synthetic Monitoring"
+    epic: EPIC-019
+    priority: P1
+    points: 5
+    owner: "@intelgraph/ops-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/ops"]
+    acceptance_criteria:
+      - "k6 tests for critical journeys"
+      - "Synthetic checks running in CI"
+      - "Alerting on threshold violations"
+      - "Dashboard integration"
+
+  # ============================================
+  # P1 HIGH - Sprint N+57
+  # ============================================
+  - id: ISS-016
+    title: "[P1] Implement Hallucination Mitigation Pipeline"
+    epic: EPIC-015
+    priority: P1
+    points: 21
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+57"
+    labels: ["priority/p1", "zone/ai", "safety"]
+    acceptance_criteria:
+      - "Chain-of-Verification (CoVe) pipeline implemented"
+      - "Knowledge conflict detection working"
+      - "Fact-Score metric tracking"
+      - "Human-in-the-loop gates for high-risk outputs"
+
+  - id: ISS-017
+    title: "[P1] Optimize Top 10 Slow Graph Queries"
+    epic: EPIC-006
+    priority: P1
+    points: 13
+    owner: "@intelgraph/data-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p1", "zone/data", "performance"]
+    source_todos:
+      - "server/src/graphql/resolvers/graphragResolvers.ts:175 - TODO: Fetch full entity objects from Neo4j"
+    acceptance_criteria:
+      - "Top 10 queries identified by latency"
+      - "Each query optimized to <1500ms p95"
+      - "Query plans documented"
+      - "Performance regression tests added"
+
+  - id: ISS-018
+    title: "[P1] Implement Cost Attribution by Service/Tenant"
+    epic: EPIC-018
+    priority: P1
+    points: 8
+    owner: "@intelgraph/finops-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p1", "zone/ops", "finops"]
+    acceptance_criteria:
+      - "Cost allocation tags per service"
+      - "Tenant-level cost visibility"
+      - "Cost anomaly alerting"
+      - "Monthly FinOps report automation"
+
+  - id: ISS-019
+    title: "[P1] Complete Streaming Ingest Pipeline"
+    epic: EPIC-011
+    priority: P1
+    points: 13
+    owner: "@intelgraph/integrations-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p1", "zone/integrations"]
+    source_todos:
+      - "services/lsc-service/src/index.ts:25 - TODO: Add logic to build GSN graph"
+    acceptance_criteria:
+      - "Kafka consumer operational"
+      - "Backpressure management working"
+      - "Dead letter queue configured"
+      - "Retry logic with exponential backoff"
+
+  - id: ISS-020
+    title: "[P1] Implement Warrant Lifecycle API"
+    epic: EPIC-004
+    priority: P1
+    points: 13
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p1", "zone/security"]
+    acceptance_criteria:
+      - "Warrant creation API"
+      - "Warrant approval workflow"
+      - "Warrant revocation API"
+      - "Warrant audit trail"
+      - "HSM integration for signing"
+
+  # ============================================
+  # TODO HARVEST ISSUES (Sample - 47 Infrastructure)
+  # ============================================
+  - id: ISS-101
+    title: "[INFRA] Wire graph backend with tenant-scoped filtering"
+    epic: EPIC-005
+    priority: P2
+    points: 5
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/server", "todo-harvest"]
+    source: ".disabled/intelgraph-mcp.disabled/src/server.ts:10"
+
+  - id: ISS-102
+    title: "[INFRA] Implement SCIM sync using IdP API"
+    epic: EPIC-003
+    priority: P2
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/security", "todo-harvest"]
+    source: "apps/gateway/src/rbac/scim.ts:2"
+
+  - id: ISS-103
+    title: "[INFRA] Configure OpenTelemetry with exporter packages"
+    epic: EPIC-020
+    priority: P2
+    points: 5
+    owner: "@intelgraph/ops-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/ops", "todo-harvest"]
+    source: "conductor-ui/frontend/src/maestro/main-maestro.js:7"
+
+  - id: ISS-104
+    title: "[INFRA] Implement certificate pinning for MCP client"
+    epic: EPIC-003
+    priority: P1
+    points: 5
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/security", "todo-harvest"]
+    source: "server/src/conductor/mcp/client.ts:76"
+
+  - id: ISS-105
+    title: "[INFRA] Verify cosign signature for OCI/S3 artifacts"
+    epic: EPIC-002
+    priority: P1
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/security", "todo-harvest"]
+    source: "server/src/conductor/models.ts:6"
+
+  - id: ISS-106
+    title: "[INFRA] Integrate SPIRE server for workload identity"
+    epic: EPIC-003
+    priority: P2
+    points: 13
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+58"
+    labels: ["priority/p2", "zone/security", "todo-harvest"]
+    source: "services/identity-spiffe/src/controller.ts:19"
+
+  - id: ISS-107
+    title: "[INFRA] Query Neo4j for code relationships"
+    epic: EPIC-005
+    priority: P2
+    points: 5
+    owner: "@intelgraph/data-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/data", "todo-harvest"]
+    source: "services/knowledge-service/src/index.ts:43"
+
+  - id: ISS-108
+    title: "[INFRA] Connect to Neo4j sandbox for NL2Cypher"
+    epic: EPIC-013
+    priority: P1
+    points: 5
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/ai", "todo-harvest"]
+    source: "server/src/ai/nl-to-cypher/nl-to-cypher.service.ts:176"
+
+  - id: ISS-109
+    title: "[INFRA] Implement Typesense search integration"
+    epic: EPIC-006
+    priority: P2
+    points: 8
+    owner: "@intelgraph/data-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/data", "todo-harvest"]
+    source: "api/search.js:6"
+
+  - id: ISS-110
+    title: "[INFRA] Replace stubbed metrics with actual scrape"
+    epic: EPIC-017
+    priority: P2
+    points: 3
+    owner: "@intelgraph/ops-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p2", "zone/ops", "todo-harvest"]
+    source: "companyos/src/evidence/sources.ts:14"
+
+  # ============================================
+  # FRONTEND TODO HARVEST (Sample)
+  # ============================================
+  - id: ISS-201
+    title: "[FE] Replace jQuery with React state in FlowStudio"
+    epic: EPIC-023
+    priority: P2
+    points: 13
+    owner: "@intelgraph/frontend-team"
+    milestone: "Sprint N+58"
+    labels: ["priority/p2", "zone/frontend", "todo-harvest", "tech-debt"]
+    source: "apps/web/src/components/FlowStudio.tsx:15"
+
+  - id: ISS-202
+    title: "[FE] Restore viewSync feature for Explain panel"
+    epic: EPIC-023
+    priority: P3
+    points: 5
+    owner: "@intelgraph/frontend-team"
+    milestone: "Sprint N+58"
+    labels: ["priority/p3", "zone/frontend", "todo-harvest"]
+    source: "apps/web/src/features/explain/explainSlice.ts:3"
+
+  - id: ISS-203
+    title: "[FE] Re-enable GraphQL subscriptions for LiveActivityFeed"
+    epic: EPIC-023
+    priority: P2
+    points: 8
+    owner: "@intelgraph/frontend-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/frontend", "todo-harvest"]
+    source: "client/src/components/dashboard/LiveActivityFeed.tsx:24"
+
+  - id: ISS-204
+    title: "[FE] Implement graph layout algorithms (dagre, radial)"
+    epic: EPIC-024
+    priority: P2
+    points: 13
+    owner: "@intelgraph/frontend-team"
+    milestone: "Sprint N+58"
+    labels: ["priority/p2", "zone/frontend", "todo-harvest"]
+    source: "client/src/components/IntelGraphWorkbench.tsx:382"
+
+  - id: ISS-205
+    title: "[FE] Add hover tooltips for graph nodes"
+    epic: EPIC-024
+    priority: P3
+    points: 5
+    owner: "@intelgraph/frontend-team"
+    milestone: "Sprint N+58"
+    labels: ["priority/p3", "zone/frontend", "todo-harvest"]
+    source: "client/src/components/IntelGraphWorkbench.tsx:732"
+
+  # ============================================
+  # SECURITY TODO HARVEST (Sample)
+  # ============================================
+  - id: ISS-301
+    title: "[SEC] Implement API key verification against DB"
+    epic: EPIC-003
+    priority: P1
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/security", "todo-harvest"]
+    source: "server/src/middleware/unifiedAuth.ts:73"
+
+  - id: ISS-302
+    title: "[SEC] Add usage tracking per user/tenant"
+    epic: EPIC-018
+    priority: P1
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+57"
+    labels: ["priority/p1", "zone/security", "todo-harvest"]
+    source: "server/src/middleware/llm-preflight.ts:220"
+
+  - id: ISS-303
+    title: "[SEC] Check user role for purpose-based access"
+    epic: EPIC-003
+    priority: P1
+    points: 5
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/security", "todo-harvest"]
+    source: "server/src/middleware/governance.ts:197"
+
+  - id: ISS-304
+    title: "[SEC] Implement Merkle log verification for claims"
+    epic: EPIC-002
+    priority: P1
+    points: 8
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/security", "todo-harvest"]
+    source: "server/src/claims/sign.ts:24"
+
+  - id: ISS-305
+    title: "[SEC] Load private keys from secure location"
+    epic: EPIC-003
+    priority: P0
+    points: 5
+    owner: "@intelgraph/security-team"
+    milestone: "Sprint N+55"
+    labels: ["priority/p0", "zone/security", "todo-harvest"]
+    source: "tools/legal/ltdim/index.ts:159"
+
+  # ============================================
+  # TESTING TODO HARVEST (Sample)
+  # ============================================
+  - id: ISS-401
+    title: "[TEST] Create test fixtures and enable trust-center tests"
+    epic: EPIC-001
+    priority: P1
+    points: 8
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+56"
+    labels: ["priority/p1", "zone/testing", "todo-harvest"]
+    source: "server/src/__tests__/trust-center-api.test.ts:9"
+
+  - id: ISS-402
+    title: "[TEST] Fix TypeScript inference in GCS ingest mocks"
+    epic: EPIC-001
+    priority: P2
+    points: 5
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/testing", "todo-harvest"]
+    source: "server/src/connectors/__tests__/gcs-ingest.test.ts:29"
+
+  - id: ISS-403
+    title: "[TEST] Implement 50-client collaboration E2E test"
+    epic: EPIC-001
+    priority: P2
+    points: 13
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+58"
+    labels: ["priority/p2", "zone/testing", "todo-harvest"]
+    source: "e2e/client/collab-delta-sync.spec.ts:5"
+
+  - id: ISS-404
+    title: "[TEST] Enable Maestro E2E tests when environment stable"
+    epic: EPIC-001
+    priority: P2
+    points: 5
+    owner: "@intelgraph/platform-core"
+    milestone: "Sprint N+57"
+    labels: ["priority/p2", "zone/testing", "todo-harvest"]
+    source: "e2e/maestro-run-console.spec.ts:3"
+
+summary:
+  total_initiatives: 6
+  total_epics: 24
+  total_issues_defined: 45  # Sample in this file
+  total_issues_in_backlog: 645  # Full backlog
+  issues_by_priority:
+    P0: 10
+    P1: 20
+    P2: 12
+    P3: 3
+  issues_by_sprint:
+    "Sprint N+55": 4
+    "Sprint N+56": 16
+    "Sprint N+57": 15
+    "Sprint N+58": 10
