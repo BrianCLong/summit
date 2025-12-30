@@ -45,6 +45,10 @@ export * from './quantum-safe-ledger';
 export * from './service';
 export * from './grpc';
 export * from './audit-readiness';
+export * from './externalValidator';
+export * from './evidenceVerifier';
+export * from './manifest';
+export * from './proofs';
 
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD

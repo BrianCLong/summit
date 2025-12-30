@@ -1,7 +1,9 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { createHmac, createHash, randomUUID } from 'node:crypto';
 import type { EvidenceBundle } from 'common-types';
 import type { ExportManifest } from './manifest.js';
 import { verifyManifest } from './manifest.js';
+import { stableHash } from '@ga-graphai/data-integrity';
+import { verifyEvidenceBundle } from './evidenceVerifier.js';
 
 export type ValidationStatus = 'verified' | 'rejected' | 'error';
 
@@ -83,6 +85,9 @@ export class ProvenanceBundleValidator {
     ];
 
     const manifestVerification = verifyManifest(manifest, bundle.entries, bundle);
+    const bundleVerification = verifyEvidenceBundle(bundle, {
+      signingKey: this.validator.name,
+    });
 
     const payload: ExternalValidationPayload = {
       bundleHash: hashBundle(bundle),
@@ -102,8 +107,10 @@ export class ProvenanceBundleValidator {
 
     const compliance = this.buildComplianceAttestation(
       payload.bundleHash,
-      manifestVerification.valid && thirdParty.status === 'verified',
-      thirdParty.notes,
+      manifestVerification.valid &&
+        thirdParty.status === 'verified' &&
+        bundleVerification.valid,
+      thirdParty.notes ?? bundleVerification.reasons.join(', '),
     );
 
     custodyTrail.push(
@@ -144,7 +151,7 @@ export class ProvenanceBundleValidator {
   }
 
   private async safeVerify(
-    payload: ExternalValidationPayload,
+      payload: ExternalValidationPayload,
   ): Promise<ExternalVerificationReceipt> {
     try {
       return await this.validator.verify(payload);
@@ -163,8 +170,22 @@ export class ProvenanceBundleValidator {
 }
 
 export function hashBundle(bundle: EvidenceBundle): string {
-  const hash = createHash('sha256');
-  hash.update(bundle.headHash ?? '');
-  hash.update(JSON.stringify(bundle.entries));
-  return hash.digest('hex');
+  if (!bundle.headHash) {
+    throw new Error('Evidence bundle is missing headHash');
+  }
+  const seen = new Set<string>();
+  bundle.entries.forEach((entry) => {
+    if (seen.has(entry.hash)) {
+      throw new Error('Duplicate ledger entry detected in bundle');
+    }
+    seen.add(entry.hash);
+  });
+  const digest = stableHash({
+    headHash: bundle.headHash,
+    entries: bundle.entries.map((entry, index) => ({ index, entry })),
+    atoms: bundle.atoms,
+    snapshotCommitment: bundle.snapshotCommitment,
+    traceDigest: bundle.traceDigest,
+  });
+  return createHmac('sha256', 'evidence-bundle:v2').update(digest).digest('hex');
 }

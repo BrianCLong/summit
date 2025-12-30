@@ -8,7 +8,14 @@ import {
   sign as signPayload,
   verify as verifyPayload,
 } from 'node:crypto';
-import type { EvidenceBundle, LedgerEntry, LedgerFactInput } from 'common-types';
+import type {
+  EvidenceBundle,
+  LedgerEntry,
+  LedgerFactInput,
+  PolicyDecisionToken,
+  SnapshotCommitment,
+} from 'common-types';
+import { buildMerkleTree, mapEntriesToAtoms } from './proofs.js';
 
 const LAMPORT_KEY_COUNT = 256;
 const LAMPORT_SECRET_BYTES = 32;
@@ -455,10 +462,67 @@ export class QuantumSafeLedger {
 
   exportEvidence(limit = 200): EvidenceBundle {
     const entries = this.list(limit);
+    const { root, proofs } = buildMerkleTree(entries);
+    const snapshotCommitment = this.snapshotCommitment(root, entries.at(-1)?.chainHash ?? '');
+    const policyTokens = this.issuePolicyTokens(entries, snapshotCommitment.rootSignature);
+    const atoms = mapEntriesToAtoms(entries, proofs).map((atom, index) => ({
+      ...atom,
+      policyTokens: [policyTokens[index]],
+    }));
+    const traceDigest = createHash('sha256')
+      .update(entries.map((entry) => entry.hash).join('|'))
+      .digest('hex');
+
     return {
       generatedAt: this.now().toISOString(),
       headHash: entries.at(-1)?.chainHash,
       entries,
+      atoms,
+      snapshotCommitment,
+      policyTokens,
+      traceDigest,
+      execAttestation: {
+        quote: 'tee-unavailable-in-tests',
+        measurement: snapshotCommitment.rootHash,
+        runtimeHash: traceDigest,
+        traceDigest,
+      },
     };
+  }
+
+  private snapshotCommitment(rootHash: string, headHash: string): SnapshotCommitment {
+    const snapshotId = sha256Hex(`${headHash}|${rootHash}`);
+    const rootSignature = createHmac('sha256', 'prov-ledger-signing-key')
+      .update(`${snapshotId}|${rootHash}`)
+      .digest('hex');
+    return {
+      snapshotId,
+      rootHash,
+      rootSignature,
+      issuer: 'prov-ledger',
+      issuedAt: this.now().toISOString(),
+      logChainHead: rootSignature,
+    };
+  }
+
+  private issuePolicyTokens(
+    entries: readonly LedgerEntry[],
+    signatureKey: string,
+  ): PolicyDecisionToken[] {
+    return entries.map((entry) => {
+      const payload = `${entry.actor}|${entry.action}|${entry.category}|${entry.resource}`;
+      const decisionSig = createHmac('sha256', signatureKey).update(payload).digest('hex');
+      return {
+        decisionId: `${entry.id}-allow`,
+        subjectHash: sha256Hex(entry.actor),
+        purpose: 'ledger-audit',
+        action: entry.action,
+        objectClass: entry.category,
+        constraints: { resource: entry.resource },
+        decision: 'ALLOW',
+        decisionSig,
+        issuedAt: this.now().toISOString(),
+      };
+    });
   }
 }

@@ -312,6 +312,57 @@ export interface EvidenceBundle {
   generatedAt: string;
   headHash?: string;
   entries: LedgerEntry[];
+  atoms?: EvidenceAtomProof[];
+  snapshotCommitment?: SnapshotCommitment;
+  policyTokens?: PolicyDecisionToken[];
+  execAttestation?: ExecutionAttestation;
+  traceDigest?: string;
+}
+
+export interface EvidenceAtomProof {
+  eaId: string;
+  contentPtr?: string;
+  displayBytes?: string;
+  contentHash?: string;
+  metaHash?: string;
+  viewId?: string;
+  viewHash?: string;
+  inclusionProof?: string[];
+  leafHash?: string;
+  policyTokens?: PolicyDecisionToken[];
+}
+
+export interface SnapshotCommitment {
+  snapshotId: string;
+  rootHash: string;
+  rootSignature: string;
+  issuer: string;
+  issuedAt: string;
+  indexVersion?: string;
+  policyVersion?: string;
+  logChainHead?: string;
+}
+
+export type PolicyDecision = 'ALLOW' | 'ALLOW_WITH_REDACTION' | 'DENY';
+
+export interface PolicyDecisionToken {
+  decisionId: string;
+  subjectHash: string;
+  purpose: string;
+  action: string;
+  objectClass: string;
+  constraints?: Record<string, unknown>;
+  decision: PolicyDecision;
+  decisionSig: string;
+  issuedAt: string;
+  expiresAt?: string;
+}
+
+export interface ExecutionAttestation {
+  quote: string;
+  measurement: string;
+  runtimeHash?: string;
+  traceDigest?: string;
 }
 
 export type ComplianceFramework =

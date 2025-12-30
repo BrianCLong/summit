@@ -1,6 +1,5 @@
 import { EventEmitter } from 'node:events';
 import type { Pool } from 'pg';
-import { createHash } from 'node:crypto';
 import express, { Router, type RequestHandler } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { buildSchema, GraphQLError } from 'graphql';
@@ -13,6 +12,7 @@ import {
   type QuantumLedgerEntry,
   type SchnorrProof,
 } from './quantum-safe-ledger.js';
+import { hashBundle } from './externalValidator.js';
 
 export interface ClaimMessage {
   caseId: string;
@@ -154,9 +154,12 @@ export class LedgerService {
   }
 
   registerEvidence(caseId: string, evidence: EvidenceBundle): EvidenceBundle {
-    const hash = createHash('sha256').update(JSON.stringify(evidence)).digest('hex');
-    const stamped: EvidenceBundle = { ...evidence, headHash: evidence.headHash ?? hash };
-    return stamped;
+    const stamped: EvidenceBundle = {
+      ...evidence,
+      headHash: evidence.headHash ?? evidence.entries.at(-1)?.hash,
+    };
+    const bundleHash = hashBundle(stamped);
+    return { ...stamped, traceDigest: stamped.traceDigest ?? bundleHash };
   }
 
   exportManifest(caseId: string): ManifestRecord {
