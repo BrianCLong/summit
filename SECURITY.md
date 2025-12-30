@@ -11,7 +11,7 @@ This document outlines the security policy for the Summit (IntelGraph) platform.
 - **Identity & access**: SSO (OIDC/SAML), service accounts, API keys/tokens, secrets management (Vault/KMS), RBAC/ABAC policy engine.
 - **Infrastructure**: Kubernetes clusters, container images, CI/CD runners, build artifacts, Terraform/Helm/IaC state, ingress/load balancers, CDN/edge caches.
 - **Observability & security tooling**: logs/metrics/traces, SIEM/SOAR connectors, provenance ledger, audit trails.
-- **Third-party dependencies**: npm/pnpm packages, Rust crates, Python packages, OS packages, external AI/model services.
+- **Third-party dependencies**: npm/pnpm packages, Rust crates (Cargo), Python packages, OS packages, external AI/model services.
 
 ### Trust Boundaries
 
