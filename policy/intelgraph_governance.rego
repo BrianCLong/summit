@@ -48,7 +48,7 @@ redact contains field if {
 
 # Rule 3: Deny-by-default is already handled by the first line, but we'll make an explicit rule
 # for unknown actors or roles for clarity. This rule will contribute to a 'deny' decision.
-deny_unknown_actor[msg] if {
+deny_unknown_actor contains msg if {
     # Deny if the subject is missing, or if their roles array is missing or empty.
     count(input.subject.roles) == 0
     msg := "Request denied: Subject has no roles or is not properly defined."
