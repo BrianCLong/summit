@@ -5,6 +5,7 @@ import { logEventBus, type LogLevel } from './logEventBus.js';
 import { LogAlertEngine, defaultAlertRules } from './logAlertEngine.js';
 import { scheduleRetention, type RetentionPolicy } from './logRetention.js';
 import { formatLogEvent } from './logEventFormatter.js';
+import { sanitizeLogArguments } from './logRedaction.js';
 import { AuditLogPipeline } from './auditLogPipeline.js';
 import { AuditLedger } from '../audit/ledger.js';
 
@@ -47,15 +48,16 @@ const baseLogger = (pino as any)(
     timestamp: (pino as any).stdTimeFunctions?.isoTime || (() => `,"time":"${new Date().toISOString()}"`),
     hooks: {
       logMethod(args, method, level) {
+        const safeArgs = sanitizeLogArguments(args);
         try {
-          const event = formatLogEvent((level as LogLevel) || 'info', args);
+          const event = formatLogEvent((level as LogLevel) || 'info', safeArgs);
           logEventBus.publish(event);
         } catch (error) {
           // Guard against serialization errors without breaking application logging.
           baseLogger.warn({ error }, 'Failed to mirror log event to bus');
         }
 
-        method.apply(this, args);
+        method.apply(this, safeArgs);
       },
     },
   },
