@@ -23,6 +23,14 @@ jest.mock('../audit/advanced-audit-system.js', () => ({
   },
 }));
 
+jest.mock('../provenance/ledger.js', () => ({
+  ProvenanceLedger: {
+    getInstance: jest.fn(() => ({
+      recordEvent: jest.fn(),
+    })),
+  },
+}));
+
 describe('IntelGraphService', () => {
   let service: IntelGraphService;
   const mockRunCypher = neo4j.runCypher as jest.MockedFunction<typeof neo4j.runCypher>;
