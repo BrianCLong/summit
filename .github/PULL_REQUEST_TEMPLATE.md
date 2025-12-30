@@ -52,6 +52,13 @@ _If this PR involves integrating an external system or library:_
 - [ ] Supply chain checks passed (signing, provenance, SBOM)
 - Exception ID/reference (if applicable):
 
+### Security Checklist
+- [ ] **Authentication**: Endpoints are authenticated.
+- [ ] **Authorization**: RBAC/ABAC permissions verified.
+- [ ] **Input Validation**: Zod/Joi used for all inputs.
+- [ ] **Output Encoding**: No raw HTML/SQL injection risks.
+- [ ] **Data Handling**: No sensitive PII in logs/storage.
+
 ## Verification
 
 - [ ] Smoke checks
