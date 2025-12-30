@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (New features will be documented here)
 
 ### Changed
-- (Changes to existing functionality)
+- Documented Node.js 20.11.0 as the required runtime to match the repository toolchain.
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 
