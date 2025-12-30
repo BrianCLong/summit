@@ -133,6 +133,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   private rootSigningInterval: NodeJS.Timeout | null = null;
   private cryptoPipeline?: CryptoPipeline;
   private cryptoPipelineInit?: Promise<void>;
+  private pool: any = pool;
 
   private static instance: ProvenanceLedgerV2;
 
@@ -148,6 +149,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     this.initializeTables();
     this.initializeCryptoPipeline();
     this.startRootSigning();
+  }
+
+  setPool(pool: any): void {
+    this.pool = pool;
   }
 
   setCryptoPipeline(pipeline: CryptoPipeline | null): void {
@@ -942,7 +947,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   private async getTenantList(): Promise<string[]> {
-    const result = await pool.query(
+    const result = await this.pool.query(
       'SELECT DISTINCT tenant_id FROM provenance_ledger_v2 ORDER BY tenant_id',
     );
     return result.rows.map((row) => row.tenant_id);
@@ -982,6 +987,11 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   private startRootSigning(): void {
+    // Skip if in zero footprint mode (tests)
+    if (process.env.ZERO_FOOTPRINT === 'true') {
+      return;
+    }
+
     // Sign roots daily at 2 AM UTC
     const dailySigningHour = 2;
     const now = new Date();
@@ -994,7 +1004,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
     const msUntilNextRun = nextRun.getTime() - now.getTime();
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       this.performDailyRootSigning();
 
       // Set up daily interval
@@ -1004,7 +1014,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         },
         24 * 60 * 60 * 1000,
       ); // 24 hours
+      this.rootSigningInterval?.unref();
     }, msUntilNextRun);
+
+    timer.unref();
   }
 
   private async performDailyRootSigning(): Promise<void> {
@@ -1081,7 +1094,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       ${options.offset ? `OFFSET ${options.offset}` : ''}
     `;
 
-    const result = await pool.query(query, params);
+    const result = await this.pool.query(query, params);
     return result.rows.map((row) => this.mapRowToEntry(row));
   }
 
@@ -1153,7 +1166,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   private async getTenantSignedRoots(tenantId: string): Promise<LedgerRoot[]> {
-    const result = await pool.query(
+    const result = await this.pool.query(
       `SELECT * FROM provenance_ledger_roots
        WHERE tenant_id = $1
        ORDER BY end_sequence ASC`,
