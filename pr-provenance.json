@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-12-30T06:13:48.952Z",
+  "actor": "Jules",
+  "context": {
+    "baseRef": "HEAD~1",
+    "headRef": "HEAD",
+    "ciJob": "local"
+  },
+  "changedFilesCount": 0,
+  "changedFiles": [],
+  "violations": [],
+  "status": "VERIFIED"
+}
