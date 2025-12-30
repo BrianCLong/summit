@@ -1,18 +1,18 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { IntelGraphService } from '../services/IntelGraphService.js';
-import * as neo4j from '../graph/neo4j.js';
+
+// Define shared mocks
+const mockRun = jest.fn();
+const mockClose = jest.fn().mockResolvedValue(undefined);
+const mockSession = { run: mockRun, close: mockClose };
+const mockDriver = { session: jest.fn(() => mockSession) };
 
 // Mock neo4j
 jest.mock('../graph/neo4j.js');
 
 // Mock configs and dependencies
 jest.mock('../config/database.js', () => ({
-  getNeo4jDriver: jest.fn(() => ({
-    session: jest.fn(() => ({
-      run: jest.fn(),
-      close: jest.fn().mockResolvedValue(undefined),
-    })),
-  })),
+  getNeo4jDriver: jest.fn(() => mockDriver),
   getPostgresPool: jest.fn(),
   getRedisClient: jest.fn(),
 }));
@@ -32,8 +32,6 @@ jest.mock('../provenance/ledger.js', () => ({
 
 describe('IntelGraphService', () => {
   let service: IntelGraphService;
-  let mockDriver: any;
-  let mockSession: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,12 +39,6 @@ describe('IntelGraphService', () => {
     // @ts-ignore
     IntelGraphService.instance = null;
     service = IntelGraphService.getInstance();
-
-    // Get access to the mock session
-    // @ts-ignore
-    const { getNeo4jDriver } = require('../config/database.js');
-    mockDriver = getNeo4jDriver();
-    mockSession = mockDriver.session();
   });
 
   describe('createEntity', () => {
@@ -58,13 +50,14 @@ describe('IntelGraphService', () => {
       const mockRecord = {
         get: jest.fn().mockReturnValue({ properties: { id: 'uuid-1', ...entityData } })
       };
-      mockSession.run.mockResolvedValue({ records: [mockRecord] });
+      // Reset mockRun implementation for this test
+      mockRun.mockResolvedValue({ records: [mockRecord] });
 
       const result = await service.createEntity(entityData, owner, tenantId);
 
       expect(result).toHaveProperty('id', 'uuid-1');
       expect(result.name).toBe('Test Entity');
-      expect(mockSession.run).toHaveBeenCalledWith(
+      expect(mockRun).toHaveBeenCalledWith(
         expect.stringContaining('CREATE (e:Entity'),
         expect.objectContaining({ props: expect.objectContaining({ name: 'Test Entity' }) })
       );
@@ -80,13 +73,13 @@ describe('IntelGraphService', () => {
       const mockRecord = {
         get: jest.fn().mockReturnValue({ properties: { id: 'c-1', ...claimData } })
       };
-      mockSession.run.mockResolvedValue({ records: [mockRecord] });
+      mockRun.mockResolvedValue({ records: [mockRecord] });
 
       const result = await service.createClaim(claimData, owner, tenantId);
 
       expect(result).toHaveProperty('id', 'c-1');
       expect(result.statement).toBe('AI is great');
-      expect(mockSession.run).toHaveBeenCalledWith(
+      expect(mockRun).toHaveBeenCalledWith(
         expect.stringContaining('CREATE (c:Claim'),
         expect.anything()
       );
