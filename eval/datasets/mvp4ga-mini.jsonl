@@ -1,0 +1,11 @@
+{"input": "What is the primary function of the Maestro Orchestrator?", "expected": "Orchestrates complex AI workflows and tasks.", "criteria": "Must mention orchestration of workflows or tasks."}
+{"input": "Who is the lead developer of IntelGraph?", "expected": "The IntelGraph Team.", "criteria": "Must mention IntelGraph Team."}
+{"input": "What database is used for the graph layer?", "expected": "Neo4j", "criteria": "Exact match: Neo4j"}
+{"input": "What is the purpose of the Provenance Ledger?", "expected": "To record and verify the lineage of data and decisions.", "criteria": "Must mention recording/verifying lineage or history."}
+{"input": "Which protocol is used for service-to-service communication security?", "expected": "mTLS", "criteria": "Exact match: mTLS"}
+{"input": "What is the default dimension for vector embeddings?", "expected": "3072", "criteria": "Exact match: 3072"}
+{"input": "Name one of the Black Projects.", "expected": "AURORA, ORACLE, etc.", "criteria": "Must match one of the known black projects."}
+{"input": "What tool is used for background job processing?", "expected": "pg-boss or bullmq", "criteria": "Must mention pg-boss or bullmq."}
+{"input": "What is the p95 latency SLO for GraphQL queries?", "expected": "350ms", "criteria": "Must contain 350ms."}
+{"input": "Where are the prompts centralized?", "expected": "prompts/ directory", "criteria": "Must mention prompts directory."}
+{"input": "What is the name of the cognitive architecture?", "expected": "Council of Solvers", "criteria": "Must mention Council of Solvers."}
