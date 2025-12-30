@@ -23,7 +23,9 @@ export default tseslint.config(
     'ui/**', 'web/**', 'webapp/**', 'k6/**', 'deepagent-mvp/**', 'sim-harness/**',
     'prov-ledger-service/**', 'ops/**', 'test/**', 'october2025/**', 'summit-intel-evo/**',
     'safety-harness/**', 'infra/**', 'connectors/**', 'intelgraph-quickstart/**',
-    'integrations/**', 'extensions/**'
+    'integrations/**', 'extensions/**',
+    'apps/**', 'client/**', 'packages/**', 'services/**', 'server/**',
+    'streaming/**', 'sprint-kits/**', 'synthetics/**', 'tooling/**'
   ] },
   {
     extends: [

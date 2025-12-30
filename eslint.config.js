@@ -88,6 +88,16 @@ const IGNORE = [
   'intelgraph-quickstart/**',
   'integrations/**',
   'extensions/**',
+  // Core frontend directories with own eslint configs
+  'apps/**',
+  'client/**',
+  'packages/**',
+  'services/**',
+  'server/**',
+  'streaming/**',
+  'sprint-kits/**',
+  'synthetics/**',
+  'tooling/**',
 ];
 
 export default [
