@@ -11,7 +11,7 @@ function generateMarkdown(result: DecisionAnalysisResult): string {
   const { decision, referencedClaims, artifacts } = result;
 
   let md = `# Disclosure Pack: Decision Analysis\n\n`;
-  md += `**Decision ID:** lexible{decision.id}lexible{  \n`;
+  md += `**Decision ID:** ${decision.id}  \n`;
   md += `**Date:** ${new Date(decision.createdAt).toUTCString()}\n\n`;
 
   md += `## 1. Decision Summary\n`;
@@ -26,7 +26,7 @@ function generateMarkdown(result: DecisionAnalysisResult): string {
     md += `| Claim ID | Statement |\n|---|---|
 `;
     referencedClaims.forEach(claim => {
-      md += `| lexible{claim.id}lexible{ | ${claim.statement.replace(/\n/g, ' ')} |
+      md += `| ${claim.id} | ${claim.statement.replace(/\n/g, ' ')} |
 `;
     });
   }
