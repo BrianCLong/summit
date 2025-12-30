@@ -6,12 +6,72 @@ import { telemetryService } from '../analytics/telemetry/TelemetryService.js';
 
 const router = Router();
 
+const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'false').toLowerCase() === 'true';
+
+const baseStatus = () => ({
+  timestamp: new Date().toISOString(),
+  uptime: process.uptime(),
+  environment: process.env.NODE_ENV || 'development',
+});
+
+const startedAt = () => new Date(Date.now() - Math.floor(process.uptime() * 1000)).toISOString();
+
 // Error details interface for better type safety
 interface ServiceHealthError {
   service: string;
   error: string;
   timestamp: string;
 }
+
+const buildDisabledResponse = (res: Response) =>
+  res.status(404).json({ status: 'disabled', reason: 'HEALTH_ENDPOINTS_ENABLED is false' });
+
+router.get('/healthz', (_req: Request, res: Response) => {
+  if (!healthEndpointsEnabled()) {
+    return buildDisabledResponse(res);
+  }
+
+  res.status(200).json({
+    status: 'ok',
+    ...baseStatus(),
+  });
+});
+
+router.get('/readyz', (_req: Request, res: Response) => {
+  if (!healthEndpointsEnabled()) {
+    return buildDisabledResponse(res);
+  }
+
+  const readiness = {
+    database: 'skipped',
+    cache: 'skipped',
+    messaging: 'skipped',
+  } as const;
+
+  res.status(200).json({
+    status: 'ready',
+    checks: readiness,
+    message: 'Shallow readiness probe; deep checks remain on /health/ready',
+    ...baseStatus(),
+  });
+});
+
+router.get('/status', (_req: Request, res: Response) => {
+  if (!healthEndpointsEnabled()) {
+    return buildDisabledResponse(res);
+  }
+
+  const version = process.env.APP_VERSION || process.env.npm_package_version || 'unknown';
+  const commit = process.env.GIT_COMMIT || process.env.COMMIT_SHA || 'unknown';
+
+  res.status(200).json({
+    status: 'ok',
+    version,
+    commit,
+    startedAt: startedAt(),
+    ...baseStatus(),
+  });
+});
 
 /**
  * @openapi
