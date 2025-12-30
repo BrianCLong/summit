@@ -1,7 +1,4 @@
 // @ts-nocheck
-/// <reference types="jest" />
-/// <reference types="node" />
-
 /**
  * Jest Global Setup
  *
@@ -9,24 +6,15 @@
  * It sets up global test utilities and configuration.
  */
 
-// @ts-nocheck
-import { jest } from '@jest/globals';
-
 // Extend Jest timeout for integration tests
-jest.setTimeout(30000);
-
-// Global test utilities
-declare global {
-  var testHelpers: {
-    waitFor: (fn: () => boolean | Promise<boolean>, timeout?: number) => Promise<void>;
-    sleep: (ms: number) => Promise<void>;
-    mockConsole: () => { restore: () => void };
-  };
+// Note: using global jest object available in Jest environment
+if (typeof jest !== 'undefined') {
+  jest.setTimeout(30000);
 }
 
-// Wait for a condition to be true
+// Global test utilities
 globalThis.testHelpers = {
-  waitFor: async (fn: () => boolean | Promise<boolean>, timeout = 5000): Promise<void> => {
+  waitFor: async (fn, timeout = 5000) => {
     const start = Date.now();
     while (Date.now() - start < timeout) {
       const result = await fn();
@@ -36,7 +24,7 @@ globalThis.testHelpers = {
     throw new Error(`waitFor timed out after ${timeout}ms`);
   },
 
-  sleep: (ms: number): Promise<void> => {
+  sleep: (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
   },
 
@@ -66,13 +54,13 @@ afterEach(() => {
 });
 
 // Global error handler for unhandled rejections in tests
-process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
+process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection in test:', reason);
 });
 
 // Suppress specific warnings in tests
 const originalWarn = console.warn;
-console.warn = (...args: unknown[]) => {
+console.warn = (...args) => {
   // Suppress known benign warnings
   const message = args[0];
   if (typeof message === 'string') {
@@ -81,5 +69,3 @@ console.warn = (...args: unknown[]) => {
   }
   originalWarn.apply(console, args);
 };
-
-export {};
