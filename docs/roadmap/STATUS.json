@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T18:00:00Z",
-  "revision_note": "Updated to reflect actual code implementation status per Critical Needs Audit 2025-12-30",
+  "last_updated": "2026-01-02T00:00:00Z",
+  "revision_note": "Aligned roadmap with Sprint 27 Governance Fabric plan and evidence expectations",
   "initiatives": [
     {
       "id": "A",
@@ -84,8 +84,12 @@
           "status": "incomplete",
           "owner": "Jules",
           "evidence": "Audit services exist but logging is console-only (BaseAgentArchetype.ts:343-352)",
-          "blockers": ["Need persistent append-only storage", "No tamper-proof verification", "No centralized log aggregation"],
-          "target_completion": "Sprint N+1 (CRITICAL for GA)"
+          "blockers": [
+            "Need persistent append-only storage",
+            "No tamper-proof verification",
+            "No centralized log aggregation"
+          ],
+          "target_completion": "Sprint 27 (Governance Fabric)"
         }
       ]
     },
