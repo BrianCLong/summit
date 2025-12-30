@@ -24,7 +24,7 @@ export async function loadPolicyBundleFromDisk(
   signaturePath?: string,
 ): Promise<PolicyBundleVersion> {
   const verification = await loadSignedPolicy(bundlePath, signaturePath);
-  const content = await fs.readFile(bundlePath, 'utf8');
+  const content = verification.buf.toString('utf8');
   const parsed = tenantPolicyBundleSchema.parse(JSON.parse(content));
   const versionId = deriveVersionId(parsed, verification.digest);
 
