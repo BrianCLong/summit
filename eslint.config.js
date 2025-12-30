@@ -70,6 +70,24 @@ const IGNORE = [
   'adapters/**',
   'tests/**',
   'src/**',
+  // Additional UI and app directories
+  'ui/**',
+  'web/**',
+  'webapp/**',
+  'k6/**',
+  'deepagent-mvp/**',
+  'sim-harness/**',
+  'prov-ledger-service/**',
+  'ops/**',
+  'test/**',
+  'october2025/**',
+  'summit-intel-evo/**',
+  'safety-harness/**',
+  'infra/**',
+  'connectors/**',
+  'intelgraph-quickstart/**',
+  'integrations/**',
+  'extensions/**',
 ];
 
 export default [
@@ -148,6 +166,17 @@ export default [
       'no-constant-binary-expression': 'warn',
       'no-dupe-keys': 'warn',
       'no-shadow-restricted-names': 'warn',
+      'no-irregular-whitespace': 'warn',
+      'no-duplicate-case': 'warn',
+      'no-async-promise-executor': 'warn',
+      'no-cond-assign': 'warn',
+      'no-unreachable': 'warn',
+      'no-unexpected-multiline': 'warn',
+      'no-sparse-arrays': 'warn',
+      'no-empty-pattern': 'warn',
+      'prefer-spread': 'warn',
+      'no-redeclare': 'warn',
+      'no-dupe-class-members': 'warn',
 
       // Best Practices
       curly: ['warn', 'all'],
