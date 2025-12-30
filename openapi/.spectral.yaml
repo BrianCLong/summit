@@ -1,0 +1,56 @@
+extends: [[spectral:oas, recommended]]
+
+rules:
+  # 1. Consistent operationIds
+  operation-operationId:
+    description: "Operation must have an operationId."
+    severity: error
+    given: "$.paths[*][get,put,post,delete,options,head,patch,trace]"
+    then:
+      field: "operationId"
+      function: truthy
+
+  operation-operationId-camelCase:
+    description: "operationId must be camelCase."
+    severity: error
+    given: "$.paths[*][get,put,post,delete,options,head,patch,trace]"
+    then:
+      field: "operationId"
+      function: casing
+      functionOptions:
+        type: camel
+
+  # 2. Response codes standardization
+  # (Standard oas3-operation-success-response rule covers "must have at least one 2xx/3xx")
+
+  # 3. Error schema requirements
+  # Enforce that error responses (4xx, 5xx) have a schema defined
+  error-response-schema:
+    description: "Error responses (4xx, 5xx) must have a schema."
+    severity: error
+    given: "$.paths..responses[?(@property >= 400 && @property < 600)]"
+    then:
+      field: "content.application/json.schema"
+      function: truthy
+
+  # 4. Path casing (Bonus/Good practice)
+  path-keys-kebab-case:
+    description: "Path segments should be kebab-case."
+    severity: warn
+    given: "$.paths"
+    then:
+      function: casing
+      functionOptions:
+        type: kebab
+        separator:
+          char: "/"
+
+  # 5. Schema names PascalCase
+  schema-names-pascal-case:
+    description: "Schema names should be PascalCase."
+    severity: warn
+    given: "$.components.schemas"
+    then:
+      function: casing
+      functionOptions:
+        type: pascal
