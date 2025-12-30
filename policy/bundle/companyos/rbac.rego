@@ -1,8 +1,7 @@
 package companyos.rbac
 
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
+# OPA v1 imports - keywords are built-in
+import rego.v1
 
 default allow := false
 
@@ -66,11 +65,17 @@ allow if {
   is_exec
 }
 
+# Helper: check if tags contain confidential
+has_confidential_tag if {
+  some t in input.resource.tags
+  t == "confidential"
+}
+
 # Read non-confidential RAG snippet - Exec
 allow if {
   input.action == "read_snippet"
   input.resource.type == "rag_snippet"
-  not input.resource.tags[_] == "confidential"
+  not has_confidential_tag
   is_exec
 }
 
@@ -78,7 +83,7 @@ allow if {
 allow if {
   input.action == "read_snippet"
   input.resource.type == "rag_snippet"
-  not input.resource.tags[_] == "confidential"
+  not has_confidential_tag
   is_am
 }
 
@@ -86,7 +91,7 @@ allow if {
 allow if {
   input.action == "read_snippet"
   input.resource.type == "rag_snippet"
-  not input.resource.tags[_] == "confidential"
+  not has_confidential_tag
   is_presenter
 }
 

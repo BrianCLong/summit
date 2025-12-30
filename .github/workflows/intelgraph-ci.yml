@@ -43,15 +43,16 @@ jobs:
 
       - name: Build OPA Policy Bundle
         run: |
-          opa build --target wasm --bundle --optimize=1 \
-            --output policy/bundle.wasm \
+          # Build rego bundle (not WASM) since WASM with optimization requires entrypoints
+          opa build --bundle \
+            --output policy/bundle.tar.gz \
             policy/
 
       - name: Upload OPA Bundle as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: opa-bundle
-          path: policy/bundle.wasm
+          path: policy/bundle.tar.gz
           retention-days: 7
 
       # The testing step is intentionally excluded due to the known,
