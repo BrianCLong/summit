@@ -52,7 +52,7 @@ export default function ScenarioChart() {
   };
 
   const rows = useMemo(() => {
-    if (!data) return [];
+    if (!data) {return [];}
     return data.revenueMonthly.map((rev, i) => ({
       month: `M${i + 1}`,
       revenue: Math.round(rev),

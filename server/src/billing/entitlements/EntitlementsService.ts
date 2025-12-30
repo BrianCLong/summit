@@ -48,7 +48,7 @@ export class EntitlementsService implements EntitlementsInterface {
       [tenantId, feature]
     );
 
-    if (result.rowCount === 0) return 0;
+    if (result.rowCount === 0) {return 0;}
 
     const limits = result.rows[0].limits;
     // Assuming limits structure like { "daily_requests": 1000 }

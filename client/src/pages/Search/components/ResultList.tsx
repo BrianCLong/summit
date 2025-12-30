@@ -102,8 +102,8 @@ const getEntityColor = (type: SearchResult['type']): ChipProps['color'] => {
 };
 
 const getScoreColor = (score: number): ChipProps['color'] => {
-  if (score >= 0.8) return 'success';
-  if (score >= 0.6) return 'warning';
+  if (score >= 0.8) {return 'success';}
+  if (score >= 0.6) {return 'warning';}
   return 'error';
 };
 

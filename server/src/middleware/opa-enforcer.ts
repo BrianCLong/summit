@@ -392,7 +392,7 @@ export class OPAEnforcer {
    * Parse approvers from header
    */
   private parseApprovers(approversHeader?: string): Array<any> | undefined {
-    if (!approversHeader) return undefined;
+    if (!approversHeader) {return undefined;}
 
     try {
       return JSON.parse(decodeURIComponent(approversHeader));

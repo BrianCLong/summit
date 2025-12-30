@@ -20,8 +20,8 @@ const handleBulkRequest = (operationType: string) => async (req: express.Request
         const payload: BulkOperationPayload = {
             items,
             requestId: requestId || randomUUID(),
-            dryRun: !!dryRun,
-            atomic: !!atomic,
+            dryRun: Boolean(dryRun),
+            atomic: Boolean(atomic),
             operationType,
             params // Rest of body is params
         };

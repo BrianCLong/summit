@@ -37,9 +37,9 @@ export function stableHash(input: unknown): string {
 }
 
 function stableStringify(value: unknown): string {
-  if (value === null || value === undefined) return String(value);
-  if (typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map((v) => stableStringify(v)).join(',')}]`;
+  if (value === null || value === undefined) {return String(value);}
+  if (typeof value !== 'object') {return JSON.stringify(value);}
+  if (Array.isArray(value)) {return `[${value.map((v) => stableStringify(v)).join(',')}]`;}
   const keys = Object.keys(value).sort();
   return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`;
 }

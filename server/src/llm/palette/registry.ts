@@ -107,9 +107,9 @@ export function listPalettes(): ReasoningPalette[] {
 }
 
 export function loadPalettesFromFile(filePath?: string): void {
-  if (!filePath) return;
+  if (!filePath) {return;}
   const absolutePath = path.resolve(filePath);
-  if (!fs.existsSync(absolutePath)) return;
+  if (!fs.existsSync(absolutePath)) {return;}
   try {
     const data = JSON.parse(fs.readFileSync(absolutePath, 'utf-8')) as ReasoningPalette[];
     data.forEach(registerPalette);

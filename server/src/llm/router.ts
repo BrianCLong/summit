@@ -57,7 +57,7 @@ export class LLMRouter {
 
     const baseMessages = baseRequest.messages || [];
     const paletteOptions = baseRequest.palette;
-    const paletteEnabled = this.paletteRuntime.enabled || !!paletteOptions;
+    const paletteEnabled = this.paletteRuntime.enabled || Boolean(paletteOptions);
     const paletteContext = { tenantId: baseRequest.tenantId };
 
     if (paletteOptions && !this.paletteRuntime.enabled) {
@@ -120,7 +120,7 @@ export class LLMRouter {
     };
 
     const applyPalette = (selection: PaletteSelectionResult | null, requestIdSuffix?: string): LLMRequest => {
-      if (!selection) return { ...baseRequest, messages: baseMessages, id: requestIdSuffix ? `${baseRequest.id}-${requestIdSuffix}` : baseRequest.id };
+      if (!selection) {return { ...baseRequest, messages: baseMessages, id: requestIdSuffix ? `${baseRequest.id}-${requestIdSuffix}` : baseRequest.id };}
       const injection = applyPaletteInjection(selection.palette, baseMessages);
       paletteUsedTotal.inc({ paletteId: selection.palette.id });
 

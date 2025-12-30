@@ -34,7 +34,7 @@ export const ComplianceAPI = {
 
   async getControls(framework, category) {
     const params = new URLSearchParams();
-    if (category) params.set('category', category);
+    if (category) {params.set('category', category);}
     const response = await fetch(`${API_BASE}/frameworks/${framework}/controls?${params}`, {
       headers: getHeaders(),
     });

@@ -50,7 +50,7 @@ class CopilotPostgresStore {
       this.memory.runs.set(mapped.id, mapped);
       return mapped;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
 
       const fallback = {
         id: run.id,
@@ -89,7 +89,7 @@ class CopilotPostgresStore {
       }
       return null;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       return this.memory.runs.get(id) || null;
     }
   }
@@ -129,9 +129,9 @@ class CopilotPostgresStore {
       }
       return null;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       const existing = this.memory.runs.get(run.id);
-      if (!existing) return null;
+      if (!existing) {return null;}
       const updated = {
         ...existing,
         status: run.status,
@@ -183,7 +183,7 @@ class CopilotPostgresStore {
       this.upsertTask(mapped);
       return mapped;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
 
       const fallback = {
         id: values[0],
@@ -224,7 +224,7 @@ class CopilotPostgresStore {
       this.memory.tasks.set(runId, mapped);
       return mapped;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       return this.getTasksFromMemory(runId);
     }
   }
@@ -263,7 +263,7 @@ class CopilotPostgresStore {
       }
       return null;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       const updated = this.updateTaskInMemory(task);
       return updated ? { ...updated } : null;
     }
@@ -295,7 +295,7 @@ class CopilotPostgresStore {
       this.appendEvent(mapped);
       return mapped;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       const fallback = {
         id: Date.now(),
         runId,
@@ -346,12 +346,12 @@ class CopilotPostgresStore {
       this.memory.events.set(runId, mapped);
       return mapped;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       const events = this.memory.events.get(runId) || [];
       return events
         .filter((event) => {
-          if (afterId && event.id <= afterId) return false;
-          if (level && event.level !== level.toLowerCase()) return false;
+          if (afterId && event.id <= afterId) {return false;}
+          if (level && event.level !== level.toLowerCase()) {return false;}
           return true;
         })
         .slice(0, limit);
@@ -381,12 +381,12 @@ class CopilotPostgresStore {
       mapped.forEach((run) => this.memory.runs.set(run.id, run));
       return mapped;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       const runs = Array.from(this.memory.runs.values());
       return runs.filter((run) => {
-        if (!['failed', 'paused'].includes(run.status)) return false;
+        if (!['failed', 'paused'].includes(run.status)) {return false;}
         if (investigationId && run.investigationId !== investigationId)
-          return false;
+          {return false;}
         return true;
       });
     }
@@ -414,14 +414,14 @@ class CopilotPostgresStore {
       const result = await this.pg.query(query);
       return result.rows;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       const now = Date.now();
       const stats = new Map();
       this.memory.runs.forEach((run) => {
         if (run.createdAt) {
           const created = new Date(run.createdAt).getTime();
           const rangeMs = this.parseTimeRangeToMs(timeRange);
-          if (rangeMs && now - created > rangeMs) return;
+          if (rangeMs && now - created > rangeMs) {return;}
         }
         const entry = stats.get(run.status) || {
           status: run.status,
@@ -459,7 +459,7 @@ class CopilotPostgresStore {
       const result = await this.pg.query(query);
       return result.rowCount;
     } catch (error) {
-      if (!this.isMissingMockError(error)) throw error;
+      if (!this.isMissingMockError(error)) {throw error;}
       const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
       const events = this.memory.events;
       let removed = 0;
@@ -503,9 +503,9 @@ class CopilotPostgresStore {
 
   updateTaskInMemory(task) {
     const tasks = this.memory.tasks.get(task.runId);
-    if (!tasks) return null;
+    if (!tasks) {return null;}
     const index = tasks.findIndex((t) => t.id === task.id);
-    if (index === -1) return null;
+    if (index === -1) {return null;}
     tasks[index] = { ...tasks[index], ...task };
     this.memory.tasks.set(task.runId, tasks);
     return tasks[index];
@@ -518,11 +518,11 @@ class CopilotPostgresStore {
   }
 
   parseTimeRangeToMs(range) {
-    if (!range) return null;
+    if (!range) {return null;}
     const match = /^\s*(\d+)\s*(day|days|hour|hours|minute|minutes)\s*$/i.exec(
       range,
     );
-    if (!match) return null;
+    if (!match) {return null;}
     const value = Number(match[1]);
     const unit = match[2].toLowerCase();
     const multipliers = {
@@ -539,7 +539,7 @@ class CopilotPostgresStore {
   // Helper methods to map database rows to application objects
 
   mapRunFromDb(row) {
-    if (!row) return null;
+    if (!row) {return null;}
 
     return {
       id: row.id,
@@ -561,7 +561,7 @@ class CopilotPostgresStore {
   }
 
   mapTaskFromDb(row) {
-    if (!row) return null;
+    if (!row) {return null;}
 
     return {
       id: row.id,
@@ -596,7 +596,7 @@ class CopilotPostgresStore {
   }
 
   mapEventFromDb(row) {
-    if (!row) return null;
+    if (!row) {return null;}
 
     return {
       id: row.id,

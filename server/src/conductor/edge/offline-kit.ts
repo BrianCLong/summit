@@ -338,7 +338,7 @@ export class OfflineKit extends EventEmitter {
    * End offline session and prepare for sync
    */
   private async endOfflineSession(): Promise<void> {
-    if (!this.currentSession) return;
+    if (!this.currentSession) {return;}
 
     this.currentSession.endTime = new Date();
     this.currentSession.duration =

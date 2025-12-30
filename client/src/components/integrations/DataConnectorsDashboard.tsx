@@ -626,17 +626,17 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
   };
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    if (num >= 1000000) {return `${(num / 1000000).toFixed(1)}M`;}
+    if (num >= 1000) {return `${(num / 1000).toFixed(1)}K`;}
     return num.toString();
   };
 
   const formatTimeAgo = (date: Date) => {
     const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
-    if (minutes < 1) return 'just now';
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 1) {return 'just now';}
+    if (minutes < 60) {return `${minutes}m ago`;}
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) {return `${hours}h ago`;}
     return `${Math.floor(hours / 24)}d ago`;
   };
 

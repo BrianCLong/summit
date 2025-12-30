@@ -130,7 +130,7 @@ export function TokenMeter({
   }
 
   const getBudgetColor = () => {
-    if (!count.budget) return 'text-gray-500';
+    if (!count.budget) {return 'text-gray-500';}
     switch (count.budget.recommendAction) {
       case 'block':
         return 'text-red-600';
@@ -142,7 +142,7 @@ export function TokenMeter({
   };
 
   const getBudgetIcon = () => {
-    if (!count.budget) return null;
+    if (!count.budget) {return null;}
     switch (count.budget.recommendAction) {
       case 'block':
         return '🚫';

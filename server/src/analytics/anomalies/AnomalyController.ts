@@ -26,7 +26,7 @@ export const runAnomalyDetection = (req: Request, res: Response) => {
 
     // Update history
     history.push({ timestamp: Date.now(), value });
-    if (history.length > 100) history.shift(); // Keep window small for demo
+    if (history.length > 100) {history.shift();} // Keep window small for demo
     metricHistory[metric] = history;
 
     res.json({

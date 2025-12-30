@@ -181,13 +181,13 @@ export class AdvancedCorrelationEngine {
     const processed = new Set<string>();
 
     for (let i = 0; i < entities.length; i++) {
-      if (processed.has(entities[i].id)) continue;
+      if (processed.has(entities[i].id)) {continue;}
 
       const currentCluster = [entities[i]];
       processed.add(entities[i].id);
 
       for (let j = i + 1; j < entities.length; j++) {
-        if (processed.has(entities[j].id)) continue;
+        if (processed.has(entities[j].id)) {continue;}
 
         const e1 = entities[i];
         const e2 = entities[j];
@@ -217,7 +217,7 @@ export class AdvancedCorrelationEngine {
     for (const e1 of g1) {
       for (const e2 of g2) {
         if (e1.embedding && e2.embedding) {
-           if (this.cosineSimilarity(e1.embedding, e2.embedding) >= threshold) return true;
+           if (this.cosineSimilarity(e1.embedding, e2.embedding) >= threshold) {return true;}
         }
       }
     }
@@ -308,7 +308,7 @@ export class AdvancedCorrelationEngine {
         .filter(e => e.embedding)
         .map(e => e.embedding);
 
-      if (embeddings.length === 0) return null;
+      if (embeddings.length === 0) {return null;}
 
       // Average embedding
       const dim = embeddings[0].length;
@@ -332,13 +332,13 @@ export class AdvancedCorrelationEngine {
     const processed = new Set<number>();
 
     for (let i = 0; i < validGroups.length; i++) {
-      if (processed.has(i)) continue;
+      if (processed.has(i)) {continue;}
 
       let cluster = [...validGroups[i].group];
       processed.add(i);
 
       for (let j = i + 1; j < validGroups.length; j++) {
-        if (processed.has(j)) continue;
+        if (processed.has(j)) {continue;}
 
         const sim = this.cosineSimilarity(validGroups[i].centroid, validGroups[j].centroid);
         // Check both semantic similarity AND temporal compatibility
@@ -372,7 +372,7 @@ export class AdvancedCorrelationEngine {
     const t1 = getTimes(g1);
     const t2 = getTimes(g2);
 
-    if (t1.length === 0 || t2.length === 0) return true; // No time info to conflict
+    if (t1.length === 0 || t2.length === 0) {return true;} // No time info to conflict
 
     const min1 = Math.min(...t1);
     const max1 = Math.max(...t1);
@@ -402,7 +402,7 @@ export class AdvancedCorrelationEngine {
   }
 
   private cosineSimilarity(vec1: number[], vec2: number[]) {
-    if (vec1.length !== vec2.length) return 0;
+    if (vec1.length !== vec2.length) {return 0;}
     let dot = 0;
     let mag1 = 0;
     let mag2 = 0;

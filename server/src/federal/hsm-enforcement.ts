@@ -408,7 +408,7 @@ class HSMEnforcement {
       hsmProvider: this.probeCache?.provider || 'unknown',
       mechanisms: this.probeCache?.mechanisms || [],
       nodeFipsEnabled: crypto.getFips?.() || false,
-      opensslFipsCapable: !!(process as any).config?.variables?.openssl_fips,
+      opensslFipsCapable: Boolean((process as any).config?.variables?.openssl_fips),
     };
 
     // In production, sign this attestation with HSM

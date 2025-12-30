@@ -56,8 +56,8 @@ export const IntegrationAPI = {
    */
   async list(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.status) queryParams.set('status', params.status);
-    if (params.category) queryParams.set('category', params.category);
+    if (params.status) {queryParams.set('status', params.status);}
+    if (params.category) {queryParams.set('category', params.category);}
 
     const response = await fetch(`${API_BASE}?${queryParams}`, {
       headers: getHeaders(),
@@ -170,9 +170,9 @@ export const IntegrationAuditAPI = {
    */
   async getLog(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.integrationId) queryParams.set('integrationId', params.integrationId);
-    if (params.from) queryParams.set('from', params.from);
-    if (params.to) queryParams.set('to', params.to);
+    if (params.integrationId) {queryParams.set('integrationId', params.integrationId);}
+    if (params.from) {queryParams.set('from', params.from);}
+    if (params.to) {queryParams.set('to', params.to);}
 
     const response = await fetch(`${API_BASE}/audit?${queryParams}`, {
       headers: getHeaders(),

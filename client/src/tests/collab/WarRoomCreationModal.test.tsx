@@ -4,7 +4,7 @@ import { MockedProvider } from '@apollo/client/testing';
 import WarRoomCreationModal from '../../components/collab/WarRoomCreationModal';
 
 // Mock the CREATE_WAR_ROOM mutation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 const mocks: any[] = [];
 
 describe('WarRoomCreationModal', () => {

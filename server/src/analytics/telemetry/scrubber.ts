@@ -21,7 +21,7 @@ export class TelemetryScrubber {
    * Hashes a value deterministically with the environment salt.
    */
   public hash(value: string): string {
-    if (!value) return '';
+    if (!value) {return '';}
     return crypto
       .createHmac('sha256', this.salt)
       .update(value)

@@ -131,7 +131,7 @@ export class StrategicPlanningService extends EventEmitter {
 
     try {
       const plan = await this.repo.findPlanById(id, tenantId);
-      if (!plan) return false;
+      if (!plan) {return false;}
 
       if (plan.status === 'ACTIVE' || plan.status === 'APPROVED') {
         throw new Error('Cannot delete an active or approved plan. Archive it first.');
@@ -185,7 +185,7 @@ export class StrategicPlanningService extends EventEmitter {
   async approvePlan(id: string, userId: string, tenantId: string): Promise<StrategicPlan | null> {
     const plan = await this.repo.findPlanById(id, tenantId);
 
-    if (!plan) return null;
+    if (!plan) {return null;}
     if (plan.status !== 'UNDER_REVIEW') {
       throw new Error('Only plans under review can be approved');
     }
@@ -201,7 +201,7 @@ export class StrategicPlanningService extends EventEmitter {
   async activatePlan(id: string, userId: string, tenantId: string): Promise<StrategicPlan | null> {
     const plan = await this.repo.findPlanById(id, tenantId);
 
-    if (!plan) return null;
+    if (!plan) {return null;}
     if (plan.status !== 'APPROVED') {
       throw new Error('Only approved plans can be activated');
     }
@@ -252,7 +252,7 @@ export class StrategicPlanningService extends EventEmitter {
     userId: string,
   ): Promise<StrategicObjective | null> {
     const objective = await this.repo.findObjectiveById(id);
-    if (!objective) return null;
+    if (!objective) {return null;}
 
     const progress = (currentValue / objective.targetValue) * 100;
     let status: ObjectiveStatus = objective.status;
@@ -468,7 +468,7 @@ export class StrategicPlanningService extends EventEmitter {
     tenantId: string,
   ): Promise<boolean> {
     const plan = await this.repo.findPlanById(planId, tenantId);
-    if (!plan) return false;
+    if (!plan) {return false;}
 
     const success = await this.repo.removeStakeholder(planId, stakeholderUserId);
 
@@ -551,7 +551,7 @@ export class StrategicPlanningService extends EventEmitter {
     }
 
     const plan = await this.repo.findPlanById(planId, tenantId);
-    if (!plan) return null;
+    if (!plan) {return null;}
 
     const progress = this.calculateProgress(plan);
 
@@ -569,7 +569,7 @@ export class StrategicPlanningService extends EventEmitter {
     }
 
     const plan = await this.repo.findPlanById(planId, tenantId);
-    if (!plan) return null;
+    if (!plan) {return null;}
 
     const timeline = this.buildTimeline(plan);
 
@@ -584,7 +584,7 @@ export class StrategicPlanningService extends EventEmitter {
     period?: { start: Date; end: Date },
   ): Promise<PlanScorecard | null> {
     const plan = await this.repo.findPlanById(planId, tenantId);
-    if (!plan) return null;
+    if (!plan) {return null;}
 
     const scorecard = this.calculateScorecard(plan, period);
 
@@ -645,7 +645,7 @@ export class StrategicPlanningService extends EventEmitter {
     currentStatus: PlanStatus | undefined,
     newStatus: PlanStatus | undefined,
   ): void {
-    if (!newStatus || !currentStatus) return;
+    if (!newStatus || !currentStatus) {return;}
 
     const validTransitions: Record<PlanStatus, PlanStatus[]> = {
       DRAFT: ['UNDER_REVIEW', 'CANCELLED'],

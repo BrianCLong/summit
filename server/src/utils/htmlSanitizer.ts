@@ -21,8 +21,8 @@ export function sanitizeHtml(value: string): string {
  * Recursively sanitize unknown input, applying DOMPurify to any string leaf nodes.
  */
 export function deepSanitize(input: unknown): unknown {
-  if (typeof input === 'string') return sanitizeHtml(input);
-  if (Array.isArray(input)) return input.map((entry) => deepSanitize(entry));
+  if (typeof input === 'string') {return sanitizeHtml(input);}
+  if (Array.isArray(input)) {return input.map((entry) => deepSanitize(entry));}
   if (input && typeof input === 'object') {
     const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(input as Record<string, unknown>)) {

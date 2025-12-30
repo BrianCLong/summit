@@ -42,8 +42,8 @@ export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
       </Typography>
     );
   }
-  if (loading && items.length === 0) return <CircularProgress size={20} />;
-  if (error) return <Typography color="error">{error.message}</Typography>;
+  if (loading && items.length === 0) {return <CircularProgress size={20} />;}
+  if (error) {return <Typography color="error">{error.message}</Typography>;}
 
   return (
     <Box>

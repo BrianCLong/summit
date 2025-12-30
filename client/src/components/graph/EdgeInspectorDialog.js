@@ -20,25 +20,25 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
   useEffect(() => {
     let cancelled = false;
     async function fetchMeta() {
-      if (!open || !edge?.id) return;
+      if (!open || !edge?.id) {return;}
       setLoading(true);
       try {
         if (import.meta?.env?.VITE_RELATIONSHIP_GQL === '1') {
           // Prefer GraphQL if enabled
           const res = await runQuery({ variables: { id: edge.id } });
           const data = res?.data?.relationship;
-          if (!cancelled) setMeta(data || {});
+          if (!cancelled) {setMeta(data || {});}
         } else {
           const base = import.meta?.env?.VITE_API_URL || '';
           const res = await fetch(`${base}/dev/relationship/${edge.id}`);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
           const data = await res.json();
-          if (!cancelled) setMeta(data);
+          if (!cancelled) {setMeta(data);}
         }
       } catch (e) {
-        if (!cancelled) setMeta({ ...edge, error: e.message });
+        if (!cancelled) {setMeta({ ...edge, error: e.message });}
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {setLoading(false);}
       }
     }
     fetchMeta();
@@ -51,7 +51,7 @@ export default function EdgeInspectorDialog({ open, onClose, edge }) {
     fetchPolicy: 'network-only',
   });
 
-  if (!edge) return null;
+  if (!edge) {return null;}
   const merged = { ...edge, ...(meta || {}) };
   const { id, type, label, properties, source, target, error } = merged;
   return (

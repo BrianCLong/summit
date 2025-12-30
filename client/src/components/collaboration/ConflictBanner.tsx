@@ -15,7 +15,7 @@ export function ConflictBanner({
   onRefresh,
   onDismiss,
 }: ConflictBannerProps) {
-  if (!visible) return null;
+  if (!visible) {return null;}
 
   return (
     <Alert

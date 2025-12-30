@@ -373,8 +373,8 @@ export class CRDTConflictResolver {
 
         // Check if operations are concurrent (neither causally precedes the other)
         if (this.areConcurrent(op1, op2)) {
-          if (!concurrent.includes(op1)) concurrent.push(op1);
-          if (!concurrent.includes(op2)) concurrent.push(op2);
+          if (!concurrent.includes(op1)) {concurrent.push(op1);}
+          if (!concurrent.includes(op2)) {concurrent.push(op2);}
         }
       }
     }
@@ -396,8 +396,8 @@ export class CRDTConflictResolver {
       const time1 = clock1[node] || 0;
       const time2 = clock2[node] || 0;
 
-      if (time1 > time2) op1Dominates = true;
-      if (time2 > time1) op2Dominates = true;
+      if (time1 > time2) {op1Dominates = true;}
+      if (time2 > time1) {op2Dominates = true;}
     }
 
     // Concurrent if neither dominates or both dominate

@@ -110,7 +110,7 @@ class DoclingRepository {
   }
 
   private async ensureSchema() {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
     await this.getPool().query(`
       CREATE TABLE IF NOT EXISTS doc_fragments (
         id UUID PRIMARY KEY,
@@ -393,7 +393,7 @@ class DoclingRepository {
        LIMIT 1`,
       [tenantId, requestId],
     );
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
     return {
       id: result.rows[0].id,
       tenantId: result.rows[0].tenant_id,

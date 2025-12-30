@@ -86,8 +86,8 @@ export class PrivacyService extends EventEmitter {
   }
 
   private ensureInitialized(): Promise<void> {
-    if (this.isInitialized) return Promise.resolve();
-    if (this.initPromise) return this.initPromise;
+    if (this.isInitialized) {return Promise.resolve();}
+    if (this.initPromise) {return this.initPromise;}
 
     this.initPromise = this.initializeTables()
         .then(() => {
@@ -214,7 +214,7 @@ export class PrivacyService extends EventEmitter {
     const query = `SELECT * FROM privacy_dsar_requests WHERE id = $1`;
     const result = await pool.query(query, [requestId]);
 
-    if (result.rows.length === 0) return undefined;
+    if (result.rows.length === 0) {return undefined;}
 
     return this.mapRowToRequest(result.rows[0]);
   }
@@ -277,7 +277,7 @@ export class PrivacyService extends EventEmitter {
    */
   async verifyRequest(requestId: string): Promise<void> {
     const request = await this.getRequestStatus(requestId);
-    if (!request) throw new Error('Request not found');
+    if (!request) {throw new Error('Request not found');}
 
     await this.updateRequestStatus(requestId, DSARStatus.VERIFYING);
     request.status = DSARStatus.VERIFYING;
@@ -315,7 +315,7 @@ export class PrivacyService extends EventEmitter {
    */
   private async executeRequest(requestId: string): Promise<void> {
     const request = await this.getRequestStatus(requestId);
-    if (!request) return;
+    if (!request) {return;}
 
     try {
       let evidence: PrivacyEvidence;
@@ -386,7 +386,7 @@ export class PrivacyService extends EventEmitter {
 
   private async failRequest(requestId: string, reason: string): Promise<void> {
     const request = await this.getRequestStatus(requestId);
-    if (!request) return;
+    if (!request) {return;}
 
     await this.updateRequestStatus(requestId, DSARStatus.FAILED, { rejectionReason: reason });
 
@@ -479,7 +479,7 @@ export class PrivacyService extends EventEmitter {
     const query = `SELECT * FROM privacy_evidence WHERE request_id = $1`;
     const result = await pool.query(query, [requestId]);
 
-    if (result.rows.length === 0) return undefined;
+    if (result.rows.length === 0) {return undefined;}
 
     const row = result.rows[0] as Record<string, unknown>;
     return {

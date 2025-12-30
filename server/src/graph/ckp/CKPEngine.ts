@@ -23,7 +23,7 @@ export class CKPEngine {
       switch (step.operation) {
         case 'query':
           // Simplified: Replace params in cypher string
-          let cypher = step.params.cypher;
+          const cypher = step.params.cypher;
           // Security: In production, use real params object, don't string-replace!
           // Here, we assume step.params.cypher is safe/trusted template and inputs are safe values.
           const results = await this.store.runCypher(cypher, { ...context, tenantId }, { tenantId });

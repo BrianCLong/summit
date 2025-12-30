@@ -23,7 +23,7 @@ export interface DSLQuery {
 export function parseDSL(json: string): DSLQuery {
   try {
     const parsed = JSON.parse(json);
-    if (!parsed.start) throw new Error('Query must have a start clause');
+    if (!parsed.start) {throw new Error('Query must have a start clause');}
     validateDSL(parsed);
     return parsed as DSLQuery;
   } catch (e) {

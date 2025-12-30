@@ -58,7 +58,7 @@ export class MaestroDSL {
       const neighbors = adj.get(nodeId) || [];
       for (const neighbor of neighbors) {
         if (!visited.has(neighbor)) {
-          if (detect(neighbor)) return true;
+          if (detect(neighbor)) {return true;}
         } else if (recursionStack.has(neighbor)) {
           return true;
         }
@@ -70,7 +70,7 @@ export class MaestroDSL {
 
     for (const node of spec.nodes) {
       if (!visited.has(node.id)) {
-        if (detect(node.id)) return true;
+        if (detect(node.id)) {return true;}
       }
     }
 

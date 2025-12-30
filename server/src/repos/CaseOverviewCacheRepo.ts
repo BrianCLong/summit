@@ -59,7 +59,7 @@ export class CaseOverviewCacheRepo {
       [caseId, tenantId],
     );
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
     return this.mapRow(rows[0]);
   }
 

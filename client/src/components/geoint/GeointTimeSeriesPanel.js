@@ -49,7 +49,7 @@ function GeointTimeSeriesPanel({
       h = 120,
       pad = 24;
     if (!series.length)
-      return <Typography variant="caption">No data</Typography>;
+      {return <Typography variant="caption">No data</Typography>;}
     const xs = series.map((d, i) => i);
     const ys = series.map((d) => d.averageSpeedKph || 0);
     const maxY = Math.max(1, ...ys);

@@ -21,7 +21,7 @@ export default function GraphCanvas() {
   const error: any = null;
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
 
     // Convert GraphQL data to Cytoscape elements
     let elements: cytoscape.ElementDefinition[] = [];
@@ -111,7 +111,7 @@ export default function GraphCanvas() {
     let startY = 0;
     let $marquee: JQuery | null = null;
     $container.on('mousedown', (e: JQuery.MouseDownEvent) => {
-      if (e.button !== 0 || e.shiftKey !== true) return; // hold Shift to lasso
+      if (e.button !== 0 || e.shiftKey !== true) {return;} // hold Shift to lasso
       lasso = true;
       startX = e.pageX;
       startY = e.pageY;
@@ -129,7 +129,7 @@ export default function GraphCanvas() {
         .appendTo('body');
     });
     $container.on('mousemove', (e: JQuery.MouseMoveEvent) => {
-      if (!lasso || !$marquee) return;
+      if (!lasso || !$marquee) {return;}
       const x = Math.min(e.pageX, startX);
       const y = Math.min(e.pageY, startY);
       const w = Math.abs(e.pageX - startX);
@@ -137,7 +137,7 @@ export default function GraphCanvas() {
       $marquee.css({ left: x, top: y, width: w, height: h });
     });
     $container.on('mouseup', (e: JQuery.MouseUpEvent) => {
-      if (!lasso) return;
+      if (!lasso) {return;}
       lasso = false;
       if ($marquee) {
         $marquee.remove();
@@ -155,7 +155,7 @@ export default function GraphCanvas() {
         const cx = (bb.x1 + bb.x2) / 2;
         const cyy = (bb.y1 + bb.y2) / 2;
         if (cx >= rect.x1 && cx <= rect.x2 && cyy >= rect.y1 && cyy <= rect.y2)
-          n.select();
+          {n.select();}
       });
     });
 
@@ -170,7 +170,7 @@ export default function GraphCanvas() {
 
   const handleExpandNeighbors = () => {
     const cy = cyRef.current;
-    if (!cy || !menuTarget?.id) return;
+    if (!cy || !menuTarget?.id) {return;}
     const id = menuTarget.id;
     const newId = `${id}-${Math.floor(Math.random() * 1000)}`;
     cy.add([
@@ -183,7 +183,7 @@ export default function GraphCanvas() {
 
   const handlePinToggle = () => {
     const cy = cyRef.current;
-    if (!cy || !menuTarget?.id) return;
+    if (!cy || !menuTarget?.id) {return;}
     const node = cy.$id(menuTarget.id);
     node.grabbed() ? node.ungrabify() : node.grabify();
     setMenuAnchor(null);

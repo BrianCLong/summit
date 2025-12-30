@@ -193,7 +193,7 @@ export async function updateAnnotation(
       logger.warn({ err }, 'Failed to load annotation from Redis');
     }
   }
-  if (!current) return null;
+  if (!current) {return null;}
   const next: GraphAnnotation = {
     ...current,
     ...patch,
@@ -288,7 +288,7 @@ export async function updateComment(
       logger.warn({ err }, 'Failed to load comment from Redis');
     }
   }
-  if (!current) return null;
+  if (!current) {return null;}
   const next: GraphComment = {
     ...current,
     ...patch,

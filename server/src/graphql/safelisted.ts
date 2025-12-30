@@ -31,7 +31,7 @@ export function enforceSafelist(
   req: { body?: { query?: string } },
   enabled = process.env.SAFELIST === '1',
 ): void {
-  if (!enabled) return;
+  if (!enabled) {return;}
   const q = req.body?.query || '';
   const hash = opHash(q);
   if (!SAFE.has(hash)) {

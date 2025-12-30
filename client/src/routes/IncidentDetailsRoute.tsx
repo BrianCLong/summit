@@ -43,16 +43,16 @@ export default function IncidentDetailsRoute() {
 
   const events = data?.provenanceByIncident ?? [];
   const groups = useMemo(() => {
-    if (!events || groupBy === 'none') return null;
+    if (!events || groupBy === 'none') {return null;}
     const fmt = (iso: string) => {
       const d = new Date(iso);
-      if (groupBy === 'hour') return d.toISOString().slice(0, 13);
+      if (groupBy === 'hour') {return d.toISOString().slice(0, 13);}
       return d.toISOString().slice(0, 16);
     };
     const m = new Map<string, any[]>();
     for (const e of events) {
       const k = fmt(e.createdAt || e.created_at);
-      if (!m.has(k)) m.set(k, []);
+      if (!m.has(k)) {m.set(k, []);}
       m.get(k)!.push(e);
     }
     return Array.from(m.entries()).sort(([a], [b]) => (a < b ? 1 : -1));
@@ -162,7 +162,7 @@ export default function IncidentDetailsRoute() {
 
 function MetadataPreview({ metadata }: { metadata: any }) {
   const [open, setOpen] = useState(false);
-  if (!metadata) return <span className="opacity-50">-</span>;
+  if (!metadata) {return <span className="opacity-50">-</span>;}
   return (
     <span className="relative inline-block">
       <button

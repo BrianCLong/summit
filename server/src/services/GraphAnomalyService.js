@@ -99,7 +99,7 @@ class GraphAnomalyService {
   }
 
   _sanitizeNodes(nodes, entityId) {
-    if (!Array.isArray(nodes)) return [];
+    if (!Array.isArray(nodes)) {return [];}
     const sanitized = nodes.map((node) => ({
       id: node?.id ?? node?.nodeId ?? null,
       type: node?.type ?? null,

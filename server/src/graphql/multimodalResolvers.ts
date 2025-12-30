@@ -176,7 +176,7 @@ export const multimodalResolvers = {
       args: MediaSourceArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -195,7 +195,7 @@ export const multimodalResolvers = {
       args: { id: string },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -212,7 +212,7 @@ export const multimodalResolvers = {
       args: EntityArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -231,7 +231,7 @@ export const multimodalResolvers = {
       args: { id: string },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -248,7 +248,7 @@ export const multimodalResolvers = {
       args: CrossModalMatchArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -268,7 +268,7 @@ export const multimodalResolvers = {
       args: TimelineArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       // TODO: Implement generateMultimodalTimeline method in MultimodalDataService
       // The method doesn't exist yet. This is a placeholder for future implementation.
@@ -292,7 +292,7 @@ export const multimodalResolvers = {
       args: ExtractionJobArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -308,7 +308,7 @@ export const multimodalResolvers = {
       args: { id: string },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -325,7 +325,7 @@ export const multimodalResolvers = {
       args: { input: SearchInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -341,7 +341,7 @@ export const multimodalResolvers = {
       args: { input: SemanticSearchInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -361,7 +361,7 @@ export const multimodalResolvers = {
       args: { investigationId: string },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -380,7 +380,7 @@ export const multimodalResolvers = {
       args: EntityArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -396,7 +396,7 @@ export const multimodalResolvers = {
       args: { investigationId?: string; similarity?: number; limit?: number },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -415,7 +415,7 @@ export const multimodalResolvers = {
       args: { input: MediaSourceInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -434,7 +434,7 @@ export const multimodalResolvers = {
       args: { id: string },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -453,7 +453,7 @@ export const multimodalResolvers = {
       args: UpdateMediaMetadataArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -474,7 +474,7 @@ export const multimodalResolvers = {
       args: { input: CreateMultimodalEntityInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -493,7 +493,7 @@ export const multimodalResolvers = {
       args: { id: string; input: CreateMultimodalEntityInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -513,7 +513,7 @@ export const multimodalResolvers = {
       args: VerifyEntityArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -533,7 +533,7 @@ export const multimodalResolvers = {
       args: MergeEntitiesArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -554,7 +554,7 @@ export const multimodalResolvers = {
       args: { input: CreateMultimodalRelationshipInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -573,7 +573,7 @@ export const multimodalResolvers = {
       args: { id: string; input: CreateMultimodalRelationshipInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -593,7 +593,7 @@ export const multimodalResolvers = {
       args: VerifyEntityArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -614,7 +614,7 @@ export const multimodalResolvers = {
       args: { input: ExtractionJobInput },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -633,7 +633,7 @@ export const multimodalResolvers = {
       args: { id: string },
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -652,7 +652,7 @@ export const multimodalResolvers = {
       args: ReprocessMediaArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -677,7 +677,7 @@ export const multimodalResolvers = {
       args: BatchUploadArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -707,7 +707,7 @@ export const multimodalResolvers = {
       args: BatchExtractArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -742,7 +742,7 @@ export const multimodalResolvers = {
       args: GenerateCrossModalMatchesArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -761,7 +761,7 @@ export const multimodalResolvers = {
       args: ComputeSemanticClustersArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -781,7 +781,7 @@ export const multimodalResolvers = {
       args: ValidateExtractionResultsArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -797,7 +797,7 @@ export const multimodalResolvers = {
       args: CleanupDuplicateEntitiesArgs,
       context: Context,
     ) => {
-      if (!context.user) throw new Error('Authentication required');
+      if (!context.user) {throw new Error('Authentication required');}
 
       const multimodalService = new MultimodalDataService(
         context.neo4jDriver,
@@ -822,7 +822,7 @@ export const multimodalResolvers = {
         args: { jobId: string },
         context: Context,
       ) => {
-        if (!context.user) throw new Error('Authentication required');
+        if (!context.user) {throw new Error('Authentication required');}
 
         // Return subscription for job updates
         return context.pubsub.asyncIterator([
@@ -838,7 +838,7 @@ export const multimodalResolvers = {
         args: { investigationId: string },
         context: Context,
       ) => {
-        if (!context.user) throw new Error('Authentication required');
+        if (!context.user) {throw new Error('Authentication required');}
 
         // Return subscription for completed jobs in investigation
         return context.pubsub.asyncIterator([
@@ -855,7 +855,7 @@ export const multimodalResolvers = {
         args: { investigationId: string },
         context: Context,
       ) => {
-        if (!context.user) throw new Error('Authentication required');
+        if (!context.user) {throw new Error('Authentication required');}
 
         return context.pubsub.asyncIterator([
           `MULTIMODAL_ENTITY_ADDED_${args.investigationId}`,
@@ -870,7 +870,7 @@ export const multimodalResolvers = {
         args: { investigationId: string },
         context: Context,
       ) => {
-        if (!context.user) throw new Error('Authentication required');
+        if (!context.user) {throw new Error('Authentication required');}
 
         return context.pubsub.asyncIterator([
           `MULTIMODAL_ENTITY_UPDATED_${args.investigationId}`,
@@ -885,7 +885,7 @@ export const multimodalResolvers = {
         args: { investigationId: string },
         context: Context,
       ) => {
-        if (!context.user) throw new Error('Authentication required');
+        if (!context.user) {throw new Error('Authentication required');}
 
         return context.pubsub.asyncIterator([
           `MULTIMODAL_ENTITY_VERIFIED_${args.investigationId}`,
@@ -901,7 +901,7 @@ export const multimodalResolvers = {
         args: { investigationId: string },
         context: Context,
       ) => {
-        if (!context.user) throw new Error('Authentication required');
+        if (!context.user) {throw new Error('Authentication required');}
 
         return context.pubsub.asyncIterator([
           `CROSS_MODAL_MATCH_FOUND_${args.investigationId}`,
@@ -977,7 +977,7 @@ export const multimodalResolvers = {
 
   ExtractionJob: {
     results: async (parent: any, args: any, context: Context) => {
-      if (parent.status !== 'COMPLETED') return null;
+      if (parent.status !== 'COMPLETED') {return null;}
 
       // Resolve extraction results
       const session = context.neo4jDriver.session();
@@ -992,7 +992,7 @@ export const multimodalResolvers = {
           { jobId: parent.id },
         );
 
-        if (result.records.length === 0) return null;
+        if (result.records.length === 0) {return null;}
 
         const record = result.records[0];
         return {

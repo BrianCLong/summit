@@ -37,10 +37,10 @@ export class FlagService {
     const envValue = process.env[envKey];
 
     if (envValue !== undefined) {
-      if (envValue.toLowerCase() === 'true') return true;
-      if (envValue.toLowerCase() === 'false') return false;
+      if (envValue.toLowerCase() === 'true') {return true;}
+      if (envValue.toLowerCase() === 'false') {return false;}
       const num = Number(envValue);
-      if (!isNaN(num)) return num;
+      if (!isNaN(num)) {return num;}
       return envValue;
     }
 

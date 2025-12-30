@@ -69,7 +69,7 @@ function UserPresence({
   };
 
   useEffect(() => {
-    if (!websocketService || !currentUser) return;
+    if (!websocketService || !currentUser) {return;}
 
     // Join investigation presence room
     websocketService.emit('join_presence', {
@@ -221,7 +221,7 @@ function UserPresence({
 
   const getActivityDescription = (userId) => {
     const activity = userActivities.get(userId);
-    if (!activity) return null;
+    if (!activity) {return null;}
 
     const timeAgo = formatDistanceToNow(activity.timestamp, {
       addSuffix: true,
@@ -305,7 +305,7 @@ function UserPresence({
     </Tooltip>
   );
 
-  if (!isVisible) return null;
+  if (!isVisible) {return null;}
 
   return (
     <Box>

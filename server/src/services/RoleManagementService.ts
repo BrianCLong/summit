@@ -312,7 +312,7 @@ export class RoleManagementService {
     inherits: string[],
     visited: Set<string> = new Set()
   ): Set<string> {
-    if (visited.has(roleName)) return new Set();
+    if (visited.has(roleName)) {return new Set();}
     visited.add(roleName);
 
     const permissions = new Set<string>(directPermissions);
@@ -440,7 +440,7 @@ export class RoleManagementService {
     inherits: string[]
   ): string[] {
     const cached = this.permissionCache.get(name);
-    if (cached) return Array.from(cached);
+    if (cached) {return Array.from(cached);}
 
     const resolved = this.resolvePermissions(name, permissions, inherits);
     return Array.from(resolved);

@@ -70,7 +70,7 @@ export async function ingestDocs() {
         const { metadata, body } = parseFrontmatter(content);
 
         // Skip if body is empty
-        if (!body.trim()) continue;
+        if (!body.trim()) {continue;}
 
         const relPath = path.relative(docsDir, file);
         // Use title from metadata or filename

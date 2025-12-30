@@ -42,7 +42,7 @@ export class DetectionEngine {
             description: 'Potential brute force attack detected',
             severity: 'high',
             condition: (event, history) => {
-                if (event.eventType !== 'login_failed') return false;
+                if (event.eventType !== 'login_failed') {return false;}
                 const recentFailures = history.filter(h =>
                     h.eventType === 'login_failed' &&
                     h.details.ip === event.details.ip &&
@@ -64,7 +64,7 @@ export class DetectionEngine {
 
     async evaluateSignal(signal: any, tenantId: string): Promise<void> {
         let history = await this.getSecuriteyes().getRecentSuspiciousEvents(tenantId, 20);
-        if (!history) history = [];
+        if (!history) {history = [];}
 
         for (const rule of this.rules) {
             if (rule.condition(signal, history)) {

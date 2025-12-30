@@ -75,8 +75,8 @@ export class TimeSeriesService {
         let tsStr = '0';
 
         for (let i = 0; i < fields.length; i += 2) {
-            if (fields[i] === 'data') dataStr = fields[i+1];
-            if (fields[i] === 'ts') tsStr = fields[i+1];
+            if (fields[i] === 'data') {dataStr = fields[i+1];}
+            if (fields[i] === 'ts') {tsStr = fields[i+1];}
         }
 
         const data = JSON.parse(dataStr);
@@ -101,7 +101,7 @@ export class TimeSeriesService {
   async getLatest(metric: string): Promise<TimeSeriesPoint | null> {
     try {
       const data = await this.redis.get(`ts:latest:${metric}`);
-      if (!data) return null;
+      if (!data) {return null;}
 
       const parsed = JSON.parse(data);
       return {

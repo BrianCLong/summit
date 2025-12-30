@@ -11,7 +11,7 @@ export const sprint28Resolvers = {
       // Logic: Aggregate events by name in the given period
       // Note: "period" parsing (e.g. "7d") is simplified here.
       const tenantId = ctx.user?.tenantId;
-      if (!tenantId) throw new Error('Unauthorized');
+      if (!tenantId) {throw new Error('Unauthorized');}
 
       try {
         const rows = await pg.many(
@@ -87,7 +87,7 @@ export const sprint28Resolvers = {
       ctx: any
     ) => {
       const workspaceId = ctx.user?.tenantId;
-      if (!workspaceId) throw new Error('Unauthorized');
+      if (!workspaceId) {throw new Error('Unauthorized');}
 
       try {
         await pg.write(
@@ -107,7 +107,7 @@ export const sprint28Resolvers = {
       ctx: any
     ) => {
       const workspaceId = ctx.user?.tenantId;
-      if (!workspaceId) throw new Error('Unauthorized');
+      if (!workspaceId) {throw new Error('Unauthorized');}
 
       try {
         await pg.write(

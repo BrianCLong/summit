@@ -4,7 +4,7 @@ import ServiceHealthCard from '../components/dashboard/ServiceHealthCard';
 
 describe('ServiceHealthCard', () => {
   afterEach(() => {
-    if (global.fetch) global.fetch = undefined;
+    if (global.fetch) {global.fetch = undefined;}
   });
 
   it('renders service statuses from /health', async () => {

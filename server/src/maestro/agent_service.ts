@@ -19,7 +19,7 @@ export class MaestroAgentService {
       `SELECT * FROM maestro_agents WHERE id = $1 AND tenant_id = $2`,
       [id, tenantId]
     );
-    if (res.rows.length === 0) return null;
+    if (res.rows.length === 0) {return null;}
     return res.rows[0];
   }
 

@@ -473,7 +473,7 @@ export const multimodalResolvers = {
             await context.multimodalDataService.deleteMultimodalEntity(
               entityId,
             );
-          if (deleted) deletedCount++;
+          if (deleted) {deletedCount++;}
         } catch (error) {
           logger.warn(`Failed to delete entity ${entityId}:`, error);
         }
@@ -587,9 +587,9 @@ export const multimodalResolvers = {
 
     // Resolve confidence level from confidence score
     confidenceLevel: (parent) => {
-      if (parent.confidence >= 0.9) return 'VERY_HIGH';
-      if (parent.confidence >= 0.7) return 'HIGH';
-      if (parent.confidence >= 0.5) return 'MEDIUM';
+      if (parent.confidence >= 0.9) {return 'VERY_HIGH';}
+      if (parent.confidence >= 0.7) {return 'HIGH';}
+      if (parent.confidence >= 0.5) {return 'MEDIUM';}
       return 'LOW';
     },
 

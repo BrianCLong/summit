@@ -122,17 +122,17 @@ export class PredictiveRelationshipService {
           }
         }
 
-        if (!targetEmbedding) continue;
+        if (!targetEmbedding) {continue;}
 
         // 4. Calculate Similarity
         const similarity = this.embeddingService.cosineSimilarity(sourceEmbedding, targetEmbedding);
 
-        if (similarity < threshold) continue;
+        if (similarity < threshold) {continue;}
 
         // 5. Heuristics & Type Suggestion
         const suggestions = this.relationshipService.suggestRelationshipTypes(sourceProps.type, targetProps.type);
 
-        if (suggestions.length === 0) continue;
+        if (suggestions.length === 0) {continue;}
 
         // Pick the best suggestion (first one is highest weight)
         const bestSuggestion = suggestions[0];
@@ -140,8 +140,8 @@ export class PredictiveRelationshipService {
         // Refine score based on heuristics
         const reasoning = [`High semantic similarity (${(similarity * 100).toFixed(1)}%)`];
 
-        if (similarity > 0.9) reasoning.push("Very strong textual match");
-        else if (similarity > 0.8) reasoning.push("Strong textual match");
+        if (similarity > 0.9) {reasoning.push("Very strong textual match");}
+        else if (similarity > 0.8) {reasoning.push("Strong textual match");}
 
         reasoning.push(`Recommended type: ${bestSuggestion.type} (Match confidence: ${bestSuggestion.weight})`);
 
@@ -175,11 +175,11 @@ export class PredictiveRelationshipService {
    */
   async generateAndStoreEmbedding(entityId: string, entityProps: Record<string, unknown>): Promise<number[]> {
     const textParts = [];
-    if (entityProps.text) textParts.push(entityProps.text);
-    if (entityProps.description) textParts.push(entityProps.description);
-    if (entityProps.label) textParts.push(entityProps.label);
-    if (entityProps.value) textParts.push(entityProps.value);
-    if (entityProps.type) textParts.push(`Type: ${entityProps.type}`);
+    if (entityProps.text) {textParts.push(entityProps.text);}
+    if (entityProps.description) {textParts.push(entityProps.description);}
+    if (entityProps.label) {textParts.push(entityProps.label);}
+    if (entityProps.value) {textParts.push(entityProps.value);}
+    if (entityProps.type) {textParts.push(`Type: ${entityProps.type}`);}
 
     const text = textParts.join(' \n');
 

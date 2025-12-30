@@ -25,7 +25,7 @@ export class STIXConnector extends BaseConnector {
   async testConnection(): Promise<boolean> {
      try {
          // TAXII discovery endpoint
-         await axios.get(this.url + '/taxii2/', {
+         await axios.get(`${this.url  }/taxii2/`, {
             headers: { 'Accept': 'application/taxii+json;version=2.1' }
          });
          return true;

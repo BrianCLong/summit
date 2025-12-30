@@ -37,8 +37,8 @@ const BENCHMARK_CONFIG = {
   BENCHMARK_ITERATIONS: 100,
 
   // Test tenant
-  TENANT_ID: 'benchmark-tenant-' + uuidv4(),
-  USER_ID: 'benchmark-user-' + uuidv4(),
+  TENANT_ID: `benchmark-tenant-${  uuidv4()}`,
+  USER_ID: `benchmark-user-${  uuidv4()}`,
 };
 
 interface BenchmarkResult {
@@ -252,7 +252,7 @@ async function runBenchmark(
 }
 
 function printResults(results: BenchmarkResult[]) {
-  console.log('\n' + '='.repeat(100));
+  console.log(`\n${  '='.repeat(100)}`);
   console.log('📈 BENCHMARK RESULTS');
   console.log('='.repeat(100));
   console.log(
@@ -266,7 +266,7 @@ function printResults(results: BenchmarkResult[]) {
     );
   }
 
-  console.log('='.repeat(100) + '\n');
+  console.log(`${'='.repeat(100)  }\n`);
 }
 
 // ============================================================================

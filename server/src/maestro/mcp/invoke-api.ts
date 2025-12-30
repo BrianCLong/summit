@@ -29,7 +29,7 @@ router.post(
       }
       try {
         // Lazy init client with current registry
-        if (!mcpClient) initializeMCPClient({ timeout: 5000 });
+        if (!mcpClient) {initializeMCPClient({ timeout: 5000 });}
         const sess = (req as any).mcpSession;
         const result = await mcpClient.executeTool(
           server,

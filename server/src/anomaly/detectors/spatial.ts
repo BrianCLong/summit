@@ -39,9 +39,9 @@ export class SpatialDetector implements Detector {
     const score = Math.min(distanceFromCenter / (radiusKm * 2), 1.0); // Normalize score
 
     let severity = Severity.LOW;
-    if (distanceFromCenter > radiusKm * 5) severity = Severity.CRITICAL;
-    else if (distanceFromCenter > radiusKm * 3) severity = Severity.HIGH;
-    else if (isAnomaly) severity = Severity.MEDIUM;
+    if (distanceFromCenter > radiusKm * 5) {severity = Severity.CRITICAL;}
+    else if (distanceFromCenter > radiusKm * 3) {severity = Severity.HIGH;}
+    else if (isAnomaly) {severity = Severity.MEDIUM;}
 
     return this.createResult(context, isAnomaly, score, severity, isAnomaly ? {
       description: `Spatial anomaly: Location is ${distanceFromCenter.toFixed(2)}km from historical center (limit ${radiusKm}km)`,

@@ -246,7 +246,7 @@ export class CognitiveMapperService {
       const neighborOpinions = record.get('neighborOpinions');
 
       // Defaulting if null
-      if (currentOpinion === null) currentOpinion = 0;
+      if (currentOpinion === null) {currentOpinion = 0;}
 
       // Clean neighbors
       const validNeighbors = neighborOpinions.filter((o: any) => o !== null);

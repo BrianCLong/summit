@@ -49,7 +49,7 @@ const defaultRules = [
 
 async function evaluateOPA(action, user, resource = {}, env = {}) {
   const opaUrl = process.env.OPA_URL; // e.g., http://localhost:8181/v1/data/intelgraph/allow
-  if (!opaUrl) return null;
+  if (!opaUrl) {return null;}
   try {
     const fetch = require('node-fetch');
     const res = await fetch(opaUrl, {

@@ -8,12 +8,12 @@ export class QueryCostEstimator {
     cost += analysis.joinCount * 50;
     cost += analysis.aggregationCount * 30;
 
-    if (analysis.hasWildcard) cost *= 1.5;
+    if (analysis.hasWildcard) {cost *= 1.5;}
 
     let rows = 1;
     rows *= Math.pow(10, analysis.nodeCount);
     rows /= Math.pow(2, analysis.filterCount);
-    if (analysis.aggregationCount > 0) rows = 1;
+    if (analysis.aggregationCount > 0) {rows = 1;}
 
     return {
       cost,

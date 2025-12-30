@@ -91,8 +91,8 @@ export class NotificationService {
     try {
       const unread = await this.repo.getUnread(userId);
       if (unread.length > 0) {
-        const digestContent = `You have ${unread.length} unread notifications:\n` +
-                              unread.map(n => `- ${n.subject || n.type}`).join('\n');
+        const digestContent = `You have ${unread.length} unread notifications:\n${ 
+                              unread.map(n => `- ${n.subject || n.type}`).join('\n')}`;
 
         await this.send({
           userId,

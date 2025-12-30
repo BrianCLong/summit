@@ -78,7 +78,7 @@ const isSafeDeleteEnabled = () => process.env.SAFE_DELETE !== 'false';
 let commentSchemaEnsured = false;
 
 async function ensureCommentSoftDeleteSchema() {
-  if (commentSchemaEnsured) return;
+  if (commentSchemaEnsured) {return;}
   const pool = getPostgresPool();
   await pool.query(`
     ALTER TABLE support_ticket_comments

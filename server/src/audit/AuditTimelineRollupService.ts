@@ -298,7 +298,7 @@ export class AuditTimelineRollupService {
     granularity: TimelineGranularity,
     rows: AggregateRow[],
   ): Promise<number> {
-    if (!rows.length) return 0;
+    if (!rows.length) {return 0;}
 
     for (const row of rows) {
       await this.ensurePartition(

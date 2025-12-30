@@ -40,10 +40,10 @@ export class MetricValidator {
         }
 
         metrics.forEach((m, idx) => {
-            if (!m.name) errors.push(`Metric at index ${idx} missing name`);
-            if (!m.owner) errors.push(`Metric ${m.name || idx} missing owner`);
-            if (!m.retentionDays) errors.push(`Metric ${m.name || idx} missing retentionDays`);
-            if (!m.sourceEvents || m.sourceEvents.length === 0) errors.push(`Metric ${m.name || idx} missing sourceEvents`);
+            if (!m.name) {errors.push(`Metric at index ${idx} missing name`);}
+            if (!m.owner) {errors.push(`Metric ${m.name || idx} missing owner`);}
+            if (!m.retentionDays) {errors.push(`Metric ${m.name || idx} missing retentionDays`);}
+            if (!m.sourceEvents || m.sourceEvents.length === 0) {errors.push(`Metric ${m.name || idx} missing sourceEvents`);}
         });
 
         // Scan code for usage (mocked for this script, but in real CI we'd grep)

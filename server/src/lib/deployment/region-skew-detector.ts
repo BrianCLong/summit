@@ -31,8 +31,8 @@ export class RegionSkewDetector {
     let maxLatency = -Infinity;
 
     for (const status of healthy) {
-      if (status.latencyMs < minLatency) minLatency = status.latencyMs;
-      if (status.latencyMs > maxLatency) maxLatency = status.latencyMs;
+      if (status.latencyMs < minLatency) {minLatency = status.latencyMs;}
+      if (status.latencyMs > maxLatency) {maxLatency = status.latencyMs;}
     }
 
     const skew = maxLatency - minLatency;

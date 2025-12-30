@@ -142,7 +142,7 @@ export class MaestroService {
   }
 
   private async getDB(): Promise<MaestroDB> {
-    if (this.dbCache) return this.dbCache;
+    if (this.dbCache) {return this.dbCache;}
     try {
       const data = await fs.readFile(DB_PATH, 'utf-8');
       this.dbCache = JSON.parse(data);
@@ -154,7 +154,7 @@ export class MaestroService {
   }
 
   private async saveDB(): Promise<void> {
-    if (!this.dbCache) return;
+    if (!this.dbCache) {return;}
     try {
       await fs.writeFile(DB_PATH, JSON.stringify(this.dbCache, null, 2));
     } catch (err) {
@@ -171,8 +171,8 @@ export class MaestroService {
     ).length;
 
     let overallScore = 100;
-    if (recentFailures > 5) overallScore -= 20;
-    if (recentFailures > 15) overallScore -= 40;
+    if (recentFailures > 5) {overallScore -= 20;}
+    if (recentFailures > 15) {overallScore -= 40;}
 
     return {
       overallScore: Math.max(0, overallScore),
@@ -224,7 +224,7 @@ export class MaestroService {
   async updateAgent(id: string, updates: Partial<AgentProfile>, actor: string): Promise<AgentProfile | null> {
     const db = await this.getDB();
     const index = db.agents.findIndex((a) => a.id === id);
-    if (index === -1) return null;
+    if (index === -1) {return null;}
 
     db.agents[index] = { ...db.agents[index], ...updates };
     await this.logAudit(actor, 'update_agent', id, `Updated agent ${id}`);
@@ -241,7 +241,7 @@ export class MaestroService {
   async toggleLoop(id: string, status: 'active' | 'paused', actor: string): Promise<boolean> {
     const db = await this.getDB();
     const loop = db.loops.find((l) => l.id === id);
-    if (!loop) return false;
+    if (!loop) {return false;}
     loop.status = status;
     await this.logAudit(actor, 'toggle_loop', id, `Set loop ${id} to ${status}`);
     await this.saveDB();
@@ -302,7 +302,7 @@ export class MaestroService {
       status: 'allowed',
     });
     // Keep log size manageable
-    if (db.auditLog.length > 1000) db.auditLog.shift();
+    if (db.auditLog.length > 1000) {db.auditLog.shift();}
     await this.saveDB();
   }
 

@@ -570,7 +570,7 @@ export class StrategicAnalysisEngine {
   }
 
   private calculateAggregateRiskScore(risks: Risk[]): number {
-    if (risks.length === 0) return 0;
+    if (risks.length === 0) {return 0;}
     const totalScore = risks.reduce((sum, r) => sum + r.riskScore, 0);
     return Math.round((totalScore / risks.length) * 100) / 100;
   }
@@ -688,7 +688,7 @@ export class StrategicAnalysisEngine {
 
       const phases = [];
       let phaseNum = 1;
-      let remainingGaps = [...sortedGaps];
+      const remainingGaps = [...sortedGaps];
 
       while (remainingGaps.length > 0) {
         const phaseGaps = remainingGaps.splice(0, Math.min(3, remainingGaps.length));
@@ -744,10 +744,10 @@ export class StrategicAnalysisEngine {
     let analyses = Array.from(analysesStore.values());
 
     if (filters) {
-      if (filters.type) analyses = analyses.filter((a) => a.type === filters.type);
-      if (filters.status) analyses = analyses.filter((a) => a.status === filters.status);
-      if (filters.analyst) analyses = analyses.filter((a) => a.analyst === filters.analyst);
-      if (filters.timeHorizon) analyses = analyses.filter((a) => a.timeHorizon === filters.timeHorizon);
+      if (filters.type) {analyses = analyses.filter((a) => a.type === filters.type);}
+      if (filters.status) {analyses = analyses.filter((a) => a.status === filters.status);}
+      if (filters.analyst) {analyses = analyses.filter((a) => a.analyst === filters.analyst);}
+      if (filters.timeHorizon) {analyses = analyses.filter((a) => a.timeHorizon === filters.timeHorizon);}
     }
 
     return analyses.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -817,7 +817,7 @@ export class StrategicAnalysisEngine {
 
   async deleteAnalysis(id: string): Promise<boolean> {
     const analysis = analysesStore.get(id);
-    if (!analysis) return false;
+    if (!analysis) {return false;}
 
     analysesStore.delete(id);
     swotStore.delete(id);
@@ -838,9 +838,9 @@ export class StrategicAnalysisEngine {
     const score2 = this.impactToNumeric(impact2);
     const avg = (score1 + score2) / 2;
 
-    if (avg >= 4.5) return 'CRITICAL';
-    if (avg >= 3.5) return 'HIGH';
-    if (avg >= 2.5) return 'MEDIUM';
+    if (avg >= 4.5) {return 'CRITICAL';}
+    if (avg >= 3.5) {return 'HIGH';}
+    if (avg >= 2.5) {return 'MEDIUM';}
     return 'LOW';
   }
 

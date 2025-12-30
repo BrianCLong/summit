@@ -104,7 +104,7 @@ function createMockRedisClient() {
 }
 
 export async function redisHealthCheck(): Promise<boolean> {
-  if (!redisClient) return false;
+  if (!redisClient) {return false;}
   try {
     await redisClient.ping();
     return true;

@@ -68,11 +68,11 @@ const defaultAcceptedTypes = [
 ];
 
 const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) {return '0 Bytes';}
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
 };
 
 export function FileUpload({
@@ -124,7 +124,7 @@ export function FileUpload({
       }
 
       const fileType = file.type;
-      const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
+      const fileExt = `.${  file.name.split('.').pop()?.toLowerCase()}`;
       const isAccepted = acceptedTypes.some((type) => {
         if (type.startsWith('.')) {
           return fileExt === type.toLowerCase();

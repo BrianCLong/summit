@@ -55,7 +55,7 @@ export function CommandPalette({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return commands;
+    if (!q) {return commands;}
     return commands.filter((c) => c.title.toLowerCase().includes(q));
   }, [commands, query]);
 
@@ -63,7 +63,7 @@ export function CommandPalette({
     function onKey(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        if (!open) onClose(); // ensure re-render to open from parent
+        if (!open) {onClose();} // ensure re-render to open from parent
       }
     }
     window.addEventListener('keydown', onKey);

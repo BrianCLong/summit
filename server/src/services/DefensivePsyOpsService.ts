@@ -47,7 +47,7 @@ export class DefensivePsyOpsService extends EventEmitter {
    * import side-effects from the monolithic config.
    */
   private async getDb(): Promise<Pool> {
-    if (this.db) return this.db;
+    if (this.db) {return this.db;}
 
     try {
       const { getPostgresPool } = await import('../config/database.js');
@@ -117,9 +117,9 @@ export class DefensivePsyOpsService extends EventEmitter {
   }
 
   private calculateThreatLevel(score: number, flags: string[]): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (score > 0.8 || flags.includes('HIGH_RISK_DISINFO')) return 'CRITICAL';
-    if (score > 0.6) return 'HIGH';
-    if (score > 0.4) return 'MEDIUM';
+    if (score > 0.8 || flags.includes('HIGH_RISK_DISINFO')) {return 'CRITICAL';}
+    if (score > 0.6) {return 'HIGH';}
+    if (score > 0.4) {return 'MEDIUM';}
     return 'LOW';
   }
 

@@ -67,7 +67,7 @@ export class PipelineOrchestrator {
            break; // Abort if source fails
         }
 
-        if (rawRecords.length === 0) continue;
+        if (rawRecords.length === 0) {continue;}
 
         logger.info({ count: rawRecords.length, stage: 'RAW' }, 'Fetched records');
 
@@ -117,7 +117,7 @@ export class PipelineOrchestrator {
         }
 
         // 3. Normalize
-        let normalized = { entities: [], edges: [], documents: processedDocuments };
+        const normalized = { entities: [], edges: [], documents: processedDocuments };
         if (config.stages.includes('normalize')) {
            try {
              // Merge with existing logic if any

@@ -47,8 +47,8 @@ export class GraphCompressionService {
         const s = typeof l.source === 'object' ? (l.source as any).id : l.source;
         const t = typeof l.target === 'object' ? (l.target as any).id : l.target;
 
-        if (adj.has(s)) adj.get(s)?.push(t);
-        if (adj.has(t)) adj.get(t)?.push(s);
+        if (adj.has(s)) {adj.get(s)?.push(t);}
+        if (adj.has(t)) {adj.get(t)?.push(s);}
     });
 
     // Initialize labels (each node is its own community)
@@ -63,7 +63,7 @@ export class GraphCompressionService {
 
       for (const node of nodes) {
         const neighbors = adj.get(node.id) || [];
-        if (neighbors.length === 0) continue;
+        if (neighbors.length === 0) {continue;}
 
         const labelCounts = new Map<string, number>();
         for (const neighbor of neighbors) {
@@ -106,7 +106,7 @@ export class GraphCompressionService {
     const clusterMap = new Map<string, GraphNode[]>();
     data.nodes.forEach(n => {
         const cId = communities.get(n.id) || n.id;
-        if (!clusterMap.has(cId)) clusterMap.set(cId, []);
+        if (!clusterMap.has(cId)) {clusterMap.set(cId, []);}
         clusterMap.get(cId)?.push(n);
     });
 

@@ -42,14 +42,14 @@ export class PhilanthropyService {
   public calculateObligation(event: PhilanthropicEvent): { contribution: number, match: number, total: number } {
     // Sliding scale logic (simplified)
     let rate = 0.01; // 1%
-    if (event.amount > 1000000) rate = 0.02;
-    if (event.amount > 10000000) rate = 0.05;
+    if (event.amount > 1000000) {rate = 0.02;}
+    if (event.amount > 10000000) {rate = 0.05;}
 
     const contribution = event.amount * rate;
 
     // Company match logic
     let matchMultiplier = 2;
-    if (event.amount > 5000000) matchMultiplier = 5;
+    if (event.amount > 5000000) {matchMultiplier = 5;}
 
     const match = contribution * matchMultiplier;
 

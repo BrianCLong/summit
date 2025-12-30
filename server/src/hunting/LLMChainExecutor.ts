@@ -565,7 +565,7 @@ Return as JSON:
    * Estimate precision based on finding characteristics
    */
   private estimatePrecision(findings: HuntFinding[]): number {
-    if (findings.length === 0) return 1.0;
+    if (findings.length === 0) {return 1.0;}
 
     let totalConfidence = 0;
     let count = 0;
@@ -630,7 +630,7 @@ Return as JSON:
     for (const { history } of chains) {
       for (const result of history) {
         totalExecutions++;
-        if (result.success) successfulExecutions++;
+        if (result.success) {successfulExecutions++;}
         totalTokens += result.tokensUsed.total;
         totalLatency += result.latencyMs;
       }

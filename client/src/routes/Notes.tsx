@@ -15,7 +15,7 @@ export default function Notes() {
   const [tag, setTag] = useState('');
 
   const handleSave = () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {return;}
     setBody('');
     setTitle('');
     setTag('');

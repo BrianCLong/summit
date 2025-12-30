@@ -156,7 +156,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   private initializeCryptoPipeline(): void {
-    if (this.cryptoPipelineInit) return;
+    if (this.cryptoPipelineInit) {return;}
     this.cryptoPipelineInit = createDefaultCryptoPipeline({
       timestampingEndpointEnv: 'CRYPTO_TIMESTAMP_ENDPOINT',
       auditSubsystem: 'provenance-ledger',
@@ -805,8 +805,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   }
 
   private computeMerkleRoot(hashes: string[]): string {
-    if (hashes.length === 0) return this.genesisHash;
-    if (hashes.length === 1) return hashes[0];
+    if (hashes.length === 0) {return this.genesisHash;}
+    if (hashes.length === 1) {return hashes[0];}
 
     // Build Merkle tree bottom-up
     let currentLevel = hashes;
@@ -1199,7 +1199,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         'current_hash',
       ];
 
-      let csv = headers.join(',') + '\n';
+      let csv = `${headers.join(',')  }\n`;
 
       for (const entry of entries) {
         const row = headers.map((header) => {
@@ -1224,7 +1224,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             ? `"${value.replace(/"/g, '""')}"`
             : value;
         });
-        csv += row.join(',') + '\n';
+        csv += `${row.join(',')  }\n`;
       }
 
       return csv;

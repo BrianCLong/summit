@@ -4,7 +4,7 @@ export default function TTPCorrelationOverlay({ cy, nodes, edges, open }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (!cy || !canvasRef.current || !open) return;
+    if (!cy || !canvasRef.current || !open) {return;}
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -16,7 +16,7 @@ export default function TTPCorrelationOverlay({ cy, nodes, edges, open }) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Only draw if the overlay is open
-      if (!open) return;
+      if (!open) {return;}
 
       // Example: Highlight nodes with ATT&CK TTPs
       nodes.forEach((node) => {

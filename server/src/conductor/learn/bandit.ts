@@ -162,7 +162,7 @@ export class ThompsonSamplingBandit {
    */
   updateArm(arm: ExpertArm, reward: number): void {
     const stats = this.arms.get(arm);
-    if (!stats) return;
+    if (!stats) {return;}
 
     // Update Beta distribution parameters
     stats.alpha += reward;
@@ -218,8 +218,8 @@ export class ThompsonSamplingBandit {
     // Box-Muller transform
     let u = 0,
       v = 0;
-    while (u === 0) u = Math.random();
-    while (v === 0) v = Math.random();
+    while (u === 0) {u = Math.random();}
+    while (v === 0) {v = Math.random();}
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   }
 
@@ -306,7 +306,7 @@ export class LinUCBBandit {
    */
   updateArm(arm: ExpertArm, features: number[], reward: number): void {
     const model = this.models.get(arm);
-    if (!model) return;
+    if (!model) {return;}
 
     // Update A = A + x * x^T
     for (let i = 0; i < this.featureDimension; i++) {
@@ -776,11 +776,11 @@ export class AdaptiveRouter extends EventEmitter {
     // Use deterministic production routing logic
     let productionArm: ExpertArm = 'LLM_LIGHT';
 
-    if (context.domain === 'graph') productionArm = 'GRAPH_TOOL';
-    else if (context.domain === 'rag') productionArm = 'RAG_TOOL';
-    else if (context.domain === 'files') productionArm = 'FILES_TOOL';
-    else if (context.domain === 'osint') productionArm = 'OSINT_TOOL';
-    else if (context.domain === 'export') productionArm = 'EXPORT_TOOL';
+    if (context.domain === 'graph') {productionArm = 'GRAPH_TOOL';}
+    else if (context.domain === 'rag') {productionArm = 'RAG_TOOL';}
+    else if (context.domain === 'files') {productionArm = 'FILES_TOOL';}
+    else if (context.domain === 'osint') {productionArm = 'OSINT_TOOL';}
+    else if (context.domain === 'export') {productionArm = 'EXPORT_TOOL';}
     else if (context.tokenEst > 5000 || context.queryComplexity === 'complex') {
       productionArm = 'LLM_HEAVY';
     }
@@ -799,7 +799,7 @@ export class AdaptiveRouter extends EventEmitter {
 
   private getThompsonConfidence(arm: ExpertArm): number {
     const stats = this.thompsonBandit.getArmStatistics().get(arm);
-    if (!stats) return 0.5;
+    if (!stats) {return 0.5;}
 
     // Return width of confidence interval as inverse confidence measure
     const width =
@@ -809,7 +809,7 @@ export class AdaptiveRouter extends EventEmitter {
 
   private getExpectedReward(arm: ExpertArm, context: BanditContext): number {
     const stats = this.thompsonBandit.getArmStatistics().get(arm);
-    if (!stats || stats.totalPulls === 0) return 0.5;
+    if (!stats || stats.totalPulls === 0) {return 0.5;}
 
     return stats.alpha / (stats.alpha + stats.beta);
   }
@@ -869,7 +869,7 @@ export class AdaptiveRouter extends EventEmitter {
   private async loadPersistedState(): Promise<void> {
     try {
       const stored = await this.redis.get('router:bandit_state');
-      if (!stored) return;
+      if (!stored) {return;}
 
       const state = JSON.parse(stored);
 

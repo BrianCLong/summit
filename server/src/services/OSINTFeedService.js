@@ -38,11 +38,11 @@ class OSINTFeedService {
   }
 
   loadSources() {
-    if (this._sources) return this._sources;
+    if (this._sources) {return this._sources;}
     try {
       const md = fs.readFileSync(this.sourcesFile, 'utf8');
       const match = md.match(/```json\n([\s\S]*?)```/);
-      if (!match) return [];
+      if (!match) {return [];}
       this._sources = JSON.parse(match[1]);
       return this._sources;
     } catch (err) {
@@ -99,10 +99,10 @@ class OSINTFeedService {
   async fetchSource(source, params = {}) {
     const providers = this.externalApi.providers();
     const handler = providers[source.provider];
-    if (!handler) throw new Error(`Provider ${source.provider} not found`);
+    if (!handler) {throw new Error(`Provider ${source.provider} not found`);}
     if (source.requiresApiKey) {
       const key = await this.getApiKey(source.provider);
-      if (!key) throw new Error(`API key for ${source.provider} not available`);
+      if (!key) {throw new Error(`API key for ${source.provider} not available`);}
       params.apiKey = key;
     }
     return handler.handler(params);

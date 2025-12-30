@@ -60,11 +60,11 @@ class CorrelationEngine {
   }
 
   private pinoLevelToString(level: number): string {
-      if (level >= 60) return 'fatal';
-      if (level >= 50) return 'error';
-      if (level >= 40) return 'warn';
-      if (level >= 30) return 'info';
-      if (level >= 20) return 'debug';
+      if (level >= 60) {return 'fatal';}
+      if (level >= 50) {return 'error';}
+      if (level >= 40) {return 'warn';}
+      if (level >= 30) {return 'info';}
+      if (level >= 20) {return 'debug';}
       return 'trace';
   }
 
@@ -78,8 +78,8 @@ class CorrelationEngine {
     // Extract unique Trace IDs from these logs to identify "related traces"
     const traceIds = new Set<string>();
     windowLogs.forEach(l => {
-        if (l.traceId) traceIds.add(l.traceId);
-        if (l.correlationId) traceIds.add(l.correlationId);
+        if (l.traceId) {traceIds.add(l.traceId);}
+        if (l.correlationId) {traceIds.add(l.correlationId);}
     });
 
     // Capture basic metrics context

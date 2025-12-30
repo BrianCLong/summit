@@ -150,7 +150,7 @@ function IntelGraphCanvas() {
   }, [nodes, edges, status]);
 
   const handleKeyDown = (event) => {
-    if (!cyInstance.current) return;
+    if (!cyInstance.current) {return;}
 
     const cy = cyInstance.current;
     const panAmount = 50; // Pixels to pan

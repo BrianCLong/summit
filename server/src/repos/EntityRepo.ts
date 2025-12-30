@@ -337,7 +337,7 @@ export class EntityRepo {
     ids: readonly string[],
     tenantId: string,
   ): Promise<(Entity | null)[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {return [];}
 
     const scopedTenantId = resolveTenantId(tenantId, 'entity.batchByIds');
     const params: any[] = [ids, scopedTenantId];

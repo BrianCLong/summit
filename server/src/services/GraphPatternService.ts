@@ -44,8 +44,8 @@ export class GraphPatternService {
   async search(query: GraphPatternQuery): Promise<{ nodes: Entity[]; edges: Edge[] }[]> {
     const { tenantId, pattern, limit = 100 } = query;
 
-    let cypherParts: string[] = [];
-    let whereParts: string[] = [];
+    const cypherParts: string[] = [];
+    const whereParts: string[] = [];
     const params: any = { tenantId };
 
     // Sanitize aliases to prevent injection
@@ -57,7 +57,7 @@ export class GraphPatternService {
         return `(${safeAlias}:Entity {tenantId: $tenantId})`;
     }).join(', ');
 
-    if (nodeDefs) cypherParts.push(`MATCH ${nodeDefs}`);
+    if (nodeDefs) {cypherParts.push(`MATCH ${nodeDefs}`);}
 
     if (pattern.edges.length > 0) {
         const edgeDefs = pattern.edges.map((e, idx) => {

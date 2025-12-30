@@ -445,7 +445,7 @@ export class SubagentCoordinator {
       },
       metadata: {
         messageType: type,
-        hasAttachments: !!attachments?.length,
+        hasAttachments: Boolean(attachments?.length),
         channel: channelId,
         messageLength: content.length
       }

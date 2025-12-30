@@ -183,7 +183,7 @@ export class ForensicsLogger extends EventEmitter {
    * Initialize the forensics logger
    */
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {return;}
 
     try {
       await this.redis.connect();
@@ -247,7 +247,7 @@ export class ForensicsLogger extends EventEmitter {
         if (data.hash) {
           this.lastHash = data.hash;
           logger.debug('Loaded last hash for chain continuity', {
-            hash: this.lastHash.substring(0, 16) + '...',
+            hash: `${this.lastHash.substring(0, 16)  }...`,
           });
         }
       }
@@ -306,7 +306,7 @@ export class ForensicsLogger extends EventEmitter {
    * Flush pending events to Redis Stream
    */
   private async flushEvents(): Promise<void> {
-    if (this.pendingEvents.length === 0) return;
+    if (this.pendingEvents.length === 0) {return;}
 
     const events = [...this.pendingEvents];
     this.pendingEvents = [];
@@ -516,7 +516,7 @@ export class ForensicsLogger extends EventEmitter {
    * Acknowledge processed events
    */
   async acknowledgeEvents(eventIds: string[]): Promise<number> {
-    if (eventIds.length === 0) return 0;
+    if (eventIds.length === 0) {return 0;}
 
     return this.redis.xack(
       this.config.streamName,

@@ -624,7 +624,7 @@ export class AlertTriageV2Service {
   }
 
   private countExternalIPs(entities: any[]): number {
-    if (!entities) return 0;
+    if (!entities) {return 0;}
     return entities.filter((e) => e.type === 'ip' && this.isExternalIP(e.value))
       .length;
   }
@@ -648,7 +648,7 @@ export class AlertTriageV2Service {
   }
 
   private isVIPUser(entities: any[]): boolean {
-    if (!entities) return false;
+    if (!entities) {return false;}
     const vipEmails = ['ceo@', 'cfo@', 'admin@']; // would load from config
     return entities.some(
       (e) =>

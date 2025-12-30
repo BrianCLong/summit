@@ -9,7 +9,7 @@ const env = new nunjucks.Environment(undefined, {
 });
 
 env.addFilter('as_date', (value: unknown) => {
-  if (!value) return '';
+  if (!value) {return '';}
   const date = typeof value === 'string' ? new Date(value) : (value as Date);
   return date.toISOString();
 });
@@ -19,8 +19,8 @@ env.addFilter('uppercase', (value: unknown) =>
 );
 
 env.addFilter('truncate', (value: unknown, length: number) => {
-  if (typeof value !== 'string') return value;
-  if (value.length <= length) return value;
+  if (typeof value !== 'string') {return value;}
+  if (value.length <= length) {return value;}
   return `${value.substring(0, length)}…`;
 });
 

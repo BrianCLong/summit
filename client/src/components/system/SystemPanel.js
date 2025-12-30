@@ -48,7 +48,7 @@ export default function SystemPanel() {
       const res = await fetch(`${SystemAPI.base || ''}/api/system/stats`, {
         headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       });
-      if (res.ok) setStats(await res.json());
+      if (res.ok) {setStats(await res.json());}
     } catch {}
   };
 

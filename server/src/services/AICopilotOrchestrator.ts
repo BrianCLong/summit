@@ -160,7 +160,7 @@ export class AICopilotOrchestrator {
 
       const cypherResult = await this.nl2CypherService.translateQuery(nl2cypherRequest);
       result = cypherResult;
-      runId = cypherResult.auditId || 'nl2cypher-' + Date.now();
+      runId = cypherResult.auditId || `nl2cypher-${  Date.now()}`;
       modeSelectionReasoning = request.mode === 'auto'
         ? 'Question appears to be a structured query requesting specific data'
         : undefined;
@@ -357,7 +357,7 @@ export class AICopilotOrchestrator {
     logger.info({
       originalRunId: runId,
       userId,
-      hasModifications: !!(options?.modifiedQuestion || options?.modifiedParameters),
+      hasModifications: Boolean(options?.modifiedQuestion || options?.modifiedParameters),
     }, 'Replaying copilot query');
 
     // Extract original request parameters
@@ -383,8 +383,8 @@ export class AICopilotOrchestrator {
    * Infer copilot mode from run type
    */
   private inferModeFromRunType(runType: string): CopilotMode {
-    if (runType.includes('graphrag')) return 'graphrag';
-    if (runType.includes('nl2cypher') || runType.includes('nl_to_cypher')) return 'nl2cypher';
+    if (runType.includes('graphrag')) {return 'graphrag';}
+    if (runType.includes('nl2cypher') || runType.includes('nl_to_cypher')) {return 'nl2cypher';}
     return 'auto';
   }
 
@@ -412,9 +412,9 @@ export class AICopilotOrchestrator {
 
     // Check each service (simplified - in production would do actual health checks)
     try {
-      checks.graphrag = !!this.graphRAGService;
-      checks.nl2cypher = !!this.nl2CypherService;
-      checks.queryPreview = !!this.queryPreviewService;
+      checks.graphrag = Boolean(this.graphRAGService);
+      checks.nl2cypher = Boolean(this.nl2CypherService);
+      checks.queryPreview = Boolean(this.queryPreviewService);
       checks.provenance = true; // ProvLedgerClient availability
       checks.redaction = true; // RedactionService availability
     } catch (error) {

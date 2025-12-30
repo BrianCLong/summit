@@ -28,7 +28,7 @@ import {
   ListItemIcon,
 } from '@mui/material';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 const AnyGrid = Grid as any;
 
 import {
@@ -293,16 +293,16 @@ export const TrustCenterDashboard: React.FC = () => {
 
         // Fetch status
         const statusRes = await fetch('/api/v1/trust/status');
-        if (!statusRes.ok) throw new Error('Failed to fetch status');
+        if (!statusRes.ok) {throw new Error('Failed to fetch status');}
         const statusData = await statusRes.json();
         setData(statusData);
 
         // Fetch packs
         const packsRes = await fetch('/api/v1/trust/packs');
-        if (!packsRes.ok) throw new Error('Failed to fetch packs');
+        if (!packsRes.ok) {throw new Error('Failed to fetch packs');}
         const packsData = await packsRes.json();
         setPacks(packsData.packs || []);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -327,12 +327,12 @@ export const TrustCenterDashboard: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ packId, format: 'pdf' }),
       });
-      if (!res.ok) throw new Error('Failed to generate report');
+      if (!res.ok) {throw new Error('Failed to generate report');}
       const report = await res.json();
       // Handle download
       // eslint-disable-next-line no-console
       console.log('Report generated:', report);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     } catch (err: any) {
       setError(err.message);
     }

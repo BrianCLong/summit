@@ -53,7 +53,7 @@ export class GraphRouter {
     const shards = this.shardManager.getAllShards();
     const results = await Promise.allSettled(shards.map(async (shardId) => {
         const driver = this.shardManager.getDriver(shardId);
-        if(!driver) return null;
+        if(!driver) {return null;}
         const session = driver.session();
         try {
             return await session.run(query, params);

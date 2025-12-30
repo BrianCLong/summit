@@ -191,12 +191,12 @@ export class CVServiceManager {
     return {
       initialized: this.initialized,
       models: {
-        object_detection: !!this.objectDetector,
-        face_analysis: !!this.faceAnalyzer,
-        ocr: !!this.ocrEngine,
-        satellite: !!this.satelliteAnalyzer,
-        video: !!this.videoAnalyzer,
-        forensics: !!this.forensicsAnalyzer,
+        object_detection: Boolean(this.objectDetector),
+        face_analysis: Boolean(this.faceAnalyzer),
+        ocr: Boolean(this.ocrEngine),
+        satellite: Boolean(this.satelliteAnalyzer),
+        video: Boolean(this.videoAnalyzer),
+        forensics: Boolean(this.forensicsAnalyzer),
       },
     };
   }
@@ -205,12 +205,12 @@ export class CVServiceManager {
    * Dispose all models
    */
   async dispose(): Promise<void> {
-    if (this.objectDetector) await this.objectDetector.dispose();
-    if (this.faceAnalyzer) await this.faceAnalyzer.dispose();
-    if (this.ocrEngine) await this.ocrEngine.dispose();
-    if (this.satelliteAnalyzer) await this.satelliteAnalyzer.dispose();
-    if (this.videoAnalyzer) await this.videoAnalyzer.dispose();
-    if (this.forensicsAnalyzer) await this.forensicsAnalyzer.dispose();
+    if (this.objectDetector) {await this.objectDetector.dispose();}
+    if (this.faceAnalyzer) {await this.faceAnalyzer.dispose();}
+    if (this.ocrEngine) {await this.ocrEngine.dispose();}
+    if (this.satelliteAnalyzer) {await this.satelliteAnalyzer.dispose();}
+    if (this.videoAnalyzer) {await this.videoAnalyzer.dispose();}
+    if (this.forensicsAnalyzer) {await this.forensicsAnalyzer.dispose();}
 
     this.initialized = false;
     console.log('All CV models disposed');

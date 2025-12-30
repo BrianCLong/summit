@@ -63,7 +63,7 @@ class MobileService extends EventEmitter {
     };
 
     // Start periodic sync cleanup
-    if (this.cleanupTimer) clearInterval(this.cleanupTimer);
+    if (this.cleanupTimer) {clearInterval(this.cleanupTimer);}
     this.cleanupTimer = setInterval(
       () => {
         this.cleanupExpiredSyncData();
@@ -119,7 +119,7 @@ class MobileService extends EventEmitter {
   // Offline data management
   async initializeOfflineData(clientId) {
     const client = this.mobileClients.get(clientId);
-    if (!client) return;
+    if (!client) {return;}
 
     const offlineData = {
       clientId,
@@ -556,7 +556,7 @@ class MobileService extends EventEmitter {
 
   async deregisterMobileClient(clientId) {
     const client = this.mobileClients.get(clientId);
-    if (!client) return false;
+    if (!client) {return false;}
 
     // Cleanup collections
     this.mobileClients.delete(clientId);
@@ -667,9 +667,9 @@ class MobileService extends EventEmitter {
     const breakdown = { ios: 0, android: 0, other: 0 };
 
     for (const client of this.mobileClients.values()) {
-      if (client.platform === 'ios') breakdown.ios++;
-      else if (client.platform === 'android') breakdown.android++;
-      else breakdown.other++;
+      if (client.platform === 'ios') {breakdown.ios++;}
+      else if (client.platform === 'android') {breakdown.android++;}
+      else {breakdown.other++;}
     }
 
     return breakdown;
@@ -677,7 +677,7 @@ class MobileService extends EventEmitter {
 
   getAverageSyncInterval() {
     const clients = Array.from(this.mobileClients.values());
-    if (clients.length === 0) return 0;
+    if (clients.length === 0) {return 0;}
 
     // Only include clients that have sync state with lastSync set
     const intervals = clients

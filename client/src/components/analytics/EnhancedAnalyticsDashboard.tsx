@@ -149,7 +149,7 @@ export const EnhancedAnalyticsDashboard: React.FC<
 
   // Real-time data simulation
   useEffect(() => {
-    if (!config.showRealTime || config.refreshInterval === 'manual') return;
+    if (!config.showRealTime || config.refreshInterval === 'manual') {return;}
 
     const interval = setInterval(() => {
       setMetrics((prev) =>

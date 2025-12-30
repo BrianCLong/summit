@@ -519,7 +519,7 @@ export class CostPerformanceOptimizer {
   private async checkCostSpikes(): Promise<void> {
     for (const [modelId, metrics] of this.metrics) {
       const recentCosts = metrics.costTrends.slice(-10); // Last 10 data points
-      if (recentCosts.length < 5) continue;
+      if (recentCosts.length < 5) {continue;}
 
       const avgCost =
         recentCosts.reduce((sum, t) => sum + t.cost, 0) / recentCosts.length;
@@ -545,7 +545,7 @@ export class CostPerformanceOptimizer {
   private async checkQualityDegradation(): Promise<void> {
     for (const [modelId, metrics] of this.metrics) {
       const recentQuality = metrics.qualityTrends.slice(-10);
-      if (recentQuality.length < 5) continue;
+      if (recentQuality.length < 5) {continue;}
 
       const avgQuality =
         recentQuality.reduce((sum, t) => sum + t.qualityScore, 0) /

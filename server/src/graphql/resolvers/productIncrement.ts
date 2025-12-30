@@ -903,13 +903,13 @@ export const productIncrementResolvers = {
     },
 
     goal: async (parent: any) => {
-      if (!parent.goalId) return null;
+      if (!parent.goalId) {return null;}
       const goal = await productIncrementService.getGoal(parent.goalId);
       return goal ? transformGoal(goal) : null;
     },
 
     parent: async (parent: any) => {
-      if (!parent.parentId) return null;
+      if (!parent.parentId) {return null;}
       const parentDeliverable = await productIncrementService.getDeliverable(
         parent.parentId,
       );
@@ -926,7 +926,7 @@ export const productIncrementResolvers = {
     },
 
     investigation: async (parent: any, _: any, context: any) => {
-      if (!parent.investigationId) return null;
+      if (!parent.investigationId) {return null;}
       // This would use the Investigation dataloader/resolver
       // For now, return a placeholder
       return { id: parent.investigationId };

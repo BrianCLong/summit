@@ -622,13 +622,13 @@ export class EnhancedPremiumModelRegistry {
     taskType: string,
   ): Promise<number> {
     const history = this.executionHistory.get(modelId);
-    if (!history || history.length === 0) return 0.5; // Default score
+    if (!history || history.length === 0) {return 0.5;} // Default score
 
     const taskHistory = history.filter(
       (h) =>
         h.metadata.timestamp > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     );
-    if (taskHistory.length === 0) return 0.5;
+    if (taskHistory.length === 0) {return 0.5;}
 
     const avgScore =
       taskHistory.reduce((sum, h) => sum + h.qualityScore, 0) /
@@ -638,7 +638,7 @@ export class EnhancedPremiumModelRegistry {
 
   private getRecentQualityScore(modelId: string): number {
     const recentScores = this.qualityTracker.get(modelId);
-    if (!recentScores || recentScores.length === 0) return 0;
+    if (!recentScores || recentScores.length === 0) {return 0;}
 
     // Get last 10 scores
     const recent = recentScores.slice(-10);

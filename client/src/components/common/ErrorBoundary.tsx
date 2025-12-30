@@ -30,8 +30,8 @@ type ErrorBoundaryState = {
 };
 
 function arraysAreEqual(first?: Array<unknown>, second?: Array<unknown>) {
-  if (first === second) return true;
-  if (!first || !second || first.length !== second.length) return false;
+  if (first === second) {return true;}
+  if (!first || !second || first.length !== second.length) {return false;}
   return first.every((value, index) => Object.is(value, second[index]));
 }
 

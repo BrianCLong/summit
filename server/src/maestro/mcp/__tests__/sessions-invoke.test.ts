@@ -10,7 +10,7 @@ jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
     executeTool: jest.fn(
       async (_server: string, tool: string, _args: any, scopes: string[]) => {
         if (!scopes?.includes('mcp:invoke'))
-          throw new Error('Insufficient scopes for tool');
+          {throw new Error('Insufficient scopes for tool');}
         return { ok: true, tool };
       },
     ),

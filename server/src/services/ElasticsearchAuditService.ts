@@ -118,7 +118,7 @@ export class ElasticsearchAuditService {
    * Create index templates for audit logs
    */
   private async createIndexTemplates(): Promise<void> {
-    if (!this.client) return;
+    if (!this.client) {return;}
 
     const templates = [
       {

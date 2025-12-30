@@ -99,10 +99,10 @@ async function addTag(
     try {
       const io = getIO();
       if (io)
-        io.of('/realtime').emit('graph:updated', {
+        {io.of('/realtime').emit('graph:updated', {
           entityId,
           change: { type: 'tag_added', tag, lastModifiedAt: newLastModifiedAt },
-        });
+        });}
     } catch (_) {
       /* Intentionally empty */
     }
@@ -158,10 +158,10 @@ async function deleteTag(entityId, tag, { user, traceId } = {}) {
     try {
       const io = getIO();
       if (io)
-        io.of('/realtime').emit('graph:updated', {
+        {io.of('/realtime').emit('graph:updated', {
           entityId,
           change: { type: 'tag_removed', tag },
-        });
+        });}
     } catch (_) {
       /* Intentionally empty */
     }

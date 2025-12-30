@@ -130,18 +130,18 @@ async function connectRedis() {
 }
 
 function getNeo4jDriver() {
-  if (!mockNeo4jDriver) throw new Error('Mock Neo4j driver not initialized');
+  if (!mockNeo4jDriver) {throw new Error('Mock Neo4j driver not initialized');}
   return mockNeo4jDriver;
 }
 
 function getPostgresPool() {
   if (!mockPostgresPool)
-    throw new Error('Mock PostgreSQL pool not initialized');
+    {throw new Error('Mock PostgreSQL pool not initialized');}
   return mockPostgresPool;
 }
 
 function getRedisClient() {
-  if (!mockRedisClient) throw new Error('Mock Redis client not initialized');
+  if (!mockRedisClient) {throw new Error('Mock Redis client not initialized');}
   return mockRedisClient;
 }
 

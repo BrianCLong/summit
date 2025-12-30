@@ -15,9 +15,9 @@ export class ContractAnalyzer {
     const hasIncidentReporting = text.includes('incident reporting') || text.includes('breach notification');
 
     const riskFactors: string[] = [];
-    if (!hasIndemnification) riskFactors.push('Missing Indemnification Clause');
-    if (!hasIncidentReporting) riskFactors.push('Missing Incident Reporting Clause');
-    if (!hasSecurityRequirements) riskFactors.push('Missing Security Requirements');
+    if (!hasIndemnification) {riskFactors.push('Missing Indemnification Clause');}
+    if (!hasIncidentReporting) {riskFactors.push('Missing Incident Reporting Clause');}
+    if (!hasSecurityRequirements) {riskFactors.push('Missing Security Requirements');}
 
     return {
       id: randomUUID(),

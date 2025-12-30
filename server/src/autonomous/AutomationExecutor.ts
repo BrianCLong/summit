@@ -104,7 +104,7 @@ export class AutomationExecutor {
             // But since we flagged it as requiring approval, actual execution happens after approval.
             break;
         default:
-            if (action.type.startsWith('test_')) return; // For testing
+            if (action.type.startsWith('test_')) {return;} // For testing
             throw new Error(`Unknown action type: ${action.type}`);
     }
   }

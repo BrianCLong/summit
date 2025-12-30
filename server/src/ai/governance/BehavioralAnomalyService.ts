@@ -956,8 +956,8 @@ Format your response as JSON:
     let fpr = baseFPR[type] || 0.2;
 
     // Adjust based on deviation strength
-    if (deviation.standardDeviations > 5) fpr *= 0.5;
-    if (deviation.statisticalSignificance < 0.001) fpr *= 0.3;
+    if (deviation.standardDeviations > 5) {fpr *= 0.5;}
+    if (deviation.statisticalSignificance < 0.001) {fpr *= 0.3;}
 
     return Math.max(0, Math.min(fpr, 1));
   }
@@ -989,7 +989,7 @@ Format your response as JSON:
     anomalies: BehavioralAnomaly[],
     minSeverity?: BehavioralAnomaly['severity']
   ): BehavioralAnomaly[] {
-    if (!minSeverity) return anomalies;
+    if (!minSeverity) {return anomalies;}
 
     const severityOrder = ['info', 'low', 'medium', 'high', 'critical'];
     const minIndex = severityOrder.indexOf(minSeverity);

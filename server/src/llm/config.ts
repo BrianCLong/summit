@@ -37,7 +37,7 @@ export interface LLMRouterConfig {
 export const defaultConfig: LLMRouterConfig = {
     providers: {
         openai: {
-            enabled: !!process.env.OPENAI_API_KEY,
+            enabled: Boolean(process.env.OPENAI_API_KEY),
             apiKey: process.env.OPENAI_API_KEY
         },
         mock: {

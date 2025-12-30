@@ -32,8 +32,8 @@ async function collectNeo4jMetrics() {
   } catch (err) {
     // swallow errors to avoid crashing the process
   } finally {
-    if (session) await session.close();
-    if (driver) await driver.close();
+    if (session) {await session.close();}
+    if (driver) {await driver.close();}
   }
 }
 

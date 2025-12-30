@@ -2,8 +2,8 @@ import { EntityInput, ResolutionFeature, ERConfig } from './models';
 
 // Simple Levenshtein distance implementation for string similarity
 function levenshteinDistance(a: string, b: string): number {
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
+  if (a.length === 0) {return b.length;}
+  if (b.length === 0) {return a.length;}
 
   const matrix = [];
 
@@ -32,9 +32,9 @@ function levenshteinDistance(a: string, b: string): number {
 }
 
 function stringSimilarity(s1: string, s2: string): number {
-  if (!s1 || !s2) return 0;
+  if (!s1 || !s2) {return 0;}
   const longer = s1.length > s2.length ? s1 : s2;
-  if (longer.length === 0) return 1.0;
+  if (longer.length === 0) {return 1.0;}
   const distance = levenshteinDistance(s1.toLowerCase(), s2.toLowerCase());
   return (longer.length - distance) / longer.length;
 }
@@ -76,7 +76,7 @@ export class ScoringEngine {
         features.push({ name: 'exactId', score, weight });
         totalScore += score * weight;
         totalWeight += weight;
-        if (match) reasons.push('Exact identifier match');
+        if (match) {reasons.push('Exact identifier match');}
       }
     }
 
@@ -94,7 +94,7 @@ export class ScoringEngine {
         features.push({ name: 'email', score, weight });
         totalScore += score * weight;
         totalWeight += weight;
-        if (match) reasons.push('Email address match');
+        if (match) {reasons.push('Email address match');}
       }
     }
 
@@ -110,7 +110,7 @@ export class ScoringEngine {
         features.push({ name: 'name', score, weight });
         totalScore += score * weight;
         totalWeight += weight;
-        if (score > 0.8) reasons.push(`High name similarity (${(score*100).toFixed(0)}%)`);
+        if (score > 0.8) {reasons.push(`High name similarity (${(score*100).toFixed(0)}%)`);}
       }
     }
 
@@ -127,7 +127,7 @@ export class ScoringEngine {
           features.push({ name: 'phone', score, weight });
           totalScore += score * weight;
           totalWeight += weight;
-          if (match) reasons.push('Phone number match');
+          if (match) {reasons.push('Phone number match');}
         }
     }
 
@@ -145,20 +145,20 @@ export class ScoringEngine {
     const ids: string[] = [];
     const keys = ['ssn', 'passport', 'driverLicense', 'taxId', 'externalId'];
     for (const key of keys) {
-      if (entity.properties[key]) ids.push(String(entity.properties[key]));
+      if (entity.properties[key]) {ids.push(String(entity.properties[key]));}
     }
     return ids;
   }
 
   private extractEmails(entity: EntityInput): string[] {
-    if (entity.properties.email) return [entity.properties.email.toLowerCase()];
-    if (Array.isArray(entity.properties.emails)) return entity.properties.emails.map((e: string) => e.toLowerCase());
+    if (entity.properties.email) {return [entity.properties.email.toLowerCase()];}
+    if (Array.isArray(entity.properties.emails)) {return entity.properties.emails.map((e: string) => e.toLowerCase());}
     return [];
   }
 
   private extractPhones(entity: EntityInput): string[] {
-    if (entity.properties.phone) return [entity.properties.phone.replace(/\D/g, '')]; // Normalize to digits
-    if (Array.isArray(entity.properties.phones)) return entity.properties.phones.map((p: string) => p.replace(/\D/g, ''));
+    if (entity.properties.phone) {return [entity.properties.phone.replace(/\D/g, '')];} // Normalize to digits
+    if (Array.isArray(entity.properties.phones)) {return entity.properties.phones.map((p: string) => p.replace(/\D/g, ''));}
     return [];
   }
 }

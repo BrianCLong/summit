@@ -60,7 +60,7 @@ export const SafeMutationsResolvers = {
       const tracer = trace.getTracer('maestro');
       return await tracer.startActiveSpan('startRun', async (span) => {
         try {
-          const dryRun = !!input?.meta?.dryRun;
+          const dryRun = Boolean(input?.meta?.dryRun);
           const auditId = `audit-${Date.now()}`;
           const autonomyLevel = Number(process.env.AUTONOMY_LEVEL || '1');
           const executeEnabled = process.env.RUNS_EXECUTE_ENABLED !== 'false';

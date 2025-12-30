@@ -353,11 +353,9 @@ export class ImmutableAuditServiceImpl implements ImmutableAuditService {
   private async verifyBlockchainAnchor(anchor: BlockchainAnchor): Promise<boolean> {
     // In production, this would verify against actual blockchain
     // For prototype, just validate structure
-    return !!(
-      anchor.anchorHash &&
+    return Boolean(anchor.anchorHash &&
       anchor.transactionId &&
-      anchor.timestamp
-    );
+      anchor.timestamp);
   }
 
   private async getMerkleTree(): Promise<MerkleTree> {

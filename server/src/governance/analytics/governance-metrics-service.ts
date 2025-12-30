@@ -732,8 +732,8 @@ export class GovernanceMetricsService {
     const threshold = 0.05; // 5% change threshold
     const change = previous > 0 ? (current - previous) / previous : 0;
 
-    if (change > threshold) return 'up';
-    if (change < -threshold) return 'down';
+    if (change > threshold) {return 'up';}
+    if (change < -threshold) {return 'down';}
     return 'stable';
   }
 

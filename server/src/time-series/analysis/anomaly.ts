@@ -7,7 +7,7 @@ export function zScoreAnomalies(rows: TimeSeriesRow[], field: string, window = 3
 
   for (const row of rows) {
     const value = row.values[field];
-    if (typeof value !== 'number') continue;
+    if (typeof value !== 'number') {continue;}
     if (values.length >= window) {
       const { anomaly, z } = detectAnomalySeries(values.slice(-window), value);
       if (anomaly && Math.abs(z) >= threshold) {
@@ -27,13 +27,13 @@ export function seasonalEwmaAnomalies(
   alpha = 0.3,
   threshold = 3.0,
 ): Anomaly[] {
-  if (!rows.length || seasonality <= 1) return [];
+  if (!rows.length || seasonality <= 1) {return [];}
   const smoothed: number[] = [];
   const anomalies: Anomaly[] = [];
 
   for (let i = 0; i < rows.length; i += 1) {
     const value = rows[i].values[field];
-    if (typeof value !== 'number') continue;
+    if (typeof value !== 'number') {continue;}
     if (i < seasonality) {
       smoothed.push(value);
       continue;

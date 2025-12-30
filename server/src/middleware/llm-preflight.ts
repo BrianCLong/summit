@@ -161,8 +161,8 @@ export async function truncatePromptIfNeeded(
       const maxChars = Math.floor(maxTokens * averageCharsPerToken * 0.9);
 
       const truncatedPrompt =
-        prompt.substring(0, maxChars) +
-        '\n\n[... content truncated due to token limit ...]';
+        `${prompt.substring(0, maxChars) 
+        }\n\n[... content truncated due to token limit ...]`;
 
       req.body.prompt = truncatedPrompt;
       req.body._tokcount = {

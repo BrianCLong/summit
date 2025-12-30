@@ -715,7 +715,7 @@ export class ProductIncrementRepo {
       rows: IncrementSummaryRow[];
     };
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const row = rows[0];
     return {
@@ -1221,7 +1221,7 @@ export class ProductIncrementRepo {
     ids: readonly string[],
     tenantId?: string,
   ): Promise<(ProductIncrement | null)[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {return [];}
 
     const params: any[] = [ids];
     let query = `SELECT * FROM product_increments WHERE id = ANY($1)`;

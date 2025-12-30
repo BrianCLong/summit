@@ -125,13 +125,13 @@ export default function FinOpsDashboard() {
     setError(null);
     FinOpsAPI.rollups(windowDays)
       .then((data) => {
-        if (mounted) setOverview(data);
+        if (mounted) {setOverview(data);}
       })
       .catch((err: Error) => {
-        if (mounted) setError(err.message || 'Failed to load FinOps data');
+        if (mounted) {setError(err.message || 'Failed to load FinOps data');}
       })
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted) {setLoading(false);}
       });
 
     return () => {

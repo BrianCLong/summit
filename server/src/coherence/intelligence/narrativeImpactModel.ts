@@ -70,7 +70,7 @@ export class NarrativeImpactModel {
     tenantId: string,
     signals: any[],
   ): Promise<NarrativeImpact[]> {
-    if (!signals.length) return [];
+    if (!signals.length) {return [];}
 
     try {
       logger.info('Starting narrative impact analysis', {
@@ -378,14 +378,14 @@ export class NarrativeImpactModel {
     narrativeKey: string,
     signals: any[],
   ): Promise<NarrativeImpact | null> {
-    if (signals.length < 3) return null; // Need minimum signals for analysis
+    if (signals.length < 3) {return null;} // Need minimum signals for analysis
 
     const [impactType, source] = narrativeKey.split('_');
 
     // Calculate impact magnitude
     const magnitude = this.calculateImpactMagnitude(signals);
 
-    if (magnitude < this.impactThresholds.low) return null;
+    if (magnitude < this.impactThresholds.low) {return null;}
 
     // Determine impact direction
     const direction = this.determineImpactDirection(signals);
@@ -429,7 +429,7 @@ export class NarrativeImpactModel {
   }
 
   private calculateImpactMagnitude(signals: any[]): number {
-    if (!signals.length) return 0;
+    if (!signals.length) {return 0;}
 
     // Weighted average of signal values with temporal decay
     const now = Date.now();
@@ -459,8 +459,8 @@ export class NarrativeImpactModel {
     const targetSet = new Set(targets);
 
     // Simple heuristics for direction
-    if (sourceSet.size < targetSet.size) return 'downstream'; // One-to-many
-    if (sourceSet.size > targetSet.size) return 'upstream'; // Many-to-one
+    if (sourceSet.size < targetSet.size) {return 'downstream';} // One-to-many
+    if (sourceSet.size > targetSet.size) {return 'upstream';} // Many-to-one
     return 'lateral'; // Many-to-many or equal
   }
 
@@ -547,7 +547,7 @@ export class NarrativeImpactModel {
   }
 
   private calculateTimeframe(signals: any[]): string {
-    if (signals.length < 2) return 'instant';
+    if (signals.length < 2) {return 'instant';}
 
     const start = new Date(
       signals.reduce(
@@ -563,8 +563,8 @@ export class NarrativeImpactModel {
     );
     const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
 
-    if (diffHours < 1) return 'immediate';
-    if (diffHours < 24) return `${Math.ceil(diffHours)}h`;
+    if (diffHours < 1) {return 'immediate';}
+    if (diffHours < 24) {return `${Math.ceil(diffHours)}h`;}
     return `${Math.ceil(diffHours / 24)}d`;
   }
 
@@ -623,7 +623,7 @@ export class NarrativeImpactModel {
     tenantId: string,
     impacts: NarrativeImpact[],
   ): Promise<void> {
-    if (!impacts.length) return;
+    if (!impacts.length) {return;}
 
     const session = this.neo4j.getSession();
     try {
@@ -696,7 +696,7 @@ export class NarrativeImpactModel {
 
   // Helper methods
   private calculateTransmissionDelay(signals: any[]): number {
-    if (signals.length < 2) return 0;
+    if (signals.length < 2) {return 0;}
 
     const intervals = [];
     for (let i = 1; i < signals.length; i++) {
@@ -716,7 +716,7 @@ export class NarrativeImpactModel {
   private calculateAmplificationFactor(signals: any[]): number {
     // Analyze signal strength progression
     const values = signals.map((s) => s.value * s.weight);
-    if (values.length < 2) return 1;
+    if (values.length < 2) {return 1;}
 
     let amplificationSum = 0;
     for (let i = 1; i < values.length; i++) {
@@ -743,13 +743,13 @@ export class NarrativeImpactModel {
     const sources = signals.map((s) => s.source);
     const uniqueSources = new Set(sources);
 
-    if (uniqueSources.size === 1) return 'individual';
-    if (uniqueSources.size < sources.length * 0.3) return 'group';
+    if (uniqueSources.size === 1) {return 'individual';}
+    if (uniqueSources.size < sources.length * 0.3) {return 'group';}
     return 'network';
   }
 
   private calculateTimeSpan(signals: any[]): string {
-    if (signals.length < 2) return '0m';
+    if (signals.length < 2) {return '0m';}
 
     const start = new Date(
       signals.reduce(
@@ -765,8 +765,8 @@ export class NarrativeImpactModel {
     );
     const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
 
-    if (diffMinutes < 60) return `${Math.ceil(diffMinutes)}m`;
-    if (diffMinutes < 1440) return `${Math.ceil(diffMinutes / 60)}h`;
+    if (diffMinutes < 60) {return `${Math.ceil(diffMinutes)}m`;}
+    if (diffMinutes < 1440) {return `${Math.ceil(diffMinutes / 60)}h`;}
     return `${Math.ceil(diffMinutes / 1440)}d`;
   }
 

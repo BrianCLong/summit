@@ -48,9 +48,9 @@ export class TemporalDetector implements Detector {
     const isAnomaly = absZ > this.Z_SCORE_THRESHOLD;
 
     let severity = Severity.LOW;
-    if (absZ > 5) severity = Severity.CRITICAL;
-    else if (absZ > 4) severity = Severity.HIGH;
-    else if (absZ > 3) severity = Severity.MEDIUM;
+    if (absZ > 5) {severity = Severity.CRITICAL;}
+    else if (absZ > 4) {severity = Severity.HIGH;}
+    else if (absZ > 3) {severity = Severity.MEDIUM;}
 
     return this.createResult(context, isAnomaly, score, severity, isAnomaly ? {
       description: `Temporal anomaly detected for ${metric} (Z-Score: ${zScore.toFixed(2)})`,

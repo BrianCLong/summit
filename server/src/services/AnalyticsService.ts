@@ -92,8 +92,8 @@ export class AnalyticsService {
     const maxDepth = params.maxDepth ? parseInt(params.maxDepth, 10) : 5;
 
     // Validate params
-    if (isNaN(k) || k < 1) throw new Error('Invalid parameter: k');
-    if (isNaN(maxDepth) || maxDepth < 1) throw new Error('Invalid parameter: maxDepth');
+    if (isNaN(k) || k < 1) {throw new Error('Invalid parameter: k');}
+    if (isNaN(maxDepth) || maxDepth < 1) {throw new Error('Invalid parameter: maxDepth');}
 
     let cypher = '';
     let explanation = '';

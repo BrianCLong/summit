@@ -4,7 +4,7 @@ import AlertsDashboard from '../components/alerts/AlertsDashboard';
 import AlertRuleForm from '../components/alerts/AlertRuleForm';
 
 const AlertingPage: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const handleFormSubmit = (rule: any) => {
     // In a real implementation, this would trigger a GraphQL mutation
     // eslint-disable-next-line no-console

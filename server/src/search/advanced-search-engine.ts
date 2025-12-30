@@ -73,7 +73,7 @@ type Embedder = { embed(text: string): number[] };
 class BasicEmbedder implements Embedder {
   embed(text: string): number[] {
     const tokens = tokenize(text);
-    if (!tokens.length) return [0];
+    if (!tokens.length) {return [0];}
     return tokens.map((t) => t.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) / t.length);
   }
 }
@@ -82,7 +82,7 @@ class SearchAnalytics {
   private queryCounts = new Map<string, number>();
 
   trackQuery(text: string | undefined) {
-    if (!text) return;
+    if (!text) {return;}
     const normalized = text.trim().toLowerCase();
     this.queryCounts.set(normalized, (this.queryCounts.get(normalized) || 0) + 1);
   }
@@ -109,7 +109,7 @@ class InMemorySearchStore {
   indexDocuments(documents: SearchDocument[]) {
     documents.forEach((doc) => {
       if (!doc.embedding) {
-        doc.embedding = this.embedder.embed(doc.title + ' ' + doc.body);
+        doc.embedding = this.embedder.embed(`${doc.title  } ${  doc.body}`);
       }
       this.docs.set(doc.id, doc);
     });
@@ -208,7 +208,7 @@ export class AdvancedSearchEngine {
   }
 
   autocomplete(prefix: string) {
-    if (!prefix) return [] as string[];
+    if (!prefix) {return [] as string[];}
     const normalized = prefix.trim().toLowerCase();
     const seen = new Set<string>();
     const completions: string[] = [];
@@ -247,13 +247,13 @@ export class AdvancedSearchEngine {
     query: SearchQuery,
     dslTokens: Token[],
   ): SearchHit | null {
-    if (!this.matchesDsl(doc, dslTokens)) return null;
-    if (!this.matchesFacetFilters(doc, query.facets)) return null;
-    if (!this.matchesTimeWindow(doc, query.time)) return null;
+    if (!this.matchesDsl(doc, dslTokens)) {return null;}
+    if (!this.matchesFacetFilters(doc, query.facets)) {return null;}
+    if (!this.matchesTimeWindow(doc, query.time)) {return null;}
 
     const fullTextScore = tokens.reduce((score, token) => {
       const combined = `${doc.title} ${doc.body}`.toLowerCase();
-      if (combined.includes(token.toLowerCase())) return score + 2;
+      if (combined.includes(token.toLowerCase())) {return score + 2;}
       if (query.fuzzy) {
         const distance = natural.LevenshteinDistance(token.toLowerCase(), doc.title.toLowerCase());
         return distance <= 2 ? score + 1 : score;
@@ -269,7 +269,7 @@ export class AdvancedSearchEngine {
     const entityScore = entityMatches.length ? 1.5 : 0;
 
     const score = fullTextScore + semanticScore + entityScore;
-    if (score <= 0) return null;
+    if (score <= 0) {return null;}
 
     return {
       document: doc,
@@ -310,25 +310,25 @@ export class AdvancedSearchEngine {
   }
 
   private matchesFacetFilters(doc: SearchDocument, filters?: FacetFilter) {
-    if (!filters) return true;
+    if (!filters) {return true;}
     return Object.entries(filters).every(([facet, values]) => {
-      if (!values.length) return true;
+      if (!values.length) {return true;}
       const docValues = doc.facets?.[facet] ?? [];
       return values.some((v) => docValues.includes(v));
     });
   }
 
   private matchesTimeWindow(doc: SearchDocument, time?: { from?: Date; to?: Date }) {
-    if (!time) return true;
+    if (!time) {return true;}
     const created = doc.createdAt ? new Date(doc.createdAt) : undefined;
-    if (!created) return true;
-    if (time.from && created < time.from) return false;
-    if (time.to && created > time.to) return false;
+    if (!created) {return true;}
+    if (time.from && created < time.from) {return false;}
+    if (time.to && created > time.to) {return false;}
     return true;
   }
 
   private matchesDsl(doc: SearchDocument, tokens: Token[]) {
-    if (!tokens.length) return true;
+    if (!tokens.length) {return true;}
     let result: boolean | null = null;
     let pendingOp: 'AND' | 'OR' | null = null;
     let negateNext = false;
@@ -419,7 +419,7 @@ function parseDsl(input: string): Token[] {
 }
 
 function cosineSimilarity(a: number[], b: number[]) {
-  if (!a.length || !b.length) return 0;
+  if (!a.length || !b.length) {return 0;}
   const length = Math.min(a.length, b.length);
   let dot = 0;
   let aMag = 0;
@@ -429,7 +429,7 @@ function cosineSimilarity(a: number[], b: number[]) {
     aMag += a[i] * a[i];
     bMag += b[i] * b[i];
   }
-  if (!aMag || !bMag) return 0;
+  if (!aMag || !bMag) {return 0;}
   return dot / (Math.sqrt(aMag) * Math.sqrt(bMag));
 }
 

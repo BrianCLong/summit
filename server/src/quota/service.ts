@@ -91,7 +91,7 @@ export class QuotaService {
       evidenceId,
     );
     let combinedReason: QuotaReason | undefined;
-    let allowed = used <= limits.evidenceCount;
+    const allowed = used <= limits.evidenceCount;
     let remaining = Math.max(0, limits.evidenceCount - used);
 
     if (footprintBytes && allowed) {

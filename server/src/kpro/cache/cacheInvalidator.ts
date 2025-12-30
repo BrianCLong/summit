@@ -16,7 +16,7 @@ export class RedisCacheInvalidator implements CacheInvalidator {
   }
 
   async invalidate(keys: string[]): Promise<void> {
-    if (!keys.length) return;
+    if (!keys.length) {return;}
     const namespaced = keys.map((key) => `${this.namespace}:${key}`);
     await this.redis.del(...namespaced);
   }

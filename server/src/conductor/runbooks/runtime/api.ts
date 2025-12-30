@@ -53,7 +53,7 @@ let logRepository: RedisRunbookExecutionLogRepository | InMemoryRunbookExecution
  * Initialize the runtime with Redis or in-memory storage
  */
 function initializeRuntime(): void {
-  if (runtimeEngine) return;
+  if (runtimeEngine) {return;}
 
   const useRedis = process.env.REDIS_URL && process.env.NODE_ENV !== 'test';
 
@@ -471,7 +471,7 @@ function formatExecutionResponse(execution: RunbookExecution): object {
       finishedAt: step.finishedAt,
       durationMs: step.durationMs,
       errorMessage: step.errorMessage,
-      hasOutput: !!step.output,
+      hasOutput: Boolean(step.output),
     })),
     kpis: execution.kpis,
     evidenceCount: execution.evidence.length,

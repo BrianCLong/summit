@@ -190,7 +190,7 @@ export default function UserList() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Never';
+    if (!dateString) {return 'Never';}
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -475,7 +475,7 @@ export default function UserList() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)}>
+      <Dialog open={Boolean(deleteConfirm)} onClose={() => setDeleteConfirm(null)}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -492,7 +492,7 @@ export default function UserList() {
       </Dialog>
 
       {/* Lock User Dialog */}
-      <Dialog open={!!lockDialog} onClose={() => setLockDialog(null)}>
+      <Dialog open={Boolean(lockDialog)} onClose={() => setLockDialog(null)}>
         <DialogTitle>Lock User Account</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>

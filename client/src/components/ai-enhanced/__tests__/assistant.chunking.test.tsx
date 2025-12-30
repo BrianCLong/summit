@@ -9,7 +9,7 @@ function chunksFrom(text: string, cuts: number[]) {
   const idxs = [0, ...cuts, text.length].sort((a, b) => a - b);
   const out: string[] = [];
   for (let i = 0; i < idxs.length - 1; i++)
-    out.push(text.slice(idxs[i], idxs[i + 1]));
+    {out.push(text.slice(idxs[i], idxs[i + 1]));}
   return out;
 }
 

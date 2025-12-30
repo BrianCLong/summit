@@ -26,7 +26,7 @@ function expBackoff(
 function withAuthHeaders(getAuthToken: () => string | null) {
   const token = getAuthToken?.();
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (token) {headers.Authorization = `Bearer ${token}`;}
   return headers;
 }
 
@@ -52,7 +52,7 @@ export function createFetchStreamTransport(
           body: JSON.stringify({ input }),
           signal,
         });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {throw new Error(`HTTP ${res.status}`);}
         // Support both streaming body and text() fallback
         if (res.body && 'getReader' in res.body) {
           const reader = res.body.getReader();
@@ -60,7 +60,7 @@ export function createFetchStreamTransport(
           let buffer = '';
           while (true) {
             const { value, done } = await reader.read();
-            if (done) break;
+            if (done) {break;}
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split('\n');
             buffer = lines.pop() || ''; // Keep incomplete line in buffer
@@ -100,7 +100,7 @@ export function createFetchStreamTransport(
         // Ensure done even for non-streaming paths
         handler?.({ type: 'done' });
       } catch (e: any) {
-        if (signal?.aborted) return;
+        if (signal?.aborted) {return;}
         handler?.({ type: 'error', error: e });
       }
     },
@@ -121,9 +121,9 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
       window.location.origin,
     );
     url.searchParams.set('q', input);
-    if (token) url.searchParams.set('token', token);
+    if (token) {url.searchParams.set('token', token);}
 
-    es = new EventSource(url.toString(), { withCredentials: !!token });
+    es = new EventSource(url.toString(), { withCredentials: Boolean(token) });
     // handler?.({ type: "status", value: "thinking" }); // Server will send this
 
     const onMessage = (ev: MessageEvent) => {
@@ -140,7 +140,7 @@ export function createSseTransport(opts: TransportOpts): AssistantTransport {
     };
 
     const onError = () => {
-      if (signal.aborted) return;
+      if (signal.aborted) {return;}
       es?.close();
       es = null;
       attempt += 1;
@@ -182,7 +182,7 @@ export function createSocketIoTransport(
   let attempt = 0;
 
   const connect = () => {
-    if (!SocketIO) throw new Error('socket.io-client not available');
+    if (!SocketIO) {throw new Error('socket.io-client not available');}
     const token = opts.getAuthToken?.();
     socket = SocketIO.io(opts.baseUrl, {
       auth: token ? { token } : undefined,
@@ -215,7 +215,7 @@ export function createSocketIoTransport(
           attempt = 0;
         }); // Expecting structured event
         socket.on('connect_error', () => {
-          if (signal.aborted) return;
+          if (signal.aborted) {return;}
           attempt += 1;
           const delay = expBackoff(attempt, opts.backoff);
           setTimeout(() => {
@@ -225,7 +225,7 @@ export function createSocketIoTransport(
             socket = null;
           }, 0);
           setTimeout(() => {
-            if (!signal.aborted) run();
+            if (!signal.aborted) {run();}
           }, delay);
         });
         signal.addEventListener('abort', () => {

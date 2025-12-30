@@ -44,11 +44,11 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
     pollInterval: 20000, // Poll every 20 seconds
   });
 
-  if (loading) return <CircularProgress />;
+  if (loading) {return <CircularProgress />;}
   if (error)
-    return (
+    {return (
       <Alert severity="error">Error loading playbooks: {error.message}</Alert>
-    );
+    );}
 
   const playbooks = data?.getStrategicResponsePlaybooks || [];
 

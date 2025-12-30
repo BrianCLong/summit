@@ -354,7 +354,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
    */
   async processAlerts(): Promise<void> {
     for (const [ruleId, rule] of this.alertRules) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       try {
         const shouldAlert = await this.evaluateAlertRule(rule);
@@ -485,7 +485,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
    */
   async checkSLOs(): Promise<void> {
     for (const [name, slo] of this.sloDefinitions) {
-      if (!slo.enabled) continue;
+      if (!slo.enabled) {continue;}
 
       try {
         const status = await this.calculateSLOStatus(slo);
@@ -602,13 +602,13 @@ export class PerformanceMonitoringSystem extends EventEmitter {
 
     for (const metricConfig of metricsToCheck) {
       const baseline = this.performanceBaselines.get(metricConfig.key);
-      if (!baseline) continue;
+      if (!baseline) {continue;}
 
       const current = this.getNestedMetricValue(
         currentMetrics,
         metricConfig.key,
       );
-      if (current === null) continue;
+      if (current === null) {continue;}
 
       const deviation = (current - baseline) / baseline;
 
@@ -983,7 +983,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
 
   private calculateCurrentRPS(): number {
     const recentMetrics = this.metrics.application.slice(-4); // Last minute
-    if (recentMetrics.length === 0) return 0;
+    if (recentMetrics.length === 0) {return 0;}
 
     const totalRequests = recentMetrics.reduce(
       (sum, m) => sum + (m as any).requests?.total || 0,
@@ -994,7 +994,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
 
   private calculateAvgResponseTime(): number {
     const recentMetrics = this.metrics.application.slice(-20); // Last 5 minutes
-    if (recentMetrics.length === 0) return 0;
+    if (recentMetrics.length === 0) {return 0;}
 
     return (
       recentMetrics.reduce(
@@ -1024,7 +1024,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
 
   private calculateErrorRate(): number {
     const recentMetrics = this.metrics.application.slice(-20);
-    if (recentMetrics.length === 0) return 0;
+    if (recentMetrics.length === 0) {return 0;}
 
     return (
       recentMetrics.reduce(
@@ -1039,7 +1039,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
     const latestApp =
       this.metrics.application[this.metrics.application.length - 1];
 
-    if (!latestDb || !latestApp) return 0;
+    if (!latestDb || !latestApp) {return 0;}
 
     // Weighted average of database and application cache hit rates
     const dbRate =
@@ -1250,8 +1250,8 @@ export class PerformanceMonitoringSystem extends EventEmitter {
   private classifyRegressionSeverity(
     deviation: number,
   ): 'minor' | 'major' | 'critical' {
-    if (deviation > 0.5) return 'critical';
-    if (deviation > 0.25) return 'major';
+    if (deviation > 0.5) {return 'critical';}
+    if (deviation > 0.25) {return 'major';}
     return 'minor';
   }
 
@@ -1309,9 +1309,9 @@ export class PerformanceMonitoringSystem extends EventEmitter {
     ).length;
     const violatedSLOs = slos.filter((s) => s.status === 'violated').length;
 
-    if (criticalAlerts > 0 || violatedSLOs > 0) return 'critical';
+    if (criticalAlerts > 0 || violatedSLOs > 0) {return 'critical';}
     if (alerts.length > 0 || slos.some((s) => s.status === 'at_risk'))
-      return 'degraded';
+      {return 'degraded';}
     return 'healthy';
   }
 

@@ -33,9 +33,9 @@ router.post(
   async (req: Request, res: Response) => {
     const parse = ExecCreate.safeParse(req.body || {});
     if (!parse.success)
-      return res
+      {return res
         .status(400)
-        .json({ error: 'invalid_input', details: parse.error.issues });
+        .json({ error: 'invalid_input', details: parse.error.issues });}
     const tenantId = (req.user as { tenantId?: string })?.tenantId || 'default';
     const created = await executorsRepo.create(parse.data, tenantId);
     res.status(201).json(created);

@@ -42,15 +42,15 @@ const AuditTraceViewer: React.FC<AuditTraceViewerProps> = ({
 
   const applyFilters = () => {
     const filter: any = {};
-    if (filters.userId) filter.userId = filters.userId;
-    if (filters.entityType) filter.entityType = filters.entityType;
-    if (filters.from) filter.from = new Date(filters.from).toISOString();
-    if (filters.to) filter.to = new Date(filters.to).toISOString();
+    if (filters.userId) {filter.userId = filters.userId;}
+    if (filters.entityType) {filter.entityType = filters.entityType;}
+    if (filters.from) {filter.from = new Date(filters.from).toISOString();}
+    if (filters.to) {filter.to = new Date(filters.to).toISOString();}
     refetch({ investigationId, filter });
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error loading audit trace</div>;
+  if (loading) {return <div>Loading...</div>;}
+  if (error) {return <div>Error loading audit trace</div>;}
 
   return (
     <Box>

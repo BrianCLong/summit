@@ -490,8 +490,8 @@ class SandboxManager {
     let failed = 0;
 
     results.forEach((r) => {
-      if (r.status === 'passed') passed++;
-      else if (r.status === 'failed') failed++;
+      if (r.status === 'passed') {passed++;}
+      else if (r.status === 'failed') {failed++;}
 
       switch (r.verdict) {
         case 'ALLOW':

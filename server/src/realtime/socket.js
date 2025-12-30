@@ -28,7 +28,7 @@ function initSocket(httpServer) {
         socket.handshake.auth?.token ||
         socket.handshake.headers?.authorization?.replace('Bearer ', '');
       const user = await auth.verifyToken(token);
-      if (!user) return next(new Error('Unauthorized'));
+      if (!user) {return next(new Error('Unauthorized'));}
       socket.user = user;
       next();
     } catch (e) {
@@ -54,11 +54,11 @@ function initSocket(httpServer) {
     }
     socket.on('join_ai_entity', ({ entityId }) => {
       // add any RBAC validation here if required
-      if (!entityId) return;
+      if (!entityId) {return;}
       socket.join(`ai:entity:${entityId}`);
     });
     socket.on('leave_ai_entity', ({ entityId }) => {
-      if (!entityId) return;
+      if (!entityId) {return;}
       socket.leave(`ai:entity:${entityId}`);
     });
     import('./maestro.js')

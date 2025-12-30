@@ -100,7 +100,7 @@ export class CaseOverviewService {
   }
 
   private async triggerRevalidation(cacheKey: string, caseId: string, tenantId: string): Promise<void> {
-    if (this.inflight.has(cacheKey)) return;
+    if (this.inflight.has(cacheKey)) {return;}
     void this.refresh(caseId, tenantId, cacheKey);
   }
 

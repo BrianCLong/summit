@@ -49,7 +49,7 @@ export class CohortEvaluator {
             const content = fs.readFileSync(path.join(this.logDir, file), 'utf-8');
             const lines = content.split('\n');
             for (const line of lines) {
-                if (!line.trim()) continue;
+                if (!line.trim()) {continue;}
                 try {
                     const event: TelemetryEvent = JSON.parse(line);
                     if (event.eventType === cohort.criteria.eventType) {

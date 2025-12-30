@@ -58,7 +58,7 @@ describe('Docker Security Configuration', () => {
         expect(content).not.toMatch(/USER root/);
         expect(content).not.toMatch(/USER 0/);
       } catch (error) {
-        if (error.code !== 'ENOENT') throw error;
+        if (error.code !== 'ENOENT') {throw error;}
         // File doesn't exist, skip test
       }
     });
@@ -327,7 +327,7 @@ describe('Docker Security Configuration', () => {
           expect(content).not.toMatch(/password.*=\s*['"]123456['"][^$]/i);
           expect(content).not.toMatch(/password.*=\s*['"]password['"][^$]/i);
         } catch (error) {
-          if (error.code !== 'ENOENT') throw error;
+          if (error.code !== 'ENOENT') {throw error;}
           // File doesn't exist, skip
         }
       }

@@ -4,7 +4,7 @@ import { Pool } from 'pg';
 // Lazy import Kafka to avoid hard dependency if not configured
 async function getProducer() {
   const brokers = (process.env.KAFKA || '').split(',').filter(Boolean);
-  if (!brokers.length) throw new Error('KAFKA not configured');
+  if (!brokers.length) {throw new Error('KAFKA not configured');}
   const { Kafka } = await import('kafkajs');
   const kafka = new Kafka({ clientId: 'conductor', brokers });
   const producer = kafka.producer();

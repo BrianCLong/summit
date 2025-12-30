@@ -98,7 +98,7 @@ export function instrumentPostgresPool(pool: Pool, poolName: string = 'default')
   // Wrap query method with metrics and tracing
   const originalQuery = pool.query.bind(pool);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   pool.query = async function (queryTextOrConfig: any, values?: any, callback?: any) {
     const queryText =
       typeof queryTextOrConfig === 'string' ? queryTextOrConfig : queryTextOrConfig.text;
@@ -118,7 +118,7 @@ export function instrumentPostgresPool(pool: Pool, poolName: string = 'default')
           span.setAttributes({
             'db.system': 'postgresql',
             'db.operation': operation,
-            'db.statement': queryText.length > 500 ? queryText.substring(0, 500) + '...' : queryText,
+            'db.statement': queryText.length > 500 ? `${queryText.substring(0, 500)  }...` : queryText,
             'db.pool': poolName,
           });
 
@@ -181,18 +181,18 @@ export function instrumentPostgresPool(pool: Pool, poolName: string = 'default')
 function extractOperationType(query: string): string {
   const normalizedQuery = query.trim().toLowerCase();
 
-  if (normalizedQuery.startsWith('select')) return 'select';
-  if (normalizedQuery.startsWith('insert')) return 'insert';
-  if (normalizedQuery.startsWith('update')) return 'update';
-  if (normalizedQuery.startsWith('delete')) return 'delete';
-  if (normalizedQuery.startsWith('create')) return 'create';
-  if (normalizedQuery.startsWith('drop')) return 'drop';
-  if (normalizedQuery.startsWith('alter')) return 'alter';
-  if (normalizedQuery.startsWith('truncate')) return 'truncate';
-  if (normalizedQuery.startsWith('begin')) return 'begin';
-  if (normalizedQuery.startsWith('commit')) return 'commit';
-  if (normalizedQuery.startsWith('rollback')) return 'rollback';
-  if (normalizedQuery.startsWith('with')) return 'with'; // CTE
+  if (normalizedQuery.startsWith('select')) {return 'select';}
+  if (normalizedQuery.startsWith('insert')) {return 'insert';}
+  if (normalizedQuery.startsWith('update')) {return 'update';}
+  if (normalizedQuery.startsWith('delete')) {return 'delete';}
+  if (normalizedQuery.startsWith('create')) {return 'create';}
+  if (normalizedQuery.startsWith('drop')) {return 'drop';}
+  if (normalizedQuery.startsWith('alter')) {return 'alter';}
+  if (normalizedQuery.startsWith('truncate')) {return 'truncate';}
+  if (normalizedQuery.startsWith('begin')) {return 'begin';}
+  if (normalizedQuery.startsWith('commit')) {return 'commit';}
+  if (normalizedQuery.startsWith('rollback')) {return 'rollback';}
+  if (normalizedQuery.startsWith('with')) {return 'with';} // CTE
 
   return 'other';
 }

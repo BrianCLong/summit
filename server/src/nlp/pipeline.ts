@@ -146,7 +146,7 @@ export class TextIngestionPipeline {
     const seen = new Set<string>();
     const uniqueDocs = docs.filter((doc) => {
       const key = JSON.stringify(doc.payload);
-      if (seen.has(key)) return false;
+      if (seen.has(key)) {return false;}
       seen.add(key);
       return true;
     });

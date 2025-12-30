@@ -219,13 +219,13 @@ const PsyOpsDashboard: React.FC = () => {
     }
   };
 
-  if (loading) return <CircularProgress />;
+  if (loading) {return <CircularProgress />;}
   if (error)
-    return (
+    {return (
       <Alert severity="error">
         Error loading PsyOps dashboard: {error.message}
       </Alert>
-    );
+    );}
 
   const { counterPsyOpsEngine, disinformationDetection, adversarySimulation } =
     data || {};

@@ -6,7 +6,7 @@ export class SLOEvaluationEngine {
 
   evaluate(metricValue: number, definitionId: string): SLOEvent {
     const def = this.definitions.find(d => `${d.service}-${d.metric}` === definitionId);
-    if (!def) throw new Error(`SLO Definition ${definitionId} not found`);
+    if (!def) {throw new Error(`SLO Definition ${definitionId} not found`);}
 
     let inCompliance = false;
     // Basic logic

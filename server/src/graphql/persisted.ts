@@ -42,7 +42,7 @@ export function checkPersistedQuery(query: string): void {
     // Log the blocked query for security monitoring
     console.warn('Blocked non-persisted query:', {
       hash: queryHash,
-      query: normalizedQuery.substring(0, 100) + '...',
+      query: `${normalizedQuery.substring(0, 100)  }...`,
       timestamp: new Date().toISOString(),
       source: 'persisted-query-guard',
     });
@@ -92,7 +92,7 @@ export function checkIntrospectionAllowed(query: string): void {
 
   if (hasIntrospection) {
     console.warn('Blocked introspection query in production:', {
-      query: query.substring(0, 100) + '...',
+      query: `${query.substring(0, 100)  }...`,
       timestamp: new Date().toISOString(),
       source: 'introspection-guard',
     });

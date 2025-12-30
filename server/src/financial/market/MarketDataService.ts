@@ -221,7 +221,7 @@ export class MarketDataService {
       [symbol],
     );
 
-    if (rows.length === 0) return null;
+    if (rows.length === 0) {return null;}
 
     const security = this.mapSecurityRow(rows[0]);
 
@@ -445,7 +445,7 @@ export class MarketDataService {
   }
 
   private async processStockSplit(action: CorporateAction): Promise<void> {
-    if (!action.ratio) return;
+    if (!action.ratio) {return;}
 
     // Adjust historical prices
     await this.pg.query(
@@ -473,7 +473,7 @@ export class MarketDataService {
 
   private async processDividend(action: CorporateAction): Promise<void> {
     // Record dividend payments for positions held on record date
-    if (!action.amount || !action.recordDate) return;
+    if (!action.amount || !action.recordDate) {return;}
 
     await this.pg.query(
       `INSERT INTO dividend_payments (

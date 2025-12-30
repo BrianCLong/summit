@@ -22,7 +22,7 @@ const safeNum = (value: unknown): number => {
 
 const safeEst = (value: unknown): number => {
   const n = Number(value);
-  if (!Number.isFinite(n) || n < 0) return 0;
+  if (!Number.isFinite(n) || n < 0) {return 0;}
   return n;
 };
 
@@ -38,7 +38,7 @@ export async function currentPricing(): Promise<Record<string, PoolCost>> {
     'SELECT pool_id, cpu_sec_usd, gb_sec_usd, egress_gb_usd FROM pool_pricing',
   );
   const m: Record<string, PoolCost> = {};
-  for (const r of rows) m[r.pool_id] = r;
+  for (const r of rows) {m[r.pool_id] = r;}
   return m;
 }
 
@@ -54,9 +54,9 @@ export function pickCheapestEligible(
       residency &&
       !p.region.toLowerCase().startsWith(residency.toLowerCase())
     )
-      continue;
+      {continue;}
     const c = costs[p.id];
-    if (!c) continue;
+    if (!c) {continue;}
 
     const cpuSec = safeEst(est.cpuSec);
     const gbSec = safeEst(est.gbSec);
@@ -74,7 +74,7 @@ export function pickCheapestEligible(
       price < best.price ||
       (price === best.price && p.id.localeCompare(best.id) < 0)
     )
-      best = { id: p.id, price };
+      {best = { id: p.id, price };}
   }
   return best;
 }

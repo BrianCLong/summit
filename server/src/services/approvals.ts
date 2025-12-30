@@ -47,7 +47,7 @@ const safeRows = <T = unknown>(result: unknown): T[] =>
     : [];
 
 export const canApprove = (role?: string | null): boolean => {
-  if (!role) return false;
+  if (!role) {return false;}
   return APPROVER_ROLES.has(role.toUpperCase());
 };
 
@@ -131,7 +131,7 @@ export async function approveApproval(
   );
 
   const approval = safeRows<Approval>(result)[0];
-  if (!approval) return null;
+  if (!approval) {return null;}
 
   approvalsPending.dec();
   approvalsApprovedTotal.inc();
@@ -169,7 +169,7 @@ export async function rejectApproval(
   );
 
   const approval = safeRows<Approval>(result)[0];
-  if (!approval) return null;
+  if (!approval) {return null;}
 
   approvalsPending.dec();
   approvalsRejectedTotal.inc();

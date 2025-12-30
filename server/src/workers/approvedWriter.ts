@@ -8,7 +8,7 @@ export async function startApprovedWriter(db: any, neo4j: any) {
   setInterval(async () => {
     try {
       const pending = await db.insights.findMany({ status: 'APPROVED' });
-      if (!pending?.length) return;
+      if (!pending?.length) {return;}
 
       // console.log(`Processing ${pending.length} approved insights...`);
 

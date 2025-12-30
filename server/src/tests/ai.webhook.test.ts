@@ -117,7 +117,7 @@ describe('AI webhook', () => {
       .createHmac('sha256', SECRET)
       .update(JSON.stringify(body))
       .digest('hex');
-    const almostValidSig = validSig.slice(0, -1) + 'x'; // Change last char
+    const almostValidSig = `${validSig.slice(0, -1)  }x`; // Change last char
 
     const res = await request(app)
       .post('/ai/webhook')

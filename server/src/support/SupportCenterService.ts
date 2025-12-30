@@ -267,9 +267,9 @@ export class SupportCenterService {
 
     // Search articles
     for (const article of this.articles.values()) {
-      if (article.status !== 'published') continue;
-      if (options?.category && article.category !== options.category) continue;
-      if (options?.locale && article.locale !== options.locale) continue;
+      if (article.status !== 'published') {continue;}
+      if (options?.category && article.category !== options.category) {continue;}
+      if (options?.locale && article.locale !== options.locale) {continue;}
 
       const score = this.calculateSearchScore(
         searchTerms,
@@ -294,8 +294,8 @@ export class SupportCenterService {
 
     // Search FAQs
     for (const faq of this.faqs.values()) {
-      if (options?.category && faq.category !== options.category) continue;
-      if (options?.locale && faq.locale !== options.locale) continue;
+      if (options?.category && faq.category !== options.category) {continue;}
+      if (options?.locale && faq.locale !== options.locale) {continue;}
 
       const score = this.calculateSearchScore(
         searchTerms,
@@ -383,7 +383,7 @@ export class SupportCenterService {
       locale?: string;
     }
   ): Promise<DataEnvelope<FAQItem[]>> {
-    let faqs = Array.from(this.faqs.values())
+    const faqs = Array.from(this.faqs.values())
       .filter((f) => !options?.category || f.category === options.category)
       .filter((f) => !options?.locale || f.locale === options.locale);
 
@@ -463,7 +463,7 @@ export class SupportCenterService {
     attachments?: Attachment[]
   ): Promise<DataEnvelope<TicketMessage>> {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     const message: TicketMessage = {
       id: randomUUID(),
@@ -510,7 +510,7 @@ export class SupportCenterService {
     status: TicketStatus
   ): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     const updates: Record<string, unknown> = {
       status,
@@ -541,7 +541,7 @@ export class SupportCenterService {
     reason: string
   ): Promise<DataEnvelope<SupportTicket>> {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     const result = await pool.query(
       'SELECT * FROM support_tickets WHERE id = $1',
@@ -595,7 +595,7 @@ export class SupportCenterService {
    */
   async checkSLABreaches(): Promise<SupportTicket[]> {
     const pool = getPostgresPool();
-    if (!pool) return [];
+    if (!pool) {return [];}
 
     const result = await pool.query(
       `SELECT * FROM support_tickets
@@ -631,7 +631,7 @@ export class SupportCenterService {
     helpful: boolean
   ): Promise<void> {
     const article = this.articles.get(articleId);
-    if (!article) return;
+    if (!article) {return;}
 
     if (helpful) {
       article.helpfulVotes++;
@@ -739,7 +739,7 @@ export class SupportCenterService {
 
   private async saveTicket(ticket: SupportTicket): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       `INSERT INTO support_tickets (
@@ -828,7 +828,7 @@ export class SupportCenterService {
 
   private async updateArticleViews(articleId: string, views: number): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       'UPDATE knowledge_base_articles SET views = $2 WHERE id = $1',
@@ -842,7 +842,7 @@ export class SupportCenterService {
     notHelpful: number
   ): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       'UPDATE knowledge_base_articles SET helpful_votes = $2, not_helpful_votes = $3 WHERE id = $1',

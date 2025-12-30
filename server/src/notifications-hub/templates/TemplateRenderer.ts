@@ -116,11 +116,11 @@ export class TemplateRenderer {
   }
 
   private interpolate(template: string, event: CanonicalEvent): string {
-    if (!template) return '';
+    if (!template) {return '';}
     return template.replace(/{{([^}]+)}}/g, (_, path) => {
       const value = this.getValueByPath(event, path.trim());
-      if (value instanceof Date) return value.toISOString();
-      if (value === undefined || value === null) return '';
+      if (value instanceof Date) {return value.toISOString();}
+      if (value === undefined || value === null) {return '';}
       return String(value);
     });
   }

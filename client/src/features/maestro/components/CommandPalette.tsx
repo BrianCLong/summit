@@ -74,19 +74,19 @@ export function CommandPalette({
       (command) => !command.requires || hasPermission?.(command.requires),
     );
 
-    if (!trimmed) return commandPool;
+    if (!trimmed) {return commandPool;}
     return commandPool.filter((command) =>
       command.label.toLowerCase().includes(trimmed),
     );
   }, [commands, hasPermission, query]);
 
   React.useEffect(() => {
-    if (!open) setQuery('');
+    if (!open) {setQuery('');}
   }, [open]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') {onClose();}
     }
     if (open) {
       window.addEventListener('keydown', onKeyDown);
@@ -95,7 +95,7 @@ export function CommandPalette({
     return undefined;
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open) {return null;}
 
   return (
     <div className="fixed inset-0 z-40 flex items-start justify-center bg-slate-950/40 pt-24">

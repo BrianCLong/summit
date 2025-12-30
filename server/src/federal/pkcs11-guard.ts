@@ -67,20 +67,20 @@ const ALLOWLIST: Record<
     mech: 0x00001041, // CKM_ECDSA
     description: 'ECDSA with P-384 curve',
     guard: (p) => {
-      if (p) throw new Error('ECDSA should not have mechanism parameters');
+      if (p) {throw new Error('ECDSA should not have mechanism parameters');}
     },
   },
   RSA_PSS_4096: {
     mech: 0x0000000d, // CKM_RSA_PKCS_PSS
     description: 'RSA-PSS-4096 with SHA-384/MGF1-SHA384',
     guard: (p) => {
-      if (!p) throw new Error('RSA-PSS requires parameters');
+      if (!p) {throw new Error('RSA-PSS requires parameters');}
       if (p.hashAlg !== 0x00000060)
-        throw new Error('RSA-PSS requires SHA-384 (0x60)'); // CKM_SHA384
+        {throw new Error('RSA-PSS requires SHA-384 (0x60)');} // CKM_SHA384
       if (p.mgf !== 0x00000003)
-        throw new Error('RSA-PSS requires MGF1-SHA384 (0x03)'); // CKG_MGF1_SHA384
+        {throw new Error('RSA-PSS requires MGF1-SHA384 (0x03)');} // CKG_MGF1_SHA384
       if (!p.sLen || p.sLen < 48)
-        throw new Error('RSA-PSS salt length must be >= 48 bytes');
+        {throw new Error('RSA-PSS salt length must be >= 48 bytes');}
     },
   },
 };

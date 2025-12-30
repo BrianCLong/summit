@@ -43,7 +43,7 @@ async function loop() {
                 `SELECT count(1) FROM run WHERE started_at > now() - interval '1 minute'`,
               );
               const count = Number(c.rows?.[0]?.count || 0);
-              if (count >= cap) continue;
+              if (count >= cap) {continue;}
             }
             let choice: any = null;
             let est: any = null;
@@ -59,7 +59,7 @@ async function loop() {
             }
             // Fairness: gate per-tenant concurrency (tenant inference TBD)
             const tenant = 'default';
-            if (!acquireTenantSlot(tenant)) continue;
+            if (!acquireTenantSlot(tenant)) {continue;}
             // Start run: insert and annotate via run_event for chosen pool
             const r = await pool.query(
               `INSERT INTO run (id, runbook, status, started_at) VALUES (gen_random_uuid(), $1, 'PENDING', now()) RETURNING id`,
@@ -98,10 +98,10 @@ function estimateFromRunbook(runbook: string): {
   const norm = runbook.toLowerCase();
   // naive heuristics: tweak as needed
   if (norm.includes('heavy') || norm.includes('gnn') || norm.includes('ml'))
-    return { cpuSec: 600, gbSec: 10, egressGb: 0.5 };
+    {return { cpuSec: 600, gbSec: 10, egressGb: 0.5 };}
   if (norm.includes('export') || norm.includes('report'))
-    return { cpuSec: 120, gbSec: 2, egressGb: 0.2 };
+    {return { cpuSec: 120, gbSec: 2, egressGb: 0.2 };}
   if (norm.includes('graph') || norm.includes('cypher'))
-    return { cpuSec: 60, gbSec: 1, egressGb: 0.05 };
+    {return { cpuSec: 60, gbSec: 1, egressGb: 0.05 };}
   return { cpuSec: 30, gbSec: 0.5, egressGb: 0.01 };
 }

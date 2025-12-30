@@ -43,7 +43,7 @@ export class SupportRouter {
     // For MVP/Simulation, we'll just implement a simple check or return true if parsing fails
     // A real implementation would use a library like Luxon/moment-timezone
     const match = config.support.hours.match(/(\d{2}):(\d{2})-(\d{2}):(\d{2})\s+(\w+)/);
-    if (!match) return true; // Fallback or 24/7
+    if (!match) {return true;} // Fallback or 24/7
 
     const [, startH, startM, endH, endM, tz] = match;
     // Mocking timezone check: assuming server time matches required TZ for simplicity in this sprint

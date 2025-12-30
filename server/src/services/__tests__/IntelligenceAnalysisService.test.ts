@@ -5,7 +5,7 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 jest.mock('../LLMService', () => {
   return class MockLLMService {
     constructor(config) {}
-    async summarize(text) { return 'Summary of ' + text; }
+    async summarize(text) { return `Summary of ${  text}`; }
     async extract(text, entities) { return { Person: ['John'] }; }
     async complete(params) { return 'Positive'; }
   };

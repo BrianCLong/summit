@@ -59,7 +59,7 @@ const mockWebGLContext = {
 };
 
 HTMLCanvasElement.prototype.getContext = jest.fn((contextType) => {
-  if (contextType === 'webgl') return mockWebGLContext;
+  if (contextType === 'webgl') {return mockWebGLContext;}
   if (contextType === '2d') {
     return {
       fillRect: jest.fn(),

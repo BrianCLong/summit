@@ -531,20 +531,20 @@ export class ContractTestingFramework extends EventEmitter {
   }
 
   private validateContractDefinition(contract: Contract): void {
-    if (!contract.id) throw new Error('Contract ID is required');
-    if (!contract.name) throw new Error('Contract name is required');
-    if (!contract.version) throw new Error('Contract version is required');
-    if (!contract.type) throw new Error('Contract type is required');
+    if (!contract.id) {throw new Error('Contract ID is required');}
+    if (!contract.name) {throw new Error('Contract name is required');}
+    if (!contract.version) {throw new Error('Contract version is required');}
+    if (!contract.type) {throw new Error('Contract type is required');}
     if (!contract.rules || contract.rules.length === 0) {
       throw new Error('Contract must have at least one rule');
     }
 
     for (const rule of contract.rules) {
-      if (!rule.id) throw new Error(`Rule missing ID`);
-      if (!rule.name) throw new Error(`Rule missing name: ${rule.id}`);
-      if (!rule.type) throw new Error(`Rule missing type: ${rule.id}`);
+      if (!rule.id) {throw new Error(`Rule missing ID`);}
+      if (!rule.name) {throw new Error(`Rule missing name: ${rule.id}`);}
+      if (!rule.type) {throw new Error(`Rule missing type: ${rule.id}`);}
       if (!rule.condition)
-        throw new Error(`Rule missing condition: ${rule.id}`);
+        {throw new Error(`Rule missing condition: ${rule.id}`);}
       if (rule.expectedResult === undefined) {
         throw new Error(`Rule missing expectedResult: ${rule.id}`);
       }

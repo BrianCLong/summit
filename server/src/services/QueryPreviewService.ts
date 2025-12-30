@@ -154,7 +154,7 @@ export class QueryPreviewService {
     this.nlToCypherService = nlToCypherService;
     this.glassBoxService = glassBoxService;
     this.redis = redis || null;
-    this.cacheEnabled = !!redis;
+    this.cacheEnabled = Boolean(redis);
     this.queryCache = new QueryResultCache(this.redis, {
       ttlSeconds: this.cacheTTL,
       streamingTtlSeconds: 20,
@@ -472,8 +472,8 @@ export class QueryPreviewService {
       let cached = false;
       let cacheTier: 'ram' | 'flash' | undefined;
       let nextCursor: number | undefined;
-      let hasMore = false;
-      let streamedBatches = 0;
+      const hasMore = false;
+      const streamedBatches = 0;
       const executionStartedAt = Date.now();
       let payload: QueryResultPayload | undefined;
       const signature = this.queryCache.buildSignature(
@@ -735,17 +735,17 @@ export class QueryPreviewService {
 
     if (breakdown.variableLengthPath) {
       warnings.push('Variable-length path can be expensive for large graphs');
-      if (level === 'low') level = 'high';
+      if (level === 'low') {level = 'high';}
     }
 
     if (breakdown.fullTableScan) {
       warnings.push('Full node scan detected - consider adding filters');
-      if (level === 'low') level = 'medium';
+      if (level === 'low') {level = 'medium';}
     }
 
     if (!query.includes('LIMIT')) {
       warnings.push('No LIMIT clause - results may be large');
-      if (level === 'low') level = 'medium';
+      if (level === 'low') {level = 'medium';}
     }
 
     return {
@@ -804,11 +804,11 @@ export class QueryPreviewService {
     // Simple explanation - in production, use LLM to generate detailed explanation
     const operations: string[] = [];
 
-    if (/MATCH/i.test(query)) operations.push('matches graph patterns');
-    if (/WHERE/i.test(query)) operations.push('filters results');
-    if (/RETURN/i.test(query)) operations.push('returns specified fields');
-    if (/ORDER BY/i.test(query)) operations.push('sorts results');
-    if (/LIMIT/i.test(query)) operations.push('limits result count');
+    if (/MATCH/i.test(query)) {operations.push('matches graph patterns');}
+    if (/WHERE/i.test(query)) {operations.push('filters results');}
+    if (/RETURN/i.test(query)) {operations.push('returns specified fields');}
+    if (/ORDER BY/i.test(query)) {operations.push('sorts results');}
+    if (/LIMIT/i.test(query)) {operations.push('limits result count');}
 
     return `This query ${operations.join(', ')}.`;
   }
@@ -982,7 +982,7 @@ export class QueryPreviewService {
     useEditedQuery = false,
   ): Promise<{ rows: unknown[]; tier: 'ram' | 'flash'; signature: string } | null> {
     const preview = await this.getPreview(previewId);
-    if (!preview) return null;
+    if (!preview) {return null;}
     const signature = this.buildSignature(preview, useEditedQuery);
     const cached = await this.queryCache.getStreamingPartial(
       signature,
@@ -1081,7 +1081,7 @@ export class QueryPreviewService {
   }
 
   private decodeCursor(cursor: string | null | undefined): number {
-    if (!cursor) return 0;
+    if (!cursor) {return 0;}
     try {
       return parseInt(Buffer.from(cursor, 'base64').toString('utf8'), 10) || 0;
     } catch {

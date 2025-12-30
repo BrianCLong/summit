@@ -12,7 +12,7 @@ function clamp(x: number, a: number, b: number) {
 
 export function riskScore(r: RiskInputs) {
   let s = 0;
-  if (!r.residencyOk) s += 0.5;
+  if (!r.residencyOk) {s += 0.5;}
   s += clamp(r.simulator.deny * 0.6 + r.simulator.requireHuman * 0.3, 0, 1);
   s += r.quotas?.over ? 0.2 : 0;
   s += r.dp?.exhausted ? 0.2 : 0;
@@ -24,16 +24,16 @@ export function admissionDecision(
   t: { warn: number; requireHuman: number; deny: number },
 ) {
   if (score >= t.deny)
-    return {
+    {return {
       action: 'deny',
       reason: `risk=${score.toFixed(2)} >= ${t.deny}`,
-    } as const;
+    } as const;}
   if (score >= t.requireHuman)
-    return {
+    {return {
       action: 'require-human',
       reason: `risk=${score.toFixed(2)}`,
-    } as const;
+    } as const;}
   if (score >= t.warn)
-    return { action: 'warn', reason: `risk=${score.toFixed(2)}` } as const;
+    {return { action: 'warn', reason: `risk=${score.toFixed(2)}` } as const;}
   return { action: 'allow' } as const;
 }

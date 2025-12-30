@@ -245,10 +245,10 @@ export class GraphRAGAssistantService {
     const concepts: string[] = [];
 
     // Context-based concepts
-    if (context.runId) concepts.push('run_analysis');
+    if (context.runId) {concepts.push('run_analysis');}
     if (context.currentPage?.includes('dashboard'))
-      concepts.push('dashboard_metrics');
-    if (context.recentErrors?.length) concepts.push('error_troubleshooting');
+      {concepts.push('dashboard_metrics');}
+    if (context.recentErrors?.length) {concepts.push('error_troubleshooting');}
 
     // Query-based concepts
     const conceptMapping = {

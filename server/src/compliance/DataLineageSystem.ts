@@ -105,7 +105,7 @@ export class DataLineageSystem {
     } as LineageEdge));
 
     const sourceIds = [...new Set(edges.map(e => e.sourceId))];
-    if (sourceIds.length === 0) return { nodes: [], edges: [] };
+    if (sourceIds.length === 0) {return { nodes: [], edges: [] };}
 
     const nodesRes = await this.pool.query(
         `SELECT * FROM lineage_nodes WHERE id = ANY($1)`,
@@ -144,7 +144,7 @@ export class DataLineageSystem {
       } as LineageEdge));
 
       const targetIds = [...new Set(edges.map(e => e.targetId))];
-      if (targetIds.length === 0) return { nodes: [], edges: [] };
+      if (targetIds.length === 0) {return { nodes: [], edges: [] };}
 
       const nodesRes = await this.pool.query(
           `SELECT * FROM lineage_nodes WHERE id = ANY($1)`,

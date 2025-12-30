@@ -102,7 +102,7 @@ export function BulkActions({
   };
 
   const executeBulkAction = async () => {
-    if (!dialogAction) return;
+    if (!dialogAction) {return;}
 
     try {
       await bulkAction({
@@ -121,7 +121,7 @@ export function BulkActions({
     }
   };
 
-  if (selectedItems.length === 0) return null;
+  if (selectedItems.length === 0) {return null;}
 
   return (
     <>

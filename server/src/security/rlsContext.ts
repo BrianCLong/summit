@@ -24,14 +24,14 @@ export const getRlsContext = (): RlsContext | undefined =>
 
 export const recordRlsOverhead = (durationMs: number): void => {
   const ctx = rlsStorage.getStore();
-  if (!ctx) return;
+  if (!ctx) {return;}
 
   ctx.overheadMs = (ctx.overheadMs || 0) + durationMs;
 };
 
 export const updateCaseContext = (caseId?: string | null): void => {
   const ctx = rlsStorage.getStore();
-  if (!ctx || !caseId) return;
+  if (!ctx || !caseId) {return;}
 
   ctx.caseId = caseId;
 };

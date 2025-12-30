@@ -15,7 +15,7 @@ import type { QueryPattern, SchemaContext } from './types';
  * Helper to add tenant filtering if context includes tenantId
  */
 function addTenantFilter(cypher: string, context: SchemaContext): string {
-  if (!context.tenantId) return cypher;
+  if (!context.tenantId) {return cypher;}
 
   // Add tenant filter to WHERE clause or create one
   if (cypher.includes('WHERE')) {
@@ -35,14 +35,14 @@ function addPolicyFilter(
   context: SchemaContext,
   classification?: string,
 ): string {
-  if (!context.policyTags || context.policyTags.length === 0) return cypher;
+  if (!context.policyTags || context.policyTags.length === 0) {return cypher;}
 
   // Filter by classification if specified
   const tags = classification
     ? context.policyTags.filter((t) => t.classification === classification)
     : context.policyTags;
 
-  if (tags.length === 0) return cypher;
+  if (tags.length === 0) {return cypher;}
 
   const labels = tags.map((t) => `'${t.label}'`).join(', ');
   const labelFilter = `labels(n)[0] IN [${labels}]`;
@@ -383,7 +383,7 @@ export function generateFromPattern(
   context: SchemaContext,
 ): { cypher: string; patternName: string; expectedCost: string } | null {
   const result = findMatchingPattern(prompt);
-  if (!result) return null;
+  if (!result) {return null;}
 
   const { pattern, match } = result;
   const cypher = pattern.generator(match, context);

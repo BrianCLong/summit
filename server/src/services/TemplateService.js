@@ -37,7 +37,7 @@ class TemplateService {
 
   updateTemplate(id, updates) {
     const existing = this.templates.get(id);
-    if (!existing) return null;
+    if (!existing) {return null;}
     const updated = { ...existing, ...updates, updatedAt: new Date() };
     this.templates.set(id, updated);
     return updated;

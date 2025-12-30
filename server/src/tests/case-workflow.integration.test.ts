@@ -187,7 +187,7 @@ describe('Case Workflow Integration Tests', () => {
     });
 
     it('should track available transitions based on role', async () => {
-      if (!testCaseId) return;
+      if (!testCaseId) {return;}
 
       // User with investigator role should see specific transitions
       const transitions = await workflowService.getAvailableTransitions(
@@ -200,7 +200,7 @@ describe('Case Workflow Integration Tests', () => {
     });
 
     it('should prevent invalid stage transitions', async () => {
-      if (!testCaseId) return;
+      if (!testCaseId) {return;}
 
       // Try to transition from intake directly to completed (should fail)
       const result = await workflowService.transitionStage(
@@ -224,7 +224,7 @@ describe('Case Workflow Integration Tests', () => {
 
   describe('SLA Management', () => {
     it('should create and track SLAs', async () => {
-      if (!testCaseId) return;
+      if (!testCaseId) {return;}
 
       // Create a manual SLA
       const sla = await workflowService.createSLA({
@@ -248,7 +248,7 @@ describe('Case Workflow Integration Tests', () => {
     });
 
     it('should detect overdue tasks', async () => {
-      if (!testCaseId) return;
+      if (!testCaseId) {return;}
 
       // Create a task that's already overdue
       const pastDueDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
@@ -303,7 +303,7 @@ describe('Case Workflow Integration Tests', () => {
 
   describe('Event System', () => {
     it('should emit events on stage transition', async () => {
-      if (!testCaseId) return;
+      if (!testCaseId) {return;}
 
       let eventFired = false;
       let eventData: any;

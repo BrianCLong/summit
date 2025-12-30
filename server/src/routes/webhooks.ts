@@ -40,7 +40,7 @@ const verifyGitHubSignature = (req: any, res: any, next: any) => {
   }
 
   const hmac = crypto.createHmac('sha256', secret);
-  const digest = 'sha256=' + hmac.update(rawBody).digest('hex');
+  const digest = `sha256=${  hmac.update(rawBody).digest('hex')}`;
 
   const sigString = Array.isArray(signature) ? signature[0] : signature;
   const sigBuffer = Buffer.from(sigString);

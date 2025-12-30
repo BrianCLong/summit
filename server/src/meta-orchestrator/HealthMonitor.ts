@@ -11,7 +11,7 @@ export class HealthMonitor {
   }
 
   public startMonitoring(intervalMs: number = 10000): void {
-    if (this.checkInterval) return;
+    if (this.checkInterval) {return;}
 
     this.checkInterval = setInterval(() => {
       this.checkAgents();

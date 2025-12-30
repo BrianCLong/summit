@@ -8,9 +8,9 @@ export function tenantAllowlist(
   return (req: any, res: any, next: any) => {
     const t = String(req.headers['x-tenant'] || '').toLowerCase();
     if (!t || !set.has(t))
-      return res
+      {return res
         .status(403)
-        .json({ error: 'tenant_not_allowed', tenant: t, mode });
+        .json({ error: 'tenant_not_allowed', tenant: t, mode });}
     next();
   };
 }

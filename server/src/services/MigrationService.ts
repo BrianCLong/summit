@@ -53,9 +53,9 @@ export async function mapCsvToGraph(
 
         rows.forEach((r, i) => {
           // Skip empty rows
-          if (Object.keys(r).length === 0) return;
+          if (Object.keys(r).length === 0) {return;}
           // Skip rows missing key column
-          if (!r[mapping.keyCol]) return;
+          if (!r[mapping.keyCol]) {return;}
 
           const e: GraphEntity = {
             type: mapping.entityType,
@@ -64,7 +64,7 @@ export async function mapCsvToGraph(
           };
 
           mapping.propMap.forEach((m) => {
-            if (r[m.from]) e.props[m.to] = r[m.from];
+            if (r[m.from]) {e.props[m.to] = r[m.from];}
           });
           out.entities.push(e);
 

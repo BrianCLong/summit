@@ -52,7 +52,7 @@ router.post('/v1/schedules', express.json(), async (req, res) => {
     const id = crypto.randomUUID();
     const { runbook, cron, enabled } = req.body || {};
     if (!runbook || !cron)
-      return res.status(400).json({ error: 'runbook and cron required' });
+      {return res.status(400).json({ error: 'runbook and cron required' });}
     await pool.query(
       `INSERT INTO schedules (id, runbook, cron, enabled) VALUES ($1,$2,$3,$4)`,
       [id, runbook, cron, enabled !== false],
@@ -81,7 +81,7 @@ router.patch('/v1/schedules/:id', express.json(), async (req, res) => {
       vals.push(cron);
     }
     if (!sets.length)
-      return res.status(400).json({ error: 'no fields to update' });
+      {return res.status(400).json({ error: 'no fields to update' });}
     vals.push(id);
     await pool.query(
       `UPDATE schedules SET ${sets.join(', ')} WHERE id=$${vals.length}`,

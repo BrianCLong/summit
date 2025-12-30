@@ -62,9 +62,9 @@ export const TABLE_MAPPINGS: TableMapping[] = [
 ];
 
 export function getRetentionDays(period: string): number {
-  if (period === 'infinity') return -1;
+  if (period === 'infinity') {return -1;}
   const match = period.match(/^(\d+)([dmy])$/);
-  if (!match) throw new Error(`Invalid retention period: ${period}`);
+  if (!match) {throw new Error(`Invalid retention period: ${period}`);}
   const value = parseInt(match[1], 10);
   const unit = match[2];
   switch (unit) {

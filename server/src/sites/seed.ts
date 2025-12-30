@@ -20,7 +20,7 @@ async function seed() {
     },
   ];
   for (const r of rows) {
-    if (!r.pubkey) throw new Error(`Missing pubkey for ${r.name}`);
+    if (!r.pubkey) {throw new Error(`Missing pubkey for ${r.name}`);}
     await pg.query(
       `INSERT INTO sites(name,region,residency,trust_pubkey,bandwidth_class)
        VALUES ($1,$2,$3,$4,$5)

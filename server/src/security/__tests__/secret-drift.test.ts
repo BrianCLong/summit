@@ -53,7 +53,7 @@ describe('SecretDriftDetector', () => {
 
       // Mock readdirSync and statSync for traversal
       (fs.readdirSync as jest.Mock).mockImplementation((dir) => {
-        if (dir === path.resolve(process.cwd(), 'src')) return ['leaky.ts'];
+        if (dir === path.resolve(process.cwd(), 'src')) {return ['leaky.ts'];}
         return [];
       });
       (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });

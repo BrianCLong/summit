@@ -73,7 +73,7 @@ export class DecisionRecorder {
     }
 
     for (const line of content.split('\n')) {
-      if (!line.trim()) continue;
+      if (!line.trim()) {continue;}
       const parsed = JSON.parse(line) as DecisionRecord;
       if (parsed.decisionId === decisionId) {
         return parsed;

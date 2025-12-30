@@ -235,7 +235,7 @@ export async function handleHttpSignal(req: Request, res: Response): Promise<voi
   return tracer.startActiveSpan('ingest.http_signal', async (span: Span) => {
     span.setAttributes({
       tenant_id: tenantId,
-      has_idempotency_key: !!idempotencyKey,
+      has_idempotency_key: Boolean(idempotencyKey),
       source: source,
     });
 

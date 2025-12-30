@@ -522,10 +522,10 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
     const stepMap = new Map(steps.map((s) => [s.id, s]));
 
     const visit = (stepId: string) => {
-      if (visited.has(stepId)) return;
+      if (visited.has(stepId)) {return;}
 
       const step = stepMap.get(stepId);
-      if (!step) return;
+      if (!step) {return;}
 
       // Visit dependencies first
       for (const depId of step.dependsOn || []) {
@@ -554,7 +554,7 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
       const batch: RunbookStepDefinition[] = [];
 
       for (const step of sortedSteps) {
-        if (completed.has(step.id)) continue;
+        if (completed.has(step.id)) {continue;}
 
         // Check if all dependencies are completed
         const dependenciesMet = (step.dependsOn || []).every((depId) => completed.has(depId));

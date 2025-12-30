@@ -18,17 +18,17 @@ export function getSocket() {
       auth: token ? { token } : undefined,
     });
 
-    socket.on('connect', function () {
+    socket.on('connect', () => {
       clock = 0;
       $(document).trigger('socket:connect');
     });
-    socket.on('disconnect', function () {
+    socket.on('disconnect', () => {
       $(document).trigger('socket:disconnect');
     });
-    socket.on('ai:insight', function (payload) {
+    socket.on('ai:insight', (payload) => {
       $(document).trigger('ai:insight', payload);
     });
-    socket.on('graph:op', function (payload) {
+    socket.on('graph:op', (payload) => {
       clock = Math.max(clock, payload?.op?.ts || 0);
       $(document).trigger('graph:op', payload);
     });

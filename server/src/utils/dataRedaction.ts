@@ -60,7 +60,7 @@ const REDACTION_POLICIES_BY_ROLE = {
  * @returns The redacted data object.
  */
 export function redactData(data: any, user: User, sensitivity?: string): any {
-  if (!data) return data;
+  if (!data) {return data;}
 
   const userRole = user.role || 'VIEWER'; // Default to VIEWER if no role
   const policy = REDACTION_POLICIES_BY_ROLE[userRole.toUpperCase()] || {};
@@ -72,7 +72,7 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
   const piiFieldsRedacted: string[] = [];
 
   const applyRedaction = (obj: any, path: string[]) => {
-    if (typeof obj !== 'object' || obj === null) return;
+    if (typeof obj !== 'object' || obj === null) {return;}
 
     for (const key in obj) {
       if (obj.hasOwnProperty(key)) {
@@ -123,7 +123,7 @@ function applyStrategy(
   piiType: keyof typeof PII_DEFINITIONS,
   strategy: RedactionStrategy,
 ): any {
-  if (value === undefined || value === null) return value;
+  if (value === undefined || value === null) {return value;}
 
   switch (strategy) {
     case RedactionStrategy.REDACT:

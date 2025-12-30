@@ -183,7 +183,7 @@ export class SecretRotationManager extends EventEmitter {
    * Initialize the secret rotation manager
    */
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {return;}
 
     try {
       await this.redis.connect();
@@ -236,12 +236,12 @@ export class SecretRotationManager extends EventEmitter {
     for (const key of secretKeys) {
       try {
         const metadataStr = await this.redis.get(key);
-        if (!metadataStr) continue;
+        if (!metadataStr) {continue;}
 
         const metadata: SecretMetadata = JSON.parse(metadataStr);
         const policy = this.policies.get(metadata.type);
 
-        if (!policy || !policy.autoRotate) continue;
+        if (!policy || !policy.autoRotate) {continue;}
 
         // Check if rotation is needed
         const now = Date.now();
@@ -325,13 +325,13 @@ export class SecretRotationManager extends EventEmitter {
    */
   async getSecret(id: string, version?: number): Promise<string | null> {
     const metadataStr = await this.redis.get(`${id}:metadata`);
-    if (!metadataStr) return null;
+    if (!metadataStr) {return null;}
 
     const metadata: SecretMetadata = JSON.parse(metadataStr);
     const targetVersion = version || metadata.version;
 
     const encryptedValue = await this.redis.get(`${id}:value:${targetVersion}`);
-    if (!encryptedValue) return null;
+    if (!encryptedValue) {return null;}
 
     return this.config.encryptAtRest
       ? this.decrypt(encryptedValue)
@@ -343,7 +343,7 @@ export class SecretRotationManager extends EventEmitter {
    */
   async getSecretMetadata(id: string): Promise<SecretMetadata | null> {
     const metadataStr = await this.redis.get(`${id}:metadata`);
-    if (!metadataStr) return null;
+    if (!metadataStr) {return null;}
 
     const metadata = JSON.parse(metadataStr);
     metadata.createdAt = new Date(metadata.createdAt);
@@ -478,7 +478,7 @@ export class SecretRotationManager extends EventEmitter {
    */
   private async cleanupOldVersions(id: string): Promise<void> {
     const metadata = await this.getSecretMetadata(id);
-    if (!metadata) return;
+    if (!metadata) {return;}
 
     const versionKeys = await this.redis.keys(`${id}:value:*`);
     const versions = versionKeys
@@ -646,7 +646,7 @@ export class SecretRotationManager extends EventEmitter {
         status: isHealthy ? (isDegraded ? 'degraded' : 'healthy') : 'unhealthy',
         details: {
           redis: ping === 'PONG' ? 'connected' : 'disconnected',
-          rotationSchedulerActive: !!this.rotationTimer,
+          rotationSchedulerActive: Boolean(this.rotationTimer),
           ...rotationStatus,
         },
       };

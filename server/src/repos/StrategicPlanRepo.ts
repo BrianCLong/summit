@@ -208,7 +208,7 @@ export class StrategicPlanRepo {
       params,
     );
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const plan = this.mapPlanRow(rows[0]);
 
@@ -282,7 +282,7 @@ export class StrategicPlanRepo {
     }
 
     const { rows } = await this.pg.query(query, params);
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const plan = this.mapPlanRow(rows[0]);
     return this.loadPlanRelations(plan);
@@ -372,7 +372,7 @@ export class StrategicPlanRepo {
     ids: readonly string[],
     tenantId?: string,
   ): Promise<(StrategicPlan | null)[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {return [];}
 
     const params: unknown[] = [ids];
     let query = `SELECT * FROM strategic_plans WHERE id = ANY($1)`;
@@ -470,7 +470,7 @@ export class StrategicPlanRepo {
       params,
     );
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const objective = this.mapObjectiveRow(rows[0]);
 
@@ -492,7 +492,7 @@ export class StrategicPlanRepo {
       [id],
     );
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const objective = this.mapObjectiveRow(rows[0]);
     objective.milestones = await this.getMilestones(id, 'objective');
@@ -677,7 +677,7 @@ export class StrategicPlanRepo {
       params,
     );
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const initiative = this.mapInitiativeRow(rows[0]);
 
@@ -699,7 +699,7 @@ export class StrategicPlanRepo {
       [id],
     );
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const initiative = this.mapInitiativeRow(rows[0]);
     initiative.milestones = await this.getMilestones(id, 'initiative');
@@ -954,7 +954,7 @@ export class StrategicPlanRepo {
       params,
     );
 
-    if (!rows[0]) return null;
+    if (!rows[0]) {return null;}
 
     const risk = this.mapRiskRow(rows[0]);
 
@@ -1162,7 +1162,7 @@ export class StrategicPlanRepo {
       [id],
     );
 
-    if (!current[0]) return null;
+    if (!current[0]) {return null;}
 
     const previousValue = current[0].current_value;
     const history = current[0].history || [];
@@ -1174,8 +1174,8 @@ export class StrategicPlanRepo {
     });
 
     let trend: 'UP' | 'DOWN' | 'STABLE' = 'STABLE';
-    if (currentValue > previousValue) trend = 'UP';
-    else if (currentValue < previousValue) trend = 'DOWN';
+    if (currentValue > previousValue) {trend = 'UP';}
+    else if (currentValue < previousValue) {trend = 'DOWN';}
 
     const { rows } = await this.pg.query(
       `UPDATE strategic_kpis
@@ -1267,9 +1267,9 @@ export class StrategicPlanRepo {
   }
 
   private calculateRiskLevel(score: number): RiskLevel {
-    if (score >= 20) return 'CRITICAL';
-    if (score >= 12) return 'HIGH';
-    if (score >= 6) return 'MEDIUM';
+    if (score >= 20) {return 'CRITICAL';}
+    if (score >= 12) {return 'HIGH';}
+    if (score >= 6) {return 'MEDIUM';}
     return 'LOW';
   }
 

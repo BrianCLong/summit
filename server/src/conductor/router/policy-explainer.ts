@@ -174,7 +174,7 @@ export class PolicyExplainer {
     proposedRules: PolicyRule[],
   ): Promise<PolicySimulation | null> {
     const originalTrace = this.decisionHistory.get(queryId);
-    if (!originalTrace) return null;
+    if (!originalTrace) {return null;}
 
     // Temporarily add proposed rules
     const originalRules = new Map(this.rules);
@@ -377,7 +377,7 @@ export class PolicyExplainer {
   // API endpoints for UI integration
   async getPolicyExplanationAPI(queryId: string) {
     const trace = await this.explainDecision(queryId);
-    if (!trace) return null;
+    if (!trace) {return null;}
 
     return {
       queryId: trace.queryId,
@@ -414,7 +414,7 @@ export class PolicyExplainer {
       queryId,
       proposedChanges.rules || [],
     );
-    if (!simulation) return null;
+    if (!simulation) {return null;}
 
     return {
       impact: {

@@ -445,12 +445,12 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   private async getMaterializedViewResult(
     viewName: string,
   ): Promise<{ result: any; metrics: QueryMetrics } | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     const cacheKey = `${this.MATERIALIZED_VIEW_PREFIX}${viewName}`;
     const cached = await this.redis.get(cacheKey);
 
-    if (!cached) return null;
+    if (!cached) {return null;}
 
     const viewData = JSON.parse(cached);
     return {
@@ -552,10 +552,10 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   private async getCachedResult(
     queryHash: string,
   ): Promise<CachedQueryResult | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     const cached = await this.redis.get(`${this.CACHE_PREFIX}${queryHash}`);
-    if (!cached) return null;
+    if (!cached) {return null;}
 
     const result: CachedQueryResult = JSON.parse(cached);
 
@@ -576,7 +576,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     complexity: QueryComplexity,
     ttlSeconds: number,
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const serializedResult = this.serializeResult(result);
     const cachedData: CachedQueryResult = {
@@ -599,14 +599,14 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     metrics: QueryMetrics,
   ): boolean {
     // Cache expensive queries that took longer than 1 second
-    if (metrics.executionTimeMs > 1000) return true;
+    if (metrics.executionTimeMs > 1000) {return true;}
 
     // Cache complex queries regardless of execution time
-    if (complexity.score > 0.5) return true;
+    if (complexity.score > 0.5) {return true;}
 
     // Cache queries that return many results
     if (metrics.nodesReturned + metrics.relationshipsReturned > 100)
-      return true;
+      {return true;}
 
     return false;
   }
@@ -618,8 +618,8 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     let ttl = 300; // 5 minutes base
 
     // Longer TTL for expensive queries
-    if (metrics.executionTimeMs > 5000) ttl *= 4;
-    else if (metrics.executionTimeMs > 2000) ttl *= 2;
+    if (metrics.executionTimeMs > 5000) {ttl *= 4;}
+    else if (metrics.executionTimeMs > 2000) {ttl *= 2;}
 
     // Shorter TTL for simple, fast queries
     if (complexity.score < 0.2 && metrics.executionTimeMs < 500) {
@@ -656,7 +656,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
     queryHash: string,
     metrics: QueryMetrics,
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const statsKey = `${this.QUERY_STATS_PREFIX}${queryHash}`;
     const stats = this.queryStats.get(queryHash) || [];
@@ -676,7 +676,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   }
 
   private aggregateStats(stats: QueryMetrics[]): any {
-    if (stats.length === 0) return null;
+    if (stats.length === 0) {return null;}
 
     const executionTimes = stats.map((s) => s.executionTimeMs);
     const dbHits = stats.map((s) => s.dbHits);
@@ -781,7 +781,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
    * 🧹 Cache management
    */
   async clearCache(pattern?: string): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const searchPattern = pattern
       ? `${this.CACHE_PREFIX}*${pattern}*`
@@ -797,7 +797,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   }
 
   async getCacheStats(): Promise<any> {
-    if (!this.redis) return { available: false };
+    if (!this.redis) {return { available: false };}
 
     const queryKeys = await this.redis.keys(`${this.CACHE_PREFIX}*`);
     const viewKeys = await this.redis.keys(`${this.MATERIALIZED_VIEW_PREFIX}*`);
@@ -820,7 +820,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
   }
 
   private async estimateCacheMemoryUsage(keys: string[]): Promise<number> {
-    if (!this.redis || keys.length === 0) return 0;
+    if (!this.redis || keys.length === 0) {return 0;}
 
     // Sample a few keys to estimate average size
     const sampleSize = Math.min(10, keys.length);

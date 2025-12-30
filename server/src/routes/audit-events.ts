@@ -13,7 +13,7 @@ function getTenantId(req: any): string | null {
 }
 
 function parseList(value?: string | string[]): string[] | undefined {
-  if (!value) return undefined;
+  if (!value) {return undefined;}
   const raw = Array.isArray(value) ? value.join(',') : value;
   const list = raw
     .split(',')

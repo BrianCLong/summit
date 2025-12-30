@@ -26,7 +26,7 @@ export class SafetyPipeline {
         // 1. Basic Content Safety (Regex based for now)
         this.checkForInjection(request);
 
-        if (!policy) return; // No policy, allow default
+        if (!policy) {return;} // No policy, allow default
 
         // 2. Policy Enforcement
         // Check cost limits if known ahead of time (hard to do exactly without running)

@@ -203,7 +203,7 @@ export class MissionVault {
       // If no specific mission ID, get the most active/recent mission
       if (!missionId) {
         const activeMissions = await this.getActiveMissions(tenantId);
-        if (activeMissions.length === 0) return null;
+        if (activeMissions.length === 0) {return null;}
         return activeMissions[0];
       }
 
@@ -251,7 +251,7 @@ export class MissionVault {
           );
         });
 
-        if (result.records.length === 0) return null;
+        if (result.records.length === 0) {return null;}
 
         const missionData = result.records[0].get('mission');
         const mission = this.transformNeo4jToMissionContext(missionData);
@@ -823,8 +823,8 @@ export class MissionVault {
     const active = objectives.filter((o) => o.status === 'active').length;
 
     let score = completed / objectives.length;
-    if (blocked > 0) score -= (blocked / objectives.length) * 0.5;
-    if (active === 0 && completed < objectives.length) score -= 0.2;
+    if (blocked > 0) {score -= (blocked / objectives.length) * 0.5;}
+    if (active === 0 && completed < objectives.length) {score -= 0.2;}
 
     return {
       factor: 'objectives',
@@ -917,10 +917,10 @@ export class MissionVault {
   private determineOverallHealth(
     healthScore: number,
   ): 'excellent' | 'good' | 'fair' | 'poor' | 'critical' {
-    if (healthScore >= 0.9) return 'excellent';
-    if (healthScore >= 0.7) return 'good';
-    if (healthScore >= 0.5) return 'fair';
-    if (healthScore >= 0.3) return 'poor';
+    if (healthScore >= 0.9) {return 'excellent';}
+    if (healthScore >= 0.7) {return 'good';}
+    if (healthScore >= 0.5) {return 'fair';}
+    if (healthScore >= 0.3) {return 'poor';}
     return 'critical';
   }
 

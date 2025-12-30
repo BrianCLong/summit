@@ -186,7 +186,7 @@ export class IntelGraphClientImpl implements IntelGraphClient {
         `,
         { runId }
       );
-      if (result.records.length === 0) return null;
+      if (result.records.length === 0) {return null;}
       const props = result.records[0].get('r').properties;
       return {
         ...props,
@@ -230,7 +230,7 @@ export class IntelGraphClientImpl implements IntelGraphClient {
         `,
         { taskId }
       );
-      if (result.records.length === 0) return null;
+      if (result.records.length === 0) {return null;}
       const props = result.records[0].get('t').properties;
       return {
         ...props,

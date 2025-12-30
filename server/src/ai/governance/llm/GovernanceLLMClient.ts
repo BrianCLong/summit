@@ -494,7 +494,7 @@ export class GovernanceLLMClient {
       conflict_resolution: `You are a policy conflict resolver. Analyze overlapping policies and suggest how to consolidate or prioritize them without breaking existing workflows.`,
     };
 
-    let prompt = systemPrompts[taskType] + '\n\n';
+    let prompt = `${systemPrompts[taskType]  }\n\n`;
 
     if (context) {
       prompt += 'CONTEXT:\n';

@@ -52,7 +52,7 @@ export class RuleBasedAgent extends SimulationAgent {
 
   async decideAction(state: NarrativeState): Promise<NarrativeEvent | null> {
     const entityState = state.entities[this.id];
-    if (!entityState) return null;
+    if (!entityState) {return null;}
 
     // Simple heuristic: if pressure is high, do something to reduce it
     if (entityState.pressure > 0.7) {
@@ -108,7 +108,7 @@ export class LLMAgent extends SimulationAgent {
 
   async decideAction(state: NarrativeState): Promise<NarrativeEvent | null> {
     const entityState = state.entities[this.id];
-    if (!entityState) return null;
+    if (!entityState) {return null;}
 
     // Only act occasionally to avoid flooding
     // LLM agents might be expensive, so we throttle them artificially here or rely on the caller.

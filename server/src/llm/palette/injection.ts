@@ -31,6 +31,6 @@ export function sanitizeMessagesForRedaction(messages: ChatMessage[]): ChatMessa
 }
 
 export function paletteAsPromptContent(injection: PaletteInjection): string | undefined {
-  if (injection.kind === 'text_prefix') return injection.textPrefix;
+  if (injection.kind === 'text_prefix') {return injection.textPrefix;}
   return undefined;
 }

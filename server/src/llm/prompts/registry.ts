@@ -81,7 +81,7 @@ export class InMemoryPromptRegistry implements PromptService {
 
   get(id: string, version: string = 'latest'): PromptTemplate | undefined {
     const versions = this.templates.get(id);
-    if (!versions || versions.length === 0) return undefined;
+    if (!versions || versions.length === 0) {return undefined;}
 
     if (version === 'latest') {
         return versions[0];

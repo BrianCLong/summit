@@ -623,13 +623,13 @@ export class ComplianceEngine {
         f.requirements.some((r) => r.controls.some((c) => c.id === control.id)),
       );
 
-      if (!framework) return findings;
+      if (!framework) {return findings;}
 
       const requirement = framework.requirements.find((r) =>
         r.controls.some((c) => c.id === control.id),
       );
 
-      if (!requirement) return findings;
+      if (!requirement) {return findings;}
 
       for (const testProcedure of requirement.testProcedures) {
         if (testProcedure.automationScript) {
@@ -819,7 +819,7 @@ export class ComplianceEngine {
    * Calculate assessment score
    */
   private calculateAssessmentScore(findings: ComplianceFinding[]): number {
-    if (findings.length === 0) return 100;
+    if (findings.length === 0) {return 100;}
 
     const severityWeights = { low: 1, medium: 3, high: 5, critical: 10 };
     let totalDeductions = 0;
@@ -847,9 +847,9 @@ export class ComplianceEngine {
     const criticalFindings = findings.filter((f) => f.severity === 'critical');
     const highFindings = findings.filter((f) => f.severity === 'high');
 
-    if (criticalFindings.length > 0) return 'critical';
-    if (highFindings.length > 2) return 'high';
-    if (findings.length > 5) return 'medium';
+    if (criticalFindings.length > 0) {return 'critical';}
+    if (highFindings.length > 2) {return 'high';}
+    if (findings.length > 5) {return 'medium';}
     return 'low';
   }
 
@@ -860,7 +860,7 @@ export class ComplianceEngine {
     assessmentId: string,
   ): Promise<ComplianceAssessment | null> {
     const cached = this.assessments.get(assessmentId);
-    if (cached) return cached;
+    if (cached) {return cached;}
 
     const data = await this.redis.get(`assessment:${assessmentId}`);
     if (data) {

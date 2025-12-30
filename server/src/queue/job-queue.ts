@@ -111,7 +111,7 @@ export class JobQueue<TData = unknown, TResult = unknown> {
     });
 
     this.queueEvents.on('progress', ({ jobId, data }) => {
-      if (!jobId) return;
+      if (!jobId) {return;}
       this.progressEmitter.emit('progress', { jobId, progress: data });
     });
   }
@@ -138,13 +138,13 @@ export class JobQueue<TData = unknown, TResult = unknown> {
     });
 
     this.worker.on('progress', (job, progress) => {
-      if (!job?.id) return;
+      if (!job?.id) {return;}
       this.progressEmitter.emit('progress', { jobId: job.id as string, progress });
     });
 
     this.worker.on('failed', async (job, err) => {
       this.logger.error({ jobId: job?.id, err }, 'Job failed');
-      if (!job || !this.deadLetterQueue) return;
+      if (!job || !this.deadLetterQueue) {return;}
 
       const maxAttempts = this.getMaxAttempts(job);
       if (job.attemptsMade >= maxAttempts) {
@@ -192,7 +192,7 @@ export class JobQueue<TData = unknown, TResult = unknown> {
 
   async getJobDetails(jobId: string): Promise<JobDetails<TData, TResult> | null> {
     const job = await this.queue.getJob(jobId);
-    if (!job) return null;
+    if (!job) {return null;}
 
     const [state, progress] = await Promise.all([
       job.getState(),

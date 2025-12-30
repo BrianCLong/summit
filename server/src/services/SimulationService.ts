@@ -55,11 +55,11 @@ export class SimulationService {
 
     edges.forEach((e) => {
       // Add source -> target
-      if (!adj.has(e.source)) adj.set(e.source, new Set());
+      if (!adj.has(e.source)) {adj.set(e.source, new Set());}
       adj.get(e.source)?.add({ target: e.target, weight: e.weight ?? 1.0 });
 
       // Add target -> source (bidirectional)
-      if (!adj.has(e.target)) adj.set(e.target, new Set());
+      if (!adj.has(e.target)) {adj.set(e.target, new Set());}
       adj.get(e.target)?.add({ target: e.source, weight: e.weight ?? 1.0 });
     });
 
@@ -83,13 +83,13 @@ export class SimulationService {
       // Iterate over all currently infected nodes to see who they influence
       for (const carrierId of infected) {
         const neighbors = adj.get(carrierId);
-        if (!neighbors) continue;
+        if (!neighbors) {continue;}
 
         for (const { target: targetId, weight: influenceWeight } of neighbors) {
-          if (infected.has(targetId)) continue; // Already infected
+          if (infected.has(targetId)) {continue;} // Already infected
 
           const targetNode = nodeMap.get(targetId);
-          if (!targetNode) continue;
+          if (!targetNode) {continue;}
 
           // Calculate transmission probability
           // P = Virality * Influence * Susceptibility * (1 - Resistance)
@@ -119,7 +119,7 @@ export class SimulationService {
       });
 
       // Stop if fully saturated
-      if (infected.size === nodes.length) break;
+      if (infected.size === nodes.length) {break;}
     }
 
     return {

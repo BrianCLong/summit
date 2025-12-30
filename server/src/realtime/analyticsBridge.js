@@ -50,7 +50,7 @@ class AnalyticsBridge {
           socket.handshake.auth?.token ||
           socket.handshake.headers?.authorization?.replace('Bearer ', '');
         const user = await authService.verifyToken(token);
-        if (!user) return next(new Error('Unauthorized'));
+        if (!user) {return next(new Error('Unauthorized'));}
         socket.user = user;
         next();
       } catch (e) {
@@ -60,7 +60,7 @@ class AnalyticsBridge {
 
     this.ns.on('connection', (socket) => {
       socket.on('join_job', async ({ jobId }) => {
-        if (!jobId) return;
+        if (!jobId) {return;}
         // ABAC gate for job visibility
         const decision = await evaluate(
           'analytics_job_view',
@@ -78,7 +78,7 @@ class AnalyticsBridge {
         socket.join(`job:${jobId}`);
       });
       socket.on('leave_job', ({ jobId }) => {
-        if (!jobId) return;
+        if (!jobId) {return;}
         socket.leave(`job:${jobId}`);
       });
     });
@@ -99,10 +99,10 @@ class AnalyticsBridge {
   _classify(event) {
     const msg = (event.message || '').toLowerCase();
     const level = (event.level || 'INFO').toUpperCase();
-    if (level === 'ERROR' || msg.includes('fail')) return 'error';
+    if (level === 'ERROR' || msg.includes('fail')) {return 'error';}
     if (msg.startsWith('job:done') || msg.startsWith('job:complete'))
-      return 'complete';
-    if (msg.includes('done') || msg.includes('result')) return 'result';
+      {return 'complete';}
+    if (msg.includes('done') || msg.includes('result')) {return 'result';}
     return 'progress';
   }
 
@@ -131,7 +131,7 @@ class AnalyticsBridge {
           STREAM_KEY,
           '>',
         );
-        if (!res) continue; // timeout
+        if (!res) {continue;} // timeout
         for (const [_stream, entries] of res) {
           for (const [id, fields] of entries) {
             try {

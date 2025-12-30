@@ -15,12 +15,12 @@ export async function signClaimSet(transitKey: string, payload: any) {
       body: JSON.stringify({ input: digest }),
     },
   );
-  if (!r.ok) throw new Error(`transit sign failed ${r.status}`);
+  if (!r.ok) {throw new Error(`transit sign failed ${r.status}`);}
   const j = await r.json();
   return { signature: j.data?.signature, sha256: digest };
 }
 
 export function verifyMerkle(root: string, leaves: string[]) {
   // TODO: reuse MerkleLog to recompute root; placeholder returns true
-  return !!root && Array.isArray(leaves);
+  return Boolean(root) && Array.isArray(leaves);
 }

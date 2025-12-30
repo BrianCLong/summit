@@ -38,7 +38,7 @@ export class SummitQAF {
   private updateAgentCounts() {
     let secureCount = 0;
     for (const agent of this.agents.values()) {
-        if (agent.quantumSafe) secureCount++;
+        if (agent.quantumSafe) {secureCount++;}
     }
     this.telemetry.updateAgentCounts(this.agents.size, secureCount);
   }

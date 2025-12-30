@@ -93,11 +93,11 @@ export class BulkOperationService {
   private async checkIdempotency(context: BulkContext, items: BulkItemInput[], payload: BulkOperationPayload): Promise<BulkItemResult[]> {
       const results: BulkItemResult[] = [];
       const pool = this.getPool();
-      if (!pool) return []; // Cannot check
+      if (!pool) {return [];} // Cannot check
 
       // We only check items that have an idempotency key
       const itemsWithKeys = items.filter(i => i.idempotencyKey);
-      if (itemsWithKeys.length === 0) return [];
+      if (itemsWithKeys.length === 0) {return [];}
 
       try {
           // Check ledger
@@ -126,7 +126,7 @@ export class BulkOperationService {
 
   private async recordResults(context: BulkContext, payload: BulkOperationPayload, results: BulkItemResult[]) {
       const pool = this.getPool();
-      if (!pool) return;
+      if (!pool) {return;}
 
       // Map results back to inputs to get keys?
       // The results array has itemId. We need to find the input to get the key.
@@ -134,7 +134,7 @@ export class BulkOperationService {
 
       const records = results.map(r => {
           const input = inputsMap.get(r.itemId);
-          if (!input || !input.idempotencyKey) return null;
+          if (!input || !input.idempotencyKey) {return null;}
           return {
               request_id: payload.requestId,
               item_id: r.itemId,
@@ -147,7 +147,7 @@ export class BulkOperationService {
           };
       }).filter(Boolean);
 
-      if (records.length === 0) return;
+      if (records.length === 0) {return;}
 
       try {
           // Batch insert

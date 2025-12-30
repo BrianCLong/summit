@@ -37,7 +37,7 @@ function isHostAllowed(url: string): boolean {
     process.env.MCP_ALLOWED_HOSTS?.split(',')
       .map((s) => s.trim())
       .filter(Boolean) || [];
-  if (allow.length === 0) return true; // if not set, allow any (dev)
+  if (allow.length === 0) {return true;} // if not set, allow any (dev)
   try {
     const u = new URL(url);
     return allow.includes(u.hostname);
@@ -107,7 +107,7 @@ router.get('/servers', async (_req, res) => {
 router.get('/servers/:id', async (req, res) => {
   try {
     const rec = await mcpServersRepo.get(req.params.id);
-    if (!rec) return res.status(404).json({ error: 'server not found' });
+    if (!rec) {return res.status(404).json({ error: 'server not found' });}
     const { auth_token, ...safe } = rec as any;
     res.json(safe);
   } catch (err) {
@@ -146,7 +146,7 @@ router.put('/servers/:id', requireAdminMCP, async (req, res) => {
       tags,
       fingerprintSha256,
     });
-    if (!updated) return res.status(404).json({ error: 'server not found' });
+    if (!updated) {return res.status(404).json({ error: 'server not found' });}
     const { auth_token, ...safe } = updated as any;
     res.json(safe);
   } catch (err: any) {
@@ -159,7 +159,7 @@ router.put('/servers/:id', requireAdminMCP, async (req, res) => {
 router.delete('/servers/:id', requireAdminMCP, async (req, res) => {
   try {
     const ok = await mcpServersRepo.delete(req.params.id);
-    if (!ok) return res.status(404).json({ error: 'server not found' });
+    if (!ok) {return res.status(404).json({ error: 'server not found' });}
     res.status(204).send();
   } catch (err) {
     console.error('Failed to delete MCP server:', err);
@@ -171,7 +171,7 @@ router.delete('/servers/:id', requireAdminMCP, async (req, res) => {
 router.get('/servers/:id/health', async (req, res) => {
   try {
     const rec = await mcpServersRepo.get(req.params.id);
-    if (!rec) return res.status(404).json({ error: 'server not found' });
+    if (!rec) {return res.status(404).json({ error: 'server not found' });}
     const healthy = await checkMCPHealth(rec.url, rec.auth_token || undefined);
     res.json({ id: rec.id, name: rec.name, url: rec.url, healthy });
   } catch (err) {
@@ -192,7 +192,7 @@ export async function checkMCPHealth(
 ): Promise<boolean> {
   return new Promise((resolve) => {
     const headers: Record<string, string> = {};
-    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+    if (authToken) {headers['Authorization'] = `Bearer ${authToken}`;}
     const ws = new WebSocket(url, { headers, rejectUnauthorized: true });
     let resolved = false;
     const timer = setTimeout(() => {
@@ -285,7 +285,7 @@ function requireAdminMCP(
     : user.role === 'ADMIN' || user.role === 'admin';
   const hasAdminPerm =
     Array.isArray(user.permissions) && user.permissions.includes('admin:mcp');
-  if (hasAdminPerm || hasAdminRole) return next();
+  if (hasAdminPerm || hasAdminRole) {return next();}
   return res
     .status(403)
     .json({ error: 'forbidden', message: 'admin:mcp required' });

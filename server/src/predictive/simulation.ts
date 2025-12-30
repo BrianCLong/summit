@@ -8,7 +8,7 @@ export class CampaignSimulator {
 
     const trajectory: SimulationStep[] = [];
     let currentInfected = new Set<string>(seedEntityIds);
-    let allInfected = new Set<string>(seedEntityIds);
+    const allInfected = new Set<string>(seedEntityIds);
 
     // Initial state
     trajectory.push({
@@ -47,7 +47,7 @@ export class CampaignSimulator {
       }
 
       // Update state
-      if (nextInfected.size === 0) break; // Trajectory ends if no new infections
+      if (nextInfected.size === 0) {break;} // Trajectory ends if no new infections
 
       // For next step, who spreads?
       // Option A: Only newly infected (SI model with recovery/inactive after 1 step)

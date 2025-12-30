@@ -531,7 +531,7 @@ export class SOARPlaybookService {
   private async createIncidentTicket(params: any): Promise<any> {
     // Mock implementation - would integrate with ITSM system
     return {
-      ticketId: 'INC-' + Date.now(),
+      ticketId: `INC-${  Date.now()}`,
       title: params.title,
       created: true,
     };
@@ -539,7 +539,7 @@ export class SOARPlaybookService {
 
   private async generateContainmentReport(executionId: string): Promise<any> {
     // Mock implementation - would generate detailed report
-    return { reportId: 'RPT-' + Date.now(), executionId, generated: true };
+    return { reportId: `RPT-${  Date.now()}`, executionId, generated: true };
   }
 
   private async resetUserMFA(params: any): Promise<any> {
@@ -559,7 +559,7 @@ export class SOARPlaybookService {
   private async createAuditLog(params: any): Promise<any> {
     // Mock implementation - would create audit log entry
     return {
-      auditId: 'AUD-' + Date.now(),
+      auditId: `AUD-${  Date.now()}`,
       action: params.action,
       timestamp: new Date(),
     };

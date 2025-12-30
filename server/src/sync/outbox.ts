@@ -22,12 +22,12 @@ export async function pump(siteId: string, send: (m: any) => Promise<boolean>) {
   for (const r of rows) {
     const ok = await send(r);
     if (ok)
-      await pg.query(`UPDATE sync_outbox SET status='SENT' WHERE id=$1`, [
+      {await pg.query(`UPDATE sync_outbox SET status='SENT' WHERE id=$1`, [
         r.id,
-      ]);
+      ]);}
     else
-      await pg.query(`UPDATE sync_outbox SET retries=retries+1 WHERE id=$1`, [
+      {await pg.query(`UPDATE sync_outbox SET retries=retries+1 WHERE id=$1`, [
         r.id,
-      ]);
+      ]);}
   }
 }

@@ -3,8 +3,8 @@ class SimulationService {
     const nbrs = new Map();
     nodes.forEach((id) => nbrs.set(id, new Set()));
     edges.forEach((e) => {
-      if (!nbrs.has(e.source)) nbrs.set(e.source, new Set());
-      if (!nbrs.has(e.target)) nbrs.set(e.target, new Set());
+      if (!nbrs.has(e.source)) {nbrs.set(e.source, new Set());}
+      if (!nbrs.has(e.target)) {nbrs.set(e.target, new Set());}
       nbrs.get(e.source).add(e.target);
       nbrs.get(e.target).add(e.source);
     });
@@ -21,7 +21,7 @@ class SimulationService {
         const neis = nbrs.get(u) || new Set();
         neis.forEach((v) => {
           if (!infected.has(v)) {
-            if (Math.random() < probability) newly.add(v);
+            if (Math.random() < probability) {newly.add(v);}
           }
         });
       });

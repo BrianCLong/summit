@@ -82,7 +82,7 @@ export class EvidenceIntegrityService {
     try {
       while (true) {
         const rows = await this.fetchChunk(cursor, chunkSize);
-        if (!rows.length) break;
+        if (!rows.length) {break;}
         chunksProcessed += 1;
 
         for (const artifact of rows) {
@@ -218,7 +218,7 @@ export class EvidenceIntegrityService {
         'SELECT content FROM evidence_artifact_content WHERE artifact_id = $1',
         [contentId],
       );
-      if (!rows.length) return null;
+      if (!rows.length) {return null;}
       return (rows[0] as { content: Buffer }).content;
     }
 

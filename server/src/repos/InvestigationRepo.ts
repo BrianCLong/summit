@@ -320,7 +320,7 @@ export class InvestigationRepo {
     ids: readonly string[],
     tenantId: string,
   ): Promise<(Investigation | null)[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {return [];}
 
     const scopedTenantId = resolveTenantId(tenantId, 'investigation.batchByIds');
     const params: any[] = [ids, scopedTenantId];

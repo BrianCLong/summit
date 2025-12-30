@@ -60,7 +60,7 @@ export default function AlertsBell() {
 
   const onClickAlert = async (a) => {
     await markRead({ variables: { id: a.id } });
-    if (a.link) window.location.href = a.link;
+    if (a.link) {window.location.href = a.link;}
   };
 
   return (
@@ -79,7 +79,7 @@ export default function AlertsBell() {
         ))}
       </Menu>
       <Snackbar
-        open={!!snack}
+        open={Boolean(snack)}
         autoHideDuration={6000}
         onClose={() => setSnack(null)}
       >

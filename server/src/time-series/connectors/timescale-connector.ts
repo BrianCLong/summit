@@ -75,7 +75,7 @@ export class TimescaleConnector implements TimeSeriesConnector {
   }
 
   async writePoints(points: TimeSeriesPoint[]): Promise<void> {
-    if (!points.length) return;
+    if (!points.length) {return;}
     const values: unknown[] = [];
     const placeholders = points
       .map((point, idx) => {

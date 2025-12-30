@@ -269,7 +269,7 @@ export class IntelGraphTracer {
         span.setAttributes({
           'db.system': database,
           'db.operation': operation,
-          'db.statement': query.length > 500 ? query.substring(0, 500) + '...' : query,
+          'db.statement': query.length > 500 ? `${query.substring(0, 500)  }...` : query,
         });
         return fn();
       },

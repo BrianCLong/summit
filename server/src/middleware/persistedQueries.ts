@@ -215,14 +215,14 @@ export class PersistedQueriesMiddleware {
     manifest: Record<string, string>,
   ): boolean {
     const hash = this.hashQuery(query);
-    return !!manifest[hash];
+    return Boolean(manifest[hash]);
   }
 
   /**
    * Check if query is an introspection query
    */
   private isIntrospectionQuery(query?: string): boolean {
-    if (!query) return false;
+    if (!query) {return false;}
     return query.includes('__schema') || query.includes('__type');
   }
 

@@ -441,7 +441,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
     }
   }, [initialTopic]);
 
-  if (!isVisible) return null;
+  if (!isVisible) {return null;}
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
@@ -518,7 +518,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({
             <div className="flex-1 overflow-y-auto">
               {(() => {
                 const topic = helpTopics.find((t) => t.id === activeTopic);
-                if (!topic) return <div className="p-8">Topic not found</div>;
+                if (!topic) {return <div className="p-8">Topic not found</div>;}
 
                 return (
                   <div className="p-8">

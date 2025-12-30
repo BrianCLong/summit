@@ -664,9 +664,9 @@ export class Conductor {
       const arg = m[2];
       logs.push(`OSINT via plugin prompt: ${name}`);
       let inputs: any = {};
-      if (name === 'shodan.ip.lookup') inputs = { ip: arg };
-      else if (name === 'virustotal.hash.lookup') inputs = { hash: arg };
-      else if (name === 'crowdstrike.query') inputs = { query: arg };
+      if (name === 'shodan.ip.lookup') {inputs = { ip: arg };}
+      else if (name === 'virustotal.hash.lookup') {inputs = { hash: arg };}
+      else if (name === 'crowdstrike.query') {inputs = { query: arg };}
       const out = await runPlugin(name, inputs, { tenant });
       return { output: out?.data ?? out, logs, cost: 0.004 };
     }
@@ -762,12 +762,12 @@ export class Conductor {
   // Helper methods for task parsing
   private detectAlgorithm(task: string): string {
     const lower = task.toLowerCase();
-    if (lower.includes('pagerank')) return 'pagerank';
-    if (lower.includes('community')) return 'community';
+    if (lower.includes('pagerank')) {return 'pagerank';}
+    if (lower.includes('community')) {return 'community';}
     if (lower.includes('shortest') || lower.includes('path'))
-      return 'shortestPath';
-    if (lower.includes('betweenness')) return 'betweenness';
-    if (lower.includes('closeness')) return 'closeness';
+      {return 'shortestPath';}
+    if (lower.includes('betweenness')) {return 'betweenness';}
+    if (lower.includes('closeness')) {return 'closeness';}
     return 'pagerank'; // default
   }
 

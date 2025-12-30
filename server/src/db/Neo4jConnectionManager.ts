@@ -468,7 +468,7 @@ export class Neo4jConnectionManager {
     if (query.length <= maxLength) {
       return query;
     }
-    return query.substring(0, maxLength) + '...';
+    return `${query.substring(0, maxLength)  }...`;
   }
 
   /**

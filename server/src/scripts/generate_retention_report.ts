@@ -29,7 +29,7 @@ async function generateReport() {
 
     const outputPath = 'artifacts/compliance/retention-audit.json';
     const dir = path.dirname(outputPath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(dir)) {fs.mkdirSync(dir, { recursive: true });}
 
     fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
     logger.info(`Retention audit report generated at ${outputPath}`);

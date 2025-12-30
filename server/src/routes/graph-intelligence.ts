@@ -40,7 +40,7 @@ router.get('/centrality', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const tenantId = authReq.user?.tenantId;
-    if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
+    if (!tenantId) {return res.status(400).json({ error: 'Tenant ID missing' });}
 
     const results = await calculateDegreeCentrality(tenantId);
     res.json(results);
@@ -58,7 +58,7 @@ router.get('/betweenness', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const tenantId = authReq.user?.tenantId;
-    if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
+    if (!tenantId) {return res.status(400).json({ error: 'Tenant ID missing' });}
 
     const results = await calculateBetweenness(tenantId);
     res.json(results);
@@ -76,7 +76,7 @@ router.get('/communities', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const tenantId = authReq.user?.tenantId;
-    if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
+    if (!tenantId) {return res.status(400).json({ error: 'Tenant ID missing' });}
 
     const results = await detectCommunities(tenantId);
     res.json(results);
@@ -94,7 +94,7 @@ router.post('/path', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const tenantId = authReq.user?.tenantId;
-    if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
+    if (!tenantId) {return res.status(400).json({ error: 'Tenant ID missing' });}
 
     const { startNodeId, endNodeId } = ShortestPathSchema.parse(req.body);
     const result = await findShortestPath(tenantId, startNodeId, endNodeId);
@@ -113,7 +113,7 @@ router.get('/influence/bots', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const tenantId = authReq.user?.tenantId;
-    if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
+    if (!tenantId) {return res.status(400).json({ error: 'Tenant ID missing' });}
 
     const results = await InfluenceDetectionService.detectBots(tenantId);
     res.json(results);
@@ -131,7 +131,7 @@ router.get('/influence/coordinated', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const tenantId = authReq.user?.tenantId;
-    if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
+    if (!tenantId) {return res.status(400).json({ error: 'Tenant ID missing' });}
 
     const { minutes } = TimeWindowSchema.parse(req.query);
     const results = await InfluenceDetectionService.detectCoordinatedBehavior(tenantId, minutes);
@@ -150,7 +150,7 @@ router.get('/influence/amplification', async (req: Request, res: Response) => {
   try {
     const authReq = req as AuthenticatedRequest;
     const tenantId = authReq.user?.tenantId;
-    if (!tenantId) return res.status(400).json({ error: 'Tenant ID missing' });
+    if (!tenantId) {return res.status(400).json({ error: 'Tenant ID missing' });}
 
     const results = await InfluenceDetectionService.identifyAmplificationNetworks(tenantId);
     res.json(results);

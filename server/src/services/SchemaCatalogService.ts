@@ -76,7 +76,7 @@ export class SchemaCatalogService {
    */
   public async registerSchema(schema: SchemaDefinition): Promise<ValidationResult> {
     // Ensure we have the latest loaded
-    if (!this.currentSchema) await this.loadSchema();
+    if (!this.currentSchema) {await this.loadSchema();}
 
     const errors: string[] = [];
     const breakingChanges: string[] = [];

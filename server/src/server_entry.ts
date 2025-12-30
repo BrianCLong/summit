@@ -147,7 +147,7 @@ const startServer = async () => {
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
     stopTenantHotEmbeddingsRefresh();
-    if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
+    if (stopKafkaConsumer) {await stopKafkaConsumer();} // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),
       closePostgresPool(),

@@ -46,10 +46,10 @@ export class GovernanceRiskService {
     }
 
     let mitigation: RiskScoreOutput['requiredMitigation'] = 'NONE';
-    if (score >= 90) mitigation = 'DENY';
-    else if (score >= 70) mitigation = 'REVIEW';
-    else if (score >= 50) mitigation = 'RESTRICT';
-    else if (score >= 30) mitigation = 'PHILANTHROPIC_OFFSET';
+    if (score >= 90) {mitigation = 'DENY';}
+    else if (score >= 70) {mitigation = 'REVIEW';}
+    else if (score >= 50) {mitigation = 'RESTRICT';}
+    else if (score >= 30) {mitigation = 'PHILANTHROPIC_OFFSET';}
 
     return {
       score,

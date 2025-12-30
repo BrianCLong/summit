@@ -19,7 +19,7 @@ interface Metric {
 }
 
 function sumMetric(metric: Metric | undefined): number {
-  if (!metric?.values?.length) return 0;
+  if (!metric?.values?.length) {return 0;}
   return metric.values.reduce((acc: number, v: MetricValue) => acc + (v.value || 0), 0);
 }
 
@@ -43,7 +43,7 @@ async function getRedisInfo(): Promise<RedisInfo> {
     if (typeof info === 'string') {
       info.split('\n').forEach((line) => {
         const [k, v] = line.split(':');
-        if (k && v) parsed[k] = v.trim();
+        if (k && v) {parsed[k] = v.trim();}
       });
     }
     return {

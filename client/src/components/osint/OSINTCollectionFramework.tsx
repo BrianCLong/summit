@@ -834,7 +834,7 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
   };
 
   const simulateRealTimeCollection = () => {
-    if (!isCollecting) return;
+    if (!isCollecting) {return;}
 
     // Simulate discovering new artifacts
     if (Math.random() > 0.7) {
@@ -960,9 +960,9 @@ const OSINTCollectionFramework: React.FC<OSINTCollectionFrameworkProps> = ({
           return 'text-gray-700 bg-gray-100 border-gray-200';
       }
     } else {
-      if (risk >= 80) return 'text-red-700 bg-red-100 border-red-200';
-      if (risk >= 60) return 'text-orange-700 bg-orange-100 border-orange-200';
-      if (risk >= 40) return 'text-yellow-700 bg-yellow-100 border-yellow-200';
+      if (risk >= 80) {return 'text-red-700 bg-red-100 border-red-200';}
+      if (risk >= 60) {return 'text-orange-700 bg-orange-100 border-orange-200';}
+      if (risk >= 40) {return 'text-yellow-700 bg-yellow-100 border-yellow-200';}
       return 'text-green-700 bg-green-100 border-green-200';
     }
   };

@@ -90,7 +90,7 @@ export function validateRequestLegacy(schema: ValidationSchema) {
         if (rules.pattern) {
           const re = new RegExp(rules.pattern);
           if (!re.test(body[key]))
-            return res.status(400).json({ error: `${key} invalid format` });
+            {return res.status(400).json({ error: `${key} invalid format` });}
         }
       }
     }

@@ -21,12 +21,12 @@ export class FunnelService {
 
     public generateReport(funnelId: string): FunnelReport {
         const funnel = this.funnels.get(funnelId);
-        if (!funnel) throw new Error('Funnel not found');
+        if (!funnel) {throw new Error('Funnel not found');}
 
         const userEvents = this.loadUserEvents();
 
         const stepCounts: Record<string, number> = {};
-        for (let i = 0; i < funnel.steps.length; i++) stepCounts[i] = 0;
+        for (let i = 0; i < funnel.steps.length; i++) {stepCounts[i] = 0;}
 
         for (const [userId, events] of userEvents.entries()) {
             // Sort by time
@@ -56,7 +56,7 @@ export class FunnelService {
 
     // Naive evaluation: greedy matching of steps within window
     private evaluateUser(userId: string, events: TelemetryEvent[], funnel: Funnel, counts: Record<string, number>) {
-        let currentStepIdx = 0;
+        const currentStepIdx = 0;
         let startTime = 0;
 
         // Simple state machine: look for step 0, then step 1, etc.
@@ -110,10 +110,10 @@ export class FunnelService {
     }
 
     private matchStep(event: TelemetryEvent, step: FunnelStep): boolean {
-        if (event.eventType !== step.eventType) return false;
+        if (event.eventType !== step.eventType) {return false;}
         if (step.props) {
             for (const [k, v] of Object.entries(step.props)) {
-                if (event.props[k] !== v) return false;
+                if (event.props[k] !== v) {return false;}
             }
         }
         return true;
@@ -122,19 +122,19 @@ export class FunnelService {
     private loadUserEvents(): Map<string, TelemetryEvent[]> {
         // Scan all logs
         const map = new Map<string, TelemetryEvent[]>();
-        if (!fs.existsSync(this.logDir)) return map;
+        if (!fs.existsSync(this.logDir)) {return map;}
 
         const files = fs.readdirSync(this.logDir).filter(f => f.endsWith('.jsonl'));
         for (const file of files) {
              const content = fs.readFileSync(path.join(this.logDir, file), 'utf-8');
              const lines = content.split('\n');
              for (const line of lines) {
-                 if (!line.trim()) continue;
+                 if (!line.trim()) {continue;}
                  try {
                      const e: TelemetryEvent = JSON.parse(line);
                      // Group by user hash
                      const uid = e.scopeHash;
-                     if (!map.has(uid)) map.set(uid, []);
+                     if (!map.has(uid)) {map.set(uid, []);}
                      map.get(uid)!.push(e);
                  } catch (err) {}
              }

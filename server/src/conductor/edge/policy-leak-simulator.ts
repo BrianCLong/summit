@@ -557,7 +557,7 @@ export class PolicyLeakSimulator {
     violations: PolicyViolation[],
     totalOperations: number,
   ): number {
-    if (violations.length === 0) return 0;
+    if (violations.length === 0) {return 0;}
 
     // Weight by severity
     const severityWeights: Record<string, number> = {

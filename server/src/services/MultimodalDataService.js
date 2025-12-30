@@ -948,10 +948,10 @@ class MultimodalDataService {
   }
 
   determineConfidenceLevel(confidence) {
-    if (confidence >= 0.9) return 'VERY_HIGH';
-    if (confidence >= 0.8) return 'HIGH';
-    if (confidence >= 0.6) return 'MEDIUM';
-    if (confidence >= 0.4) return 'LOW';
+    if (confidence >= 0.9) {return 'VERY_HIGH';}
+    if (confidence >= 0.8) {return 'HIGH';}
+    if (confidence >= 0.6) {return 'MEDIUM';}
+    if (confidence >= 0.4) {return 'LOW';}
     return 'VERY_LOW';
   }
 
@@ -960,8 +960,8 @@ class MultimodalDataService {
     const label1 = entity1.label.toLowerCase();
     const label2 = entity2.label.toLowerCase();
 
-    if (label1 === label2) return 1.0;
-    if (label1.includes(label2) || label2.includes(label1)) return 0.8;
+    if (label1 === label2) {return 1.0;}
+    if (label1.includes(label2) || label2.includes(label1)) {return 0.8;}
 
     // Levenshtein distance-based similarity
     const distance = this.levenshteinDistance(label1, label2);

@@ -12,7 +12,7 @@ export type TrustContract = {
 };
 
 export async function verifyTrustContract(tc: TrustContract) {
-  if (new Date(tc.expiresAt) < new Date()) throw new Error('contract expired');
+  if (new Date(tc.expiresAt) < new Date()) {throw new Error('contract expired');}
   // TODO: Verify signature against provider's registered key (PKI/cosign)
   return true;
 }

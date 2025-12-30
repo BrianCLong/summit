@@ -20,7 +20,7 @@ export class CanvasPerformanceMonitor {
   }
 
   start() {
-    if (this.isRunning) return;
+    if (this.isRunning) {return;}
     this.isRunning = true;
     this.lastTime = performance.now();
     this.frameCount = 0;
@@ -28,7 +28,7 @@ export class CanvasPerformanceMonitor {
   }
 
   stop() {
-    if (!this.isRunning) return;
+    if (!this.isRunning) {return;}
     this.isRunning = false;
     if (this.rafId) {
       cancelAnimationFrame(this.rafId);
@@ -37,7 +37,7 @@ export class CanvasPerformanceMonitor {
   }
 
   tick() {
-    if (!this.isRunning) return;
+    if (!this.isRunning) {return;}
 
     this.frameCount++;
     const now = performance.now();
@@ -72,7 +72,7 @@ export class CanvasPerformanceMonitor {
   }
 
   getMemoryUsage() {
-    if (!performance.memory) return 0;
+    if (!performance.memory) {return 0;}
     return Math.round(performance.memory.usedJSHeapSize / 1048576); // MB
   }
 
@@ -98,7 +98,7 @@ export class LODManager {
 
   // Automatically adjust LOD based on performance
   adaptToPerformance(fps, nodeCount, edgeCount) {
-    if (!this.adaptiveMode) return this.currentLevel;
+    if (!this.adaptiveMode) {return this.currentLevel;}
 
     // Performance is good, try upgrading
     if (fps >= 60) {

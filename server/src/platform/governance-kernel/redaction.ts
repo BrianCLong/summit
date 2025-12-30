@@ -13,7 +13,7 @@ const LEVEL_ORDER = [
 ];
 
 export function redactSensitive(data: any, allowedLevel: DataSensitivity): any {
-  if (!data || typeof data !== 'object') return data;
+  if (!data || typeof data !== 'object') {return data;}
 
   if (Array.isArray(data)) {
     return data.map(item => redactSensitive(item, allowedLevel));

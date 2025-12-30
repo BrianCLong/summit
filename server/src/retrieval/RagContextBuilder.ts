@@ -68,10 +68,10 @@ export class RagContextBuilder {
     const maxTokens = req.maxTokens || 4000;
 
     for (const item of result.items) {
-      if (currentTokens >= maxTokens) break;
+      if (currentTokens >= maxTokens) {break;}
 
       const content = item.object.body || "";
-      if (!content) continue;
+      if (!content) {continue;}
 
       const title = item.object.title || "Untitled";
       const snippetTokens = this.countTokens(content);
@@ -85,7 +85,7 @@ export class RagContextBuilder {
 
       if (currentTokens + snippetTokens > maxTokens) {
         const remaining = maxTokens - currentTokens;
-        if (remaining < 50) break; // Don't add tiny snippets
+        if (remaining < 50) {break;} // Don't add tiny snippets
 
         // Truncate
         // This is rough. Ideally decode(encode(content)[:remaining])
@@ -121,7 +121,7 @@ export class RagContextBuilder {
   private truncateToTokens(text: string, limit: number): string {
     if (this.tokenizer) {
        const tokens = this.tokenizer.encode(text);
-       if (tokens.length <= limit) return text;
+       if (tokens.length <= limit) {return text;}
        const sliced = tokens.slice(0, limit);
        return new TextDecoder().decode(this.tokenizer.decode(sliced)); // TextDecoder needed? decode returns string usually?
        // tiktoken decode returns Uint8Array or string depending on version/binding.

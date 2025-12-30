@@ -33,8 +33,8 @@ export async function runWasmStep(
 
   const guard = setInterval(() => {
     const m = inst.exports?.memory as WebAssembly.Memory | undefined;
-    if (m && m.buffer.byteLength > memLimit) throw new Error('wasm OOM');
-    if (Date.now() > deadline) throw new Error('wasm timeout');
+    if (m && m.buffer.byteLength > memLimit) {throw new Error('wasm OOM');}
+    if (Date.now() > deadline) {throw new Error('wasm timeout');}
   }, 50);
 
   try {
@@ -43,7 +43,7 @@ export async function runWasmStep(
     // Convention: export_json(ptr) returns a pointer to a NUL-terminated JSON string
     const exportJson = inst.exports?.['export_json'] as Function | undefined;
     if (typeof exportJson !== 'function')
-      throw new Error('missing export_json()');
+      {throw new Error('missing export_json()');}
     // Pass input via memory: simple approach, let plugin read from stdin or global if needed.
     const resPtr = exportJson(JSON.stringify(input));
     // @ts-ignore Memory access needs cast
@@ -57,6 +57,6 @@ export async function runWasmStep(
 
 function decodeCString(mem: Uint8Array, ptr: number) {
   let end = ptr;
-  while (mem[end] !== 0) end++;
+  while (mem[end] !== 0) {end++;}
   return new TextDecoder().decode(mem.slice(ptr, end));
 }

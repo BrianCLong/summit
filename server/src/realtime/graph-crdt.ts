@@ -96,7 +96,7 @@ export function registerGraphHandlers(
   socket.on(
     'graph:op',
     async ({ graphId, op }: { graphId: string; op: GraphOperation }) => {
-      if (!graphId || !op) return;
+      if (!graphId || !op) {return;}
       if (options.authorize) {
         const allowed = await options.authorize(graphId, op, 'mutate');
         if (!allowed) {
@@ -119,7 +119,7 @@ export function registerGraphHandlers(
   );
 
   socket.on('graph:sync', async ({ graphId }: { graphId: string }) => {
-    if (!graphId) return;
+    if (!graphId) {return;}
     if (options.authorize) {
       const allowed = await options.authorize(
         graphId,

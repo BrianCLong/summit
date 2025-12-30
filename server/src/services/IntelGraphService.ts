@@ -53,7 +53,7 @@ export class IntelGraphService {
     const now = new Date().toISOString();
 
     let cypher: string;
-    let params: any = {
+    const params: any = {
       props: properties,
       id,
       tenantId,

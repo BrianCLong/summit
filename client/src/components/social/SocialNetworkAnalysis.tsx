@@ -646,10 +646,10 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
   // Canvas Drawing (Simplified Network Visualization)
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -693,7 +693,7 @@ const SocialNetworkAnalysis: React.FC<SocialNetworkAnalysisProps> = ({
       const sourceIndex = filteredNodes.findIndex((n) => n.id === edge.source);
       const targetIndex = filteredNodes.findIndex((n) => n.id === edge.target);
 
-      if (sourceIndex === -1 || targetIndex === -1) return;
+      if (sourceIndex === -1 || targetIndex === -1) {return;}
 
       const sourceX = (sourceIndex % 4) * 180 + 100;
       const sourceY = Math.floor(sourceIndex / 4) * 120 + 80;

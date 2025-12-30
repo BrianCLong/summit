@@ -157,7 +157,7 @@ export class AutoMLService {
    */
   async startTraining(modelId: string, datasetId: string, hyperparameters: Record<string, any> = {}): Promise<TrainingJob> {
     const model = this.models.get(modelId);
-    if (!model) throw new Error(`Model ${modelId} not found`);
+    if (!model) {throw new Error(`Model ${modelId} not found`);}
 
     const jobId = uuidv4();
     const job: TrainingJob = {
@@ -180,7 +180,7 @@ export class AutoMLService {
 
   private async runTrainingSimulation(jobId: string, hyperparameters: Record<string, any>) {
     const job = this.jobs.get(jobId);
-    if (!job) return;
+    if (!job) {return;}
 
     job.status = 'running';
     job.logs.push('Starting training...');
@@ -250,12 +250,12 @@ export class AutoMLService {
   async runABTest(modelId: string, versionAId: string, versionBId: string, durationSeconds: number = 5): Promise<any> {
      // Simulate A/B test results
      const model = this.models.get(modelId);
-     if (!model) throw new Error('Model not found');
+     if (!model) {throw new Error('Model not found');}
 
      const verA = model.versions.find(v => v.id === versionAId);
      const verB = model.versions.find(v => v.id === versionBId);
 
-     if (!verA || !verB) throw new Error('Versions not found');
+     if (!verA || !verB) {throw new Error('Versions not found');}
 
      return {
        experimentId: uuidv4(),

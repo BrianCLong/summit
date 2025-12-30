@@ -81,7 +81,7 @@ export class LlmSecurityService {
 
       // Apply redactions if recommended
       const { processedContent } = await dlpService.applyActions(prompt, scanResults, dlpCtx);
-      let finalPrompt = typeof processedContent === 'string' ? processedContent : JSON.stringify(processedContent);
+      const finalPrompt = typeof processedContent === 'string' ? processedContent : JSON.stringify(processedContent);
 
       return { allowed: true, redactedPrompt: finalPrompt };
 

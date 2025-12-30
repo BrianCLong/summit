@@ -36,7 +36,7 @@ export class TargetExpander {
   private async expandEmail(target: Target): Promise<Target[]> {
     const email = target.value;
     const parts = email.split('@');
-    if (parts.length < 2) return [];
+    if (parts.length < 2) {return [];}
 
     const domain = parts[1];
 

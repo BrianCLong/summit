@@ -115,7 +115,7 @@ export class AuditChainVerifier {
 
       if (!chainLink) {
         brokenChains++;
-        if (!firstCorruptedRecord) firstCorruptedRecord = record.id;
+        if (!firstCorruptedRecord) {firstCorruptedRecord = record.id;}
         continue;
       }
 
@@ -134,7 +134,7 @@ export class AuditChainVerifier {
         lastVerifiedRecord = record.id;
       } else {
         brokenChains++;
-        if (!firstCorruptedRecord) firstCorruptedRecord = record.id;
+        if (!firstCorruptedRecord) {firstCorruptedRecord = record.id;}
       }
 
       // Verify chain continuity
@@ -142,7 +142,7 @@ export class AuditChainVerifier {
         const previousLink = chains[i - 1];
         if (chainLink.previousHash !== previousLink?.currentHash) {
           brokenChains++;
-          if (!firstCorruptedRecord) firstCorruptedRecord = record.id;
+          if (!firstCorruptedRecord) {firstCorruptedRecord = record.id;}
         }
       }
     }

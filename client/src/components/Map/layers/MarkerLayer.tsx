@@ -34,7 +34,7 @@ export const Marker: React.FC<MarkerProps> = ({
   const markerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map) {return;}
 
     // Create marker
     const marker = L.marker([position.latitude, position.longitude], {
@@ -92,10 +92,10 @@ export interface MarkerClusterLayerProps {
   markers: Array<{
     position: GeoPoint;
     id: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     data?: any;
   }>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   onMarkerClick?: (id: string, data?: any) => void;
 }
 
@@ -110,7 +110,7 @@ export const MarkerClusterLayer: React.FC<MarkerClusterLayerProps> = ({
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map) {return;}
 
     // Create layer group
     const layerGroup = L.layerGroup().addTo(map);
@@ -126,7 +126,7 @@ export const MarkerClusterLayer: React.FC<MarkerClusterLayerProps> = ({
   }, [map]);
 
   useEffect(() => {
-    if (!layerGroupRef.current) return;
+    if (!layerGroupRef.current) {return;}
 
     // Clear existing markers
     layerGroupRef.current.clearLayers();

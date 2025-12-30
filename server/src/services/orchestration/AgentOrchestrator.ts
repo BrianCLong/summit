@@ -88,7 +88,7 @@ export class AgentOrchestrator extends EventEmitter {
   public async processQueue() {
     return traceTask('processQueue', async () => {
         const pendingTasks = await this.persistence.getPendingTasks();
-        if (pendingTasks.length === 0) return;
+        if (pendingTasks.length === 0) {return;}
 
         for (const task of pendingTasks) {
           // Check dependencies
@@ -123,7 +123,7 @@ export class AgentOrchestrator extends EventEmitter {
   }
 
   private checkDependencies(task: AgentTask): boolean {
-    if (task.dependencies.length === 0) return true;
+    if (task.dependencies.length === 0) {return true;}
     // Check if all dependent tasks are complete
     // This requires looking up tasks which we don't store persistently in this class yet
     // Assuming dependencies are satisfied for this prototype or implemented with a lookup

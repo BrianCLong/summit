@@ -202,7 +202,7 @@ export function QueryBuilderPreview({
 
   const handlePreviewUpdate = useCallback(
     (event: GraphQueryPreviewEvent | null | undefined) => {
-      if (!event) return;
+      if (!event) {return;}
 
       setPreviewState((prev) => {
         if (event.eventId && event.eventId === prev.lastEventId) {
@@ -212,7 +212,7 @@ export function QueryBuilderPreview({
         const nodeMap = new Map<string, GraphPreviewNode>();
         prev.nodes.forEach((node) => nodeMap.set(node.id, node));
         event.nodes?.forEach((node) => {
-          if (!node?.id) return;
+          if (!node?.id) {return;}
           const existing = nodeMap.get(node.id);
           nodeMap.set(node.id, { ...existing, ...node });
         });
@@ -223,7 +223,7 @@ export function QueryBuilderPreview({
           edgeMap.set(key, edge);
         });
         event.edges?.forEach((edge) => {
-          if (!edge?.source || !edge?.target) return;
+          if (!edge?.source || !edge?.target) {return;}
           const key = edge.id ?? `${edge.source}-${edge.target}`;
           const existing = edgeMap.get(key);
           edgeMap.set(key, { ...existing, ...edge });

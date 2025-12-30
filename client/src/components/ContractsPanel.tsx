@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import $ from 'jquery';
 export default function ContractsPanel() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [c, setC] = useState<any | null>(null);
   useEffect(() => {
     const controller = new AbortController();

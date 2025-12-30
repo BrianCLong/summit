@@ -473,7 +473,7 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
   };
 
   const performAddressSearch = async (address: string) => {
-    if (!address.trim()) return;
+    if (!address.trim()) {return;}
 
     setIsAnalyzing(true);
     setSearchAddress(address);
@@ -509,10 +509,10 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
       address.startsWith('3') ||
       address.startsWith('bc1')
     )
-      return 'bitcoin';
-    if (address.startsWith('0x')) return 'ethereum';
-    if (address.startsWith('L')) return 'litecoin';
-    if (address.startsWith('4') || address.startsWith('8')) return 'monero';
+      {return 'bitcoin';}
+    if (address.startsWith('0x')) {return 'ethereum';}
+    if (address.startsWith('L')) {return 'litecoin';}
+    if (address.startsWith('4') || address.startsWith('8')) {return 'monero';}
     return 'bitcoin'; // default
   };
 
@@ -527,11 +527,11 @@ const CryptocurrencyAnalyzer: React.FC<CryptocurrencyAnalyzerProps> = ({
   };
 
   const getRiskColor = (riskScore: number) => {
-    if (riskScore >= 80) return 'text-red-700 bg-red-100 border-red-200';
+    if (riskScore >= 80) {return 'text-red-700 bg-red-100 border-red-200';}
     if (riskScore >= 60)
-      return 'text-orange-700 bg-orange-100 border-orange-200';
+      {return 'text-orange-700 bg-orange-100 border-orange-200';}
     if (riskScore >= 40)
-      return 'text-yellow-700 bg-yellow-100 border-yellow-200';
+      {return 'text-yellow-700 bg-yellow-100 border-yellow-200';}
     return 'text-green-700 bg-green-100 border-green-200';
   };
 

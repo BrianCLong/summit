@@ -30,7 +30,7 @@ export function createHypothesisStore(): HypothesisStore {
     },
     addEvidence(id, e) {
       const h = store.hypotheses.find((x) => x.id === id);
-      if (!h) return;
+      if (!h) {return;}
       h.evidence.push(e);
       const odds = h.posterior / (1 - h.posterior);
       const updated = odds * e.weight;
@@ -38,7 +38,7 @@ export function createHypothesisStore(): HypothesisStore {
     },
     addDissent(id, note) {
       const h = store.hypotheses.find((x) => x.id === id);
-      if (h) h.dissent.push(note);
+      if (h) {h.dissent.push(note);}
     },
   };
   return store;

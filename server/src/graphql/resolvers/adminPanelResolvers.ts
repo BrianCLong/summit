@@ -403,7 +403,7 @@ export const adminPanelResolvers = {
     },
 
     suspendedBy: async (user: any) => {
-      if (!user.suspendedBy) return null;
+      if (!user.suspendedBy) {return null;}
       const service = getAdminPanelService();
       return await service.getUserById(user.suspendedBy);
     },
@@ -434,7 +434,7 @@ export const adminPanelResolvers = {
 
   AuditLog: {
     user: async (log: any) => {
-      if (!log.userId) return null;
+      if (!log.userId) {return null;}
       const service = getAdminPanelService();
       return await service.getUserById(log.userId);
     },
@@ -442,19 +442,19 @@ export const adminPanelResolvers = {
 
   ModerationItem: {
     reporter: async (item: any) => {
-      if (!item.reporterUserId) return null;
+      if (!item.reporterUserId) {return null;}
       const service = getAdminPanelService();
       return await service.getUserById(item.reporterUserId);
     },
 
     assignedTo: async (item: any) => {
-      if (!item.assignedTo) return null;
+      if (!item.assignedTo) {return null;}
       const service = getAdminPanelService();
       return await service.getUserById(item.assignedTo);
     },
 
     reviewedBy: async (item: any) => {
-      if (!item.reviewedBy) return null;
+      if (!item.reviewedBy) {return null;}
       const service = getAdminPanelService();
       return await service.getUserById(item.reviewedBy);
     },
@@ -462,13 +462,13 @@ export const adminPanelResolvers = {
 
   FeatureFlag: {
     createdBy: async (flag: any) => {
-      if (!flag.createdBy) return null;
+      if (!flag.createdBy) {return null;}
       const service = getAdminPanelService();
       return await service.getUserById(flag.createdBy);
     },
 
     updatedBy: async (flag: any) => {
-      if (!flag.updatedBy) return null;
+      if (!flag.updatedBy) {return null;}
       const service = getAdminPanelService();
       return await service.getUserById(flag.updatedBy);
     },

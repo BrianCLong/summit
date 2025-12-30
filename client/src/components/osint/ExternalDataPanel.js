@@ -94,7 +94,7 @@ export default function ExternalDataPanel() {
                 variant="outlined"
                 onClick={() => {
                   const p = presets[provider];
-                  if (p) setParams(JSON.stringify(p.params, null, 2));
+                  if (p) {setParams(JSON.stringify(p.params, null, 2));}
                 }}
               >
                 Quick Fill

@@ -26,13 +26,13 @@ export class GraphDetector {
           `;
 
           const result = await session.run(query, { actorIds });
-          if (result.records.length === 0) return { isAnomalous: false, score: 0, reason: 'No data' };
+          if (result.records.length === 0) {return { isAnomalous: false, score: 0, reason: 'No data' };}
 
           const record = result.records[0];
           const internalInteractions = record.get('internalInteractions').toNumber();
           const actorCount = record.get('actorCount').toNumber();
 
-          if (actorCount < 2) return { isAnomalous: false, score: 0, reason: 'Insufficient actors' };
+          if (actorCount < 2) {return { isAnomalous: false, score: 0, reason: 'Insufficient actors' };}
 
           const maxPossible = actorCount * (actorCount - 1); // Directed
           const density = internalInteractions / maxPossible;
@@ -70,7 +70,7 @@ export class GraphDetector {
             LIMIT 1
         `;
         const result = await session.run(query, { rootPostId });
-        if (result.records.length === 0) return { depth: 0, breadth: 0 };
+        if (result.records.length === 0) {return { depth: 0, breadth: 0 };}
 
         const depth = result.records[0].get('depth').toNumber();
 

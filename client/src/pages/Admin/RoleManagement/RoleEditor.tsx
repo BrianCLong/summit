@@ -68,7 +68,7 @@ export default function RoleEditor({
   onSubmit,
   loading = false,
 }: RoleEditorProps) {
-  const isEditing = !!role;
+  const isEditing = Boolean(role);
 
   const [formData, setFormData] = useState<RoleFormData>({
     name: '',
@@ -237,7 +237,7 @@ export default function RoleEditor({
               label="Role Name"
               value={formData.name}
               onChange={handleChange('name')}
-              error={!!errors.name}
+              error={Boolean(errors.name)}
               helperText={errors.name || 'Lowercase, alphanumeric, hyphens only'}
               fullWidth
               required
@@ -247,7 +247,7 @@ export default function RoleEditor({
               label="Display Name"
               value={formData.displayName}
               onChange={handleChange('displayName')}
-              error={!!errors.displayName}
+              error={Boolean(errors.displayName)}
               helperText={errors.displayName}
               fullWidth
               required

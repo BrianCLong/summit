@@ -16,7 +16,7 @@ function chunkByIndices(s: string, cuts: number[]) {
   ].sort((a, b) => a - b);
   const out: string[] = [];
   for (let i = 0; i < indices.length - 1; i++)
-    out.push(s.slice(indices[i], indices[i + 1]));
+    {out.push(s.slice(indices[i], indices[i + 1]));}
   return out;
 }
 

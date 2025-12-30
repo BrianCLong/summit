@@ -46,7 +46,7 @@ async function hashFile(filePath: string): Promise<string> {
 }
 
 function merkleFromHashes(hashes: string[]): string {
-  if (hashes.length === 0) return '';
+  if (hashes.length === 0) {return '';}
   let layer = hashes.slice().sort();
   while (layer.length > 1) {
     const next: string[] = [];

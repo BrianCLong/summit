@@ -38,13 +38,13 @@ interface ManagedConnectionOptions {
   backoffMultiplier?: number;
   jitter?: number;
   logger?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     info: (...args: any[]) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     warn: (...args: any[]) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     error: (...args: any[]) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     debug: (...args: any[]) => void;
   };
 }
@@ -316,7 +316,7 @@ export class ManagedConnection {
   }
 
   private startHeartbeatMonitor() {
-      if (this.timers.has(TimerType.HEARTBEAT)) return;
+      if (this.timers.has(TimerType.HEARTBEAT)) {return;}
 
       const interval = setInterval(() => {
           if (this.state === ConnectionState.CONNECTED) {

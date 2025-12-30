@@ -313,7 +313,7 @@ const GraphVisualization = () => {
     }
 
     const cy = cyRef.current;
-    if (!cy) return;
+    if (!cy) {return;}
 
     // --- Incremental Update Logic ---
     const currentNodes = graphData.nodes.filter(
@@ -371,8 +371,8 @@ const GraphVisualization = () => {
         removedEdges.length > 0)
     ) {
       // Remove elements
-      removedNodes.forEach((node) => cy.remove(cy.$('#' + node.data.id)));
-      removedEdges.forEach((edge) => cy.remove(cy.$('#' + edge.data.id)));
+      removedNodes.forEach((node) => cy.remove(cy.$(`#${  node.data.id}`)));
+      removedEdges.forEach((edge) => cy.remove(cy.$(`#${  edge.data.id}`)));
 
       // Add elements
       const elementsToAdd = [];
@@ -495,7 +495,7 @@ const GraphVisualization = () => {
 
     // Hide/show nodes based on cluster expansion state
     graphData.nodes.forEach((node) => {
-      const cyNode = cy.$('#' + node.data.id);
+      const cyNode = cy.$(`#${  node.data.id}`);
       const cluster = graphData.clusters.find((c) =>
         c.nodes.includes(node.data.id),
       );
@@ -529,16 +529,16 @@ const GraphVisualization = () => {
     // Apply selection from Redux state
     cy.$('.selected').removeClass('selected');
     if (graphData.selectedNode) {
-      cy.$('#' + graphData.selectedNode).addClass('selected');
+      cy.$(`#${  graphData.selectedNode}`).addClass('selected');
     }
     if (graphData.selectedEdge) {
-      cy.$('#' + graphData.selectedEdge).addClass('selected');
+      cy.$(`#${  graphData.selectedEdge}`).addClass('selected');
     }
 
     // Highlight found path
     cy.elements().removeClass('path-node path-edge');
     graphData.foundPath.forEach((id) => {
-      cy.$('#' + id).addClass('path-node path-edge');
+      cy.$(`#${  id}`).addClass('path-node path-edge');
     });
 
     // Update refs for next render
@@ -637,11 +637,11 @@ const GraphVisualization = () => {
       !graphData.pathSourceNode ||
       !graphData.pathTargetNode
     )
-      return;
+      {return;}
 
     const cy = cyRef.current;
-    const sourceNode = cy.$('#' + graphData.pathSourceNode);
-    const targetNode = cy.$('#' + graphData.pathTargetNode);
+    const sourceNode = cy.$(`#${  graphData.pathSourceNode}`);
+    const targetNode = cy.$(`#${  graphData.pathTargetNode}`);
 
     if (sourceNode.empty() || targetNode.empty()) {
       dispatch(setFoundPath([]));
@@ -1026,7 +1026,7 @@ const GraphVisualization = () => {
         </Box>
       )}
       <Snackbar
-        open={!!graphData.errorMessage}
+        open={Boolean(graphData.errorMessage)}
         autoHideDuration={6000}
         onClose={() => dispatch(setErrorMessage(null))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}

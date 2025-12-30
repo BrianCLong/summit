@@ -15,7 +15,7 @@ export async function syncRunbooks(baseDir?: string) {
     const entries = await fs.readdir(d, { withFileTypes: true });
     for (const e of entries) {
       const p = path.join(d, e.name);
-      if (e.isDirectory()) await visit(p);
+      if (e.isDirectory()) {await visit(p);}
       else if (e.name === 'runbook.yaml') {
         const pkgDir = path.dirname(p);
         const parts = pkgDir.split(path.sep);

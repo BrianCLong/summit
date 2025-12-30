@@ -19,11 +19,11 @@ const GraphPane = () => {
   );
 
   useEffect(() => {
-    if (activePane !== 'graph') return;
+    if (activePane !== 'graph') {return;}
     const handler = (e) => {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
-        if (!visibleNodes.length) return;
+        if (!visibleNodes.length) {return;}
         const idx = visibleNodes.findIndex((v) => v.id === selected);
         const nextIdx =
           e.key === 'ArrowDown'

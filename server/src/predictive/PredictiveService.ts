@@ -73,7 +73,7 @@ export class PredictiveService {
     Object.keys(scenarioMetrics.centrality).forEach(k => {
         const base = baselineMetrics.centrality[k] || 0;
         const scen = scenarioMetrics.centrality[k];
-        if (scen !== base) centralityDelta[k] = scen - base;
+        if (scen !== base) {centralityDelta[k] = scen - base;}
     });
 
     return {
@@ -190,11 +190,11 @@ export class PredictiveService {
                     const nInternal = n?.elementId || n?.identity;
                     const mInternal = m?.elementId || m?.identity;
 
-                    if (n && nInternal === startNodeId) sourceId = n.properties.id;
-                    else if (m && mInternal === startNodeId) sourceId = m.properties.id;
+                    if (n && nInternal === startNodeId) {sourceId = n.properties.id;}
+                    else if (m && mInternal === startNodeId) {sourceId = m.properties.id;}
 
-                    if (n && nInternal === endNodeId) targetId = n.properties.id;
-                    else if (m && mInternal === endNodeId) targetId = m.properties.id;
+                    if (n && nInternal === endNodeId) {targetId = n.properties.id;}
+                    else if (m && mInternal === endNodeId) {targetId = m.properties.id;}
                 }
 
                 if (sourceId && targetId) {

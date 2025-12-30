@@ -25,7 +25,7 @@ export class TaskRouter {
     const requiredCaps = task.requiredCapabilities || [];
     let candidates = this.lifecycleManager.getAllAgents().filter(agent => {
       // Must be active
-      if (['offline', 'error', 'terminated'].includes(agent.status)) return false;
+      if (['offline', 'error', 'terminated'].includes(agent.status)) {return false;}
 
       // Must match all capabilities
       // Simplified matching: checking if agent has a capability with the same name
@@ -70,8 +70,8 @@ export class TaskRouter {
     let score = 0;
 
     // Status preference
-    if (agent.status === 'idle') score += 100;
-    else if (agent.status === 'busy') score += 10; // Can still accept if concurrent allowed
+    if (agent.status === 'idle') {score += 100;}
+    else if (agent.status === 'busy') {score += 10;} // Can still accept if concurrent allowed
 
     // Constraint checks (concurrency)
     const maxTasks = agent.constraints.maxConcurrentTasks || 1;

@@ -67,20 +67,20 @@ export class TradeSurveillanceService {
 
     // Check restricted list
     const restrictedAlert = await this.checkRestrictedList(trade);
-    if (restrictedAlert) alerts.push(restrictedAlert);
+    if (restrictedAlert) {alerts.push(restrictedAlert);}
 
     // Check for wash trading
     const washTradingAlert = await this.detectWashTrading(trade);
-    if (washTradingAlert) alerts.push(washTradingAlert);
+    if (washTradingAlert) {alerts.push(washTradingAlert);}
 
     // Check for unusual volume
     const volumeAlert = await this.detectUnusualVolume(trade);
-    if (volumeAlert) alerts.push(volumeAlert);
+    if (volumeAlert) {alerts.push(volumeAlert);}
 
     // Check position limits
     if (this.config.positionLimitCheckEnabled) {
       const positionAlert = await this.checkPositionLimits(trade);
-      if (positionAlert) alerts.push(positionAlert);
+      if (positionAlert) {alerts.push(positionAlert);}
     }
 
     // Store alerts
@@ -116,11 +116,11 @@ export class TradeSurveillanceService {
 
     // Check for layering pattern
     const layeringAlert = await this.detectLayering(order);
-    if (layeringAlert) alerts.push(layeringAlert);
+    if (layeringAlert) {alerts.push(layeringAlert);}
 
     // Check for spoofing
     const spoofingAlert = await this.detectSpoofing(order);
-    if (spoofingAlert) alerts.push(spoofingAlert);
+    if (spoofingAlert) {alerts.push(spoofingAlert);}
 
     for (const alert of alerts) {
       await this.storeAlert(alert);
@@ -350,7 +350,7 @@ export class TradeSurveillanceService {
     const avgVolume = parseFloat(rows[0]?.avg_volume || '0');
     const stddevVolume = parseFloat(rows[0]?.stddev_volume || '0');
 
-    if (avgVolume === 0) return null;
+    if (avgVolume === 0) {return null;}
 
     // Get today's volume
     const { rows: todayRows } = await this.pg.query(
@@ -404,7 +404,7 @@ export class TradeSurveillanceService {
    */
   private async checkPositionLimits(trade: Trade): Promise<SurveillanceAlert | null> {
     const limit = this.positionLimits.get(trade.symbol);
-    if (!limit) return null;
+    if (!limit) {return null;}
 
     // Get current position
     const { rows } = await this.pg.query(
@@ -445,7 +445,7 @@ export class TradeSurveillanceService {
    * Check if symbol is on restricted list
    */
   private async checkRestrictedList(trade: Trade): Promise<SurveillanceAlert | null> {
-    if (!this.restrictedList.has(trade.symbol)) return null;
+    if (!this.restrictedList.has(trade.symbol)) {return null;}
 
     return this.createAlert({
       tenantId: trade.tenantId,

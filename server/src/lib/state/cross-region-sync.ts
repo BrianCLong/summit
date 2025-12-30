@@ -47,7 +47,7 @@ export class CrossRegionSyncService extends EventEmitter {
 
   public async sync(key: string) {
     const crdt = this.crdts.get(key);
-    if (!crdt) throw new Error(`CRDT with key ${key} not found`);
+    if (!crdt) {throw new Error(`CRDT with key ${key} not found`);}
 
     const serializedState = crdt.toJSON();
 
@@ -69,7 +69,7 @@ export class CrossRegionSyncService extends EventEmitter {
     try {
       const { originRegion, key, state, type } = JSON.parse(message);
 
-      if (originRegion === this.regionId) return;
+      if (originRegion === this.regionId) {return;}
 
       const localCRDT = this.crdts.get(key);
       const factory = this.factories.get(key);

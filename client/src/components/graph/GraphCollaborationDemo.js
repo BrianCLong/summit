@@ -113,7 +113,7 @@ const GraphCollaborationDemo = () => {
   });
 
   useEffect(() => {
-    if (!socket.socket) return;
+    if (!socket.socket) {return;}
     const userId = 'demo-user';
     socket.emit('war_room_join', {
       roomId: 'demo-graph-001',

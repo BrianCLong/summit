@@ -175,7 +175,7 @@ export class PredictiveMaintenanceService {
     const sortedPredictions = [...predictions].sort((a, b) => {
       const priorityOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
       const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
-      if (priorityDiff !== 0) return priorityDiff;
+      if (priorityDiff !== 0) {return priorityDiff;}
       return a.predictedFailureDate.getTime() - b.predictedFailureDate.getTime();
     });
 
@@ -261,7 +261,7 @@ export class PredictiveMaintenanceService {
     // Store in history
     const history = this.healthHistory.get(asset.id) || [];
     history.push({ timestamp: new Date(), score });
-    if (history.length > 365) history.shift();
+    if (history.length > 365) {history.shift();}
     this.healthHistory.set(asset.id, history);
 
     return { score: Math.min(score, 100), factors };
@@ -323,7 +323,7 @@ export class PredictiveMaintenanceService {
    */
   async getHealthTrend(assetId: string): Promise<HealthTrend | null> {
     const history = this.healthHistory.get(assetId);
-    if (!history || history.length < 2) return null;
+    if (!history || history.length < 2) {return null;}
 
     const dataPoints = history.map((h, i) => ({
       timestamp: h.timestamp,
@@ -341,10 +341,10 @@ export class PredictiveMaintenanceService {
     const diff = secondAvg - firstAvg;
 
     let trend: HealthTrend['trend'];
-    if (diff > 5) trend = 'IMPROVING';
-    else if (diff > -5) trend = 'STABLE';
-    else if (secondAvg > 30) trend = 'DEGRADING';
-    else trend = 'CRITICAL';
+    if (diff > 5) {trend = 'IMPROVING';}
+    else if (diff > -5) {trend = 'STABLE';}
+    else if (secondAvg > 30) {trend = 'DEGRADING';}
+    else {trend = 'CRITICAL';}
 
     const degradationRate = -diff / (history.length * 0.1);
 
@@ -366,7 +366,7 @@ export class PredictiveMaintenanceService {
     status: MaintenanceSchedule['status']
   ): Promise<MaintenanceSchedule | null> {
     const schedule = this.schedules.get(scheduleId);
-    if (!schedule) return null;
+    if (!schedule) {return null;}
 
     schedule.status = status;
     return schedule;
@@ -457,9 +457,9 @@ export class PredictiveMaintenanceService {
     const criticalTypes = [AssetType.POWER_GRID, AssetType.WATER_SYSTEM, AssetType.BRIDGE];
     const isCritical = criticalTypes.includes(asset.type);
 
-    if (probability > 0.8 || (probability > 0.6 && isCritical)) return 'CRITICAL';
-    if (probability > 0.5 || (probability > 0.3 && isCritical)) return 'HIGH';
-    if (probability > 0.3) return 'MEDIUM';
+    if (probability > 0.8 || (probability > 0.6 && isCritical)) {return 'CRITICAL';}
+    if (probability > 0.5 || (probability > 0.3 && isCritical)) {return 'HIGH';}
+    if (probability > 0.3) {return 'MEDIUM';}
     return 'LOW';
   }
 
@@ -532,13 +532,13 @@ export class PredictiveMaintenanceService {
     for (let d = startDate; d <= maxDate; d.setDate(d.getDate() + 1)) {
       const dateKey = d.toISOString().split('T')[0];
 
-      if (blackoutSet.has(dateKey)) continue;
-      if ((dailyJobs.get(dateKey) || 0) >= constraints.maxDailyJobs) continue;
+      if (blackoutSet.has(dateKey)) {continue;}
+      if ((dailyJobs.get(dateKey) || 0) >= constraints.maxDailyJobs) {continue;}
       if (
         (dailyCosts.get(dateKey) || 0) + prediction.estimatedCost >
         constraints.maxDailyCost
       )
-        continue;
+        {continue;}
 
       return new Date(d);
     }
@@ -552,7 +552,7 @@ export class PredictiveMaintenanceService {
   }
 
   private assessOperatingConditions(readings: SensorReading[]): number {
-    if (readings.length === 0) return 12.5;
+    if (readings.length === 0) {return 12.5;}
 
     const qualityScores = { HIGH: 25, MEDIUM: 18, LOW: 10, UNKNOWN: 5 };
     const avgScore =
@@ -602,7 +602,7 @@ export class PredictiveMaintenanceService {
   }
 
   private predictFutureScore(history: Array<{ timestamp: Date; score: number }>): number {
-    if (history.length < 2) return history[0]?.score || 50;
+    if (history.length < 2) {return history[0]?.score || 50;}
 
     const scores = history.map((h) => h.score);
     const trend =

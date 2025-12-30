@@ -275,7 +275,7 @@ export function useProvenanceEnforcement<T>(
 
   // Provenance summary for display
   const provenanceSummary = useMemo(() => {
-    if (!envelope?.provenance) return null;
+    if (!envelope?.provenance) {return null;}
 
     return {
       source: envelope.provenance.source,
@@ -287,7 +287,7 @@ export function useProvenanceEnforcement<T>(
 
   // Governance summary for display
   const governanceSummary = useMemo(() => {
-    if (!envelope?.governanceVerdict) return null;
+    if (!envelope?.governanceVerdict) {return null;}
 
     return {
       verdict: envelope.governanceVerdict.result,
@@ -328,7 +328,7 @@ export function useGovernanceGate<T>(
   envelope: DataEnvelope<T> | null | undefined
 ) {
   const isAllowed = useMemo(() => {
-    if (!envelope?.governanceVerdict) return false;
+    if (!envelope?.governanceVerdict) {return false;}
     return envelope.governanceVerdict.result === 'ALLOW';
   }, [envelope]);
 
@@ -374,7 +374,7 @@ export function useProvenanceChain<T>(
   envelope: DataEnvelope<T> | null | undefined
 ) {
   const chain = useMemo(() => {
-    if (!envelope?.provenance?.lineage) return [];
+    if (!envelope?.provenance?.lineage) {return [];}
 
     return envelope.provenance.lineage.map((node, index) => ({
       step: index + 1,
@@ -386,7 +386,7 @@ export function useProvenanceChain<T>(
   }, [envelope]);
 
   const sourceInfo = useMemo(() => {
-    if (!envelope?.provenance) return null;
+    if (!envelope?.provenance) {return null;}
 
     return {
       source: envelope.provenance.source,

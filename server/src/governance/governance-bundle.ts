@@ -331,7 +331,7 @@ async function pathExists(target: string): Promise<boolean> {
 function resolveTimestamp(record: Record<string, any>): number | null {
   const candidate =
     record?.timestamp || record?.created_at || record?.createdAt || record?.ts;
-  if (!candidate) return null;
+  if (!candidate) {return null;}
   const date = new Date(candidate);
   return Number.isNaN(date.getTime()) ? null : date.getTime();
 }

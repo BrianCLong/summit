@@ -75,7 +75,7 @@ export default function RoleAssignment({
   }, [open, user, loadUserRoles]);
 
   const handleAssignRole = async () => {
-    if (!selectedRole) return;
+    if (!selectedRole) {return;}
 
     const result = await assignRoleToUser(
       user.id,
@@ -99,7 +99,7 @@ export default function RoleAssignment({
   const availableRoles = roles.filter((r) => !assignedRoleIds.has(r.id));
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
+    if (!dateString) {return null;}
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -284,7 +284,7 @@ export default function RoleAssignment({
                 </Typography>
                 {(() => {
                   const role = roles.find((r) => r.id === selectedRole);
-                  if (!role) return null;
+                  if (!role) {return null;}
                   return (
                     <Stack spacing={1}>
                       <Typography variant="body2">

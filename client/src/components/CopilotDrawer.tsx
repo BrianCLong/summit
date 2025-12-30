@@ -42,7 +42,7 @@ const CopilotDrawer: React.FC = () => {
   }, []);
 
   const send = () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {return;}
     setMessages((m) => [...m, { from: 'user', text: input }]);
     socketRef.current?.emit('copilot:question', input);
     setInput('');

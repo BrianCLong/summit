@@ -3,7 +3,7 @@
  * Endpoints for accessing tracing information and metrics
  */
 
-/* eslint-disable no-undef */
+ 
 // TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization
 
 const express = require('express');

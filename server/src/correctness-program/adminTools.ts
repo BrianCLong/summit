@@ -12,15 +12,15 @@ export class AdminRepairService {
 
   approve(actionId: string, approver: string) {
     const action = this.actions.find((a) => a.id === actionId);
-    if (!action) throw new Error('Action not found');
+    if (!action) {throw new Error('Action not found');}
     action.approvedBy = approver;
     return action;
   }
 
   execute(actionId: string, executor: string) {
     const action = this.actions.find((a) => a.id === actionId);
-    if (!action) throw new Error('Action not found');
-    if (action.approvalRequired && !action.approvedBy) throw new Error('Approval required');
+    if (!action) {throw new Error('Action not found');}
+    if (action.approvalRequired && !action.approvedBy) {throw new Error('Approval required');}
     action.executedBy = executor;
     action.executedAt = new Date();
     return action;

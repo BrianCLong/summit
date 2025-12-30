@@ -146,11 +146,11 @@ class AdaptiveRouter {
    */
   public getReadBackend(tenantId: string, region?: string): Backend | null {
     const healthy = this.backends.filter(b => b.status === 'UP');
-    if (healthy.length === 0) return null;
+    if (healthy.length === 0) {return null;}
 
     if (region) {
       const localReplica = healthy.find(b => b.role === 'REPLICA' && b.region === region);
-      if (localReplica) return localReplica;
+      if (localReplica) {return localReplica;}
     }
 
     // Fallback to Primary

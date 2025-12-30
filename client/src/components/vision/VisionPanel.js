@@ -40,9 +40,9 @@ export default function VisionPanel() {
     setLoading(true);
     setResult(null);
     try {
-      let payload = {};
-      if (file) payload.imageBase64 = await toBase64(file);
-      if (imageUrl) payload.imageUrl = imageUrl;
+      const payload = {};
+      if (file) {payload.imageBase64 = await toBase64(file);}
+      if (imageUrl) {payload.imageUrl = imageUrl;}
       const res = await VisionAPI.analyze(payload);
       setResult(res);
     } catch (e) {
@@ -63,7 +63,7 @@ export default function VisionPanel() {
   };
 
   const downloadJSON = () => {
-    if (!result) return;
+    if (!result) {return;}
     const blob = new Blob([JSON.stringify(result, null, 2)], {
       type: 'application/json',
     });
@@ -77,7 +77,7 @@ export default function VisionPanel() {
 
   useEffect(() => {
     const el = imgRef.current;
-    if (!el) return;
+    if (!el) {return;}
     const onLoad = () => setImgDims({ w: el.clientWidth, h: el.clientHeight });
     el.addEventListener('load', onLoad);
     const ro = new ResizeObserver(() =>

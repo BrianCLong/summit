@@ -165,7 +165,7 @@ export class Neo4jCaseGraphRepository implements ICaseGraphRepository {
   private sanitizeProperties(
     props: Record<string, any>,
   ): Record<string, any> {
-    if (!props) return {};
+    if (!props) {return {};}
 
     const sensitiveKeys = [
       'password',
@@ -187,7 +187,7 @@ export class Neo4jCaseGraphRepository implements ICaseGraphRepository {
 
       // Truncate large string values
       if (typeof value === 'string' && value.length > largeFieldMaxLength) {
-        sanitized[key] = value.substring(0, largeFieldMaxLength) + '...';
+        sanitized[key] = `${value.substring(0, largeFieldMaxLength)  }...`;
       } else if (value !== null && value !== undefined) {
         sanitized[key] = value;
       }

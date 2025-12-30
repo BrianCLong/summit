@@ -384,7 +384,7 @@ export class CrossBorderGateway extends EventEmitter {
     operation: string,
     details: Record<string, unknown>
   ): void {
-    if (!this.config.auditEnabled) return;
+    if (!this.config.auditEnabled) {return;}
 
     const entry: CrossBorderAuditEntry = {
       id: randomUUID(),

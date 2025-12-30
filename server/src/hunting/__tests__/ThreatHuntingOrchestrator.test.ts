@@ -59,7 +59,7 @@ jest.mock('../AutoRemediationHooks', () => {
     executePlan: jest.fn(),
     approvePlan: jest.fn((planId: string, userId: string) => {
       const plan = plans.find(p => p.id === planId);
-      if (!plan) throw new Error('Plan not found');
+      if (!plan) {throw new Error('Plan not found');}
       plan.status = 'approved';
       plan.approvedBy = userId;
       plan.approvedAt = new Date();
@@ -101,7 +101,7 @@ jest.mock('../CypherTemplateEngine', () => {
       const upperQuery = query.toUpperCase();
       let isValid = true;
       let isReadOnly = true;
-      let hasLimit = /\bLIMIT\s+\d+/i.test(query);
+      const hasLimit = /\bLIMIT\s+\d+/i.test(query);
       let complexity = 10; // Default complexity
 
       if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
@@ -110,8 +110,8 @@ jest.mock('../CypherTemplateEngine', () => {
       }
 
       // Simple complexity estimation for mock
-      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
-      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+      if ((query.match(/MATCH/gi) || []).length > 1) {complexity = 20;}
+      if ((query.match(/\*\d*\.\./gi) || []).length > 0) {complexity = 30;}
 
       return { isValid, isReadOnly, hasLimit, complexity };
     }),
@@ -136,7 +136,7 @@ jest.mock('../CypherTemplateEngine.js', () => {
       const upperQuery = query.toUpperCase();
       let isValid = true;
       let isReadOnly = true;
-      let hasLimit = /\bLIMIT\s+\d+/i.test(query);
+      const hasLimit = /\bLIMIT\s+\d+/i.test(query);
       let complexity = 10; // Default complexity
 
       if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
@@ -145,8 +145,8 @@ jest.mock('../CypherTemplateEngine.js', () => {
       }
 
       // Simple complexity estimation for mock
-      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
-      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+      if ((query.match(/MATCH/gi) || []).length > 1) {complexity = 20;}
+      if ((query.match(/\*\d*\.\./gi) || []).length > 0) {complexity = 30;}
 
       return { isValid, isReadOnly, hasLimit, complexity };
     }),

@@ -163,7 +163,7 @@ function createRateLimiter(config: RateLimitConfig) {
  */
 export async function recordFailedLogin(ip: string, email: string): Promise<void> {
   const redis = getRedisClient();
-  if (!redis) return;
+  if (!redis) {return;}
 
   const key = `auth:login:${ip}:${email}`;
 
@@ -190,7 +190,7 @@ export async function recordFailedLogin(ip: string, email: string): Promise<void
  */
 export async function clearFailedLogins(ip: string, email: string): Promise<void> {
   const redis = getRedisClient();
-  if (!redis) return;
+  if (!redis) {return;}
 
   try {
     const windowKey = `auth:login:${ip}:${email}`;

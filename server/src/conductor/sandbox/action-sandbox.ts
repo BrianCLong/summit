@@ -459,7 +459,7 @@ export class ActionSandbox {
     // Execute command or code
     if (request.command) {
       const args = request.args
-        ? ' ' + request.args.map((arg) => `"${arg}"`).join(' ')
+        ? ` ${  request.args.map((arg) => `"${arg}"`).join(' ')}`
         : '';
       script += `exec ${request.command}${args}\n`;
     } else if (request.code) {
@@ -797,7 +797,7 @@ export class ActionSandbox {
    */
   private parseMemoryUsage(memUsage: string): number {
     const match = memUsage.match(/^([\d.]+)([KMGT]?i?B)/);
-    if (!match) return 0;
+    if (!match) {return 0;}
 
     const value = parseFloat(match[1]);
     const unit = match[2];
@@ -824,7 +824,7 @@ export class ActionSandbox {
    */
   private parseNetworkUsage(netIO: string): number {
     const match = netIO.match(/^([\d.]+[KMGT]?i?B) \/ ([\d.]+[KMGT]?i?B)$/);
-    if (!match) return 0;
+    if (!match) {return 0;}
 
     const inbound = match[1];
     const outbound = match[2];
@@ -837,7 +837,7 @@ export class ActionSandbox {
    */
   private parseByteSize(sizeStr: string): number {
     const match = sizeStr.match(/^([\d.]+)([KMGT]?i?B)$/);
-    if (!match) return 0;
+    if (!match) {return 0;}
 
     const value = parseFloat(match[1]);
     const unit = match[2];

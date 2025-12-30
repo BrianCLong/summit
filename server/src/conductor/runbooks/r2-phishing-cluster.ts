@@ -312,7 +312,7 @@ export function createR2PhishingClusterRunbook(): RunbookDAG {
         // Create clusters
         let clusterIdx = 0;
         for (const [domain, inds] of domainGroups.entries()) {
-          if (inds.length < 2) continue; // Skip singleton clusters
+          if (inds.length < 2) {continue;} // Skip singleton clusters
 
           const emailsInCluster = emails.filter((e) =>
             inds.some((ind) => ind.emailId === e.id),

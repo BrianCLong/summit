@@ -420,7 +420,7 @@ export class RTBFAuditService extends EventEmitter {
         operation: this.inferOperation(event),
         strategy: target.strategy,
         dryRun: false, // Record events are only for actual operations
-        cascadeTriggered: !!target.cascadeRules?.length,
+        cascadeTriggered: Boolean(target.cascadeRules?.length),
       },
       dataChanges:
         result.before && result.after
@@ -505,7 +505,7 @@ export class RTBFAuditService extends EventEmitter {
   }
 
   private async flushAuditBuffer(): Promise<void> {
-    if (this.auditBuffer.length === 0) return;
+    if (this.auditBuffer.length === 0) {return;}
 
     const entries = [...this.auditBuffer];
     this.auditBuffer = [];
@@ -528,7 +528,7 @@ export class RTBFAuditService extends EventEmitter {
   private async batchInsertAuditEntries(
     entries: RTBFAuditEntry[],
   ): Promise<void> {
-    if (entries.length === 0) return;
+    if (entries.length === 0) {return;}
 
     const values: string[] = [];
     const params: any[] = [];
@@ -1218,10 +1218,10 @@ export class RTBFAuditService extends EventEmitter {
     reason: string,
   ): 'GDPR' | 'CCPA' | 'PIPEDA' | 'LGPD' | 'OTHER' {
     const lowerReason = reason.toLowerCase();
-    if (lowerReason.includes('gdpr')) return 'GDPR';
-    if (lowerReason.includes('ccpa')) return 'CCPA';
-    if (lowerReason.includes('pipeda')) return 'PIPEDA';
-    if (lowerReason.includes('lgpd')) return 'LGPD';
+    if (lowerReason.includes('gdpr')) {return 'GDPR';}
+    if (lowerReason.includes('ccpa')) {return 'CCPA';}
+    if (lowerReason.includes('pipeda')) {return 'PIPEDA';}
+    if (lowerReason.includes('lgpd')) {return 'LGPD';}
     return 'OTHER';
   }
 
@@ -1243,7 +1243,7 @@ export class RTBFAuditService extends EventEmitter {
   }
 
   private calculateChecksum(data: Record<string, any>): string {
-    if (!data) return '';
+    if (!data) {return '';}
     const str = JSON.stringify(data, Object.keys(data).sort());
     return require('crypto')
       .createHash('sha256')
@@ -1256,13 +1256,13 @@ export class RTBFAuditService extends EventEmitter {
     // Infer data categories from record structure
     const categories: string[] = [];
 
-    if (record.email) categories.push('contact_info');
+    if (record.email) {categories.push('contact_info');}
     if (record.name || record.firstName || record.lastName)
-      categories.push('personal_identity');
-    if (record.phone) categories.push('contact_info');
-    if (record.address) categories.push('location_data');
+      {categories.push('personal_identity');}
+    if (record.phone) {categories.push('contact_info');}
+    if (record.address) {categories.push('location_data');}
     if (record.paymentInfo || record.creditCard)
-      categories.push('financial_data');
+      {categories.push('financial_data');}
 
     return categories.length > 0 ? categories : ['general'];
   }
@@ -1355,7 +1355,7 @@ export class RTBFAuditService extends EventEmitter {
   }
 
   private convertToCSV(auditData: RTBFAuditEntry[]): string {
-    if (auditData.length === 0) return '';
+    if (auditData.length === 0) {return '';}
 
     const headers = [
       'timestamp',

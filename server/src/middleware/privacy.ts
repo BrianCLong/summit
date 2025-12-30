@@ -11,6 +11,6 @@ export function privacyLogger(req: any, res: any, next: any) {
 }
 export function egressGuard(req: any, res: any, next: any) {
   if (/export|download/.test(req.path) && req.query.includePII === 'true')
-    return res.status(403).json({ error: 'PII export blocked' });
+    {return res.status(403).json({ error: 'PII export blocked' });}
   next();
 }

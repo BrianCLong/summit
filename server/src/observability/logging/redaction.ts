@@ -14,7 +14,7 @@ export const SENSITIVE_KEYS = [
 export const MASK = '***REDACTED***';
 
 export function redact(obj: any): any {
-  if (obj === null || obj === undefined) return obj;
+  if (obj === null || obj === undefined) {return obj;}
 
   if (Array.isArray(obj)) {
     return obj.map(redact);

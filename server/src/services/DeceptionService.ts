@@ -222,9 +222,9 @@ export class DeceptionService {
       const uniqueAttackerCount = new Set(attackersList).size;
 
       let severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
-      if (totalHits > 100) severity = 'CRITICAL';
-      else if (totalHits > 50) severity = 'HIGH';
-      else if (totalHits > 10) severity = 'MEDIUM';
+      if (totalHits > 100) {severity = 'CRITICAL';}
+      else if (totalHits > 50) {severity = 'HIGH';}
+      else if (totalHits > 10) {severity = 'MEDIUM';}
 
       return {
         reportId: uuidv4(),

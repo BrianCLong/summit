@@ -303,7 +303,7 @@ export async function withConductorSpan<T>(
  */
 export function getCurrentTraceContext() {
   const span = trace.getActiveSpan();
-  if (!span) return null;
+  if (!span) {return null;}
 
   const spanContext = span.spanContext();
   return {
@@ -320,7 +320,7 @@ export function createTraceLink(
   baseUrl: string = process.env.TEMPO_BASE_URL || 'http://localhost:3000',
 ): string | null {
   const traceContext = getCurrentTraceContext();
-  if (!traceContext) return null;
+  if (!traceContext) {return null;}
 
   return `${baseUrl}/trace/${traceContext.traceId}`;
 }

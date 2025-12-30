@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     const runbook = String(req.query.runbook || '');
     const tenant = String(req.query.tenant || '');
     if (!runbook || !tenant)
-      return res.status(400).json({ error: 'runbook and tenant required' });
+      {return res.status(400).json({ error: 'runbook and tenant required' });}
     const r = await computeBurn(
       runbook,
       tenant,

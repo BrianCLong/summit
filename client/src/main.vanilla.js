@@ -63,9 +63,9 @@ if (root) {
       .then((React) => {
         console.log('✅ React imported:', React);
         testDiv.innerHTML =
-          '<div style="background: rgba(76,175,80,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;"><strong>✅ React import successful!</strong><br/>Version: ' +
-          (React.version || 'Unknown') +
-          '</div>';
+          `<div style="background: rgba(76,175,80,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;"><strong>✅ React import successful!</strong><br/>Version: ${ 
+          React.version || 'Unknown' 
+          }</div>`;
 
         // Test ReactDOM
         return import('react-dom/client');
@@ -107,9 +107,9 @@ if (root) {
       .catch((error) => {
         console.error('❌ React import/render failed:', error);
         testDiv.innerHTML =
-          '<div style="background: rgba(244,67,54,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;"><strong>❌ React test failed:</strong><br/>' +
-          error.message +
-          '</div>';
+          `<div style="background: rgba(244,67,54,0.3); padding: 15px; border-radius: 8px; margin-top: 10px;"><strong>❌ React test failed:</strong><br/>${ 
+          error.message 
+          }</div>`;
       });
   };
 } else {

@@ -22,7 +22,7 @@ export class SignalClassificationService {
     let label = 'Unknown Signal';
     let tags: string[] = [];
     let threatLevel: ClassificationResult['threatLevel'] = 'LOW';
-    let confidence = 0.5 + Math.random() * 0.4; // Random confidence 0.5-0.9
+    const confidence = 0.5 + Math.random() * 0.4; // Random confidence 0.5-0.9
 
     const freqMHz = signal.frequency / 1e6;
 

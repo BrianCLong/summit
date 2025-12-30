@@ -857,8 +857,8 @@ class IntegrationService extends EventEmitter {
         breakdown[connectorId] = { total: 0, active: 0, failed: 0 };
       }
       breakdown[connectorId].total++;
-      if (connection.status === 'ACTIVE') breakdown[connectorId].active++;
-      if (connection.status === 'FAILED') breakdown[connectorId].failed++;
+      if (connection.status === 'ACTIVE') {breakdown[connectorId].active++;}
+      if (connection.status === 'FAILED') {breakdown[connectorId].failed++;}
     }
 
     return breakdown;

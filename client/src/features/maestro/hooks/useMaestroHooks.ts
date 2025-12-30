@@ -73,7 +73,7 @@ export function useLiveLogFeed(
   }, [lines]);
 
   React.useEffect(() => {
-    if (!followTail) return undefined;
+    if (!followTail) {return undefined;}
     const timer = setInterval(() => {
       setCursor((prevCursor) => {
         const nextCursor = Math.min(lines.length, prevCursor + 10);

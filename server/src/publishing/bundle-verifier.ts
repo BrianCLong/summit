@@ -470,7 +470,7 @@ export class BundleVerifier {
     lines.push(`Verified Offline: ${result.verifiedOffline ? 'Yes' : 'No'}`);
     lines.push('');
 
-    lines.push('Overall Status: ' + (result.valid ? '✓ VALID' : '✗ INVALID'));
+    lines.push(`Overall Status: ${  result.valid ? '✓ VALID' : '✗ INVALID'}`);
     lines.push('');
 
     lines.push('Checks:');

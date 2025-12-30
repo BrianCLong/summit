@@ -760,13 +760,13 @@ class VisualizationService extends EventEmitter {
   // Interaction helpers (minimal implementations for tests)
   async selectNode(visualizationId, nodeId, userId) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     viz.selectedNode = nodeId;
     const edges = Array.isArray(viz.data?.edges) ? viz.data.edges : [];
     const neighbors = new Set([nodeId]);
     edges.forEach((e) => {
-      if (e.source === nodeId) neighbors.add(e.target);
-      if (e.target === nodeId) neighbors.add(e.source);
+      if (e.source === nodeId) {neighbors.add(e.target);}
+      if (e.target === nodeId) {neighbors.add(e.source);}
     });
     const highlightedNodes = Array.from(neighbors);
     return { success: true, selectedNode: nodeId, userId, highlightedNodes };
@@ -774,7 +774,7 @@ class VisualizationService extends EventEmitter {
 
   async applyNodeFilter(visualizationId, filter) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     const nodes = Array.isArray(viz.data?.nodes) ? viz.data.nodes : [];
     const visible = nodes.filter((n) => {
       const typeOk = filter.type ? n.type === filter.type : true;
@@ -798,11 +798,11 @@ class VisualizationService extends EventEmitter {
 
   async changeLayout(visualizationId, layoutId, params = {}) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     viz.layout = layoutId;
     viz.configuration = { ...viz.configuration, ...params };
     // Ensure engine exists
-    if (!viz.engine) viz.engine = this.getDefaultEngine(viz.type);
+    if (!viz.engine) {viz.engine = this.getDefaultEngine(viz.type);}
     viz.specification = await this.generateVisualizationSpec(viz);
     return {
       success: true,
@@ -814,7 +814,7 @@ class VisualizationService extends EventEmitter {
 
   async updateViewport(visualizationId, viewport) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     viz.configuration = viz.configuration || {};
     viz.configuration.viewport = {
       zoom: viewport.zoom,
@@ -827,7 +827,7 @@ class VisualizationService extends EventEmitter {
   // Realtime updates and performance helpers (minimal implementations for tests)
   async addNode(visualizationId, node) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     viz.data = viz.data || {};
     viz.data.nodes = Array.isArray(viz.data.nodes) ? viz.data.nodes : [];
     viz.data.nodes.push(node);
@@ -836,7 +836,7 @@ class VisualizationService extends EventEmitter {
 
   async addEdge(visualizationId, edge) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     viz.data = viz.data || {};
     viz.data.edges = Array.isArray(viz.data.edges) ? viz.data.edges : [];
     viz.data.edges.push(edge);
@@ -845,9 +845,9 @@ class VisualizationService extends EventEmitter {
 
   async updateNodeProperties(visualizationId, nodeId, props) {
     const viz = this.visualizations.get(visualizationId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     const node = (viz.data?.nodes || []).find((n) => n.id === nodeId);
-    if (!node) throw new Error('Node not found');
+    if (!node) {throw new Error('Node not found');}
     Object.assign(node, props);
     return { success: true, node };
   }
@@ -898,7 +898,7 @@ class VisualizationService extends EventEmitter {
 
   async shareVisualization(vizId, ownerId, users, options = {}) {
     const viz = this.visualizations.get(vizId);
-    if (!viz) throw new Error('Visualization not found');
+    if (!viz) {throw new Error('Visualization not found');}
     return {
       success: true,
       shareId: uuidv4(),
@@ -1547,7 +1547,7 @@ class VisualizationService extends EventEmitter {
         },
       },
       heatmap: {
-        enabled: !!heatmap,
+        enabled: Boolean(heatmap),
         data: heatmap?.data || [],
         options: {
           radius: 25,
@@ -1627,7 +1627,7 @@ class VisualizationService extends EventEmitter {
       const levels = {};
       nodes.forEach((n) => {
         const lvl = n.level || 0;
-        if (!levels[lvl]) levels[lvl] = [];
+        if (!levels[lvl]) {levels[lvl] = [];}
         levels[lvl].push(n.id);
       });
       hierarchy = { levels };
@@ -1678,7 +1678,7 @@ class VisualizationService extends EventEmitter {
   calculateGridLayout(data, configuration = {}) {
     const nodes = Array.isArray(data) ? data : data?.nodes || [];
     const positions = {};
-    if (nodes.length === 0) return positions;
+    if (nodes.length === 0) {return positions;}
 
     const columns = configuration.columns || Math.ceil(Math.sqrt(nodes.length));
     const cellWidth = configuration.cellWidth || 100;

@@ -498,44 +498,44 @@ export class CostTracker {
   }
 
   private determineSizeTier(value: number): string {
-    if (value < 100) return CostTier.SMALL;
-    if (value < 1000) return CostTier.MEDIUM;
-    if (value < 10000) return CostTier.LARGE;
+    if (value < 100) {return CostTier.SMALL;}
+    if (value < 1000) {return CostTier.MEDIUM;}
+    if (value < 10000) {return CostTier.LARGE;}
     return CostTier.XLARGE;
   }
 
   private determineCpuTier(cpuHours: number): string {
-    if (cpuHours < 1) return CostTier.SMALL;
-    if (cpuHours < 4) return CostTier.MEDIUM;
-    if (cpuHours < 16) return CostTier.LARGE;
+    if (cpuHours < 1) {return CostTier.SMALL;}
+    if (cpuHours < 4) {return CostTier.MEDIUM;}
+    if (cpuHours < 16) {return CostTier.LARGE;}
     return CostTier.XLARGE;
   }
 
   private determineMemoryTier(memoryGBHours: number): string {
-    if (memoryGBHours < 2) return CostTier.SMALL;
-    if (memoryGBHours < 8) return CostTier.MEDIUM;
-    if (memoryGBHours < 32) return CostTier.LARGE;
+    if (memoryGBHours < 2) {return CostTier.SMALL;}
+    if (memoryGBHours < 8) {return CostTier.MEDIUM;}
+    if (memoryGBHours < 32) {return CostTier.LARGE;}
     return CostTier.XLARGE;
   }
 
   private determineStorageTier(gbStored: number): string {
-    if (gbStored < 10) return CostTier.SMALL;
-    if (gbStored < 100) return CostTier.MEDIUM;
-    if (gbStored < 1000) return CostTier.LARGE;
+    if (gbStored < 10) {return CostTier.SMALL;}
+    if (gbStored < 100) {return CostTier.MEDIUM;}
+    if (gbStored < 1000) {return CostTier.LARGE;}
     return CostTier.XLARGE;
   }
 
   private determineBandwidthTier(gbTransferred: number): string {
-    if (gbTransferred < 1) return CostTier.SMALL;
-    if (gbTransferred < 10) return CostTier.MEDIUM;
-    if (gbTransferred < 100) return CostTier.LARGE;
+    if (gbTransferred < 1) {return CostTier.SMALL;}
+    if (gbTransferred < 10) {return CostTier.MEDIUM;}
+    if (gbTransferred < 100) {return CostTier.LARGE;}
     return CostTier.XLARGE;
   }
 
   private determineRequestSizeTier(requestSizeKB: number): string {
-    if (requestSizeKB < 10) return CostTier.SMALL;
-    if (requestSizeKB < 100) return CostTier.MEDIUM;
-    if (requestSizeKB < 1000) return CostTier.LARGE;
+    if (requestSizeKB < 10) {return CostTier.SMALL;}
+    if (requestSizeKB < 100) {return CostTier.MEDIUM;}
+    if (requestSizeKB < 1000) {return CostTier.LARGE;}
     return CostTier.XLARGE;
   }
 }

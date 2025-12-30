@@ -33,7 +33,7 @@ export async function listPlugins(pluginsDir: string): Promise<void> {
 
   console.log('Detected Plugins:');
   console.table(plugins.map(p => {
-      if ('error' in p) return { Directory: p.dir, Status: 'INVALID', Error: p.error };
+      if ('error' in p) {return { Directory: p.dir, Status: 'INVALID', Error: p.error };}
       return {
           Directory: p.dir,
           Name: p.name,

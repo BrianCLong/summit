@@ -59,7 +59,7 @@ export const rlsSessionMiddleware =
       () => {
         res.once('finish', () => {
           const ctx = getRlsContext();
-          if (!ctx?.enabled) return;
+          if (!ctx?.enabled) {return;}
 
           const overheadMs = ctx.overheadMs ?? 0;
           const elapsedMs = performance.now() - start;

@@ -340,7 +340,7 @@ export class DataEnvelopeErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error?: Error }
 > {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   constructor(props: any) {
     super(props);
     this.state = { hasError: false };

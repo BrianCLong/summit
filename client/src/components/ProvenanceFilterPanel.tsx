@@ -83,7 +83,7 @@ export default function ProvenanceFilterPanel({
   const [exportProv] = useMutation(EXPORT_MUT);
 
   const buildCurl = (scope?: 'incident' | 'investigation', id?: string) => {
-    if (!scope || !id) return '';
+    if (!scope || !id) {return '';}
     const opName =
       scope === 'incident' ? 'ProvByIncident' : 'ProvByInvestigation';
     const field =
@@ -92,12 +92,12 @@ export default function ProvenanceFilterPanel({
         : 'provenanceByInvestigation';
     const query = `query ${opName}($id: ID!, $filter: ProvenanceFilter, $first: Int, $offset: Int) { ${field}(${scope}Id: $id, filter: $filter, first: $first, offset: $offset) { id kind createdAt metadata } }`;
     const filter: any = {};
-    if (codes.length) filter.reasonCodeIn = codes;
-    if (kinds.length) filter.kindIn = kinds;
-    if (sources.length) filter.sourceIn = sources;
-    if (from) filter.from = from;
-    if (to) filter.to = to;
-    if (contains && contains.trim().length) filter.contains = contains.trim();
+    if (codes.length) {filter.reasonCodeIn = codes;}
+    if (kinds.length) {filter.kindIn = kinds;}
+    if (sources.length) {filter.sourceIn = sources;}
+    if (from) {filter.from = from;}
+    if (to) {filter.to = to;}
+    if (contains && contains.trim().length) {filter.contains = contains.trim();}
     const body = { query, variables: { id, filter, first: 50, offset: 0 } };
     const payload = JSON.stringify(body);
     const endpoint = '/graphql';
@@ -218,26 +218,26 @@ export default function ProvenanceFilterPanel({
           <>
             <button
               className="border px-3 py-1"
-              disabled={!!exporting}
+              disabled={Boolean(exporting)}
               onClick={async () => {
-                if (!scope || !id) return;
+                if (!scope || !id) {return;}
                 setExporting('json');
                 try {
                   const filter: any = {};
-                  if (codes.length) filter.reasonCodeIn = codes;
-                  if (kinds.length) filter.kindIn = kinds;
-                  if (sources.length) filter.sourceIn = sources;
-                  if (from) filter.from = from;
-                  if (to) filter.to = to;
+                  if (codes.length) {filter.reasonCodeIn = codes;}
+                  if (kinds.length) {filter.kindIn = kinds;}
+                  if (sources.length) {filter.sourceIn = sources;}
+                  if (from) {filter.from = from;}
+                  if (to) {filter.to = to;}
                   if (contains && contains.trim().length)
-                    filter.contains = contains.trim();
+                    {filter.contains = contains.trim();}
                   const variables: any = { format: 'json' };
-                  if (scope === 'incident') variables.incidentId = id;
-                  else variables.investigationId = id;
-                  if (Object.keys(filter).length) variables.filter = filter;
+                  if (scope === 'incident') {variables.incidentId = id;}
+                  else {variables.investigationId = id;}
+                  if (Object.keys(filter).length) {variables.filter = filter;}
                   const res = await exportProv({ variables });
                   const url = res.data?.exportProvenance?.url;
-                  if (url) window.open(url, '_blank', 'noopener');
+                  if (url) {window.open(url, '_blank', 'noopener');}
                 } finally {
                   setExporting(null);
                 }
@@ -248,26 +248,26 @@ export default function ProvenanceFilterPanel({
             </button>
             <button
               className="border px-3 py-1"
-              disabled={!!exporting}
+              disabled={Boolean(exporting)}
               onClick={async () => {
-                if (!scope || !id) return;
+                if (!scope || !id) {return;}
                 setExporting('csv');
                 try {
                   const filter: any = {};
-                  if (codes.length) filter.reasonCodeIn = codes;
-                  if (kinds.length) filter.kindIn = kinds;
-                  if (sources.length) filter.sourceIn = sources;
-                  if (from) filter.from = from;
-                  if (to) filter.to = to;
+                  if (codes.length) {filter.reasonCodeIn = codes;}
+                  if (kinds.length) {filter.kindIn = kinds;}
+                  if (sources.length) {filter.sourceIn = sources;}
+                  if (from) {filter.from = from;}
+                  if (to) {filter.to = to;}
                   if (contains && contains.trim().length)
-                    filter.contains = contains.trim();
+                    {filter.contains = contains.trim();}
                   const variables: any = { format: 'csv' };
-                  if (scope === 'incident') variables.incidentId = id;
-                  else variables.investigationId = id;
-                  if (Object.keys(filter).length) variables.filter = filter;
+                  if (scope === 'incident') {variables.incidentId = id;}
+                  else {variables.investigationId = id;}
+                  if (Object.keys(filter).length) {variables.filter = filter;}
                   const res = await exportProv({ variables });
                   const url = res.data?.exportProvenance?.url;
-                  if (url) window.open(url, '_blank', 'noopener');
+                  if (url) {window.open(url, '_blank', 'noopener');}
                 } finally {
                   setExporting(null);
                 }
@@ -300,7 +300,7 @@ function CopyCurlButton({
   copied: boolean;
   busy: boolean;
 }) {
-  if (!scope || !id) return null;
+  if (!scope || !id) {return null;}
   return (
     <button
       className="border px-3 py-1"

@@ -8,7 +8,7 @@ const SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET || '';
 function verifySlackSignature(req: any, body: string) {
   const ts = req.headers['x-slack-request-timestamp'];
   const sig = req.headers['x-slack-signature'] as string;
-  if (!ts || !sig) return false;
+  if (!ts || !sig) {return false;}
   const base = `v0:${ts}:${body}`;
   const hmac = crypto
     .createHmac('sha256', SIGNING_SECRET)
@@ -27,14 +27,14 @@ router.post(
   '/webhooks/slack',
   express.raw({ type: '*/*', limit: '1mb' }),
   async (req: Request, res: Response) => {
-    if (!SIGNING_SECRET) return res.status(503).send('slack disabled');
+    if (!SIGNING_SECRET) {return res.status(503).send('slack disabled');}
     const raw = Buffer.isBuffer((req as any).body)
       ? (req as any).body.toString()
       : (req as any).rawBody || '';
     // Preserve rawBody for downstream logic
     (req as any).rawBody = raw;
     if (!verifySlackSignature(req as any, raw))
-      return res.status(401).send('bad sig');
+      {return res.status(401).send('bad sig');}
 
     // Parse JSON payload if present
     let payload: any = {};

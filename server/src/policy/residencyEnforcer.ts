@@ -139,7 +139,7 @@ export class ResidencyPolicyEnforcer {
           operation: context.operation,
           region: context.region,
           target_region: context.targetRegion || 'same',
-          has_export_token: !!context.hasExportToken,
+          has_export_token: Boolean(context.hasExportToken),
           residency_class: tenantContext.residency.class,
         });
 
@@ -567,7 +567,7 @@ export class ResidencyPolicyEnforcer {
     context: ResidencyPolicyContext,
     tenantContext: TenantContext,
   ): string {
-    return `${this.cachePrefix}:${context.tenantId}:${context.operation}:${context.region}:${context.targetRegion || 'same'}:${tenantContext.residency.class}:${!!context.hasExportToken}`;
+    return `${this.cachePrefix}:${context.tenantId}:${context.operation}:${context.region}:${context.targetRegion || 'same'}:${tenantContext.residency.class}:${Boolean(context.hasExportToken)}`;
   }
 
   private async getFromCache(
@@ -608,7 +608,7 @@ export class ResidencyPolicyEnforcer {
       decision: decision.allow ? 'allow' : 'deny',
       reason: decision.reason,
       dataClassifications: context.dataClassifications,
-      hasExportToken: !!context.hasExportToken,
+      hasExportToken: Boolean(context.hasExportToken),
       timestamp: new Date(),
       ipAddress: context.metadata?.clientIP,
       userAgent: context.metadata?.userAgent,

@@ -127,16 +127,16 @@ export const pricingReadLatencyMs = new client.Histogram({
 
 // Helper functions to work with confidence buckets
 export function getConfidenceBucket(confidence: number): string {
-  if (confidence >= 0.9) return 'high';
-  if (confidence >= 0.7) return 'medium';
-  if (confidence >= 0.5) return 'low';
+  if (confidence >= 0.9) {return 'high';}
+  if (confidence >= 0.7) {return 'medium';}
+  if (confidence >= 0.5) {return 'low';}
   return 'very_low';
 }
 
 export function getCostBucket(cost: number): string {
-  if (cost >= 5) return 'expensive';
-  if (cost >= 1) return 'moderate';
-  if (cost >= 0.1) return 'cheap';
+  if (cost >= 5) {return 'expensive';}
+  if (cost >= 1) {return 'moderate';}
+  if (cost >= 0.1) {return 'cheap';}
   return 'free';
 }
 

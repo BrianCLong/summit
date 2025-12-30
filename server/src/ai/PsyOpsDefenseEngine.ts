@@ -597,10 +597,10 @@ export class PsyOpsDefenseEngine extends EventEmitter {
     threatTypes: string[],
     vulnerabilities: string[],
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (score > 0.8 && vulnerabilities.length > 2) return 'CRITICAL';
+    if (score > 0.8 && vulnerabilities.length > 2) {return 'CRITICAL';}
     if (score > 0.7 || threatTypes.includes('EMOTIONAL_MANIPULATION'))
-      return 'HIGH';
-    if (score > 0.5) return 'MEDIUM';
+      {return 'HIGH';}
+    if (score > 0.5) {return 'MEDIUM';}
     return 'LOW';
   }
 
@@ -664,22 +664,22 @@ export class PsyOpsDefenseEngine extends EventEmitter {
   private identifyVulnerabilities(profile: CognitiveProfile): string[] {
     const vulnerabilities: string[] = [];
     if (profile.susceptibilityFactors.emotionalVolatility > 0.7)
-      vulnerabilities.push('emotional_volatility');
+      {vulnerabilities.push('emotional_volatility');}
     if (profile.susceptibilityFactors.confirmationBias > 0.7)
-      vulnerabilities.push('confirmation_bias');
+      {vulnerabilities.push('confirmation_bias');}
     if (profile.susceptibilityFactors.authorityDependence > 0.7)
-      vulnerabilities.push('authority_dependence');
+      {vulnerabilities.push('authority_dependence');}
     return vulnerabilities;
   }
 
   private identifyStrengths(profile: CognitiveProfile): string[] {
     const strengths: string[] = [];
     if (profile.protectiveFactors.criticalThinking > 0.7)
-      strengths.push('critical_thinking');
+      {strengths.push('critical_thinking');}
     if (profile.protectiveFactors.sourceVerification > 0.7)
-      strengths.push('source_verification');
+      {strengths.push('source_verification');}
     if (profile.protectiveFactors.emotionalRegulation > 0.7)
-      strengths.push('emotional_regulation');
+      {strengths.push('emotional_regulation');}
     return strengths;
   }
 

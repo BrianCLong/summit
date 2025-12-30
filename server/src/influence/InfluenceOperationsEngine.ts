@@ -31,7 +31,7 @@ export class InfluenceOperationsEngine {
 
     // Group posts by actor
     for (const post of posts) {
-        if (!postsByActor.has(post.authorId)) postsByActor.set(post.authorId, []);
+        if (!postsByActor.has(post.authorId)) {postsByActor.set(post.authorId, []);}
         postsByActor.get(post.authorId)!.push(post);
     }
 
@@ -87,7 +87,7 @@ export class InfluenceOperationsEngine {
             const involvedActors = new Set<string>();
             cluster.exemplarPosts.forEach(postId => {
                 const post = posts.find(p => p.id === postId);
-                if (post) involvedActors.add(post.authorId);
+                if (post) {involvedActors.add(post.authorId);}
             });
 
             campaigns.push({

@@ -95,7 +95,7 @@ function GraphExplorer() {
   // Initialize WebSocket connection (if token exists)
   useEffect(() => {
     const s = getSocket();
-    if (s) setSocket(s);
+    if (s) {setSocket(s);}
     return () => {
       // Keep socket for app-wide reuse; no disconnect here
     };

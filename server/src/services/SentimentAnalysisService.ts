@@ -92,9 +92,9 @@ export class SentimentAnalysisService {
    */
   public detectLanguage(text: string): string {
       // Very naive check for demo purposes
-      if (/[а-яА-Я]/.test(text)) return 'ru';
-      if (/[\u0600-\u06FF]/.test(text)) return 'ar';
-      if (/[\u4e00-\u9FFF]/.test(text)) return 'zh';
+      if (/[а-яА-Я]/.test(text)) {return 'ru';}
+      if (/[\u0600-\u06FF]/.test(text)) {return 'ar';}
+      if (/[\u4e00-\u9FFF]/.test(text)) {return 'zh';}
       return 'en';
   }
 
@@ -239,8 +239,8 @@ export class SentimentAnalysisService {
           return { topic, stance: 'neutral', confidence: 0 };
       }
 
-      if (sentiment.score > 0.2) return { topic, stance: 'pro', confidence: sentiment.confidence };
-      if (sentiment.score < -0.2) return { topic, stance: 'anti', confidence: sentiment.confidence };
+      if (sentiment.score > 0.2) {return { topic, stance: 'pro', confidence: sentiment.confidence };}
+      if (sentiment.score < -0.2) {return { topic, stance: 'anti', confidence: sentiment.confidence };}
 
       return { topic, stance: 'neutral', confidence: sentiment.confidence };
   }

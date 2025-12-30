@@ -66,7 +66,7 @@ export default function UserForm({
   onSubmit,
   loading = false,
 }: UserFormProps) {
-  const isEditing = !!user;
+  const isEditing = Boolean(user);
 
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
@@ -166,7 +166,7 @@ export default function UserForm({
               label="First Name"
               value={formData.firstName}
               onChange={handleChange('firstName')}
-              error={!!errors.firstName}
+              error={Boolean(errors.firstName)}
               helperText={errors.firstName}
               fullWidth
               required
@@ -175,7 +175,7 @@ export default function UserForm({
               label="Last Name"
               value={formData.lastName}
               onChange={handleChange('lastName')}
-              error={!!errors.lastName}
+              error={Boolean(errors.lastName)}
               helperText={errors.lastName}
               fullWidth
               required
@@ -187,7 +187,7 @@ export default function UserForm({
             type="email"
             value={formData.email}
             onChange={handleChange('email')}
-            error={!!errors.email}
+            error={Boolean(errors.email)}
             helperText={errors.email}
             fullWidth
             required
@@ -199,7 +199,7 @@ export default function UserForm({
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={handleChange('password')}
-              error={!!errors.password}
+              error={Boolean(errors.password)}
               helperText={errors.password || 'Minimum 12 characters'}
               fullWidth
               required

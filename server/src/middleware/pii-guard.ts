@@ -33,7 +33,7 @@ const flattenStrings = (
   path: string[] = [],
   results: Array<{ path: string; value: string }> = [],
 ): Array<{ path: string; value: string }> => {
-  if (value === null || value === undefined) return results;
+  if (value === null || value === undefined) {return results;}
 
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
     results.push({ path: path.join('.'), value: String(value) });
@@ -57,11 +57,11 @@ const flattenStrings = (
 };
 
 const summarizePayload = (payload: unknown, maximumPreviewBytes: number): string | undefined => {
-  if (payload === undefined) return undefined;
+  if (payload === undefined) {return undefined;}
 
   const serialized = JSON.stringify(payload);
-  if (!serialized) return undefined;
-  if (serialized.length <= maximumPreviewBytes) return serialized;
+  if (!serialized) {return undefined;}
+  if (serialized.length <= maximumPreviewBytes) {return serialized;}
   return `${serialized.slice(0, maximumPreviewBytes)}…[truncated]`;
 };
 
@@ -69,7 +69,7 @@ const redactPayloadForLogging = async (
   payload: unknown,
   tenantId: string,
 ): Promise<any | undefined> => {
-  if (!payload || typeof payload !== 'object') return undefined;
+  if (!payload || typeof payload !== 'object') {return undefined;}
   try {
     const policy = redactionService.createRedactionPolicy(['pii', 'financial', 'sensitive']);
     return await redactionService.redactObject(payload, policy, tenantId, { source: 'pii-guard' });
@@ -87,7 +87,7 @@ const detectPii = async (
   const findings: PiiFinding[] = [];
 
   for (const target of targets) {
-    if (!target.value) continue;
+    if (!target.value) {continue;}
     const result = await recognizer.recognize({
       value: target.value,
       recordId: target.path,

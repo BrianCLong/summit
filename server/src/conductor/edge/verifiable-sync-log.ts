@@ -276,10 +276,10 @@ export class VerifiableSyncLog {
       };
 
       const errors: string[] = [];
-      if (!checks.hashChainValid) errors.push('Hash chain broken');
-      if (!checks.signatureValid) errors.push('Invalid signature');
-      if (!checks.merkleValid) errors.push('Merkle proof invalid');
-      if (!checks.timestampValid) errors.push('Timestamp invalid');
+      if (!checks.hashChainValid) {errors.push('Hash chain broken');}
+      if (!checks.signatureValid) {errors.push('Invalid signature');}
+      if (!checks.merkleValid) {errors.push('Merkle proof invalid');}
+      if (!checks.timestampValid) {errors.push('Timestamp invalid');}
 
       const valid = Object.values(checks).every((check) => check);
 
@@ -345,9 +345,9 @@ export class VerifiableSyncLog {
       };
 
       const errors: string[] = [];
-      if (!merkleValid) errors.push('Merkle root mismatch');
-      if (!signatureValid) errors.push('Batch signature invalid');
-      if (!timestampValid) errors.push('Batch timestamp invalid');
+      if (!merkleValid) {errors.push('Merkle root mismatch');}
+      if (!signatureValid) {errors.push('Batch signature invalid');}
+      if (!timestampValid) {errors.push('Batch timestamp invalid');}
 
       const valid = Object.values(checks).every((check) => check);
 
@@ -568,11 +568,11 @@ export class VerifiableSyncLog {
   private async verifyMerkleProof(entry: SyncLogEntry): Promise<boolean> {
     // Merkle verification would require the full batch context
     // For now, accept merkle root presence as valid
-    return !!entry.merkleRoot;
+    return Boolean(entry.merkleRoot);
   }
 
   private async verifyTimestamp(entry: SyncLogEntry): Promise<boolean> {
-    if (!entry.tsaTimestamp) return true;
+    if (!entry.tsaTimestamp) {return true;}
 
     try {
       const entryHash = this.computeEntryHash(entry);
@@ -613,7 +613,7 @@ export class VerifiableSyncLog {
   }
 
   private async verifyBatchTimestamp(batch: SyncBatch): Promise<boolean> {
-    if (!batch.tsaTimestamp) return true;
+    if (!batch.tsaTimestamp) {return true;}
 
     try {
       const notarized = {
@@ -639,7 +639,7 @@ export class VerifiableSyncLog {
       [entryId],
     );
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
 
     const row = result.rows[0];
     return {
@@ -665,7 +665,7 @@ export class VerifiableSyncLog {
         [batchId],
       );
 
-      if (result.rows.length === 0) return null;
+      if (result.rows.length === 0) {return null;}
 
       const row = result.rows[0];
       return {

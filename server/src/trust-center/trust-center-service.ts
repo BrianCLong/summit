@@ -78,7 +78,7 @@ export class TrustCenterService {
   }
 
   private normalizeRole(role?: string | Role): Role | undefined {
-    if (!role) return undefined;
+    if (!role) {return undefined;}
     const lowerRole = role.toLowerCase();
     return Object.values(Role).includes(lowerRole as Role)
       ? (lowerRole as Role)
@@ -86,10 +86,10 @@ export class TrustCenterService {
   }
 
   private allowSensitiveData(actor?: AuditExportActor): boolean {
-    if (!actor) return false;
+    if (!actor) {return false;}
     const normalizedRole = this.normalizeRole(actor.role);
     if (normalizedRole === Role.ADMIN || normalizedRole === Role.SUPER_ADMIN)
-      return true;
+      {return true;}
     return (
       actor.permissions?.includes(Permission.SYSTEM_ADMIN) ||
       actor.permissions?.includes(Permission.AUDIT_EXPORT) ||
@@ -98,9 +98,9 @@ export class TrustCenterService {
   }
 
   private pickFields(row: any, allowed: string[]): any {
-    if (!row) return row;
+    if (!row) {return row;}
     return allowed.reduce((acc: any, key) => {
-      if (key in row) acc[key] = row[key];
+      if (key in row) {acc[key] = row[key];}
       return acc;
     }, {} as any);
   }
@@ -694,7 +694,7 @@ export class TrustCenterService {
     reportId: string,
   ): Promise<void> {
     // Optional 3rd-party timestamping (RFC 3161)
-    if (!this.timestampService) return;
+    if (!this.timestampService) {return;}
 
     try {
       const hash = createHash('sha256').update(content).digest();
@@ -907,12 +907,12 @@ export class TrustCenterService {
     const policyDenials =
       auditSections.policyDecisions?.filter((d: any) => d.decision === 'deny')
         .length || 0;
-    if (policyDenials > 10) riskScore += 2;
-    else if (policyDenials > 5) riskScore += 1;
+    if (policyDenials > 10) {riskScore += 2;}
+    else if (policyDenials > 5) {riskScore += 1;}
 
     // Check evidence integrity
     const evidenceCount = auditSections.evidenceArtifacts?.length || 0;
-    if (evidenceCount < 10) riskScore += 1;
+    if (evidenceCount < 10) {riskScore += 1;}
 
     // Check compliance status
     const nonCompliantFrameworks = complianceResults.filter(
@@ -920,8 +920,8 @@ export class TrustCenterService {
     ).length;
     riskScore += nonCompliantFrameworks;
 
-    if (riskScore >= 4) return 'high';
-    if (riskScore >= 2) return 'medium';
+    if (riskScore >= 4) {return 'high';}
+    if (riskScore >= 2) {return 'medium';}
     return 'low';
   }
 

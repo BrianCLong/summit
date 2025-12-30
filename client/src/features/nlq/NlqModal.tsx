@@ -28,7 +28,7 @@ export function NlqModal() {
         variables: { prompt: nl, tenantId, manualCypher: manual || null },
       });
       const p: NLPreview | undefined = data?.previewNLQuery;
-      if (!p) return;
+      if (!p) {return;}
       setCypher(p.cypher || '');
       setRows(p.estimatedRows ?? null);
       setCost(p.estimatedCost ?? null);

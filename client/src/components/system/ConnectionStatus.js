@@ -92,7 +92,7 @@ const ConnectionStatus = () => {
   };
 
   const formatUptime = (uptime) => {
-    if (!uptime) return 'Unknown';
+    if (!uptime) {return 'Unknown';}
     const seconds = parseInt(uptime.replace(' seconds', ''));
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);

@@ -305,7 +305,7 @@ class WebSocketService {
     // Investigation chat handlers
     socket.on('join_investigation_chat', (data) => {
       const { investigationId, userId, userName } = data || {};
-      if (!investigationId) return;
+      if (!investigationId) {return;}
       socket.join(`chat:${investigationId}`);
       this.io.to(`chat:${investigationId}`).emit('user_presence', {
         userId: userId || socket.userId,
@@ -317,7 +317,7 @@ class WebSocketService {
     socket.on('send_chat_message', async (message) => {
       try {
         const { investigationId, content } = message || {};
-        if (!investigationId || !content) return;
+        if (!investigationId || !content) {return;}
         const { getPostgresPool } = require('../config/database');
         const pool = getPostgresPool();
         const result = await pool.query(
@@ -349,18 +349,18 @@ class WebSocketService {
 
     socket.on('user_typing', (data) => {
       const { investigationId, userId, userName, isTyping } = data || {};
-      if (!investigationId) return;
+      if (!investigationId) {return;}
       socket.to(`chat:${investigationId}`).emit('user_typing', {
         userId: userId || socket.userId,
         userName: userName || socket.user?.firstName || 'User',
-        isTyping: !!isTyping,
+        isTyping: Boolean(isTyping),
       });
     });
 
     socket.on('delete_chat_message', async (data) => {
       try {
         const { investigationId, messageId } = data || {};
-        if (!investigationId || !messageId) return;
+        if (!investigationId || !messageId) {return;}
         const { getPostgresPool } = require('../config/database');
         const pool = getPostgresPool();
         await pool.query(
@@ -385,7 +385,7 @@ class WebSocketService {
     socket.on('edit_chat_message', async (data) => {
       try {
         const { investigationId, messageId, newContent } = data || {};
-        if (!investigationId || !messageId || !newContent) return;
+        if (!investigationId || !messageId || !newContent) {return;}
         const { getPostgresPool } = require('../config/database');
         const pool = getPostgresPool();
         await pool.query(
@@ -558,7 +558,7 @@ class WebSocketService {
     );
 
     recorded.forEach((entry) => {
-      if (socket.processedOps.has(entry.opId)) return;
+      if (socket.processedOps.has(entry.opId)) {return;}
       socket.processedOps.add(entry.opId);
       socket.emit('op:ack', {
         opId: entry.opId,
@@ -592,7 +592,7 @@ class WebSocketService {
   handleCollabUndo(socket, data = {}) {
     const session = this.userSessions.get(socket.id);
     const investigationId = data.investigationId || session?.currentInvestigation;
-    if (!investigationId) return;
+    if (!investigationId) {return;}
 
     const result = operationLog.undo(investigationId, socket.id, session?.userId);
     if (!result) {
@@ -611,7 +611,7 @@ class WebSocketService {
   handleCollabRedo(socket, data = {}) {
     const session = this.userSessions.get(socket.id);
     const investigationId = data.investigationId || session?.currentInvestigation;
-    if (!investigationId) return;
+    if (!investigationId) {return;}
 
     const result = operationLog.redo(investigationId, socket.id, session?.userId);
     if (!result) {
@@ -679,7 +679,7 @@ class WebSocketService {
     const { investigationId } = data;
     const session = this.userSessions.get(socket.id);
 
-    if (!investigationId) return;
+    if (!investigationId) {return;}
 
     socket.leave(`investigation:${investigationId}`);
     session.currentInvestigation = null;
@@ -1151,7 +1151,7 @@ class WebSocketService {
 
   handleDisconnection(socket, reason) {
     const session = this.userSessions.get(socket.id);
-    if (!session) return;
+    if (!session) {return;}
 
     const userId = session.userId;
 

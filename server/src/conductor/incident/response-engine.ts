@@ -346,7 +346,7 @@ export class IncidentResponseEngine extends EventEmitter {
    */
   private async isolateUser(incident: IncidentRecord): Promise<void> {
     const userId = incident.context.metadata.userId;
-    if (!userId) return;
+    if (!userId) {return;}
 
     // Revoke user tokens
     await this.redis.setex(
@@ -374,7 +374,7 @@ export class IncidentResponseEngine extends EventEmitter {
    */
   private async isolateService(incident: IncidentRecord): Promise<void> {
     const serviceName = incident.context.metadata.service;
-    if (!serviceName) return;
+    if (!serviceName) {return;}
 
     // Open circuit breaker for service
     const circuitBreaker =
@@ -673,7 +673,7 @@ export class IncidentResponseEngine extends EventEmitter {
   private findActionById(actionId: string): ResponseAction | undefined {
     for (const playbook of this.playbooks.values()) {
       const action = playbook.actions.find((a) => a.id === actionId);
-      if (action) return action;
+      if (action) {return action;}
     }
     return undefined;
   }

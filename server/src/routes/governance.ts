@@ -16,13 +16,13 @@ router.get('/schemas', ensureAuthenticated, (req: AuthenticatedRequest, res: Res
 
 router.get('/schemas/latest', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
   const schema = registry.getLatestSchema();
-  if (!schema) return res.status(404).json({ error: 'No active schema' });
+  if (!schema) {return res.status(404).json({ error: 'No active schema' });}
   res.json(schema);
 });
 
 router.get('/schemas/:id', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
   const schema = registry.getSchemaById(req.params.id);
-  if (!schema) return res.status(404).json({ error: 'Schema not found' });
+  if (!schema) {return res.status(404).json({ error: 'Schema not found' });}
   res.json(schema);
 });
 
@@ -60,7 +60,7 @@ router.post('/changes', ensureAuthenticated, (req: AuthenticatedRequest, res: Re
 
 router.get('/changes/:id', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
     const cr = workflow.getChangeRequest(req.params.id);
-    if (!cr) return res.status(404).json({ error: 'Change Request not found' });
+    if (!cr) {return res.status(404).json({ error: 'Change Request not found' });}
     res.json(cr);
 });
 

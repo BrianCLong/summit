@@ -61,7 +61,7 @@ interface Investigation {
   entityCount?: number;
   relationshipCount?: number;
   tags?: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   metadata?: any;
 }
 
@@ -77,7 +77,7 @@ function InvestigationManager({
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingInvestigation, setEditingInvestigation] =
     useState<Investigation | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [filter, setFilter] = useState<any>({
     status: '',
     priority: '',
@@ -101,7 +101,7 @@ function InvestigationManager({
 
   const investigations = data?.investigations || [];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const handleCreateInvestigation = async (formData: any) => {
     try {
       const result = await createInvestigation({
@@ -129,7 +129,7 @@ function InvestigationManager({
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const handleUpdateInvestigation = async (id: string, formData: any) => {
     try {
       await updateInvestigation({
@@ -187,7 +187,7 @@ function InvestigationManager({
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const InvestigationForm = ({ investigation, onSubmit, onCancel }: any) => {
     const [formData, setFormData] = useState({
       name: investigation?.name || '',
@@ -546,7 +546,7 @@ function InvestigationManager({
             <select
               value={filter.status}
               onChange={(e) =>
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 setFilter((prev: any) => ({ ...prev, status: e.target.value }))
               }
               style={{
@@ -579,7 +579,7 @@ function InvestigationManager({
             <select
               value={filter.priority}
               onChange={(e) =>
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 setFilter((prev: any) => ({ ...prev, priority: e.target.value }))
               }
               style={{
@@ -613,7 +613,7 @@ function InvestigationManager({
               type="text"
               value={filter.assignedTo}
               onChange={(e) =>
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 setFilter((prev: any) => ({ ...prev, assignedTo: e.target.value }))
               }
               placeholder="Filter by assignee..."
@@ -641,7 +641,7 @@ function InvestigationManager({
       {editingInvestigation && (
         <InvestigationForm
           investigation={editingInvestigation}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           onSubmit={(formData: any) =>
             handleUpdateInvestigation(editingInvestigation.id, formData)
           }
@@ -792,7 +792,7 @@ function InvestigationManager({
                           padding: '2px 6px',
                           borderRadius: '3px',
                           backgroundColor:
-                            getStatusColor(investigation.status) + '20',
+                            `${getStatusColor(investigation.status)  }20`,
                           color: getStatusColor(investigation.status),
                           textTransform: 'uppercase',
                           fontWeight: '600',
@@ -807,7 +807,7 @@ function InvestigationManager({
                           padding: '2px 6px',
                           borderRadius: '3px',
                           backgroundColor:
-                            getPriorityColor(investigation.priority) + '20',
+                            `${getPriorityColor(investigation.priority)  }20`,
                           color: getPriorityColor(investigation.priority),
                           textTransform: 'uppercase',
                           fontWeight: '600',

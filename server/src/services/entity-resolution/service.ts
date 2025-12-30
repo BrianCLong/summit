@@ -82,9 +82,9 @@ export class EntityResolutionService {
   }
 
   private makeDecision(score: number): DecisionType {
-    if (score >= this.config.thresholds.merge) return 'MERGE';
-    if (score >= this.config.thresholds.link) return 'LINK';
-    if (score >= this.config.thresholds.review) return 'REVIEW';
+    if (score >= this.config.thresholds.merge) {return 'MERGE';}
+    if (score >= this.config.thresholds.link) {return 'LINK';}
+    if (score >= this.config.thresholds.review) {return 'REVIEW';}
     return 'NO_MATCH';
   }
 

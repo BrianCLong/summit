@@ -32,14 +32,14 @@ describe('PredictiveService Integration (Mocked Driver)', () => {
             records: [
                 {
                     get: (key: string) => {
-                        if (key === 'n') return { properties: { id: 'node1' }, labels: ['Person'], elementId: 'n1' };
-                        if (key === 'm') return { properties: { id: 'node2' }, labels: ['Person'], elementId: 'n2' };
-                        if (key === 'r') return {
+                        if (key === 'n') {return { properties: { id: 'node1' }, labels: ['Person'], elementId: 'n1' };}
+                        if (key === 'm') {return { properties: { id: 'node2' }, labels: ['Person'], elementId: 'n2' };}
+                        if (key === 'r') {return {
                             properties: { id: 'edge1', fromId: 'node1', toId: 'node2' },
                             type: 'KNOWS',
                             startNodeElementId: 'n1',
                             endNodeElementId: 'n2'
-                        };
+                        };}
                     }
                 }
             ]
@@ -69,16 +69,16 @@ describe('PredictiveService Integration (Mocked Driver)', () => {
             records: [
                 {
                     get: (key: string) => {
-                        if (key === 'n') return { properties: { id: 'nodeA' }, labels: ['Person'], elementId: 'intA', identity: 'intA' };
-                        if (key === 'm') return { properties: { id: 'nodeB' }, labels: ['Person'], elementId: 'intB', identity: 'intB' };
-                        if (key === 'r') return {
+                        if (key === 'n') {return { properties: { id: 'nodeA' }, labels: ['Person'], elementId: 'intA', identity: 'intA' };}
+                        if (key === 'm') {return { properties: { id: 'nodeB' }, labels: ['Person'], elementId: 'intB', identity: 'intB' };}
+                        if (key === 'r') {return {
                             properties: { id: 'edgeX' }, // Missing fromId/toId
                             type: 'KNOWS',
                             startNodeElementId: 'intA', // Matches nodeA
                             endNodeElementId: 'intB',   // Matches nodeB
                             start: 'intA',
                             end: 'intB'
-                        };
+                        };}
                     }
                 }
             ]

@@ -180,7 +180,7 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 }
 
 function calculatePercentile(values: number[], percentile: number): number {
-  if (values.length === 0) return 0;
+  if (values.length === 0) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const index = Math.ceil((percentile / 100) * sorted.length) - 1;
   return sorted[Math.max(0, index)];
@@ -191,20 +191,20 @@ function calculateHealthScore(metrics: PolicyMetrics): number {
 
   // Penalize high denial rates (some denial is normal)
   const denialRate = metrics.decisions.denied / metrics.decisions.total;
-  if (denialRate > 0.3) score -= 20;
-  else if (denialRate > 0.2) score -= 10;
+  if (denialRate > 0.3) {score -= 20;}
+  else if (denialRate > 0.2) {score -= 10;}
 
   // Penalize slow performance
-  if (metrics.performance.p95EvaluationMs > 100) score -= 15;
-  else if (metrics.performance.p95EvaluationMs > 50) score -= 5;
+  if (metrics.performance.p95EvaluationMs > 100) {score -= 15;}
+  else if (metrics.performance.p95EvaluationMs > 50) {score -= 5;}
 
   // Reward good coverage
-  if (metrics.coverage.uniqueSubjects > 100) score += 5;
+  if (metrics.coverage.uniqueSubjects > 100) {score += 5;}
 
   // Check rule hit distribution (some rules should be matching)
   const totalHits = Array.from(metrics.coverage.ruleHitDistribution.values())
     .reduce((sum, hits) => sum + hits, 0);
-  if (totalHits === 0) score -= 10;
+  if (totalHits === 0) {score -= 10;}
 
   return Math.max(0, Math.min(100, score));
 }
@@ -472,8 +472,8 @@ class ComplianceStatusTracker {
     // SOC 2 - looks for proper access controls
     let soc2Score = 80;
     for (const policy of metrics) {
-      if (policy.decisions.denied > 0) soc2Score += 5;
-      if (policy.decisions.reviewRequired > 0) soc2Score += 5;
+      if (policy.decisions.denied > 0) {soc2Score += 5;}
+      if (policy.decisions.reviewRequired > 0) {soc2Score += 5;}
     }
     frameworkScores.set('SOC2', Math.min(100, soc2Score));
 

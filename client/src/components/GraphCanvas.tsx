@@ -20,7 +20,7 @@ const GraphCanvas: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
 
     const cy = cytoscape({
       container: containerRef.current,
@@ -30,7 +30,7 @@ const GraphCanvas: React.FC = () => {
     });
 
     // jQuery wrapper for simple drag feedback
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     $(cy.container()).on('mouseup', 'node', (evt: any) => {
       const n = evt.target;
       dispatch(

@@ -577,25 +577,25 @@ export class ExperimentationService {
 
       switch (rule.operator) {
         case 'equals':
-          if (value !== rule.value) return false;
+          if (value !== rule.value) {return false;}
           break;
         case 'not_equals':
-          if (value === rule.value) return false;
+          if (value === rule.value) {return false;}
           break;
         case 'contains':
-          if (!String(value).includes(String(rule.value))) return false;
+          if (!String(value).includes(String(rule.value))) {return false;}
           break;
         case 'in':
-          if (!Array.isArray(rule.value) || !rule.value.includes(value)) return false;
+          if (!Array.isArray(rule.value) || !rule.value.includes(value)) {return false;}
           break;
         case 'not_in':
-          if (Array.isArray(rule.value) && rule.value.includes(value)) return false;
+          if (Array.isArray(rule.value) && rule.value.includes(value)) {return false;}
           break;
         case 'gt':
-          if (Number(value) <= Number(rule.value)) return false;
+          if (Number(value) <= Number(rule.value)) {return false;}
           break;
         case 'lt':
-          if (Number(value) >= Number(rule.value)) return false;
+          if (Number(value) >= Number(rule.value)) {return false;}
           break;
       }
     }
@@ -646,7 +646,7 @@ export class ExperimentationService {
   }
 
   private calculateConfidenceInterval(rate: number, n: number): [number, number] {
-    if (n === 0) return [0, 0];
+    if (n === 0) {return [0, 0];}
     const z = 1.96; // 95% confidence
     const stderr = Math.sqrt((rate * (1 - rate)) / n);
     return [Math.max(0, rate - z * stderr), Math.min(1, rate + z * stderr)];
@@ -655,24 +655,24 @@ export class ExperimentationService {
   private calculateStatisticalSignificance(variantResults: VariantResults[]): number {
     // Simplified z-test for significance
     const control = variantResults.find((v) => v.variantId.includes('control'));
-    if (!control) return 0;
+    if (!control) {return 0;}
 
     let maxSignificance = 0;
 
     for (const variant of variantResults) {
-      if (variant === control) continue;
+      if (variant === control) {continue;}
 
       const p1 = control.conversionRate;
       const p2 = variant.conversionRate;
       const n1 = control.sampleSize;
       const n2 = variant.sampleSize;
 
-      if (n1 === 0 || n2 === 0) continue;
+      if (n1 === 0 || n2 === 0) {continue;}
 
       const pooledP = (p1 * n1 + p2 * n2) / (n1 + n2);
       const se = Math.sqrt(pooledP * (1 - pooledP) * (1 / n1 + 1 / n2));
 
-      if (se === 0) continue;
+      if (se === 0) {continue;}
 
       const z = Math.abs(p2 - p1) / se;
       const significance = this.zToConfidence(z);
@@ -687,15 +687,15 @@ export class ExperimentationService {
 
   private zToConfidence(z: number): number {
     // Approximate z-score to confidence level
-    if (z < 1.645) return 0.90;
-    if (z < 1.96) return 0.95;
-    if (z < 2.576) return 0.99;
+    if (z < 1.645) {return 0.90;}
+    if (z < 1.96) {return 0.95;}
+    if (z < 2.576) {return 0.99;}
     return 0.999;
   }
 
   private async trackExposure(assignment: ExperimentAssignment): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       `INSERT INTO experiment_exposures (
@@ -715,7 +715,7 @@ export class ExperimentationService {
 
   private async saveExperiment(experiment: Experiment): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       `INSERT INTO experiments (
@@ -757,7 +757,7 @@ export class ExperimentationService {
 
   private async saveAssignment(assignment: ExperimentAssignment): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       `INSERT INTO experiment_assignments (
@@ -777,7 +777,7 @@ export class ExperimentationService {
 
   private async saveMetricEvent(event: MetricEvent): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       `INSERT INTO experiment_metrics (
@@ -797,7 +797,7 @@ export class ExperimentationService {
 
   private async loadExperiments(): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     try {
       const result = await pool.query(

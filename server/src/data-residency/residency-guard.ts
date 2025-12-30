@@ -145,7 +145,7 @@ export class ResidencyGuard {
             [tenantId]
         );
 
-        if (result.rows.length === 0) return null;
+        if (result.rows.length === 0) {return null;}
         const row = result.rows[0];
 
         const allowedRegions = row.allowed_regions ? JSON.parse(row.allowed_regions) : (row.allowed_transfers ? JSON.parse(row.allowed_transfers) : []);

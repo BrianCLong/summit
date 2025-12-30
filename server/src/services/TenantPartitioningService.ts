@@ -673,7 +673,7 @@ export class TenantPartitioningService extends EventEmitter {
     fromPartition: string,
     toPartition: string,
   ): 'low' | 'medium' | 'high' {
-    if (fromPartition === toPartition) return 'low';
+    if (fromPartition === toPartition) {return 'low';}
 
     const fromType = this.config.partitionTypes.find(
       (pt) => pt.name === fromPartition,
@@ -682,7 +682,7 @@ export class TenantPartitioningService extends EventEmitter {
       (pt) => pt.name === toPartition,
     );
 
-    if (!fromType || !toType) return 'high';
+    if (!fromType || !toType) {return 'high';}
 
     // Risk increases with isolation level changes
     if (fromType.isolationLevel !== toType.isolationLevel) {
@@ -908,17 +908,17 @@ export class TenantPartitioningService extends EventEmitter {
   }
 
   private async processMigrationQueue(): Promise<void> {
-    if (this.migrationQueue.length === 0) return;
+    if (this.migrationQueue.length === 0) {return;}
 
     // Process migrations during maintenance window
     const now = new Date();
     const hour = now.getUTCHours();
 
     // Only process migrations during low-traffic hours (2-6 AM UTC)
-    if (hour < 2 || hour > 6) return;
+    if (hour < 2 || hour > 6) {return;}
 
     // Limit concurrent migrations
-    if (this.activeMigrations.size >= 3) return;
+    if (this.activeMigrations.size >= 3) {return;}
 
     const plan = this.migrationQueue.shift()!;
     this.metrics.setGauge('migration_queue_size', this.migrationQueue.length);

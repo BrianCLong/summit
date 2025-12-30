@@ -81,7 +81,7 @@ export class NarrativeAnalysisService {
 
   async detectTrends(narrativeId: string): Promise<TopicTrend[]> {
     const history = this.snapshots.get(narrativeId);
-    if (!history || history.length < 2) return [];
+    if (!history || history.length < 2) {return [];}
 
     const trends: TopicTrend[] = [];
     const recent = history[history.length - 1];

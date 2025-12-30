@@ -82,7 +82,7 @@ class OSINTAggregator {
 
     // 1. Keyword Boosting
     this.priorityRules.keywords.forEach(kw => {
-      if (content.includes(kw)) score += 10;
+      if (content.includes(kw)) {score += 10;}
     });
 
     // 2. Source Credibility Boosting
@@ -91,8 +91,8 @@ class OSINTAggregator {
     }
 
     // 3. Modality Weighting (Images/Signals might be higher priority for fusion)
-    if (item.type === 'image') score += 5;
-    if (item.type === 'signal') score += 15; // Signals are fleeting, high priority
+    if (item.type === 'image') {score += 5;}
+    if (item.type === 'signal') {score += 15;} // Signals are fleeting, high priority
 
     // 4. Uncertainty / Novelty (Simulated)
     // If we haven't seen this source in a while, boost it?

@@ -24,7 +24,7 @@ export class PolicyWatcher {
     }
 
     public start(intervalMs: number = 60000) {
-        if (this.checkInterval) return;
+        if (this.checkInterval) {return;}
 
         logger.info('Starting PolicyWatcher drift detection', { policiesDir: this.policiesDir });
         this.checkDrift(); // Initial check

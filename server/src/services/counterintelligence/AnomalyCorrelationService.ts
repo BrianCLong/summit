@@ -487,13 +487,13 @@ export class AnomalyCorrelationService {
     const temporalGroups = this.groupByTimeWindow(uncorrelated, 24 * 60 * 60 * 1000); // 24 hours
 
     for (const group of temporalGroups) {
-      if (group.length < 2) continue;
+      if (group.length < 2) {continue;}
 
       // Entity correlation
       const entityGroups = this.groupByEntity(group);
 
       for (const [entityId, entityAnomalies] of Object.entries(entityGroups)) {
-        if (entityAnomalies.length < 2) continue;
+        if (entityAnomalies.length < 2) {continue;}
 
         // Pattern matching
         const matchedPattern = this.matchThreatPattern(entityAnomalies);
@@ -688,10 +688,10 @@ export class AnomalyCorrelationService {
     const baseScore = weights[input.type] || 50;
     const confidenceAdjusted = baseScore * (input.confidence || 0.7);
 
-    if (confidenceAdjusted >= 80) return 'CRITICAL';
-    if (confidenceAdjusted >= 60) return 'HIGH';
-    if (confidenceAdjusted >= 40) return 'MEDIUM';
-    if (confidenceAdjusted >= 20) return 'LOW';
+    if (confidenceAdjusted >= 80) {return 'CRITICAL';}
+    if (confidenceAdjusted >= 60) {return 'HIGH';}
+    if (confidenceAdjusted >= 40) {return 'MEDIUM';}
+    if (confidenceAdjusted >= 20) {return 'LOW';}
     return 'INFO';
   }
 
@@ -733,7 +733,7 @@ export class AnomalyCorrelationService {
 
   private async correlateAnomaly(anomaly: Anomaly): Promise<void> {
     // Find recent anomalies for same entity
-    if (!anomaly.entityId) return;
+    if (!anomaly.entityId) {return;}
 
     const relatedAnomalies = Array.from(this.anomalies.values())
       .filter(a =>
@@ -742,7 +742,7 @@ export class AnomalyCorrelationService {
         a.timestamp > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       );
 
-    if (relatedAnomalies.length === 0) return;
+    if (relatedAnomalies.length === 0) {return;}
 
     const allAnomalies = [anomaly, ...relatedAnomalies];
     const matchedPattern = this.matchThreatPattern(allAnomalies);
@@ -1068,7 +1068,7 @@ export class AnomalyCorrelationService {
 
   private calculatePercentileRank(score: number): number {
     const allScores = Array.from(this.riskScores.values()).map(r => r.overallScore);
-    if (allScores.length === 0) return 50;
+    if (allScores.length === 0) {return 50;}
     const belowCount = allScores.filter(s => s < score).length;
     return (belowCount / allScores.length) * 100;
   }

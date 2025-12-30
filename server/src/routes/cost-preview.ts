@@ -27,7 +27,7 @@ function estimate(doc: string): CostPreview {
           fieldCount += 1;
           const d = (stack[stack.length - 1] || 0) + 1;
           stack.push(d);
-          if (d > maxDepth) maxDepth = d;
+          if (d > maxDepth) {maxDepth = d;}
         },
       },
       leave: {

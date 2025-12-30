@@ -10,8 +10,8 @@ export class FuzzyMatcher {
     const norm1 = StringNormalizer.normalize(s1);
     const norm2 = StringNormalizer.normalize(s2);
 
-    if (norm1 === norm2) return 1.0;
-    if (norm1.length === 0 || norm2.length === 0) return 0.0;
+    if (norm1 === norm2) {return 1.0;}
+    if (norm1.length === 0 || norm2.length === 0) {return 0.0;}
 
     const distance = natural.LevenshteinDistance(norm1, norm2);
     const maxLength = Math.max(norm1.length, norm2.length);
@@ -26,8 +26,8 @@ export class FuzzyMatcher {
     const norm1 = StringNormalizer.normalize(s1);
     const norm2 = StringNormalizer.normalize(s2);
 
-    if (norm1 === norm2) return 1.0;
-    if (norm1.length === 0 || norm2.length === 0) return 0.0;
+    if (norm1 === norm2) {return 1.0;}
+    if (norm1.length === 0 || norm2.length === 0) {return 0.0;}
 
     // @ts-ignore - natural types might be strict about options
     return natural.JaroWinklerDistance(norm1, norm2, undefined);
@@ -40,8 +40,8 @@ export class FuzzyMatcher {
     const norm1 = StringNormalizer.normalize(s1);
     const norm2 = StringNormalizer.normalize(s2);
 
-    if (norm1 === norm2) return 1.0;
-    if (norm1.length === 0 || norm2.length === 0) return 0.0;
+    if (norm1 === norm2) {return 1.0;}
+    if (norm1.length === 0 || norm2.length === 0) {return 0.0;}
 
     const tokens1 = this.tokenize(norm1);
     const tokens2 = this.tokenize(norm2);
@@ -63,7 +63,7 @@ export class FuzzyMatcher {
       magnitude2 += v2 * v2;
     }
 
-    if (magnitude1 === 0 || magnitude2 === 0) return 0;
+    if (magnitude1 === 0 || magnitude2 === 0) {return 0;}
 
     return dotProduct / (Math.sqrt(magnitude1) * Math.sqrt(magnitude2));
   }
@@ -79,8 +79,8 @@ export class FuzzyMatcher {
     const tokens1 = new Set(this.tokenize(norm1));
     const tokens2 = new Set(this.tokenize(norm2));
 
-    if (tokens1.size === 0 && tokens2.size === 0) return 1.0;
-    if (tokens1.size === 0 || tokens2.size === 0) return 0.0;
+    if (tokens1.size === 0 && tokens2.size === 0) {return 1.0;}
+    if (tokens1.size === 0 || tokens2.size === 0) {return 0.0;}
 
     const intersection = new Set([...tokens1].filter(x => tokens2.has(x)));
     const union = new Set([...tokens1, ...tokens2]);

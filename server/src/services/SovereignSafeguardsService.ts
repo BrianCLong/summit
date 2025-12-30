@@ -508,7 +508,7 @@ export class SovereignSafeguardsService {
 
   private async processVerificationRequest(requestId: string): Promise<void> {
     const request = this.verificationRequests.get(requestId);
-    if (!request) return;
+    if (!request) {return;}
 
     // Simulate verification processing
     request.status = 'IN_PROGRESS';

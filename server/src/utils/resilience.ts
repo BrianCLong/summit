@@ -106,9 +106,9 @@ export class RetryPolicy {
   }
 
   private shouldRetry(error: any, attempt: number): boolean {
-    if (attempt >= this.options.maxAttempts) return false;
+    if (attempt >= this.options.maxAttempts) {return false;}
     // Don't retry 4xx (except maybe 429, but typically handled by rate limiters)
-    if (error.status && error.status >= 400 && error.status < 500) return false;
+    if (error.status && error.status >= 400 && error.status < 500) {return false;}
 
     return this.options.retryableErrors.some((pattern) => {
       if (typeof pattern === 'string') {
@@ -220,7 +220,7 @@ export class Bulkhead {
         const timer = setTimeout(() => {
            // Remove from queue
            const idx = this.queue.indexOf(next);
-           if (idx > -1) this.queue.splice(idx, 1);
+           if (idx > -1) {this.queue.splice(idx, 1);}
            reject(new Error(`Bulkhead '${this.name}' queue timeout`));
         }, this.options.timeoutMs);
 
@@ -238,7 +238,7 @@ export class Bulkhead {
     } finally {
       this.active--;
       const next = this.queue.shift();
-      if (next) next();
+      if (next) {next();}
     }
   }
 }

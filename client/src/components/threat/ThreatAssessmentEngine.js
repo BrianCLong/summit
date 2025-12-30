@@ -206,7 +206,7 @@ const ThreatScoringEngine = {
     const processed = new Set();
 
     entities.forEach((entity) => {
-      if (processed.has(entity.id)) return;
+      if (processed.has(entity.id)) {return;}
 
       const cluster = {
         id: `cluster_${clusters.length}`,

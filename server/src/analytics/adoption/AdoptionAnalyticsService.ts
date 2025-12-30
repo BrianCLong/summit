@@ -143,7 +143,7 @@ export class AdoptionAnalyticsService {
     options: AnalyticsQueryOptions
   ): Promise<DataEnvelope<Map<string, number>>> {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     const result = await pool.query(
       `SELECT
@@ -172,7 +172,7 @@ export class AdoptionAnalyticsService {
     options: AnalyticsQueryOptions
   ): Promise<DataEnvelope<ProductMetricsDashboard>> {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     // Get engagement metrics
     const engagement = await this.calculateEngagementMetrics(options);
@@ -220,7 +220,7 @@ export class AdoptionAnalyticsService {
     }
 
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     // Calculate step conversions
     const stepResults = await this.calculateFunnelSteps(funnel, options);
@@ -260,7 +260,7 @@ export class AdoptionAnalyticsService {
     }
 
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     // Get cohort members
     const members = await this.getCohortMembers(cohort, options);
@@ -299,7 +299,7 @@ export class AdoptionAnalyticsService {
   ): Promise<DataEnvelope<TenantAdoptionSummary>> {
     const tenantHash = this.hashIdentifier(tenantId);
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     // Get active users
     const usersResult = await pool.query(
@@ -419,7 +419,7 @@ export class AdoptionAnalyticsService {
 
   private async storeEvent(event: AdoptionEvent): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     await pool.query(
       `INSERT INTO adoption_events (
@@ -442,7 +442,7 @@ export class AdoptionAnalyticsService {
 
   private async updateRealtimeMetrics(event: AdoptionEvent): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) return;
+    if (!pool) {return;}
 
     const date = new Date(event.timestamp).toISOString().split('T')[0];
 
@@ -486,7 +486,7 @@ export class AdoptionAnalyticsService {
 
   private async calculateEngagementMetrics(options: AnalyticsQueryOptions) {
     const pool = getPostgresPool();
-    if (!pool) return { dau: 0, wau: 0, mau: 0, dauMauRatio: 0, avgSessionDuration: 0, sessionsPerUser: 0 };
+    if (!pool) {return { dau: 0, wau: 0, mau: 0, dauMauRatio: 0, avgSessionDuration: 0, sessionsPerUser: 0 };}
 
     // DAU calculation
     const dauResult = await pool.query(
@@ -598,7 +598,7 @@ export class AdoptionAnalyticsService {
 
   private async getTopFeatures(options: AnalyticsQueryOptions) {
     const pool = getPostgresPool();
-    if (!pool) return [];
+    if (!pool) {return [];}
 
     const result = await pool.query(
       `SELECT

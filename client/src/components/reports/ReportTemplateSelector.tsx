@@ -163,7 +163,7 @@ export function ReportTemplateSelector({
   };
 
   const handleGenerate = async () => {
-    if (!selectedTemplateData || !reportTitle) return;
+    if (!selectedTemplateData || !reportTitle) {return;}
 
     try {
       setLoading(true);

@@ -22,7 +22,7 @@ const mockRecord = (keys: string[], values: any[]): Neo4jRecord => {
     length: keys.length,
     get: (key: string) => {
       const index = keys.indexOf(key);
-      if (index === -1) return null;
+      if (index === -1) {return null;}
       const val = values[index];
 
       // Only mock Neo4j integer behavior for specific fields expected to be Integers

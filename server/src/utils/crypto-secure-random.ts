@@ -22,7 +22,7 @@ import * as crypto from 'crypto';
  */
 export function randomString(
   length: number = 32,
-  // eslint-disable-next-line no-undef
+   
   encoding: BufferEncoding = 'hex'
 ): string {
   const bytes = Math.ceil(length / 2);

@@ -71,9 +71,9 @@ export class LlmPolicyStore {
     task: TaskType,
   ): { tenant: TenantPolicy; task: TaskPolicy } | null {
     const tenant = this.getTenantPolicy(tenantId);
-    if (!tenant) return null;
+    if (!tenant) {return null;}
     const taskPolicy = tenant.tasks[task];
-    if (!taskPolicy) return null;
+    if (!taskPolicy) {return null;}
     return { tenant, task: taskPolicy };
   }
 
@@ -83,9 +83,9 @@ export class LlmPolicyStore {
     modelClass: ModelClass,
   ): { tenant: TenantPolicy; task: TaskPolicy; classPolicy: TaskClassPolicy } | null {
     const scoped = this.getTaskPolicy(tenantId, task);
-    if (!scoped) return null;
+    if (!scoped) {return null;}
     const classPolicy = scoped.task.modelClasses[modelClass];
-    if (!classPolicy) return null;
+    if (!classPolicy) {return null;}
     return { tenant: scoped.tenant, task: scoped.task, classPolicy };
   }
 

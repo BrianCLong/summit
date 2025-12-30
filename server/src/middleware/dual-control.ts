@@ -41,7 +41,7 @@ const DEFAULT_REQUIRED_ROLES = ['compliance-officer'];
 export const normalizeApprovalActors = (
   approvals?: Array<string | ApprovalActorInput>,
 ): ApprovalActorInput[] => {
-  if (!approvals) return [];
+  if (!approvals) {return [];}
 
   return approvals.map((approval) =>
     typeof approval === 'string' ? { user_id: approval } : approval,

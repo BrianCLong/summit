@@ -17,7 +17,7 @@ export const riskSignalsTotal = new Counter({
 
 export function recordTrustScore(subjectId: string, score: number) {
   if (Number.isFinite(score))
-    trustScoreGauge.set({ subject: subjectId }, score);
+    {trustScoreGauge.set({ subject: subjectId }, score);}
 }
 
 export function recordRiskSignal(opts: {

@@ -180,7 +180,7 @@ export class PromptInjectionDetector {
 
   private calculateEntropy(str: string): number {
     const len = str.length;
-    if (len === 0) return 0;
+    if (len === 0) {return 0;}
     const frequencies = new Map<string, number>();
 
     for (const char of str) {
@@ -444,7 +444,7 @@ export class LLMGuardrailsService {
           };
         }
         riskScore = Math.max(riskScore, evaluation.riskScore);
-        if (evaluation.reasoning) warnings.push(...evaluation.reasoning);
+        if (evaluation.reasoning) {warnings.push(...evaluation.reasoning);}
       } catch (error) {
         logger.error('SafetyV2 check failed', error as Error);
         warnings.push('Safety check unavailable');
@@ -554,10 +554,10 @@ export class LLMGuardrailsService {
     return {
       healthy: true,
       checks: {
-        injection_detector: !!this.injectionDetector,
-        output_sanitizer: !!this.outputSanitizer,
-        audit_logger: !!this.auditLogger,
-        privacy_engine: !!this.privacyEngine,
+        injection_detector: Boolean(this.injectionDetector),
+        output_sanitizer: Boolean(this.outputSanitizer),
+        audit_logger: Boolean(this.auditLogger),
+        privacy_engine: Boolean(this.privacyEngine),
       },
     };
   }

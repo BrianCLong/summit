@@ -116,7 +116,7 @@ export class GAEnrollmentService {
 
     // 2. Check Domain
     const domain = email.split('@')[1];
-    if (!domain) return { eligible: false, reason: 'Invalid email format' };
+    if (!domain) {return { eligible: false, reason: 'Invalid email format' };}
 
     if (config.blockedDomains.includes(domain)) {
         return { eligible: false, reason: 'Email domain not allowed.' };

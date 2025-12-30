@@ -78,7 +78,7 @@ router.get('/documents/:id', async (req, res) => {
             [req.params.id, req.user.tenantId],
             { tenantId: req.user.tenantId }
         );
-        if (!doc) return res.status(404).json({ error: "Not found" });
+        if (!doc) {return res.status(404).json({ error: "Not found" });}
         res.json(doc);
     } catch (e: any) {
         res.status(500).json({ error: e.message });

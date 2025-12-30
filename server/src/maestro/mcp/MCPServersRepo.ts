@@ -40,7 +40,7 @@ export class MCPServersRepo {
   }
 
   private async ensureTable() {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
     const sql = `
       CREATE TABLE IF NOT EXISTS mcp_servers (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

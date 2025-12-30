@@ -116,7 +116,7 @@ export class CacheInvalidationService extends EventEmitter {
    * Start listening for invalidation events
    */
   async start(): Promise<void> {
-    if (this.isRunning) return;
+    if (this.isRunning) {return;}
 
     const channels = [
       `${this.config.channelPrefix}:keys`,
@@ -154,7 +154,7 @@ export class CacheInvalidationService extends EventEmitter {
    * Stop listening and clean up
    */
   async stop(): Promise<void> {
-    if (!this.isRunning) return;
+    if (!this.isRunning) {return;}
 
     // Flush any pending batch
     await this.flushBatch();
@@ -236,7 +236,7 @@ export class CacheInvalidationService extends EventEmitter {
     let count = 0;
     for (const event of events) {
       const result = await this.publishEvent(event);
-      if (result.data) count++;
+      if (result.data) {count++;}
     }
 
     return createDataEnvelope(count, {
@@ -359,7 +359,7 @@ export class CacheInvalidationService extends EventEmitter {
       this.batchTimer = null;
     }
 
-    if (this.eventBatch.length === 0) return;
+    if (this.eventBatch.length === 0) {return;}
 
     const batch = this.eventBatch;
     this.eventBatch = [];

@@ -142,9 +142,9 @@ export default function LiveActivityFeed() {
     const diffMs = now.getTime() - eventTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+    if (diffMins < 1) {return 'Just now';}
+    if (diffMins < 60) {return `${diffMins}m ago`;}
+    if (diffMins < 1440) {return `${Math.floor(diffMins / 60)}h ago`;}
     return eventTime.toLocaleDateString();
   };
 

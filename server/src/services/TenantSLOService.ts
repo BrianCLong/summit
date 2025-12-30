@@ -548,12 +548,12 @@ export class TenantSLOService extends EventEmitter {
   }
 
   private calculateAvailability(metrics: any): number {
-    if (metrics.requests === 0) return 100;
+    if (metrics.requests === 0) {return 100;}
     return ((metrics.requests - metrics.errors) / metrics.requests) * 100;
   }
 
   private calculatePercentile(values: number[], percentile: number): number {
-    if (!values || values.length === 0) return 0;
+    if (!values || values.length === 0) {return 0;}
 
     const sorted = values.sort((a, b) => a - b);
     const index = Math.ceil(sorted.length * percentile) - 1;
@@ -561,7 +561,7 @@ export class TenantSLOService extends EventEmitter {
   }
 
   private calculateErrorRate(metrics: any): number {
-    if (metrics.requests === 0) return 0;
+    if (metrics.requests === 0) {return 0;}
     return (metrics.errors / metrics.requests) * 100;
   }
 
@@ -943,7 +943,7 @@ export class TenantSLOService extends EventEmitter {
     const cutoff = Date.now() - windowMinutes * 60 * 1000;
     const windowHistory = history.filter((h) => h.timestamp.getTime() > cutoff);
 
-    if (windowHistory.length === 0) return 0;
+    if (windowHistory.length === 0) {return 0;}
 
     return (
       windowHistory.reduce((sum, h) => sum + h.burnRate, 0) /
@@ -956,7 +956,7 @@ export class TenantSLOService extends EventEmitter {
     burnRate: number,
   ): number {
     const sloMetrics = this.tenantSLOs.get(tenantId);
-    if (!sloMetrics || burnRate <= 0) return Infinity;
+    if (!sloMetrics || burnRate <= 0) {return Infinity;}
 
     return sloMetrics.errorBudget.remainingBudget / burnRate;
   }
@@ -1412,7 +1412,7 @@ export class TenantSLOService extends EventEmitter {
     tenantId: string,
   ): Promise<TenantDashboard | null> {
     const cached = this.dashboards.get(tenantId);
-    if (cached) return cached;
+    if (cached) {return cached;}
 
     try {
       return await this.generateTenantDashboard(tenantId);

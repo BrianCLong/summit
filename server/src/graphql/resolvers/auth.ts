@@ -86,7 +86,7 @@ const authResolvers = {
       try {
         const user = await authService.verifyToken(token);
         return {
-          valid: !!user,
+          valid: Boolean(user),
           user: user
             ? {
               id: user.id,

@@ -13,7 +13,7 @@ router.post(
   async (req, res) => {
     // NOTE: For production, verify X-Twilio-Signature using your Twilio auth token
     const secret = process.env.TWILIO_AUTH_TOKEN;
-    if (!secret) return res.status(503).send('webhook disabled');
+    if (!secret) {return res.status(503).send('webhook disabled');}
     // Signature verification omitted here; ensure to compare against header
     return res.sendStatus(200);
   },

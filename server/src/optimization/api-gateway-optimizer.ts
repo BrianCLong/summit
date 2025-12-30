@@ -438,7 +438,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
    * 💡 Intelligent Cache Invalidation
    */
   async invalidateCache(tags?: string[], patterns?: string[]): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const keysToDelete: string[] = [];
 
@@ -538,7 +538,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
   createBudgetMiddleware() {
     return async (req: any, res: any, next: any) => {
       const userId = (req as any).user?.id;
-      if (!userId) return next();
+      if (!userId) {return next();}
 
       const estimatedCost = this.estimateRequestCost(req);
       const budgetCheck = await this.checkBudgetLimit(userId, estimatedCost);
@@ -611,10 +611,10 @@ export class ApiGatewayOptimizer extends EventEmitter {
   }
 
   private async getCachedResponse(cacheKey: string): Promise<any> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     const cached = await this.redis.get(`${this.CACHE_PREFIX}${cacheKey}`);
-    if (!cached) return null;
+    if (!cached) {return null;}
 
     try {
       return JSON.parse(cached);
@@ -631,7 +631,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
     ttl: number,
     tags?: string[],
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       // Cache the response
@@ -678,13 +678,13 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   private shouldCacheResponse(statusCode: number, data: any): boolean {
     // Only cache successful responses
-    if (statusCode >= 400) return false;
+    if (statusCode >= 400) {return false;}
 
     // Don't cache empty responses
-    if (!data) return false;
+    if (!data) {return false;}
 
     // Don't cache very large responses (>1MB)
-    if (JSON.stringify(data).length > 1024 * 1024) return false;
+    if (JSON.stringify(data).length > 1024 * 1024) {return false;}
 
     return true;
   }
@@ -801,7 +801,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   private async executeBatch(batchKey: string): Promise<void> {
     const batch = this.requestBatches.get(batchKey);
-    if (!batch || batch.requests.length === 0) return;
+    if (!batch || batch.requests.length === 0) {return;}
 
     try {
       this.emit('batchExecution', {
@@ -837,14 +837,14 @@ export class ApiGatewayOptimizer extends EventEmitter {
     const processed = new Set();
 
     for (let i = 0; i < requests.length; i++) {
-      if (processed.has(i)) continue;
+      if (processed.has(i)) {continue;}
 
       const group = [requests[i]];
       processed.add(i);
 
       // Find similar requests
       for (let j = i + 1; j < requests.length; j++) {
-        if (processed.has(j)) continue;
+        if (processed.has(j)) {continue;}
 
         if (this.areRequestsSimilar(requests[i], requests[j])) {
           group.push(requests[j]);
@@ -860,7 +860,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   private areRequestsSimilar(req1: any, req2: any): boolean {
     // Check if requests can be batched together
-    if (req1.endpoint !== req2.endpoint) return false;
+    if (req1.endpoint !== req2.endpoint) {return false;}
 
     // Check parameter similarity (simplified)
     const params1 = JSON.stringify(
@@ -1073,7 +1073,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
   }
 
   private async optimizeCacheStorage(): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       // Get cache statistics
@@ -1144,7 +1144,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
   }
 
   private async getCacheStats(): Promise<any> {
-    if (!this.redis) return { available: false };
+    if (!this.redis) {return { available: false };}
 
     try {
       const keys = await this.redis.keys(`${this.CACHE_PREFIX}*`);
@@ -1159,7 +1159,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
   }
 
   async clearAllCaches(): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const keys = await this.redis.keys(`${this.CACHE_PREFIX}*`);
     if (keys.length > 0) {

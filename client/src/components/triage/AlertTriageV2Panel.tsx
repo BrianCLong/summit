@@ -185,7 +185,7 @@ export default function AlertTriageV2Panel({
   );
 
   const handleFeedbackSubmit = async () => {
-    if (!selectedFeedbackType || !reasonCode) return;
+    if (!selectedFeedbackType || !reasonCode) {return;}
 
     await recordFeedback({
       variables: {
@@ -201,7 +201,7 @@ export default function AlertTriageV2Panel({
   };
 
   const renderTriageScore = () => {
-    if (!scoringData?.triageScoring) return null;
+    if (!scoringData?.triageScoring) {return null;}
 
     const { score, confidence, reasoning, factors } = scoringData.triageScoring;
     const scoreColor =
@@ -333,7 +333,7 @@ export default function AlertTriageV2Panel({
   );
 
   const renderEvidenceSnippets = () => {
-    if (!alertData?.evidenceSnippets) return null;
+    if (!alertData?.evidenceSnippets) {return null;}
 
     return (
       <Card sx={{ mb: 2 }}>
@@ -374,7 +374,7 @@ export default function AlertTriageV2Panel({
   };
 
   const renderFeedbackHistory = () => {
-    if (!feedbackData?.alertFeedback?.length) return null;
+    if (!feedbackData?.alertFeedback?.length) {return null;}
 
     return (
       <Card sx={{ mb: 2 }}>
@@ -444,7 +444,7 @@ export default function AlertTriageV2Panel({
     );
   };
 
-  if (!open) return null;
+  if (!open) {return null;}
 
   return (
     <>

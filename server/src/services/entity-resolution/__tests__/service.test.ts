@@ -50,8 +50,8 @@ describe('EntityResolutionService', () => {
     mockRun.mockResolvedValueOnce({
         records: [{
             get: (key: string) => {
-                if (key === 'properties') return { name: 'John Doe', email: 'john@example.com' };
-                if (key === 'id') return 'target-1';
+                if (key === 'properties') {return { name: 'John Doe', email: 'john@example.com' };}
+                if (key === 'id') {return 'target-1';}
                 return null;
             }
         }]

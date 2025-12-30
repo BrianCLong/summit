@@ -1167,9 +1167,9 @@ class CopilotOrchestrationService extends EventEmitter {
   calculateAnalysisConfidence(analysis) {
     let confidence = 0.5; // base confidence
 
-    if (analysis.intent) confidence += 0.2;
-    if (analysis.queryType) confidence += 0.2;
-    if (analysis.entities.length > 0) confidence += 0.1;
+    if (analysis.intent) {confidence += 0.2;}
+    if (analysis.queryType) {confidence += 0.2;}
+    if (analysis.entities.length > 0) {confidence += 0.1;}
 
     return Math.min(1.0, confidence);
   }
@@ -1224,13 +1224,13 @@ class CopilotOrchestrationService extends EventEmitter {
   }
 
   calculateResultConfidence(results) {
-    if (results.entities.length === 0) return 0.1;
+    if (results.entities.length === 0) {return 0.1;}
 
     const entityConfidences = results.entities
       .filter((e) => e.confidence)
       .map((e) => e.confidence);
 
-    if (entityConfidences.length === 0) return 0.5;
+    if (entityConfidences.length === 0) {return 0.5;}
 
     const avgConfidence =
       entityConfidences.reduce((sum, c) => sum + c, 0) /
@@ -1285,7 +1285,7 @@ class CopilotOrchestrationService extends EventEmitter {
 
   async cancelQuery(queryId) {
     const query = this.activeQueries.get(queryId);
-    if (!query) return false;
+    if (!query) {return false;}
 
     query.status = 'CANCELLED';
     query.completedAt = new Date();

@@ -40,7 +40,7 @@ export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
     async requestDidStart(): Promise<GraphQLRequestListener<any>> {
       return {
         async didResolveOperation(requestContext: GraphQLRequestContext<any>) {
-          if (!config.enabled) return;
+          if (!config.enabled) {return;}
 
           const { request, contextValue, operationName } = requestContext;
 
@@ -184,7 +184,7 @@ export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
         },
 
         async willSendResponse(requestContext: GraphQLRequestContext<any>) {
-          if (!config.enabled || !config.scanResponse) return;
+          if (!config.enabled || !config.scanResponse) {return;}
 
           const { response, contextValue, operationName } = requestContext;
 

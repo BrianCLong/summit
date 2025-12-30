@@ -17,14 +17,14 @@ describe('Security middleware integration', () => {
       (req, res, next) =>
         cors({
           origin: (origin, callback) => {
-            if (!origin) return callback(null, true);
+            if (!origin) {return callback(null, true);}
             return allowedOrigins.includes(origin)
               ? callback(null, true)
               : callback(new Error('Origin not allowed'));
           },
           credentials: true,
         })(req, res, (err) => {
-          if (err) return res.status(403).json({ error: err.message });
+          if (err) {return res.status(403).json({ error: err.message });}
           next();
         }),
     );

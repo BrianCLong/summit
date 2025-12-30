@@ -70,7 +70,7 @@ export class PluginSandbox {
   ): Promise<PluginExecutionResult> {
     const startTime = Date.now();
     const logs: PluginLogEntry[] = [];
-    let apiCallCount = 0;
+    const apiCallCount = 0;
 
     // Create sandboxed context with resource tracking
     const sandboxedContext: PluginContext = {

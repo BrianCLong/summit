@@ -231,7 +231,7 @@ export class CompensationManager {
     correlationId: string,
     compensators: CompensationEntry[],
   ): Promise<void> {
-    if (compensators.length === 0) return;
+    if (compensators.length === 0) {return;}
 
     const session = this.driver.session();
 

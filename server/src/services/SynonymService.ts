@@ -52,7 +52,7 @@ export class SynonymService {
    * Returns the expanded query string.
    */
   expandQuery(query: string): string {
-    if (!query || !this.loaded) return query;
+    if (!query || !this.loaded) {return query;}
 
     const terms = query.toLowerCase().split(/\s+/);
     const expandedTerms = new Set<string>();

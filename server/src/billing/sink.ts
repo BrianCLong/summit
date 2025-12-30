@@ -47,7 +47,7 @@ export class BillingAdapter {
 
   // Simple CSV escape function
   private escapeCsv(field: unknown): string {
-    if (field === null || field === undefined) return '';
+    if (field === null || field === undefined) {return '';}
     const stringField = String(field);
     if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
         return `"${stringField.replace(/"/g, '""')}"`;

@@ -102,7 +102,7 @@ const PerformanceMode = ({
 
   // Auto-detect optimal settings based on graph size
   const autoDetectSettings = useCallback(() => {
-    if (!graph || !graph.nodes) return PERFORMANCE_PRESETS.BALANCED;
+    if (!graph || !graph.nodes) {return PERFORMANCE_PRESETS.BALANCED;}
 
     const nodeCount = graph.nodes.length;
     const edgeCount = graph.edges ? graph.edges.length : 0;
@@ -222,7 +222,7 @@ const PerformanceMode = ({
   // Viewport culling
   const performViewportCulling = useCallback(
     (nodes, viewport) => {
-      if (!config.enableCulling) return nodes;
+      if (!config.enableCulling) {return nodes;}
 
       const padding = 100; // Viewport padding
       return nodes.filter((node) => {
@@ -240,7 +240,7 @@ const PerformanceMode = ({
   // Apply performance optimizations
   const applyOptimizations = useCallback(
     async (graphData, viewport, zoom) => {
-      if (!graphData || !graphData.nodes) return graphData;
+      if (!graphData || !graphData.nodes) {return graphData;}
 
       let optimizedNodes = [...graphData.nodes];
       let optimizedEdges = [...(graphData.edges || [])];

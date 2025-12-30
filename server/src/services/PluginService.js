@@ -443,9 +443,9 @@ class PluginService extends EventEmitter {
     const errors = [];
 
     // Required fields
-    if (!plugin.name) errors.push('Plugin name is required');
-    if (!plugin.version) errors.push('Plugin version is required');
-    if (!plugin.main) errors.push('Plugin main file is required');
+    if (!plugin.name) {errors.push('Plugin name is required');}
+    if (!plugin.version) {errors.push('Plugin version is required');}
+    if (!plugin.main) {errors.push('Plugin main file is required');}
 
     // Version format
     if (plugin.version && !/^\d+\.\d+\.\d+/.test(plugin.version)) {
@@ -541,9 +541,9 @@ class PluginService extends EventEmitter {
       .split('.')
       .map(Number);
 
-    if (availMajor !== reqMajor) return false;
-    if (availMinor < reqMinor) return false;
-    if (availMinor === reqMinor && availPatch < reqPatch) return false;
+    if (availMajor !== reqMajor) {return false;}
+    if (availMinor < reqMinor) {return false;}
+    if (availMinor === reqMinor && availPatch < reqPatch) {return false;}
 
     return true;
   }
@@ -838,7 +838,7 @@ class PluginService extends EventEmitter {
   async registerPluginExtensions(plugin) {
     for (const extensionPointId of plugin.extensionPoints) {
       const extensionPoint = this.extensionPoints.get(extensionPointId);
-      if (!extensionPoint) continue;
+      if (!extensionPoint) {continue;}
 
       if (plugin.instance[extensionPointId.toLowerCase()]) {
         await this.registerExtension(
@@ -1025,7 +1025,7 @@ class PluginService extends EventEmitter {
   // Configuration management
   async savePluginConfiguration(pluginId) {
     const plugin = this.pluginRegistry.get(pluginId);
-    if (!plugin) return false;
+    if (!plugin) {return false;}
 
     const configPath = path.join('plugins/configs', `${pluginId}.json`);
     const writer = this.fs?.writeFile || fs.writeFile;

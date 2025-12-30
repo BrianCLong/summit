@@ -227,14 +227,14 @@ export class BudgetAdmissionController {
 
     // Update hourly usage
     pipeline.hincrbyfloat(`${hourKey}:total`, 'spent', deltaCost);
-    if (deltaRequests > 0) pipeline.hincrby(`${hourKey}:total`, 'requests', deltaRequests);
+    if (deltaRequests > 0) {pipeline.hincrby(`${hourKey}:total`, 'requests', deltaRequests);}
     pipeline.hincrbyfloat(`${hourKey}:experts`, expert, deltaCost);
     pipeline.expire(`${hourKey}:total`, 3600); // 1 hour TTL
     pipeline.expire(`${hourKey}:experts`, 3600);
 
     // Update daily usage
     pipeline.hincrbyfloat(`${dayKey}:total`, 'spent', deltaCost);
-    if (deltaRequests > 0) pipeline.hincrby(`${dayKey}:total`, 'requests', deltaRequests);
+    if (deltaRequests > 0) {pipeline.hincrby(`${dayKey}:total`, 'requests', deltaRequests);}
     pipeline.hincrbyfloat(`${dayKey}:experts`, expert, deltaCost);
     pipeline.expire(`${dayKey}:total`, 86400); // 24 hour TTL
     pipeline.expire(`${dayKey}:experts`, 86400);

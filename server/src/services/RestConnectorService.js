@@ -464,11 +464,11 @@ class RestConnectorService {
   }
 
   hasMorePages(pagination, paginationType, currentPage, maxPages) {
-    if (currentPage >= maxPages) return false;
+    if (currentPage >= maxPages) {return false;}
 
     switch (paginationType) {
       case 'cursor':
-        return !!pagination.nextCursor || !!pagination.next_cursor;
+        return Boolean(pagination.nextCursor) || Boolean(pagination.next_cursor);
       case 'offset':
         return (
           pagination.hasMore ||
@@ -529,10 +529,10 @@ class RestConnectorService {
   getHealth() {
     const successRate =
       this.metrics.totalRequests > 0
-        ? (
+        ? `${(
             (this.metrics.successfulRequests / this.metrics.totalRequests) *
             100
-          ).toFixed(1) + '%'
+          ).toFixed(1)  }%`
         : '100%';
 
     return {

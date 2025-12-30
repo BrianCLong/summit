@@ -530,7 +530,7 @@ export class IngestService {
           }
 
           offset += entities.length;
-          if (entities.length < BATCH_SIZE) hasMore = false;
+          if (entities.length < BATCH_SIZE) {hasMore = false;}
         }
 
         // Sync Relationships
@@ -570,7 +570,7 @@ export class IngestService {
           }
 
           offset += relationships.length;
-           if (relationships.length < BATCH_SIZE) hasMore = false;
+           if (relationships.length < BATCH_SIZE) {hasMore = false;}
         }
 
       } finally {

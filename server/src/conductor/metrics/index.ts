@@ -210,7 +210,7 @@ export class ConductorMetrics {
     // Export histogram summaries
     this.histograms.forEach((metric, key) => {
       const values = metric.values;
-      if (values.length === 0) return;
+      if (values.length === 0) {return;}
 
       const sorted = [...values].sort((a, b) => a - b);
       const count = values.length;
@@ -267,7 +267,7 @@ export class ConductorMetrics {
     // Summarize histograms
     this.histograms.forEach((metric, key) => {
       const values = metric.values;
-      if (values.length === 0) return;
+      if (values.length === 0) {return;}
 
       const sorted = [...values].sort((a, b) => a - b);
       const avg = values.reduce((a, b) => a + b, 0) / values.length;
@@ -316,23 +316,23 @@ export class HealthChecker {
     // Check active tasks
     const activeTasksCheck = await this.checkActiveTasks();
     checks.push(activeTasksCheck);
-    if (activeTasksCheck.status === 'fail') overallStatus = 'unhealthy';
+    if (activeTasksCheck.status === 'fail') {overallStatus = 'unhealthy';}
     if (activeTasksCheck.status === 'warn' && overallStatus === 'healthy')
-      overallStatus = 'degraded';
+      {overallStatus = 'degraded';}
 
     // Check error rates
     const errorRateCheck = this.checkErrorRates();
     checks.push(errorRateCheck);
-    if (errorRateCheck.status === 'fail') overallStatus = 'unhealthy';
+    if (errorRateCheck.status === 'fail') {overallStatus = 'unhealthy';}
     if (errorRateCheck.status === 'warn' && overallStatus === 'healthy')
-      overallStatus = 'degraded';
+      {overallStatus = 'degraded';}
 
     // Check latencies
     const latencyCheck = this.checkLatencies();
     checks.push(latencyCheck);
-    if (latencyCheck.status === 'fail') overallStatus = 'unhealthy';
+    if (latencyCheck.status === 'fail') {overallStatus = 'unhealthy';}
     if (latencyCheck.status === 'warn' && overallStatus === 'healthy')
-      overallStatus = 'degraded';
+      {overallStatus = 'degraded';}
 
     return { status: overallStatus, checks };
   }

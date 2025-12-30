@@ -133,7 +133,7 @@ export class TimeSeriesIntelligenceService {
     const startDate = new Date(now.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
 
     for (const p of dataPoints) {
-      if (p.timestamp < startDate) continue;
+      if (p.timestamp < startDate) {continue;}
       const dateKey = p.timestamp.toISOString().split('T')[0];
       const curr = dailyValues.get(dateKey) || { sum: 0, count: 0 };
       curr.sum += p.value;

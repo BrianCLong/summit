@@ -45,7 +45,7 @@ export default function OverridesPanel() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/overrides');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
       const data = await response.json();
       setOverrides(data.overrides || []);
       setError('');
@@ -111,7 +111,7 @@ export default function OverridesPanel() {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
       await loadOverrides();
     } catch (err) {
       setError(

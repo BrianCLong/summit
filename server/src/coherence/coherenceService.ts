@@ -521,16 +521,16 @@ export class CoherenceService {
       missionAlignment * weights.mission;
 
     let status: 'high' | 'medium' | 'low' | 'insufficient';
-    if (overallScore >= 0.8) status = 'high';
-    else if (overallScore >= 0.6) status = 'medium';
-    else if (overallScore >= 0.3) status = 'low';
-    else status = 'insufficient';
+    if (overallScore >= 0.8) {status = 'high';}
+    else if (overallScore >= 0.6) {status = 'medium';}
+    else if (overallScore >= 0.3) {status = 'low';}
+    else {status = 'insufficient';}
 
     return { score: Math.min(1, Math.max(0, overallScore)), status };
   }
 
   private calculateSignalCoherence(signals: any[]): number {
-    if (!signals.length) return 0;
+    if (!signals.length) {return 0;}
 
     // Weighted average of signal values
     const weightedSum = signals.reduce(
@@ -543,7 +543,7 @@ export class CoherenceService {
   }
 
   private calculateActivityCoherence(fingerprints: any[]): number {
-    if (!fingerprints.length) return 0.5; // Neutral if no activity data
+    if (!fingerprints.length) {return 0.5;} // Neutral if no activity data
 
     // Average confidence of activity fingerprints
     const avgConfidence =
@@ -557,7 +557,7 @@ export class CoherenceService {
   }
 
   private calculateNarrativeCoherence(impacts: any[]): number {
-    if (!impacts.length) return 0.5; // Neutral if no narrative data
+    if (!impacts.length) {return 0.5;} // Neutral if no narrative data
 
     // Weight by impact magnitude and confidence
     const weightedSum = impacts.reduce(
@@ -577,7 +577,7 @@ export class CoherenceService {
     signals: any[],
   ): number {
     // Simple alignment based on signal relevance to mission objectives
-    if (!missionContext || !missionContext.objectives) return 0.5;
+    if (!missionContext || !missionContext.objectives) {return 0.5;}
 
     // Count signals that relate to mission objectives (simplified heuristic)
     const relevantSignals = signals.filter((signal) => {
@@ -646,7 +646,7 @@ export class CoherenceService {
 
     signals.forEach((signal) => {
       const hour =
-        new Date(signal.ts).toISOString().substring(0, 13) + ':00:00.000Z';
+        `${new Date(signal.ts).toISOString().substring(0, 13)  }:00:00.000Z`;
       if (!hourlyGroups.has(hour)) {
         hourlyGroups.set(hour, []);
       }
@@ -720,7 +720,7 @@ export class CoherenceService {
       (ni) => ni.magnitude > 0.8,
     );
     if (highImpactNarratives.length > 0) {
-      if (riskLevel === 'low') riskLevel = 'medium';
+      if (riskLevel === 'low') {riskLevel = 'medium';}
       riskFactors.push(
         `${highImpactNarratives.length} high-impact narrative shifts detected`,
       );
@@ -991,7 +991,7 @@ export class CoherenceService {
   private async getRecentAlerts(tenantId: string): Promise<any[]> {
     // Get recent anomalies and high-risk activities
     const latestAnalysis = await this.getLatestAnalysisResult(tenantId);
-    if (!latestAnalysis) return [];
+    if (!latestAnalysis) {return [];}
 
     const alerts = [];
 

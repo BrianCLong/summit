@@ -116,7 +116,7 @@ export class GraphAnalysisService {
 
   public async runJob(jobId: string): Promise<GraphAnalysisJob> {
     const job = this.jobs.get(jobId);
-    if (!job) throw new Error(`Job ${jobId} not found`);
+    if (!job) {throw new Error(`Job ${jobId} not found`);}
 
     job.status = 'running';
     job.startTime = new Date();
@@ -134,13 +134,13 @@ export class GraphAnalysisService {
       switch (job.algorithm) {
         case 'shortestPath': {
             const p = job.params as unknown as ShortestPathParams;
-            if (!p.sourceNodeId || !p.targetNodeId) throw new Error("Missing sourceNodeId or targetNodeId");
+            if (!p.sourceNodeId || !p.targetNodeId) {throw new Error("Missing sourceNodeId or targetNodeId");}
             result = shortestPath(graph, p.sourceNodeId, p.targetNodeId, p.maxDepth);
             break;
         }
         case 'kHopNeighborhood': {
             const p = job.params as unknown as KHopParams;
-            if (!p.sourceNodeId || !p.k) throw new Error("Missing sourceNodeId or k");
+            if (!p.sourceNodeId || !p.k) {throw new Error("Missing sourceNodeId or k");}
             result = kHopNeighborhood(graph, p.sourceNodeId, p.k, p.direction);
             break;
         }
@@ -173,7 +173,7 @@ export class GraphAnalysisService {
 
   public getJob(jobId: string, tenantId: string): GraphAnalysisJob | undefined {
     const job = this.jobs.get(jobId);
-    if (job && job.tenantId === tenantId) return job;
+    if (job && job.tenantId === tenantId) {return job;}
     return undefined;
   }
 }

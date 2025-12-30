@@ -472,7 +472,7 @@ export class DeceptionDetectionEngine {
    */
   async generateCounterNarrativeStrategy(narrativeId: string): Promise<CounterNarrativeStrategy> {
     const narrative = this.narratives.get(narrativeId);
-    if (!narrative) throw new Error(`Narrative not found: ${narrativeId}`);
+    if (!narrative) {throw new Error(`Narrative not found: ${narrativeId}`);}
 
     return {
       narrativeId,
@@ -643,7 +643,7 @@ export class DeceptionDetectionEngine {
     if (analysis.linguisticAnalysis) {
       score += analysis.linguisticAnalysis.emotionalIntensity * 0.2;
       score += analysis.linguisticAnalysis.rhetoricalDevices.length * 0.1;
-      if (analysis.linguisticAnalysis.translationArtifacts) score += 0.15;
+      if (analysis.linguisticAnalysis.translationArtifacts) {score += 0.15;}
     }
 
     if (analysis.visualAnalysis?.manipulationDetected) {
@@ -671,7 +671,7 @@ export class DeceptionDetectionEngine {
   }
 
   private async checkNetworkInvolvement(content: ContentInput): Promise<CoordinatedNetwork | undefined> {
-    if (!content.authorId) return undefined;
+    if (!content.authorId) {return undefined;}
 
     for (const network of Array.from(this.networks.values())) {
       if (network.accounts.some(a => a.accountId === content.authorId)) {
@@ -763,15 +763,15 @@ export class DeceptionDetectionEngine {
       score += indicator.confidence * severityMultiplier * 10;
     }
 
-    if (network) score += 20;
+    if (network) {score += 20;}
 
     return Math.min(100, score);
   }
 
   private determineVerdict(score: number): DeceptionAssessment['verdict'] {
-    if (score < 25) return 'AUTHENTIC';
-    if (score < 50) return 'SUSPICIOUS';
-    if (score < 75) return 'LIKELY_DECEPTIVE';
+    if (score < 25) {return 'AUTHENTIC';}
+    if (score < 50) {return 'SUSPICIOUS';}
+    if (score < 75) {return 'LIKELY_DECEPTIVE';}
     return 'CONFIRMED_DECEPTIVE';
   }
 

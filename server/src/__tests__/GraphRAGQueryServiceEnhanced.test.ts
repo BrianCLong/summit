@@ -159,8 +159,8 @@ describe('GraphRAGQueryServiceEnhanced', () => {
         records: [
           {
             get: jest.fn<any>((key: string) => {
-              if (key === 'nodeCount') return { toNumber: () => 100 };
-              if (key === 'edgeCount') return { toNumber: () => 50 };
+              if (key === 'nodeCount') {return { toNumber: () => 100 };}
+              if (key === 'edgeCount') {return { toNumber: () => 50 };}
               return null;
             }),
           },

@@ -154,7 +154,7 @@ export class IndexingService {
     entities: Entity[],
     ctx: ConnectorContext,
   ) {
-    if (entities.length === 0) return;
+    if (entities.length === 0) {return;}
 
     const placeholders: string[] = [];
     const params: any[] = [];
@@ -202,7 +202,7 @@ export class IndexingService {
     edges: Edge[],
     ctx: ConnectorContext,
   ) {
-    if (edges.length === 0) return;
+    if (edges.length === 0) {return;}
 
     const placeholders: string[] = [];
     const params: any[] = [];
@@ -246,7 +246,7 @@ export class IndexingService {
     documents: Document[],
     ctx: ConnectorContext,
   ) {
-    if (documents.length === 0) return;
+    if (documents.length === 0) {return;}
 
     const placeholders: string[] = [];
     const params: any[] = [];
@@ -295,7 +295,7 @@ export class IndexingService {
     chunks: Chunk[],
     ctx: ConnectorContext,
   ) {
-    if (chunks.length === 0) return;
+    if (chunks.length === 0) {return;}
 
     const placeholders: string[] = [];
     const params: any[] = [];

@@ -55,8 +55,8 @@ describe('InfluenceOperationsEngine', () => {
             records: [
               {
                 get: (key: string) => {
-                  if (key === 'internalInteractions') return { toNumber: () => 30 };
-                  if (key === 'actorCount') return { toNumber: () => 6 };
+                  if (key === 'internalInteractions') {return { toNumber: () => 30 };}
+                  if (key === 'actorCount') {return { toNumber: () => 6 };}
                   return null;
                 }
               }

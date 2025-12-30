@@ -5,9 +5,9 @@ import { provenanceLedger } from '../../provenance/ledger';
 export const canonicalResolvers = {
   CanonicalEntity: {
     __resolveType(obj: any) {
-      if (obj.entityType === 'Person') return 'Person';
-      if (obj.entityType === 'Organization') return 'Organization';
-      if (obj.entityType === 'Claim') return 'Claim';
+      if (obj.entityType === 'Person') {return 'Person';}
+      if (obj.entityType === 'Organization') {return 'Organization';}
+      if (obj.entityType === 'Claim') {return 'Claim';}
       return 'GenericEntity';
     },
     temporal(obj: any) {
@@ -65,7 +65,7 @@ export const canonicalResolvers = {
       // Fetch existing to merge policyLabels if not provided?
       // For now assume policyLabels required or we need a fetch
       const existing = await graphCore.getEntity(tenantId, id);
-      if (!existing) throw new Error('Entity not found');
+      if (!existing) {throw new Error('Entity not found');}
 
       const labels = policyLabels || (typeof existing.policyLabels === 'string' ? JSON.parse(existing.policyLabels) : existing.policyLabels);
 

@@ -146,7 +146,7 @@ export class StrategicPlanningService {
     const span = tracer.startSpan('strategicPlanning.getGoal');
     try {
       const goal = goalsStore.get(id);
-      if (!goal) return null;
+      if (!goal) {return null;}
 
       // Hydrate with objectives
       const objectives = await this.getObjectivesForGoal(id);
@@ -202,7 +202,7 @@ export class StrategicPlanningService {
     const span = tracer.startSpan('strategicPlanning.deleteGoal');
     try {
       const goal = goalsStore.get(id);
-      if (!goal) return false;
+      if (!goal) {return false;}
 
       // Delete all related objectives
       const objectives = await this.getObjectivesForGoal(id);
@@ -277,7 +277,7 @@ export class StrategicPlanningService {
     const span = tracer.startSpan('strategicPlanning.getObjective');
     try {
       const objective = objectivesStore.get(id);
-      if (!objective) return null;
+      if (!objective) {return null;}
 
       // Hydrate with key results and initiatives
       const keyResults = await this.getKeyResultsForObjective(id);
@@ -353,7 +353,7 @@ export class StrategicPlanningService {
     const span = tracer.startSpan('strategicPlanning.deleteObjective');
     try {
       const objective = objectivesStore.get(id);
-      if (!objective) return false;
+      if (!objective) {return false;}
 
       // Delete all related key results
       const keyResults = await this.getKeyResultsForObjective(id);
@@ -588,7 +588,7 @@ export class StrategicPlanningService {
     const span = tracer.startSpan('strategicPlanning.getInitiative');
     try {
       const initiative = initiativesStore.get(id);
-      if (!initiative) return null;
+      if (!initiative) {return null;}
 
       // Hydrate with milestones and deliverables
       const milestones = await this.getMilestonesForInitiative(id);
@@ -653,7 +653,7 @@ export class StrategicPlanningService {
     const span = tracer.startSpan('strategicPlanning.deleteInitiative');
     try {
       const initiative = initiativesStore.get(id);
-      if (!initiative) return false;
+      if (!initiative) {return false;}
 
       // Delete all related milestones
       const milestones = await this.getMilestonesForInitiative(id);
@@ -937,7 +937,7 @@ export class StrategicPlanningService {
 
   private async recalculateGoalProgress(goalId: string): Promise<void> {
     const goal = goalsStore.get(goalId);
-    if (!goal) return;
+    if (!goal) {return;}
 
     const objectives = await this.getObjectivesForGoal(goalId);
     if (objectives.length === 0) {
@@ -964,7 +964,7 @@ export class StrategicPlanningService {
 
   private async recalculateObjectiveProgress(objectiveId: string): Promise<void> {
     const objective = objectivesStore.get(objectiveId);
-    if (!objective) return;
+    if (!objective) {return;}
 
     const keyResults = await this.getKeyResultsForObjective(objectiveId);
     const initiatives = await this.getInitiativesForObjective(objectiveId);
@@ -1002,7 +1002,7 @@ export class StrategicPlanningService {
 
   private async recalculateInitiativeProgress(initiativeId: string): Promise<void> {
     const initiative = initiativesStore.get(initiativeId);
-    if (!initiative) return;
+    if (!initiative) {return;}
 
     const milestones = await this.getMilestonesForInitiative(initiativeId);
     if (milestones.length === 0) {
@@ -1022,8 +1022,8 @@ export class StrategicPlanningService {
     let score = 100;
 
     // Status penalty
-    if (goal.status === StrategicStatus.AT_RISK) score -= 30;
-    if (goal.status === StrategicStatus.ON_HOLD) score -= 20;
+    if (goal.status === StrategicStatus.AT_RISK) {score -= 30;}
+    if (goal.status === StrategicStatus.ON_HOLD) {score -= 20;}
 
     // Progress vs time penalty
     const now = new Date();
@@ -1040,8 +1040,8 @@ export class StrategicPlanningService {
     }
 
     // Risk penalty (simplified - in production, would analyze actual risks)
-    if (goal.risks.length > 5) score -= 10;
-    if (goal.risks.length > 10) score -= 10;
+    if (goal.risks.length > 5) {score -= 10;}
+    if (goal.risks.length > 10) {score -= 10;}
 
     return Math.max(0, Math.min(100, score));
   }
@@ -1156,7 +1156,7 @@ export class StrategicPlanningService {
     const span = tracer.startSpan('strategicPlanning.getGoalHierarchy');
     try {
       const goal = await this.getGoal(goalId);
-      if (!goal) return null;
+      if (!goal) {return null;}
 
       const objectives = await this.getObjectivesForGoal(goalId);
 

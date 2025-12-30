@@ -61,7 +61,7 @@ type Entity = {
   type: string;
   label: string;
   description?: string | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   properties?: Record<string, any> | null;
   updatedAt?: string;
 };
@@ -148,7 +148,7 @@ export default function EntityDrawer({
   }, [subData, entityId, entity]);
 
   const handleSave = async () => {
-    if (!entityId) return;
+    if (!entityId) {return;}
     const input = {
       label: formValues.label,
       description: formValues.description,
@@ -160,7 +160,7 @@ export default function EntityDrawer({
   };
 
   const handleBlur = () => {
-    if (editMode) handleSave();
+    if (editMode) {handleSave();}
   };
 
   const handleTagAdd = () => {

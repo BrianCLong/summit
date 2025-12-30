@@ -20,18 +20,18 @@ export class SimpleTextChunkingStrategy implements ChunkingStrategy {
       .split(/(?<=[.!?])\s+/)
       .map((s) => s.trim())
       .filter(Boolean);
-    if (sentences.length === 0) return [text];
+    if (sentences.length === 0) {return [text];}
     const chunks: string[] = [];
     let current = '';
     for (const sentence of sentences) {
-      if ((current + ' ' + sentence).trim().length > 400) {
-        if (current) chunks.push(current.trim());
+      if ((`${current  } ${  sentence}`).trim().length > 400) {
+        if (current) {chunks.push(current.trim());}
         current = sentence;
       } else {
         current = `${current} ${sentence}`.trim();
       }
     }
-    if (current) chunks.push(current.trim());
+    if (current) {chunks.push(current.trim());}
     return chunks;
   }
 
@@ -68,7 +68,7 @@ export class InMemoryChunkStore implements ChunkStore {
 
   linkDocuments(documentId: string, relatedIds: string[]): void {
     const doc = this.documents.get(documentId);
-    if (!doc) throw new Error(`Document ${documentId} not registered`);
+    if (!doc) {throw new Error(`Document ${documentId} not registered`);}
     doc.relatedIds = Array.from(
       new Set([...(doc.relatedIds ?? []), ...relatedIds]),
     );
@@ -89,7 +89,7 @@ export class InMemoryChunkStore implements ChunkStore {
   async getImpactedDocuments(removedIds: string[]): Promise<DocumentRecord[]> {
     const impacted: DocumentRecord[] = [];
     for (const doc of this.documents.values()) {
-      if (!doc.relatedIds || doc.relatedIds.length === 0) continue;
+      if (!doc.relatedIds || doc.relatedIds.length === 0) {continue;}
       if (doc.relatedIds.some((id) => removedIds.includes(id))) {
         impacted.push({ ...doc });
       }

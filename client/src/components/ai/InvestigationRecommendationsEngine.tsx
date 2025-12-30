@@ -579,7 +579,7 @@ const InvestigationRecommendationsEngine: React.FC<
     setStrategies(mockStrategies);
     setSimilarCases(mockSimilarCases);
 
-    if (!enableRealTimeUpdates) return;
+    if (!enableRealTimeUpdates) {return;}
 
     // Simulate AI generating new recommendations
     const interval = setInterval(() => {
@@ -645,11 +645,11 @@ const InvestigationRecommendationsEngine: React.FC<
   // Filtered and sorted recommendations
   const filteredRecommendations = useMemo(() => {
     const filtered = recommendations.filter((rec) => {
-      if (showAcceptedOnly && !rec.feedback?.helpful) return false;
+      if (showAcceptedOnly && !rec.feedback?.helpful) {return false;}
       if (filterPriority !== 'all' && rec.priority !== filterPriority)
-        return false;
+        {return false;}
       if (filterCategory !== 'all' && rec.category !== filterCategory)
-        return false;
+        {return false;}
       return true;
     });
 

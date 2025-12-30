@@ -9,8 +9,8 @@ function randomNormal(mu = 0, sigma = 1) {
   // Box-Muller
   let u = 0,
     v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
+  while (u === 0) {u = Math.random();}
+  while (v === 0) {v = Math.random();}
   return (
     mu + sigma * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
   );

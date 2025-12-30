@@ -79,7 +79,7 @@ function Layout() {
     (async () => {
       try {
         const info = await SystemAPI.version();
-        if (!cancelled) setVersionInfo(info);
+        if (!cancelled) {setVersionInfo(info);}
       } catch {
         // ignore if backend not reachable
       }
@@ -87,9 +87,9 @@ function Layout() {
     const fetchReady = async () => {
       try {
         const status = await SystemAPI.ready();
-        if (!cancelled) setReadyStatus(status);
+        if (!cancelled) {setReadyStatus(status);}
       } catch {
-        if (!cancelled) setReadyStatus({ ready: false, services: {} });
+        if (!cancelled) {setReadyStatus({ ready: false, services: {} });}
       }
     };
     fetchReady();

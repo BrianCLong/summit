@@ -20,10 +20,10 @@ function parseBoolean(
   value: string | undefined,
   defaultValue: boolean,
 ): boolean {
-  if (typeof value !== 'string') return defaultValue;
+  if (typeof value !== 'string') {return defaultValue;}
   const normalized = value.trim().toLowerCase();
-  if (truthyValues.has(normalized)) return true;
-  if (falsyValues.has(normalized)) return false;
+  if (truthyValues.has(normalized)) {return true;}
+  if (falsyValues.has(normalized)) {return false;}
   return defaultValue;
 }
 

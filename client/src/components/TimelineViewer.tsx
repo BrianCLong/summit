@@ -61,7 +61,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
       timelineRef.current.on('select', (props) => {
         if (onSelect) {
           const item = items.get(props.items[0]);
-          if (item) onSelect(item);
+          if (item) {onSelect(item);}
         }
       });
     }
@@ -88,7 +88,7 @@ const TimelineViewer: React.FC<TimelineViewerProps> = ({
   }, [data, onSelect]);
 
   const setRange = (range: 'hour' | 'day' | 'week') => {
-    if (!timelineRef.current) return;
+    if (!timelineRef.current) {return;}
     const end = new Date();
     let start: Date;
     switch (range) {

@@ -820,17 +820,17 @@ export class KeyRiskMLExplainer extends EventEmitter {
   }
 
   private getMagnitude(value: number): 'high' | 'medium' | 'low' {
-    if (value > 0.3) return 'high';
-    if (value > 0.1) return 'medium';
+    if (value > 0.3) {return 'high';}
+    if (value > 0.1) {return 'medium';}
     return 'low';
   }
 
   private assessRiskLevel(
     contribution: number,
   ): 'low' | 'medium' | 'high' | 'critical' {
-    if (contribution > 0.5) return 'critical';
-    if (contribution > 0.3) return 'high';
-    if (contribution > 0.1) return 'medium';
+    if (contribution > 0.5) {return 'critical';}
+    if (contribution > 0.3) {return 'high';}
+    if (contribution > 0.1) {return 'medium';}
     return 'low';
   }
 
@@ -937,7 +937,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
 
   private detectSeasonality(values: number[], timestamps: Date[]): number {
     // Simplified seasonality detection
-    if (values.length < 10) return 0;
+    if (values.length < 10) {return 0;}
 
     // Look for patterns in different time periods
     const hourlyPattern = this.calculatePeriodicity(values, timestamps, 24);
@@ -952,7 +952,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
     period: number,
   ): number {
     // Simplified periodicity calculation
-    if (values.length < period * 2) return 0;
+    if (values.length < period * 2) {return 0;}
 
     let correlation = 0;
     const chunks = Math.floor(values.length / period);
@@ -972,7 +972,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
   private detectChangePoints(values: number[], timestamps: Date[]): Date[] {
     const changePoints: Date[] = [];
 
-    if (values.length < 5) return changePoints;
+    if (values.length < 5) {return changePoints;}
 
     // Simple change point detection using sliding window variance
     const windowSize = Math.min(5, Math.floor(values.length / 3));
@@ -996,7 +996,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
   }
 
   private calculateAdaptiveThreshold(values: number[]): number {
-    if (values.length === 0) return 0.1;
+    if (values.length === 0) {return 0.1;}
 
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
     const variance =
@@ -1006,7 +1006,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
   }
 
   private calculateCorrelation(x: number[], y: number[]): number {
-    if (x.length !== y.length || x.length === 0) return 0;
+    if (x.length !== y.length || x.length === 0) {return 0;}
 
     const n = x.length;
     const sumX = x.reduce((sum, val) => sum + val, 0);
@@ -1057,7 +1057,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
   ): AnomalyDetection[] {
     const anomalies: AnomalyDetection[] = [];
 
-    if (values.length < 5) return anomalies;
+    if (values.length < 5) {return anomalies;}
 
     // Calculate statistical thresholds
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;

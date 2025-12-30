@@ -617,21 +617,21 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         const hasRequiredCapabilities = criteria.requiredCapabilities.every(
           (cap) => model.capabilities.includes(cap),
         );
-        if (!hasRequiredCapabilities) continue;
+        if (!hasRequiredCapabilities) {continue;}
       }
 
       // Check context window
-      if (criteria.contextSize > model.contextWindow) continue;
+      if (criteria.contextSize > model.contextWindow) {continue;}
 
       // Check latency requirements
       if (criteria.maxLatency && model.averageLatency > criteria.maxLatency)
-        continue;
+        {continue;}
 
       // Check quality requirements
-      if (model.qualityScore < criteria.qualityRequirement) continue;
+      if (model.qualityScore < criteria.qualityRequirement) {continue;}
 
       // Check availability and health
-      if (model.performance.successRate < 0.9) continue;
+      if (model.performance.successRate < 0.9) {continue;}
 
       candidates.push(model);
     }
@@ -727,11 +727,11 @@ export class CostEfficiencyOptimizer extends EventEmitter {
 
   private determineRoutingStrategy(criteria: ModelSelectionCriteria): string {
     // Intelligent routing strategy based on request characteristics
-    if (criteria.urgency === 'critical') return 'performance_first';
-    if (criteria.qualityRequirement > 0.9) return 'quality_first';
+    if (criteria.urgency === 'critical') {return 'performance_first';}
+    if (criteria.qualityRequirement > 0.9) {return 'quality_first';}
     if (criteria.budgetLimit && criteria.budgetLimit < 0.01)
-      return 'cost_first';
-    if (criteria.complexity > 0.8) return 'capability_first';
+      {return 'cost_first';}
+    if (criteria.complexity > 0.8) {return 'capability_first';}
 
     return 'balanced';
   }
@@ -1007,7 +1007,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   private async getCachedPrediction(
     cacheKey: string,
   ): Promise<CostPrediction | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     const cached = await this.redis.get(`cost_prediction:${cacheKey}`);
     return cached ? JSON.parse(cached) : null;
@@ -1017,7 +1017,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     cacheKey: string,
     prediction: CostPrediction,
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     await this.redis.setex(
       `cost_prediction:${cacheKey}`,
@@ -1038,13 +1038,13 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     let confidence = 0.8; // Base confidence
 
     // Higher confidence for well-known models
-    if (model.performance.successRate > 0.95) confidence += 0.1;
+    if (model.performance.successRate > 0.95) {confidence += 0.1;}
 
     // Lower confidence for very new or experimental models
-    if (Date.now() - model.lastUpdated < 24 * 60 * 60 * 1000) confidence -= 0.1;
+    if (Date.now() - model.lastUpdated < 24 * 60 * 60 * 1000) {confidence -= 0.1;}
 
     // Lower confidence for highly complex tasks
-    if (criteria.complexity > 0.8) confidence -= 0.1;
+    if (criteria.complexity > 0.8) {confidence -= 0.1;}
 
     return Math.max(0.3, Math.min(0.95, confidence));
   }
@@ -1071,7 +1071,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     }> = [];
 
     for (const model of this.modelProfiles.values()) {
-      if (model.id === baseModel.id) continue;
+      if (model.id === baseModel.id) {continue;}
 
       const cost = this.estimateRequestCost(model, criteria);
       const savings = baseCost - cost;
@@ -1163,7 +1163,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     requestData: any,
   ): Promise<void> {
     const model = this.modelProfiles.get(modelId);
-    if (!model) return;
+    if (!model) {return;}
 
     // Update performance metrics (rolling average)
     const alpha = 0.1; // Exponential moving average factor

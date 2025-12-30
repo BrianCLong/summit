@@ -24,7 +24,7 @@ export class OpenAiProvider implements LlmProvider {
             role: m.role,
             content: m.content
         };
-        if (m.name) msg.name = m.name;
+        if (m.name) {msg.name = m.name;}
         if (m.toolCalls) {
             msg.tool_calls = m.toolCalls.map(tc => ({
                 id: tc.id,

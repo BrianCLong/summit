@@ -117,8 +117,8 @@ export async function wireConductor(options: {
     };
 
     conductorLogger.info('Conductor system wired successfully', {
-      graphOpsEnabled: !!servers.graphOpsServer,
-      filesEnabled: !!servers.filesServer,
+      graphOpsEnabled: Boolean(servers.graphOpsServer),
+      filesEnabled: Boolean(servers.filesServer),
       experts: process.env.CONDUCTOR_EXPERTS?.split(',') || ['ALL'],
     });
 

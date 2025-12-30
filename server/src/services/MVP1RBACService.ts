@@ -255,7 +255,7 @@ export class MVP1RBACService {
     resource: PermissionContext['resource'],
     action: Permission,
   ): Promise<boolean> {
-    if (!resource) return true;
+    if (!resource) {return true;}
 
     // Tenant isolation check (except for super admin)
     if (
@@ -290,7 +290,7 @@ export class MVP1RBACService {
     resource: PermissionContext['resource'],
     action: Permission,
   ): Promise<boolean> {
-    if (!resource?.id) return true;
+    if (!resource?.id) {return true;}
 
     try {
       const query = `

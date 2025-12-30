@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
 export default function ArtifactBusPanel() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
     fetch('/api/oci/metrics')

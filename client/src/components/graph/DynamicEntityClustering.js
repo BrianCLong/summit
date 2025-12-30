@@ -151,7 +151,7 @@ const ClusteringEngine = {
     let clusterId = 0;
 
     for (const location of locations) {
-      if (processed.has(location.id)) continue;
+      if (processed.has(location.id)) {continue;}
 
       const cluster = {
         id: `geo_${clusterId++}`,

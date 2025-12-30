@@ -443,8 +443,8 @@ export function createFaultControlMiddleware() {
     } else if (req.path === '/chaos/faults' && req.method === 'POST') {
       const { flags, config } = req.body;
 
-      if (flags) setFaults(flags);
-      if (config) setFaultConfig(config);
+      if (flags) {setFaults(flags);}
+      if (config) {setFaultConfig(config);}
 
       res.json({ success: true, stats: getFaultStats() });
     } else if (req.path === '/chaos/scenarios' && req.method === 'POST') {

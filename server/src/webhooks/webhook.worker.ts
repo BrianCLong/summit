@@ -36,7 +36,7 @@ export const webhookWorker = new Worker<WebhookJobData>(
         : 1000;
 
     const truncateBody = (body: any) => {
-      if (body === undefined || body === null) return body as any;
+      if (body === undefined || body === null) {return body as any;}
       try {
         return JSON.stringify(body).substring(0, 10000);
       } catch {

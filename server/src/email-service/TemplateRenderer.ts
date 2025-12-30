@@ -105,7 +105,7 @@ export class TemplateRenderer {
     try {
       // Note: This is a basic implementation
       // A full implementation would require dynamic component loading
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const html = renderReactEmail(componentCode as any, variables as any);
       return html;
     } catch (error) {

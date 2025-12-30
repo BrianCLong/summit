@@ -4,7 +4,7 @@ export function pickGpuPool(req: {
   vram?: string;
 }) {
   const need = req.gpus || 0;
-  if (!need) return null;
+  if (!need) {return null;}
   const pools = listEligible();
   const filtered = pools.filter((p) => satisfies(p, req));
   return (
@@ -40,6 +40,6 @@ function satisfies(pool: any, req: any) {
   return classOk && vramOk && capOk;
 }
 function compareGpuClass(have: string, want: string) {
-  if (want.endsWith('+')) return have >= want.replace('+', '');
+  if (want.endsWith('+')) {return have >= want.replace('+', '');}
   return have === want;
 }

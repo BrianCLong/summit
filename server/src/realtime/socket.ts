@@ -144,7 +144,7 @@ export function initSocket(httpServer: any): Server {
       target: { type: string; id?: string; path?: string; name?: string } | undefined,
       metadata: Record<string, unknown>,
     ) => {
-      if (!socket.user?.id || !socket.tenantId) return;
+      if (!socket.user?.id || !socket.tenantId) {return;}
       try {
         await emitAuditEvent(
           {
@@ -217,10 +217,10 @@ export function initSocket(httpServer: any): Server {
     socket.on(
       'investigation:join',
       async ({ investigationId }: InvestigationJoinPayload) => {
-        if (!investigationId || !socket.user?.id) return;
+        if (!investigationId || !socket.user?.id) {return;}
         try {
           const auth = await ensureAuthorized(investigationId, 'view');
-          if (!auth.allowed) return;
+          if (!auth.allowed) {return;}
 
           socket.join(roomFor(investigationId));
           socket.join(`graph:${investigationId}`);
@@ -407,7 +407,7 @@ export function initSocket(httpServer: any): Server {
           return;
         }
         const auth = await ensureAuthorized(payload.investigationId, 'edit');
-        if (!auth.allowed) return;
+        if (!auth.allowed) {return;}
         try {
           const annotation = await addAnnotation(payload.investigationId, {
             targetId: payload.targetId,
@@ -445,7 +445,7 @@ export function initSocket(httpServer: any): Server {
           return;
         }
         const auth = await ensureAuthorized(payload.investigationId, 'edit');
-        if (!auth.allowed) return;
+        if (!auth.allowed) {return;}
         try {
           const updated = await updateAnnotation(
             payload.investigationId,
@@ -456,7 +456,7 @@ export function initSocket(httpServer: any): Server {
               resolved: payload.resolved,
             },
           );
-          if (!updated) return;
+          if (!updated) {return;}
           ns.to(roomFor(payload.investigationId)).emit('annotation:updated', {
             investigationId: payload.investigationId,
             annotation: updated,
@@ -485,7 +485,7 @@ export function initSocket(httpServer: any): Server {
           return;
         }
         const auth = await ensureAuthorized(investigationId, 'edit');
-        if (!auth.allowed) return;
+        if (!auth.allowed) {return;}
         try {
           await deleteAnnotation(investigationId, annotationId);
           ns.to(roomFor(investigationId)).emit('annotation:deleted', {
@@ -514,7 +514,7 @@ export function initSocket(httpServer: any): Server {
         return;
       }
       const auth = await ensureAuthorized(payload.investigationId, 'comment');
-      if (!auth.allowed) return;
+      if (!auth.allowed) {return;}
       try {
         const comment = await addComment(payload.investigationId, {
           threadId: payload.threadId,
@@ -562,7 +562,7 @@ export function initSocket(httpServer: any): Server {
         return;
       }
       const auth = await ensureAuthorized(payload.investigationId, 'comment');
-      if (!auth.allowed) return;
+      if (!auth.allowed) {return;}
       try {
         const updated = await updateComment(
           payload.investigationId,
@@ -571,7 +571,7 @@ export function initSocket(httpServer: any): Server {
             message: payload.message,
           },
         );
-        if (!updated) return;
+        if (!updated) {return;}
         ns.to(roomFor(payload.investigationId)).emit('comment:updated', {
           investigationId: payload.investigationId,
           comment: updated,
@@ -611,7 +611,7 @@ export function initSocket(httpServer: any): Server {
           return;
         }
         const auth = await ensureAuthorized(investigationId, 'comment');
-        if (!auth.allowed) return;
+        if (!auth.allowed) {return;}
         try {
           await deleteComment(investigationId, commentId);
           ns.to(roomFor(investigationId)).emit('comment:deleted', {
@@ -651,7 +651,7 @@ export function initSocket(httpServer: any): Server {
         return;
       }
       const auth = await ensureAuthorized(payload.investigationId, 'view');
-      if (!auth.allowed) return;
+      if (!auth.allowed) {return;}
       const list = await getActivity(
         payload.investigationId,
         payload.limit ?? 50,
@@ -668,7 +668,7 @@ export function initSocket(httpServer: any): Server {
         return;
       }
       const auth = await ensureAuthorized(investigationId, 'edit');
-      if (!auth.allowed) return;
+      if (!auth.allowed) {return;}
       const eventPayload = {
         userId: socket.user!.id,
         username: displayName(),
@@ -690,7 +690,7 @@ export function initSocket(httpServer: any): Server {
 
     registerGraphHandlers(socket, {
       authorize: async (graphId: string, op: GraphOperation, intent) => {
-        if (!joinedInvestigations.has(graphId)) return false;
+        if (!joinedInvestigations.has(graphId)) {return false;}
         const action: InvestigationAction = intent === 'mutate' ? 'edit' : 'view';
         const auth = await authorizeInvestigationAction(
           graphId,

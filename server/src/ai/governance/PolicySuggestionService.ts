@@ -118,7 +118,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
    * Initialize the service
    */
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
 
     await this.llmClient.initialize();
     this.initialized = true;
@@ -478,7 +478,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
           existingPolicies,
           context,
         });
-        if (suggestion) suggestions.push(suggestion);
+        if (suggestion) {suggestions.push(suggestion);}
       } catch (error) {
         logger.warn({ gap, error }, 'Failed to generate gap suggestion');
       }
@@ -500,7 +500,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
           policies: existingPolicies.slice(0, 2),
           context,
         });
-        if (suggestion) suggestions.push(suggestion);
+        if (suggestion) {suggestions.push(suggestion);}
       } catch (error) {
         logger.warn({ error }, 'Failed to generate conflict resolution suggestion');
       }
@@ -525,7 +525,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
             existingPolicies,
             context,
           });
-          if (suggestion) suggestions.push(suggestion);
+          if (suggestion) {suggestions.push(suggestion);}
         } catch (error) {
           logger.warn({ pattern, error }, 'Failed to generate usage-based suggestion');
         }

@@ -4,7 +4,7 @@ export function driftScore(diffs: string[]) {
 
 export async function postDriftAlert(stepId: string, diffs: string[]) {
   const hook = process.env.SLACK_WEBHOOK;
-  if (!hook) return;
+  if (!hook) {return;}
   await fetch(hook, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

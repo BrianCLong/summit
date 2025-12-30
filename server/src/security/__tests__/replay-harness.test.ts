@@ -132,7 +132,7 @@ describe('S8 - Security Regression Replay Harness', () => {
       test(`${incident.description}`, async () => {
         for (const step of incident.steps) {
           // Cast to any to allow dynamic method access
-          let req = (request(app) as any)[step.method.toLowerCase()](step.path);
+          const req = (request(app) as any)[step.method.toLowerCase()](step.path);
 
           if (step.headers) {
             for (const [key, value] of Object.entries(step.headers)) {

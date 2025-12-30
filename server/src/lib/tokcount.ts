@@ -101,10 +101,10 @@ export async function countTokens(
 }
 
 export function getModelFamily(model: string): ModelFamily {
-  if (model.startsWith('gpt-') || model.includes('openai')) return 'openai';
+  if (model.startsWith('gpt-') || model.includes('openai')) {return 'openai';}
   if (model.startsWith('claude-') || model.includes('anthropic'))
-    return 'anthropic';
-  if (model.startsWith('gemini-') || model.includes('google')) return 'gemini';
+    {return 'anthropic';}
+  if (model.startsWith('gemini-') || model.includes('google')) {return 'gemini';}
 
   // Default to openai for unknown models
   return 'openai';
@@ -121,8 +121,8 @@ export function validateTokenBudget(
   const percentUsed = (tokens / budgetLimit) * 100;
 
   let recommendAction: 'proceed' | 'warn' | 'block' = 'proceed';
-  if (percentUsed >= 100) recommendAction = 'block';
-  else if (percentUsed >= 80) recommendAction = 'warn';
+  if (percentUsed >= 100) {recommendAction = 'block';}
+  else if (percentUsed >= 80) {recommendAction = 'warn';}
 
   return {
     withinBudget: tokens <= budgetLimit,

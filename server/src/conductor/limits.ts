@@ -4,7 +4,7 @@ export function shouldAdmit(req, costUsd: number) {
   // fetch rolling cost from Redis/DB…
   const projected = /* currentDayCost */ 0 + costUsd;
   if (budgetDaily && projected > budgetDaily)
-    return { admit: false, reason: 'BudgetExceeded' };
+    {return { admit: false, reason: 'BudgetExceeded' };}
   // token bucket / leaky bucket here for RPS…
   return { admit: true };
 }

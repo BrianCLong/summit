@@ -1111,7 +1111,7 @@ export class ExtractionJobService {
     entities: ExtractedEntity[],
   ): ConfidenceDistribution[] {
     const total = entities.length;
-    if (total === 0) return [];
+    if (total === 0) {return [];}
 
     const counts = {
       LOW: entities.filter((e) => e.confidence < 0.5).length,

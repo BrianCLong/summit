@@ -121,10 +121,10 @@ describe('Visualization Service - P2 Priority', () => {
           records: [
             {
               get: (field) => {
-                if (field === 'source') return { properties: { id: 'n1' } };
-                if (field === 'target') return { properties: { id: 'n2' } };
+                if (field === 'source') {return { properties: { id: 'n1' } };}
+                if (field === 'target') {return { properties: { id: 'n2' } };}
                 if (field === 'relationship')
-                  return { properties: { type: 'WORKS_FOR', weight: 0.8 } };
+                  {return { properties: { type: 'WORKS_FOR', weight: 0.8 } };}
               },
             },
           ],
@@ -237,10 +237,10 @@ describe('Visualization Service - P2 Priority', () => {
           {
             get: (field) => {
               if (field === 'parent')
-                return { properties: { id: 'root', label: 'Root Node' } };
+                {return { properties: { id: 'root', label: 'Root Node' } };}
               if (field === 'child')
-                return { properties: { id: 'child1', label: 'Child 1' } };
-              if (field === 'depth') return 1;
+                {return { properties: { id: 'child1', label: 'Child 1' } };}
+              if (field === 'depth') {return 1;}
             },
           },
         ],
@@ -278,10 +278,10 @@ describe('Visualization Service - P2 Priority', () => {
       mockSession.run.mockResolvedValue({
         records: mockMatrixData.map((row, i) => ({
           get: (field) => {
-            if (field === 'row_entity') return `entity${i}`;
+            if (field === 'row_entity') {return `entity${i}`;}
             if (field === 'col_entity')
-              return `entity${field.split('_')[2] || 0}`;
-            if (field === 'value') return row[field.split('_')[2] || 0];
+              {return `entity${field.split('_')[2] || 0}`;}
+            if (field === 'value') {return row[field.split('_')[2] || 0];}
           },
         })),
       });
@@ -311,9 +311,9 @@ describe('Visualization Service - P2 Priority', () => {
         records: [
           {
             get: (field) => {
-              if (field === 'source') return 'Source A';
-              if (field === 'target') return 'Target B';
-              if (field === 'value') return 50;
+              if (field === 'source') {return 'Source A';}
+              if (field === 'target') {return 'Target B';}
+              if (field === 'value') {return 50;}
             },
           },
         ],
@@ -354,10 +354,10 @@ describe('Visualization Service - P2 Priority', () => {
           records: [
             {
               get: (field) => {
-                if (field === 'source') return { properties: { id: 'n1' } };
-                if (field === 'target') return { properties: { id: 'n2' } };
+                if (field === 'source') {return { properties: { id: 'n1' } };}
+                if (field === 'target') {return { properties: { id: 'n2' } };}
                 if (field === 'relationship')
-                  return { properties: { type: 'CONNECTED' } };
+                  {return { properties: { type: 'CONNECTED' } };}
               },
             },
           ],

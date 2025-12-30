@@ -157,7 +157,7 @@ export class QueryResultCache {
     cacheLocalSize.labels('query-signature:result').set(this.l1.size);
     recSet('query-signature', 'result', tenantId);
 
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.setex(
@@ -181,7 +181,7 @@ export class QueryResultCache {
     cacheLocalSize.labels('query-signature:streaming').set(this.streamingCache.size);
     recSet('query-signature', 'streaming', tenantId);
 
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.setex(
@@ -297,7 +297,7 @@ export class QueryResultCache {
   ): void {
     const maxEntries =
       operation === 'streaming' ? this.config.streamingMaxEntries : this.config.maxEntries;
-    if (map.size < maxEntries) return;
+    if (map.size < maxEntries) {return;}
 
     let candidate: { key: string; entry: CacheEntry<T> } | null = null;
     for (const [key, entry] of map.entries()) {

@@ -4,7 +4,7 @@ import $ from 'jquery';
 export function useHoldToTalk(onStart: () => void, onEnd: () => void) {
   const ref = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {return;}
     const $btn = $(ref.current);
     const down = () => onStart();
     const up = () => onEnd();

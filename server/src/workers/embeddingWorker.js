@@ -3,16 +3,16 @@ const { getNeo4jDriver, getPostgresPool } = require('../config/database');
 const EmbeddingService = require('../services/EmbeddingService');
 
 function arrayToVectorLiteral(arr) {
-  if (!Array.isArray(arr)) return null;
+  if (!Array.isArray(arr)) {return null;}
   return (
-    '[' +
-    arr.map((x) => (typeof x === 'number' ? x : Number(x) || 0)).join(',') +
-    ']'
+    `[${ 
+    arr.map((x) => (typeof x === 'number' ? x : Number(x) || 0)).join(',') 
+    }]`
   );
 }
 
 async function fetchExistingIds(pg, ids) {
-  if (!ids.length) return new Set();
+  if (!ids.length) {return new Set();}
   const { rows } = await pg.query(
     'SELECT entity_id FROM entity_embeddings WHERE entity_id = ANY($1::text[])',
     [ids],
@@ -21,7 +21,7 @@ async function fetchExistingIds(pg, ids) {
 }
 
 async function upsertEmbeddings(pg, pairs, model) {
-  if (!pairs.length) return 0;
+  if (!pairs.length) {return 0;}
   const values = [];
   const placeholders = [];
   for (let i = 0; i < pairs.length; i++) {
@@ -76,7 +76,7 @@ async function runOnce(batchSize = 50) {
       all.map((x) => x.id),
     );
     const todo = all.filter((x) => !existing.has(x.id)).slice(0, batchSize);
-    if (todo.length === 0) return { processed: 0 };
+    if (todo.length === 0) {return { processed: 0 };}
 
     const embeddings = await embeddingService.generateEmbeddings(
       todo.map((t) => t.text),
@@ -108,9 +108,9 @@ function startEmbeddingWorker(options = {}) {
   let timer = null;
   const tick = async () => {
     const { processed, error } = await runOnce(batchSize);
-    if (error) logger.warn('Embedding worker tick error', { error });
+    if (error) {logger.warn('Embedding worker tick error', { error });}
     if (processed)
-      logger.info(`Embedding worker wrote ${processed} embeddings`);
+      {logger.info(`Embedding worker wrote ${processed} embeddings`);}
   };
 
   // run soon after start, then on interval

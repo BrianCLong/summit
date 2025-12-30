@@ -390,10 +390,10 @@ export class ExternalVerifier {
       // Check 3: Verify band assignment is correct
       const score = riskResult.score;
       let expectedBand: string;
-      if (score < 0.33) expectedBand = 'low';
-      else if (score < 0.66) expectedBand = 'medium';
-      else if (score < 0.85) expectedBand = 'high';
-      else expectedBand = 'critical';
+      if (score < 0.33) {expectedBand = 'low';}
+      else if (score < 0.66) {expectedBand = 'medium';}
+      else if (score < 0.85) {expectedBand = 'high';}
+      else {expectedBand = 'critical';}
 
       if (expectedBand !== riskResult.band) {
         inconsistencies.push(
@@ -428,9 +428,9 @@ export class ExternalVerifier {
     const issues: string[] = [];
 
     // Check required fields
-    if (!metadata.modelName) issues.push('Missing model name');
-    if (!metadata.modelVersion) issues.push('Missing model version');
-    if (!metadata.modelType) issues.push('Missing model type');
+    if (!metadata.modelName) {issues.push('Missing model name');}
+    if (!metadata.modelVersion) {issues.push('Missing model version');}
+    if (!metadata.modelType) {issues.push('Missing model type');}
 
     // Check timestamp validity
     if (metadata.lastUpdated) {
@@ -583,11 +583,11 @@ export class ExternalVerifier {
 
     let confidence = 0;
 
-    if (checks.digestIntegrity.passed) confidence += weights.digestIntegrity;
-    if (checks.signatureValidity.passed) confidence += weights.signatureValidity;
-    if (checks.reproducibility.passed) confidence += weights.reproducibility;
-    if (checks.parameterConsistency.passed) confidence += weights.parameterConsistency;
-    if (checks.modelMetadata.passed) confidence += weights.modelMetadata;
+    if (checks.digestIntegrity.passed) {confidence += weights.digestIntegrity;}
+    if (checks.signatureValidity.passed) {confidence += weights.signatureValidity;}
+    if (checks.reproducibility.passed) {confidence += weights.reproducibility;}
+    if (checks.parameterConsistency.passed) {confidence += weights.parameterConsistency;}
+    if (checks.modelMetadata.passed) {confidence += weights.modelMetadata;}
 
     return confidence;
   }

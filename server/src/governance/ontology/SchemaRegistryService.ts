@@ -48,7 +48,7 @@ export class SchemaRegistryService {
       schemas.forEach(s => {
           // Convert date strings back to objects
           s.createdAt = new Date(s.createdAt);
-          if (s.approvedAt) s.approvedAt = new Date(s.approvedAt);
+          if (s.approvedAt) {s.approvedAt = new Date(s.approvedAt);}
 
           this.schemas.set(s.id, s);
           if (s.status === 'ACTIVE') {
@@ -66,13 +66,13 @@ export class SchemaRegistryService {
   // --- Schema Management ---
 
   public getLatestSchema(): SchemaVersion | null {
-    if (!this.activeVersionId) return null;
+    if (!this.activeVersionId) {return null;}
     return this.schemas.get(this.activeVersionId) || null;
   }
 
   public getSchema(version: string): SchemaVersion | undefined {
     for (const schema of this.schemas.values()) {
-      if (schema.version === version) return schema;
+      if (schema.version === version) {return schema;}
     }
     return undefined;
   }
@@ -106,7 +106,7 @@ export class SchemaRegistryService {
 
   public async activateSchema(id: string, approver: string): Promise<void> {
     const schema = this.schemas.get(id);
-    if (!schema) throw new Error('Schema not found');
+    if (!schema) {throw new Error('Schema not found');}
 
     // Deprecate current active
     if (this.activeVersionId) {
@@ -149,7 +149,7 @@ export class SchemaRegistryService {
 
   public async addConceptToVocabulary(vocabId: string, concept: Concept): Promise<void> {
     const vocab = this.vocabularies.get(vocabId);
-    if (!vocab) throw new Error('Vocabulary not found');
+    if (!vocab) {throw new Error('Vocabulary not found');}
     vocab.concepts.push(concept);
     await this.vocabRepo.save(vocab.id, vocab);
   }
@@ -158,14 +158,14 @@ export class SchemaRegistryService {
 
   private incrementVersion(version: string): string {
     const parts = version.split('.').map(Number);
-    if (parts.length !== 3) return '1.0.0';
+    if (parts.length !== 3) {return '1.0.0';}
     parts[1] += 1;
     return parts.join('.');
   }
 
   private async initializeBootstrapSchema() {
     // Check if we already have data (safety check, though caller logic handles this)
-    if (this.schemas.size > 0) return;
+    if (this.schemas.size > 0) {return;}
 
     // Stable ID for bootstrap schema
     const BOOTSTRAP_SCHEMA_ID = '00000000-0000-0000-0000-000000000001';

@@ -9,7 +9,7 @@ class RuleRunnerService {
   }
 
   start() {
-    if (this.timer) return;
+    if (this.timer) {return;}
     this.logger &&
       this.logger.info(
         `RuleRunner starting, interval=${this.intervalMs}ms, threshold=${this.threshold}`,
@@ -24,7 +24,7 @@ class RuleRunnerService {
   }
 
   stop() {
-    if (this.timer) clearInterval(this.timer);
+    if (this.timer) {clearInterval(this.timer);}
     this.timer = null;
   }
 
@@ -57,7 +57,7 @@ class RuleRunnerService {
       );
     }
     if (rows.length && this.logger)
-      this.logger.info(`RuleRunner created ${rows.length} alerts.`);
+      {this.logger.info(`RuleRunner created ${rows.length} alerts.`);}
   }
 }
 

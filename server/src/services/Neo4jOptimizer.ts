@@ -348,7 +348,7 @@ export class Neo4jOptimizer {
   }
 
   private percentile(values: number[], p: number): number {
-    if (!values.length) return 0;
+    if (!values.length) {return 0;}
     const sorted = [...values].sort((a, b) => a - b);
     const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p));
     return sorted[idx];

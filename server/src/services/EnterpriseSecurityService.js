@@ -686,7 +686,7 @@ class EnterpriseSecurityService extends EventEmitter {
       ipAddress: clientInfo.ip,
       userAgent: clientInfo.userAgent,
       location: clientInfo.location,
-      mfaVerified: !!clientInfo.mfaToken,
+      mfaVerified: Boolean(clientInfo.mfaToken),
       permissions: this.roles.get(user.role).permissions,
       dataClassifications: this.roles.get(user.role).dataClassifications,
       token: this.generateSessionToken(sessionId, user.id),
@@ -1364,7 +1364,7 @@ class EnterpriseSecurityService extends EventEmitter {
   parseTimeToMs(timeStr) {
     const units = { s: 1000, m: 60000, h: 3600000, d: 86400000 };
     const match = timeStr.match(/^(\d+)([smhd])$/);
-    if (!match) return 24 * 60 * 60 * 1000; // Default 24 hours
+    if (!match) {return 24 * 60 * 60 * 1000;} // Default 24 hours
     return parseInt(match[1]) * units[match[2]];
   }
 
@@ -1402,10 +1402,10 @@ class EnterpriseSecurityService extends EventEmitter {
     // Implementation would query database with filters
     return this.auditLog.filter((event) => {
       if (filters.startDate && event.timestamp < filters.startDate)
-        return false;
-      if (filters.endDate && event.timestamp > filters.endDate) return false;
-      if (filters.user && event.user !== filters.user) return false;
-      if (filters.type && event.type !== filters.type) return false;
+        {return false;}
+      if (filters.endDate && event.timestamp > filters.endDate) {return false;}
+      if (filters.user && event.user !== filters.user) {return false;}
+      if (filters.type && event.type !== filters.type) {return false;}
       return true;
     });
   }

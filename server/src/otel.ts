@@ -8,7 +8,7 @@ import { initializeTracing } from './observability/tracer.js';
 let started = false;
 
 export async function startOtel(): Promise<void> {
-  if (started) return;
+  if (started) {return;}
 
   // If explicitly disabled via env var
   if (process.env.ENABLE_OTEL === 'false') {

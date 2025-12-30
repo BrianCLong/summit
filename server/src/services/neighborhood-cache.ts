@@ -36,7 +36,7 @@ export class NeighborhoodCache {
             for (const record of ctxRes.records) {
               const tenantId = record.get('tenantId');
               const investigationId = record.get('investigationId');
-              if (!tenantId || !investigationId) continue;
+              if (!tenantId || !investigationId) {continue;}
               const topRes = await session.run(
                 `MATCH (e:Entity {tenantId: $tenantId, investigationId: $investigationId})-[r]-(m:Entity {tenantId: $tenantId, investigationId: $investigationId})
                  RETURN e.id AS id, count(r) AS score

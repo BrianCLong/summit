@@ -135,7 +135,7 @@ function CommentSystem({
   };
 
   const handleSubmitComment = async () => {
-    if (!newComment.trim()) return;
+    if (!newComment.trim()) {return;}
 
     const comment = {
       id: Date.now().toString(),
@@ -289,7 +289,7 @@ function CommentSystem({
 
   const filteredAndSortedComments = comments
     .filter((comment) => {
-      if (filterType === 'all') return true;
+      if (filterType === 'all') {return true;}
       return comment.type === filterType;
     })
     .sort((a, b) => {

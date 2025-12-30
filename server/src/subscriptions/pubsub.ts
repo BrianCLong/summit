@@ -71,7 +71,7 @@ export const redis = {
 
   // Cache for OPA decisions with TTL
   setWithTTL: async (key: string, value: string, ttlSeconds: number = 300) => {
-    if (!redisClient) return false;
+    if (!redisClient) {return false;}
     try {
       await redisClient.setex(key, ttlSeconds, value);
       return true;
@@ -86,7 +86,7 @@ export const redis = {
     value: string,
     ttlSeconds: number = 300,
   ) => {
-    if (!redisClient) return false;
+    if (!redisClient) {return false;}
     try {
       const result = await redisClient.set(key, value, 'EX', ttlSeconds, 'NX');
       return result === 'OK';
@@ -97,7 +97,7 @@ export const redis = {
   },
 
   setex: async (key: string, ttlSeconds: number, value: string) => {
-    if (!redisClient) return false;
+    if (!redisClient) {return false;}
     try {
       await redisClient.setex(key, ttlSeconds, value);
       return true;
@@ -108,7 +108,7 @@ export const redis = {
   },
 
   get: async (key: string): Promise<string | null> => {
-    if (!redisClient) return null;
+    if (!redisClient) {return null;}
     try {
       return await redisClient.get(key);
     } catch (error) {

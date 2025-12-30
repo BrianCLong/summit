@@ -84,7 +84,7 @@ export class EvidenceRegistry {
   }
 
   private async persistArtifact(artifact: EvidenceArtifact): Promise<void> {
-    if (!this.pool) return;
+    if (!this.pool) {return;}
     await this.pool.query(
       `INSERT INTO litigation_evidence (
         id,
@@ -117,7 +117,7 @@ export class EvidenceRegistry {
   }
 
   private async persistCustodyEvent(event: CustodyEvent): Promise<void> {
-    if (!this.pool) return;
+    if (!this.pool) {return;}
     await this.pool.query(
       `INSERT INTO litigation_evidence_custody (
         artifact_id,

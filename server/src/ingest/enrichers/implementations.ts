@@ -6,7 +6,7 @@ import axios from 'axios';
 export class GeoIPEnricher extends BaseEnricher {
   async enrich(event: IngestionEvent): Promise<EnrichmentResult> {
     const ip = event.data[this.config.config.ipField || 'ip'];
-    if (!ip) return { enrichedData: {}, metadata: {} };
+    if (!ip) {return { enrichedData: {}, metadata: {} };}
 
     // Mock GeoIP lookup for sandbox
     // In production, use MaxMind or API
@@ -27,7 +27,7 @@ export class GeoIPEnricher extends BaseEnricher {
 export class LanguageEnricher extends BaseEnricher {
   async enrich(event: IngestionEvent): Promise<EnrichmentResult> {
     const text = event.data[this.config.config.textField || 'text'];
-    if (!text) return { enrichedData: {}, metadata: {} };
+    if (!text) {return { enrichedData: {}, metadata: {} };}
 
     // Mock detection
     return {

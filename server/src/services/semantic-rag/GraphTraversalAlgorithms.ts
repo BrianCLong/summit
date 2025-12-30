@@ -693,13 +693,13 @@ export class GraphTraversalAlgorithms {
     }
 
     const segments = metapath.map((type, i) => {
-      if (i === 0) return '';
+      if (i === 0) {return '';}
       return `-[:RELATED_TO|RELATIONSHIP]->(n${i}:Entity)`;
     });
 
     const whereClause = metapath
       .map((type, i) => {
-        if (i === 0) return `start.type = '${type}'`;
+        if (i === 0) {return `start.type = '${type}'`;}
         return `n${i}.type = '${type}'`;
       })
       .join(' AND ');

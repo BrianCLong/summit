@@ -208,7 +208,7 @@ export const WorkflowDashboard: React.FC = () => {
   };
 
   const calculateProgress = (workflow: Workflow): number => {
-    if (!workflow.tasks || workflow.tasks.length === 0) return 0;
+    if (!workflow.tasks || workflow.tasks.length === 0) {return 0;}
     const completedTasks = workflow.tasks.filter(
       (t) => t.status === 'COMPLETED',
     ).length;

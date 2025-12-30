@@ -99,7 +99,7 @@ export async function initializeFeatureFlags(): Promise<FeatureFlagService> {
     featureFlagService = new FeatureFlagService({
       provider,
       cache,
-      enableCache: !!cache,
+      enableCache: Boolean(cache),
       enableMetrics: true,
       enableAnalytics: true,
       cacheTTL: parseInt(process.env.FEATURE_FLAG_CACHE_TTL || '300'),
@@ -115,7 +115,7 @@ export async function initializeFeatureFlags(): Promise<FeatureFlagService> {
     featureFlagService.on('ready', () => {
       logger.info('Feature flag service ready', {
         provider: provider.name,
-        cacheEnabled: !!cache,
+        cacheEnabled: Boolean(cache),
       });
     });
 

@@ -38,13 +38,13 @@ const AdversaryIntentDisplay: React.FC<AdversaryIntentDisplayProps> = ({
     pollInterval: 10000, // Poll every 10 seconds
   });
 
-  if (loading) return <CircularProgress />;
+  if (loading) {return <CircularProgress />;}
   if (error)
-    return (
+    {return (
       <Alert severity="error">
         Error loading adversary intent: {error.message}
       </Alert>
-    );
+    );}
 
   const estimates = data?.getAdversaryIntentEstimates || [];
 

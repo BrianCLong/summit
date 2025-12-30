@@ -33,10 +33,10 @@ const SEARCH_HYBRID = gql`
 `;
 
 function highlight(text, q) {
-  if (!text) return text;
+  if (!text) {return text;}
   try {
     const parts = q.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return text;
+    if (parts.length === 0) {return text;}
     const re = new RegExp(
       `(${parts.map((p) => p.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|')})`,
       'ig',
@@ -64,10 +64,10 @@ export default function SearchPanel() {
 
   const onSearch = () => {
     const filters = {};
-    if (type) filters.type = type;
-    if (investigationId) filters.investigationId = investigationId;
-    if (hybrid) runHybrid({ variables: { q, filters, limit: 25 } });
-    else runSearch({ variables: { q, filters, limit: 25 } });
+    if (type) {filters.type = type;}
+    if (investigationId) {filters.investigationId = investigationId;}
+    if (hybrid) {runHybrid({ variables: { q, filters, limit: 25 } });}
+    else {runSearch({ variables: { q, filters, limit: 25 } });}
   };
 
   const results = useMemo(
@@ -89,7 +89,7 @@ export default function SearchPanel() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onSearch();
+              if (e.key === 'Enter') {onSearch();}
             }}
           />
         </Grid>

@@ -57,7 +57,7 @@ export class AbyssService {
    * This simulates the self-destruct and mirroring process.
    */
   private async triggerProtocol() {
-    if (this.protocolState.status !== 'armed') return;
+    if (this.protocolState.status !== 'armed') {return;}
 
     console.error(`[ABYSS] TRIGGER EVENT DETECTED. Self-destruct and mirroring initiated.`);
     this.protocolState.status = 'triggered';

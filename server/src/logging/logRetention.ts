@@ -25,9 +25,9 @@ async function compressOldLogs(directory: string, compressAfterDays: number, log
         const fullPath = path.join(directory, file);
         const stats = await fs.promises.stat(fullPath);
         const ageDays = (now - stats.mtimeMs) / (1000 * 60 * 60 * 24);
-        if (ageDays < compressAfterDays) return;
+        if (ageDays < compressAfterDays) {return;}
         const gzPath = `${fullPath}.gz`;
-        if (fs.existsSync(gzPath)) return;
+        if (fs.existsSync(gzPath)) {return;}
 
         await pump(fs.createReadStream(fullPath), zlib.createGzip(), fs.createWriteStream(gzPath));
         await fs.promises.unlink(fullPath);
@@ -70,12 +70,12 @@ async function enforceSizeLimit(directory: string, maxTotalSizeMb: number, logge
   let totalBytes = entries.reduce((acc, entry) => acc + entry.stats.size, 0);
   const maxBytes = maxTotalSizeMb * 1024 * 1024;
 
-  if (totalBytes <= maxBytes) return;
+  if (totalBytes <= maxBytes) {return;}
 
   // delete oldest until under limit
   const sorted = entries.sort((a, b) => a.stats.mtimeMs - b.stats.mtimeMs);
   for (const entry of sorted) {
-    if (totalBytes <= maxBytes) break;
+    if (totalBytes <= maxBytes) {break;}
     await fs.promises.unlink(entry.fullPath);
     totalBytes -= entry.stats.size;
     logger.warn({ file: entry.file }, 'Removed log to enforce size cap');

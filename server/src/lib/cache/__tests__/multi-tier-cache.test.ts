@@ -55,8 +55,8 @@ class InMemoryRedis {
   async del(...keys: string[]) {
     let count = 0;
     keys.forEach((key) => {
-      if (this.state.kv.delete(key)) count++;
-      if (this.state.sets.delete(key)) count++;
+      if (this.state.kv.delete(key)) {count++;}
+      if (this.state.sets.delete(key)) {count++;}
     });
     return count;
   }
@@ -86,7 +86,7 @@ class InMemoryRedis {
   async srem(key: string, member: string) {
     this.cleanupSet(key);
     const set = this.state.sets.get(key);
-    if (!set) return 0;
+    if (!set) {return 0;}
     const existed = set.members.delete(member);
     if (set.members.size === 0) {
       this.state.sets.delete(key);
@@ -111,7 +111,7 @@ class InMemoryRedis {
 
   async publish(channel: string, message: string) {
     const handlers = this.state.subscribers.get(channel);
-    if (!handlers) return 0;
+    if (!handlers) {return 0;}
     handlers.forEach((handler) => handler(channel, message));
     return handlers.size;
   }

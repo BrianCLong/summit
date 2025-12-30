@@ -195,7 +195,7 @@ export class OptimizationManager {
           }
 
           const originalQuery = req.body.query || req.query.q;
-          if (!originalQuery) return next();
+          if (!originalQuery) {return next();}
 
           try {
             const optimizedResult =
@@ -245,7 +245,7 @@ export class OptimizationManager {
           const originalQuery = req.body.query || req.query.q;
           const parameters = req.body.parameters || [];
 
-          if (!originalQuery) return next();
+          if (!originalQuery) {return next();}
 
           try {
             const optimizedResult =
@@ -742,7 +742,7 @@ export class OptimizationManager {
   }
 
   private calculateConnectionEfficiency(poolMetrics: any): number {
-    if (!poolMetrics) return 0;
+    if (!poolMetrics) {return 0;}
 
     const totalConnections = (poolMetrics.totalConnections as number) || 1;
     const activeConnections = (poolMetrics.activeConnections as number) || 0;
@@ -769,7 +769,7 @@ export class OptimizationManager {
 
   private calculateBudgetCompliance(costReport: any): number {
     // Calculate budget compliance rate
-    if (!costReport.budget) return 100;
+    if (!costReport.budget) {return 100;}
 
     return Math.min(
       100,

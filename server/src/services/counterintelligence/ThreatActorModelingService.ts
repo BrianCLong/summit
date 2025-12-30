@@ -353,7 +353,7 @@ export class ThreatActorModelingService {
    */
   async predictNextActions(actorId: string, currentState: CampaignState): Promise<PredictedAction[]> {
     const actor = this.actors.get(actorId);
-    if (!actor) throw new Error(`Unknown actor: ${actorId}`);
+    if (!actor) {throw new Error(`Unknown actor: ${actorId}`);}
 
     const predictions: PredictedAction[] = [];
 
@@ -416,7 +416,7 @@ export class ThreatActorModelingService {
    */
   async generateThreatReport(actorId: string): Promise<ThreatReport> {
     const actor = this.actors.get(actorId);
-    if (!actor) throw new Error(`Unknown actor: ${actorId}`);
+    if (!actor) {throw new Error(`Unknown actor: ${actorId}`);}
 
     const activeCampaigns = Array.from(this.campaigns.values())
       .filter(c => c.attributedActor === actorId && c.status === 'ACTIVE');
@@ -528,9 +528,9 @@ export class ThreatActorModelingService {
       t.technique.includes('firmware')
     ).length;
 
-    if (advancedTechniques > 3) return 'NATION_STATE';
-    if (advancedTechniques > 1) return 'EXPERT';
-    if (ttps.length > 5) return 'ADVANCED';
+    if (advancedTechniques > 3) {return 'NATION_STATE';}
+    if (advancedTechniques > 1) {return 'EXPERT';}
+    if (ttps.length > 5) {return 'ADVANCED';}
     return 'SCRIPT_KIDDIE';
   }
 
@@ -588,8 +588,8 @@ export class ThreatActorModelingService {
   }
 
   private generateRecommendation(confidence: number, actor: ThreatActorProfile): string {
-    if (confidence > 0.8) return `High confidence match to ${actor.codename}. Recommend immediate escalation.`;
-    if (confidence > 0.6) return `Moderate confidence match. Continue collection on ${actor.codename} TTPs.`;
+    if (confidence > 0.8) {return `High confidence match to ${actor.codename}. Recommend immediate escalation.`;}
+    if (confidence > 0.6) {return `Moderate confidence match. Continue collection on ${actor.codename} TTPs.`;}
     return `Low confidence match. Monitor for additional indicators.`;
   }
 

@@ -131,7 +131,7 @@ export class AirGapVulnManager {
    * Initialize the vulnerability manager
    */
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
 
     console.log('🔒 Initializing Air-Gapped Vulnerability Manager...');
 
@@ -364,7 +364,7 @@ export class AirGapVulnManager {
     const severityOrder = { critical: 0, high: 1, medium: 2, low: 3, unknown: 4 };
     results.sort((a, b) => {
       const sevDiff = severityOrder[a.severity] - severityOrder[b.severity];
-      if (sevDiff !== 0) return sevDiff;
+      if (sevDiff !== 0) {return sevDiff;}
       return (b.cvssScore || 0) - (a.cvssScore || 0);
     });
 
@@ -493,7 +493,7 @@ export class AirGapVulnManager {
         });
       }
 
-      if (violations.length >= limit) break;
+      if (violations.length >= limit) {break;}
     }
 
     return violations;

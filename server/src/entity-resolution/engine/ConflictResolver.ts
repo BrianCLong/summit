@@ -20,7 +20,7 @@ export class ConflictResolver {
    */
   public static resolve(entityA: any, entityB: any, strategies: StrategyType[] = ['recency']): any {
     // Start with a base merge (A as base)
-    let merged = { ...entityA, ...entityB };
+    const merged = { ...entityA, ...entityB };
 
     // Critical fields that should be merged carefully
     const criticalFields = ['name', 'address', 'phone', 'email', 'dateOfBirth'];
@@ -58,21 +58,21 @@ export class ConflictResolver {
       if (strategy === 'source_priority') {
         const scoreA = this.SOURCE_PRIORITY[entityA.source] || 0;
         const scoreB = this.SOURCE_PRIORITY[entityB.source] || 0;
-        if (scoreA > scoreB) return valA;
-        if (scoreB > scoreA) return valB;
+        if (scoreA > scoreB) {return valA;}
+        if (scoreB > scoreA) {return valB;}
       }
 
       if (strategy === 'recency') {
         const dateA = new Date(entityA.updatedAt || 0).getTime();
         const dateB = new Date(entityB.updatedAt || 0).getTime();
-        if (dateA > dateB) return valA;
-        if (dateB > dateA) return valB;
+        if (dateA > dateB) {return valA;}
+        if (dateB > dateA) {return valB;}
       }
 
       if (strategy === 'completeness') {
          // Simple heuristic: longer string is "more complete"
-         if (String(valA).length > String(valB).length) return valA;
-         if (String(valB).length > String(valA).length) return valB;
+         if (String(valA).length > String(valB).length) {return valA;}
+         if (String(valB).length > String(valA).length) {return valB;}
       }
     }
 

@@ -21,7 +21,7 @@ router.post(
   async (req, res) => {
     const { provider, externalId } = req.params as any;
     const { runId } = (req.body || {}) as any;
-    if (!runId) return res.status(400).json({ error: 'runId required' });
+    if (!runId) {return res.status(400).json({ error: 'runId required' });}
     await linkTicketToRun({ provider, externalId, runId });
     res.json({ ok: true });
   },
@@ -35,7 +35,7 @@ router.post(
     const { provider, externalId } = req.params as any;
     const { deploymentId } = (req.body || {}) as any;
     if (!deploymentId)
-      return res.status(400).json({ error: 'deploymentId required' });
+      {return res.status(400).json({ error: 'deploymentId required' });}
     await linkTicketToDeployment({ provider, externalId, deploymentId });
     res.json({ ok: true });
   },

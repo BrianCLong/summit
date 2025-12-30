@@ -114,10 +114,10 @@ export class AutomatedIntelligenceReportingService {
       const factors = [];
 
       // Base CVSS or Severity
-      if (threat.cvss) score += threat.cvss * 10;
-      else if (threat.severity === 'high') score += 80;
-      else if (threat.severity === 'medium') score += 50;
-      else score += 20;
+      if (threat.cvss) {score += threat.cvss * 10;}
+      else if (threat.severity === 'high') {score += 80;}
+      else if (threat.severity === 'medium') {score += 50;}
+      else {score += 20;}
 
       // Contextual Boosting (Simulated)
       // e.g., if threat targets our sector
@@ -137,9 +137,9 @@ export class AutomatedIntelligenceReportingService {
       score = Math.min(100, score);
 
       let severity: ThreatPriority['severity'] = 'LOW';
-      if (score >= 90) severity = 'CRITICAL';
-      else if (score >= 70) severity = 'HIGH';
-      else if (score >= 40) severity = 'MEDIUM';
+      if (score >= 90) {severity = 'CRITICAL';}
+      else if (score >= 70) {severity = 'HIGH';}
+      else if (score >= 40) {severity = 'MEDIUM';}
 
       return {
         id: threat.id,

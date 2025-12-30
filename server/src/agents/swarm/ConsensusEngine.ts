@@ -90,7 +90,7 @@ export class ConsensusEngine {
 
   private async handleProposal(proposal: Proposal, senderId: string) {
     // Store the proposal even if we are not the proposer
-    if (this.proposals.has(proposal.id)) return;
+    if (this.proposals.has(proposal.id)) {return;}
 
     // Validate proposal content (e.g. check if action is allowed)
     // For now, accept all.
@@ -115,7 +115,7 @@ export class ConsensusEngine {
 
     // If we don't have the proposal, we can't process the vote yet.
     // In a real system, we might request it.
-    if (!proposal) return;
+    if (!proposal) {return;}
 
     proposal.votes[voterId] = vote;
 

@@ -10,11 +10,11 @@ const TimelinePane = () => {
   );
 
   useEffect(() => {
-    if (activePane !== 'timeline') return;
+    if (activePane !== 'timeline') {return;}
     const handler = (e) => {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
-        if (!visible.length) return;
+        if (!visible.length) {return;}
         const idx = visible.findIndex((v) => v.id === selected);
         const nextIdx =
           e.key === 'ArrowDown'

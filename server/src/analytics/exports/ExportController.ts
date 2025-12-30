@@ -33,7 +33,7 @@ export const exportData = (req: Request, res: Response) => {
 
         const threshold = 5;
         const safeData = data.filter((row: any) => {
-             if (typeof row.count === 'number') return row.count >= threshold;
+             if (typeof row.count === 'number') {return row.count >= threshold;}
              return true;
         });
 

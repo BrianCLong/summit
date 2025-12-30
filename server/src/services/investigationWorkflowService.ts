@@ -820,7 +820,7 @@ export class InvestigationWorkflowService extends EventEmitter {
         {} as Record<WorkflowStageType, number>,
       ),
       overdueSLA: investigations.filter((inv) => {
-        if (!inv.dueDate) return false;
+        if (!inv.dueDate) {return false;}
         return new Date() > new Date(inv.dueDate);
       }).length,
     };

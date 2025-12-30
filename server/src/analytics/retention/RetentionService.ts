@@ -10,7 +10,7 @@ export class RetentionService {
 
     // Deletes files older than N days
     public runRetentionPolicy(daysToKeep: number): number {
-        if (!fs.existsSync(this.logDir)) return 0;
+        if (!fs.existsSync(this.logDir)) {return 0;}
 
         const files = fs.readdirSync(this.logDir).filter(f => f.startsWith('telemetry-') && f.endsWith('.jsonl'));
         const now = new Date();

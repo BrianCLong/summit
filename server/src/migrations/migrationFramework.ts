@@ -277,7 +277,7 @@ export class MigrationFramework extends EventEmitter {
       startIndex = steps.findIndex(
         (step) => step.id === options.resumeFromStep,
       );
-      if (startIndex === -1) startIndex = 0;
+      if (startIndex === -1) {startIndex = 0;}
     }
 
     for (let i = startIndex; i < steps.length; i++) {
@@ -459,7 +459,7 @@ export class MigrationFramework extends EventEmitter {
   private async executeSQLInBatches(
     sql: string,
     execution: MigrationExecution,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     client: any,
     batchSize: number,
   ): Promise<void> {

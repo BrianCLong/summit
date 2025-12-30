@@ -577,9 +577,9 @@ export class CostOptimizationService {
   }
 
   private categorizeSavings(savingsUSD: number): string {
-    if (savingsUSD < 1) return 'small';
-    if (savingsUSD < 10) return 'medium';
-    if (savingsUSD < 50) return 'large';
+    if (savingsUSD < 1) {return 'small';}
+    if (savingsUSD < 10) {return 'medium';}
+    if (savingsUSD < 50) {return 'large';}
     return 'xlarge';
   }
 }

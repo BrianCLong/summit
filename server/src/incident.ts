@@ -22,7 +22,7 @@ export async function openIncident({
     [id, runbook, tenant, severity, reason, details],
   );
   if (process.env.PAGERDUTY_URL)
-    await fetch(process.env.PAGERDUTY_URL, {
+    {await fetch(process.env.PAGERDUTY_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
@@ -31,24 +31,24 @@ export async function openIncident({
         source: 'maestro',
         custom_details: details,
       }),
-    });
+    });}
   if (process.env.OPSGENIE_URL)
-    await fetch(process.env.OPSGENIE_URL, {
+    {await fetch(process.env.OPSGENIE_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         message: `${runbook} incident: ${reason}`,
         priority: severity,
       }),
-    });
+    });}
   if (process.env.SLACK_WEBHOOK)
-    await fetch(process.env.SLACK_WEBHOOK, {
+    {await fetch(process.env.SLACK_WEBHOOK, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         text: `🚨 Incident ${id} for ${runbook}: ${reason}`,
       }),
-    });
+    });}
   return id;
 }
 

@@ -376,14 +376,14 @@ export class MCPOrchestrator extends EventEmitter {
     const stepMap = new Map(steps.map(s => [s.id, s]));
 
     const visit = (step: WorkflowStep) => {
-      if (visited.has(step.id)) return;
+      if (visited.has(step.id)) {return;}
       if (visiting.has(step.id)) {
         throw new Error(`Circular dependency detected at step '${step.id}'`);
       }
       visiting.add(step.id);
       for (const depId of step.dependsOn || []) {
         const dep = stepMap.get(depId);
-        if (dep) visit(dep);
+        if (dep) {visit(dep);}
       }
       visiting.delete(step.id);
       visited.add(step.id);

@@ -242,7 +242,7 @@ export class StateMerkleAnchor extends EventEmitter {
 
         logger.debug('State queued for batch anchoring', {
           anchorId,
-          stateHash: stateHash.slice(0, 16) + '...',
+          stateHash: `${stateHash.slice(0, 16)  }...`,
           priority,
           pendingCount: this.pendingAnchors.size,
         });
@@ -470,8 +470,8 @@ export class StateMerkleAnchor extends EventEmitter {
         batchId,
         anchorsCreated: pendingList.length,
         duration,
-        merkleRoot: merkleRoot.slice(0, 16) + '...',
-        blockchainTxId: blockchainTxId?.slice(0, 16) + '...',
+        merkleRoot: `${merkleRoot.slice(0, 16)  }...`,
+        blockchainTxId: `${blockchainTxId?.slice(0, 16)  }...`,
         s3Location: s3BatchLocation,
       });
 
@@ -545,8 +545,8 @@ export class StateMerkleAnchor extends EventEmitter {
 
     logger.info('Immediate anchor created', {
       anchorId,
-      stateHash: stateHash.slice(0, 16) + '...',
-      merkleRoot: merkleRoot.slice(0, 16) + '...',
+      stateHash: `${stateHash.slice(0, 16)  }...`,
+      merkleRoot: `${merkleRoot.slice(0, 16)  }...`,
       priority: metadata.priority,
     });
 
@@ -798,7 +798,7 @@ export class StateMerkleAnchor extends EventEmitter {
       });
 
       // Verify object hasn't been modified
-      const objectExists = !!headResult.LastModified;
+      const objectExists = Boolean(headResult.LastModified);
 
       return {
         intact: objectExists,
@@ -832,7 +832,7 @@ export class StateMerkleAnchor extends EventEmitter {
         await this.blockchainClient.getTransaction(transactionId);
 
       return {
-        valid: !!transaction,
+        valid: Boolean(transaction),
         confirmations: transaction.confirmations || 0,
       };
     } catch (error) {
@@ -989,8 +989,8 @@ export class StateMerkleAnchor extends EventEmitter {
         }
 
         // External anchor counts
-        if (anchor.transactionId) stats.blockchainAnchors++;
-        if (anchor.s3Location) stats.s3Anchors++;
+        if (anchor.transactionId) {stats.blockchainAnchors++;}
+        if (anchor.s3Location) {stats.s3Anchors++;}
       }
 
       stats.averageAnchorSize = totalSize / anchors.length;

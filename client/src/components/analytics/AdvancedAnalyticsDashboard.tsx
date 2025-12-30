@@ -66,7 +66,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
   }, [selectedTimeRange, autoRefresh, investigationId]);
 
   const loadAnalyticsData = async (silent = false) => {
-    if (!silent) setIsLoading(true);
+    if (!silent) {setIsLoading(true);}
 
     try {
       // Simulate API call delay
@@ -209,7 +209,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
       console.error('Failed to load analytics:', error);
       toast.error('Analytics Error', 'Failed to load dashboard data');
     } finally {
-      if (!silent) setIsLoading(false);
+      if (!silent) {setIsLoading(false);}
     }
   };
 

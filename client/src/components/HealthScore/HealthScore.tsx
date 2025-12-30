@@ -38,8 +38,8 @@ const GET_HEALTH_SCORE = gql`
 const HealthScore: React.FC = () => {
   const { loading, error, data } = useQuery(GET_HEALTH_SCORE);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) {return <p>Loading...</p>;}
+  if (error) {return <p>Error: {error.message}</p>;}
 
   const { healthScore } = data;
 

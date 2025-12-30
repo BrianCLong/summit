@@ -264,7 +264,7 @@ export class ActionSandbox {
       });
 
       dockerProcess.on('close', (code) => {
-        if (timeoutHandle) clearTimeout(timeoutHandle);
+        if (timeoutHandle) {clearTimeout(timeoutHandle);}
         clearInterval(resourceMonitor);
         networkMonitor.stop();
 
@@ -284,7 +284,7 @@ export class ActionSandbox {
       });
 
       process.on('error', (error) => {
-        if (timeoutHandle) clearTimeout(timeoutHandle);
+        if (timeoutHandle) {clearTimeout(timeoutHandle);}
         clearInterval(resourceMonitor);
         networkMonitor.stop();
 
@@ -292,7 +292,7 @@ export class ActionSandbox {
           success: false,
           exitCode: -1,
           stdout,
-          stderr: stderr + '\n' + error.message,
+          stderr: `${stderr  }\n${  error.message}`,
           duration: 0,
           resourceUsage: {
             maxMemoryMB,
@@ -817,7 +817,7 @@ class NetworkGuard {
     // Parse connection and check against policy
     try {
       const parts = connection.trim().split(/\s+/);
-      if (parts.length < 4) return;
+      if (parts.length < 4) {return;}
 
       const localAddr = parts[3];
       const [host, port] = localAddr.split(':');

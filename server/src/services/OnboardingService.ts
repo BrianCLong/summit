@@ -48,13 +48,13 @@ export class OnboardingService {
    */
   async getSession(tenantId: string): Promise<OnboardingSession | null> {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Postgres pool not initialized');
+    if (!pool) {throw new Error('Postgres pool not initialized');}
     const result = await pool.query(
       'SELECT * FROM onboarding_sessions WHERE tenant_id = $1',
       [tenantId]
     );
 
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) {return null;}
     return this.mapRowToSession(result.rows[0]);
   }
 
@@ -237,13 +237,13 @@ export class OnboardingService {
   private getNextStep(current: OnboardingStep): OnboardingStep {
       const order: OnboardingStep[] = ['create_tenant', 'ss_sso', 'scim', 'siem', 'baseline_policies', 'test_event', 'completed'];
       const idx = order.indexOf(current);
-      if (idx === -1 || idx === order.length - 1) return 'completed';
+      if (idx === -1 || idx === order.length - 1) {return 'completed';}
       return order[idx + 1];
   }
 
   private async saveSession(session: OnboardingSession) {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Postgres pool not initialized');
+    if (!pool) {throw new Error('Postgres pool not initialized');}
     await pool.query(
         `INSERT INTO onboarding_sessions (tenant_id, current_step, steps_status, created_at, updated_at, completed_at)
          VALUES ($1, $2, $3, $4, $5, $6)

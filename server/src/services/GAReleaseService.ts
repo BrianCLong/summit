@@ -230,8 +230,8 @@ export class GAReleaseService {
 
   private detectEnvironment(): 'development' | 'staging' | 'production' {
     const env = process.env.NODE_ENV?.toLowerCase();
-    if (env === 'production') return 'production';
-    if (env === 'staging') return 'staging';
+    if (env === 'production') {return 'production';}
+    if (env === 'staging') {return 'staging';}
     return 'development';
   }
 

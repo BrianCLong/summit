@@ -305,7 +305,7 @@ export class PromptRegistry {
     logger.info('Golden tests completed', {
       passed,
       total,
-      successRate: total > 0 ? ((passed / total) * 100).toFixed(1) + '%' : '0%',
+      successRate: total > 0 ? `${((passed / total) * 100).toFixed(1)  }%` : '0%',
     });
 
     return results;

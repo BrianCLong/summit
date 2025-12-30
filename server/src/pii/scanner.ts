@@ -66,7 +66,7 @@ const walkRecord = function* (
 
   while (stack.length > 0) {
     const current = stack.pop();
-    if (!current) continue;
+    if (!current) {continue;}
     const currentValue = current.value;
     const fieldName = current.path[current.path.length - 1];
     const schemaField = schemaFields?.find(

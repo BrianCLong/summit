@@ -93,7 +93,7 @@ export class GraphStore {
       RETURN n
     `;
     const results = await runCypher(query, { globalId, tenantId }, { tenantId });
-    if (results.length === 0) return null;
+    if (results.length === 0) {return null;}
 
     const record = results[0].n.properties;
     return this.mapNeo4jToEntity(record);
@@ -150,7 +150,7 @@ export class GraphStore {
       RETURN n
     `;
     const results = await runCypher(query, { tenantId, value }, { tenantId });
-    if (results.length === 0) return null;
+    if (results.length === 0) {return null;}
     return this.mapNeo4jToEntity(results[0].n.properties);
   }
 

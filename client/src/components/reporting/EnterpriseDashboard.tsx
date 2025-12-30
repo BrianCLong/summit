@@ -549,14 +549,14 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
   }, [mockMetrics, mockWidgets, mockReportTemplates]);
 
   const getMetricTrendIcon = (trend: number) => {
-    if (trend > 0) return '📈';
-    if (trend < 0) return '📉';
+    if (trend > 0) {return '📈';}
+    if (trend < 0) {return '📉';}
     return '➡️';
   };
 
   const getMetricTrendColor = (trend: number) => {
-    if (trend > 0) return '#28a745';
-    if (trend < 0) return '#dc3545';
+    if (trend > 0) {return '#28a745';}
+    if (trend < 0) {return '#dc3545';}
     return '#6c757d';
   };
 
@@ -600,8 +600,8 @@ const EnterpriseDashboard: React.FC<EnterpriseDashboardProps> = ({
   };
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    if (num >= 1000000) {return `${(num / 1000000).toFixed(1)}M`;}
+    if (num >= 1000) {return `${(num / 1000).toFixed(1)}K`;}
     return num.toString();
   };
 

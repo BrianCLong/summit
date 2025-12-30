@@ -142,7 +142,7 @@ async function exportToCSV(bundle: ExportBundle, config: ExportConfig): Promise<
     const allColumns = [...dataKeys, ...metadataColumns];
 
     // Header row
-    csv += allColumns.join(',') + '\n';
+    csv += `${allColumns.join(',')  }\n`;
 
     // Data rows
     for (const item of bundle.items) {
@@ -161,7 +161,7 @@ async function exportToCSV(bundle: ExportBundle, config: ExportConfig): Promise<
       row.push(escapeCsvValue(item.isSimulated));
       row.push(escapeCsvValue(item.classification));
 
-      csv += row.join(',') + '\n';
+      csv += `${row.join(',')  }\n`;
     }
   }
 

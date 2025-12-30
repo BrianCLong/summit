@@ -96,7 +96,7 @@ export function KGExplorer({
 
   // Filter elements based on current filters
   const filteredElements = useMemo(() => {
-    if (!cytoscapeElements.length) return [];
+    if (!cytoscapeElements.length) {return [];}
 
     return cytoscapeElements.filter((el) => {
       if ('source' in el.data) {
@@ -134,7 +134,7 @@ export function KGExplorer({
 
   // Initialize Cytoscape
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
 
     const cy = cytoscape({
       container: containerRef.current,
@@ -254,7 +254,7 @@ export function KGExplorer({
   const runLayout = useCallback(
     (layoutName: string) => {
       const cy = cyRef.current;
-      if (!cy || cy.nodes().length === 0) return;
+      if (!cy || cy.nodes().length === 0) {return;}
 
       const layoutOptions: Record<string, object> = {
         fcose: {
@@ -338,7 +338,7 @@ export function KGExplorer({
   // Update elements when data changes
   useEffect(() => {
     const cy = cyRef.current;
-    if (!cy) return;
+    if (!cy) {return;}
 
     // Batch update elements
     cy.batch(() => {
@@ -355,22 +355,22 @@ export function KGExplorer({
   // Zoom controls
   const handleZoomIn = useCallback(() => {
     const cy = cyRef.current;
-    if (cy) cy.zoom(cy.zoom() * 1.2);
+    if (cy) {cy.zoom(cy.zoom() * 1.2);}
   }, []);
 
   const handleZoomOut = useCallback(() => {
     const cy = cyRef.current;
-    if (cy) cy.zoom(cy.zoom() / 1.2);
+    if (cy) {cy.zoom(cy.zoom() / 1.2);}
   }, []);
 
   const handleFitGraph = useCallback(() => {
     const cy = cyRef.current;
-    if (cy) cy.fit(undefined, 50);
+    if (cy) {cy.fit(undefined, 50);}
   }, []);
 
   const handleCenterSelected = useCallback(() => {
     const cy = cyRef.current;
-    if (!cy || !selectedNode) return;
+    if (!cy || !selectedNode) {return;}
     const node = cy.getElementById(selectedNode.id);
     if (node.length) {
       cy.animate({

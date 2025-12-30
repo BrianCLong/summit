@@ -340,8 +340,8 @@ export const RBAC = {
   isAnalyst: (user: User) => ['analyst', 'senior_analyst'].includes(user.role),
   canAccess: (user: User, resource: string, action: string) => {
     // Quick local checks before OPA
-    if (user.role === 'admin') return true;
-    if (action === 'read' && RBAC.isAnalyst(user)) return true;
+    if (user.role === 'admin') {return true;}
+    if (action === 'read' && RBAC.isAnalyst(user)) {return true;}
     return false; // Defer to OPA for complex cases
   },
 };

@@ -12,7 +12,7 @@ function getOrCreateCounter(
   config: ConstructorParameters<typeof Counter>[0],
 ): Counter<string> {
   const existing = register.getSingleMetric(name);
-  if (existing) return existing as Counter<string>;
+  if (existing) {return existing as Counter<string>;}
   return new Counter(config);
 }
 
@@ -21,7 +21,7 @@ function getOrCreateHistogram(
   config: ConstructorParameters<typeof Histogram>[0],
 ): Histogram<string> {
   const existing = register.getSingleMetric(name);
-  if (existing) return existing as Histogram<string>;
+  if (existing) {return existing as Histogram<string>;}
   return new Histogram(config);
 }
 
@@ -30,7 +30,7 @@ function getOrCreateGauge(
   config: ConstructorParameters<typeof Gauge>[0],
 ): Gauge<string> {
   const existing = register.getSingleMetric(name);
-  if (existing) return existing as Gauge<string>;
+  if (existing) {return existing as Gauge<string>;}
   return new Gauge(config);
 }
 

@@ -324,7 +324,7 @@ export class CoherenceGraphQLResolvers {
     signals: any[],
   ): Promise<any[]> {
     // Simple statistical anomaly detection
-    if (signals.length < 3) return [];
+    if (signals.length < 3) {return [];}
 
     const values = signals.map((s) => s.avgWeightedValue);
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
@@ -474,9 +474,9 @@ export class CoherenceGraphQLResolvers {
     // Simple confidence calculation based on data availability
     let confidence = 0.5; // Base confidence
 
-    if (fingerprints.length > 10) confidence += 0.2;
-    if (narratives.length > 5) confidence += 0.2;
-    if (fingerprints.some((fp) => fp.confidence > 0.8)) confidence += 0.1;
+    if (fingerprints.length > 10) {confidence += 0.2;}
+    if (narratives.length > 5) {confidence += 0.2;}
+    if (fingerprints.some((fp) => fp.confidence > 0.8)) {confidence += 0.1;}
 
     return Math.min(confidence, 1.0);
   }

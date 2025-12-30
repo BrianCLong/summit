@@ -46,7 +46,7 @@ export class SearchIndexService {
 
   // Hook for Entity Upsert
   public async onEntityUpsert(entity: any) {
-    if (process.env.SEARCH_ENABLED !== 'true') return;
+    if (process.env.SEARCH_ENABLED !== 'true') {return;}
 
     // Map entity to SearchableItem
     // Attempt to extract caseId from properties if available
@@ -68,7 +68,7 @@ export class SearchIndexService {
 
   // Hook for Claim Upsert
   public async onClaimUpsert(claim: any) {
-    if (process.env.SEARCH_ENABLED !== 'true') return;
+    if (process.env.SEARCH_ENABLED !== 'true') {return;}
 
     const caseId = claim.context?.caseId || 'global';
 
@@ -103,22 +103,22 @@ export class SearchIndexService {
     const opts: any = {
       filter: (result: any) => {
         // Filter by caseId
-        if (result.caseId !== query.caseId) return false;
+        if (result.caseId !== query.caseId) {return false;}
 
         // Apply other filters
         if (query.filters) {
-          if (query.filters.type && query.filters.type.length > 0 && !query.filters.type.includes(result.type)) return false;
+          if (query.filters.type && query.filters.type.length > 0 && !query.filters.type.includes(result.type)) {return false;}
           if (query.filters.tags && query.filters.tags.length > 0) {
             // check intersection
             const hasTag = query.filters.tags.some(t => result.tags && result.tags.includes(t));
-            if (!hasTag) return false;
+            if (!hasTag) {return false;}
           }
-          if (query.filters.source && query.filters.source.length > 0 && !query.filters.source.includes(result.source)) return false;
+          if (query.filters.source && query.filters.source.length > 0 && !query.filters.source.includes(result.source)) {return false;}
 
           if (query.filters.timeRange) {
             const created = new Date(result.createdAt).getTime();
-            if (query.filters.timeRange.start && created < new Date(query.filters.timeRange.start).getTime()) return false;
-            if (query.filters.timeRange.end && created > new Date(query.filters.timeRange.end).getTime()) return false;
+            if (query.filters.timeRange.start && created < new Date(query.filters.timeRange.start).getTime()) {return false;}
+            if (query.filters.timeRange.end && created > new Date(query.filters.timeRange.end).getTime()) {return false;}
           }
         }
         return true;
@@ -137,7 +137,7 @@ export class SearchIndexService {
       // Generate snippet (simple substring for now, MiniSearch doesn't do full snippets out of box easily without raw access)
       // We stored content.
       const content = r.content || '';
-      const snippet = content.length > 100 ? content.substring(0, 100) + '...' : content;
+      const snippet = content.length > 100 ? `${content.substring(0, 100)  }...` : content;
 
       return {
         objectRef: {

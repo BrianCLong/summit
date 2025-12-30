@@ -119,7 +119,7 @@ export class BehavioralAnalyzer {
   }
 
   private calculateBurstiness(sortedPosts: SocialPost[]): number {
-    if (sortedPosts.length < 2) return 0;
+    if (sortedPosts.length < 2) {return 0;}
 
     const intervals: number[] = [];
     for (let i = 1; i < sortedPosts.length; i++) {
@@ -127,7 +127,7 @@ export class BehavioralAnalyzer {
     }
 
     const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-    if (mean === 0) return 0;
+    if (mean === 0) {return 0;}
 
     const variance = intervals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / intervals.length;
     const stdDev = Math.sqrt(variance);
@@ -139,7 +139,7 @@ export class BehavioralAnalyzer {
   }
 
   private calculateContentRepetition(posts: SocialPost[]): number {
-    if (posts.length === 0) return 0;
+    if (posts.length === 0) {return 0;}
     const uniqueContents = new Set(posts.map(p => p.content)); // Ideally hash content
     return 1 - (uniqueContents.size / posts.length);
   }
@@ -201,7 +201,7 @@ export class BehavioralAnalyzer {
       .map(p => p.metadata?.sentimentScore)
       .filter(s => typeof s === 'number');
 
-    if (scores.length < 2) return 0; // Not enough data
+    if (scores.length < 2) {return 0;} // Not enough data
 
     const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
     const variance = scores.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / scores.length;

@@ -171,7 +171,7 @@ if (LINEAGE_UI_CONTRACT) {
       });
     }
 
-    let response = { ...lineageGraphFixture };
+    const response = { ...lineageGraphFixture };
 
     if (collapse) {
       const collapsedNodeIds = new Set<string>();

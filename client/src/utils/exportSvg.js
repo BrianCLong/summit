@@ -1,5 +1,5 @@
 export function exportCyToSvg(cy, options = {}) {
-  if (!cy) return '';
+  if (!cy) {return '';}
   const padding = options.padding || 20;
   const bbox = cy.elements().boundingBox();
   const width = Math.ceil(bbox.w + padding * 2);

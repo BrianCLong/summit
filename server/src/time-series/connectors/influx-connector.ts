@@ -25,7 +25,7 @@ function toLineProtocol(point: TimeSeriesPoint) {
 }
 
 function toFluxFilter(tags?: Tags) {
-  if (!tags) return '';
+  if (!tags) {return '';}
   return Object.entries(tags)
     .map(([key, value]) => `  |> filter(fn: (r) => r["${key}"] == "${value}")`)
     .join('\n');
@@ -51,7 +51,7 @@ function parseFluxCsv(csv: string): TimeSeriesRow[] {
     const columns = line.split(',');
     const timeIdx = columns.findIndex((value) => value === '_time');
     const valueIdx = columns.findIndex((value) => value === '_value');
-    if (timeIdx === -1 || valueIdx === -1) continue;
+    if (timeIdx === -1 || valueIdx === -1) {continue;}
     const timestamp = new Date(columns[timeIdx]);
     const value = Number(columns[valueIdx]);
     rows.push({ timestamp, values: { value } });
@@ -74,7 +74,7 @@ export class InfluxConnector implements TimeSeriesConnector {
   }
 
   async writePoints(points: TimeSeriesPoint[]): Promise<void> {
-    if (!points.length) return;
+    if (!points.length) {return;}
     const payload = points.map(toLineProtocol).join('\n');
     const url = new URL('/api/v2/write', this.config.url);
     url.searchParams.set('org', this.config.org);

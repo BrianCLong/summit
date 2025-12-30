@@ -36,9 +36,9 @@ function markRecentWrite(options: { tenantId?: string; caseId?: string }) {
 function shouldStickToPrimary(options: { tenantId?: string; caseId?: string }) {
   const key = stickyKey(options.tenantId, options.caseId);
   const ts = recentWrites.get(key);
-  if (!ts) return false;
+  if (!ts) {return false;}
   const fresh = Date.now() - ts < stickyWindowMs;
-  if (!fresh) recentWrites.delete(key);
+  if (!fresh) {recentWrites.delete(key);}
   return fresh;
 }
 
@@ -125,7 +125,7 @@ export async function runCypher<T = unknown>(
     }
   }
 
-  const isWrite = !!options.write;
+  const isWrite = Boolean(options.write);
   const stickyPrimary = shouldStickToPrimary(options);
   if (stickyPrimary && !isWrite) {
     metrics.incrementCounter('sticky_reads', { scope: options.caseId ? 'case' : 'tenant' });

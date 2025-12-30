@@ -63,7 +63,7 @@ router.post('/negotiations', async (req: AuthenticatedRequest, res: Response) =>
 router.get('/negotiations/:id', (req, res) => {
     const { id } = req.params;
     const negotiation = orchestrator.negotiationEngine.getNegotiation(id);
-    if (!negotiation) return res.status(404).json({ error: 'Not found' });
+    if (!negotiation) {return res.status(404).json({ error: 'Not found' });}
 
     // Security check: ensure tenant matches
     if (negotiation.tenantId !== req.user?.tenant_id) {

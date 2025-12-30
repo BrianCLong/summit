@@ -60,7 +60,7 @@ export class BehavioralDnaNetwork extends EventEmitter {
    */
   predictNext(entityId: string): number[] | undefined {
     const history = this.history.get(entityId);
-    if (!history || history.length < 2) return undefined;
+    if (!history || history.length < 2) {return undefined;}
     const last = history[history.length - 1];
     const prev = history[history.length - 2];
     const trend = last.map((v, i) => v - prev[i]);
@@ -72,7 +72,7 @@ export class BehavioralDnaNetwork extends EventEmitter {
    */
   private normalize(vector: number[]): number[] {
     const magnitude = Math.sqrt(vector.reduce((s, v) => s + v * v, 0));
-    if (magnitude === 0) return vector.map(() => 0);
+    if (magnitude === 0) {return vector.map(() => 0);}
     return vector.map((v) => v / magnitude);
   }
 

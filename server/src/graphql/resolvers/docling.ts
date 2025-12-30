@@ -52,7 +52,7 @@ export const doclingResolvers = {
         tenantId,
         args.requestId,
       );
-      if (!record) return null;
+      if (!record) {return null;}
       return {
         id: record.id,
         text: record.text,

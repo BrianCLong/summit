@@ -52,7 +52,7 @@ export class InMemoryPersistence implements PersistenceLayer {
     const task = this.tasks.get(id);
     if (task) {
       task.status = status;
-      if (assignedTo) task.assignedTo = assignedTo;
+      if (assignedTo) {task.assignedTo = assignedTo;}
       this.tasks.set(id, task);
     }
   }

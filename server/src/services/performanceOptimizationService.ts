@@ -227,7 +227,7 @@ export class PerformanceOptimizationService extends EventEmitter {
       .filter((metric) => Date.now() - metric.timestamp.getTime() < 300000) // Last 5 minutes
       .slice(-50);
 
-    if (recentMetrics.length === 0) return;
+    if (recentMetrics.length === 0) {return;}
 
     const avgResponseTime =
       recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
@@ -313,7 +313,7 @@ export class PerformanceOptimizationService extends EventEmitter {
         !query.toLowerCase().includes('limit') &&
         query.toLowerCase().includes('return')
       ) {
-        optimizedQuery = query + ' LIMIT 1000';
+        optimizedQuery = `${query  } LIMIT 1000`;
         indexRecommendations.push('Consider adding explicit LIMIT clause');
       }
 

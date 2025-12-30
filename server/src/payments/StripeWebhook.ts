@@ -12,7 +12,7 @@ export function verifyStripeSig(
     .createHmac('sha256', secret)
     .update(`${t}.${payload}`)
     .digest('hex');
-  if (sig !== v1) throw new Error('stripe_sig_invalid');
+  if (sig !== v1) {throw new Error('stripe_sig_invalid');}
   return { ts: Number(t), ok: true };
 }
 
@@ -27,7 +27,7 @@ export async function handleWebhook(
 ) {
   const id = evt.id;
   if (deps.idempotency) {
-    if (deps.idempotency.has(id)) return { idempotent: true };
+    if (deps.idempotency.has(id)) {return { idempotent: true };}
     deps.idempotency.add(id);
   }
 

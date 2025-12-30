@@ -72,7 +72,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
   // Enhanced analysis function that integrates with backend capabilities
   const performAnalysis = useCallback(
     async (text: string, source: string = 'manual') => {
-      if (!text.trim()) return;
+      if (!text.trim()) {return;}
 
       // Use the existing client-side detector
       const basicAnalysis: BasicAnalysis = analyzeText(text);
@@ -129,11 +129,11 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
     const uppercaseCount = (text.match(/[A-Z]/g) || []).length;
     if (text.length > 0) {
       const upperCaseRatio = uppercaseCount / text.length;
-      if (upperCaseRatio > 0.3) score += 0.1;
+      if (upperCaseRatio > 0.3) {score += 0.1;}
     }
 
     const exclamationCount = (text.match(/!/g) || []).length;
-    if (exclamationCount > 2) score += 0.1; // Excessive exclamation
+    if (exclamationCount > 2) {score += 0.1;} // Excessive exclamation
 
     const urgencyWords = [
       'urgent',
@@ -148,7 +148,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
     }
 
     const repetitionPattern = /(.{3,})\1{2,}/i;
-    if (repetitionPattern.test(text)) score += 0.1; // Repetitive content
+    if (repetitionPattern.test(text)) {score += 0.1;} // Repetitive content
 
     return Math.min(1, score);
   };
@@ -203,7 +203,7 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {clearInterval(interval);}
     };
   }, [realTimeEnabled, isMonitoring, performAnalysis]);
 
@@ -215,14 +215,14 @@ const EnhancedPsyOpsMonitor: React.FC = () => {
   const getScoreColor = (
     score: number,
   ): 'error' | 'warning' | 'success' => {
-    if (score >= 0.7) return 'error';
-    if (score >= 0.4) return 'warning';
+    if (score >= 0.7) {return 'error';}
+    if (score >= 0.4) {return 'warning';}
     return 'success';
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 0.7) return 'High Risk';
-    if (score >= 0.4) return 'Medium Risk';
+    if (score >= 0.7) {return 'High Risk';}
+    if (score >= 0.4) {return 'Medium Risk';}
     return 'Low Risk';
   };
 

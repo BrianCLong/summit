@@ -43,7 +43,7 @@ class DefaultPalettePolicyGate implements PalettePolicyGate {
 
 function createRng(seed = Date.now()) {
   let state = seed % 2147483647;
-  if (state <= 0) state += 2147483646;
+  if (state <= 0) {state += 2147483646;}
   return () => (state = (state * 16807) % 2147483647) / 2147483647;
 }
 
@@ -51,7 +51,7 @@ function pickWeighted<T>(items: T[], weights: number[], rng: () => number): T {
   const total = weights.reduce((a, b) => a + b, 0);
   let r = rng() * total;
   for (let i = 0; i < items.length; i++) {
-    if (r < weights[i]) return items[i];
+    if (r < weights[i]) {return items[i];}
     r -= weights[i];
   }
   return items[items.length - 1];
@@ -77,7 +77,7 @@ export class PaletteSelector {
   private resolvePalette(strategy?: PaletteSelectionStrategy, seed?: number): PaletteSelectionResult {
     if (strategy?.type === 'fixed') {
       const palette = getPalette(strategy.id);
-      if (!palette) throw new Error(`Palette ${strategy.id} not found`);
+      if (!palette) {throw new Error(`Palette ${strategy.id} not found`);}
       return { palette, strategyUsed: strategy, injectionKind: palette.injection.kind, decodingApplied: palette.decoding };
     }
 
@@ -108,7 +108,7 @@ export class PaletteSelector {
   private randomPalette(allowed?: string[], weights?: number[], seed?: number): ReasoningPalette {
     const rng = createRng(seed ?? Date.now());
     const candidates = allowed?.length ? listPalettes().filter((p) => allowed.includes(p.id)) : listPalettes();
-    if (!candidates.length) throw new Error('No palettes available for random selection');
+    if (!candidates.length) {throw new Error('No palettes available for random selection');}
     if (weights && weights.length === candidates.length) {
       return pickWeighted(candidates, weights, rng);
     }
@@ -132,7 +132,7 @@ export class PaletteSelector {
     const defaultPalette = getPalette(this.runtime.defaultPaletteId);
     if (!defaultPalette) {
       const available = listPalettes();
-      if (!available.length) throw new Error('No palettes registered');
+      if (!available.length) {throw new Error('No palettes registered');}
       return available[0];
     }
     return defaultPalette;

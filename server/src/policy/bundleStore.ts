@@ -49,7 +49,7 @@ class PolicyBundleStore {
 
   addVersion(version: PolicyBundleVersion, makeCurrent = true): PolicyBundleVersion {
     this.versions.set(version.versionId, version);
-    if (makeCurrent) this.currentPolicyVersionId = version.versionId;
+    if (makeCurrent) {this.currentPolicyVersionId = version.versionId;}
     return version;
   }
 
@@ -67,7 +67,7 @@ class PolicyBundleStore {
 
   resolve(versionId?: string): PolicyBundleVersion {
     const candidate = versionId && this.versions.get(versionId);
-    if (candidate) return candidate;
+    if (candidate) {return candidate;}
     const current = this.getCurrent();
     if (!current) {
       throw new Error('no policy bundles loaded');

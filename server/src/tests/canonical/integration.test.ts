@@ -350,7 +350,7 @@ describe('Canonical Entities Integration', () => {
     console.log('✓ Provenance manifest verification passed');
 
     // ============ Final Summary ============
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log('INTEGRATION TEST SUMMARY');
     console.log('='.repeat(60));
     console.log('✓ Provenance chain created and verified');
@@ -364,7 +364,7 @@ describe('Canonical Entities Integration', () => {
   });
 
   it('should demonstrate acceptance criteria', async () => {
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log('ACCEPTANCE CRITERIA VERIFICATION');
     console.log('='.repeat(60));
 
@@ -448,7 +448,7 @@ describe('Canonical Entities Integration', () => {
     console.log('   ✓ Export includes provenance manifest');
     console.log('   ✓ Manifest version:', exported.provenance.version);
     console.log('   ✓ Manifest contains', exported.provenance.chains.length, 'chains');
-    console.log('   ✓ Manifest hash:', exported.provenance.manifestHash.substring(0, 16) + '...');
+    console.log('   ✓ Manifest hash:', `${exported.provenance.manifestHash.substring(0, 16)  }...`);
 
     // Verify manifest integrity
     const manifestCheck = verifyManifest(exported.provenance);
@@ -460,7 +460,7 @@ describe('Canonical Entities Integration', () => {
     expect(exportCheck.valid).toBe(true);
     console.log('   ✓ Export validation passed');
 
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log('ALL ACCEPTANCE CRITERIA VERIFIED ✓');
     console.log('='.repeat(60));
   });

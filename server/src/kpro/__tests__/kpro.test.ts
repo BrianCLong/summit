@@ -158,11 +158,11 @@ describe('KnowledgePurgeReindexOrchestrator', () => {
     const replayChunkStore = new InMemoryChunkStore();
     const replayContext: ReplayContext = {
       applyVectorDelete: async (adapter, ids) => {
-        if (adapter !== replayVector.name) return;
+        if (adapter !== replayVector.name) {return;}
         await replayVector.removeByIds(ids);
       },
       applyVectorUpsert: async (adapter, docs) => {
-        if (adapter !== replayVector.name) return;
+        if (adapter !== replayVector.name) {return;}
         await replayVector.upsert(docs);
       },
       applyChunkReplace: async (documentId, chunks, document) => {

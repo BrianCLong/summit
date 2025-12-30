@@ -44,7 +44,7 @@ function GraphPreview({
   const [simulationNodes, setSimulationNodes] = useState<GraphNode[]>([]);
 
   // Get graph data from Redux store
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const graphData = useSelector((state: any) => state.graph);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const nodes = graphData?.nodes?.slice(0, maxNodes) || [];
@@ -64,7 +64,7 @@ function GraphPreview({
 
   // Simple physics simulation for node positioning
   useEffect(() => {
-    if (!nodes.length) return;
+    if (!nodes.length) {return;}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let animationId: number;
@@ -73,7 +73,7 @@ function GraphPreview({
         return currentNodes.map((node) => {
           // Simple circular layout with some randomness
           const angle =
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+             
             (nodes.findIndex((n: any) => n.id === node.id) / nodes.length) *
             Math.PI *
             2;
@@ -101,7 +101,7 @@ function GraphPreview({
 
     // Initialize nodes with positions
     setSimulationNodes(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       nodes.map((node: any) => ({
         ...node,
         x: width / 2 + (Math.random() - 0.5) * 100,
@@ -117,10 +117,10 @@ function GraphPreview({
   // Canvas drawing
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     // Set canvas size
     canvas.width = width;
@@ -138,7 +138,7 @@ function GraphPreview({
       ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       edges.forEach((edge: any) => {
         const sourceNode = simulationNodes.find((n) => n.id === edge.source);
         const targetNode = simulationNodes.find((n) => n.id === edge.target);
@@ -161,7 +161,7 @@ function GraphPreview({
 
     // Draw nodes
     simulationNodes.forEach((node) => {
-      if (!node.x || !node.y) return;
+      if (!node.x || !node.y) {return;}
 
       const radius = hoveredNode === node.id ? 8 : 6;
       const color =
@@ -199,10 +199,10 @@ function GraphPreview({
 
   // Handle mouse interactions
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!interactive) return;
+    if (!interactive) {return;}
 
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
@@ -211,7 +211,7 @@ function GraphPreview({
     // Find hovered node
     const hoveredNodeId =
       simulationNodes.find((node) => {
-        if (!node.x || !node.y) return false;
+        if (!node.x || !node.y) {return false;}
         const distance = Math.sqrt(
           Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2),
         );
@@ -222,10 +222,10 @@ function GraphPreview({
   };
 
   const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!interactive || !onNodeClick) return;
+    if (!interactive || !onNodeClick) {return;}
 
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
@@ -233,7 +233,7 @@ function GraphPreview({
 
     // Find clicked node
     const clickedNode = simulationNodes.find((node) => {
-      if (!node.x || !node.y) return false;
+      if (!node.x || !node.y) {return false;}
       const distance = Math.sqrt(
         Math.pow(mouseX - node.x, 2) + Math.pow(mouseY - node.y, 2),
       );

@@ -93,7 +93,7 @@ class TracingService {
    */
   endSpan(spanId) {
     const span = this.activeSpans.get(spanId);
-    if (!span) return;
+    if (!span) {return;}
 
     span.endTime = Date.now();
     span.duration = span.endTime - span.startTime;

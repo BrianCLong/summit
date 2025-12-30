@@ -9,7 +9,7 @@ const service = new TenantAdminService();
 
 router.get('/plan', async (req, res) => {
     const tenantId = req.headers['x-tenant-id'] as string;
-    if (!tenantId) return res.status(400).json({ error: 'Missing tenant ID' });
+    if (!tenantId) {return res.status(400).json({ error: 'Missing tenant ID' });}
     try {
         const plan = await service.getPlan(tenantId);
         res.json(plan);
@@ -21,7 +21,7 @@ router.get('/plan', async (req, res) => {
 router.post('/plan', async (req, res) => {
     const tenantId = req.headers['x-tenant-id'] as string;
     const { planId } = req.body;
-    if (!tenantId || !planId) return res.status(400).json({ error: 'Missing params' });
+    if (!tenantId || !planId) {return res.status(400).json({ error: 'Missing params' });}
     try {
         await service.updatePlan(tenantId, planId);
         res.json({ success: true });
@@ -33,7 +33,7 @@ router.post('/plan', async (req, res) => {
 router.post('/residency', async (req, res) => {
     const tenantId = req.headers['x-tenant-id'] as string;
     const { region, reason } = req.body;
-    if (!tenantId || !region) return res.status(400).json({ error: 'Missing params' });
+    if (!tenantId || !region) {return res.status(400).json({ error: 'Missing params' });}
     try {
         const request = await service.requestResidencyChange(tenantId, region, reason);
         res.json(request);
@@ -44,7 +44,7 @@ router.post('/residency', async (req, res) => {
 
 router.get('/residency', async (req, res) => {
     const tenantId = req.headers['x-tenant-id'] as string;
-    if (!tenantId) return res.status(400).json({ error: 'Missing tenant ID' });
+    if (!tenantId) {return res.status(400).json({ error: 'Missing tenant ID' });}
      try {
         const requests = await service.getResidencyRequests(tenantId);
         res.json(requests);
@@ -55,7 +55,7 @@ router.get('/residency', async (req, res) => {
 
 router.get('/invoice', async (req, res) => {
     const tenantId = req.headers['x-tenant-id'] as string;
-    if (!tenantId) return res.status(400).json({ error: 'Missing tenant ID' });
+    if (!tenantId) {return res.status(400).json({ error: 'Missing tenant ID' });}
 
     // Simulate Invoice Generation
     const invoiceData = `

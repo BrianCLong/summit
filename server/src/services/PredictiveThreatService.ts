@@ -207,7 +207,7 @@ export class PredictiveThreatService extends EventEmitter {
     const forecast = await this.forecastSignal(signal, 24);
 
     const adjustedPoints = forecast.points.map(p => {
-      if (!p.isForecast) return p;
+      if (!p.isForecast) {return p;}
 
       // Apply impact (e.g., reduce threat events by 30%)
       const newValue = p.value * (1 + scenario.impactFactor);

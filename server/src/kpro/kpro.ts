@@ -83,7 +83,7 @@ export class KnowledgePurgeReindexOrchestrator {
       const afterSnapshot = await store.snapshot();
       const before = beforeSnapshots.find((s) => s.adapter === store.name);
       if (!before)
-        throw new Error(`Missing snapshot for adapter ${store.name}`);
+        {throw new Error(`Missing snapshot for adapter ${store.name}`);}
       const diff = computeDiff(before, afterSnapshot);
       const absence = await store.fetchByIds(vectorIds);
       if (absence.length) {

@@ -185,9 +185,9 @@ function calculateRiskScore(factors: RiskFactor[]): number {
 }
 
 function determineOverallRisk(score: number): 'critical' | 'high' | 'medium' | 'low' {
-  if (score >= 80) return 'critical';
-  if (score >= 60) return 'high';
-  if (score >= 30) return 'medium';
+  if (score >= 80) {return 'critical';}
+  if (score >= 60) {return 'high';}
+  if (score >= 30) {return 'medium';}
   return 'low';
 }
 
@@ -255,7 +255,7 @@ class PolicyEvaluator {
   }
 
   private matchesSubject(ruleSubjects: string[], subject: string): boolean {
-    if (ruleSubjects.includes('*')) return true;
+    if (ruleSubjects.includes('*')) {return true;}
     return ruleSubjects.some(s => {
       if (s.endsWith('*')) {
         return subject.startsWith(s.slice(0, -1));
@@ -265,7 +265,7 @@ class PolicyEvaluator {
   }
 
   private matchesResource(ruleResource: string, resource: string): boolean {
-    if (ruleResource === '*') return true;
+    if (ruleResource === '*') {return true;}
     if (ruleResource.endsWith('*')) {
       return resource.startsWith(ruleResource.slice(0, -1));
     }

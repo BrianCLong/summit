@@ -35,7 +35,7 @@ export class ConsistencyStore {
 
   async getReports(): Promise<ConsistencyReport[]> {
     const data = await this.redis.get(this.KEY_PREFIX);
-    if (!data) return [];
+    if (!data) {return [];}
     try {
       return JSON.parse(data);
     } catch (err) {

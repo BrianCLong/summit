@@ -65,7 +65,7 @@ describe('Entity Model System', () => {
     });
 
     test('should enforce unique entity IDs', async () => {
-      const entityId = 'test-duplicate-entity-' + Date.now();
+      const entityId = `test-duplicate-entity-${  Date.now()}`;
 
       // First entity should succeed
       await session.run(
@@ -124,7 +124,7 @@ describe('Entity Model System', () => {
     });
 
     test('should enforce email format for EMAIL entities', async () => {
-      const entityId = 'test-invalid-email-' + Date.now();
+      const entityId = `test-invalid-email-${  Date.now()}`;
 
       // Invalid email format should fail
       await expect(
@@ -147,7 +147,7 @@ describe('Entity Model System', () => {
   });
 
   describe('Entity Model Service', () => {
-    const testInvestigationId = 'test-investigation-' + Date.now();
+    const testInvestigationId = `test-investigation-${  Date.now()}`;
     const testEntityIds = [];
 
     beforeEach(async () => {

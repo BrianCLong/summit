@@ -254,7 +254,7 @@ export class EvidenceEngine {
         };
     }
 
-    if (!content) return null;
+    if (!content) {return null;}
 
     const contentStr = JSON.stringify(content);
     const snapshot: EvidenceSnapshot = {
@@ -508,7 +508,7 @@ export class EvidenceEngine {
       span?.addSpanAttributes({
         'evidence_engine.package_id': pkg.id,
         'evidence_engine.snapshot_count': redactedSnapshots.length,
-        'evidence_engine.signed': !!pkg.integrity.signature,
+        'evidence_engine.signed': Boolean(pkg.integrity.signature),
       });
 
       return pkg;

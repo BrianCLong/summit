@@ -58,7 +58,7 @@ export class FileBillingAdapter implements BillingAdapter {
       const content = fs.readFileSync(filePath, 'utf-8');
       // Simple CSV parsing assuming header + 1 line
       const lines = content.trim().split('\n');
-      if (lines.length < 2) return null;
+      if (lines.length < 2) {return null;}
 
       const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
       const values = lines[1].split(',').map(v => v.replace(/"/g, ''));

@@ -268,7 +268,7 @@ export class SelectorMinimizationService {
     tripwireConfig: TripwireConfig
   ): Promise<ReasonForAccessValidation> {
     const required = tripwireConfig.requireReason;
-    const provided = !!metrics.reasonForAccess && metrics.reasonForAccess.length > 0;
+    const provided = Boolean(metrics.reasonForAccess) && metrics.reasonForAccess.length > 0;
     const validationErrors: string[] = [];
 
     let valid = true;
@@ -469,9 +469,9 @@ export class SelectorMinimizationService {
   ): 'low' | 'medium' | 'high' | 'critical' {
     const exceedance = expansionRatio / threshold;
 
-    if (exceedance >= 5) return 'critical';
-    if (exceedance >= 3) return 'high';
-    if (exceedance >= 2) return 'medium';
+    if (exceedance >= 5) {return 'critical';}
+    if (exceedance >= 3) {return 'high';}
+    if (exceedance >= 2) {return 'medium';}
     return 'low';
   }
 

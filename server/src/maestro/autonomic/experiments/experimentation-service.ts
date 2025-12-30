@@ -11,7 +11,7 @@ export class ExperimentationService {
 
   public getAssignment(experimentId: string, entityId: string): Assignment | null {
     const exp = this.experiments.get(experimentId);
-    if (!exp || exp.status !== 'ACTIVE') return null;
+    if (!exp || exp.status !== 'ACTIVE') {return null;}
 
     // Deterministic hashing for assignment
     const hash = crypto.createHash('md5').update(`${experimentId}:${entityId}`).digest('hex');
@@ -30,7 +30,7 @@ export class ExperimentationService {
 
   public checkStopConditions(experimentId: string, metrics: Record<string, number>): boolean {
     const exp = this.experiments.get(experimentId);
-    if (!exp) return false;
+    if (!exp) {return false;}
 
     for (const [metric, threshold] of Object.entries(exp.stopConditions)) {
         if (metrics[metric] !== undefined && metrics[metric] < threshold) { // Assuming lower is worse for success rate, etc. need operator support in real impl

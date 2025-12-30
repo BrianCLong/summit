@@ -60,7 +60,7 @@ export class PatternOfLifeService {
     const eventsByType = this.groupEventsByType(events);
 
     for (const [type, typeEvents] of eventsByType.entries()) {
-      if (typeEvents.length < 3) continue; // Need at least 3 events to establish a period
+      if (typeEvents.length < 3) {continue;} // Need at least 3 events to establish a period
 
       const timestamps = typeEvents.map((e) => new Date(e.timestamp).getTime());
       const intervals: number[] = [];
@@ -73,7 +73,7 @@ export class PatternOfLifeService {
       const meanInterval =
         intervals.reduce((a, b) => a + b, 0) / intervals.length;
 
-      if (meanInterval < 1) continue; // Ignore very high frequency noise for now
+      if (meanInterval < 1) {continue;} // Ignore very high frequency noise for now
 
       const variance =
         intervals.reduce((a, b) => a + Math.pow(b - meanInterval, 2), 0) /
@@ -120,7 +120,7 @@ export class PatternOfLifeService {
 
     // We'll look for sequences of length 2 to 5
     for (let n = 2; n <= 5; n++) {
-      if (actionSequence.length < n * 2) break; // Need at least 2 occurrences
+      if (actionSequence.length < n * 2) {break;} // Need at least 2 occurrences
 
       const ngrams = new Map<string, number>();
 
@@ -165,7 +165,7 @@ export class PatternOfLifeService {
    * Analyzes time-of-day and day-of-week distribution.
    */
   detectTimeDistribution(events: ProvenanceEntry[]): Pattern[] {
-    if (events.length < 10) return [];
+    if (events.length < 10) {return [];}
 
     const hours = new Array(24).fill(0);
     const days = new Array(7).fill(0);

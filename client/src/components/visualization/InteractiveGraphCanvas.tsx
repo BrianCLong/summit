@@ -189,7 +189,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
           while (queue.length > 0) {
             const { node, level } = queue.shift()!;
 
-            if (visited.has(node.id)) continue;
+            if (visited.has(node.id)) {continue;}
             visited.add(node.id);
 
             const outgoingEdges = edges.filter((e) => e.source === node.id);
@@ -255,7 +255,7 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
   // Physics simulation for force-directed layout
   const applyPhysics = useCallback(() => {
-    if (!physics || layoutAlgorithm !== 'force') return;
+    if (!physics || layoutAlgorithm !== 'force') {return;}
 
     const alpha = 0.1;
     const linkStrength = 0.1;
@@ -432,10 +432,10 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
   // Rendering
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     // Clear canvas
     ctx.save();

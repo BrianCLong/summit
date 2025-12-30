@@ -337,7 +337,7 @@ export const createApp = async () => {
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
   app.use((req, res, next) => {
-    if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
+    if (req.path === '/graphql') {return next();} // Skip global limiter for graphql, handled in route
     return advancedRateLimiter.middleware()(req, res, next);
   });
 

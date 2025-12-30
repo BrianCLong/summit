@@ -111,7 +111,7 @@ export function createChainNodeFromTrace(trace: ReasoningTrace, parentId?: strin
 }
 
 function calculateConfidenceFromSaliency(saliency: SaliencyExplanation[]): number {
-  if (saliency.length === 0) return 0.5;
+  if (saliency.length === 0) {return 0.5;}
 
   const criticalCount = saliency.filter((s) => s.importance === 'critical').length;
   const highCount = saliency.filter((s) => s.importance === 'high').length;

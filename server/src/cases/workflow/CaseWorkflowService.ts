@@ -71,7 +71,7 @@ export class CaseWorkflowService {
     },
   ): Promise<CaseWithWorkflow | null> {
     const baseCase = await this.caseRepo.findById(caseId, tenantId);
-    if (!baseCase) return null;
+    if (!baseCase) {return null;}
 
     const caseWithWorkflow: CaseWithWorkflow = {
       ...baseCase,
@@ -209,7 +209,7 @@ export class CaseWorkflowService {
     userId: string,
   ): Promise<string[]> {
     const caseData = await this.getCase(caseId, '');
-    if (!caseData) return [];
+    if (!caseData) {return [];}
 
     const userRoles = await this.participantRepo.getUserRoleIds(caseId, userId);
 

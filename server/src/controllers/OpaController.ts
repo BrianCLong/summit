@@ -26,8 +26,8 @@ const findOPA = async (): Promise<string> => {
         const proc = spawn(loc, ['version']);
         proc.on('error', reject);
         proc.on('close', (code) => {
-          if (code === 0) resolve(true);
-          else reject(new Error('Non-zero exit'));
+          if (code === 0) {resolve(true);}
+          else {reject(new Error('Non-zero exit'));}
         });
       });
       return loc;
@@ -166,8 +166,8 @@ export class OpaController {
               let stderr = '';
               proc.stderr.on('data', (data) => stderr += data.toString());
               proc.on('close', (code) => {
-                  if (code !== 0) reject(new Error(stderr || 'Validation failed'));
-                  else resolve();
+                  if (code !== 0) {reject(new Error(stderr || 'Validation failed'));}
+                  else {resolve();}
               });
               proc.on('error', (err) => reject(err));
           });

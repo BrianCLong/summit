@@ -43,10 +43,10 @@ export class AlertingEngine {
     const tenantRules = this.rules.get(context.tenantId) || this.rules.get('default') || [];
 
     for (const rule of tenantRules) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       const metricValue = context.metrics[rule.metric];
-      if (metricValue === undefined) continue;
+      if (metricValue === undefined) {continue;}
 
       let triggered = false;
       switch (rule.condition) {

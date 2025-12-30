@@ -58,14 +58,14 @@ import {
 
 const AuditReadinessGauge: React.FC<{ score: number }> = ({ score }) => {
   const getColor = () => {
-    if (score >= 80) return 'success.main';
-    if (score >= 60) return 'warning.main';
+    if (score >= 80) {return 'success.main';}
+    if (score >= 60) {return 'warning.main';}
     return 'error.main';
   };
 
   const getLabel = () => {
-    if (score >= 80) return 'Ready';
-    if (score >= 60) return 'Needs Work';
+    if (score >= 80) {return 'Ready';}
+    if (score >= 60) {return 'Needs Work';}
     return 'At Risk';
   };
 
@@ -123,8 +123,8 @@ const FrameworkCard: React.FC<{
   compliant: number;
 }> = ({ framework, displayName, percentage, total, compliant }) => {
   const getColor = () => {
-    if (percentage >= 80) return 'success';
-    if (percentage >= 60) return 'warning';
+    if (percentage >= 80) {return 'success';}
+    if (percentage >= 60) {return 'warning';}
     return 'error';
   };
 

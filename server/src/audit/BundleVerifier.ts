@@ -81,7 +81,7 @@ export class BundleVerifier {
         input.files,
         input.manifest.files,
       );
-      if (!fileCheck.passed) valid = false;
+      if (!fileCheck.passed) {valid = false;}
       checks.push(fileCheck);
     } else if (input.files) {
          valid = false;
@@ -91,14 +91,14 @@ export class BundleVerifier {
     // 3. Transform Chain
     if (input.provenance) {
       const chainCheck = this.verifyTransformChain(input.provenance);
-      if (!chainCheck.passed) valid = false;
+      if (!chainCheck.passed) {valid = false;}
       checks.push(chainCheck);
     }
 
     // 4. Policy Pack
     if (input.policyPack) {
       const policyCheck = this.verifyPolicyPack(input.policyPack);
-      if (!policyCheck.passed) valid = false;
+      if (!policyCheck.passed) {valid = false;}
       checks.push(policyCheck);
     }
 
@@ -202,9 +202,9 @@ export class BundleVerifier {
   private async checkLedgerStatus(
     bundleId?: string,
   ): Promise<'verified' | 'not_found' | 'tampered'> {
-    if (!bundleId) return 'not_found';
-    if (bundleId === 'tampered-bundle') return 'tampered';
-    if (bundleId === 'missing-bundle') return 'not_found';
+    if (!bundleId) {return 'not_found';}
+    if (bundleId === 'tampered-bundle') {return 'tampered';}
+    if (bundleId === 'missing-bundle') {return 'not_found';}
     return 'verified';
   }
 }

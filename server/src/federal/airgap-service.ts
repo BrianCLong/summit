@@ -201,7 +201,7 @@ export class AirGapService {
   }
 
   private async verifyNetworkIsolation(): Promise<void> {
-    if (this.config.mode !== 'STRICT') return;
+    if (this.config.mode !== 'STRICT') {return;}
 
     // In production, verify no external network access
     try {
@@ -244,7 +244,7 @@ export class AirGapService {
   }
 
   private async initializeBreakGlass(): Promise<void> {
-    if (!this.config.breakGlass.enabled) return;
+    if (!this.config.breakGlass.enabled) {return;}
 
     // Load any active break-glass sessions from persistent storage
     try {
@@ -733,7 +733,7 @@ export class AirGapService {
   }
 
   private async saveManifest(): Promise<void> {
-    if (!this.manifest) return;
+    if (!this.manifest) {return;}
 
     const manifestPath = '/opt/intelgraph/manifest.json';
     await fs.writeFile(manifestPath, JSON.stringify(this.manifest, null, 2));

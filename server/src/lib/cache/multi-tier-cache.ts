@@ -81,7 +81,7 @@ class SimpleLRUCache<K, V> {
 
   get(key: K): V | undefined {
     const entry = this.cache.get(key);
-    if (!entry) return undefined;
+    if (!entry) {return undefined;}
 
     if (Date.now() > entry.expiry) {
       this.currentSize -= entry.size;
@@ -193,7 +193,7 @@ export class MultiTierCache {
   }
 
   async get<T>(key: string): Promise<T | null> {
-    if (!this.cacheEnabled) return null;
+    if (!this.cacheEnabled) {return null;}
 
     const namespacedKey = this.namespaced(key);
     const l1Value = this.l1Cache.get(namespacedKey);
@@ -223,7 +223,7 @@ export class MultiTierCache {
     ttlOrOptions?: number | CacheSetOptions,
     tags?: string[],
   ): Promise<void> {
-    if (!this.cacheEnabled) return;
+    if (!this.cacheEnabled) {return;}
 
     const { ttlSeconds, tags: resolvedTags } = this.normalizeSetOptions(
       ttlOrOptions,
@@ -235,7 +235,7 @@ export class MultiTierCache {
     this.l1Cache.set(namespacedKey, payload, { ttl: ttlSeconds * 1000 });
     this.trackTags(namespacedKey, resolvedTags);
 
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.setex(namespacedKey, ttlSeconds, JSON.stringify(payload));
@@ -252,7 +252,7 @@ export class MultiTierCache {
     options?: CacheSetOptions,
   ): Promise<T> {
     const cached = await this.get<T>(key);
-    if (cached !== null) return cached;
+    if (cached !== null) {return cached;}
 
     const namespacedKey = this.namespaced(key);
     if (this.inflight.has(namespacedKey)) {
@@ -279,7 +279,7 @@ export class MultiTierCache {
     const cachedTags = this.keyTags.get(namespacedKey);
     this.evictLocal(namespacedKey);
 
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       const tags = (await this.readTags(namespacedKey)) ?? cachedTags;
@@ -297,7 +297,7 @@ export class MultiTierCache {
 
     keys.forEach((k) => this.evictLocal(k));
 
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       if (keys.length > 0) {
@@ -345,7 +345,7 @@ export class MultiTierCache {
   }
 
   private trackTags(key: string, tags?: string[]): void {
-    if (!tags || tags.length === 0) return;
+    if (!tags || tags.length === 0) {return;}
 
     this.dropTagTracking(key);
     this.keyTags.set(key, tags);
@@ -366,7 +366,7 @@ export class MultiTierCache {
     if (tags) {
       tags.forEach((tag) => {
         const entry = this.tagIndex.get(tag);
-        if (!entry) return;
+        if (!entry) {return;}
         entry.delete(key);
         if (entry.size === 0) {
           this.tagIndex.delete(tag);
@@ -377,11 +377,11 @@ export class MultiTierCache {
   }
 
   private async readFromRedis<T>(key: string): Promise<CachePayload<T> | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     try {
       const raw = await this.redis.get(key);
-      if (!raw) return null;
+      if (!raw) {return null;}
 
       const payload = JSON.parse(raw) as CachePayload<T>;
       if (payload.expiresAt <= Date.now()) {
@@ -398,11 +398,11 @@ export class MultiTierCache {
   }
 
   private async readTags(key: string): Promise<string[] | undefined> {
-    if (!this.redis) return this.keyTags.get(key);
+    if (!this.redis) {return this.keyTags.get(key);}
 
     try {
       const raw = await this.redis.get(key);
-      if (!raw) return this.keyTags.get(key);
+      if (!raw) {return this.keyTags.get(key);}
       const payload = JSON.parse(raw) as CachePayload<unknown>;
       return payload.tags;
     } catch (error) {
@@ -416,7 +416,7 @@ export class MultiTierCache {
     tags: string[] | undefined,
     ttlSeconds: number,
   ): Promise<void> {
-    if (!this.redis || !tags || tags.length === 0) return;
+    if (!this.redis || !tags || tags.length === 0) {return;}
 
     await Promise.all(
       tags.map(async (tag) => {
@@ -431,7 +431,7 @@ export class MultiTierCache {
     key: string,
     tags: string[] | undefined,
   ): Promise<void> {
-    if (!this.redis || !tags || tags.length === 0) return;
+    if (!this.redis || !tags || tags.length === 0) {return;}
 
     await Promise.all(
       tags.map(async (tag) => {
@@ -448,7 +448,7 @@ export class MultiTierCache {
   private async collectKeysForTag(tagKey: string): Promise<string[]> {
     if (!this.redis) {
       const tag = tagKey.split(':').at(-1);
-      if (!tag) return [];
+      if (!tag) {return [];}
       return Array.from(this.tagIndex.get(tag) ?? []);
     }
 
@@ -462,7 +462,7 @@ export class MultiTierCache {
   }
 
   private async publishInvalidation(message: InvalidationMessage): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.publish(INVALIDATION_CHANNEL, JSON.stringify(message));
@@ -472,10 +472,10 @@ export class MultiTierCache {
   }
 
   private setupPubSub(): void {
-    if (!this.subscriber) return;
+    if (!this.subscriber) {return;}
 
     this.subscriber.on('message', (channel, message) => {
-      if (channel !== INVALIDATION_CHANNEL) return;
+      if (channel !== INVALIDATION_CHANNEL) {return;}
 
       try {
         const payload = JSON.parse(message) as InvalidationMessage;

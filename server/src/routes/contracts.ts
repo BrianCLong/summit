@@ -10,7 +10,7 @@ function ensurePackBuiltDevOnly() {
   const devAutoBuild =
     process.env.MC_DEV_AUTO_BUILD_PACK === 'true' &&
     process.env.NODE_ENV !== 'production';
-  if (!devAutoBuild) return;
+  if (!devAutoBuild) {return;}
   const build = spawnSync('bash', ['scripts/build_policy_pack.sh'], {
     encoding: 'utf8',
   });
@@ -27,14 +27,14 @@ function ensurePackBuiltDevOnly() {
     const sign = spawnSync('bash', ['scripts/cosign_sign.sh'], {
       encoding: 'utf8',
     });
-    if (sign.status !== 0) console.warn('[pack:auto-sign] warn:', sign.stderr);
+    if (sign.status !== 0) {console.warn('[pack:auto-sign] warn:', sign.stderr);}
   }
 }
 
 router.get('/policy/packs/:packId', async (req, res) => {
   const { packId } = req.params; // expect 'policy-pack-v0'
   if (packId !== 'policy-pack-v0')
-    return res.status(404).json({ error: 'unknown pack' });
+    {return res.status(404).json({ error: 'unknown pack' });}
 
   const packTar = path.resolve(
     process.cwd(),
@@ -52,9 +52,9 @@ router.get('/policy/packs/:packId', async (req, res) => {
     ensurePackBuiltDevOnly();
   }
   if (!fs.existsSync(packTar))
-    return res.status(503).json({ error: 'pack not built yet' });
+    {return res.status(503).json({ error: 'pack not built yet' });}
   if (!fs.existsSync(manifestPath))
-    return res.status(404).json({ error: 'manifest missing' });
+    {return res.status(404).json({ error: 'manifest missing' });}
 
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   const digestValue =
@@ -75,12 +75,12 @@ router.get('/policy/packs/:packId', async (req, res) => {
 
 router.head('/policy/packs/:packId', (req, res) => {
   const { packId } = req.params;
-  if (packId !== 'policy-pack-v0') return res.status(404).end();
+  if (packId !== 'policy-pack-v0') {return res.status(404).end();}
   const manifestPath = path.resolve(
     process.cwd(),
     'contracts/policy-pack/v0/manifest.json',
   );
-  if (!fs.existsSync(manifestPath)) return res.status(503).end();
+  if (!fs.existsSync(manifestPath)) {return res.status(503).end();}
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   const digestValue =
     manifest?.manifest?.digest?.value || manifest?.digest?.value || 'TBD';
@@ -93,7 +93,7 @@ router.head('/policy/packs/:packId', (req, res) => {
 router.get('/policy/packs/:packId/attestation', (req, res) => {
   const { packId } = req.params;
   if (packId !== 'policy-pack-v0')
-    return res.status(404).json({ error: 'unknown pack' });
+    {return res.status(404).json({ error: 'unknown pack' });}
   const bundleJson = path.resolve(
     process.cwd(),
     'contracts/policy-pack/v0/signing/cosign.bundle.json',
@@ -103,7 +103,7 @@ router.get('/policy/packs/:packId/attestation', (req, res) => {
     'contracts/policy-pack/v0/manifest.json',
   );
   if (!fs.existsSync(bundleJson) || !fs.existsSync(manifestPath))
-    return res.status(503).json({ error: 'attestation not available' });
+    {return res.status(503).json({ error: 'attestation not available' });}
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   const digestValue =
     manifest?.manifest?.digest?.value || manifest?.digest?.value || 'TBD';

@@ -968,7 +968,7 @@ export class ThreatHuntingService extends EventEmitter {
    */
   analyzeDiamondModel(actorId: string): DiamondModel {
     const actor = this.threatActors.get(actorId);
-    if (!actor) throw new Error('Actor not found');
+    if (!actor) {throw new Error('Actor not found');}
 
     // Dynamic generation based on linked IDs
     const malwareIds = actor.malware_ids || [];
@@ -1030,8 +1030,8 @@ export class ThreatHuntingService extends EventEmitter {
       const actor = this.threatActors.get(entityId);
       if (actor) {
           let score = 50;
-          if (actor.sophistication === 'expert') score += 30;
-          if (actor.threat_actor_types.includes('nation-state')) score += 15;
+          if (actor.sophistication === 'expert') {score += 30;}
+          if (actor.threat_actor_types.includes('nation-state')) {score += 15;}
           return score;
       }
 
@@ -1133,7 +1133,7 @@ export class ThreatHuntingService extends EventEmitter {
 
   private calculateAverageHuntDuration(hunts: ThreatHunt[]): number {
     const completedHunts = hunts.filter((hunt) => hunt.completedAt);
-    if (completedHunts.length === 0) return 0;
+    if (completedHunts.length === 0) {return 0;}
 
     const totalDuration = completedHunts.reduce((sum, hunt) => {
       const start = new Date(hunt.startDate).getTime();

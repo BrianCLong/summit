@@ -24,7 +24,7 @@ describe('BillingAdapter', () => {
 
   // Helper to match implementation logic
   function escapeCsv(field: any): string {
-    if (field === null || field === undefined) return '';
+    if (field === null || field === undefined) {return '';}
     const stringField = String(field);
     if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
       return `"${stringField.replace(/"/g, '""')}"`;

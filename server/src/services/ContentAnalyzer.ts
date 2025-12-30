@@ -46,10 +46,10 @@ export class ContentAnalyzer {
     let score = 0;
     const lower = text.toLowerCase();
     positive.forEach((w) => {
-      if (lower.includes(w)) score += 0.2;
+      if (lower.includes(w)) {score += 0.2;}
     });
     negative.forEach((w) => {
-      if (lower.includes(w)) score -= 0.2;
+      if (lower.includes(w)) {score -= 0.2;}
     });
 
     // Normalize to -1..1 (simplified)
@@ -75,7 +75,7 @@ export class ContentAnalyzer {
     let hits = 0;
     const lower = text.toLowerCase();
     indicators.forEach((i) => {
-      if (lower.includes(i)) hits++;
+      if (lower.includes(i)) {hits++;}
     });
 
     // 5 hits = 100% manipulation score
@@ -94,8 +94,8 @@ export class ContentAnalyzer {
 
   private generateFlags(score: number, keywords: string[]): string[] {
     const flags: string[] = [];
-    if (score >= 0.4) flags.push('POTENTIAL_MANIPULATION');
-    if (score >= 0.8) flags.push('HIGH_RISK_DISINFO');
+    if (score >= 0.4) {flags.push('POTENTIAL_MANIPULATION');}
+    if (score >= 0.8) {flags.push('HIGH_RISK_DISINFO');}
     return flags;
   }
 }

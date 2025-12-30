@@ -230,7 +230,7 @@ export class ThreatDetectionEngine {
    */
   private async calculateAnomalyScore(context: ThreatContext): Promise<number> {
     const profile = context.userProfile;
-    if (!profile) return 0;
+    if (!profile) {return 0;}
 
     let anomalyScore = 0;
     const factors: Array<{ name: string; score: number; weight: number }> = [];

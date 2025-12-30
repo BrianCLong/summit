@@ -51,7 +51,7 @@ export class SymbiosisEngine {
     const memoryUpdate = this.memoryFabric.evolve();
     const metaProposal = this.metaSymbiote.monitor();
     const proposals: EvolutionProposal[] = [];
-    if (metaProposal) proposals.push(metaProposal);
+    if (metaProposal) {proposals.push(metaProposal);}
     if (memoryUpdate) {
         proposals.push({
             layer: 'memory',

@@ -33,8 +33,8 @@ function isSensitive(req: Request): boolean {
 }
 
 function redactPayload(body: any): any {
-  if (!body) return body;
-  if (typeof body !== 'object') return body;
+  if (!body) {return body;}
+  if (typeof body !== 'object') {return body;}
 
   if (Array.isArray(body)) {
     return body.map((item) => redactPayload(item));

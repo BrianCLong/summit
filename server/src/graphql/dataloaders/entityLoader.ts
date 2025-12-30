@@ -55,7 +55,7 @@ async function batchLoadEntities(
       // If redis fails, load everything from DB
       missingIds.length = 0;
       ids.forEach(id => {
-          if (!entityMap.has(id)) missingIds.push(id);
+          if (!entityMap.has(id)) {missingIds.push(id);}
       });
     }
   } else {

@@ -79,8 +79,8 @@ describe('PredictiveRelationshipService', () => {
       mockRun.mockResolvedValueOnce({
         records: [{
           get: (key) => {
-            if (key === 'target') return { properties: candidateProps };
-            if (key === 'embedding') return candidateEmbedding;
+            if (key === 'target') {return { properties: candidateProps };}
+            if (key === 'embedding') {return candidateEmbedding;}
             return null;
           }
         }]

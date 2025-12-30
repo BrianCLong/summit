@@ -9,7 +9,7 @@ function parseClusterNodes(nodes: string[]): ClusterNode[] {
     .map((node) => {
       const [host, port] = node.split(':');
       const parsedPort = Number(port || config.redis.port);
-      if (!host) return null;
+      if (!host) {return null;}
       return { host, port: Number.isNaN(parsedPort) ? config.redis.port : parsedPort };
     })
     .filter(Boolean) as ClusterNode[];

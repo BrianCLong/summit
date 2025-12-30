@@ -72,9 +72,9 @@ router.get('/admin/stats', ensureAuthenticated, ensureRole('admin'), (req, res) 
     };
 
     runs.forEach(r => {
-        if (!stats.byLab[r.labId]) stats.byLab[r.labId] = { started: 0, completed: 0 };
+        if (!stats.byLab[r.labId]) {stats.byLab[r.labId] = { started: 0, completed: 0 };}
         stats.byLab[r.labId].started++;
-        if (r.status === 'completed') stats.byLab[r.labId].completed++;
+        if (r.status === 'completed') {stats.byLab[r.labId].completed++;}
     });
 
     res.json(stats);

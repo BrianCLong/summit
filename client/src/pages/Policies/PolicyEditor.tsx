@@ -131,10 +131,10 @@ const parseRuleValue = (value: string, operator: PolicyRule['operator']): unknow
   }
   // Try to parse as number
   const num = Number(value);
-  if (!isNaN(num)) return num;
+  if (!isNaN(num)) {return num;}
   // Try to parse as boolean
-  if (value === 'true') return true;
-  if (value === 'false') return false;
+  if (value === 'true') {return true;}
+  if (value === 'false') {return false;}
   // Return as string
   return value;
 };
@@ -235,7 +235,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
     setFormData((prev) => ({
       ...prev,
       rules: prev.rules.map((rule, i) => {
-        if (i !== index) return rule;
+        if (i !== index) {return rule;}
         return { ...rule, [field]: value };
       }),
     }));
@@ -280,7 +280,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
 
   // Submit handler
   const handleSubmit = useCallback(async () => {
-    if (!validate()) return;
+    if (!validate()) {return;}
 
     const scope: PolicyScope = {
       stages: formData.stages,

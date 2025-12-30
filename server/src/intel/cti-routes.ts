@@ -375,7 +375,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
           userId: authReq.user.userId,
           entityCount: entities.length,
           objectCount: result.bundle.objects.length,
-          signed: options.sign && !!signingService,
+          signed: options.sign && Boolean(signingService),
           duration,
         }, 'STIX bundle exported');
 
@@ -547,7 +547,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
       status: 'healthy',
       services: {
         taxii: true,
-        signing: !!signingService,
+        signing: Boolean(signingService),
         database: true,
       },
       timestamp: new Date().toISOString(),
@@ -567,8 +567,8 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
       capabilities: {
         export: true,
         import: true,
-        signing: !!signingService,
-        airgap: !!signingService,
+        signing: Boolean(signingService),
+        airgap: Boolean(signingService),
         collections: taxiiService.listCollections().length,
       },
       endpoints: {
@@ -593,7 +593,7 @@ async function fetchEntities(
   tenantId: string,
   entityIds: string[],
 ): Promise<any[]> {
-  if (entityIds.length === 0) return [];
+  if (entityIds.length === 0) {return [];}
 
   const result = await pg.query(
     'SELECT * FROM entities WHERE tenant_id = $1 AND id = ANY($2)',

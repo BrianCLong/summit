@@ -113,10 +113,10 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
   // Render spectrum
   const render = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     const { width, height } = canvas;
     const dbRange = maxDecibels - minDecibels;
@@ -162,7 +162,7 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
 
     // Convert samples to Float32Array for FFT
     const sampleData = new Float32Array(samples.map((s) => s.amplitude));
-    let spectrum = computeFFT(sampleData);
+    const spectrum = computeFFT(sampleData);
 
     // Apply smoothing with previous frame
     if (prevSpectrumRef.current && prevSpectrumRef.current.length === spectrum.length) {
@@ -216,11 +216,11 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
   // Handle resize
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const handleResize = () => {
       const container = canvas.parentElement;
-      if (!container) return;
+      if (!container) {return;}
 
       const { width, height } = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
@@ -273,8 +273,8 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
 };
 
 function formatFreq(hz: number): string {
-  if (hz >= 1000000) return `${(hz / 1000000).toFixed(1)}MHz`;
-  if (hz >= 1000) return `${(hz / 1000).toFixed(1)}kHz`;
+  if (hz >= 1000000) {return `${(hz / 1000000).toFixed(1)}MHz`;}
+  if (hz >= 1000) {return `${(hz / 1000).toFixed(1)}kHz`;}
   return `${hz}Hz`;
 }
 

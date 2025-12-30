@@ -102,7 +102,7 @@ export class StrategicMonitoringService {
 
   async getDashboard(id: string): Promise<StrategicDashboard | null> {
     const dashboard = dashboardsStore.get(id);
-    if (!dashboard) return null;
+    if (!dashboard) {return null;}
 
     // Hydrate alerts
     const alerts = Array.from(alertsStore.values()).filter(
@@ -272,9 +272,9 @@ export class StrategicMonitoringService {
     let metrics = Array.from(metricsStore.values());
 
     if (filters) {
-      if (filters.type) metrics = metrics.filter((m) => m.type === filters.type);
-      if (filters.category) metrics = metrics.filter((m) => m.category === filters.category);
-      if (filters.owner) metrics = metrics.filter((m) => m.owner === filters.owner);
+      if (filters.type) {metrics = metrics.filter((m) => m.type === filters.type);}
+      if (filters.category) {metrics = metrics.filter((m) => m.category === filters.category);}
+      if (filters.owner) {metrics = metrics.filter((m) => m.owner === filters.owner);}
     }
 
     return metrics.sort((a, b) => a.name.localeCompare(b.name));
@@ -318,7 +318,7 @@ export class StrategicMonitoringService {
       await this.checkThresholds(metric);
 
       metric.updatedAt = now;
-      if (userId) metric.updatedBy = userId;
+      if (userId) {metric.updatedBy = userId;}
       metric.version++;
 
       metricsStore.set(metricId, metric);
@@ -647,9 +647,9 @@ export class StrategicMonitoringService {
     let reports = Array.from(reportsStore.values());
 
     if (filters) {
-      if (filters.reportType) reports = reports.filter((r) => r.reportType === filters.reportType);
-      if (filters.startDate) reports = reports.filter((r) => r.periodStart >= filters.startDate!);
-      if (filters.endDate) reports = reports.filter((r) => r.periodEnd <= filters.endDate!);
+      if (filters.reportType) {reports = reports.filter((r) => r.reportType === filters.reportType);}
+      if (filters.startDate) {reports = reports.filter((r) => r.periodStart >= filters.startDate!);}
+      if (filters.endDate) {reports = reports.filter((r) => r.periodEnd <= filters.endDate!);}
     }
 
     return reports.sort((a, b) => b.periodEnd.getTime() - a.periodEnd.getTime());

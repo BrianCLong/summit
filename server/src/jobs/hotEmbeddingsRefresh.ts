@@ -58,7 +58,7 @@ export async function refreshTenantHotEmbeddings(): Promise<void> {
 }
 
 export function startTenantHotEmbeddingsRefresh(intervalMs = REFRESH_INTERVAL_MS): void {
-  if (refreshTimer) return;
+  if (refreshTimer) {return;}
 
   const runRefresh = async () => {
     try {
@@ -77,7 +77,7 @@ export function startTenantHotEmbeddingsRefresh(intervalMs = REFRESH_INTERVAL_MS
 }
 
 export function stopTenantHotEmbeddingsRefresh(): void {
-  if (!refreshTimer) return;
+  if (!refreshTimer) {return;}
   clearInterval(refreshTimer);
   refreshTimer = null;
   logger.info('stopped hot embeddings refresh loop');

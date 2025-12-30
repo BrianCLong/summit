@@ -117,7 +117,7 @@ export default function Watchlists() {
           <Button
             variant="contained"
             onClick={async () => {
-              if (!caseId || !pendingAlert) return;
+              if (!caseId || !pendingAlert) {return;}
               await addItem({
                 variables: { caseId, kind: 'ALERT', refId: pendingAlert.id },
               });

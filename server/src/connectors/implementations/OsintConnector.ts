@@ -67,8 +67,8 @@ export class OsintConnector extends BaseConnector {
 
   // Override to include validation logic specific to OSINT
   protected async validateRecord(record: OsintRecord): Promise<boolean> {
-    if (!record.content || record.content.length === 0) return false;
-    if (!record.timestamp) return false;
+    if (!record.content || record.content.length === 0) {return false;}
+    if (!record.timestamp) {return false;}
     return true;
   }
 }

@@ -656,9 +656,9 @@ class RelationshipService {
     // Value factors (for financial relationships)
     if (properties.amount || properties.value) {
       const value = parseFloat(properties.amount || properties.value);
-      if (value > 1000000) strengthModifiers *= 1.5;
-      else if (value > 100000) strengthModifiers *= 1.3;
-      else if (value > 10000) strengthModifiers *= 1.1;
+      if (value > 1000000) {strengthModifiers *= 1.5;}
+      else if (value > 100000) {strengthModifiers *= 1.3;}
+      else if (value > 10000) {strengthModifiers *= 1.1;}
     }
 
     return Math.min(1.0, baseWeight * strengthModifiers);

@@ -105,9 +105,9 @@ export class PredictiveThreatAnalyticsService {
     score = Math.min(100, score);
 
     let level: StrategicWarning['level'] = 'LOW';
-    if (score > 80) level = 'CRITICAL';
-    else if (score > 50) level = 'HIGH';
-    else if (score > 20) level = 'MEDIUM';
+    if (score > 80) {level = 'CRITICAL';}
+    else if (score > 50) {level = 'HIGH';}
+    else if (score > 20) {level = 'MEDIUM';}
 
     return {
       level,

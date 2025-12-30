@@ -75,8 +75,8 @@ export function createCsrfLayer(skip?: (req: Request) => boolean): {
   });
 
   const middleware: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
-    if (skip?.(req)) return next();
-    if (!req.headers.cookie) return next();
+    if (skip?.(req)) {return next();}
+    if (!req.headers.cookie) {return next();}
     return csrfProtection(req, res, next);
   };
 
@@ -101,8 +101,8 @@ export function createUserIpRateLimiter(): RequestHandler {
     keyGenerator: (req) => {
       const reqWithUser = req as RequestWithUser;
       const user = reqWithUser.user;
-      if (user?.id) return `user:${user.id}`;
-      if (user?.sub) return `user:${user.sub}`;
+      if (user?.id) {return `user:${user.id}`;}
+      if (user?.sub) {return `user:${user.sub}`;}
       return `ip:${req.ip}`;
     },
     message: {

@@ -198,7 +198,7 @@ class PayoutScheduler {
    */
   calculateNextPayoutDate(schedule: PayoutSchedule): Date {
     const now = new Date();
-    let nextDate = new Date(now);
+    const nextDate = new Date(now);
     nextDate.setUTCHours(this.config.processingHourUtc, 0, 0, 0);
 
     switch (schedule.frequency) {
@@ -906,7 +906,7 @@ export class PayoutService extends EventEmitter {
   private findPayout(payoutId: string): Payout | undefined {
     for (const payouts of this.payouts.values()) {
       const found = payouts.find(p => p.id === payoutId);
-      if (found) return found;
+      if (found) {return found;}
     }
     return undefined;
   }

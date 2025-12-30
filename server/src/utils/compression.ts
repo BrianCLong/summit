@@ -59,7 +59,7 @@ export class CompressionUtils {
    * @throws Error if the compression marker is unknown.
    */
   static async decompress(data: Buffer): Promise<Buffer> {
-    if (data.length === 0) return Buffer.alloc(0);
+    if (data.length === 0) {return Buffer.alloc(0);}
 
     const marker = data.readUInt8(0);
     const payload = data.subarray(1);

@@ -35,7 +35,7 @@ const reviveDates = (_key: string, value: unknown): unknown => {
 
 // Function to batch load comments by ticket IDs with Redis MGET support
 const batchGetComments = async (ticketIds: readonly string[]): Promise<SupportTicketComment[][]> => {
-  if (ticketIds.length === 0) return [];
+  if (ticketIds.length === 0) {return [];}
 
   const redis = getRedisClient();
   const cacheKeys = ticketIds.map(id => `support:comments:${id}`);

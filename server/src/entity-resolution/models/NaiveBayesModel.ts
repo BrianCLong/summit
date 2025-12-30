@@ -123,7 +123,7 @@ export class NaiveBayesModel implements SimilarityModel {
       .map(f => `${f.name} (${f.weight > 0 ? '+' : ''}${f.weight.toFixed(1)})`);
 
     let explanation = `Prob ${probability.toFixed(3)} (LogOdds ${logOdds.toFixed(1)}). Factors: ${topFactors.join(', ')}`;
-    if (topFactors.length === 0) explanation = "No strong evidence.";
+    if (topFactors.length === 0) {explanation = "No strong evidence.";}
 
     return {
       score: probability,

@@ -53,7 +53,7 @@ describe('OsintConnector', () => {
     for await (const record of stream) {
       expect(record.sourceType).toBe(OsintSourceType.WEB);
       count++;
-      if (count >= 5) break;
+      if (count >= 5) {break;}
     }
     expect(count).toBe(5);
   });

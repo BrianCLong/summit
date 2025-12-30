@@ -81,7 +81,7 @@ function extractEntities(text: string) {
   // Malware (example: specific names, case-insensitive)
   const malwareKeywords = ['Ryuk', 'WannaCry', 'NotPetya'];
   malwareKeywords.forEach((keyword) => {
-    if (text.includes(keyword)) push('Malware', keyword);
+    if (text.includes(keyword)) {push('Malware', keyword);}
   });
 
   return ents.slice(0, 50); // Limit to 50 entities
@@ -110,7 +110,7 @@ function scoreEntities(
 
   // Dummy cosine similarity (replace with actual calculation if needed)
   const cosineSimilarity = (emb1: number[], emb2: number[]) => {
-    if (emb1.length !== emb2.length || emb1.length === 0) return 0;
+    if (emb1.length !== emb2.length || emb1.length === 0) {return 0;}
     let dotProduct = 0;
     let magnitude1 = 0;
     let magnitude2 = 0;
@@ -121,7 +121,7 @@ function scoreEntities(
     }
     magnitude1 = Math.sqrt(magnitude1);
     magnitude2 = Math.sqrt(magnitude2);
-    if (magnitude1 === 0 || magnitude2 === 0) return 0;
+    if (magnitude1 === 0 || magnitude2 === 0) {return 0;}
     return dotProduct / (magnitude1 * magnitude2);
   };
 
@@ -132,7 +132,7 @@ function scoreEntities(
     // Very basic placeholder, replace with actual Jaro-Winkler
     const longer = s1.length > s2.length ? s1 : s2;
     const shorter = s1.length > s2.length ? s2 : s1;
-    if (longer.length === 0) return 1.0;
+    if (longer.length === 0) {return 1.0;}
     return longer.indexOf(shorter) !== -1 ? 0.8 : 0.2; // Dummy logic
   };
   const jaro = jaroWinkler(suggestionLabel, candidateName);

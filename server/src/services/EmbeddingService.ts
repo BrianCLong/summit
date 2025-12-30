@@ -281,7 +281,7 @@ class EmbeddingService {
     const magnitude = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
 
     // Avoid division by zero for empty/null text (though strictly guarded above)
-    if (magnitude === 0) return new Array(this.config.dimension).fill(0);
+    if (magnitude === 0) {return new Array(this.config.dimension).fill(0);}
 
     return vector.map(val => val / magnitude);
   }
@@ -377,11 +377,11 @@ class EmbeddingService {
         batchCount: this.metrics.batchCount,
         successRate:
           this.metrics.totalEmbeddings > 0
-            ? (
+            ? `${(
                 ((this.metrics.totalEmbeddings - this.metrics.errorCount) /
                   this.metrics.totalEmbeddings) *
                 100
-              ).toFixed(1) + '%'
+              ).toFixed(1)  }%`
             : '100%',
       },
     };

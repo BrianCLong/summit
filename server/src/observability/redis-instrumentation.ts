@@ -41,7 +41,7 @@ export function instrumentRedisClient(client: Redis, clientType: string = 'defau
 
   // Wrap command execution with metrics
   const originalSendCommand = client.sendCommand.bind(client);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   client.sendCommand = async function (command: any, ...args: any[]) {
     const commandName = command?.name?.toLowerCase() || 'unknown';
     const startTime = Date.now();

@@ -103,9 +103,9 @@ export class DefaultIndicatorIngestService implements IndicatorIngestService {
   ): 'malicious' | 'suspicious' | 'clean' | 'unknown' {
     // Simulated reputation scoring
     const random = Math.random();
-    if (random < 0.4) return 'malicious';
-    if (random < 0.6) return 'suspicious';
-    if (random < 0.8) return 'clean';
+    if (random < 0.4) {return 'malicious';}
+    if (random < 0.6) {return 'suspicious';}
+    if (random < 0.8) {return 'clean';}
     return 'unknown';
   }
 
@@ -217,14 +217,14 @@ export class IngestStepExecutor extends BaseStepExecutor {
   }
 
   private calculateQualityScore(indicators: EnrichedIndicator[]): number {
-    if (indicators.length === 0) return 0;
+    if (indicators.length === 0) {return 0;}
 
     let score = 0;
     for (const ind of indicators) {
-      if (ind.reputation && ind.reputation !== 'unknown') score += 0.3;
-      if (ind.firstSeen) score += 0.2;
-      if (ind.lastSeen) score += 0.2;
-      if (ind.tags && ind.tags.length > 0) score += 0.3;
+      if (ind.reputation && ind.reputation !== 'unknown') {score += 0.3;}
+      if (ind.firstSeen) {score += 0.2;}
+      if (ind.lastSeen) {score += 0.2;}
+      if (ind.tags && ind.tags.length > 0) {score += 0.3;}
     }
     return score / indicators.length;
   }

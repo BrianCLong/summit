@@ -128,8 +128,8 @@ export class SecurityIncidentPipeline {
 
   private extractEntities(event: SecurityEvent): Array<{ type: string; value: string }> {
     const entities: Array<{ type: string; value: string }> = [];
-    if (event.actorId) entities.push({ type: 'user', value: event.actorId });
-    if (event.resourceId) entities.push({ type: 'resource', value: event.resourceId });
+    if (event.actorId) {entities.push({ type: 'user', value: event.actorId });}
+    if (event.resourceId) {entities.push({ type: 'resource', value: event.resourceId });}
     // Extract IPs, etc from details if available
     if (typeof event.details === 'object' && event.details !== null && 'ip' in event.details && typeof event.details.ip === 'string') {
       entities.push({ type: 'ip', value: event.details.ip });
@@ -199,7 +199,7 @@ export class SecurityIncidentPipeline {
   private async dumpGraphNodes(event: SecurityEvent): Promise<string | null> {
     this.logger.info(`Dumping graph nodes for event ${event.id}`);
 
-    if (!event.actorId && !event.resourceId) return null;
+    if (!event.actorId && !event.resourceId) {return null;}
 
     try {
       // Fetch immediate neighborhood of the actor/resource
@@ -231,7 +231,7 @@ export class SecurityIncidentPipeline {
 
   private async updateIncidentEvidence(incidentId: string, logs: string[], dbPath: string, graphPath: string | null) {
     const rawData = await this.redis.get(`incident:${incidentId}`);
-    if (!rawData) return;
+    if (!rawData) {return;}
     const incidentData = JSON.parse(rawData);
     incidentData.evidence = {
       logIds: logs,
@@ -248,7 +248,7 @@ export class SecurityIncidentPipeline {
     const onCallAnalyst = 'analyst-01';
 
     const rawData = await this.redis.get(`incident:${incidentId}`);
-    if (!rawData) return onCallAnalyst;
+    if (!rawData) {return onCallAnalyst;}
     const incidentData = JSON.parse(rawData);
     incidentData.ownerId = onCallAnalyst;
     await this.redis.set(`incident:${incidentId}`, JSON.stringify(incidentData));

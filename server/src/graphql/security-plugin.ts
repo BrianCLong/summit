@@ -85,7 +85,7 @@ export function createGraphQLSecurityPlugin(
             if (finalConfig.logBlockedQueries) {
               console.warn('GraphQL security violation:', {
                 error: error.message,
-                query: query.substring(0, 200) + '...',
+                query: `${query.substring(0, 200)  }...`,
                 userAgent:
                   requestContext.request.http?.headers.get('user-agent'),
                 ip:
@@ -165,7 +165,7 @@ function calculateQueryDepth(query: string): number {
       continue;
     }
 
-    if (inString) continue;
+    if (inString) {continue;}
 
     if (char === '{') {
       depth++;

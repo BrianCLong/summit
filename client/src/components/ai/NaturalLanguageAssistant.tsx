@@ -904,7 +904,7 @@ Key findings include multiple relevant entities and suspicious patterns that war
   };
 
   const startVoiceInput = () => {
-    if (!enableVoiceInput) return;
+    if (!enableVoiceInput) {return;}
 
     setIsListening(true);
 

@@ -99,7 +99,7 @@ export class CostAttributionRepository implements CostAttributionSource {
     const start = new Date(periodStart).getTime();
     const end = new Date(periodEnd).getTime();
     return this.rows.filter((row) => {
-      if (row.tenantId !== tenantId) return false;
+      if (row.tenantId !== tenantId) {return false;}
       const rowStart = new Date(row.periodStart).getTime();
       const rowEnd = new Date(row.periodEnd).getTime();
       return rowStart <= end && rowEnd >= start;
@@ -323,7 +323,7 @@ export class FinopsReportService {
     start: Date,
     end: Date,
   ): boolean {
-    if (row.tenantId !== tenantId) return false;
+    if (row.tenantId !== tenantId) {return false;}
     const date = new Date(`${row.date}T00:00:00Z`);
     return date >= start && date <= end;
   }

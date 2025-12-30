@@ -9,7 +9,7 @@ module.exports = {
     return runs.get(id) || null;
   },
   pushEvent(runId, ev) {
-    if (!events.has(runId)) events.set(runId, []);
+    if (!events.has(runId)) {events.set(runId, []);}
     events.get(runId).push(ev);
   },
   listEvents(runId) {

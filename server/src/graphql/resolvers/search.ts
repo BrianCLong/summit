@@ -400,11 +400,11 @@ export const searchResolvers = {
         }
 
         const updates: any = {};
-        if (name !== undefined) updates.name = name;
-        if (description !== undefined) updates.description = description;
-        if (query !== undefined) updates.query = transformSearchInput(query);
-        if (isPublic !== undefined) updates.isPublic = isPublic;
-        if (tags !== undefined) updates.tags = tags;
+        if (name !== undefined) {updates.name = name;}
+        if (description !== undefined) {updates.description = description;}
+        if (query !== undefined) {updates.query = transformSearchInput(query);}
+        if (isPublic !== undefined) {updates.isPublic = isPublic;}
+        if (tags !== undefined) {updates.tags = tags;}
 
         return await savedSearchService.updateSavedSearch(
           id,

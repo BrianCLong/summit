@@ -283,7 +283,7 @@ export class CryptoPipeline {
   private async logAudit(
     event: Parameters<AuditLogger['log']>[0],
   ): Promise<void> {
-    if (!this.auditLogger) return;
+    if (!this.auditLogger) {return;}
     await this.auditLogger.log(event);
   }
 }

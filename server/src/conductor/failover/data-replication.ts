@@ -562,7 +562,7 @@ export class DataReplicationEngine extends EventEmitter {
     clock1?: VectorClock,
     clock2?: VectorClock,
   ): boolean {
-    if (!clock1 || !clock2) return false;
+    if (!clock1 || !clock2) {return false;}
 
     const allRegions = new Set([
       ...Object.keys(clock1),
@@ -575,8 +575,8 @@ export class DataReplicationEngine extends EventEmitter {
       const v1 = clock1[region] || 0;
       const v2 = clock2[region] || 0;
 
-      if (v1 > v2) clock1Greater = true;
-      if (v2 > v1) clock2Greater = true;
+      if (v1 > v2) {clock1Greater = true;}
+      if (v2 > v1) {clock2Greater = true;}
     }
 
     // Concurrent if neither dominates the other

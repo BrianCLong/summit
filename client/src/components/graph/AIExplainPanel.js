@@ -43,7 +43,7 @@ export default function AIExplainPanel({ cy, investigationId }) {
   });
 
   React.useEffect(() => {
-    if (!cy) return;
+    if (!cy) {return;}
     cy.style()
       .selector('edge.why')
       .style({ width: 6, 'line-style': 'solid' })
@@ -51,7 +51,7 @@ export default function AIExplainPanel({ cy, investigationId }) {
   }, [cy]);
 
   React.useEffect(() => {
-    if (!cy || !data?.graphRagAnswer) return;
+    if (!cy || !data?.graphRagAnswer) {return;}
     const ids = data.graphRagAnswer.why_paths.map((w) => w.relId);
     cy.batch(() => {
       cy.elements('edge').removeClass('why');

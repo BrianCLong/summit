@@ -93,10 +93,10 @@ router.post('/ai/webhook', async (req, res) => {
 });
 
 function normalizeInsights(evt: any) {
-  if (evt.kind === 'nlp_entities') return evt.results;
-  if (evt.kind === 'entity_resolution') return evt.links;
-  if (evt.kind === 'link_prediction') return evt.predictions;
-  if (evt.kind === 'community_detect') return evt.communities;
+  if (evt.kind === 'nlp_entities') {return evt.results;}
+  if (evt.kind === 'entity_resolution') {return evt.links;}
+  if (evt.kind === 'link_prediction') {return evt.predictions;}
+  if (evt.kind === 'community_detect') {return evt.communities;}
   return [evt];
 }
 

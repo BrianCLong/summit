@@ -60,7 +60,7 @@ function resolvePolicyVersion(request: PreflightRequest): string | undefined {
     (request as any).policyVersion ||
     request.context?.policyVersion ||
     request.context?.pinnedPolicyVersion;
-  if (pinned) return pinned;
+  if (pinned) {return pinned;}
 
   try {
     const resolved = policyBundleStore.resolve();
@@ -157,7 +157,7 @@ class PolicyDecisionStore {
       [preflightId],
     );
 
-    if (!result.rows.length) return null;
+    if (!result.rows.length) {return null;}
     const row = result.rows[0];
 
     let parsed: {
@@ -224,7 +224,7 @@ export class ActionPolicyService {
       },
     };
 
-    if (!normalized.context) normalized.context = {} as any;
+    if (!normalized.context) {normalized.context = {} as any;}
     if ((normalized as any).policyVersion && !normalized.context?.policyVersion) {
       normalized.context = {
         ...normalized.context,
@@ -297,7 +297,7 @@ export class ActionPolicyService {
     | { status: 'ok'; decision: PolicyDecision; requestHash: string }
   > {
     const record = await this.store.getDecision(preflightId);
-    if (!record) return { status: 'missing' };
+    if (!record) {return { status: 'missing' };}
 
     const requestHash = calculateRequestHash(request);
     if (record.requestHash !== requestHash) {

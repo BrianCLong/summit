@@ -213,7 +213,7 @@ class LeastPrivilegeAnalyzer {
     for (const [subject, subjectPatterns] of bySubject) {
       // Find patterns that haven't been used recently
       for (const pattern of subjectPatterns) {
-        if (!pattern.isActive) continue;
+        if (!pattern.isActive) {continue;}
 
         const daysSinceUsed = pattern.lastAccess
           ? Math.floor((now - pattern.lastAccess.getTime()) / (1000 * 60 * 60 * 24))
@@ -819,8 +819,8 @@ export class PolicyRecommendationService extends EventEmitter {
     for (const [tenantId, recs] of this.recommendations) {
       const now = Date.now();
       const valid = recs.filter(r => {
-        if (!r.expiresAt) return true;
-        if (r.status === 'implemented' || r.status === 'dismissed') return false;
+        if (!r.expiresAt) {return true;}
+        if (r.status === 'implemented' || r.status === 'dismissed') {return false;}
         return new Date(r.expiresAt).getTime() > now;
       });
 

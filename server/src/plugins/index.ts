@@ -93,16 +93,16 @@ export async function runPlugin(
       },
   };
 
-  if (!deps.vault) await loadDependencies();
+  if (!deps.vault) {await loadDependencies();}
   const vault = deps.vault || { read: (path: string) => vaultReadKvV2(path) };
 
-  if (!deps.metrics) await loadDependencies();
+  if (!deps.metrics) {await loadDependencies();}
   const metrics = deps.metrics || {
       invocations: pluginInvocations,
       errors: pluginErrors
   };
 
-  if (!deps.tracer) await loadDependencies();
+  if (!deps.tracer) {await loadDependencies();}
   const tracer = deps.tracer || otelService;
 
   const tenant = opts?.tenant || 'unknown';
@@ -144,7 +144,7 @@ export async function runPlugin(
     } else {
       // 4. Fallback to Legacy (Internal)
       const p = legacyRegistry.get(idOrName);
-      if (!p) throw new Error(`Plugin not found: ${idOrName}`);
+      if (!p) {throw new Error(`Plugin not found: ${idOrName}`);}
 
       // Warn: executing legacy plugin without strict sandbox capabilities if not managed
       // Ideally internal legacy plugins also run via runtime but we kept legacy path for now.

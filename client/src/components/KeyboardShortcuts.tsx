@@ -19,12 +19,12 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
 }) => {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!enabled) return;
+      if (!enabled) {return;}
 
       const pressedKeys = [];
-      if (event.ctrlKey || event.metaKey) pressedKeys.push('ctrl');
-      if (event.shiftKey) pressedKeys.push('shift');
-      if (event.altKey) pressedKeys.push('alt');
+      if (event.ctrlKey || event.metaKey) {pressedKeys.push('ctrl');}
+      if (event.shiftKey) {pressedKeys.push('shift');}
+      if (event.altKey) {pressedKeys.push('alt');}
 
       const key = event.key.toLowerCase();
       if (!['control', 'shift', 'alt', 'meta'].includes(key)) {
@@ -68,7 +68,7 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
   );
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
@@ -84,13 +84,13 @@ export const useKeyboardShortcuts = (
   enabled = true,
 ) => {
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const pressedKeys = [];
-      if (event.ctrlKey || event.metaKey) pressedKeys.push('ctrl');
-      if (event.shiftKey) pressedKeys.push('shift');
-      if (event.altKey) pressedKeys.push('alt');
+      if (event.ctrlKey || event.metaKey) {pressedKeys.push('ctrl');}
+      if (event.shiftKey) {pressedKeys.push('shift');}
+      if (event.altKey) {pressedKeys.push('alt');}
 
       const key = event.key.toLowerCase();
       if (!['control', 'shift', 'alt', 'meta'].includes(key)) {
@@ -183,14 +183,14 @@ export const ShortcutsHelp: React.FC<ShortcutsHelpProps> = ({
   const groupedShortcuts = shortcuts.reduce(
     (acc, shortcut) => {
       const category = shortcut.category || 'General';
-      if (!acc[category]) acc[category] = [];
+      if (!acc[category]) {acc[category] = [];}
       acc[category].push(shortcut);
       return acc;
     },
     {} as Record<string, ShortcutAction[]>,
   );
 
-  if (!isVisible) return null;
+  if (!isVisible) {return null;}
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">

@@ -12,7 +12,7 @@ r.get('/replicate', async (req, res) => {
      FROM run_ledger WHERE seq > $1 ORDER BY seq ASC LIMIT 10000`,
     [since],
   );
-  for (const row of rows) res.write(JSON.stringify(row) + '\n');
+  for (const row of rows) {res.write(`${JSON.stringify(row)  }\n`);}
   res.end();
 });
 

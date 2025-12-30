@@ -16,7 +16,7 @@ const flags: Record<string, Flag> = {};
  */
 export function getFlag(key: string, ctx: Record<string, any> = {}) {
   const f = flags[key];
-  if (!f) return false;
+  if (!f) {return false;}
 
   // Neutralized: Rules are no longer evaluated to prevent security risks (eval).
   // If rules are present, we log a warning and return the base enabled state.

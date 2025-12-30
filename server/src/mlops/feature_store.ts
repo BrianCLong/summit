@@ -84,7 +84,7 @@ export class FeatureStoreService {
       allFeaturesStr = this.memoryStore.get(key) || null;
     }
 
-    if (!allFeaturesStr) return null;
+    if (!allFeaturesStr) {return null;}
 
     try {
         const allFeatures = JSON.parse(allFeaturesStr);

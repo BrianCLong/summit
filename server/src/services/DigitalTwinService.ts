@@ -317,10 +317,10 @@ export class DigitalTwinService {
    * Converts health score to status
    */
   private getHealthStatus(score: number): HealthStatus {
-    if (score >= 90) return HealthStatus.EXCELLENT;
-    if (score >= 70) return HealthStatus.GOOD;
-    if (score >= 50) return HealthStatus.FAIR;
-    if (score >= 25) return HealthStatus.POOR;
+    if (score >= 90) {return HealthStatus.EXCELLENT;}
+    if (score >= 70) {return HealthStatus.GOOD;}
+    if (score >= 50) {return HealthStatus.FAIR;}
+    if (score >= 25) {return HealthStatus.POOR;}
     return HealthStatus.CRITICAL;
   }
 

@@ -210,7 +210,7 @@ export default function MTTTTrendWidget({
   };
 
   const handleExport = () => {
-    if (!data?.mtttMetrics) return;
+    if (!data?.mtttMetrics) {return;}
 
     const exportData = {
       timestamp: new Date().toISOString(),
@@ -267,14 +267,14 @@ export default function MTTTTrendWidget({
 
   const renderChart = () => {
     const metrics = data?.mtttMetrics;
-    if (!metrics) return null;
+    if (!metrics) {return null;}
 
     const timeSeriesData = (metrics.timeSeries ?? []).map((point) => ({
       ...point,
       timestamp: new Date(point.timestamp).toLocaleTimeString(),
     }));
 
-    if (timeSeriesData.length === 0) return null;
+    if (timeSeriesData.length === 0) {return null;}
 
     const targetMTTT = metrics.summary?.targetMTTT ?? 15; // Default 15 minutes
 

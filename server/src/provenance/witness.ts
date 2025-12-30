@@ -73,7 +73,7 @@ export class MutationWitnessService {
 
     checks.push({
       check: 'Schema Integrity',
-      passed: !!hasValidStructure,
+      passed: Boolean(hasValidStructure),
       message: hasValidStructure ? 'Structure matches mutation type' : 'Invalid state combination for mutation type'
     });
 

@@ -288,13 +288,13 @@ export class NarrativeSimulationEngine {
       if (actor) {
         actor.relationships.forEach((edge) => {
           const related = this.state.entities[edge.targetId];
-          if (!related) return;
+          if (!related) {return;}
 
           // Decay intensity
           const newIntensity = event.intensity * edge.strength * 0.5;
 
           // If intensity drops below threshold, stop propagating
-          if (newIntensity < 0.01) return;
+          if (newIntensity < 0.01) {return;}
 
           const propagatedEvent: NarrativeEvent = {
             ...event,
@@ -459,15 +459,15 @@ export class NarrativeSimulationEngine {
   private calculateTrend(
     history: Array<{ tick: number; value: number }>,
   ): 'rising' | 'falling' | 'stable' {
-    if (history.length < 2) return 'stable';
+    if (history.length < 2) {return 'stable';}
     const recent = history.slice(-3);
     const deltas = recent
       .slice(1)
       .map((point, index) => point.value - recent[index].value);
     const avgDelta =
       deltas.reduce((total, value) => total + value, 0) / (deltas.length || 1);
-    if (avgDelta > MOMENTUM_SENSITIVITY / 2) return 'rising';
-    if (avgDelta < -MOMENTUM_SENSITIVITY / 2) return 'falling';
+    if (avgDelta > MOMENTUM_SENSITIVITY / 2) {return 'rising';}
+    if (avgDelta < -MOMENTUM_SENSITIVITY / 2) {return 'falling';}
     return 'stable';
   }
 

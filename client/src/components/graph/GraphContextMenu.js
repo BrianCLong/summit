@@ -36,14 +36,14 @@ export default function GraphContextMenu() {
   useEffect(() => {
     if (contextMenu?.open) {
       setAnchorPos({ mouseX: contextMenu.y + 2, mouseY: contextMenu.x + 2 });
-    } else setAnchorPos(null);
+    } else {setAnchorPos(null);}
   }, [contextMenu]);
 
   const closeMenu = () => dispatch(g.contextMenuClose());
 
   const onExpand = async () => {
     closeMenu();
-    if (!contextMenu?.targetId) return;
+    if (!contextMenu?.targetId) {return;}
     try {
       const { data } = await expand({
         variables: { entityId: contextMenu.targetId, limit: 50 },
@@ -94,7 +94,7 @@ export default function GraphContextMenu() {
 
   const onSendToAI = async () => {
     closeMenu();
-    if (!contextMenu?.targetId) return;
+    if (!contextMenu?.targetId) {return;}
     try {
       socket.emit('ai:request', { entityId: contextMenu.targetId });
       setSnackbar({
@@ -119,7 +119,7 @@ export default function GraphContextMenu() {
   return (
     <>
       <Menu
-        open={!!anchorPos}
+        open={Boolean(anchorPos)}
         onClose={closeMenu}
         anchorReference="anchorPosition"
         anchorPosition={

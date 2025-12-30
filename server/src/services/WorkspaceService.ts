@@ -48,7 +48,7 @@ export class WorkspaceService {
   ): Promise<Workspace | null> {
     const pool = getPostgresPool();
     const current = await this.getWorkspace(tenantId, userId, workspaceId);
-    if (!current) return null;
+    if (!current) {return null;}
 
     const name = updates.name || current.name;
     const config = updates.config || current.config;

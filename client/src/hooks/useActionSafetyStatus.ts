@@ -17,7 +17,7 @@ export const useActionSafetyStatus = (actionId: string, tenantId?: string) => {
   const scopedTenant = tenantId || resolvedTenant;
 
   useEffect(() => {
-    if (authorizationLoading) return;
+    if (authorizationLoading) {return;}
 
     if (!actionId) {
       setError(new Error('actionId is required'));

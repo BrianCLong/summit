@@ -54,7 +54,7 @@ export function NeighborhoodStreaming({
   } | null>(null);
 
   useEffect(() => {
-    if (!isStreaming) return;
+    if (!isStreaming) {return;}
 
     let processed = 0;
     const totalBatches = batchLimit * Math.max(maxDepth, 1);

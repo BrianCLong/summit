@@ -42,7 +42,7 @@ router.get('/status', async (req: Request, res: Response, next: NextFunction) =>
     `);
 
     // Calculate uptime (try fetching from slo-exporter, fallback to mock)
-    let uptime = {
+    const uptime = {
       last24h: 99.99,
       last7d: 99.95,
       last30d: 99.92,

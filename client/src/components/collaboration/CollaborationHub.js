@@ -83,7 +83,7 @@ function CollaborationHub({
   const [conflictAlerts, setConflictAlerts] = useState([]);
 
   useEffect(() => {
-    if (!websocketService) return;
+    if (!websocketService) {return;}
 
     // Connection status monitoring
     const handleConnect = () => setConnectionStatus('connected');
@@ -381,7 +381,7 @@ function CollaborationHub({
           onClick={() => {
             // Handle invite logic
             setInviteDialog(false);
-            if (onInviteUser) onInviteUser();
+            if (onInviteUser) {onInviteUser();}
           }}
         >
           Send Invitations

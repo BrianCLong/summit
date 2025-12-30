@@ -125,9 +125,9 @@ describe('Advanced Analytics Service - P1 Priority', () => {
           records: [
             {
               get: (field) => {
-                if (field === 'a') return { properties: { id: '1' } };
-                if (field === 'b') return { properties: { id: '3' } };
-                if (field === 'r') return { properties: { weight: 0.8 } };
+                if (field === 'a') {return { properties: { id: '1' } };}
+                if (field === 'b') {return { properties: { id: '3' } };}
+                if (field === 'r') {return { properties: { weight: 0.8 } };}
               },
             },
           ],
@@ -272,12 +272,12 @@ describe('Advanced Analytics Service - P1 Priority', () => {
           {
             get: (field) => {
               if (field === 'r')
-                return {
+                {return {
                   properties: {
                     timestamp: new Date().toISOString(),
                     type: 'COMMUNICATION',
                   },
-                };
+                };}
               return { properties: { id: 'related_entity' } };
             },
           },
@@ -352,9 +352,9 @@ describe('Advanced Analytics Service - P1 Priority', () => {
           {
             get: (field) => {
               if (field === 'e')
-                return { properties: { id: '1', label: 'High Risk Entity' } };
-              if (field === 'connectionCount') return { toNumber: () => 25 };
-              if (field === 'relationships') return [];
+                {return { properties: { id: '1', label: 'High Risk Entity' } };}
+              if (field === 'connectionCount') {return { toNumber: () => 25 };}
+              if (field === 'relationships') {return [];}
             },
           },
         ],

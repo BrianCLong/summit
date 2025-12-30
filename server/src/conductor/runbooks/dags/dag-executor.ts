@@ -326,7 +326,7 @@ export class DAGExecutor {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
     const visit = (nodeId: string) => {
-      if (visited.has(nodeId)) return;
+      if (visited.has(nodeId)) {return;}
 
       if (visiting.has(nodeId)) {
         throw new Error(`Circular dependency detected at node ${nodeId}`);
@@ -370,7 +370,7 @@ export class DAGExecutor {
       const batch: DAGNode[] = [];
 
       for (const node of sortedNodes) {
-        if (completed.has(node.id)) continue;
+        if (completed.has(node.id)) {continue;}
 
         // Check if all dependencies are completed
         const dependenciesMet = node.dependencies.every((depId) => completed.has(depId));

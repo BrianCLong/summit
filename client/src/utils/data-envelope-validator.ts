@@ -42,20 +42,20 @@ export interface LineageNode {
   inputs: string[];
   timestamp: string;
   actor?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   metadata?: Record<string, any>;
 }
 
 /**
  * Data envelope interface
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export interface DataEnvelope<T = any> {
   data: T;
   provenance: Provenance;
   confidence?: number;
   isSimulated: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   governanceVerdict?: any;
   classification: DataClassification;
   dataHash: string;
@@ -107,7 +107,7 @@ const DEFAULT_CONFIG: ValidationConfig = {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function validateDataEnvelope<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   envelope: any,
   config: ValidationConfig = {}
 ): ValidationResult {
@@ -325,7 +325,7 @@ export function createEnvelopeInterceptor(config: ValidationConfig = {}) {
     /**
      * Response interceptor for axios
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     axiosResponseInterceptor: (response: any) => {
       const validation = validateDataEnvelope(response.data, config);
 
@@ -349,7 +349,7 @@ export function createEnvelopeInterceptor(config: ValidationConfig = {}) {
     /**
      * Response interceptor for fetch
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     async fetchResponseInterceptor(response: Response): Promise<any> {
       const json = await response.json();
 

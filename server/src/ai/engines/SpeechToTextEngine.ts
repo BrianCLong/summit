@@ -641,7 +641,7 @@ export class SpeechToTextEngine {
     const start = Math.max(range1.startTime, range2.startTime);
     const end = Math.min(range1.endTime, range2.endTime);
 
-    if (end <= start) return 0;
+    if (end <= start) {return 0;}
 
     const intersectionDuration = end - start;
     const range1Duration = range1.endTime - range1.startTime;
@@ -656,7 +656,7 @@ export class SpeechToTextEngine {
    * Get total duration of all segments
    */
   private getTotalDuration(segments: TranscriptionSegment[]): number {
-    if (segments.length === 0) return 0;
+    if (segments.length === 0) {return 0;}
 
     const firstStart = Math.min(...segments.map((s) => s.startTime));
     const lastEnd = Math.max(...segments.map((s) => s.endTime));

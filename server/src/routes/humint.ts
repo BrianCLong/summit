@@ -50,7 +50,7 @@ router.get('/sources', async (req: AuthenticatedRequest, res: Response) => {
 router.get('/sources/:id', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const source = await service.getSource(req.user!.tenantId, req.params.id);
-    if (!source) return res.status(404).json({ error: 'Source not found' });
+    if (!source) {return res.status(404).json({ error: 'Source not found' });}
     res.json(source);
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
@@ -93,7 +93,7 @@ router.patch('/reports/:id/status', async (req: AuthenticatedRequest, res: Respo
         return res.status(400).json({ error: 'Invalid status' });
     }
     const report = await service.updateReportStatus(req.user!.tenantId, req.params.id, status);
-    if (!report) return res.status(404).json({ error: 'Report not found' });
+    if (!report) {return res.status(404).json({ error: 'Report not found' });}
     res.json(report);
   } catch (error) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });

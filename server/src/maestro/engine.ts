@@ -94,7 +94,7 @@ export class MaestroEngine {
       `SELECT * FROM maestro_templates WHERE id = $1 AND tenant_id = $2`,
       [templateId, tenantId]
     );
-    if (res.rows.length === 0) throw new Error(`Template not found: ${templateId}`);
+    if (res.rows.length === 0) {throw new Error(`Template not found: ${templateId}`);}
     const template: MaestroTemplate = res.rows[0]; // TODO: Map snake_case to camelCase
 
     // 2. Validate Input (stub)
@@ -180,7 +180,7 @@ export class MaestroEngine {
   private async processTask(taskId: string, runId: string, tenantId: string): Promise<any> {
     // 1. Fetch Task
     const res = await this.db.query(`SELECT * FROM maestro_tasks WHERE id = $1`, [taskId]);
-    if (res.rows.length === 0) throw new Error(`Task not found: ${taskId}`);
+    if (res.rows.length === 0) {throw new Error(`Task not found: ${taskId}`);}
     const taskRow = res.rows[0];
 
     const task: MaestroTask = {
@@ -291,7 +291,7 @@ export class MaestroEngine {
   }
 
   private async areDependenciesSatisfied(taskIds: string[]): Promise<boolean> {
-    if (taskIds.length === 0) return true;
+    if (taskIds.length === 0) {return true;}
 
     const res = await this.db.query(
       `SELECT count(*) as count FROM maestro_tasks WHERE id = ANY($1) AND status = 'succeeded'`,

@@ -91,7 +91,7 @@ function createShader(
   source: string
 ): WebGLShader | null {
   const shader = gl.createShader(type);
-  if (!shader) return null;
+  if (!shader) {return null;}
 
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
@@ -111,7 +111,7 @@ function createProgram(
   fragmentShader: WebGLShader
 ): WebGLProgram | null {
   const program = gl.createProgram();
-  if (!program) return null;
+  if (!program) {return null;}
 
   gl.attachShader(program, vertexShader);
   gl.attachShader(program, fragmentShader);
@@ -156,7 +156,7 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
   // Initialize WebGL context and shaders
   const initializeGL = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return false;
+    if (!canvas) {return false;}
 
     const gl = canvas.getContext('webgl', {
       antialias: true,
@@ -174,11 +174,11 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
 
-    if (!vertexShader || !fragmentShader) return false;
+    if (!vertexShader || !fragmentShader) {return false;}
 
     // Create program
     const program = createProgram(gl, vertexShader, fragmentShader);
-    if (!program) return false;
+    if (!program) {return false;}
 
     programRef.current = program;
 
@@ -344,10 +344,10 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas) {return;}
 
       const container = canvas.parentElement;
-      if (!container) return;
+      if (!container) {return;}
 
       const { width, height } = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
@@ -395,9 +395,9 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
       // Cleanup WebGL resources
       const gl = glRef.current;
       if (gl) {
-        if (positionBufferRef.current) gl.deleteBuffer(positionBufferRef.current);
-        if (intensityBufferRef.current) gl.deleteBuffer(intensityBufferRef.current);
-        if (programRef.current) gl.deleteProgram(programRef.current);
+        if (positionBufferRef.current) {gl.deleteBuffer(positionBufferRef.current);}
+        if (intensityBufferRef.current) {gl.deleteBuffer(intensityBufferRef.current);}
+        if (programRef.current) {gl.deleteProgram(programRef.current);}
       }
     };
   }, [initializeGL, render]);

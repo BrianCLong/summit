@@ -136,7 +136,7 @@ export class FIPSComplianceService implements FIPSCrypto {
   }
 
   private async connectToHSM(): Promise<void> {
-    if (!this.config.enabled) return;
+    if (!this.config.enabled) {return;}
 
     switch (this.config.hsm.provider) {
       case 'AWS_CloudHSM':
@@ -158,7 +158,7 @@ export class FIPSComplianceService implements FIPSCrypto {
   }
 
   private async loadKeysFromHSM(): Promise<void> {
-    if (!this.hsmConnection) return;
+    if (!this.hsmConnection) {return;}
 
     // Load existing keys from HSM partition
     // In production, enumerate keys from HSM

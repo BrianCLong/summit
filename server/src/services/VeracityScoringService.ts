@@ -69,8 +69,8 @@ export class VeracityScoringService {
 
       // Determine confidence
       let confidence = 'LOW';
-      if (sourceCount > 5 && score > 70) confidence = 'HIGH';
-      else if (sourceCount > 2) confidence = 'MEDIUM';
+      if (sourceCount > 5 && score > 70) {confidence = 'HIGH';}
+      else if (sourceCount > 2) {confidence = 'MEDIUM';}
 
       const veracity: VeracityScore = {
         score,

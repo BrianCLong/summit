@@ -38,7 +38,7 @@ type Neo4jReadyCallback = (event: { reason: string }) => void | Promise<void>;
 const readyCallbacks: Neo4jReadyCallback[] = [];
 
 export async function initializeNeo4jDriver(): Promise<void> {
-  if (initializationPromise) return initializationPromise;
+  if (initializationPromise) {return initializationPromise;}
 
   initializationPromise = (async () => {
     try {
@@ -108,7 +108,7 @@ export const neo = {
       // Return a dummy session or throw?
       // For now, simple mock if needed or just rely on realDriver if available
       // But typically we should just return realDriver.session() if initialized
-      if(realDriver) return realDriver.session();
+      if(realDriver) {return realDriver.session();}
       // If we are in mock mode but no driver (e.g. tests without init),
       // we might need a better mock strategy.
       // For now, let's assume getNeo4jDriver throws or handles it.

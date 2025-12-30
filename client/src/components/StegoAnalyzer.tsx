@@ -45,7 +45,7 @@ const MatrixGraph: React.FC<{ matrix: RiskMatrix }> = ({ matrix }) => {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!ref.current || !matrix || matrix.length === 0) return;
+    if (!ref.current || !matrix || matrix.length === 0) {return;}
 
     const numRows = matrix.length;
     const numCols = matrix[0].length;
@@ -179,7 +179,7 @@ const StegoAnalyzer: React.FC = () => {
         const riskMatrix = Array.isArray(analysis?.risk_matrix)
           ? (analysis.risk_matrix as RiskMatrix)
           : null;
-        if (!analysis) return null;
+        if (!analysis) {return null;}
 
         return (
         <div className="mt-4 p-4 bg-gray-100 rounded">

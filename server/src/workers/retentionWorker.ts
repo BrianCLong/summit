@@ -39,7 +39,7 @@ export async function runRetentionOnce() {
 
 let timer: any;
 export function startRetentionWorker() {
-  if (process.env.ENABLE_RETENTION_WORKER !== 'true') return;
+  if (process.env.ENABLE_RETENTION_WORKER !== 'true') {return;}
   const intervalMs = Number(
     process.env.RETENTION_WORKER_INTERVAL_MS || 24 * 3600 * 1000,
   );
@@ -50,5 +50,5 @@ export function startRetentionWorker() {
 }
 
 export function stopRetentionWorker() {
-  if (timer) clearInterval(timer);
+  if (timer) {clearInterval(timer);}
 }

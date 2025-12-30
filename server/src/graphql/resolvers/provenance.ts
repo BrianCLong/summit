@@ -11,7 +11,7 @@ export const provenanceResolvers = {
   Query: {
     async evidenceBundles(_: any, { filter }: any) {
       const { service, releaseId, since, until, limit, offset } = filter || {};
-      if (!service || !releaseId) return [];
+      if (!service || !releaseId) {return [];}
       if (
         since ||
         until ||

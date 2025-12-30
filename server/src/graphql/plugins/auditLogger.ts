@@ -17,7 +17,7 @@ const LOG_FILE = process.env.AUDIT_LOG_FILE || 'audit-log.jsonl';
 const ANONYMIZE = process.env.AUDIT_LOG_ANONYMIZE === 'true';
 
 const anonymize = (value: unknown): any => {
-  if (value === null || value === undefined) return value;
+  if (value === null || value === undefined) {return value;}
   if (typeof value === 'object') {
     if (Array.isArray(value)) {
       return value.map(() => '[redacted]');
@@ -144,7 +144,7 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
         } catch (_err) {
            // Fallback only if no other system is working
            if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
-             fs.appendFileSync(LOG_FILE, JSON.stringify(logEntry) + '\n');
+             fs.appendFileSync(LOG_FILE, `${JSON.stringify(logEntry)  }\n`);
            }
         }
       },

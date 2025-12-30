@@ -106,11 +106,11 @@ const ExecutiveDashboard: React.FC = () => {
     }
   };
 
-  if (loading) return <CircularProgress />;
+  if (loading) {return <CircularProgress />;}
   if (error)
-    return (
+    {return (
       <Alert severity="error">Error loading scenarios: {error.message}</Alert>
-    );
+    );}
 
   const scenarios = data?.getAllCrisisScenarios || [];
 

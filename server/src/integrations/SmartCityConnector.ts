@@ -425,15 +425,15 @@ export class SmartCityConnector {
 
   private assessDataQuality(value: unknown, timestamp: string): SensorReading['quality'] {
     const age = Date.now() - new Date(timestamp).getTime();
-    if (age > 3600000) return 'LOW';
-    if (value === null || value === undefined) return 'UNKNOWN';
-    if (age > 300000) return 'MEDIUM';
+    if (age > 3600000) {return 'LOW';}
+    if (value === null || value === undefined) {return 'UNKNOWN';}
+    if (age > 300000) {return 'MEDIUM';}
     return 'HIGH';
   }
 
   private checkForAnomalies(deviceId: string, readings: SensorReading[]): void {
     const history = this.sensorCache.get(deviceId) || [];
-    if (history.length < 10) return;
+    if (history.length < 10) {return;}
 
     for (const reading of readings) {
       if (typeof reading.value === 'number') {

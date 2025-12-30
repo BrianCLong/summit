@@ -3,12 +3,12 @@
 import { DbObservabilityService, EXPLAIN_WHITELIST } from '../observability/db-observability.js';
 
 function parseParams(raw: string | undefined): Record<string, string | number> | undefined {
-  if (!raw) return undefined;
+  if (!raw) {return undefined;}
   return raw.split(',').reduce<Record<string, string | number>>((acc, pair) => {
     const [key, value] = pair.split('=');
-    if (!key) return acc;
+    if (!key) {return acc;}
     const trimmed = key.trim();
-    if (!trimmed) return acc;
+    if (!trimmed) {return acc;}
     const num = Number(value);
     acc[trimmed] = Number.isNaN(num) ? value : num;
     return acc;

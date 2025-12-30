@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import $ from 'jquery';
 export default function FlowLintPanel() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [items, setItems] = useState<any[]>([]);
   const handlerBoundRef = useRef(false);
 

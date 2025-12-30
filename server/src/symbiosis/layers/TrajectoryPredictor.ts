@@ -19,7 +19,7 @@ export class TrajectoryPredictor {
       this.learn(lastState, state);
     }
     this.history.push(state);
-    if (this.history.length > 50) this.history.shift(); // Keep window small
+    if (this.history.length > 50) {this.history.shift();} // Keep window small
   }
 
   private learn(from: string, to: string) {
@@ -38,7 +38,7 @@ export class TrajectoryPredictor {
 
     for (let i = 0; i < horizon; i++) {
       const transitions = this.transitionMatrix.get(current);
-      if (!transitions) break;
+      if (!transitions) {break;}
 
       // Find most likely next step
       let bestNext = '';

@@ -59,8 +59,8 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
   }
 
   async close(): Promise<void> {
-    if (this.redis) await this.redis.quit();
-    if (this.pubsub) await this.pubsub.quit();
+    if (this.redis) {await this.redis.quit();}
+    if (this.pubsub) {await this.pubsub.quit();}
     this.ready = false;
   }
 
@@ -234,16 +234,16 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
   }
 
   private getContextValue(context: FlagContext, attribute: string): any {
-    if (attribute === 'userId') return context.userId;
-    if (attribute === 'email') return context.userEmail;
-    if (attribute === 'role') return context.userRole;
-    if (attribute === 'tenantId') return context.tenantId;
+    if (attribute === 'userId') {return context.userId;}
+    if (attribute === 'email') {return context.userEmail;}
+    if (attribute === 'role') {return context.userRole;}
+    if (attribute === 'tenantId') {return context.tenantId;}
     return context.attributes?.[attribute];
   }
 
   private evaluateCondition(condition: Condition, value: any): boolean {
     // Simple implementation for now
-    if (value === undefined || value === null) return false;
+    if (value === undefined || value === null) {return false;}
 
     switch (condition.operator) {
       case 'equals': return value === condition.value;

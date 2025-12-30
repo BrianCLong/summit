@@ -42,17 +42,17 @@ export default function InvestigationDetailsRoute() {
   const events = data?.provenanceByInvestigation ?? [];
 
   const groups = useMemo(() => {
-    if (!events || groupBy === 'none') return null;
+    if (!events || groupBy === 'none') {return null;}
     const fmt = (iso: string) => {
       const d = new Date(iso);
-      if (groupBy === 'hour') return d.toISOString().slice(0, 13); // YYYY-MM-DDTHH
+      if (groupBy === 'hour') {return d.toISOString().slice(0, 13);} // YYYY-MM-DDTHH
       // minute
       return d.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
     };
     const m = new Map<string, any[]>();
     for (const e of events) {
       const k = fmt(e.createdAt || e.created_at);
-      if (!m.has(k)) m.set(k, []);
+      if (!m.has(k)) {m.set(k, []);}
       m.get(k)!.push(e);
     }
     return Array.from(m.entries()).sort(([a], [b]) => (a < b ? 1 : -1));
@@ -64,7 +64,7 @@ export default function InvestigationDetailsRoute() {
         <h2 className="text-lg font-semibold">
           Investigation {investigationId}
         </h2>
-        {!!investigationId && (
+        {Boolean(investigationId) && (
           <ExportAuditBundleButton investigationId={investigationId} />
         )}
       </div>
@@ -166,11 +166,11 @@ export default function InvestigationDetailsRoute() {
 
 function MetadataPreview({ metadata }: { metadata: any }) {
   const [open, setOpen] = useState(false);
-  if (!metadata) return <span className="opacity-50">-</span>;
+  if (!metadata) {return <span className="opacity-50">-</span>;}
   const preview = (() => {
     try {
       const s = JSON.stringify(metadata);
-      return s.length > 60 ? s.slice(0, 60) + '…' : s;
+      return s.length > 60 ? `${s.slice(0, 60)  }…` : s;
     } catch {
       return String(metadata);
     }

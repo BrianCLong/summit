@@ -118,8 +118,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
 
 const HealthScoreGauge: React.FC<{ score: number }> = ({ score }) => {
   const getColor = () => {
-    if (score >= 80) return 'success.main';
-    if (score >= 60) return 'warning.main';
+    if (score >= 80) {return 'success.main';}
+    if (score >= 60) {return 'warning.main';}
     return 'error.main';
   };
 

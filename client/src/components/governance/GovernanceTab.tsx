@@ -61,8 +61,8 @@ export const GovernanceTab: React.FC = () => {
     };
   }, [rotateKeys]);
 
-  if (loading) return <p>Loading policies...</p>;
-  if (error) return <p>Error loading policies: {error.message}</p>;
+  if (loading) {return <p>Loading policies...</p>;}
+  if (error) {return <p>Error loading policies: {error.message}</p>;}
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">

@@ -24,10 +24,10 @@ export class TraversalOptimizer {
   }
 
   private sanitizeRelTypes(types: string[] | undefined): string {
-    if (!types || types.length === 0) return '';
+    if (!types || types.length === 0) {return '';}
     // strict validation: only allow alphanumeric and underscores
     const validTypes = types.filter(t => /^[a-zA-Z0-9_]+$/.test(t));
-    if (validTypes.length === 0) return '';
+    if (validTypes.length === 0) {return '';}
     // Join with backticks just in case, though regex enforces safety
     return `:${validTypes.map(t => `\`${t}\``).join('|')}`;
   }

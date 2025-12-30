@@ -594,8 +594,8 @@ export class QuantumResistantCryptoService extends EventEmitter {
     const now = new Date();
     return Array.from(this.keyStore.values())
       .filter((k) => {
-        if (options.algorithm && k.algorithm !== options.algorithm) return false;
-        if (!options.includeExpired && k.expiresAt && k.expiresAt < now) return false;
+        if (options.algorithm && k.algorithm !== options.algorithm) {return false;}
+        if (!options.includeExpired && k.expiresAt && k.expiresAt < now) {return false;}
         return true;
       })
       .map((k) => ({
@@ -811,7 +811,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
 
     for (const [keyId, keyStore] of this.keyStore.entries()) {
       const policy = this.rotationPolicies.get(keyStore.algorithm);
-      if (!policy) continue;
+      if (!policy) {continue;}
 
       if (keyStore.expiresAt) {
         const daysUntilExpiry =

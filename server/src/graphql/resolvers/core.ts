@@ -577,7 +577,7 @@ export const coreResolvers = {
 
     investigation: async (parent: any) => {
       const investigationId = parent.props?.investigationId;
-      if (!investigationId) return null;
+      if (!investigationId) {return null;}
 
       // Validate IDs
       InvestigationIdZ.parse(investigationId);

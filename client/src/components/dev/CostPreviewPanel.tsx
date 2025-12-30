@@ -27,7 +27,7 @@ export default function CostPreviewPanel() {
         body: JSON.stringify({ operation }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || 'Request failed');
+      if (!res.ok) {throw new Error(json?.error || 'Request failed');}
       setPreview(json.preview as Preview);
     } catch (e: any) {
       setError(e.message);
@@ -36,7 +36,7 @@ export default function CostPreviewPanel() {
     }
   };
 
-  if (import.meta?.env?.VITE_COST_PREVIEW !== '1') return null;
+  if (import.meta?.env?.VITE_COST_PREVIEW !== '1') {return null;}
 
   return (
     <div

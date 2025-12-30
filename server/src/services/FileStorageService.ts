@@ -66,7 +66,7 @@ export class FileStorageService {
   }
 
   private async ensureInitialized(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
 
     await fs.mkdir(this.config.basePath, { recursive: true });
     await fs.mkdir(path.join(this.config.basePath, 'temp'), { recursive: true });
@@ -258,7 +258,7 @@ export class FileStorageService {
     await this.ensureInitialized();
 
     const result = await this.getFile(fileId);
-    if (!result) return false;
+    if (!result) {return false;}
 
     try {
       await fs.unlink(result.metadata.storagePath);
@@ -272,7 +272,7 @@ export class FileStorageService {
 
   async verifyIntegrity(fileId: string, expectedHash: string): Promise<boolean> {
     const result = await this.getFile(fileId);
-    if (!result) return false;
+    if (!result) {return false;}
 
     const hash = createHash('sha256');
     for await (const chunk of result.stream) {

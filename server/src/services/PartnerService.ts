@@ -116,7 +116,7 @@ export class PartnerService {
    */
   async getPartner(tenantId: string) {
     const tenant = await tenantService.getTenant(tenantId);
-    if (!tenant) return null;
+    if (!tenant) {return null;}
 
     const profile = await pg.oneOrNone(
       `SELECT * FROM partner_profiles WHERE tenant_id = $1`,

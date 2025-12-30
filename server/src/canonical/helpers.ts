@@ -140,7 +140,7 @@ export async function createEntityVersion<T extends BaseCanonicalEntity>(
   // Get column names and values from entity
   const columns: string[] = [];
   const values: unknown[] = [];
-  let paramIndex = 1;
+  const paramIndex = 1;
 
   for (const [key, value] of Object.entries(entity)) {
     const columnName = camelToSnake(key);

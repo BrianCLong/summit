@@ -81,7 +81,7 @@ export class TelemetryService {
     this.rotateLog();
 
     if (this.logStream) {
-      const line = JSON.stringify(event) + '\n';
+      const line = `${JSON.stringify(event)  }\n`;
       // console.log(`[TelemetryService] Writing event: ${line.trim()}`);
       this.logStream.write(line);
     } else {

@@ -10,10 +10,10 @@ import {
 
 function kvColor(v) {
   const ok = ['ok', 'healthy', 'connected'];
-  if (!v) return 'default';
+  if (!v) {return 'default';}
   const val = String(v).toLowerCase();
-  if (ok.includes(val)) return 'success';
-  if (val.includes('fail') || val.includes('error')) return 'error';
+  if (ok.includes(val)) {return 'success';}
+  if (val.includes('fail') || val.includes('error')) {return 'error';}
   return 'warning';
 }
 

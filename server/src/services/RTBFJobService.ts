@@ -298,7 +298,7 @@ export class RTBFJobService extends EventEmitter {
   }
 
   private createWorker(workerId: string): void {
-    if (!isMainThread) return; // Only create workers from main thread
+    if (!isMainThread) {return;} // Only create workers from main thread
 
     const worker = new Worker(__filename, {
       workerData: {
@@ -365,14 +365,14 @@ export class RTBFJobService extends EventEmitter {
   }
 
   private async assignNextBatch(workerId: string): Promise<void> {
-    if (this.batchQueue.length === 0) return;
+    if (this.batchQueue.length === 0) {return;}
 
     // Find highest priority batch
     this.batchQueue.sort((a, b) => b.priority - a.priority);
     const batch = this.batchQueue.shift()!;
 
     const worker = this.workers.get(workerId);
-    if (!worker) return;
+    if (!worker) {return;}
 
     // Send batch to worker
     worker.postMessage({
@@ -500,7 +500,7 @@ export class RTBFJobService extends EventEmitter {
 
   private monitorWorkers(): void {
     for (const [workerId, metrics] of this.workerMetrics.entries()) {
-      if (!this.workers.has(workerId)) continue;
+      if (!this.workers.has(workerId)) {continue;}
 
       // Check if worker is responsive
       const uptimeHours = (Date.now() - metrics.uptime) / (1000 * 60 * 60);
@@ -1077,7 +1077,7 @@ export class RTBFJobService extends EventEmitter {
   public async getJob(jobId: string): Promise<RTBFJob | null> {
     // Check active jobs first
     const activeJob = this.activeJobs.get(jobId);
-    if (activeJob) return activeJob;
+    if (activeJob) {return activeJob;}
 
     // Query database
     try {
@@ -1086,7 +1086,7 @@ export class RTBFJobService extends EventEmitter {
         [jobId],
       );
 
-      if (result.rows.length === 0) return null;
+      if (result.rows.length === 0) {return null;}
 
       return JSON.parse(result.rows[0].job_data);
     } catch (error) {
@@ -1100,7 +1100,7 @@ export class RTBFJobService extends EventEmitter {
 
   public async cancelJob(jobId: string, reason: string): Promise<boolean> {
     const job = this.activeJobs.get(jobId);
-    if (!job) return false;
+    if (!job) {return false;}
 
     if (job.status === 'completed' || job.status === 'failed') {
       return false;
@@ -1247,7 +1247,7 @@ class RTBFWorker {
             batch.target,
             recordId,
           );
-          if (deleted) recordsDeleted++;
+          if (deleted) {recordsDeleted++;}
           recordsProcessed++;
 
           // Send progress updates periodically

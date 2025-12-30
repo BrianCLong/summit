@@ -2,7 +2,7 @@ export function bucketForResidency(residency?: string) {
   const map =
     safeParse<Record<string, string>>(process.env.CAS_BUCKETS_JSON) || {};
   const def = process.env.CAS_BUCKET_DEFAULT || Object.values(map)[0];
-  if (!residency) return def;
+  if (!residency) {return def;}
   return map[residency.toUpperCase()] || def;
 }
 

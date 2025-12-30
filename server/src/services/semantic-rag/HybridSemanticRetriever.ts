@@ -556,7 +556,7 @@ export class HybridSemanticRetriever {
         if (remainingChars > 100) {
           trimmed.push({
             ...result,
-            content: result.content.substring(0, remainingChars) + '...',
+            content: `${result.content.substring(0, remainingChars)  }...`,
           });
         }
         break;

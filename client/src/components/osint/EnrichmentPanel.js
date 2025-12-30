@@ -78,7 +78,7 @@ export default function EnrichmentPanel({
 
   useEffect(() => {
     if (entityId)
-      loadProv({ variables: { resourceType: 'entity', resourceId: entityId } });
+      {loadProv({ variables: { resourceType: 'entity', resourceId: entityId } });}
   }, [entityId]);
 
   const handleRun = async () => {
@@ -86,18 +86,18 @@ export default function EnrichmentPanel({
       setStatus('running');
       setMessage('');
       if (provider === 'wikipedia') {
-        if (!title) throw new Error('Title required');
+        if (!title) {throw new Error('Title required');}
         await enrichWiki({ variables: { entityId, title } });
         setMessage('Wikipedia enrichment complete.');
         await loadProv({
           variables: { resourceType: 'entity', resourceId: entityId },
         });
       } else if (provider === 'rss') {
-        if (!feedUrl) throw new Error('Feed URL required');
+        if (!feedUrl) {throw new Error('Feed URL required');}
         const res = await ingestRSS({ variables: { feedUrl } });
         setMessage(`Ingested ${res?.data?.ingestRSS || 0} RSS items.`);
       } else {
-        if (!query) throw new Error('Query required');
+        if (!query) {throw new Error('Query required');}
         const host =
           provider === 'mastodon'
             ? window.prompt(
@@ -113,7 +113,7 @@ export default function EnrichmentPanel({
         );
       }
       setStatus('done');
-      if (refetchProv) refetchProv();
+      if (refetchProv) {refetchProv();}
     } catch (e) {
       setStatus('error');
       setMessage(e.message || 'Unknown error');

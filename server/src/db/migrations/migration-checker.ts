@@ -174,7 +174,7 @@ export const formatMigrationRiskReport = (
   const lines = ['❌ Destructive migration patterns detected:'];
 
   for (const migration of report.migrations) {
-    if (migration.findings.length === 0) continue;
+    if (migration.findings.length === 0) {continue;}
     lines.push(`\n- ${migration.name}`);
     for (const finding of migration.findings) {
       lines.push(`  • [${finding.severity}] ${finding.message}`);

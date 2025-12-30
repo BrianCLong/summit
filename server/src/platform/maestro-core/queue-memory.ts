@@ -22,7 +22,7 @@ export class InMemoryTaskQueue implements TaskQueue {
   async dequeue(workerTypes: string[]): Promise<Task | null> {
     // Simple filter and find first logic
     const index = this.queue.findIndex(t => workerTypes.includes(t.type) && t.status === 'PENDING');
-    if (index === -1) return null;
+    if (index === -1) {return null;}
 
     const task = this.queue[index];
     this.queue.splice(index, 1);
@@ -44,7 +44,7 @@ export class InMemoryTaskQueue implements TaskQueue {
 
   async nack(taskId: string, error?: string): Promise<void> {
     const task = this.tasks.get(taskId);
-    if (!task) return;
+    if (!task) {return;}
 
     task.attemptCount++;
     task.lastError = error;
@@ -76,7 +76,7 @@ export class InMemoryTaskQueue implements TaskQueue {
     this.queue.sort((a, b) => {
       const pA = priorityMap[a.priority];
       const pB = priorityMap[b.priority];
-      if (pA !== pB) return pA - pB;
+      if (pA !== pB) {return pA - pB;}
       return a.createdAt.getTime() - b.createdAt.getTime();
     });
   }

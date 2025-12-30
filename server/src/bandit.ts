@@ -62,15 +62,15 @@ function gamma(k: number) {
       v = 1 + c * x;
     } while (v <= 0);
     v = v * v * v;
-    if (Math.random() < 1 - 0.0331 * (x * x) * (x * x)) return d * v;
+    if (Math.random() < 1 - 0.0331 * (x * x) * (x * x)) {return d * v;}
     if (Math.log(Math.random()) < 0.5 * x * x + d * (1 - v + Math.log(v)))
-      return d * v;
+      {return d * v;}
   }
 }
 function randn() {
   let u = 0,
     v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
+  while (u === 0) {u = Math.random();}
+  while (v === 0) {v = Math.random();}
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }

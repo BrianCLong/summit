@@ -344,7 +344,7 @@ export class EnhancedGuardedGenerator {
     if (value.length <= showLast) {
       return '***';
     }
-    return '***' + value.slice(-showLast);
+    return `***${  value.slice(-showLast)}`;
   }
 
   /**
@@ -384,9 +384,9 @@ export class EnhancedGuardedGenerator {
       'employeeId',
     ];
 
-    if (criticalTypes.includes(piiType)) return 'critical';
-    if (highTypes.includes(piiType)) return 'high';
-    if (mediumTypes.includes(piiType)) return 'medium';
+    if (criticalTypes.includes(piiType)) {return 'critical';}
+    if (highTypes.includes(piiType)) {return 'high';}
+    if (mediumTypes.includes(piiType)) {return 'medium';}
     return 'low';
   }
 
@@ -395,10 +395,10 @@ export class EnhancedGuardedGenerator {
    */
   private getCategoriesForPIIType(piiType: PIIType): string[] {
     // Simplified - in production, use taxonomy
-    if (piiType.includes('biometric')) return ['biometric'];
-    if (piiType.includes('health') || piiType.includes('medical')) return ['health'];
-    if (piiType.includes('credit') || piiType.includes('bank')) return ['financial'];
-    if (piiType.includes('passport') || piiType.includes('license')) return ['government', 'identity'];
+    if (piiType.includes('biometric')) {return ['biometric'];}
+    if (piiType.includes('health') || piiType.includes('medical')) {return ['health'];}
+    if (piiType.includes('credit') || piiType.includes('bank')) {return ['financial'];}
+    if (piiType.includes('passport') || piiType.includes('license')) {return ['government', 'identity'];}
     return ['identity'];
   }
 

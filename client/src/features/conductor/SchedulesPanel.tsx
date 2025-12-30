@@ -41,7 +41,7 @@ export default function SchedulesPanel() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ runbook, cron, enabled }),
       });
-      if (!r.ok) throw new Error(String(r.status));
+      if (!r.ok) {throw new Error(String(r.status));}
       await load();
       setRunbook('');
     } catch (e: unknown) {

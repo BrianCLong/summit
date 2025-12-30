@@ -170,9 +170,9 @@ describe('ScimService', () => {
     describe('listGroups', () => {
         it('should list groups from database', async () => {
             mockClient.query.mockImplementation((sql: string) => {
-                if (sql.includes('COUNT')) return { rows: [{ count: 1 }] };
-                if (sql.includes('SELECT * FROM scim_groups')) return { rows: [{ id: 'group-1', display_name: 'Engineers', created_at: new Date(), updated_at: new Date() }] };
-                if (sql.includes('SELECT user_id')) return { rows: [{ user_id: 'user-1' }] };
+                if (sql.includes('COUNT')) {return { rows: [{ count: 1 }] };}
+                if (sql.includes('SELECT * FROM scim_groups')) {return { rows: [{ id: 'group-1', display_name: 'Engineers', created_at: new Date(), updated_at: new Date() }] };}
+                if (sql.includes('SELECT user_id')) {return { rows: [{ user_id: 'user-1' }] };}
                 return { rows: [] };
             });
 
@@ -185,7 +185,7 @@ describe('ScimService', () => {
 
         it('should filter groups by displayName', async () => {
             mockClient.query.mockImplementation((sql: string, params: any[]) => {
-                if (sql.includes('COUNT')) return { rows: [{ count: 1 }] };
+                if (sql.includes('COUNT')) {return { rows: [{ count: 1 }] };}
                 if (sql.includes('SELECT * FROM scim_groups')) {
                      // Check if filter param was passed
                      if (params.includes('Engineers')) {
@@ -193,7 +193,7 @@ describe('ScimService', () => {
                      }
                      return { rows: [] };
                 }
-                if (sql.includes('SELECT user_id')) return { rows: [] };
+                if (sql.includes('SELECT user_id')) {return { rows: [] };}
                 return { rows: [] };
             });
 

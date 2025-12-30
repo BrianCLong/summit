@@ -64,7 +64,7 @@ export class InvestigationSessionService {
       WHERE id = $1 AND tenant_id = $2
     `;
     const res = await pool.query(query, [id, tenantId]);
-    if (res.rows.length === 0) return null;
+    if (res.rows.length === 0) {return null;}
     return this.mapRow(res.rows[0]);
   }
 
@@ -114,7 +114,7 @@ export class InvestigationSessionService {
       values.push(JSON.stringify(updates.metadata));
     }
 
-    if (setClauses.length === 0) return this.getSession(tenantId, id);
+    if (setClauses.length === 0) {return this.getSession(tenantId, id);}
 
     setClauses.push(`updated_at = NOW()`);
 
@@ -127,7 +127,7 @@ export class InvestigationSessionService {
 
     try {
       const res = await pool.query(query, values);
-      if (res.rows.length === 0) return null;
+      if (res.rows.length === 0) {return null;}
       return this.mapRow(res.rows[0]);
     } catch (err) {
       logger.error('Error updating investigation session', err);

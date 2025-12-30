@@ -119,7 +119,7 @@ export class SigIntManager {
   }
 
   private async updateEmitterDatabase(signal: Signal) {
-      if (!signal.emitterId) return;
+      if (!signal.emitterId) {return;}
 
       const existing = await this.repository.getEmitter(signal.emitterId);
 

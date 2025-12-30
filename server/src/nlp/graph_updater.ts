@@ -30,7 +30,7 @@ export class GraphUpdater {
             // Try to resolve existing entity
             // In a real system, we'd use a robust resolution service.
             // Here we use exact name match.
-            let existingNode = await this.store.findNodeByAttribute(tenantId, 'name', name);
+            const existingNode = await this.store.findNodeByAttribute(tenantId, 'name', name);
 
             const globalId = existingNode ? existingNode.globalId : uuidv4();
 

@@ -16,8 +16,8 @@ interface SimulatedContext {
 const runSimulation = async (): Promise<void> => {
     console.log("Starting Tenant Boundary Leak Simulation Engine...");
 
-    const tenantA = 'tenant-a-' + Date.now();
-    const tenantB = 'tenant-b-' + Date.now();
+    const tenantA = `tenant-a-${  Date.now()}`;
+    const tenantB = `tenant-b-${  Date.now()}`;
 
     console.log(`Simulating traffic between ${tenantA} and ${tenantB}`);
 

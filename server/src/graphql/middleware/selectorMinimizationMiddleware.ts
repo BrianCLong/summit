@@ -107,7 +107,7 @@ function extractFieldSelections(info: GraphQLResolveInfo): Set<string> {
   const fields = new Set<string>();
 
   function traverse(selections: any, prefix = '') {
-    if (!selections) return;
+    if (!selections) {return;}
 
     for (const selection of selections) {
       if (selection.kind === 'Field') {
@@ -183,7 +183,7 @@ function wrapContextForTracking(
  * Count number of records in a result
  */
 function countRecords(data: any): number {
-  if (!data) return 0;
+  if (!data) {return 0;}
 
   if (Array.isArray(data)) {
     return data.length;
@@ -243,7 +243,7 @@ async function trackQueryScope(
     purpose: context.purpose,
     reasonForAccess: context.reasonForAccess,
     reasonRequired: false, // Determined by service
-    reasonProvided: !!context.reasonForAccess,
+    reasonProvided: Boolean(context.reasonForAccess),
 
     isAnomaly: false, // Determined by service
     tripwireThreshold: 10.0, // Default, will be loaded by service

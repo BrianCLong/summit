@@ -19,13 +19,13 @@ export class NarrativeTracker {
        const keywords = this.extractKeywords(post.content);
        postKeywords.set(post.id, keywords);
        for (const k of keywords) {
-           if (!keywordIndex.has(k)) keywordIndex.set(k, []);
+           if (!keywordIndex.has(k)) {keywordIndex.set(k, []);}
            keywordIndex.get(k)!.push(post.id);
        }
     }
 
     for (const post of posts) {
-      if (processed.has(post.id)) continue;
+      if (processed.has(post.id)) {continue;}
 
       const clusterPosts = [post];
       processed.add(post.id);
@@ -36,14 +36,14 @@ export class NarrativeTracker {
       // Only check posts that share at least one keyword
       for (const k of keywords) {
           const ids = keywordIndex.get(k) || [];
-          for (const id of ids) candidates.add(id);
+          for (const id of ids) {candidates.add(id);}
       }
 
       for (const candidateId of candidates) {
-        if (processed.has(candidateId) || candidateId === post.id) continue;
+        if (processed.has(candidateId) || candidateId === post.id) {continue;}
 
         const otherPost = posts.find(p => p.id === candidateId);
-        if (!otherPost) continue;
+        if (!otherPost) {continue;}
 
         const otherKeywords = postKeywords.get(candidateId)!;
         if (this.calculateJaccardSimilarity(keywords, otherKeywords) > 0.3) {
@@ -134,7 +134,7 @@ export class NarrativeTracker {
   }
 
   private calculateVelocity(posts: SocialPost[]): number {
-      if (posts.length < 2) return 0;
+      if (posts.length < 2) {return 0;}
       const timestamps = posts.map(p => p.timestamp.getTime()).sort((a, b) => a - b);
       const durationMinutes = (timestamps[timestamps.length - 1] - timestamps[0]) / (1000 * 60) || 1;
       return posts.length / durationMinutes;

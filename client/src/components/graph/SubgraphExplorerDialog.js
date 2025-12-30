@@ -13,7 +13,7 @@ export default function SubgraphExplorerDialog({ open, onClose, elements }) {
   const cyRef = useRef(null);
 
   useEffect(() => {
-    if (!open || !containerRef.current) return;
+    if (!open || !containerRef.current) {return;}
     const cy = cytoscape({
       container: containerRef.current,
       elements,

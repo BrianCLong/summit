@@ -7,7 +7,7 @@ import { CreatePageInput, MemoryPage } from '../types';
 import { assertSameTenant, getSessionById } from './sessionRepository';
 
 export function toPgVector(value?: number[] | null): string | null {
-  if (!value || value.length === 0) return null;
+  if (!value || value.length === 0) {return null;}
   return `[${value.join(',')}]`;
 }
 

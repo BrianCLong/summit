@@ -73,7 +73,7 @@ export default function CopilotGoals() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim()) {return;}
     await createGoal({
       variables: {
         text: text.trim(),

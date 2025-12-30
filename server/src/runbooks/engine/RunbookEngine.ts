@@ -208,7 +208,7 @@ export class RunbookEngine extends EventEmitter {
   }
 
   private interpolate(str: string, context: RunbookContext): any {
-    if (!str.startsWith('{{') || !str.endsWith('}}')) return str;
+    if (!str.startsWith('{{') || !str.endsWith('}}')) {return str;}
 
     const path = str.slice(2, -2).trim();
     const parts = path.split('.');
@@ -227,7 +227,7 @@ export class RunbookEngine extends EventEmitter {
 
   public getStatus(runId: string): any {
     const context = this.activeContexts.get(runId);
-    if (!context) return null;
+    if (!context) {return null;}
     return {
       runId: context.runId,
       status: 'running', // Simplified
@@ -241,7 +241,7 @@ export class RunbookEngine extends EventEmitter {
       resourceType: 'runbook_step'
     });
     // Filter by runId in resourceId or payload (simplified)
-    return entries.filter(e => e.resourceId.startsWith(runId + ':'));
+    return entries.filter(e => e.resourceId.startsWith(`${runId  }:`));
   }
 }
 

@@ -236,7 +236,7 @@ export function persistedEnforcer(
           const rawQuery = (requestContext.request as any)?.body?.query;
           const apqHash = (requestContext.request as any)?.body?.extensions
             ?.persistedQuery?.sha256Hash;
-          const isAPQ = !!apqHash;
+          const isAPQ = Boolean(apqHash);
 
           let queryHash: string;
 

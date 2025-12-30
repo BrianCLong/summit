@@ -11,7 +11,7 @@ export function withETag(ttl=60, swr=300){
     res.send = (body: any) => {
       // Calculate ETag
       const content = typeof body === 'string' ? body : JSON.stringify(body);
-      const etag = 'W/"'+crypto.createHash('sha1').update(content).digest('hex')+'"';
+      const etag = `W/"${crypto.createHash('sha1').update(content).digest('hex')}"`;
       res.setHeader('ETag', etag);
 
       if (req.headers['if-none-match'] === etag) {

@@ -80,13 +80,13 @@ export const pqcResolvers = {
   Query: {
     pqcKey: async (_: unknown, { keyId }: { keyId: string }) => {
       const key = quantumCryptoService.getKey(keyId);
-      if (!key) return null;
+      if (!key) {return null;}
       return formatKey(key);
     },
 
     pqcPublicKey: async (_: unknown, { keyId }: { keyId: string }) => {
       const publicKey = quantumCryptoService.getPublicKey(keyId);
-      if (!publicKey) return null;
+      if (!publicKey) {return null;}
       return toBase64(publicKey);
     },
 

@@ -168,9 +168,9 @@ export class RegulatoryPackService {
       const rawPack = yaml.load(content) as any;
 
       // Validate required fields
-      if (!rawPack.id) validationErrors.push('Missing required field: id');
-      if (!rawPack.name) validationErrors.push('Missing required field: name');
-      if (!rawPack.framework) validationErrors.push('Missing required field: framework');
+      if (!rawPack.id) {validationErrors.push('Missing required field: id');}
+      if (!rawPack.name) {validationErrors.push('Missing required field: name');}
+      if (!rawPack.framework) {validationErrors.push('Missing required field: framework');}
       if (!rawPack.controls || rawPack.controls.length === 0) {
         warnings.push('Pack has no controls defined');
       }
@@ -329,7 +329,7 @@ export class RegulatoryPackService {
       [packId]
     );
 
-    if (rows.length === 0) return null;
+    if (rows.length === 0) {return null;}
 
     const pack = rows[0].pack_data as RegulatoryPack;
     this.loadedPacks.set(packId, pack);
@@ -777,11 +777,11 @@ export class RegulatoryPackService {
     const recentTests = testResults.slice(0, 5);
     const failedCount = recentTests.filter((t) => t.status === 'failed').length;
 
-    if (failedCount >= 3) return 'ineffective';
-    if (failedCount >= 1) return 'partially_effective';
+    if (failedCount >= 3) {return 'ineffective';}
+    if (failedCount >= 1) {return 'partially_effective';}
 
     // If no recent tests, not tested
-    if (testResults.length === 0) return 'not_tested';
+    if (testResults.length === 0) {return 'not_tested';}
 
     // If evidence collection failed significantly
     if (evidenceResult.errors.length > evidenceResult.snapshots.length) {
@@ -789,7 +789,7 @@ export class RegulatoryPackService {
     }
 
     // If checklist shows not ready
-    if (checklist.overallStatus === 'not_ready') return 'partially_effective';
+    if (checklist.overallStatus === 'not_ready') {return 'partially_effective';}
 
     return 'effective';
   }

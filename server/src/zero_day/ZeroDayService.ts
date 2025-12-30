@@ -113,7 +113,7 @@ export class ZeroDayService {
    */
   private async executeKillChain(threatId: string) {
     const killChain = this.activeKillChains.get(threatId);
-    if (!killChain) return;
+    if (!killChain) {return;}
 
     // Step 1: Satellite Retasking
     await new Promise(resolve => setTimeout(resolve, 1500));

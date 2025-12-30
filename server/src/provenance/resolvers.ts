@@ -18,7 +18,7 @@ export const provenanceResolvers = {
 
     resourceProvenance: async (_: any, args: { resourceType: string; limit?: number; offset?: number }, context: GraphQLContext) => {
       const tenantId = context.user?.tenantId;
-      if (!tenantId) throw new Error('Tenant context required');
+      if (!tenantId) {throw new Error('Tenant context required');}
 
       return await provenanceLedger.getEntries(tenantId, {
         resourceType: args.resourceType,
@@ -30,7 +30,7 @@ export const provenanceResolvers = {
 
     verifyProvenanceChain: async (_: any, __: any, context: GraphQLContext) => {
       const tenantId = context.user?.tenantId;
-      if (!tenantId) throw new Error('Tenant context required');
+      if (!tenantId) {throw new Error('Tenant context required');}
 
       // This is a heavy operation, usually restricted to admins
       // For now, allow it.
@@ -39,7 +39,7 @@ export const provenanceResolvers = {
 
     explainCausality: async (_: any, args: { nodeId: string; depth?: number }, context: GraphQLContext) => {
       const tenantId = context.user?.tenantId;
-      if (!tenantId) throw new Error('Tenant context required');
+      if (!tenantId) {throw new Error('Tenant context required');}
 
       return await CanonicalGraphService.getInstance().explainCausality(
         args.nodeId,
@@ -50,7 +50,7 @@ export const provenanceResolvers = {
 
     provenanceDiff: async (_: any, args: { startNodeId: string; endNodeId: string }, context: GraphQLContext) => {
       const tenantId = context.user?.tenantId;
-      if (!tenantId) throw new Error('Tenant context required');
+      if (!tenantId) {throw new Error('Tenant context required');}
 
       return await CanonicalGraphService.getInstance().getGraphDiff(
         args.startNodeId,
@@ -61,7 +61,7 @@ export const provenanceResolvers = {
 
     exportProvenanceGraph: async (_: any, args: { from?: Date; to?: Date }, context: GraphQLContext) => {
       const tenantId = context.user?.tenantId;
-      if (!tenantId) throw new Error('Tenant context required');
+      if (!tenantId) {throw new Error('Tenant context required');}
 
       // Security Check: Verify permission (e.g., 'provenance:export') - Assumed handled by directives or gateway
 

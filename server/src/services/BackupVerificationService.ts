@@ -74,7 +74,7 @@ export class BackupVerificationService {
       const latest = this.getLatestVerifiedBackup(region);
       return {
           region,
-          hasVerifiedBackup: !!latest,
+          hasVerifiedBackup: Boolean(latest),
           lastVerifiedAt: latest?.timestamp || null,
           complianceStatus: latest ? 'COMPLIANT' : 'AT_RISK'
       }

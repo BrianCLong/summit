@@ -628,28 +628,28 @@ const strategicPlanningResolvers = {
 
   StrategicObjective: {
     progress: (parent: StrategicObjective) => {
-      if (parent.targetValue === 0) return 0;
+      if (parent.targetValue === 0) {return 0;}
       return Math.min(100, (parent.currentValue / parent.targetValue) * 100);
     },
   },
 
   KeyResult: {
     progress: (parent: KeyResult) => {
-      if (parent.targetValue === 0) return 0;
+      if (parent.targetValue === 0) {return 0;}
       return Math.min(100, (parent.currentValue / parent.targetValue) * 100);
     },
   },
 
   Initiative: {
     budgetUtilization: (parent: Initiative) => {
-      if (!parent.budget || parent.budget === 0) return null;
+      if (!parent.budget || parent.budget === 0) {return null;}
       return ((parent.budgetUsed || 0) / parent.budget) * 100;
     },
   },
 
   Milestone: {
     isOverdue: (parent: Milestone) => {
-      if (parent.status === 'COMPLETED') return false;
+      if (parent.status === 'COMPLETED') {return false;}
       return new Date(parent.dueDate) < new Date();
     },
 
@@ -663,14 +663,14 @@ const strategicPlanningResolvers = {
 
   ResourceAllocation: {
     utilizationRate: (parent: ResourceAllocation) => {
-      if (parent.allocated === 0) return 0;
+      if (parent.allocated === 0) {return 0;}
       return (parent.used / parent.allocated) * 100;
     },
   },
 
   KeyPerformanceIndicator: {
     achievement: (parent: KeyPerformanceIndicator) => {
-      if (parent.targetValue === 0) return 0;
+      if (parent.targetValue === 0) {return 0;}
       return Math.min(100, (parent.currentValue / parent.targetValue) * 100);
     },
   },

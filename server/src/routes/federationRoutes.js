@@ -3,7 +3,7 @@
  * P0 Critical - MVP1 federated search endpoints
  */
 
-/* eslint-disable no-undef */
+ 
 // TODO: requirePermission middleware not yet implemented - planned for fine-grained authorization
 
 const express = require('express');

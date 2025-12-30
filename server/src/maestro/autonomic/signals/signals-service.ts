@@ -117,7 +117,7 @@ export class SignalsService {
     const metricsAcc: Record<string, number[]> = {};
 
     for (const s of signals) {
-      if (!metricsAcc[s.type]) metricsAcc[s.type] = [];
+      if (!metricsAcc[s.type]) {metricsAcc[s.type] = [];}
       metricsAcc[s.type].push(s.value);
 
       if (s.type === SignalType.TASK_FAILURE_COUNT || s.type === SignalType.LLM_ERROR_RATE || s.type === SignalType.CI_BUILD_STATUS && s.value === 0) {
@@ -144,8 +144,8 @@ export class SignalsService {
     score = Math.max(0, Math.min(100, score));
 
     let status = HealthStatus.HEALTHY;
-    if (score < 50) status = HealthStatus.CRITICAL;
-    else if (score < 80) status = HealthStatus.DEGRADED;
+    if (score < 50) {status = HealthStatus.CRITICAL;}
+    else if (score < 80) {status = HealthStatus.DEGRADED;}
 
     return {
       id,

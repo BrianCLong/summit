@@ -64,7 +64,7 @@ export default function AppHeader() {
 
   const isActivePath = (path: string) => {
     return (
-      location.pathname === path || location.pathname.startsWith(path + '/')
+      location.pathname === path || location.pathname.startsWith(`${path  }/`)
     );
   };
 

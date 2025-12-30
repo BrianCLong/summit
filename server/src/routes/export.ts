@@ -16,7 +16,7 @@ function verify(params: Record<string, string>, sig: string, secret: string) {
   const expected = sign(params, secret);
   const expectedBuf = Buffer.from(expected);
   const sigBuf = Buffer.from(sig);
-  if (expectedBuf.length !== sigBuf.length) return false;
+  if (expectedBuf.length !== sigBuf.length) {return false;}
   try {
     return crypto.timingSafeEqual(expectedBuf, sigBuf);
   } catch {
@@ -57,7 +57,7 @@ function redactForeignTenantIdentifiers(value: any, tenantId: string): any {
 let redis: any = null;
 try {
   const Redis = require('ioredis');
-  if (process.env.REDIS_URL) redis = new Redis(process.env.REDIS_URL);
+  if (process.env.REDIS_URL) {redis = new Redis(process.env.REDIS_URL);}
 } catch {}
 
 export const exportRouter = Router();
@@ -85,20 +85,20 @@ exportRouter.get('/provenance', async (req, res) => {
     if (!['incident', 'investigation'].includes(scope) || !id) {
       return res.status(400).json({ error: 'invalid_scope_or_id' });
     }
-    if (!tenant) return res.status(400).json({ error: 'tenant_required' });
+    if (!tenant) {return res.status(400).json({ error: 'tenant_required' });}
     if (!headerTenant || headerTenant !== tenant)
-      return res.status(403).json({ error: 'tenant_mismatch' });
+      {return res.status(403).json({ error: 'tenant_mismatch' });}
 
     // Rate limit per-tenant: 5/minute
     if (redis) {
       try {
         const rk = `rate:export:${tenant}:${Math.floor(Date.now() / 60000)}`;
         const c = await redis.incr(rk);
-        if (c === 1) await redis.expire(rk, 60);
+        if (c === 1) {await redis.expire(rk, 60);}
         if (c > 5)
-          return res
+          {return res
             .status(429)
-            .json({ error: 'rate_limited', reasonCode: 'RATE_LIMIT' });
+            .json({ error: 'rate_limited', reasonCode: 'RATE_LIMIT' });}
       } catch {}
     }
 
@@ -117,20 +117,20 @@ exportRouter.get('/provenance', async (req, res) => {
       ...(contains ? { contains } : {}),
     };
     if (!sig || !verify(params, sig, secret))
-      return res.status(403).json({ error: 'invalid_signature' });
+      {return res.status(403).json({ error: 'invalid_signature' });}
     if (Math.abs(Date.now() - ts) > 15 * 60 * 1000)
-      return res.status(403).json({ error: 'expired' });
+      {return res.status(403).json({ error: 'expired' });}
 
     const pg = getPostgresPool();
     const repo = new ProvenanceRepo(pg);
     const filter: ProvenanceFilter = {};
     if (reasonCodeIn)
-      filter.reasonCodeIn = reasonCodeIn.split(',').filter(Boolean);
-    if (kindIn) filter.kindIn = kindIn.split(',').filter(Boolean);
-    if (sourceIn) filter.sourceIn = sourceIn.split(',').filter(Boolean);
-    if (from) filter.from = from;
-    if (to) filter.to = to;
-    if (contains) filter.contains = contains;
+      {filter.reasonCodeIn = reasonCodeIn.split(',').filter(Boolean);}
+    if (kindIn) {filter.kindIn = kindIn.split(',').filter(Boolean);}
+    if (sourceIn) {filter.sourceIn = sourceIn.split(',').filter(Boolean);}
+    if (from) {filter.from = from;}
+    if (to) {filter.to = to;}
+    if (contains) {filter.contains = contains;}
     const first = Math.min(Number(req.query.first || 1000), 5000);
     const offset = Math.max(Number(req.query.offset || 0), 0);
 
@@ -142,7 +142,7 @@ exportRouter.get('/provenance', async (req, res) => {
     if (format === 'json' && redis) {
       try {
         const hit = await redis.get(cacheKey);
-        if (hit) return res.json(JSON.parse(hit));
+        if (hit) {return res.json(JSON.parse(hit));}
       } catch {}
     }
 

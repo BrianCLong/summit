@@ -73,11 +73,11 @@ describe('RelationshipShapeValidator', () => {
         records: [
           {
             get: (key: string) => {
-               if (key === 'id') return 1;
-               if (key === 'type') return 'UNKNOWN_REL';
-               if (key === 'sLabels') return ['Person'];
-               if (key === 'tLabels') return ['Person'];
-               if (key === 'propKeys') return [];
+               if (key === 'id') {return 1;}
+               if (key === 'type') {return 'UNKNOWN_REL';}
+               if (key === 'sLabels') {return ['Person'];}
+               if (key === 'tLabels') {return ['Person'];}
+               if (key === 'propKeys') {return [];}
             }
           }
         ]
@@ -100,11 +100,11 @@ describe('RelationshipShapeValidator', () => {
         records: [
           {
              get: (key: string) => {
-               if (key === 'id') return 1;
-               if (key === 'type') return 'EMPLOYMENT';
-               if (key === 'sLabels') return ['Person'];
-               if (key === 'tLabels') return ['Person']; // Invalid target for Employment
-               if (key === 'propKeys') return [];
+               if (key === 'id') {return 1;}
+               if (key === 'type') {return 'EMPLOYMENT';}
+               if (key === 'sLabels') {return ['Person'];}
+               if (key === 'tLabels') {return ['Person'];} // Invalid target for Employment
+               if (key === 'propKeys') {return [];}
             }
           }
         ]

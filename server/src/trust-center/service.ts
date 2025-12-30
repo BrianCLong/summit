@@ -205,7 +205,7 @@ export class TrustCenterService {
 
   approveAnswer(answerId: string, approver: string): QuestionnaireAnswer {
     const answer = this.answers.find((a) => a.id === answerId);
-    if (!answer) throw new Error(`Answer ${answerId} not found`);
+    if (!answer) {throw new Error(`Answer ${answerId} not found`);}
     answer.approvedBy = approver;
     answer.approvedAt = new Date();
     return answer;
@@ -213,7 +213,7 @@ export class TrustCenterService {
 
   recordDeviation(answerId: string, deviation: Deviation): QuestionnaireAnswer {
     const answer = this.answers.find((a) => a.id === answerId);
-    if (!answer) throw new Error(`Answer ${answerId} not found`);
+    if (!answer) {throw new Error(`Answer ${answerId} not found`);}
     answer.deviation = deviation;
     return answer;
   }
@@ -231,7 +231,7 @@ export class TrustCenterService {
     const existing = this.accessElevations.find(
       (e) => e.userId === elevation.userId && e.role === elevation.role && e.active,
     );
-    if (existing) existing.active = false;
+    if (existing) {existing.active = false;}
     this.accessElevations.push(elevation);
     return elevation;
   }
@@ -320,20 +320,20 @@ export class TrustCenterService {
   }
 
   private calculateControlPassRate(): number {
-    if (!this.controls.length) return 100;
+    if (!this.controls.length) {return 100;}
     const passes = this.controls.filter((c) => c.status === 'pass').length;
     return Math.round((passes / this.controls.length) * 100);
   }
 
   private computeDeflectionRate(): number {
-    if (!this.answers.length) return 0;
+    if (!this.answers.length) {return 0;}
     const reusable = this.answers.filter((a) => !a.deviation).length;
     return Math.round((reusable / this.answers.length) * 100);
   }
 
   private calculateRemediationCycleTime(): number {
     const failures = this.controls.filter((c) => c.status === 'fail');
-    if (!failures.length) return 0;
+    if (!failures.length) {return 0;}
     // Represent cycle time as count of fail items for simplicity; real impl would track duration
     return failures.length;
   }

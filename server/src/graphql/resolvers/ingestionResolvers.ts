@@ -7,7 +7,7 @@ export const ingestionResolvers = {
         (parent: any, args: any, context: any) => {
           const engine = context.subscriptionEngine;
           const pubsub = context.pubsub || (engine ? engine.getPubSub() : null);
-          if (!pubsub) throw new Error('PubSub not available');
+          if (!pubsub) {throw new Error('PubSub not available');}
           return pubsub.asyncIterator(['EVIDENCE_INGESTED']);
         },
         (payload: any, variables: any) => {

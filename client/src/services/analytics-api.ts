@@ -156,9 +156,9 @@ export interface ComplianceActivity {
 
 const buildTimeRangeParams = (timeRange?: Partial<TimeRange>): string => {
   const params = new URLSearchParams();
-  if (timeRange?.start) params.set('start', timeRange.start);
-  if (timeRange?.end) params.set('end', timeRange.end);
-  if (timeRange?.granularity) params.set('granularity', timeRange.granularity);
+  if (timeRange?.start) {params.set('start', timeRange.start);}
+  if (timeRange?.end) {params.set('end', timeRange.end);}
+  if (timeRange?.granularity) {params.set('granularity', timeRange.granularity);}
   return params.toString();
 };
 
@@ -205,9 +205,9 @@ export const GovernanceMetricsAPI = {
    */
   async getPolicyEffectiveness(timeRange?: Partial<TimeRange>, limit?: number): Promise<DataEnvelope<PolicyEffectiveness[]>> {
     const params = new URLSearchParams();
-    if (timeRange?.start) params.set('start', timeRange.start);
-    if (timeRange?.end) params.set('end', timeRange.end);
-    if (limit) params.set('limit', String(limit));
+    if (timeRange?.start) {params.set('start', timeRange.start);}
+    if (timeRange?.end) {params.set('end', timeRange.end);}
+    if (limit) {params.set('limit', String(limit));}
     const url = params.toString() ? `${GOVERNANCE_BASE}/policies?${params}` : `${GOVERNANCE_BASE}/policies`;
     return apiFetch(url, { headers: getAuthHeaders() });
   },

@@ -114,13 +114,13 @@ const NarrativeHeatmap: React.FC<NarrativeHeatmapProps> = ({ scenarioId }) => {
     };
   }, []);
 
-  if (loading) return <CircularProgress />;
+  if (loading) {return <CircularProgress />;}
   if (error)
-    return (
+    {return (
       <Alert severity="error">
         Error loading heatmap data: {error.message}
       </Alert>
-    );
+    );}
 
   const heatmapData = data?.getNarrativeHeatmapData || [];
 

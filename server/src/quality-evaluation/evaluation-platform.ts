@@ -335,7 +335,7 @@ export class QualityEvaluationPlatform {
 
         // Collect metrics for aggregation
         Object.entries(result.metrics).forEach(([metric, value]) => {
-          if (!batchMetrics[metric]) batchMetrics[metric] = [];
+          if (!batchMetrics[metric]) {batchMetrics[metric] = [];}
           batchMetrics[metric].push(value);
         });
       }
@@ -531,7 +531,7 @@ export class QualityEvaluationPlatform {
     groundTruth?: string,
     metadata?: any,
   ): Promise<number> {
-    if (!groundTruth) return 0.5; // Default score when no ground truth
+    if (!groundTruth) {return 0.5;} // Default score when no ground truth
 
     // Semantic similarity using simple approach (in production, use embeddings)
     const similarity = this.calculateStringSimilarity(
@@ -580,7 +580,7 @@ export class QualityEvaluationPlatform {
     // Logical flow and coherence
     const sentences = output.split(/[.!?]+/).filter((s) => s.trim().length > 0);
 
-    if (sentences.length < 2) return 0.7; // Single sentence gets moderate score
+    if (sentences.length < 2) {return 0.7;} // Single sentence gets moderate score
 
     let coherenceScore = 0.8; // Base score
 
@@ -704,7 +704,7 @@ export class QualityEvaluationPlatform {
     const latencyMs = metadata?.latencyMs || 1000; // Default 1s if not provided
     const targetLatency = metadata?.targetLatencyMs || 2000; // Default 2s target
 
-    if (latencyMs <= targetLatency) return 1.0;
+    if (latencyMs <= targetLatency) {return 1.0;}
 
     // Exponential decay for latency penalty
     const latencyRatio = latencyMs / targetLatency;
@@ -720,7 +720,7 @@ export class QualityEvaluationPlatform {
     const costUSD = metadata?.costUSD || 0.001; // Default cost
     const targetCost = metadata?.targetCostUSD || 0.01; // Default target
 
-    if (costUSD <= targetCost) return 1.0;
+    if (costUSD <= targetCost) {return 1.0;}
 
     // Linear decay for cost penalty
     const costRatio = costUSD / targetCost;
@@ -766,8 +766,8 @@ export class QualityEvaluationPlatform {
     const expectedLength = inputLength * 2; // Rough heuristic
     const lengthRatio = outputLength / expectedLength;
 
-    if (lengthRatio > 0.5 && lengthRatio < 2.0) return 0; // Good length
-    if (lengthRatio <= 0.5) return 0.2; // Too short
+    if (lengthRatio > 0.5 && lengthRatio < 2.0) {return 0;} // Good length
+    if (lengthRatio <= 0.5) {return 0.2;} // Too short
     return Math.min(0.3, (lengthRatio - 2.0) * 0.1); // Too long
   }
 
@@ -789,7 +789,7 @@ export class QualityEvaluationPlatform {
           const words2 = new Set(sent2.split(' '));
           const overlap = new Set([...words1].filter((x) => words2.has(x)));
 
-          if (overlap.size > 2) contradictions++;
+          if (overlap.size > 2) {contradictions++;}
         }
       }
     }
@@ -815,14 +815,14 @@ export class QualityEvaluationPlatform {
       ];
       const hasTransition = transitions.some((t) => sent2.includes(t));
 
-      if (hasTransition) flowScore += 0.05;
+      if (hasTransition) {flowScore += 0.05;}
 
       // Check for topic continuity
       const words1 = new Set(sent1.split(' '));
       const words2 = new Set(sent2.split(' '));
       const continuity = new Set([...words1].filter((x) => words2.has(x))).size;
 
-      if (continuity === 0) flowScore -= 0.1; // No word overlap might indicate topic jump
+      if (continuity === 0) {flowScore -= 0.1;} // No word overlap might indicate topic jump
     }
 
     return Math.max(0, Math.min(1, flowScore));
@@ -856,7 +856,7 @@ export class QualityEvaluationPlatform {
 
     slos.forEach((slo) => {
       const metricValue = metrics[slo.metricType];
-      if (metricValue === undefined) return;
+      if (metricValue === undefined) {return;}
 
       let violated = false;
       switch (slo.operator) {
@@ -916,7 +916,7 @@ export class QualityEvaluationPlatform {
   }
 
   private calculateSLOComplianceRate(results: EvaluationResult[]): number {
-    if (results.length === 0) return 1.0;
+    if (results.length === 0) {return 1.0;}
 
     const compliantResults = results.filter(
       (r) => r.sloViolations.length === 0,
@@ -941,7 +941,7 @@ export class QualityEvaluationPlatform {
       [tenantId, modelId],
     );
 
-    if (historicalResult.rows.length === 0) return false;
+    if (historicalResult.rows.length === 0) {return false;}
 
     // Simple regression detection - check if current scores are significantly lower
     const currentAverages = this.calculateAverageScores(currentMetrics);
@@ -992,7 +992,7 @@ export class QualityEvaluationPlatform {
     evaluations.forEach((evaluation) => {
       const metrics = JSON.parse(evaluation.metrics);
       Object.entries(metrics).forEach(([metric, value]) => {
-        if (!metricsByType[metric]) metricsByType[metric] = [];
+        if (!metricsByType[metric]) {metricsByType[metric] = [];}
         metricsByType[metric].push(value as number);
       });
     });
@@ -1013,7 +1013,7 @@ export class QualityEvaluationPlatform {
   }
 
   private calculateSLOCompliance(evaluations: any[]): number {
-    if (evaluations.length === 0) return 1.0;
+    if (evaluations.length === 0) {return 1.0;}
 
     const compliantCount = evaluations.filter((evaluation) => {
       const violations = JSON.parse(evaluation.slo_violations);
@@ -1129,7 +1129,7 @@ export class QualityEvaluationPlatform {
       [tenantId, modelId],
     );
 
-    if (recentResults.rows.length < 3) return false;
+    if (recentResults.rows.length < 3) {return false;}
 
     const scores = recentResults.rows.map((row) => row.overall_score);
     const trend = this.calculateTrend(scores);
@@ -1154,8 +1154,8 @@ export class QualityEvaluationPlatform {
       total_evaluations > 0 ? violations / total_evaluations : 0;
 
     let overallHealth = 'healthy';
-    if (violationRate > 0.1) overallHealth = 'degraded';
-    if (violationRate > 0.3) overallHealth = 'critical';
+    if (violationRate > 0.1) {overallHealth = 'degraded';}
+    if (violationRate > 0.3) {overallHealth = 'critical';}
 
     return {
       overallHealth,
@@ -1174,7 +1174,7 @@ export class QualityEvaluationPlatform {
       const summary = JSON.parse(data.metrics);
       if (summary.averageScores) {
         Object.entries(summary.averageScores).forEach(([metric, value]) => {
-          if (!allMetrics[metric]) allMetrics[metric] = [];
+          if (!allMetrics[metric]) {allMetrics[metric] = [];}
           allMetrics[metric].push(value as number);
         });
       }
@@ -1190,7 +1190,7 @@ export class QualityEvaluationPlatform {
   }
 
   private calculateTrend(values: number[]): number {
-    if (values.length < 2) return 0;
+    if (values.length < 2) {return 0;}
 
     // Simple linear trend calculation
     const n = values.length;

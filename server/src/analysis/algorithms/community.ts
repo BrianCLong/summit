@@ -14,10 +14,10 @@ export function connectedComponents(graph: Graph): ConnectedComponentsResult {
   const adj = new Map<NodeId, NodeId[]>();
   graph.nodes.forEach(n => adj.set(n.id, []));
   graph.edges.forEach(e => {
-    if (!adj.has(e.source)) adj.set(e.source, []);
+    if (!adj.has(e.source)) {adj.set(e.source, []);}
     adj.get(e.source)?.push(e.target);
 
-    if (!adj.has(e.target)) adj.set(e.target, []);
+    if (!adj.has(e.target)) {adj.set(e.target, []);}
     adj.get(e.target)?.push(e.source);
   });
 
@@ -31,7 +31,7 @@ export function connectedComponents(graph: Graph): ConnectedComponentsResult {
         const u = stack.pop()!;
         // Find the full node object
         const fullNode = graph.nodes.find(n => n.id === u);
-        if (fullNode) component.push(fullNode);
+        if (fullNode) {component.push(fullNode);}
 
         const neighbors = adj.get(u) || [];
         for (const v of neighbors) {

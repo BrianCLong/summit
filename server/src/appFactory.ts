@@ -48,7 +48,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
     res.status(200).json(auditLogDashboard.getDashboardSnapshot());
   });
 
-  if (lightweight) return app;
+  if (lightweight) {return app;}
 
   // In full mode, server.js wires DB + GraphQL + websockets.
   return app;

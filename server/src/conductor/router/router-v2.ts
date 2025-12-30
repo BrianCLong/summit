@@ -700,7 +700,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
     context: any,
   ): number {
     const capability = this.expertCapabilities.get(expert);
-    if (!capability) return 2000;
+    if (!capability) {return 2000;}
 
     // Base latency + token processing time
     let latency = capability.averageLatency + tokens * 2; // 2ms per token
@@ -714,7 +714,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
   }
 
   private inferDomain(query: string, providedDomain?: string): string {
-    if (providedDomain) return providedDomain;
+    if (providedDomain) {return providedDomain;}
 
     const lowerQuery = query.toLowerCase();
 
@@ -759,15 +759,15 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
   private getTimeOfDay(): 'morning' | 'afternoon' | 'evening' | 'night' {
     const hour = new Date().getHours();
-    if (hour >= 6 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 17) return 'afternoon';
-    if (hour >= 17 && hour < 22) return 'evening';
+    if (hour >= 6 && hour < 12) {return 'morning';}
+    if (hour >= 12 && hour < 17) {return 'afternoon';}
+    if (hour >= 17 && hour < 22) {return 'evening';}
     return 'night';
   }
 
   private assessComplexity(query: string): 'simple' | 'medium' | 'complex' {
-    if (query.length < 50) return 'simple';
-    if (query.length < 200) return 'medium';
+    if (query.length < 50) {return 'simple';}
+    if (query.length < 200) {return 'medium';}
     return 'complex';
   }
 
@@ -779,7 +779,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
   private updatePerformanceMetrics(expert: ExpertArm, outcome: any): void {
     const metrics = this.performanceMetrics.get(expert);
-    if (!metrics) return;
+    if (!metrics) {return;}
 
     // Update success rate (exponential moving average)
     const alpha = 0.1;

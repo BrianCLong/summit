@@ -21,9 +21,9 @@ class ContextAwareLogger implements Logger {
     const meta: Record<string, unknown> = { ...userMeta };
 
     if (ctx) {
-      if (ctx.correlationId) meta.correlationId = ctx.correlationId;
-      if (ctx.tenantId) meta.tenantId = ctx.tenantId;
-      if (ctx.requestId) meta.requestId = ctx.requestId;
+      if (ctx.correlationId) {meta.correlationId = ctx.correlationId;}
+      if (ctx.tenantId) {meta.tenantId = ctx.tenantId;}
+      if (ctx.requestId) {meta.requestId = ctx.requestId;}
     }
 
     return meta;

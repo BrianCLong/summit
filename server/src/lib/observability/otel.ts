@@ -110,7 +110,7 @@ class OpenTelemetryService {
     attributes: Record<string, string | number | boolean> = {},
     kind: (typeof SpanKind)[keyof typeof SpanKind] = SpanKind.INTERNAL,
   ) {
-    if (!this.tracer) return this.createNoOpSpan();
+    if (!this.tracer) {return this.createNoOpSpan();}
     return this.tracer.startSpan(name, {
       kind,
       attributes: {

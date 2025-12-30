@@ -54,7 +54,7 @@ export class SecretManager {
             details: {
                 requester: context.requester,
                 purpose: context.purpose,
-                success: !!value,
+                success: Boolean(value),
                 durationMs: Date.now() - start
             },
             actorRole: 'system' // or passed in context

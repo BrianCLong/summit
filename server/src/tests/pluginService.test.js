@@ -704,7 +704,7 @@ describe('Plugin Service - P2 Priority', () => {
   describe('Plugin Management API', () => {
     test('should list plugins with filtering', async () => {
       // Fresh state for this test
-      if (typeof pluginService.reset === 'function') pluginService.reset();
+      if (typeof pluginService.reset === 'function') {pluginService.reset();}
 
       // Seed two plugins deterministically
       await pluginService.registerPlugin({
@@ -762,7 +762,7 @@ describe('Plugin Service - P2 Priority', () => {
 
   describe('Metrics and Monitoring', () => {
     test('should track plugin system metrics', async () => {
-      if (typeof pluginService.reset === 'function') pluginService.reset();
+      if (typeof pluginService.reset === 'function') {pluginService.reset();}
 
       // Seed exactly two plugins
       const plugin1 = await pluginService.registerPlugin({

@@ -248,7 +248,7 @@ function explainMatchClause(matchClause: string): string {
  */
 function explainWhereClause(cypher: string): string | null {
   const whereMatch = cypher.match(/WHERE\s+(.*?)(?=RETURN|ORDER|LIMIT|WITH|OPTIONAL|$)/is);
-  if (!whereMatch) return null;
+  if (!whereMatch) {return null;}
 
   const whereClause = whereMatch[1].trim();
   const conditions: string[] = [];
@@ -325,7 +325,7 @@ function extractAggregations(cypher: string): string[] {
  */
 function explainReturnClause(cypher: string): string | null {
   const returnMatch = cypher.match(/RETURN\s+(.*?)(?=ORDER|LIMIT|$)/is);
-  if (!returnMatch) return null;
+  if (!returnMatch) {return null;}
 
   const returnClause = returnMatch[1].trim();
   const items: string[] = [];
@@ -364,7 +364,7 @@ function explainReturnClause(cypher: string): string | null {
     }
   }
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {return null;}
   return items.join(', ');
 }
 

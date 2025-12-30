@@ -13,7 +13,7 @@ router.post(
   async (_req, res) => {
     // Plaid v2 verification requires SDK/header parsing; stubbed route
     const secret = process.env.PLAID_WEBHOOK_SECRET;
-    if (!secret) return res.status(503).send('webhook disabled');
+    if (!secret) {return res.status(503).send('webhook disabled');}
     return res.sendStatus(200);
   },
 );

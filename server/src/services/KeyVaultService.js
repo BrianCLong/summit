@@ -20,7 +20,7 @@ class KeyVaultService {
       `SELECT id, key, expires_at FROM api_keys WHERE provider = $1 AND status = 'active' ORDER BY created_at DESC LIMIT 1`,
       [provider],
     );
-    if (!res.rows[0]) return null;
+    if (!res.rows[0]) {return null;}
 
     const record = res.rows[0];
     const keyStr = record.key;

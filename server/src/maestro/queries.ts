@@ -10,7 +10,7 @@ export class MaestroQueries {
 
   async getTaskWithArtifacts(taskId: string): Promise<{ task: unknown; artifacts: unknown[] } | null> {
     const task = await this.ig.getTask(taskId);
-    if (!task) return null;
+    if (!task) {return null;}
     const artifacts = await this.ig.getArtifactsForTask(taskId);
     return { task, artifacts };
   }
@@ -20,7 +20,7 @@ export class MaestroQueries {
    */
   async getRunResponse(runId: string): Promise<MaestroRunResponse | null> {
     const run = await this.ig.getRun(runId);
-    if (!run) return null;
+    if (!run) {return null;}
 
     const [tasks, artifacts, costSummary] = await Promise.all([
       this.ig.getTasksForRun(runId),

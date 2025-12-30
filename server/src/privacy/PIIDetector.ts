@@ -110,7 +110,7 @@ const PII_PATTERNS: PIIPattern[] = [
         let digit = parseInt(clean[i], 10);
         if (isEven) {
           digit *= 2;
-          if (digit > 9) digit -= 9;
+          if (digit > 9) {digit -= 9;}
         }
         sum += digit;
         isEven = !isEven;
@@ -157,7 +157,7 @@ const PII_PATTERNS: PIIPattern[] = [
     sensitivity: 'medium',
     // Basic name pattern - in production, use NER
     pattern: /\b([A-Z][a-z]+\s){1,2}[A-Z][a-z]+\b/g,
-    maskFn: (v) => v.split(' ').map((n) => n[0] + '***').join(' '),
+    maskFn: (v) => v.split(' ').map((n) => `${n[0]  }***`).join(' '),
     recommendation: 'Consider pseudonymization for personal names',
   },
 ];
@@ -280,7 +280,7 @@ export class PIIDetector {
     maxDepth: number,
     includeValue?: boolean
   ): void {
-    if (depth > maxDepth) return;
+    if (depth > maxDepth) {return;}
 
     if (typeof obj === 'string') {
       this.scanStringValue(obj, path, detections, includeValue);

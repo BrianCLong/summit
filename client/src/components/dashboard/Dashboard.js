@@ -43,7 +43,7 @@ function Dashboard() {
 
   useEffect(() => {
     const seen = localStorage.getItem('onboarding_seen');
-    if (!seen) setShowOnboarding(true);
+    if (!seen) {setShowOnboarding(true);}
   }, []);
 
   const stats = [

@@ -245,12 +245,12 @@ export class PolicyEngine {
   private async validateInput(input: PolicyInput): Promise<void> {
     const errors: string[] = [];
 
-    if (!input.subject.userId) errors.push('subject.userId is required');
-    if (!input.subject.tenantId) errors.push('subject.tenantId is required');
-    if (!input.action.type) errors.push('action.type is required');
-    if (!input.action.category) errors.push('action.category is required');
-    if (!input.resource.type) errors.push('resource.type is required');
-    if (!input.resource.id) errors.push('resource.id is required');
+    if (!input.subject.userId) {errors.push('subject.userId is required');}
+    if (!input.subject.tenantId) {errors.push('subject.tenantId is required');}
+    if (!input.action.type) {errors.push('action.type is required');}
+    if (!input.action.category) {errors.push('action.category is required');}
+    if (!input.resource.type) {errors.push('resource.type is required');}
+    if (!input.resource.id) {errors.push('resource.id is required');}
     if (input.context.autonomyLevel < 0 || input.context.autonomyLevel > 5) {
       errors.push('context.autonomyLevel must be between 0 and 5');
     }

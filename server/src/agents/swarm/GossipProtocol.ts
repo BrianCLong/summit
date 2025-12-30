@@ -30,7 +30,7 @@ export class GossipProtocol {
       try {
         const parsed: SwarmMessage = JSON.parse(message);
         // Don't process own messages
-        if (parsed.senderId === this.nodeId) return;
+        if (parsed.senderId === this.nodeId) {return;}
 
         const handler = this.handlers.get(channel);
         if (handler) {
@@ -43,7 +43,7 @@ export class GossipProtocol {
   }
 
   async broadcast(channel: string, message: Omit<SwarmMessage, 'senderId' | 'timestamp' | 'id'>): Promise<void> {
-    if (!this.publisher) return;
+    if (!this.publisher) {return;}
 
     const fullMessage: SwarmMessage = {
       ...message,
@@ -60,7 +60,7 @@ export class GossipProtocol {
   }
 
   async shutdown(): Promise<void> {
-    if (this.publisher) await this.publisher.quit();
-    if (this.subscriber) await this.subscriber.quit();
+    if (this.publisher) {await this.publisher.quit();}
+    if (this.subscriber) {await this.subscriber.quit();}
   }
 }

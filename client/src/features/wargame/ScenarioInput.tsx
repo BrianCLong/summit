@@ -252,8 +252,8 @@ const ScenarioInput: React.FC<ScenarioInputProps> = ({
         multiline
         rows={4}
         helperText="Enter additional simulation parameters in JSON format"
-        error={!!inputError}
-        FormHelperTextProps={{ error: !!inputError }}
+        error={Boolean(inputError)}
+        FormHelperTextProps={{ error: Boolean(inputError) }}
       />
       {inputError && <Alert severity="error">{inputError}</Alert>}
 

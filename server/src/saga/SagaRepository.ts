@@ -463,7 +463,7 @@ export class SagaRepository {
   }
 
   private async cacheInstance(instance: SagaInstance): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.setex(
@@ -477,7 +477,7 @@ export class SagaRepository {
   }
 
   private async getCached(id: string): Promise<SagaInstance | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     try {
       const cached = await this.redis.get(`saga:${id}`);
@@ -489,7 +489,7 @@ export class SagaRepository {
   }
 
   private async invalidateCache(id: string): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.del(`saga:${id}`);

@@ -152,7 +152,7 @@ const crudResolvers = {
   Query: {
     // Entity queries
     entity: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -170,7 +170,7 @@ const crudResolvers = {
           { id, permissions },
         );
 
-        if (result.records.length === 0) return null;
+        if (result.records.length === 0) {return null;}
 
         const record = result.records[0];
         const entity = record.get('e').properties;
@@ -200,7 +200,7 @@ const crudResolvers = {
       }: any,
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -268,7 +268,7 @@ const crudResolvers = {
         );
 
         const hasNextPage = entities.length > first;
-        if (hasNextPage) entities.pop(); // Remove the extra entity
+        if (hasNextPage) {entities.pop();} // Remove the extra entity
 
         const edges = entities.map((entity) => ({
           node: entity,
@@ -279,7 +279,7 @@ const crudResolvers = {
           edges,
           pageInfo: {
             hasNextPage,
-            hasPreviousPage: !!after,
+            hasPreviousPage: Boolean(after),
             startCursor: edges.length > 0 ? edges[0].cursor : null,
             endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
             totalCount,
@@ -292,7 +292,7 @@ const crudResolvers = {
 
     // Relationship queries
     relationship: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -308,7 +308,7 @@ const crudResolvers = {
           { id, permissions },
         );
 
-        if (result.records.length === 0) return null;
+        if (result.records.length === 0) {return null;}
 
         const record = result.records[0];
         const relationship = record.get('r').properties;
@@ -336,7 +336,7 @@ const crudResolvers = {
       }: any,
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -403,7 +403,7 @@ const crudResolvers = {
         }));
 
         const hasNextPage = relationships.length > first;
-        if (hasNextPage) relationships.pop();
+        if (hasNextPage) {relationships.pop();}
 
         const edges = relationships.map((relationship) => ({
           node: relationship,
@@ -414,7 +414,7 @@ const crudResolvers = {
           edges,
           pageInfo: {
             hasNextPage,
-            hasPreviousPage: !!after,
+            hasPreviousPage: Boolean(after),
             startCursor: edges.length > 0 ? edges[0].cursor : null,
             endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
             totalCount,
@@ -431,7 +431,7 @@ const crudResolvers = {
       { id }: { id: string },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -446,7 +446,7 @@ const crudResolvers = {
           { id },
         );
 
-        if (result.records.length === 0) return null;
+        if (result.records.length === 0) {return null;}
 
         const record = result.records[0];
         const investigation = record.get('i').properties;
@@ -479,7 +479,7 @@ const crudResolvers = {
       }: any,
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -539,7 +539,7 @@ const crudResolvers = {
         );
 
         const hasNextPage = investigations.length > first;
-        if (hasNextPage) investigations.pop();
+        if (hasNextPage) {investigations.pop();}
 
         const edges = investigations.map((investigation) => ({
           node: investigation,
@@ -550,7 +550,7 @@ const crudResolvers = {
           edges,
           pageInfo: {
             hasNextPage,
-            hasPreviousPage: !!after,
+            hasPreviousPage: Boolean(after),
             startCursor: edges.length > 0 ? edges[0].cursor : null,
             endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
             totalCount,
@@ -567,7 +567,7 @@ const crudResolvers = {
       { investigationId, filter }: GraphDataArgs,
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const { minConfidence, tags, startDate, endDate } = filter || {};
 
@@ -600,9 +600,9 @@ const crudResolvers = {
           obj.confidence >= minConfidence;
 
         const matchesTags = (obj: any) => {
-          if (!tags || tags.length === 0) return true;
+          if (!tags || tags.length === 0) {return true;}
           const raw = obj.customMetadata;
-          if (!raw) return false;
+          if (!raw) {return false;}
           try {
             const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
             return (
@@ -615,10 +615,10 @@ const crudResolvers = {
         };
 
         const matchesTime = (obj: any) => {
-          if (!obj.createdAt) return true;
+          if (!obj.createdAt) {return true;}
           const created = new Date(obj.createdAt);
-          if (startDate && created < new Date(startDate)) return false;
-          if (endDate && created > new Date(endDate)) return false;
+          if (startDate && created < new Date(startDate)) {return false;}
+          if (endDate && created > new Date(endDate)) {return false;}
           return true;
         };
 
@@ -653,7 +653,7 @@ const crudResolvers = {
       { entityId }: { entityId: string },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -685,7 +685,7 @@ const crudResolvers = {
       { input }: { input: EntityInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -781,7 +781,7 @@ const crudResolvers = {
       { inputs }: { inputs: EntityInput[] },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -890,7 +890,7 @@ const crudResolvers = {
       { id, input }: { id: string; input: EntityInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -984,7 +984,7 @@ const crudResolvers = {
     },
 
     deleteEntity: async (_: any, { id }: { id: string }, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1027,7 +1027,7 @@ const crudResolvers = {
       { input }: { input: RelationshipInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1125,7 +1125,7 @@ const crudResolvers = {
       { inputs }: { inputs: RelationshipInput[] },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1250,7 +1250,7 @@ const crudResolvers = {
       { id, input }: { id: string; input: RelationshipInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1362,7 +1362,7 @@ const crudResolvers = {
       { id }: { id: string },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1411,7 +1411,7 @@ const crudResolvers = {
       { input }: { input: InvestigationInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1468,7 +1468,7 @@ const crudResolvers = {
       { id, input }: { id: string; input: InvestigationInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1536,7 +1536,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           'ENTITY_CREATED',
@@ -1553,7 +1553,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           'ENTITY_UPDATED',
@@ -1570,7 +1570,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           'ENTITY_DELETED',
@@ -1587,7 +1587,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           'RELATIONSHIP_CREATED',
@@ -1604,7 +1604,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           'RELATIONSHIP_UPDATED',
@@ -1621,7 +1621,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           'RELATIONSHIP_DELETED',
@@ -1638,7 +1638,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           'INVESTIGATION_UPDATED',
@@ -1655,7 +1655,7 @@ const crudResolvers = {
         { investigationId }: { investigationId?: string },
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createFilteredAsyncIterator(
           GRAPH_EVENTS,
@@ -1683,7 +1683,7 @@ const crudResolvers = {
           | undefined,
         { user }: Context,
       ) => {
-        if (!user) throw new Error('Not authenticated');
+        if (!user) {throw new Error('Not authenticated');}
 
         return subscriptionEngine.createBatchedAsyncIterator(
           GRAPH_EVENTS,
@@ -1708,7 +1708,7 @@ const crudResolvers = {
   // Field resolvers
   Entity: {
     relationships: async (entity: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1731,7 +1731,7 @@ const crudResolvers = {
     },
 
     inboundRelationships: async (entity: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1754,7 +1754,7 @@ const crudResolvers = {
     },
 
     outboundRelationships: async (entity: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1788,7 +1788,7 @@ const crudResolvers = {
 
   Investigation: {
     entities: async (investigation: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -1806,7 +1806,7 @@ const crudResolvers = {
     },
 
     relationships: async (investigation: any, _: any, { user }: Context) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();

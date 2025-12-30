@@ -41,9 +41,9 @@ export class TrafficDetector implements Detector {
     // Determine max severity and score
     const maxScore = Math.max(...anomalies.map(a => a.score));
     let severity = Severity.LOW;
-    if (maxScore > 0.9) severity = Severity.CRITICAL;
-    else if (maxScore > 0.7) severity = Severity.HIGH;
-    else if (maxScore > 0.5) severity = Severity.MEDIUM;
+    if (maxScore > 0.9) {severity = Severity.CRITICAL;}
+    else if (maxScore > 0.7) {severity = Severity.HIGH;}
+    else if (maxScore > 0.5) {severity = Severity.MEDIUM;}
 
     // Group by type for explanation
     const counts = anomalies.reduce((acc, curr) => {

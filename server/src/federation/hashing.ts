@@ -8,7 +8,7 @@ export class IdentifierHasher {
     if (!this.tenantSalts.has(tenantId)) {
       // For MVP, generate a deterministic salt based on tenantId
       // In production, this would be retrieved from a KMS or secure configuration
-      const salt = crypto.createHash('sha256').update(tenantId + 'MVP_SALT_SEED_2025').digest('hex');
+      const salt = crypto.createHash('sha256').update(`${tenantId  }MVP_SALT_SEED_2025`).digest('hex');
       this.tenantSalts.set(tenantId, salt);
     }
     return this.tenantSalts.get(tenantId)!;

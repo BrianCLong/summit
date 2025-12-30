@@ -67,7 +67,7 @@ export class MaestroHandlers {
 
     // 1. Resolve Agent
     const agent = await this.agentService.getAgent(agentId, task.tenantId);
-    if (!agent) throw new Error(`Agent not found: ${agentId}`);
+    if (!agent) {throw new Error(`Agent not found: ${agentId}`);}
 
     // 2. Trigger Sub-Run
     // Note: In a real distributed system, we might need to handle the sub-run async

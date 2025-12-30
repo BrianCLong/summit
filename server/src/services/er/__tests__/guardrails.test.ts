@@ -91,11 +91,11 @@ describe('EntityResolutionV2Service guardrails', () => {
             records: [
               {
                 get: (key: string) => {
-                  if (key === 'decisionId') return 'dec-guardrail';
-                  if (key === 'mergeId') return 'merge-guardrail';
-                  if (key === 'masterId') return 'm1';
-                  if (key === 'mergeIds') return ['m2'];
-                  if (key === 'created') return false;
+                  if (key === 'decisionId') {return 'dec-guardrail';}
+                  if (key === 'mergeId') {return 'merge-guardrail';}
+                  if (key === 'masterId') {return 'm1';}
+                  if (key === 'mergeIds') {return ['m2'];}
+                  if (key === 'created') {return false;}
                   return null;
                 },
               },

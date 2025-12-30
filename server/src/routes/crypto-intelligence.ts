@@ -13,7 +13,7 @@ const enforceAnalystAccess = [ensureAuthenticated];
 router.post('/analyze/transaction', enforceAnalystAccess, async (req, res) => {
   try {
     const { txHash, chain } = req.body;
-    if (!txHash) return res.status(400).json({ error: 'txHash is required' });
+    if (!txHash) {return res.status(400).json({ error: 'txHash is required' });}
 
     const result = await service.analyzeTransactionPattern(txHash, chain);
     res.json(result);
@@ -26,7 +26,7 @@ router.post('/analyze/transaction', enforceAnalystAccess, async (req, res) => {
 router.post('/cluster/wallet', enforceAnalystAccess, async (req, res) => {
   try {
     const { address, chain } = req.body;
-    if (!address) return res.status(400).json({ error: 'address is required' });
+    if (!address) {return res.status(400).json({ error: 'address is required' });}
 
     const result = await service.clusterWallets(address, chain);
     res.json(result);
@@ -39,7 +39,7 @@ router.post('/cluster/wallet', enforceAnalystAccess, async (req, res) => {
 router.post('/monitor/darkweb', enforceAnalystAccess, async (req, res) => {
   try {
     const { marketplace, keyword } = req.body;
-    if (!marketplace || !keyword) return res.status(400).json({ error: 'marketplace and keyword are required' });
+    if (!marketplace || !keyword) {return res.status(400).json({ error: 'marketplace and keyword are required' });}
 
     const result = await service.monitorDarkWeb(marketplace, keyword);
     res.json(result);
@@ -52,7 +52,7 @@ router.post('/monitor/darkweb', enforceAnalystAccess, async (req, res) => {
 router.post('/detect/mixer', enforceAnalystAccess, async (req, res) => {
     try {
         const { address, chain } = req.body;
-        if (!address) return res.status(400).json({ error: 'address is required' });
+        if (!address) {return res.status(400).json({ error: 'address is required' });}
 
         const result = await service.detectMixingService(address, chain);
         res.json(result);

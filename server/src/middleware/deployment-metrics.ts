@@ -180,7 +180,7 @@ export class DeploymentMetrics {
     strategy: string,
     durationSeconds: number
   ): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     this.deploymentCounter.inc({ environment, status, strategy });
     this.deploymentDuration.observe({ environment, strategy }, durationSeconds);
@@ -191,7 +191,7 @@ export class DeploymentMetrics {
    * Record a feature flag evaluation
    */
   recordFeatureFlagEvaluation(flagKey: string, result: string | boolean): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     this.featureFlagEvaluations.inc({
       flag_key: flagKey,
@@ -203,7 +203,7 @@ export class DeploymentMetrics {
    * Record feature flag cache hit
    */
   recordFeatureFlagCacheHit(): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
     this.featureFlagCacheHits.inc();
   }
 
@@ -211,7 +211,7 @@ export class DeploymentMetrics {
    * Record feature flag cache miss
    */
   recordFeatureFlagCacheMiss(): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
     this.featureFlagCacheMisses.inc();
   }
 
@@ -223,7 +223,7 @@ export class DeploymentMetrics {
     status: 'healthy' | 'unhealthy',
     durationSeconds: number
   ): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     this.healthCheckDuration.observe({ check_name: checkName, status }, durationSeconds);
     this.healthCheckStatus.set({ check_name: checkName }, status === 'healthy' ? 1 : 0);
@@ -233,7 +233,7 @@ export class DeploymentMetrics {
    * Record a release
    */
   recordRelease(type: 'major' | 'minor' | 'patch', branch: string): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
     this.releaseCounter.inc({ type, branch });
   }
 
@@ -241,7 +241,7 @@ export class DeploymentMetrics {
    * Record a rollback
    */
   recordRollback(environment: string, reason: string): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
     this.rollbackCounter.inc({ environment, reason });
   }
 
@@ -254,7 +254,7 @@ export class DeploymentMetrics {
     statusCode: number,
     durationSeconds: number
   ): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     const labels = {
       method,
@@ -270,7 +270,7 @@ export class DeploymentMetrics {
    * Record an error
    */
   recordError(type: string, code?: string): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
     this.errorCounter.inc({ type, code: code || 'unknown' });
   }
 
@@ -278,7 +278,7 @@ export class DeploymentMetrics {
    * Get metrics in Prometheus format
    */
   async getMetrics(): Promise<string> {
-    if (!this.enabled) return '';
+    if (!this.enabled) {return '';}
     return this.registry.metrics();
   }
 
@@ -286,7 +286,7 @@ export class DeploymentMetrics {
    * Reset all metrics (useful for testing)
    */
   reset(): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
     this.registry.resetMetrics();
   }
 

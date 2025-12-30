@@ -120,7 +120,7 @@ export class MoERouter {
       sensitivityLevel: input.sensitivity || 'low',
       maxLatencyMs: input.maxLatencyMs || 4000,
       userRole: input.userContext?.role,
-      investigationContext: !!input.investigationId,
+      investigationContext: Boolean(input.investigationId),
     };
   }
 
@@ -219,9 +219,9 @@ export class MoERouter {
     let score = 0;
 
     // Length-based complexity
-    if (task.length > 1000) score += 3;
-    else if (task.length > 500) score += 2;
-    else if (task.length > 100) score += 1;
+    if (task.length > 1000) {score += 3;}
+    else if (task.length > 500) {score += 2;}
+    else if (task.length > 100) {score += 1;}
 
     // Complexity keywords
     const complexKeywords = [
@@ -240,7 +240,7 @@ export class MoERouter {
     ];
 
     complexKeywords.forEach((keyword) => {
-      if (task.includes(keyword)) score += 1;
+      if (task.includes(keyword)) {score += 1;}
     });
 
     return Math.min(score, 10); // Cap at 10
@@ -350,27 +350,27 @@ export class MoERouter {
 
     switch (expert) {
       case 'GRAPH_TOOL':
-        if (features.hasGraphKeywords) confidence += 0.4;
+        if (features.hasGraphKeywords) {confidence += 0.4;}
         break;
       case 'FILES_TOOL':
-        if (features.hasFileKeywords) confidence += 0.4;
+        if (features.hasFileKeywords) {confidence += 0.4;}
         break;
       case 'OSINT_TOOL':
-        if (features.hasOSINTKeywords) confidence += 0.4;
+        if (features.hasOSINTKeywords) {confidence += 0.4;}
         break;
       case 'EXPORT_TOOL':
-        if (features.hasExportKeywords) confidence += 0.4;
+        if (features.hasExportKeywords) {confidence += 0.4;}
         break;
       case 'LLM_HEAVY':
-        if (features.complexityScore >= 5) confidence += 0.3;
-        if (features.taskLength > 1000) confidence += 0.2;
+        if (features.complexityScore >= 5) {confidence += 0.3;}
+        if (features.taskLength > 1000) {confidence += 0.2;}
         break;
       case 'LLM_LIGHT':
-        if (features.maxLatencyMs < 1500) confidence += 0.3;
-        if (features.complexityScore <= 2) confidence += 0.2;
+        if (features.maxLatencyMs < 1500) {confidence += 0.3;}
+        if (features.complexityScore <= 2) {confidence += 0.2;}
         break;
       case 'RAG_TOOL':
-        if (features.investigationContext) confidence += 0.3;
+        if (features.investigationContext) {confidence += 0.3;}
         break;
     }
 
@@ -389,30 +389,30 @@ export class MoERouter {
     switch (expert) {
       case 'GRAPH_TOOL':
         if (features.hasGraphKeywords)
-          reasons.push('graph-related keywords detected');
+          {reasons.push('graph-related keywords detected');}
         break;
       case 'FILES_TOOL':
-        if (features.hasFileKeywords) reasons.push('file operations required');
+        if (features.hasFileKeywords) {reasons.push('file operations required');}
         break;
       case 'OSINT_TOOL':
         if (features.hasOSINTKeywords)
-          reasons.push('OSINT/web research needed');
+          {reasons.push('OSINT/web research needed');}
         break;
       case 'EXPORT_TOOL':
         if (features.hasExportKeywords)
-          reasons.push('export/report generation requested');
+          {reasons.push('export/report generation requested');}
         break;
       case 'LLM_HEAVY':
-        if (features.complexityScore >= 5) reasons.push('high complexity task');
-        if (features.taskLength > 1000) reasons.push('long-form content');
+        if (features.complexityScore >= 5) {reasons.push('high complexity task');}
+        if (features.taskLength > 1000) {reasons.push('long-form content');}
         break;
       case 'LLM_LIGHT':
-        if (features.maxLatencyMs < 1500) reasons.push('tight latency budget');
-        if (features.complexityScore <= 2) reasons.push('simple query');
+        if (features.maxLatencyMs < 1500) {reasons.push('tight latency budget');}
+        if (features.complexityScore <= 2) {reasons.push('simple query');}
         break;
       case 'RAG_TOOL':
         if (features.investigationContext)
-          reasons.push('investigation context available');
+          {reasons.push('investigation context available');}
         reasons.push('general knowledge retrieval');
         break;
     }

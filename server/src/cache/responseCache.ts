@@ -22,7 +22,7 @@ class MemoryTier implements CacheTier {
 
   async get(key: string): Promise<string | null> {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (!entry) {return null;}
 
     if (Date.now() - entry.ts > entry.ttl * 1000) {
       this.cache.delete(key);
@@ -58,33 +58,33 @@ class RedisTier implements CacheTier {
 
   async get(key: string): Promise<string | null> {
     const redis = getRedisClient();
-    if (!redis) return null;
+    if (!redis) {return null;}
     return redis.get(key);
   }
 
   async set(key: string, value: string, ttl: number): Promise<void> {
     const redis = getRedisClient();
-    if (!redis) return;
+    if (!redis) {return;}
     await redis.set(key, value, 'EX', ttl);
   }
 
   async del(key: string): Promise<void> {
     const redis = getRedisClient();
-    if (!redis) return;
+    if (!redis) {return;}
     await redis.del(key);
   }
 
   // Redis specific methods for tagging
   async addTag(tag: string, key: string): Promise<void> {
     const redis = getRedisClient();
-    if (!redis) return;
+    if (!redis) {return;}
     await redis.sAdd(`idx:${tag}`, key);
     await redis.expire(`idx:${tag}`, 86400); // Index expires in 24h
   }
 
   async invalidateByTag(tag: string): Promise<void> {
     const redis = getRedisClient();
-    if (!redis) return;
+    if (!redis) {return;}
 
     const keys = await redis.sMembers(`idx:${tag}`);
     if (keys.length > 0) {
@@ -120,7 +120,7 @@ export async function getCachedJson<T>(
 
   // Try L1
   const l1Hit = await l1.get(key);
-  if (l1Hit) return JSON.parse(l1Hit) as T;
+  if (l1Hit) {return JSON.parse(l1Hit) as T;}
 
   // Try L2
   try {
@@ -200,7 +200,7 @@ export async function cached<T>(
   const tags = tagsOverride || (typeof ttlOrOptions === 'object' ? ttlOrOptions.tags : []) || [];
 
   const redisDisabled = process.env.REDIS_DISABLE === '1';
-  const key = 'gql:' + crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex');
+  const key = `gql:${  crypto.createHash('sha1').update(JSON.stringify(keyParts)).digest('hex')}`;
   const tenant = typeof keyParts?.[1] === 'string' ? keyParts[1] : 'unknown';
 
   // L1 Check

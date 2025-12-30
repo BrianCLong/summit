@@ -44,7 +44,7 @@ export class CSVExporter extends BaseReportExporter {
 
   private hasTabularData(report: Report): boolean {
     // Check if report has entities or other tabular data
-    return !!(report.data?.entities?.length > 0 || report.data?.items?.length > 0);
+    return Boolean(report.data?.entities?.length > 0 || report.data?.items?.length > 0);
   }
 
   private generateCSVContent(report: Report): string {

@@ -108,7 +108,7 @@ router.put('/templates/:id', async (req, res) => {
     try {
         const templates = await getTemplates();
         const index = templates.findIndex(t => t.id === req.params.id);
-        if (index === -1) return res.status(404).json({ error: 'Template not found' });
+        if (index === -1) {return res.status(404).json({ error: 'Template not found' });}
 
         templates[index] = { ...templates[index], ...req.body };
         await saveTemplates(templates);
@@ -125,7 +125,7 @@ router.post('/generate', async (req, res) => {
     if (typeof request.template === 'string') {
          const templates = await getTemplates();
          const tpl = templates.find(t => t.id === request.template as unknown as string);
-         if (!tpl) return res.status(404).json({ error: 'Template not found' });
+         if (!tpl) {return res.status(404).json({ error: 'Template not found' });}
          request.template = tpl;
     }
 
@@ -160,7 +160,7 @@ router.post('/schedule', async (req, res) => {
         if (typeof reportRequest.template === 'string') {
              const templates = await getTemplates();
              const tpl = templates.find(t => t.id === reportRequest.template as unknown as string);
-             if (!tpl) return res.status(404).json({ error: 'Template not found' });
+             if (!tpl) {return res.status(404).json({ error: 'Template not found' });}
              reportRequest.template = tpl;
         }
 

@@ -113,11 +113,11 @@ function normalizePath(pointer: string): string {
 }
 
 function overlayMatches(overlay: TenantPolicyBundle['overlays'][number], ctx?: OverlayContext) {
-  if (!ctx) return true;
+  if (!ctx) {return true;}
   const selectors = overlay.selectors || {};
   const envContext = ctx.environment || ctx.environments?.[0];
   if (selectors.environments && selectors.environments.length > 0) {
-    if (!envContext || !selectors.environments.includes(envContext)) return false;
+    if (!envContext || !selectors.environments.includes(envContext)) {return false;}
   }
   if (selectors.regions && selectors.regions.length > 0) {
     if (!ctx.regions || !ctx.regions.some((region) => selectors.regions!.includes(region))) {
@@ -126,7 +126,7 @@ function overlayMatches(overlay: TenantPolicyBundle['overlays'][number], ctx?: O
   }
   if (selectors.labels && selectors.labels.length > 0) {
     const ctxLabels = ctx.labels || [];
-    if (!ctxLabels.some((label) => selectors.labels!.includes(label))) return false;
+    if (!ctxLabels.some((label) => selectors.labels!.includes(label))) {return false;}
   }
   return true;
 }
@@ -168,7 +168,7 @@ function materializeProfile(
 
   const applied: string[] = [];
   for (const overlay of overlays) {
-    if (!overlayMatches(overlay, ctx)) continue;
+    if (!overlayMatches(overlay, ctx)) {continue;}
     applied.push(overlay.id);
     for (const patch of overlay.patches) {
       applyPatch(profile, patch);
@@ -183,21 +183,21 @@ function ruleMatches(
   input: PolicySimulationInput,
   ctx?: OverlayContext,
 ) {
-  if (rule.conditions.actions && !rule.conditions.actions.includes(input.action)) return false;
+  if (rule.conditions.actions && !rule.conditions.actions.includes(input.action)) {return false;}
   if (
     rule.conditions.resourceTenants &&
     !rule.conditions.resourceTenants.includes(input.resourceTenantId)
   )
-    return false;
+    {return false;}
   if (
     rule.conditions.subjectTenants &&
     !rule.conditions.subjectTenants.includes(input.subjectTenantId)
   )
-    return false;
+    {return false;}
   if (rule.conditions.purposes && input.purpose && !rule.conditions.purposes.includes(input.purpose))
-    return false;
+    {return false;}
   if (rule.conditions.environments && ctx?.environment) {
-    if (!rule.conditions.environments.includes(ctx.environment)) return false;
+    if (!rule.conditions.environments.includes(ctx.environment)) {return false;}
   }
   return true;
 }
@@ -241,11 +241,11 @@ export function simulatePolicyDecision(
   }
 
   const sortedRules = [...profile.rules].sort((a, b) => (a.priority || 0) - (b.priority || 0));
-  let allow = profile.guardrails.defaultDeny ? false : true;
+  let allow = !profile.guardrails.defaultDeny;
   let reason = profile.guardrails.defaultDeny ? 'default deny' : 'default allow';
 
   for (const rule of sortedRules) {
-    if (!ruleMatches(rule, input, ctx)) continue;
+    if (!ruleMatches(rule, input, ctx)) {continue;}
     allow = rule.effect === 'allow';
     reason =
       rule.description ||

@@ -291,7 +291,7 @@ const AIAnalysisPanel = () => {
 
   // Handler functions for AI operations
   const handleExtractEntities = () => {
-    if (!analysisText.trim()) return;
+    if (!analysisText.trim()) {return;}
     setLoading(true);
 
     const docs = [{ id: `doc-${Date.now()}`, text: analysisText }];
@@ -401,10 +401,10 @@ const AIAnalysisPanel = () => {
     const time = new Date(timestamp);
     const diffInSeconds = Math.floor((now - time) / 1000);
 
-    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 60) {return `${diffInSeconds}s ago`;}
+    if (diffInSeconds < 3600) {return `${Math.floor(diffInSeconds / 60)}m ago`;}
     if (diffInSeconds < 86400)
-      return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      {return `${Math.floor(diffInSeconds / 3600)}h ago`;}
     return `${Math.floor(diffInSeconds / 86400)}d ago`;
   };
 

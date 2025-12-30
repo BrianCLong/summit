@@ -965,11 +965,11 @@ export class AdvancedRoutingEngine {
   ): string[] {
     const capabilities: string[] = [];
 
-    if (dimensions.logical > 0.6) capabilities.push('reasoning');
-    if (dimensions.creative > 0.6) capabilities.push('creative');
-    if (dimensions.technical > 0.6) capabilities.push('code');
-    if (dimensions.multimodal > 0.5) capabilities.push('vision');
-    if (dimensions.factual > 0.7) capabilities.push('knowledge');
+    if (dimensions.logical > 0.6) {capabilities.push('reasoning');}
+    if (dimensions.creative > 0.6) {capabilities.push('creative');}
+    if (dimensions.technical > 0.6) {capabilities.push('code');}
+    if (dimensions.multimodal > 0.5) {capabilities.push('vision');}
+    if (dimensions.factual > 0.7) {capabilities.push('knowledge');}
 
     return capabilities;
   }
@@ -1120,11 +1120,11 @@ export class AdvancedRoutingEngine {
     const factors: string[] = [];
 
     if (dimensions.linguistic > 0.8)
-      factors.push('High linguistic complexity detected');
+      {factors.push('High linguistic complexity detected');}
     if (dimensions.logical > 0.8)
-      factors.push('Strong logical reasoning requirements');
+      {factors.push('Strong logical reasoning requirements');}
     if (dimensions.factual > 0.8)
-      factors.push('Extensive factual knowledge needed');
+      {factors.push('Extensive factual knowledge needed');}
 
     return factors;
   }
@@ -1156,11 +1156,11 @@ export class AdvancedRoutingEngine {
   private inferTaskType(analysis: QueryComplexityAnalysis): string {
     const { dimensions } = analysis;
 
-    if (dimensions.creative > 0.7) return 'creative_writing';
-    if (dimensions.logical > 0.7) return 'reasoning';
-    if (dimensions.technical > 0.7) return 'code_generation';
-    if (dimensions.factual > 0.7) return 'analysis';
-    if (dimensions.multimodal > 0.5) return 'multimodal';
+    if (dimensions.creative > 0.7) {return 'creative_writing';}
+    if (dimensions.logical > 0.7) {return 'reasoning';}
+    if (dimensions.technical > 0.7) {return 'code_generation';}
+    if (dimensions.factual > 0.7) {return 'analysis';}
+    if (dimensions.multimodal > 0.5) {return 'multimodal';}
 
     return 'general';
   }
@@ -1216,9 +1216,9 @@ export class AdvancedRoutingEngine {
   private getComplexityPreferredModel(
     analysis: QueryComplexityAnalysis,
   ): string {
-    if (analysis.dimensions.logical > 0.8) return 'claude-3.5-sonnet';
-    if (analysis.dimensions.multimodal > 0.6) return 'gpt-4o';
-    if (analysis.dimensions.contextual > 0.8) return 'gemini-ultra';
+    if (analysis.dimensions.logical > 0.8) {return 'claude-3.5-sonnet';}
+    if (analysis.dimensions.multimodal > 0.6) {return 'gpt-4o';}
+    if (analysis.dimensions.contextual > 0.8) {return 'gemini-ultra';}
     return 'claude-3.5-sonnet';
   }
 

@@ -6,6 +6,6 @@ export interface AstNode {
 
 export function estimateCost(ast: AstNode): number {
   let cost = 1;
-  if (ast.filter) cost += 1;
+  if (ast.filter) {cost += 1;}
   return cost;
 }

@@ -21,23 +21,23 @@ function useData<T>(
       try {
         setLoading(true);
         const res = await fetcher();
-        if (!alive) return;
+        if (!alive) {return;}
         setData(res);
         setUpdatedAt(Date.now());
         setError(null);
       } catch (e: unknown) {
-        if (!alive) return;
+        if (!alive) {return;}
         setError(e as Error);
       } finally {
-        if (alive) setLoading(false);
+        if (alive) {setLoading(false);}
       }
     }
     run();
     let t: ReturnType<typeof setInterval>;
-    if (opts.refreshMs) t = setInterval(run, opts.refreshMs);
+    if (opts.refreshMs) {t = setInterval(run, opts.refreshMs);}
     return () => {
       alive = false;
-      if (t) clearInterval(t);
+      if (t) {clearInterval(t);}
     };
   }, deps);
 
@@ -50,7 +50,7 @@ export function useRolloutSteps() {
     async () => {
       if (api) {
         const r = await fetch(api);
-        if (!r.ok) throw new Error('rollouts api error');
+        if (!r.ok) {throw new Error('rollouts api error');}
         return (await r.json()) as RolloutStep[];
       }
       return [
@@ -101,7 +101,7 @@ export function useBudgetDenials() {
     async () => {
       if (api) {
         const r = await fetch(`${api}/denials?window=24h`);
-        if (!r.ok) throw new Error('policy api error');
+        if (!r.ok) {throw new Error('policy api error');}
         return (await r.json()) as Denial[];
       }
       return [
@@ -124,7 +124,7 @@ export function useProvenanceRoot() {
   return useData<StepNode>(async () => {
     if (api) {
       const r = await fetch(`${api}/latest`);
-      if (!r.ok) throw new Error('prov api error');
+      if (!r.ok) {throw new Error('prov api error');}
       return await r.json();
     }
     return {

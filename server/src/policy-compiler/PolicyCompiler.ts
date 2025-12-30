@@ -74,8 +74,8 @@ export class PolicyCompiler {
   }
 
   private validateSpec(spec: PolicySpec): void {
-    if (!spec.version) throw new Error("Policy version is required");
-    if (!spec.tenantId) throw new Error("Tenant ID is required");
+    if (!spec.version) {throw new Error("Policy version is required");}
+    if (!spec.tenantId) {throw new Error("Tenant ID is required");}
   }
 
   private calculateHash(data: any): string {
@@ -100,7 +100,7 @@ export class PolicyCompiler {
 
     // If both are CONDITIONAL (or one is), merge conditions (AND logic)
     if (newEntry.conditions && newEntry.conditions.length > 0) {
-      if (!existing.conditions) existing.conditions = [];
+      if (!existing.conditions) {existing.conditions = [];}
       existing.conditions.push(...newEntry.conditions);
 
       // If existing was ALLOW, it becomes CONDITIONAL

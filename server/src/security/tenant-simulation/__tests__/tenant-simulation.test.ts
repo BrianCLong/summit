@@ -17,8 +17,8 @@ jest.mock('../../../config/database', () => ({
 
 describe('Tenant Boundary Leak Simulation Engine', () => {
   let app;
-  let tenantA = 'tenant-a-' + Date.now();
-  let tenantB = 'tenant-b-' + Date.now();
+  const tenantA = `tenant-a-${  Date.now()}`;
+  const tenantB = `tenant-b-${  Date.now()}`;
 
   beforeAll(async () => {
       // Create lightweight app that doesn't try to connect to DBs on startup

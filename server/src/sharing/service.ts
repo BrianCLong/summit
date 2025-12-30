@@ -30,10 +30,10 @@ export const issueShareLink = (input: {
 export const validateShareToken = (token: string) => {
   const payload = verifyShareToken(token);
   const link = getShareLink(payload.linkId);
-  if (!link) throw new Error('unknown_link');
-  if (link.scopeHash !== payload.scopeHash) throw new Error('scope_mismatch');
-  if (isRevoked(link.id, link.revokedAt)) throw new Error('revoked');
-  if (link.expiresAt.getTime() < Date.now()) throw new Error('expired');
+  if (!link) {throw new Error('unknown_link');}
+  if (link.scopeHash !== payload.scopeHash) {throw new Error('scope_mismatch');}
+  if (isRevoked(link.id, link.revokedAt)) {throw new Error('revoked');}
+  if (link.expiresAt.getTime() < Date.now()) {throw new Error('expired');}
   return link;
 };
 

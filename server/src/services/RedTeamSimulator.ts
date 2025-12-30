@@ -183,7 +183,7 @@ export class RedTeamSimulator extends EventEmitter {
 
   getCampaignStatus(campaignId: string) {
     const simId = this.activeCampaigns.get(campaignId);
-    if (!simId) return null;
+    if (!simId) {return null;}
     return this.simulationEngine.getSimulationStatus(simId);
   }
 }

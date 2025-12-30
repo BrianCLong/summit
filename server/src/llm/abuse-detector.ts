@@ -40,7 +40,7 @@ export class AbuseDetector {
     messages: ChatMessage[],
     limit?: number,
   ): SecurityEvent | null {
-    if (!limit) return null;
+    if (!limit) {return null;}
     const totalLength = messages.reduce((acc, m) => acc + (m.content?.length || 0), 0);
     if (totalLength > limit) {
       return {
@@ -57,7 +57,7 @@ export class AbuseDetector {
     messages: ChatMessage[],
     patterns: string[] = [],
   ): SecurityEvent | null {
-    if (!patterns.length) return null;
+    if (!patterns.length) {return null;}
     const combined = messages.map((m) => m.content || '').join('\n');
     for (const pattern of patterns) {
       const regex = new RegExp(pattern, 'i');

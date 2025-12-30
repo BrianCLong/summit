@@ -10,7 +10,7 @@ export class ParseStage implements PipelineStage {
 
   async execute(context: PipelineContext): Promise<PipelineContext> {
     if (!context.rawContent) {
-      if (!context.text) throw new Error("No content to parse");
+      if (!context.text) {throw new Error("No content to parse");}
       return context;
     }
 
@@ -24,7 +24,7 @@ export class NormalizeStage implements PipelineStage {
   name = 'normalize' as const;
 
   async execute(context: PipelineContext): Promise<PipelineContext> {
-    if (!context.text) return context;
+    if (!context.text) {return context;}
     context.text = context.text.replace(/\s+/g, ' ').trim();
     return context;
   }
@@ -34,7 +34,7 @@ export class ChunkStage implements PipelineStage {
   name = 'chunk' as const;
 
   async execute(context: PipelineContext): Promise<PipelineContext> {
-    if (!context.text) return context;
+    if (!context.text) {return context;}
 
     // Simple chunking strategy: fixed size with overlap
     const chunkSize = 1000;
@@ -52,7 +52,7 @@ export class ChunkStage implements PipelineStage {
         metadata: {}
       });
 
-      if (i + chunkSize >= text.length) break;
+      if (i + chunkSize >= text.length) {break;}
     }
 
     context.chunks = chunks;
@@ -69,7 +69,7 @@ export class EmbedStage implements PipelineStage {
   }
 
   async execute(context: PipelineContext): Promise<PipelineContext> {
-    if (!context.chunks || context.chunks.length === 0) return context;
+    if (!context.chunks || context.chunks.length === 0) {return context;}
 
     const texts = context.chunks.map(c => c.text);
     const embeddings = await this.embeddingService.generateEmbeddings(texts);
@@ -86,7 +86,7 @@ export class StoreStage implements PipelineStage {
   name = 'store' as const;
 
   async execute(context: PipelineContext): Promise<PipelineContext> {
-    if (!context.chunks) return context;
+    if (!context.chunks) {return context;}
 
     const client = await pool.connect();
 
@@ -241,7 +241,7 @@ export class IngestionService {
         { tenantId, forceWrite: true }
       );
 
-      if (!result) throw new Error("Failed to create document record");
+      if (!result) {throw new Error("Failed to create document record");}
 
       const docId = result.id;
 

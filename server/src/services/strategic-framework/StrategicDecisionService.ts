@@ -113,7 +113,7 @@ export class StrategicDecisionService {
 
   async getDecision(id: string): Promise<StrategicDecision | null> {
     const decision = decisionsStore.get(id);
-    if (!decision) return null;
+    if (!decision) {return null;}
 
     // Hydrate with options and criteria
     const options = await this.getOptionsForDecision(id);
@@ -131,10 +131,10 @@ export class StrategicDecisionService {
     let decisions = Array.from(decisionsStore.values());
 
     if (filters) {
-      if (filters.status) decisions = decisions.filter((d) => d.status === filters.status);
-      if (filters.type) decisions = decisions.filter((d) => d.type === filters.type);
-      if (filters.decisionMaker) decisions = decisions.filter((d) => d.decisionMaker === filters.decisionMaker);
-      if (filters.urgency) decisions = decisions.filter((d) => d.urgency === filters.urgency);
+      if (filters.status) {decisions = decisions.filter((d) => d.status === filters.status);}
+      if (filters.type) {decisions = decisions.filter((d) => d.type === filters.type);}
+      if (filters.decisionMaker) {decisions = decisions.filter((d) => d.decisionMaker === filters.decisionMaker);}
+      if (filters.urgency) {decisions = decisions.filter((d) => d.urgency === filters.urgency);}
     }
 
     // Hydrate each decision
@@ -180,7 +180,7 @@ export class StrategicDecisionService {
 
   async deleteDecision(id: string): Promise<boolean> {
     const decision = decisionsStore.get(id);
-    if (!decision) return false;
+    if (!decision) {return false;}
 
     // Delete related options and criteria
     const options = await this.getOptionsForDecision(id);
@@ -347,7 +347,7 @@ export class StrategicDecisionService {
 
   async getCriteriaForDecision(decisionId: string): Promise<DecisionCriterion[]> {
     const decision = decisionsStore.get(decisionId);
-    if (!decision) return [];
+    if (!decision) {return [];}
     return decision.criteria;
   }
 
@@ -713,7 +713,7 @@ export class StrategicDecisionService {
     }
 
     decision.updatedAt = new Date();
-    if (userId) decision.updatedBy = userId;
+    if (userId) {decision.updatedBy = userId;}
     decision.version++;
 
     decisionsStore.set(decisionId, decision);

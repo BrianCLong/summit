@@ -274,7 +274,7 @@ export class TransformStepExecutor extends BaseStepExecutor {
   }
 
   private flatten(data: unknown): unknown {
-    if (!Array.isArray(data)) return data;
+    if (!Array.isArray(data)) {return data;}
 
     return data.flat(Infinity);
   }
@@ -297,7 +297,7 @@ export class TransformStepExecutor extends BaseStepExecutor {
   }
 
   private aggregate(data: unknown, field: string): unknown {
-    if (!Array.isArray(data)) return data;
+    if (!Array.isArray(data)) {return data;}
 
     const counts: Record<string, number> = {};
     for (const item of data) {
@@ -315,8 +315,8 @@ export class TransformStepExecutor extends BaseStepExecutor {
     let current: unknown = obj;
 
     for (const part of parts) {
-      if (current === null || current === undefined) return undefined;
-      if (typeof current !== 'object') return undefined;
+      if (current === null || current === undefined) {return undefined;}
+      if (typeof current !== 'object') {return undefined;}
       current = (current as Record<string, unknown>)[part];
     }
 

@@ -79,7 +79,7 @@ export function requestContextMiddleware(
   contextStorage.run(context, () => {
     res.setHeader(CORRELATION_ID_HEADER, correlationId);
     res.setHeader(REQUEST_ID_HEADER, correlationId);
-    if (traceId) res.setHeader('x-trace-id', traceId);
+    if (traceId) {res.setHeader('x-trace-id', traceId);}
     next();
   });
 }

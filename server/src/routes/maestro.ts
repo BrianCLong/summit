@@ -83,7 +83,7 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
       [runId, tenantId]
     );
 
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Run not found' });
+    if (result.rows.length === 0) {return res.status(404).json({ error: 'Run not found' });}
     res.json(result.rows[0]);
   }));
 

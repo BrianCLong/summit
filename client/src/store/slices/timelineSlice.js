@@ -4,7 +4,7 @@ export const fetchTimelineEvents = createAsyncThunk(
   'timeline/fetchEvents',
   async () => {
     const res = await fetch('/api/events');
-    if (!res.ok) throw new Error('Failed to fetch events');
+    if (!res.ok) {throw new Error('Failed to fetch events');}
     const data = await res.json();
     return data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   },

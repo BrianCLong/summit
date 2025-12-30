@@ -75,7 +75,7 @@ export class AlertingEventAdapter implements IEventAdapter {
     environment?: string;
     dashboardUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.ALERT_TRIGGERED)
@@ -124,7 +124,7 @@ export class AlertingEventAdapter implements IEventAdapter {
     service: string;
     dashboardUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const severity =
       sloData.errorBudgetRemaining <= 0
@@ -177,7 +177,7 @@ export class AlertingEventAdapter implements IEventAdapter {
     projectId?: string;
     runUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.GOLDEN_PATH_BROKEN)
@@ -252,7 +252,7 @@ export class PipelineEventAdapter implements IEventAdapter {
     projectId?: string;
     pipelineUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.PIPELINE_FAILED)
@@ -301,7 +301,7 @@ export class PipelineEventAdapter implements IEventAdapter {
     projectId?: string;
     approvalUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.WORKFLOW_APPROVAL_REQUIRED)
@@ -380,7 +380,7 @@ export class CopilotEventAdapter implements IEventAdapter {
     projectId?: string;
     runUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.COPILOT_ESCALATION)
@@ -423,7 +423,7 @@ export class CopilotEventAdapter implements IEventAdapter {
     projectId?: string;
     investigationUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const severity =
       anomalyData.score >= 0.9
@@ -499,7 +499,7 @@ export class AuthorityEventAdapter implements IEventAdapter {
     projectId?: string;
     approvalUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.AUTHORITY_APPROVAL_REQUIRED)
@@ -555,7 +555,7 @@ export class AuthorityEventAdapter implements IEventAdapter {
     projectId?: string;
     reviewUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.AUTHORITY_DISSENT)
@@ -601,7 +601,7 @@ export class AuthorityEventAdapter implements IEventAdapter {
     projectId?: string;
     reviewUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.POLICY_VIOLATION)
@@ -676,7 +676,7 @@ export class InvestigationEventAdapter implements IEventAdapter {
     projectId?: string;
     investigationUrl?: string;
   }): Promise<void> {
-    if (!this.hub) throw new Error('Adapter not initialized');
+    if (!this.hub) {throw new Error('Adapter not initialized');}
 
     const event = new EventBuilder()
       .type(EventType.EVIDENCE_ADDED)

@@ -58,7 +58,7 @@ export class DisasterRecoveryService {
         const latestDate = backups[0];
         const backupDir = path.join(process.env.BACKUP_ROOT_DIR || './backups', target, latestDate);
         const files = await fs.readdir(backupDir);
-        if (files.length === 0) throw new Error('Empty backup directory');
+        if (files.length === 0) {throw new Error('Empty backup directory');}
 
         const backupFile = path.join(backupDir, files[0]); // Naive selection
         logger.info(`Selected backup for drill: ${backupFile}`);

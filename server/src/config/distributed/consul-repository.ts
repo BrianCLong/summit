@@ -278,7 +278,7 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
   async healthCheck(): Promise<boolean> {
     try {
       const health = await this.consul.agent.check.list();
-      return !!health;
+      return Boolean(health);
     } catch (error) {
       return false;
     }

@@ -84,7 +84,7 @@ export class InvoiceService {
 
   async finalizeInvoice(invoiceId: string): Promise<Invoice> {
     const invoice = this.invoices.get(invoiceId);
-    if (!invoice) throw new Error('invoice_not_found');
+    if (!invoice) {throw new Error('invoice_not_found');}
     if (invoice.status !== 'draft') {
       throw new Error('invoice_already_finalized');
     }
@@ -96,7 +96,7 @@ export class InvoiceService {
 
   async markPaid(invoiceId: string): Promise<Invoice> {
     const invoice = this.invoices.get(invoiceId);
-    if (!invoice) throw new Error('invoice_not_found');
+    if (!invoice) {throw new Error('invoice_not_found');}
     if (invoice.status !== 'open') {
       throw new Error('invoice_not_open');
     }
@@ -109,7 +109,7 @@ export class InvoiceService {
 
   async voidInvoice(invoiceId: string): Promise<Invoice> {
     const invoice = this.invoices.get(invoiceId);
-    if (!invoice) throw new Error('invoice_not_found');
+    if (!invoice) {throw new Error('invoice_not_found');}
     if (invoice.status === 'paid') {
       throw new Error('cannot_void_paid_invoice');
     }

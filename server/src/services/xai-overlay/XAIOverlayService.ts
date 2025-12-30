@@ -232,7 +232,7 @@ export class XAIOverlayService {
         'xai.risk_score': riskResult.score,
         'xai.risk_band': riskResult.band,
         'xai.features_count': Object.keys(features).length,
-        'xai.signed': !!trace.signature,
+        'xai.signed': Boolean(trace.signature),
       });
 
       logger.info({
@@ -241,7 +241,7 @@ export class XAIOverlayService {
         riskScore: riskResult.score,
         riskBand: riskResult.band,
         featureCount: Object.keys(features).length,
-        signed: !!trace.signature,
+        signed: Boolean(trace.signature),
       });
 
       return trace;
@@ -499,7 +499,7 @@ export class XAIOverlayService {
       logger.info({
         message: 'Reasoning trace signed',
         traceId: trace.traceId,
-        digest: trace.traceDigest.substring(0, 16) + '...',
+        digest: `${trace.traceDigest.substring(0, 16)  }...`,
         notarizedBy: notarized.notarizedBy,
       });
     } catch (error: any) {

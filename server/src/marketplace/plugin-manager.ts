@@ -215,7 +215,7 @@ export class PluginManager {
         sbomVerified: true,
         signatureVerified: true,
         exportControlChecked: true,
-        authorityBindingPresent: !!manifest.authorityBinding,
+        authorityBindingPresent: Boolean(manifest.authorityBinding),
       };
 
       await this.storeVerificationAudit(manifest, audit);
@@ -483,13 +483,13 @@ export class PluginManager {
 
   private isExportControlled(manifest: PluginManifest): boolean {
     // Check against export control lists
-    if (this.exportControlList.has(manifest.author)) return true;
-    if (this.exportControlList.has(manifest.signer)) return true;
+    if (this.exportControlList.has(manifest.author)) {return true;}
+    if (this.exportControlList.has(manifest.signer)) {return true;}
 
     // Check build provenance
     if (manifest.buildProvenance.sourceRepo) {
       const repoHost = new URL(manifest.buildProvenance.sourceRepo).hostname;
-      if (this.exportControlList.has(repoHost)) return true;
+      if (this.exportControlList.has(repoHost)) {return true;}
     }
 
     return false;
@@ -521,10 +521,10 @@ export class PluginManager {
   }
 
   private getReviewType(manifest: PluginManifest): string {
-    if (this.hasHighRiskActions(manifest.scopes)) return 'security-review';
-    if (!this.trustedSigners.has(manifest.signer)) return 'signer-verification';
+    if (this.hasHighRiskActions(manifest.scopes)) {return 'security-review';}
+    if (!this.trustedSigners.has(manifest.signer)) {return 'signer-verification';}
     if (manifest.authorityBinding?.piiCategories?.length)
-      return 'privacy-review';
+      {return 'privacy-review';}
     return 'standard-review';
   }
 
@@ -537,8 +537,8 @@ export class PluginManager {
       maxRiskScore: 1.0,
     });
 
-    if (riskScore >= 0.7) return 'high';
-    if (riskScore >= 0.35) return 'medium';
+    if (riskScore >= 0.7) {return 'high';}
+    if (riskScore >= 0.35) {return 'medium';}
     return 'low';
   }
 
@@ -546,15 +546,15 @@ export class PluginManager {
     const riskFactors: string[] = [];
 
     if (manifest.scopes.includes('exec:container'))
-      riskFactors.push('container-execution');
+      {riskFactors.push('container-execution');}
     if (manifest.scopes.includes('auth:impersonate'))
-      riskFactors.push('privilege-escalation');
+      {riskFactors.push('privilege-escalation');}
     if (manifest.scopes.some((s) => s.startsWith('egress:')))
-      riskFactors.push('data-exfiltration');
+      {riskFactors.push('data-exfiltration');}
     if (manifest.authorityBinding?.piiCategories?.length)
-      riskFactors.push('pii-processing');
+      {riskFactors.push('pii-processing');}
     if (!this.trustedSigners.has(manifest.signer))
-      riskFactors.push('untrusted-signer');
+      {riskFactors.push('untrusted-signer');}
 
     return riskFactors;
   }

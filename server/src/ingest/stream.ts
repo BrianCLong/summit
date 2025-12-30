@@ -33,7 +33,7 @@ const GROUP_ID = 'intelgraph-ingest-v1';
 const DLQ_TOPIC_SUFFIX = '-dlq';
 
 // --- Backpressure State ---
-let isBackpressureActive = false;
+const isBackpressureActive = false;
 
 // --- Service ---
 
@@ -59,7 +59,7 @@ export class StreamingIngestService {
     }
 
     async start(topics: string[]) {
-        if (this.isRunning) return;
+        if (this.isRunning) {return;}
 
         try {
             await this.consumer.connect();
@@ -87,7 +87,7 @@ export class StreamingIngestService {
             await admin.connect();
 
             const checkLag = async () => {
-                if (!this.isRunning) return;
+                if (!this.isRunning) {return;}
 
                 try {
                     const offsets = await admin.fetchOffsets({ groupId: GROUP_ID, topics });
@@ -112,7 +112,7 @@ export class StreamingIngestService {
                     logger.warn({ err: e }, 'Failed to fetch consumer lag');
                 }
 
-                if (this.isRunning) setTimeout(checkLag, 15000); // Check every 15s
+                if (this.isRunning) {setTimeout(checkLag, 15000);} // Check every 15s
             };
 
             checkLag();
@@ -124,7 +124,7 @@ export class StreamingIngestService {
     async stop() {
         this.isRunning = false;
         await this.consumer.disconnect();
-        if (this.producer) await this.producer.disconnect();
+        if (this.producer) {await this.producer.disconnect();}
     }
 
     private async handleMessage({ topic, partition, message, heartbeat, pause }: EachMessagePayload) {
@@ -139,7 +139,7 @@ export class StreamingIngestService {
         }
 
         try {
-            if (!message.value) return;
+            if (!message.value) {return;}
 
             const payloadStr = message.value.toString();
             const payload = JSON.parse(payloadStr);

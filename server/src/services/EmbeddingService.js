@@ -333,11 +333,11 @@ class EmbeddingService {
         batchCount: this.metrics.batchCount,
         successRate:
           this.metrics.totalEmbeddings > 0
-            ? (
+            ? `${(
                 ((this.metrics.totalEmbeddings - this.metrics.errorCount) /
                   this.metrics.totalEmbeddings) *
                 100
-              ).toFixed(1) + '%'
+              ).toFixed(1)  }%`
             : '100%',
       },
     };

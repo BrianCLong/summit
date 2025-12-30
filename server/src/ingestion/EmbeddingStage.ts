@@ -9,7 +9,7 @@ export class EmbeddingStage {
   }
 
   async embedChunks(chunks: Chunk[], ctx: ConnectorContext): Promise<Chunk[]> {
-    if (chunks.length === 0) return chunks;
+    if (chunks.length === 0) {return chunks;}
 
     ctx.logger?.info({ count: chunks.length }, 'Generating embeddings for chunks');
 

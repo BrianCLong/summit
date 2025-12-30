@@ -706,7 +706,7 @@ export class AdaptiveLearningSystem {
 
     for (const similarModel of similarModels) {
       const similarProfile = this.modelProfiles.get(similarModel.modelId);
-      if (!similarProfile) continue;
+      if (!similarProfile) {continue;}
 
       // Check if transfer learning is beneficial
       if (
@@ -783,7 +783,7 @@ export class AdaptiveLearningSystem {
     const similarModels: Array<{ modelId: string; similarity: number }> = [];
 
     for (const [modelId, otherProfile] of this.modelProfiles) {
-      if (modelId === profile.modelId) continue;
+      if (modelId === profile.modelId) {continue;}
 
       const similarity = this.calculateModelSimilarity(profile, otherProfile);
       if (similarity > 0.6) {
@@ -1013,7 +1013,7 @@ export class AdaptiveLearningSystem {
     profile: ModelLearningProfile,
     points: LearningPoint[],
   ): Promise<void> {
-    if (points.length < 20) return;
+    if (points.length < 20) {return;}
 
     const recent = points.slice(-10);
     const earlier = points.slice(-20, -10);

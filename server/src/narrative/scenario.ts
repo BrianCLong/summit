@@ -89,13 +89,13 @@ export class ScenarioSimulator {
     points.forEach((p) => {
       let label = 'Neutral Stability';
       if (p.avgPressure > 0.3) {
-        if (p.avgSentiment < -0.1) label = 'Crisis (High Volatility, Negative)';
-        else if (p.avgSentiment > 0.1) label = 'Optimistic Chaos';
-        else label = 'High Volatility';
+        if (p.avgSentiment < -0.1) {label = 'Crisis (High Volatility, Negative)';}
+        else if (p.avgSentiment > 0.1) {label = 'Optimistic Chaos';}
+        else {label = 'High Volatility';}
       } else {
-        if (p.avgSentiment < -0.1) label = 'Stagnation (Stable Negative)';
-        else if (p.avgSentiment > 0.1) label = 'Prosperity (Stable Positive)';
-        else label = 'Stability';
+        if (p.avgSentiment < -0.1) {label = 'Stagnation (Stable Negative)';}
+        else if (p.avgSentiment > 0.1) {label = 'Prosperity (Stable Positive)';}
+        else {label = 'Stability';}
       }
 
       if (!clusters[label]) {

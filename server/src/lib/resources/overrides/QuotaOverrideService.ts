@@ -25,7 +25,7 @@ export class QuotaOverrideService {
    */
   public async setOverride(tenantId: string, meter: string, ttlSeconds: number, reason: string): Promise<void> {
     const redis = getRedisClient();
-    if (!redis) throw new Error('Redis unavailable');
+    if (!redis) {throw new Error('Redis unavailable');}
 
     const key = `tenant:${tenantId}:override:${meter}`;
     await redis.set(key, 'true', 'EX', ttlSeconds);
@@ -38,7 +38,7 @@ export class QuotaOverrideService {
    */
   public async hasOverride(tenantId: string, meter: string): Promise<boolean> {
     const redis = getRedisClient();
-    if (!redis) return false;
+    if (!redis) {return false;}
 
     const key = `tenant:${tenantId}:override:${meter}`;
     const exists = await redis.exists(key);
@@ -50,7 +50,7 @@ export class QuotaOverrideService {
    */
   public async removeOverride(tenantId: string, meter: string): Promise<void> {
     const redis = getRedisClient();
-    if (!redis) return;
+    if (!redis) {return;}
 
     const key = `tenant:${tenantId}:override:${meter}`;
     await redis.del(key);

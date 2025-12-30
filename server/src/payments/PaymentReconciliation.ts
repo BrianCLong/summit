@@ -59,7 +59,7 @@ export class PaymentReconciliation {
     externalData: { amount: number; status: string },
   ): Promise<Transaction> {
     const txn = this.transactions.get(transactionId);
-    if (!txn) throw new Error('transaction_not_found');
+    if (!txn) {throw new Error('transaction_not_found');}
 
     if (txn.amount !== externalData.amount) {
       throw new Error('amount_mismatch');

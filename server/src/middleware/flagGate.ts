@@ -5,7 +5,7 @@ export function gate(key: string) {
       residency: req.headers['x-residency'],
       tenant: req.headers['x-tenant'],
     });
-    if (!allowed) return res.status(403).json({ error: 'flag disabled' });
+    if (!allowed) {return res.status(403).json({ error: 'flag disabled' });}
     next();
   };
 }

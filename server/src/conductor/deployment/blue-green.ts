@@ -508,7 +508,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   private async runPreDeploymentTests(
     execution: DeploymentExecution,
   ): Promise<void> {
-    if (!execution.config.validation.smokeTests) return;
+    if (!execution.config.validation.smokeTests) {return;}
 
     await this.executeCommand('npm run test:pre-deploy');
   }
@@ -531,7 +531,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     execution: DeploymentExecution,
   ): Promise<void> {
     for (const service of execution.config.services) {
-      if (!service.migrations?.length) continue;
+      if (!service.migrations?.length) {continue;}
 
       for (const migration of service.migrations) {
         console.log(`Executing migration: ${migration.name}`);
@@ -605,7 +605,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   }
 
   private async runSmokeTests(execution: DeploymentExecution): Promise<void> {
-    if (!execution.config.validation.smokeTests) return;
+    if (!execution.config.validation.smokeTests) {return;}
 
     // Run smoke tests against green environment
     const greenUrl = await this.getGreenEnvironmentUrl(execution);
@@ -623,7 +623,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   private async runIntegrationTests(
     execution: DeploymentExecution,
   ): Promise<void> {
-    if (!execution.config.validation.integrationTests) return;
+    if (!execution.config.validation.integrationTests) {return;}
 
     const greenUrl = await this.getGreenEnvironmentUrl(execution);
     await this.executeCommand(`API_URL=${greenUrl} npm run test:integration`);
@@ -632,7 +632,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   private async performanceValidation(
     execution: DeploymentExecution,
   ): Promise<void> {
-    if (!execution.config.validation.performanceTests) return;
+    if (!execution.config.validation.performanceTests) {return;}
 
     const greenUrl = await this.getGreenEnvironmentUrl(execution);
     const output = await this.executeCommand(
@@ -1046,7 +1046,7 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
     execution: DeploymentExecution,
   ): Promise<void> {
     for (const service of execution.config.services) {
-      if (!service.migrations?.length) continue;
+      if (!service.migrations?.length) {continue;}
 
       // Execute rollback scripts in reverse order
       for (const migration of service.migrations.reverse()) {

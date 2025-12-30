@@ -77,7 +77,7 @@ class RedisStore implements Store {
       return;
     }
     const keys = await this.client.keys(`${this.prefix}*`);
-    if (keys.length) await this.client.del(keys);
+    if (keys.length) {await this.client.del(keys);}
   }
 }
 

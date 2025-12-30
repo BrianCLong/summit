@@ -16,7 +16,7 @@ export async function cacheJobResult(
   result: any,
   ttlSeconds: number = 3600,
 ) {
-  if (!redisClient) return;
+  if (!redisClient) {return;}
 
   try {
     const key = `ai:job:${jobId}`;
@@ -27,7 +27,7 @@ export async function cacheJobResult(
 }
 
 export async function getCachedJobResult(jobId: string) {
-  if (!redisClient) return null;
+  if (!redisClient) {return null;}
 
   try {
     const key = `ai:job:${jobId}`;
@@ -45,7 +45,7 @@ export async function cacheGraphSnapshot(
   edges: any[],
   ttlSeconds: number = 1800,
 ) {
-  if (!redisClient) return;
+  if (!redisClient) {return;}
 
   try {
     const key = `ai:graph:${snapshotId}`;
@@ -56,7 +56,7 @@ export async function cacheGraphSnapshot(
 }
 
 export async function getCachedGraphSnapshot(snapshotId: string) {
-  if (!redisClient) return null;
+  if (!redisClient) {return null;}
 
   try {
     const key = `ai:graph:${snapshotId}`;
@@ -74,7 +74,7 @@ export async function cachePrediction(
   prediction: any,
   ttlSeconds: number = 7200,
 ) {
-  if (!redisClient) return;
+  if (!redisClient) {return;}
 
   try {
     const key = `ai:prediction:${predictionKey}`;
@@ -85,7 +85,7 @@ export async function cachePrediction(
 }
 
 export async function getCachedPrediction(predictionKey: string) {
-  if (!redisClient) return null;
+  if (!redisClient) {return null;}
 
   try {
     const key = `ai:prediction:${predictionKey}`;
@@ -104,7 +104,7 @@ export async function checkRateLimit(
   maxRequests: number = 100,
   windowSeconds: number = 3600,
 ): Promise<boolean> {
-  if (!redisClient) return true; // Allow if no Redis
+  if (!redisClient) {return true;} // Allow if no Redis
 
   try {
     const key = `ai:rate:${userId}:${endpoint}`;
@@ -123,7 +123,7 @@ export async function checkRateLimit(
 
 // Queue management for ML tasks
 export async function queueMLTask(taskId: string, taskData: any) {
-  if (!redisClient) return;
+  if (!redisClient) {return;}
 
   try {
     const queueKey = 'ai:queue:ml_tasks';
@@ -140,13 +140,13 @@ export async function dequeueMLTask(): Promise<{
   taskId: string;
   taskData: any;
 } | null> {
-  if (!redisClient) return null;
+  if (!redisClient) {return null;}
 
   try {
     const queueKey = 'ai:queue:ml_tasks';
     const taskId = await redisClient.rpop(queueKey);
 
-    if (!taskId) return null;
+    if (!taskId) {return null;}
 
     const taskKey = `ai:task:${taskId}`;
     const taskData = await redisClient.get(taskKey);

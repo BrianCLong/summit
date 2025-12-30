@@ -173,7 +173,7 @@ export async function batchCreateEntitiesOptimized(
   }>,
   userId: string,
 ): Promise<void> {
-  if (inputs.length === 0) return;
+  if (inputs.length === 0) {return;}
 
   const client = await pg.connect();
 

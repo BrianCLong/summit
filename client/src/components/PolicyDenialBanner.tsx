@@ -182,7 +182,7 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
       <Alert
         variant="danger"
         className={`policy-denial-banner ${className || ''}`}
-        dismissible={!!onDismiss}
+        dismissible={Boolean(onDismiss)}
         onClose={onDismiss}
       >
         <div className="d-flex align-items-start">

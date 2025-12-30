@@ -114,7 +114,7 @@ const investigationResolvers = {
         'SELECT * FROM maestro.investigation_snapshots WHERE id = $1',
         [id]
       );
-      if (result.rows.length === 0) return null;
+      if (result.rows.length === 0) {return null;}
       const row = result.rows[0];
       return {
         id: row.id,

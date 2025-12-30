@@ -56,31 +56,31 @@ export const toolsResolvers = {
       const issues: any[] = [];
       if (!validate(rb)) {
         for (const e of validate.errors || [])
-          issues.push({
+          {issues.push({
             rule: 'SCHEMA',
             severity: 'error',
             path: e.instancePath || '/',
             message: e.message || 'invalid',
-          });
+          });}
       }
       const ids = new Set<string>();
       for (const n of rb.graph?.nodes || []) {
         if (ids.has(n.id))
-          issues.push({
+          {issues.push({
             rule: 'NODES_UNIQUE',
             severity: 'error',
             path: `/graph/nodes/${n.id}`,
             message: 'duplicate id',
-          });
+          });}
         ids.add(n.id);
         if ((n.retries ?? 0) > 0 && !n.timeoutMs)
-          issues.push({
+          {issues.push({
             rule: 'RETRY_REQUIRES_TIMEOUT',
             severity: 'warn',
             path: `/graph/nodes/${n.id}`,
             message: 'retries without timeout',
             quickFix: 'set timeoutMs: 60000',
-          });
+          });}
       }
       if (
         rb.policy?.residency &&
@@ -89,12 +89,12 @@ export const toolsResolvers = {
           .toLowerCase()
           .startsWith(String(rb.policy.residency).toLowerCase())
       )
-        issues.push({
+        {issues.push({
           rule: 'RESIDENCY_CONFLICT',
           severity: 'error',
           path: '/meta/region',
           message: `region ${rb.meta.region} conflicts with residency ${rb.policy.residency}`,
-        });
+        });}
       return issues;
     },
     simulatePolicy: async (_: any, { yaml }: any) => {
@@ -106,12 +106,12 @@ export const toolsResolvers = {
           ? n.policyLabels
           : [];
         if (labels.some((l) => String(l).includes('sensitivity:restricted')))
-          out.push({
+          {out.push({
             stepId: n.id,
             decision: 'require-human',
             reason: 'restricted sensitivity',
-          });
-        else out.push({ stepId: n.id, decision: 'allow', reason: '' });
+          });}
+        else {out.push({ stepId: n.id, decision: 'allow', reason: '' });}
       }
       return out;
     },

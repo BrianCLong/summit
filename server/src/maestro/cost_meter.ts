@@ -61,7 +61,7 @@ export class CostMeter {
   estimateCost(usage: LLMUsage): number {
     const key = `${usage.vendor}:${usage.model}`;
     const pricing = this.pricingTable[key];
-    if (!pricing) return 0;
+    if (!pricing) {return 0;}
 
     const inCost = (usage.inputTokens / 1000) * pricing.inputPer1K;
     const outCost = (usage.outputTokens / 1000) * pricing.outputPer1K;

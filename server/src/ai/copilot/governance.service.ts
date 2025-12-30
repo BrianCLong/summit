@@ -237,7 +237,7 @@ export class CopilotGovernanceService {
         logger.error(
           {
             responseType: response.type,
-            hasData: !!response.data,
+            hasData: Boolean(response.data),
           },
           'CRITICAL: Response missing governance verdict'
         );

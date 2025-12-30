@@ -13,7 +13,7 @@ export class MockCDCService {
   }
 
   async start(intervalMs: number = 5000): Promise<void> {
-    if (this.isRunning) return;
+    if (this.isRunning) {return;}
 
     this.isRunning = true;
     this.logger.info('Starting Mock CDC Service');

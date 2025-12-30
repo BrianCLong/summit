@@ -178,13 +178,13 @@ export const UserManagementAPI = {
    */
   list: (params: ListUsersParams = {}): Promise<DataEnvelope<UserListResult>> => {
     const qs = new URLSearchParams();
-    if (params.page) qs.set('page', String(params.page));
-    if (params.pageSize) qs.set('pageSize', String(params.pageSize));
-    if (params.search) qs.set('search', params.search);
-    if (params.role) qs.set('role', params.role);
-    if (params.isActive !== undefined) qs.set('isActive', String(params.isActive));
-    if (params.sortBy) qs.set('sortBy', params.sortBy);
-    if (params.sortOrder) qs.set('sortOrder', params.sortOrder);
+    if (params.page) {qs.set('page', String(params.page));}
+    if (params.pageSize) {qs.set('pageSize', String(params.pageSize));}
+    if (params.search) {qs.set('search', params.search);}
+    if (params.role) {qs.set('role', params.role);}
+    if (params.isActive !== undefined) {qs.set('isActive', String(params.isActive));}
+    if (params.sortBy) {qs.set('sortBy', params.sortBy);}
+    if (params.sortOrder) {qs.set('sortOrder', params.sortOrder);}
     const query = qs.toString();
     return apiFetch(`/api/admin/users${query ? `?${query}` : ''}`);
   },

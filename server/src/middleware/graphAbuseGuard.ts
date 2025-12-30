@@ -413,10 +413,10 @@ export class GraphAbuseGuard {
 
   private extractGraphQuery(req: Request): string | null {
     // Check various sources for graph queries
-    if (req.body?.query) return req.body.query;
-    if (req.body?.cypher) return req.body.cypher;
-    if (req.query.query) return req.query.query as string;
-    if (req.body?.gremlin) return req.body.gremlin;
+    if (req.body?.query) {return req.body.query;}
+    if (req.body?.cypher) {return req.body.cypher;}
+    if (req.query.query) {return req.query.query as string;}
+    if (req.body?.gremlin) {return req.body.gremlin;}
 
     // Check for GraphQL
     if (req.body?.operationName || req.body?.variables) {
@@ -447,15 +447,15 @@ export class GraphAbuseGuard {
     const lowerQuery = query.toLowerCase();
 
     // Detect query patterns
-    if (lowerQuery.includes('match')) analysis.patterns.push('MATCH');
+    if (lowerQuery.includes('match')) {analysis.patterns.push('MATCH');}
     if (lowerQuery.includes('optional match'))
-      analysis.patterns.push('OPTIONAL_MATCH');
-    if (lowerQuery.includes('*')) analysis.patterns.push('VARIABLE_LENGTH');
+      {analysis.patterns.push('OPTIONAL_MATCH');}
+    if (lowerQuery.includes('*')) {analysis.patterns.push('VARIABLE_LENGTH');}
     if (lowerQuery.includes('()-[*]->()'))
-      analysis.patterns.push('STAR_TRAVERSAL');
-    if (lowerQuery.includes('limit')) analysis.patterns.push('LIMIT');
-    if (lowerQuery.includes('order by')) analysis.patterns.push('ORDER_BY');
-    if (lowerQuery.includes('with ')) analysis.patterns.push('WITH_CLAUSE');
+      {analysis.patterns.push('STAR_TRAVERSAL');}
+    if (lowerQuery.includes('limit')) {analysis.patterns.push('LIMIT');}
+    if (lowerQuery.includes('order by')) {analysis.patterns.push('ORDER_BY');}
+    if (lowerQuery.includes('with ')) {analysis.patterns.push('WITH_CLAUSE');}
 
     // Estimate complexity based on patterns
     let complexity = 10; // Base complexity
@@ -508,11 +508,11 @@ export class GraphAbuseGuard {
 
     // Calculate risk score (0-100)
     let riskScore = 0;
-    if (analysis.complexity > 500) riskScore += 30;
-    if (analysis.maxDepth > 10) riskScore += 25;
-    if (analysis.fanOutRatio > 50) riskScore += 20;
-    if (analysis.estimatedNodes > 5000) riskScore += 15;
-    if (!analysis.patterns.includes('LIMIT')) riskScore += 10;
+    if (analysis.complexity > 500) {riskScore += 30;}
+    if (analysis.maxDepth > 10) {riskScore += 25;}
+    if (analysis.fanOutRatio > 50) {riskScore += 20;}
+    if (analysis.estimatedNodes > 5000) {riskScore += 15;}
+    if (!analysis.patterns.includes('LIMIT')) {riskScore += 10;}
 
     analysis.riskScore = Math.min(riskScore, 100);
 
@@ -558,7 +558,7 @@ export class GraphAbuseGuard {
     }
 
     window.queryCount++;
-    if (suspicious) window.suspiciousCount++;
+    if (suspicious) {window.suspiciousCount++;}
 
     this.queryWindows.set(tenantId, windows);
   }
@@ -649,7 +649,7 @@ export class GraphAbuseGuard {
   // Runtime monitoring methods
   public trackNodeVisit(traversalId: string, nodeId: string): boolean {
     const state = this.activeTraversals.get(traversalId);
-    if (!state) return true; // Allow if no state tracked
+    if (!state) {return true;} // Allow if no state tracked
 
     state.nodesVisited.add(nodeId);
 
@@ -672,7 +672,7 @@ export class GraphAbuseGuard {
     fromNode: string,
   ): boolean {
     const state = this.activeTraversals.get(traversalId);
-    if (!state) return true;
+    if (!state) {return true;}
 
     state.edgesTraversed.add(edgeId);
 

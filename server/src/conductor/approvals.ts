@@ -13,7 +13,7 @@ export async function createApprovalTask(
     `INSERT INTO run_event (run_id, kind, payload) VALUES ($1,'approval.created',$2)`,
     [runId, { stepId, labels }],
   );
-  if (!SLACK_URL) return;
+  if (!SLACK_URL) {return;}
   try {
     await fetch(SLACK_URL, {
       method: 'POST',

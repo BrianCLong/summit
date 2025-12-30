@@ -261,7 +261,7 @@ export class PartnerRegistry extends EventEmitter {
    */
   canHandleClassification(code: string, classification: DataClassification): boolean {
     const partner = this.getPartner(code);
-    if (!partner) return false;
+    if (!partner) {return false;}
 
     const classificationLevels: DataClassification[] = [
       'public',

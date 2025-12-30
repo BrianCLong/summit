@@ -14,10 +14,10 @@ export class OIDCProvider implements SSOProvider {
   }
 
   validateConfig(): void {
-    if (!this.config.issuer) throw new Error('Missing issuer for OIDC');
-    if (!this.config.clientId) throw new Error('Missing clientId for OIDC');
-    if (!this.config.authorizationEndpoint) throw new Error('Missing authorizationEndpoint for OIDC');
-    if (!this.config.tokenEndpoint) throw new Error('Missing tokenEndpoint for OIDC');
+    if (!this.config.issuer) {throw new Error('Missing issuer for OIDC');}
+    if (!this.config.clientId) {throw new Error('Missing clientId for OIDC');}
+    if (!this.config.authorizationEndpoint) {throw new Error('Missing authorizationEndpoint for OIDC');}
+    if (!this.config.tokenEndpoint) {throw new Error('Missing tokenEndpoint for OIDC');}
   }
 
   async generateAuthUrl(callbackUrl: string, relayState?: string): Promise<string> {
@@ -35,7 +35,7 @@ export class OIDCProvider implements SSOProvider {
 
   async handleCallback(callbackUrl: string, body: any, query: any): Promise<SSOUser> {
     const code = query.code || body.code;
-    if (!code) throw new Error('No authorization code provided');
+    if (!code) {throw new Error('No authorization code provided');}
 
     // Exchange code for tokens
     const tokenParams = new URLSearchParams();
@@ -53,7 +53,7 @@ export class OIDCProvider implements SSOProvider {
 
     const { access_token, id_token } = tokenResponse.data;
 
-    if (!id_token) throw new Error('No ID token returned');
+    if (!id_token) {throw new Error('No ID token returned');}
 
     // Decode ID token (verify signature if jwksUri is present)
     let decoded: any;
@@ -69,7 +69,7 @@ export class OIDCProvider implements SSOProvider {
       decoded = jwt.decode(id_token);
     }
 
-    if (!decoded) throw new Error('Failed to decode ID token');
+    if (!decoded) {throw new Error('Failed to decode ID token');}
 
     let userInfo = {};
     if (this.config.userInfoEndpoint && access_token) {
@@ -100,10 +100,10 @@ export class OIDCProvider implements SSOProvider {
     if (this.config.groupMap) {
       for (const group of groups) {
         const mapped = this.config.groupMap[group];
-        if (mapped) roles.push(...mapped);
+        if (mapped) {roles.push(...mapped);}
       }
     }
-    if (roles.length === 0) roles.push('VIEWER');
+    if (roles.length === 0) {roles.push('VIEWER');}
 
     return {
       id: decoded.sub,

@@ -31,7 +31,7 @@ const DebugOverlay: React.FC = () => {
        const path = window.location.pathname;
        setBreadcrumbs(prev => {
            const newItem = `${new Date().toLocaleTimeString()} - ${path}`;
-           if (prev[prev.length - 1] === newItem) return prev;
+           if (prev[prev.length - 1] === newItem) {return prev;}
            return [...prev.slice(-4), newItem];
        });
     };
@@ -48,7 +48,7 @@ const DebugOverlay: React.FC = () => {
     }
   }, []);
 
-  if (!isVisible) return null;
+  if (!isVisible) {return null;}
 
   return (
     <div style={{

@@ -27,7 +27,7 @@ function getHtmlTemplate(packet: SOC2Packet): string {
 
   // Helper to render a table from an array of objects
   const renderTable = (data: unknown[]): string => {
-    if (!data || data.length === 0) return '<p>No data available.</p>';
+    if (!data || data.length === 0) {return '<p>No data available.</p>';}
     const firstItem = data[0] as Record<string, unknown>;
     const headers = Object.keys(firstItem);
     return `

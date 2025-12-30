@@ -30,7 +30,7 @@ class EntityCorrelationEngine {
   }
 
   registerResolver(resolver) {
-    if (typeof resolver === 'function') this.resolvers.push(resolver);
+    if (typeof resolver === 'function') {this.resolvers.push(resolver);}
   }
 
   // Normalise according to protocol schemas
@@ -51,7 +51,7 @@ class EntityCorrelationEngine {
     const a = str1.toLowerCase();
     const b = str2.toLowerCase();
     const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let j = 0; j <= a.length; j++) {matrix[0][j] = j;}
     for (let i = 1; i <= b.length; i++) {
       for (let j = 1; j <= a.length; j++) {
         if (b[i - 1] === a[j - 1]) {
@@ -74,7 +74,7 @@ class EntityCorrelationEngine {
   getDisambiguationScore(e1, e2) {
     const n1 = this.normalize(e1);
     const n2 = this.normalize(e2);
-    if (n1.type !== n2.type) return 0;
+    if (n1.type !== n2.type) {return 0;}
 
     const nameScore = this.calculateStringSimilarity(n1.label, n2.label);
     const attrs1 = n1.attributes;
@@ -82,7 +82,7 @@ class EntityCorrelationEngine {
     const keys = new Set([...Object.keys(attrs1), ...Object.keys(attrs2)]);
     let matches = 0;
     for (const k of keys) {
-      if (attrs1[k] && attrs2[k] && attrs1[k] === attrs2[k]) matches++;
+      if (attrs1[k] && attrs2[k] && attrs1[k] === attrs2[k]) {matches++;}
     }
     const attrScore = keys.size ? matches / keys.size : 0;
     const sourceBonus = n1.source === n2.source ? 0.05 : 0;
@@ -136,11 +136,11 @@ class EntityCorrelationEngine {
     const groups = [];
     const used = new Set();
     for (let i = 0; i < entities.length; i++) {
-      if (used.has(i)) continue;
+      if (used.has(i)) {continue;}
       const group = [entities[i]];
       used.add(i);
       for (let j = i + 1; j < entities.length; j++) {
-        if (used.has(j)) continue;
+        if (used.has(j)) {continue;}
         if (this.entitiesAreSimilar(entities[i], entities[j])) {
           group.push(entities[j]);
           used.add(j);
@@ -156,7 +156,7 @@ class EntityCorrelationEngine {
     let result = { ...base };
     for (const resolver of this.resolvers) {
       const out = resolver(result, incoming);
-      if (out) result = out;
+      if (out) {result = out;}
     }
     // fallback: prefer higher confidence values
     const chosen =
@@ -165,7 +165,7 @@ class EntityCorrelationEngine {
   }
 
   mergeEntities(entities = []) {
-    if (!entities.length) return null;
+    if (!entities.length) {return null;}
     let merged = this.normalize(entities[0]);
     merged.sources = [merged.source];
     for (let i = 1; i < entities.length; i++) {

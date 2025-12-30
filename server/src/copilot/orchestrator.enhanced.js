@@ -362,7 +362,7 @@ class CopilotOrchestrator {
    */
   async getRunInfo(runId, options = {}) {
     const run = await this.store.getRun(runId);
-    if (!run) return null;
+    if (!run) {return null;}
 
     const tasks = await this.store.getTasksForRun(runId);
     const events = await this.store.listEvents(runId, {

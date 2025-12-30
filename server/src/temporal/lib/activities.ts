@@ -5,7 +5,7 @@ export const activities = {
     const span = otelService.createSpan('temporal.activity.heartbeat', {
       payload_len: JSON.stringify(payload || {}).length,
     });
-    if (span) span.end();
+    if (span) {span.end();}
     return { ok: true, received: payload, ts: Date.now() };
   },
   async planRun(input: { runId: string; parameters?: { steps?: string[] } }) {
@@ -16,7 +16,7 @@ export const activities = {
       ? input.parameters.steps
       : ['prepare', 'execute', 'finalize'];
     const result = { plan: steps, runId: input.runId, createdAt: Date.now() };
-    if (span) span.end();
+    if (span) {span.end();}
     return result;
   },
   async executeStep(input: { runId: string; step: string; idx: number }) {
@@ -34,7 +34,7 @@ export const activities = {
       status: 'OK',
       ts: Date.now(),
     };
-    if (span) span.end();
+    if (span) {span.end();}
     return res;
   },
   async finalizeRun(input: { runId: string; result: unknown }) {
@@ -47,7 +47,7 @@ export const activities = {
       summary: input.result,
       finishedAt: Date.now(),
     };
-    if (span) span.end();
+    if (span) {span.end();}
     return out;
   },
 };

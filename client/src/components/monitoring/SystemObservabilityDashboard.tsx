@@ -374,7 +374,7 @@ const SystemObservabilityDashboard: React.FC<
     setLogEntries(mockLogEntries);
     setPerformanceMetrics(generateMockMetrics());
 
-    if (!isRealTimeEnabled) return;
+    if (!isRealTimeEnabled) {return;}
 
     const interval = setInterval(() => {
       // Update service health
@@ -505,8 +505,8 @@ const SystemObservabilityDashboard: React.FC<
   };
 
   const formatDuration = (ms: number) => {
-    if (ms < 1000) return `${ms}ms`;
-    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
+    if (ms < 1000) {return `${ms}ms`;}
+    if (ms < 60000) {return `${(ms / 1000).toFixed(1)}s`;}
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
     return `${minutes}m ${seconds}s`;

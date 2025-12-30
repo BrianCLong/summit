@@ -175,7 +175,7 @@ export class ChunkingService {
       });
 
       offset += (chunkSize - overlap);
-      if (offset >= text.length) break;
+      if (offset >= text.length) {break;}
     }
     return chunks;
   }

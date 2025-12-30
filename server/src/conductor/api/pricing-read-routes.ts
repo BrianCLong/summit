@@ -141,7 +141,7 @@ router.post(
       const eligible = considered.filter((c) => c.eligible && c.price !== null);
       const chosen = eligible.reduce<null | { id: string; price: number }>(
         (best, current) => {
-          if (!best) return { id: current.id, price: current.price as number };
+          if (!best) {return { id: current.id, price: current.price as number };}
           if ((current.price as number) < best.price) {
             return { id: current.id, price: current.price as number };
           }

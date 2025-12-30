@@ -85,13 +85,13 @@ export class MappingEngine {
   }
 
   private applyTransform(value: any, transform?: TransformType): any {
-    if (!transform) return value;
+    if (!transform) {return value;}
 
     switch (transform) {
       case 'string': return String(value);
       case 'number':
         const n = Number(value);
-        if (isNaN(n)) throw new Error(`Cannot convert "${value}" to number`);
+        if (isNaN(n)) {throw new Error(`Cannot convert "${value}" to number`);}
         return n;
       case 'boolean': return Boolean(value);
       case 'trim': return String(value).trim();
@@ -113,7 +113,7 @@ export class MappingEngine {
     const parts = path.split('.');
     let current = obj;
     for (const part of parts) {
-      if (current === null || current === undefined) return undefined;
+      if (current === null || current === undefined) {return undefined;}
       current = current[part];
     }
     return current;
@@ -130,7 +130,7 @@ export class MappingEngine {
     let current = obj;
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
-      if (!current[part]) current[part] = {};
+      if (!current[part]) {current[part] = {};}
       current = current[part];
     }
     current[parts[parts.length - 1]] = value;

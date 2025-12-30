@@ -10,8 +10,8 @@ import {
 const SERVICE_LABEL = process.env.OTEL_SERVICE_NAME || 'intelgraph-server';
 
 function getRouteLabel(req: Request): string {
-  if (req.route?.path) return req.route.path;
-  if (req.baseUrl) return req.baseUrl;
+  if (req.route?.path) {return req.route.path;}
+  if (req.baseUrl) {return req.baseUrl;}
   return req.path || 'unmatched';
 }
 

@@ -257,11 +257,11 @@ export const PolicyManagementAPI = {
    */
   async listPolicies(filters: PolicyListFilters = {}): Promise<DataEnvelope<PolicyListResponse>> {
     const params = new URLSearchParams();
-    if (filters.page) params.set('page', String(filters.page));
-    if (filters.pageSize) params.set('pageSize', String(filters.pageSize));
-    if (filters.status) params.set('status', filters.status);
-    if (filters.category) params.set('category', filters.category);
-    if (filters.search) params.set('search', filters.search);
+    if (filters.page) {params.set('page', String(filters.page));}
+    if (filters.pageSize) {params.set('pageSize', String(filters.pageSize));}
+    if (filters.status) {params.set('status', filters.status);}
+    if (filters.category) {params.set('category', filters.category);}
+    if (filters.search) {params.set('search', filters.search);}
 
     const url = params.toString() ? `${API_BASE}?${params}` : API_BASE;
     return apiFetch(url, { headers: getAuthHeaders() });

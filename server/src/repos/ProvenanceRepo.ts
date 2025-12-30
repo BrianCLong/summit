@@ -117,7 +117,7 @@ export class ProvenanceRepo {
     params: any[],
     tenantId?: string | null,
   ) {
-    if (!tenantId) return { where, params };
+    if (!tenantId) {return { where, params };}
     const scopedParams = [...params, tenantId];
     const tenantWhere = where
       ? `${where} AND tenant_id = $${scopedParams.length}`
@@ -204,7 +204,7 @@ export class ProvenanceRepo {
         try {
           const res = await client.query(sql, queryParams);
           const mapped = res?.rows?.map(this.mapRow) ?? [];
-          if (mapped.length) return mapped;
+          if (mapped.length) {return mapped;}
         } catch (e: any) {
           // try next shape
           continue;

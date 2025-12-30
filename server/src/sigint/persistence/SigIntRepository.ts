@@ -69,7 +69,7 @@ export class SigIntRepository {
 
   public async getEmitter(id: string): Promise<Emitter | null> {
     const res = await this.pgPool.read('SELECT * FROM sigint_emitters WHERE id = $1', [id]);
-    if (res.rows.length === 0) return null;
+    if (res.rows.length === 0) {return null;}
     return this.mapRowToEmitter(res.rows[0]);
   }
 

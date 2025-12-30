@@ -355,7 +355,7 @@ export class CaseRepo {
     ids: readonly string[],
     tenantId?: string,
   ): Promise<(Case | null)[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {return [];}
 
     const params: any[] = [ids];
     let query = `SELECT * FROM maestro.cases WHERE id = ANY($1)`;

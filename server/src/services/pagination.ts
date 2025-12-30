@@ -8,7 +8,7 @@ export function encodeCursor(offset: number): string {
 }
 
 export function decodeCursor(cursor?: string | null): number {
-  if (!cursor) return 0;
+  if (!cursor) {return 0;}
   try {
     const decoded = Buffer.from(cursor, CURSOR_ENCODING).toString('utf8');
     const value = Number.parseInt(decoded, 10);

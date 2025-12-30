@@ -300,7 +300,7 @@ export class AzureConnector extends EventEmitter {
         tenant_id: this.tenantId,
         container: this.config.containerName,
         blob_name: blobName,
-        range_request: !!options.range,
+        range_request: Boolean(options.range),
       });
 
       const startTime = Date.now();
@@ -531,7 +531,7 @@ export class AzureConnector extends EventEmitter {
 
         span.setAttributes?.({
           blobs_count: blobs.length,
-          has_continuation: !!page.value?.continuationToken,
+          has_continuation: Boolean(page.value?.continuationToken),
         });
 
         return {
@@ -565,7 +565,7 @@ export class AzureConnector extends EventEmitter {
         container: this.config.containerName,
         source_blob: sourceBlob,
         destination_blob: destinationBlob,
-        cross_account: !!sourceUrl,
+        cross_account: Boolean(sourceUrl),
       });
 
       const startTime = Date.now();

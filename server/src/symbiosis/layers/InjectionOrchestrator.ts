@@ -22,7 +22,7 @@ export class InjectionOrchestrator {
   }
 
   private generateProbes(bundles: ForesightBundle[]): string[] {
-    if (bundles.length === 0) return ["Acquire basics"];
+    if (bundles.length === 0) {return ["Acquire basics"];}
     return bundles.map(b => `Verify precondition for ${b.contextParams.predictedState}`);
   }
 }

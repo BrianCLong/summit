@@ -348,7 +348,7 @@ export const erResolvers: IResolvers = {
             { error: error.message, entityA, entityB },
             'Failed to resolve entities',
           );
-          throw new Error('Failed to resolve entities: ' + error.message);
+          throw new Error(`Failed to resolve entities: ${  error.message}`);
         } finally {
           span.end();
         }
@@ -473,7 +473,7 @@ export const erResolvers: IResolvers = {
             message: error.message,
           });
           log.error({ error: error.message, input }, 'Failed to decide merge');
-          throw new Error('Failed to decide merge: ' + error.message);
+          throw new Error(`Failed to decide merge: ${  error.message}`);
         } finally {
           span.end();
           await session.close();
@@ -544,7 +544,7 @@ export const erResolvers: IResolvers = {
         });
       } catch (error) {
         log.error({ error: error.message, mergeId }, 'Failed to rollback merge');
-        throw new Error('Failed to rollback merge: ' + error.message);
+        throw new Error(`Failed to rollback merge: ${  error.message}`);
       } finally {
         await session.close();
       }

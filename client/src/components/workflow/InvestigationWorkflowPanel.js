@@ -327,7 +327,7 @@ const InvestigationWorkflowPanel = () => {
   };
 
   const handleCreateInvestigation = async () => {
-    if (!newInvestigation.templateId || !newInvestigation.name) return;
+    if (!newInvestigation.templateId || !newInvestigation.name) {return;}
 
     try {
       await createInvestigation({
@@ -374,7 +374,7 @@ const InvestigationWorkflowPanel = () => {
   };
 
   const handleAddEvidence = async () => {
-    if (!selectedInvestigation || !newEvidence.title) return;
+    if (!selectedInvestigation || !newEvidence.title) {return;}
 
     try {
       await addEvidence({
@@ -401,7 +401,7 @@ const InvestigationWorkflowPanel = () => {
   };
 
   const handleAddFinding = async () => {
-    if (!selectedInvestigation || !newFinding.title) return;
+    if (!selectedInvestigation || !newFinding.title) {return;}
 
     try {
       await addFinding({
@@ -495,9 +495,9 @@ const InvestigationWorkflowPanel = () => {
     const time = new Date(timestamp);
     const diff = Math.floor((now - time) / 1000);
 
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 60) {return `${diff}s ago`;}
+    if (diff < 3600) {return `${Math.floor(diff / 60)}m ago`;}
+    if (diff < 86400) {return `${Math.floor(diff / 3600)}h ago`;}
     return `${Math.floor(diff / 86400)}d ago`;
   };
 

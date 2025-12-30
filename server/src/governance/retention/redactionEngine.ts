@@ -314,7 +314,7 @@ export class RedactionEngine {
       return str;
     }
 
-    return str.substring(0, maxLength) + '...';
+    return `${str.substring(0, maxLength)  }...`;
   }
 
   /**
@@ -330,10 +330,10 @@ export class RedactionEngine {
       fieldName.toLowerCase().includes('age') &&
       typeof value === 'number'
     ) {
-      if (value < 18) return '0-17';
-      if (value < 30) return '18-29';
-      if (value < 50) return '30-49';
-      if (value < 70) return '50-69';
+      if (value < 18) {return '0-17';}
+      if (value < 30) {return '18-29';}
+      if (value < 50) {return '30-49';}
+      if (value < 70) {return '50-69';}
       return '70+';
     }
 

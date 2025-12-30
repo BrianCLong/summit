@@ -106,7 +106,7 @@ export const crossBorderResolvers = {
     crossBorderPartnerHealth: (_: unknown, { code }: { code: string }) => {
       const gateway = getCrossBorderGateway();
       const health = gateway.getPartnerHealth(code);
-      if (!health) return null;
+      if (!health) {return null;}
 
       return {
         ...health,
@@ -280,7 +280,7 @@ export const crossBorderResolvers = {
     },
 
     crossBorderMessageReceived: {
-      // eslint-disable-next-line require-yield
+       
       subscribe: async function* (
         _: unknown,
         { sessionId }: { sessionId: string }

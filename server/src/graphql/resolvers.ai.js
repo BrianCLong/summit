@@ -12,7 +12,7 @@ const gnnService = new GNNService();
 
 // Helper: fetch full Entity node by id (to satisfy non-null fields)
 async function loadEntitiesByIds(ids) {
-  if (!ids || ids.length === 0) return [];
+  if (!ids || ids.length === 0) {return [];}
   const driver = getNeo4jDriver();
   const session = driver.session();
   try {
@@ -51,7 +51,7 @@ const aiResolvers = {
   Query: {
     // Suggest likely missing edges for a given entity via simple common-neighbor heuristic
     async suggestLinks(_, { entityId, limit = 5 }, { user }) {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
       const driver = getNeo4jDriver();
       const redis = getRedisClient();
       const session = driver.session();
@@ -60,7 +60,7 @@ const aiResolvers = {
         const cacheKey = `ai:suggest:${entityId}:${limit}`;
         try {
           const cached = await redis.get(cacheKey);
-          if (cached) return JSON.parse(cached);
+          if (cached) {return JSON.parse(cached);}
         } catch (_) {}
 
         // 1) Collect neighbors of the seed entity
@@ -69,10 +69,10 @@ const aiResolvers = {
            RETURN collect(distinct n.id) AS nbs`,
           { entityId },
         );
-        if (nbRes.records.length === 0) return [];
+        if (nbRes.records.length === 0) {return [];}
         const nbs = nbRes.records[0].get('nbs');
 
-        if (!nbs || nbs.length === 0) return [];
+        if (!nbs || nbs.length === 0) {return [];}
 
         // 2) Find candidate nodes that share neighbors with the seed but are not already connected
         const candRes = await session.run(
@@ -132,7 +132,7 @@ const aiResolvers = {
 
     // Simple anomaly detection: high-degree outliers per investigation
     async detectAnomalies(_, { investigationId, limit = 10 }, { user }) {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
       const driver = getNeo4jDriver();
       const session = driver.session();
       try {
@@ -183,7 +183,7 @@ const aiResolvers = {
 
     // Full-text search with optional filters; resolves to full Entity objects
     async searchEntities(_, { q, filters = {}, limit = 25 }, { user }) {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
       const driver = getNeo4jDriver();
       const session = driver.session();
       try {
@@ -228,7 +228,7 @@ const aiResolvers = {
 
     // Hybrid search using Neo4j full-text + Postgres pgvector similarity (if available)
     async searchEntitiesHybrid(_, { q, filters = {}, limit = 25 }, { user }) {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
       const driver = getNeo4jDriver();
       const pg = getPostgresPool();
       const session = driver.session();
@@ -311,7 +311,7 @@ const aiResolvers = {
   },
   Mutation: {
     async recordAnomaly(_, { entityId, anomalyScore, reason }, { user }) {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
       const driver = getNeo4jDriver();
       const session = driver.session();
       try {

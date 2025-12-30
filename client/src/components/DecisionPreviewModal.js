@@ -17,7 +17,7 @@ import {
 import Slide from '@mui/material/Slide';
 import { useRestoreFocus } from '../hooks/useRestoreFocus';
 
-const Transition = forwardRef(function Transition(props, ref) {
+const Transition = forwardRef((props, ref) => {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
@@ -37,7 +37,7 @@ export default function DecisionPreviewModal({
   useRestoreFocus(open);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {return;}
     setLoading(true);
     fetch('/v1/decisions/diff', {
       method: 'POST',

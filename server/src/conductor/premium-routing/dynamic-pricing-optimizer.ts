@@ -377,7 +377,7 @@ export class DynamicPricingOptimizer {
       prometheusConductorMetrics.recordOperationalMetric(
         'dynamic_pricing_calculation_time',
         calculationTime,
-        { model_id: modelId, has_context: !!context },
+        { model_id: modelId, has_context: Boolean(context) },
       );
 
       prometheusConductorMetrics.recordOperationalMetric(
@@ -770,7 +770,7 @@ export class DynamicPricingOptimizer {
       pricingModel.demandModel.predictedDemand.reduce((sum, d) => sum + d, 0) /
       pricingModel.demandModel.predictedDemand.length;
 
-    if (avgDemand === 0) return 1.0;
+    if (avgDemand === 0) {return 1.0;}
 
     const demandRatio = currentDemand / avgDemand;
 
@@ -850,7 +850,7 @@ export class DynamicPricingOptimizer {
   }
 
   private calculateComplexityMultiplier(complexity?: number): number {
-    if (!complexity) return 1.0;
+    if (!complexity) {return 1.0;}
 
     // Linear increase with complexity
     return 1 + complexity * 0.3;
@@ -882,7 +882,7 @@ export class DynamicPricingOptimizer {
   ): Promise<number> {
     const competitor = pricingModel.competitorPricing;
 
-    if (competitor.competitors.length === 0) return 1.0;
+    if (competitor.competitors.length === 0) {return 1.0;}
 
     const avgCompetitorPrice =
       competitor.competitors.reduce((sum, c) => sum + c.currentPrice, 0) /
@@ -1127,14 +1127,14 @@ export class DynamicPricingOptimizer {
     let confidence = 0.7; // Base confidence
 
     // Increase confidence based on data availability
-    if (pricingModel.priceHistory.length > 100) confidence += 0.1;
-    if (pricingModel.demandModel.forecastAccuracy > 0.8) confidence += 0.1;
+    if (pricingModel.priceHistory.length > 100) {confidence += 0.1;}
+    if (pricingModel.demandModel.forecastAccuracy > 0.8) {confidence += 0.1;}
     if (pricingModel.competitorPricing.competitors.length > 2)
-      confidence += 0.05;
+      {confidence += 0.05;}
 
     // Decrease confidence for volatile conditions
     if (pricingModel.demandModel.demandTrends.some((t) => t.trend !== 'stable'))
-      confidence -= 0.05;
+      {confidence -= 0.05;}
 
     return Math.max(0.3, Math.min(1.0, confidence));
   }
@@ -1217,18 +1217,18 @@ export class DynamicPricingOptimizer {
   private calculateTrend(
     ratios: number[],
   ): 'improving' | 'declining' | 'stable' {
-    if (ratios.length < 3) return 'stable';
+    if (ratios.length < 3) {return 'stable';}
 
     const recent = ratios.slice(-3);
     const earlier = ratios.slice(-6, -3);
 
-    if (earlier.length === 0) return 'stable';
+    if (earlier.length === 0) {return 'stable';}
 
     const recentAvg = recent.reduce((sum, r) => sum + r, 0) / recent.length;
     const earlierAvg = earlier.reduce((sum, r) => sum + r, 0) / earlier.length;
 
-    if (recentAvg > earlierAvg * 1.05) return 'improving';
-    if (recentAvg < earlierAvg * 0.95) return 'declining';
+    if (recentAvg > earlierAvg * 1.05) {return 'improving';}
+    if (recentAvg < earlierAvg * 0.95) {return 'declining';}
     return 'stable';
   }
 

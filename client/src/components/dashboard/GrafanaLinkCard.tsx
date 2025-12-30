@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, Button, Stack } from '@mui/material';
 
 export default function GrafanaLinkCard() {
   const isDev = import.meta.env.DEV;
-  if (!isDev) return null;
+  if (!isDev) {return null;}
   const grafana = import.meta.env.VITE_GRAFANA_URL || 'http://localhost:3000';
   const jaeger = import.meta.env.VITE_JAEGER_URL || 'http://localhost:16686';
   return (

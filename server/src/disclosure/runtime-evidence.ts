@@ -64,7 +64,7 @@ async function resolveDeployedVersion(): Promise<string | undefined> {
     process.env.DEPLOYED_VERSION ||
     process.env.RELEASE_VERSION ||
     process.env.BUILD_VERSION;
-  if (envVersion) return envVersion;
+  if (envVersion) {return envVersion;}
 
   try {
     const pkgPath = path.resolve('package.json');
@@ -76,7 +76,7 @@ async function resolveDeployedVersion(): Promise<string | undefined> {
 }
 
 function parseDate(input?: string): Date | undefined {
-  if (!input) return undefined;
+  if (!input) {return undefined;}
   const date = new Date(input);
   if (Number.isNaN(date.getTime())) {
     throw new Error('invalid_date');
@@ -85,7 +85,7 @@ function parseDate(input?: string): Date | undefined {
 }
 
 function findTimestamp(value: any): number | undefined {
-  if (!value || typeof value !== 'object') return undefined;
+  if (!value || typeof value !== 'object') {return undefined;}
   const candidates = [
     value.timestamp,
     value.ts,
@@ -94,16 +94,16 @@ function findTimestamp(value: any): number | undefined {
     value.occurred_at,
   ];
   for (const candidate of candidates) {
-    if (!candidate) continue;
+    if (!candidate) {continue;}
     const date = new Date(candidate);
     const ms = date.getTime();
-    if (!Number.isNaN(ms)) return ms;
+    if (!Number.isNaN(ms)) {return ms;}
   }
   return undefined;
 }
 
 function matchesTenant(entry: any, tenantId?: string): boolean {
-  if (!tenantId) return true;
+  if (!tenantId) {return true;}
   const candidates = [entry.tenantId, entry.tenant_id, entry.tenant];
   return candidates.some((value) => value && value === tenantId);
 }
@@ -151,9 +151,9 @@ async function collectJsonlSlice({
       try {
         const parsed = JSON.parse(line);
         const ts = findTimestamp(parsed);
-        if (startTime && (!ts || ts < startTime.getTime())) continue;
-        if (endTime && (!ts || ts > endTime.getTime())) continue;
-        if (!matchesTenant(parsed, tenantId)) continue;
+        if (startTime && (!ts || ts < startTime.getTime())) {continue;}
+        if (endTime && (!ts || ts > endTime.getTime())) {continue;}
+        if (!matchesTenant(parsed, tenantId)) {continue;}
         filtered.push(JSON.stringify(parsed));
         count += 1;
       } catch (error) {
@@ -162,7 +162,7 @@ async function collectJsonlSlice({
     }
 
     if (filtered.length > 0) {
-      await fs.appendFile(destination, filtered.join('\n') + '\n');
+      await fs.appendFile(destination, `${filtered.join('\n')  }\n`);
     }
   }
 
@@ -296,7 +296,7 @@ class RuntimeEvidenceService {
         .access(filePath)
         .then(() => true)
         .catch(() => false);
-      if (!exists) continue;
+      if (!exists) {continue;}
       const hash = await sha256(filePath);
       checksumLines.push(`${hash}  ${path.relative(workingDir, filePath)}`);
     }

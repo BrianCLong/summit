@@ -182,7 +182,7 @@ class STIXImportService {
           job.stats.totalObjects += response.objects.length;
         }
 
-        hasMore = !!response.more && !!response.next;
+        hasMore = Boolean(response.more) && Boolean(response.next);
         await this.updateJob(job);
         await this.emitProgress(job);
       }
@@ -636,7 +636,7 @@ class STIXImportService {
    * Extract CVE ID from external references
    */
   extractCveId(externalRefs) {
-    if (!externalRefs) return null;
+    if (!externalRefs) {return null;}
 
     const cveRef = externalRefs.find(
       (ref) => ref.source_name === 'cve' || ref.external_id?.startsWith('CVE-'),
@@ -649,7 +649,7 @@ class STIXImportService {
    * Extract CVSS score from external references
    */
   extractCvssScore(externalRefs) {
-    if (!externalRefs) return null;
+    if (!externalRefs) {return null;}
 
     const cvssRef = externalRefs.find(
       (ref) =>
@@ -751,7 +751,7 @@ class STIXImportService {
     const query = `SELECT * FROM stix_import_jobs WHERE id = $1`;
     const result = await this.pg.query(query, [jobId]);
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
 
     const row = result.rows[0];
     return {

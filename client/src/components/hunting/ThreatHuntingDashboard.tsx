@@ -176,7 +176,7 @@ export const ThreatHuntingDashboard: React.FC = () => {
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {clearInterval(interval);}
     };
   }, [activeHunt, activeHunt?.huntId, activeHunt?.status]);
 
@@ -224,7 +224,7 @@ export const ThreatHuntingDashboard: React.FC = () => {
   }, [config]);
 
   const cancelHunt = useCallback(async () => {
-    if (!activeHunt) return;
+    if (!activeHunt) {return;}
 
     try {
       await fetch(`/api/v1/hunt/${activeHunt.huntId}/cancel`, { method: 'POST' });

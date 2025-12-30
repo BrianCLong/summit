@@ -13,7 +13,7 @@ export class USPTOConnector implements IngestionConnector {
     return [
       {
         patentNumber: 'US11223344',
-        title: 'Mock Patent for ' + query,
+        title: `Mock Patent for ${  query}`,
         abstract: 'This is a mock abstract for a patent found via USPTO search.',
         claims: ['Claim 1: A system for...', 'Claim 2: The system of claim 1...'],
         filingDate: '2023-01-15',
@@ -43,7 +43,7 @@ export class ArXivConnector implements IngestionConnector {
     return [
       {
         doi: '10.1234/arxiv.2301.00001',
-        title: 'Mock Paper on ' + query,
+        title: `Mock Paper on ${  query}`,
         abstract: 'This is a mock abstract for a paper found via ArXiv.',
         authors: ['Jane Smith', 'Bob Jones'],
         publicationDate: '2023-02-10',

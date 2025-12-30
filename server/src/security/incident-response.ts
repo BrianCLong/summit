@@ -19,7 +19,7 @@ export function securityIncidentLogger(req: Request, res: Response, next: NextFu
   res.on('finish', () => {
     const status = res.statusCode;
     const flagged = SECURITY_RELEVANT_CODES.has(status) || res.getHeader('x-security-incident');
-    if (!flagged) return;
+    if (!flagged) {return;}
 
     const durationMs = Date.now() - startedAt;
     const authReq = req as AuthenticatedRequest;

@@ -65,7 +65,7 @@ export class ContractService {
       `SELECT * FROM purchase_orders WHERE id = $1 AND tenant_id = $2`,
       [id, tenantId]
     );
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) {return null;}
     return this.mapPORow(result.rows[0]);
   }
 
@@ -117,7 +117,7 @@ export class ContractService {
       `SELECT * FROM contracts WHERE id = $1 AND tenant_id = $2`,
       [id, tenantId]
     );
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) {return null;}
     return this.mapContractRow(result.rows[0]);
   }
 

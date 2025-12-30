@@ -316,14 +316,14 @@ export class MediaUploadService {
    * Determine media type from MIME type
    */
   private getMediaType(mimeType: string): MediaType {
-    if (mimeType.startsWith('image/')) return MediaType.IMAGE;
-    if (mimeType.startsWith('audio/')) return MediaType.AUDIO;
-    if (mimeType.startsWith('video/')) return MediaType.VIDEO;
-    if (mimeType.startsWith('text/')) return MediaType.TEXT;
+    if (mimeType.startsWith('image/')) {return MediaType.IMAGE;}
+    if (mimeType.startsWith('audio/')) {return MediaType.AUDIO;}
+    if (mimeType.startsWith('video/')) {return MediaType.VIDEO;}
+    if (mimeType.startsWith('text/')) {return MediaType.TEXT;}
     if (mimeType.includes('pdf') || mimeType.includes('document'))
-      return MediaType.DOCUMENT;
+      {return MediaType.DOCUMENT;}
     if (mimeType.includes('geo') || mimeType.includes('gis'))
-      return MediaType.GEOSPATIAL;
+      {return MediaType.GEOSPATIAL;}
 
     // Default to document for unknown types
     return MediaType.DOCUMENT;
@@ -580,7 +580,7 @@ export class MediaUploadService {
     mimeType: string,
     derivatives?: DerivativeFile[],
   ): Promise<Record<string, string>> {
-    if (!this.cdnUploadService) return {};
+    if (!this.cdnUploadService) {return {};}
 
     const requests: CdnUploadRequest[] = [
       {
@@ -658,7 +658,7 @@ export class MediaUploadService {
    * Parse frame rate string to number
    */
   private parseFrameRate(frameRate?: string): number | undefined {
-    if (!frameRate) return undefined;
+    if (!frameRate) {return undefined;}
 
     if (frameRate.includes('/')) {
       const [num, den] = frameRate.split('/').map(Number);

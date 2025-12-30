@@ -73,7 +73,7 @@ export class MigrationOrchestrator {
           cursor = batch.nextCursor;
         }
 
-        if (rawRecords.length === 0) continue;
+        if (rawRecords.length === 0) {continue;}
 
         for (const record of rawRecords) {
           result.recordsProcessed++;
@@ -106,7 +106,7 @@ export class MigrationOrchestrator {
             // Note: Batching writes would be more efficient in production
             if (!ctx.dryRun) {
                await this.destination.write(ctx, [record]);
-               if (recordId) await this.idempotencyService.markProcessed(ctx, recordId);
+               if (recordId) {await this.idempotencyService.markProcessed(ctx, recordId);}
             }
 
             result.recordsSuccess++;

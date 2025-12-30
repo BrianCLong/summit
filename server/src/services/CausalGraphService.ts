@@ -88,7 +88,7 @@ export class CausalGraphService {
         const sourceNode = nodeMap.get(sourceId);
         const targetNode = nodeMap.get(targetId);
 
-        if (!sourceNode || !targetNode) continue;
+        if (!sourceNode || !targetNode) {continue;}
 
         let weight = 0;
         let evidence = '';

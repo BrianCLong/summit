@@ -57,7 +57,7 @@ export const canonicalResolvers = {
           entity = MOCK_ENTITIES.find(e => e.id === id);
       }
 
-      if (!entity) return null;
+      if (!entity) {return null;}
 
       // Apply temporal filter
       if (temporal) {
@@ -93,7 +93,7 @@ export const canonicalResolvers = {
          entity = MOCK_ENTITIES.find(e => e.id === id && e.entityType === 'Person');
       }
 
-      if (!entity) return null;
+      if (!entity) {return null;}
        if (temporal) {
          const filtered = filterByTemporal([entity], temporal);
          return filtered.length > 0 ? filtered[0] : null;

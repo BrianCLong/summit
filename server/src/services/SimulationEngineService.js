@@ -398,7 +398,7 @@ class SimulationEngineService extends EventEmitter {
 
         simulation.environment.nodes.forEach((node) => {
           const match = feedLookup.get(String(node.id));
-          if (!match) return;
+          if (!match) {return;}
 
           node.simulationData = {
             ...node.simulationData,
@@ -516,7 +516,7 @@ class SimulationEngineService extends EventEmitter {
    * Validate utility of simulation results
    */
   validateSimulationUtility(results) {
-    if (!results) return { useful: false, issues: ['no_results'] };
+    if (!results) {return { useful: false, issues: ['no_results'] };}
     const hasInsights =
       Array.isArray(results.insights) && results.insights.length > 0;
     const hasVisuals =
@@ -524,8 +524,8 @@ class SimulationEngineService extends EventEmitter {
       results.visualizations.length > 0;
     const useful = hasInsights && hasVisuals;
     const issues = [];
-    if (!hasInsights) issues.push('missing_insights');
-    if (!hasVisuals) issues.push('missing_visualizations');
+    if (!hasInsights) {issues.push('missing_insights');}
+    if (!hasVisuals) {issues.push('missing_visualizations');}
     return { useful, issues };
   }
 
@@ -549,7 +549,7 @@ class SimulationEngineService extends EventEmitter {
     simulation.status = 'COMPLETED';
     simulation.completedAt = new Date();
     simulation.executionTime = simulation.completedAt - simulation.startedAt;
-    if (simulation.executionTime === 0) simulation.executionTime = 1; // ensure > 0 for tests
+    if (simulation.executionTime === 0) {simulation.executionTime = 1;} // ensure > 0 for tests
     simulation.progress = 1.0;
 
     this.updateExecutionTimeMetric(simulation.executionTime);
@@ -1317,9 +1317,9 @@ class SimulationEngineService extends EventEmitter {
   }
 
   classifyRiskLevel(totalRisk) {
-    if (totalRisk >= 0.8) return 'critical';
-    if (totalRisk >= 0.6) return 'high';
-    if (totalRisk >= 0.4) return 'medium';
+    if (totalRisk >= 0.8) {return 'critical';}
+    if (totalRisk >= 0.6) {return 'high';}
+    if (totalRisk >= 0.4) {return 'medium';}
     return 'low';
   }
 
@@ -1371,7 +1371,7 @@ class SimulationEngineService extends EventEmitter {
 
   async cancelSimulation(simulationId) {
     const simulation = this.activeSimulations.get(simulationId);
-    if (!simulation) return false;
+    if (!simulation) {return false;}
 
     simulation.status = 'CANCELLED';
     simulation.completedAt = new Date();
@@ -1441,21 +1441,21 @@ class SimulationEngineService extends EventEmitter {
     return [];
   }
   getConnectedNodes(nodeId, edges) {
-    if (!Array.isArray(edges)) return [];
+    if (!Array.isArray(edges)) {return [];}
     const out = [];
     edges.forEach((e) => {
       if (e.source === nodeId)
-        out.push({
+        {out.push({
           id: e.target,
           label: e.label || `Node ${e.target}`,
           edge: e,
-        });
+        });}
       if (e.target === nodeId)
-        out.push({
+        {out.push({
           id: e.source,
           label: e.label || `Node ${e.source}`,
           edge: e,
-        });
+        });}
     });
     return out;
   }

@@ -117,10 +117,10 @@ export class BackupService {
        args.push(env.DATABASE_URL);
     } else {
        // Fallback to manual host/user/db params
-       if (env.POSTGRES_HOST) args.push('-h', env.POSTGRES_HOST);
-       if (env.POSTGRES_PORT) args.push('-p', env.POSTGRES_PORT);
-       if (env.POSTGRES_USER) args.push('-U', env.POSTGRES_USER);
-       if (env.POSTGRES_DB) args.push(env.POSTGRES_DB);
+       if (env.POSTGRES_HOST) {args.push('-h', env.POSTGRES_HOST);}
+       if (env.POSTGRES_PORT) {args.push('-p', env.POSTGRES_PORT);}
+       if (env.POSTGRES_USER) {args.push('-U', env.POSTGRES_USER);}
+       if (env.POSTGRES_DB) {args.push(env.POSTGRES_DB);}
        // Password is handled via PGPASSWORD env var which is already in `env` if loaded,
        // or we explicitly set it if using manual fallback
        if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
@@ -175,7 +175,7 @@ export class BackupService {
             onNext: record => {
                apocSuccess = true;
                const chunk = record.get('data');
-               if (chunk) writeStream.write(chunk);
+               if (chunk) {writeStream.write(chunk);}
             },
             onCompleted: () => resolve(),
             onError: (err) => reject(err)
@@ -198,7 +198,7 @@ export class BackupService {
                session.run('MATCH (n) RETURN n').subscribe({
                    onNext: record => {
                        const props = record.get('n').properties;
-                       if (!isFirstNode) writeStream.write(',');
+                       if (!isFirstNode) {writeStream.write(',');}
                        writeStream.write(JSON.stringify(props));
                        isFirstNode = false;
                    },
@@ -220,7 +220,7 @@ export class BackupService {
                            start: r.startNodeElementId,
                            end: r.endNodeElementId
                        };
-                       if (!isFirstRel) writeStream.write(',');
+                       if (!isFirstRel) {writeStream.write(',');}
                        writeStream.write(JSON.stringify(rel));
                        isFirstRel = false;
                    },
@@ -241,7 +241,7 @@ export class BackupService {
 
   private async backupRedis(timestamp: string): Promise<void> {
     const client = getRedisClient();
-    if (!client) throw new Error('Redis client unavailable');
+    if (!client) {throw new Error('Redis client unavailable');}
 
     // Trigger BGSAVE for RDB persistence on disk
     try {
@@ -273,7 +273,7 @@ export class BackupService {
             keys.forEach((key: string, index: number) => {
                 const val = values?.[index]?.[1];
                 if (typeof val === 'string') {
-                    if (!isFirstKey) writeStream.write(',');
+                    if (!isFirstKey) {writeStream.write(',');}
                     writeStream.write(`"${key}":${JSON.stringify(val)}`);
                     isFirstKey = false;
                 }

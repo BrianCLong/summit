@@ -122,9 +122,9 @@ export class GraphOptimizer {
   }
 
   private transformNeo4jIntegers(obj: any): any {
-    if (obj === null || obj === undefined) return obj;
-    if (neo4j.isInt(obj)) return obj.inSafeRange() ? obj.toNumber() : obj.toString();
-    if (Array.isArray(obj)) return obj.map(v => this.transformNeo4jIntegers(v));
+    if (obj === null || obj === undefined) {return obj;}
+    if (neo4j.isInt(obj)) {return obj.inSafeRange() ? obj.toNumber() : obj.toString();}
+    if (Array.isArray(obj)) {return obj.map(v => this.transformNeo4jIntegers(v));}
     if (typeof obj === 'object') {
       const newObj: any = {};
       for (const k in obj) {

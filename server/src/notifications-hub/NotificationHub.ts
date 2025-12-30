@@ -374,7 +374,7 @@ export class NotificationHub extends EventEmitter {
 
     // Apply routing rules
     for (const rule of this.routingRules) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       const matches = this.evaluateRuleConditions(rule, event);
       if (matches) {
@@ -471,7 +471,7 @@ export class NotificationHub extends EventEmitter {
         case 'user':
           // Look up user and get their contact info
           const userRecipient = await this.resolveUser(spec.id, channels);
-          if (userRecipient) recipients.push(userRecipient);
+          if (userRecipient) {recipients.push(userRecipient);}
           break;
 
         case 'role':
@@ -568,7 +568,7 @@ export class NotificationHub extends EventEmitter {
       // Filter channels based on preferences
       const enabledChannels = recipient.channels.filter((channel) => {
         const channelPref = prefs.channels[channel as keyof typeof prefs.channels];
-        if (!channelPref?.enabled) return false;
+        if (!channelPref?.enabled) {return false;}
 
         if (channelPref.minSeverity) {
           if (!this.meetsSeverityThreshold(event.severity, channelPref.minSeverity)) {

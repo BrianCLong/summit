@@ -17,7 +17,7 @@ export function usePerfMarkers(label: string, enabled: boolean) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const duration = performance.now() - renderStartRef.current;
     renderCountRef.current += 1;
@@ -32,7 +32,7 @@ export function usePerfMarkers(label: string, enabled: boolean) {
 
   const mark = useCallback(
     (phase: string) => {
-      if (!enabled) return () => {};
+      if (!enabled) {return () => {};}
       const start = performance.now();
       const marker = `${label}:${phase}:${renderCountRef.current + 1}`;
 
@@ -85,7 +85,7 @@ export function PerfMarkOverlay({
   state: PerfOverlayState;
   show: boolean;
 }) {
-  if (!show || !state.renderCount) return null;
+  if (!show || !state.renderCount) {return null;}
 
   return (
     <div

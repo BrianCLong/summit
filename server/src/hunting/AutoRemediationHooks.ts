@@ -560,7 +560,7 @@ export class AutoRemediationHooks extends EventEmitter {
     const correlations: CTICorrelation[] = [];
 
     for (const [name, source] of this.ctiSources) {
-      if (!source.enabled) continue;
+      if (!source.enabled) {continue;}
 
       for (const ioc of iocs) {
         try {
@@ -614,7 +614,7 @@ export class AutoRemediationHooks extends EventEmitter {
     const osintData: OSINTData[] = [];
 
     for (const [name, source] of this.osintSources) {
-      if (!source.enabled) continue;
+      if (!source.enabled) {continue;}
 
       for (const ioc of iocs) {
         try {
@@ -919,8 +919,8 @@ export class AutoRemediationHooks extends EventEmitter {
     context: RemediationContext
   ): Promise<HookResult> {
     for (const [, hook] of this.hooks) {
-      if (hook.type !== type) continue;
-      if (!hook.actionTypes.includes(action.actionType)) continue;
+      if (hook.type !== type) {continue;}
+      if (!hook.actionTypes.includes(action.actionType)) {continue;}
 
       const result = await hook.handler(action, context);
       if (!result.proceed && type === 'pre') {
@@ -940,11 +940,11 @@ export class AutoRemediationHooks extends EventEmitter {
     const result: RemediationAction[] = [];
 
     const visit = (actionId: string) => {
-      if (visited.has(actionId)) return;
+      if (visited.has(actionId)) {return;}
       visited.add(actionId);
 
       const action = actionMap.get(actionId);
-      if (!action) return;
+      if (!action) {return;}
 
       for (const depId of action.dependsOn) {
         visit(depId);

@@ -73,7 +73,7 @@ export class GCSBatchConnector extends PullConnector {
   }
 
   async testConnection(): Promise<{ success: boolean; message: string }> {
-    if (!this.gcs) return { success: false, message: 'Not initialized' };
+    if (!this.gcs) {return { success: false, message: 'Not initialized' };}
     const result = await this.gcs.healthCheck();
     return {
       success: result.healthy,
@@ -83,7 +83,7 @@ export class GCSBatchConnector extends PullConnector {
 
   async pull(context: ConnectorContext): Promise<ConnectorResult> {
     this.ensureInitialized();
-    if (!this.gcs) throw new Error('GCS Connector not initialized');
+    if (!this.gcs) {throw new Error('GCS Connector not initialized');}
 
     const startTime = Date.now();
     let entitiesProcessed = 0;
@@ -104,12 +104,12 @@ export class GCSBatchConnector extends PullConnector {
 
         const files = result.objects;
         pageToken = result.nextPageToken;
-        hasMore = !!pageToken;
+        hasMore = Boolean(pageToken);
 
         await Promise.all(
           files.map((file) =>
             limit(async () => {
-              if (context.signal.aborted) return;
+              if (context.signal.aborted) {return;}
 
               const stateKey = `file:${file.name}`;
               const lastEtag = await context.stateStore.get<string>(stateKey);
@@ -224,7 +224,7 @@ export class GCSBatchConnector extends PullConnector {
 
     let count = 0;
     for await (const line of rl) {
-      if (!line.trim()) continue;
+      if (!line.trim()) {continue;}
       try {
         const record = JSON.parse(line);
         const entity = this.mapRecordToEntity(record, metadata, count);

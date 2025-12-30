@@ -30,18 +30,18 @@ export function useSafeQuery<T = any>({
       try {
         if (shouldMock && mock !== undefined) {
           await new Promise((r) => setTimeout(r, 10));
-          if (mounted) setData(mock);
+          if (mounted) {setData(mock);}
         } else if (fetcher) {
           const res = await fetcher();
-          if (mounted) setData(res);
+          if (mounted) {setData(res);}
         } else {
-          if (mounted) setData(undefined as any);
+          if (mounted) {setData(undefined as any);}
         }
-        if (mounted) setError(null);
+        if (mounted) {setError(null);}
       } catch (e) {
-        if (mounted) setError(e);
+        if (mounted) {setError(e);}
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {setLoading(false);}
         // DEV-only telemetry stub
         if (shouldMock) {
           (window as any).__ui_metrics = (window as any).__ui_metrics || {};

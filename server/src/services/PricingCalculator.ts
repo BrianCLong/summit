@@ -33,7 +33,7 @@ export class PricingCalculator {
         const kind = kindStr as UsageKind; // Type assertion, could validate
         const limitConfig = plan.limits[kindStr];
 
-        if (!limitConfig) continue;
+        if (!limitConfig) {continue;}
 
         const included = limitConfig.monthlyIncluded || 0;
         const billableQty = Math.max(0, quantity - included);

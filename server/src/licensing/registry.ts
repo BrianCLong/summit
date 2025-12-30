@@ -50,7 +50,7 @@ export class DataLicenseRegistry {
       [sourceId]
     );
 
-    if (result.rows.length === 0) return { allowed: true, reason: 'No license restriction found' }; // Default allow if unknown? Or default block? Prompt implies enforcement.
+    if (result.rows.length === 0) {return { allowed: true, reason: 'No license restriction found' };} // Default allow if unknown? Or default block? Prompt implies enforcement.
 
     const license = result.rows[0];
     const restrictions = license.restrictions;

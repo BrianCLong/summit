@@ -84,8 +84,8 @@ export const UsageAndQuotas: React.FC<{ tenantId: string }> = ({
     };
   }, [tenantId]); // Re-run effect if tenantId changes
 
-  if (loading) return <p>Loading usage data...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) {return <p>Loading usage data...</p>;}
+  if (error) {return <p>Error: {error.message}</p>;}
 
   const tenantPlan = data?.tenantPlan;
   const usageSummary = data?.usageSummary;

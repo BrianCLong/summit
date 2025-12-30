@@ -19,7 +19,7 @@ export class AggregationProcessor extends StreamProcessor {
   protected async process(message: any): Promise<any | null> {
     // Expecting CloudEvent structure
     const entityId = message.subject || message.data?.id;
-    if (!entityId) return null;
+    if (!entityId) {return null;}
 
     // Idempotency check (deduplication)
     // Assumes message.id is unique per event

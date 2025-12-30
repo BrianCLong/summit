@@ -44,7 +44,7 @@ export async function startTemporalWorker() {
 }
 
 export async function getTemporalClient() {
-  if (process.env.TEMPORAL_ENABLED !== 'true') return null;
+  if (process.env.TEMPORAL_ENABLED !== 'true') {return null;}
   try {
     const { Connection, Client } = await import('temporalio');
     const connection = await Connection.connect();

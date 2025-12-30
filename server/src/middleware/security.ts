@@ -275,7 +275,7 @@ export const corsConfig = {
     ];
 
     // Allow requests with no origin (mobile apps, etc.)
-    if (!origin) return callback(null, true);
+    if (!origin) {return callback(null, true);}
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true);

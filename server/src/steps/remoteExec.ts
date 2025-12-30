@@ -4,7 +4,7 @@ const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export async function remoteExecStep(ctx: any, step: any) {
   const siteId = step.inputs?.siteId || ctx.meta?.siteId;
-  if (!siteId) throw new Error('REMOTE.EXEC requires siteId');
+  if (!siteId) {throw new Error('REMOTE.EXEC requires siteId');}
   const payload = {
     runId: ctx.id,
     stepId: step.id,
@@ -28,10 +28,10 @@ export async function remoteExecStep(ctx: any, step: any) {
     );
     if (r?.status === 'DONE') {
       const digests: string[] = (r.result?.artifacts as string[]) || [];
-      if (digests.length) await ctx.attachArtifacts(digests);
+      if (digests.length) {await ctx.attachArtifacts(digests);}
       return { ticket };
     }
-    if (Date.now() - start > timeout) throw new Error('REMOTE.EXEC timeout');
+    if (Date.now() - start > timeout) {throw new Error('REMOTE.EXEC timeout');}
     await new Promise((res) => setTimeout(res, 1500));
   }
 }

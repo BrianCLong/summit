@@ -197,8 +197,8 @@ export abstract class BaseReceiver implements IReceiver {
   abstract validateRecipient(recipient: string): Promise<boolean>;
 
   async healthCheck(): Promise<boolean> {
-    if (!this.initialized) return false;
-    if (!this.config.enabled) return false;
+    if (!this.initialized) {return false;}
+    if (!this.config.enabled) {return false;}
     return this.performHealthCheck();
   }
 

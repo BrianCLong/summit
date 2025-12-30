@@ -14,13 +14,13 @@ const DEFAULTS: Required<AnalyzerOptions> = {
 };
 
 function normalizeScore(value: number): number {
-  if (!Number.isFinite(value)) return 0;
+  if (!Number.isFinite(value)) {return 0;}
   return Math.max(0, Math.min(1, Number(value.toFixed(4))));
 }
 
 function computeServiceScore(group: CorrelatedSignalGroup, service: string, options: Required<AnalyzerOptions>) {
   const related = group.signals.filter((signal) => signal.service === service);
-  if (!related.length) return 0;
+  if (!related.length) {return 0;}
 
   const errors = related.filter((signal) => signal.kind === 'log' && signal.severity === 'error');
   const traces = related.filter((signal): signal is { durationMs: number; status?: string } => signal.kind === 'trace');
@@ -42,12 +42,12 @@ function computeServiceScore(group: CorrelatedSignalGroup, service: string, opti
 }
 
 function percentile(values: number[], p: number) {
-  if (!values.length) return 0;
+  if (!values.length) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const index = (sorted.length - 1) * p;
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
-  if (lower === upper) return sorted[lower];
+  if (lower === upper) {return sorted[lower];}
   const weight = index - lower;
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
 }
@@ -77,7 +77,7 @@ export class RootCauseAnalyzer {
       }
 
       const entries = Object.entries(serviceScores).sort(([, a], [, b]) => b - a);
-      if (!entries.length) continue;
+      if (!entries.length) {continue;}
 
       const [probableService, confidenceRaw] = entries[0];
       const contributingSignals = group.signals

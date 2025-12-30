@@ -248,14 +248,14 @@ class ConflictDetector {
 
   private resourcesOverlap(res1: string, res2: string): boolean {
     // Simple pattern matching (in production, use proper glob matching)
-    if (res1 === res2) return true;
-    if (res1.includes('*') && res2.startsWith(res1.replace('*', ''))) return true;
-    if (res2.includes('*') && res1.startsWith(res2.replace('*', ''))) return true;
+    if (res1 === res2) {return true;}
+    if (res1.includes('*') && res2.startsWith(res1.replace('*', ''))) {return true;}
+    if (res2.includes('*') && res1.startsWith(res2.replace('*', ''))) {return true;}
     return false;
   }
 
   private subjectsOverlap(subjects1: string[], subjects2: string[]): boolean {
-    if (subjects1.includes('*') || subjects2.includes('*')) return true;
+    if (subjects1.includes('*') || subjects2.includes('*')) {return true;}
     return subjects1.some(s => subjects2.includes(s));
   }
 
@@ -274,8 +274,8 @@ class ConflictDetector {
     rule1: PolicyRule,
     rule2: PolicyRule
   ): 'direct' | 'indirect' | 'conditional' {
-    if (rule1.resource === rule2.resource) return 'direct';
-    if (rule1.condition || rule2.condition) return 'conditional';
+    if (rule1.resource === rule2.resource) {return 'direct';}
+    if (rule1.condition || rule2.condition) {return 'conditional';}
     return 'indirect';
   }
 
@@ -358,10 +358,10 @@ class RedundancyAnalyzer {
 
   private suggestConsolidation(rules: PolicyRule[]): string | null {
     // Check if rules have same action and can be merged
-    if (rules.length < 2) return null;
+    if (rules.length < 2) {return null;}
 
     const action = rules[0].action;
-    if (!rules.every(r => r.action === action)) return null;
+    if (!rules.every(r => r.action === action)) {return null;}
 
     // Check for similar conditions
     const allSubjects = new Set<string>();
@@ -423,7 +423,7 @@ class CoverageAnalyzer {
   }
 
   private resourceMatches(pattern: string, resource: string): boolean {
-    if (pattern === resource) return true;
+    if (pattern === resource) {return true;}
     if (pattern.endsWith('*')) {
       return resource.startsWith(pattern.slice(0, -1));
     }
@@ -492,7 +492,7 @@ class PerformanceOptimizer {
   }
 
   private isLikelyUnused(rule: PolicyRule): boolean {
-    if (!rule.lastMatchedAt) return true;
+    if (!rule.lastMatchedAt) {return true;}
     const daysSinceMatch = (Date.now() - rule.lastMatchedAt.getTime()) / (1000 * 60 * 60 * 24);
     return daysSinceMatch > 30 && rule.usageCount < 10;
   }
@@ -953,7 +953,7 @@ export class PolicyOptimizationEngine extends EventEmitter {
   }
 
   private updateAverageConfidence(suggestions: OptimizationSuggestion[]): void {
-    if (suggestions.length === 0) return;
+    if (suggestions.length === 0) {return;}
 
     const totalConfidence = suggestions.reduce((sum, s) => sum + s.confidence, 0);
     const n = this.stats.suggestionsGenerated;

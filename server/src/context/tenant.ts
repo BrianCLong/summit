@@ -342,7 +342,7 @@ class TenantContextService {
       context.headers?.['x-ig-region'] ||
       process.env.CURRENT_REGION ||
       'us-east-1';
-    const hasExportToken = !!context.headers?.['x-export-token'];
+    const hasExportToken = Boolean(context.headers?.['x-export-token']);
 
     // System-level access check
     if (

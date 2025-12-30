@@ -312,7 +312,7 @@ export class CaseBundleService {
 
   private async ensureDirectory(bundlePath: string): Promise<string> {
     const stats = await fs.stat(bundlePath);
-    if (stats.isDirectory()) return bundlePath;
+    if (stats.isDirectory()) {return bundlePath;}
 
     if (bundlePath.endsWith('.zip')) {
       const extractDir = await fs.mkdtemp(path.join(tmpdir(), 'case-bundle-import-'));

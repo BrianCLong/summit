@@ -24,12 +24,12 @@ function loadManifest(paths: string[]): Map<string, string> {
   const allowlist = new Map<string, string>();
   for (const manifestPath of paths) {
     try {
-      if (!existsSync(manifestPath)) continue;
+      if (!existsSync(manifestPath)) {continue;}
       const raw = readFileSync(manifestPath, 'utf8');
       const parsed: ManifestShape = JSON.parse(raw);
       const entries = Object.entries(parsed);
 
-      if (!entries.length) continue;
+      if (!entries.length) {continue;}
 
       for (const [id, query] of entries) {
         const normalized = query.trim();
@@ -85,7 +85,7 @@ export class GraphqlPersistedAllowlistMiddleware {
   }
 
   middleware = (req: Request, res: Response, next: NextFunction) => {
-    if (!this.isGraphQLRequest(req)) return next();
+    if (!this.isGraphQLRequest(req)) {return next();}
 
     const body = this.getRequestPayload(req);
     // Ensure downstream middleware sees the normalized payload
@@ -158,7 +158,7 @@ export class GraphqlPersistedAllowlistMiddleware {
   }
 
   private parseMaybeJson(value: unknown) {
-    if (typeof value !== 'string') return value;
+    if (typeof value !== 'string') {return value;}
     try {
       return JSON.parse(value);
     } catch {
@@ -172,7 +172,7 @@ export class GraphqlPersistedAllowlistMiddleware {
       const normalized: Record<string, any> = {};
 
       for (const [key, value] of Object.entries(queryParams)) {
-        if (Array.isArray(value)) continue;
+        if (Array.isArray(value)) {continue;}
         normalized[key] = this.parseMaybeJson(value);
       }
 

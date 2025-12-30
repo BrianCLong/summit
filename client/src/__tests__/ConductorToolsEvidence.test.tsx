@@ -19,7 +19,7 @@ describe('Conductor Tools & Evidence panel', () => {
             },
           ]),
           { status: 200, headers: { 'Content-Type': 'application/json' } },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         ) as any;
       }
       if (url.includes('/api/maestro/v1/runs/demo-run/mcp/invocations')) {
@@ -32,19 +32,19 @@ describe('Conductor Tools & Evidence panel', () => {
             },
           ]),
           { status: 200, headers: { 'Content-Type': 'application/json' } },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         ) as any;
       }
       return new Response(JSON.stringify([]), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       }) as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     }) as any;
   });
   afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     global.fetch = origFetch as any;
   });
 

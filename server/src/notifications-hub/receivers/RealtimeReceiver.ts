@@ -65,7 +65,7 @@ export class RealtimeSessionManager extends EventEmitter {
 
   private evictClient(clientId: string): void {
     const client = this.clients.get(clientId);
-    if (!client) return;
+    if (!client) {return;}
 
     this.clients.delete(clientId);
     if (client.userId) {

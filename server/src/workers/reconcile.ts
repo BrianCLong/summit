@@ -187,8 +187,8 @@ export class ReconcileManager {
     let priority = 0;
 
     // High-cost operations get priority
-    if (data.estimated.totalUsd > 1.0) priority += 10;
-    if (data.estimated.totalUsd > 5.0) priority += 20;
+    if (data.estimated.totalUsd > 1.0) {priority += 10;}
+    if (data.estimated.totalUsd > 5.0) {priority += 20;}
 
     // Recently created entries get priority
     const now = Date.now();
@@ -356,7 +356,7 @@ export class ReconcileManager {
     // In production, this would query OpenAI's usage API
     // For now, use enhanced estimation as fallback
 
-    if (!originalPayload) return null;
+    if (!originalPayload) {return null;}
 
     try {
       const result = await estimateTokensAndCost({
@@ -388,7 +388,7 @@ export class ReconcileManager {
   } | null> {
     // Similar to OpenAI but for Anthropic API
 
-    if (!originalPayload) return null;
+    if (!originalPayload) {return null;}
 
     try {
       const result = await estimateTokensAndCost({
@@ -420,7 +420,7 @@ export class ReconcileManager {
   } | null> {
     // Similar to OpenAI but for Gemini API
 
-    if (!originalPayload) return null;
+    if (!originalPayload) {return null;}
 
     try {
       const result = await estimateTokensAndCost({

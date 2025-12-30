@@ -107,9 +107,9 @@ incidentRouter.get('/incidents', async (req, res) => {
         const incident = JSON.parse(data);
 
         // Apply filters
-        if (status && incident.status !== status) continue;
-        if (type && incident.context.type !== type) continue;
-        if (severity && incident.context.severity !== severity) continue;
+        if (status && incident.status !== status) {continue;}
+        if (type && incident.context.type !== type) {continue;}
+        if (severity && incident.context.severity !== severity) {continue;}
 
         incidents.push(incident);
       }

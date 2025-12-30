@@ -100,15 +100,15 @@ router.post('/validate', async (req, res) => {
 
     for (const [i, n] of nodes.entries()) {
       if (!n.uuid && !n.id)
-        problems.push({ type: 'node', index: i, issue: 'missing id/uuid' });
+        {problems.push({ type: 'node', index: i, issue: 'missing id/uuid' });}
       if (!n.type)
-        problems.push({ type: 'node', index: i, issue: 'missing type' });
+        {problems.push({ type: 'node', index: i, issue: 'missing type' });}
     }
     for (const [i, e] of edges.entries()) {
       if (!e.source || !e.target)
-        problems.push({ type: 'edge', index: i, issue: 'missing endpoints' });
+        {problems.push({ type: 'edge', index: i, issue: 'missing endpoints' });}
       if (!e.type)
-        problems.push({ type: 'edge', index: i, issue: 'missing type' });
+        {problems.push({ type: 'edge', index: i, issue: 'missing type' });}
     }
 
     const summary = {
@@ -166,7 +166,7 @@ router.post('/csv/analyze', upload.single('file'), async (req, res) => {
       const cursor = reader.getCursor();
       let record;
       while ((record = await cursor.next()) && rowCount < 100) {
-        if (rowCount < 5) sampleRows.push(record);
+        if (rowCount < 5) {sampleRows.push(record);}
         rowCount++;
       }
       while (await cursor.next()) {
@@ -184,7 +184,7 @@ router.post('/csv/analyze', upload.single('file'), async (req, res) => {
         .on('data', (row) => {
           if (rowCount < 100) {
             Object.keys(row).forEach((key) => fieldSet.add(key));
-            if (rowCount < 5) sampleRows.push(row);
+            if (rowCount < 5) {sampleRows.push(row);}
           }
           rowCount++;
         });

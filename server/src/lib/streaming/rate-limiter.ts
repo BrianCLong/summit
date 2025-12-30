@@ -135,7 +135,7 @@ export class AdaptiveRateLimiter {
   }
 
   private adapt(): void {
-    if (!this.adaptiveConfig) return;
+    if (!this.adaptiveConfig) {return;}
 
     if (this.requestQueue.length > this.adaptiveConfig.queueThreshold) {
       this.refillRate = Math.max(1, this.refillRate * this.adaptiveConfig.refillRateAdjustment);

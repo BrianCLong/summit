@@ -58,12 +58,12 @@ function tenantFromCtx(ctx: GraphQLRequestContext<any>): string {
     // Prefer GraphQL context if present
     const fromCtx =
       (ctx.contextValue as any)?.tenant || (ctx.contextValue as any)?.tenantId;
-    if (fromCtx) return String(fromCtx);
+    if (fromCtx) {return String(fromCtx);}
     // Fallback to HTTP header commonly used for multitenancy
     const hdr =
       ctx.request.http?.headers.get('x-tenant') ||
       ctx.request.http?.headers.get('x-tenant-id');
-    if (hdr) return String(hdr);
+    if (hdr) {return String(hdr);}
   } catch {}
   return 'unknown';
 }

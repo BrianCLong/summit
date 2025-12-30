@@ -468,7 +468,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
     const now = Date.now();
 
     for (const [name, task] of this.maintenanceTasks) {
-      if (!task.enabled) continue;
+      if (!task.enabled) {continue;}
 
       // Simple cron-like scheduling (simplified for demonstration)
       const shouldRun = this.shouldRunMaintenanceTask(task, now);
@@ -614,13 +614,13 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
 
     // Analyze complex queries
     if (queryLower.includes('join') && queryLower.includes('where'))
-      return true;
+      {return true;}
     if (queryLower.includes('order by') && queryLower.includes('limit'))
-      return true;
-    if (queryLower.includes('group by')) return true;
-    if (queryLower.includes('union')) return true;
+      {return true;}
+    if (queryLower.includes('group by')) {return true;}
+    if (queryLower.includes('union')) {return true;}
     if (queryLower.includes('exists') || queryLower.includes('in (select'))
-      return true;
+      {return true;}
 
     return false;
   }
@@ -630,10 +630,10 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
     const queryLower = query.toLowerCase();
 
     let multiplier = 1;
-    if (queryLower.includes('join')) multiplier += 0.5;
-    if (queryLower.includes('group by')) multiplier += 0.3;
-    if (queryLower.includes('order by')) multiplier += 0.2;
-    if (queryLower.includes('union')) multiplier += 0.4;
+    if (queryLower.includes('join')) {multiplier += 0.5;}
+    if (queryLower.includes('group by')) {multiplier += 0.3;}
+    if (queryLower.includes('order by')) {multiplier += 0.2;}
+    if (queryLower.includes('union')) {multiplier += 0.4;}
 
     return Math.min(baseTimeout * multiplier, 300000); // Max 5 minutes
   }
@@ -668,14 +668,14 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
     }
 
     // Cache slow queries
-    if (executionTime > 2000) return true;
+    if (executionTime > 2000) {return true;}
 
     // Cache queries with many results
-    if (result.rowCount && result.rowCount > 100) return true;
+    if (result.rowCount && result.rowCount > 100) {return true;}
 
     // Cache queries with complex operations
     if (queryLower.includes('join') || queryLower.includes('group by'))
-      return true;
+      {return true;}
 
     return false;
   }
@@ -685,8 +685,8 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
 
     // Longer TTL for expensive queries
     if (executionTime > 10000)
-      ttl *= 4; // 20 minutes
-    else if (executionTime > 5000) ttl *= 2; // 10 minutes
+      {ttl *= 4;} // 20 minutes
+    else if (executionTime > 5000) {ttl *= 2;} // 10 minutes
 
     // Shorter TTL for data that changes frequently
     const queryLower = query.toLowerCase();
@@ -813,10 +813,10 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
   private async getCachedResult<T = any>(
     queryHash: string,
   ): Promise<QueryResult<T> | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     const cached = await this.redis.get(`postgres:query:${queryHash}`);
-    if (!cached) return null;
+    if (!cached) {return null;}
 
     try {
       return JSON.parse(cached) as QueryResult<T>;
@@ -832,7 +832,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
     result: QueryResult,
     ttlSeconds: number,
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       // Only cache the essential parts of the result
@@ -890,7 +890,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
     executionTime: number,
     rowCount?: number,
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const statsKey = `postgres:stats:${queryHash}`;
     const stats = await this.redis.get(statsKey);
@@ -933,7 +933,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
     now: number,
   ): boolean {
     // Simplified cron-like scheduling
-    if (task.lastRun === 0) return true; // First run
+    if (task.lastRun === 0) {return true;} // First run
 
     const hoursSinceLastRun = (now - task.lastRun) / (1000 * 60 * 60);
 
@@ -1012,7 +1012,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
   }
 
   private async getAggregatedQueryStats(): Promise<any> {
-    if (!this.redis) return {};
+    if (!this.redis) {return {};}
 
     const keys = await this.redis.keys('postgres:stats:*');
     const stats = [];
@@ -1079,7 +1079,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
    * 🧹 Cache and cleanup methods
    */
   async clearQueryCache(pattern?: string): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const searchPattern = pattern
       ? `postgres:query:*${pattern}*`
@@ -1095,7 +1095,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
   }
 
   async getCacheStats(): Promise<any> {
-    if (!this.redis) return { available: false };
+    if (!this.redis) {return { available: false };}
 
     const queryKeys = await this.redis.keys('postgres:query:*');
     const statsKeys = await this.redis.keys('postgres:stats:*');

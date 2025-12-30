@@ -19,7 +19,7 @@ export async function triggerN8nFlow(
   body: any,
   ctx: { userId?: string; runId?: string },
 ) {
-  if (!base || !secret) throw new Error('n8n missing env');
+  if (!base || !secret) {throw new Error('n8n missing env');}
   const path = `/webhook/${encodeURIComponent(flowKey)}`;
   const payload = { ...body };
   const { payload: json, mac } = sign(payload);

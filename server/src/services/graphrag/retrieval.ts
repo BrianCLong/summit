@@ -212,7 +212,7 @@ export function buildLlmContextPayload(
 function extractKeyProperties(
   properties?: Record<string, any>,
 ): Record<string, any> {
-  if (!properties) return {};
+  if (!properties) {return {};}
 
   const keyProps: Record<string, any> = {};
 

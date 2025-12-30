@@ -22,11 +22,11 @@ export default function WorkBoard() {
   const load = React.useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (provider) params.set('provider', provider);
-    if (assignee) params.set('assignee', assignee);
-    if (label) params.set('label', label);
-    if (project) params.set('project', project);
-    if (repo) params.set('repo', repo);
+    if (provider) {params.set('provider', provider);}
+    if (assignee) {params.set('assignee', assignee);}
+    if (label) {params.set('label', label);}
+    if (project) {params.set('project', project);}
+    if (repo) {params.set('repo', repo);}
     fetch(`/api/tickets?${params.toString()}`)
       .then((r) => r.json())
       .then((data) => setTickets(data.items || []))

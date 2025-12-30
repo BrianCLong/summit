@@ -300,7 +300,7 @@ export class GraphRAGQueryService {
         confidence: ragResponse.confidence,
         citationCount: enrichedCitations.length,
         executionTimeMs,
-        hasPreview: !!preview,
+        hasPreview: Boolean(preview),
       }, 'Completed GraphRAG query');
 
       try {
@@ -467,7 +467,7 @@ export class GraphRAGQueryService {
     logger.info({
       originalRunId: runId,
       userId,
-      hasModifications: !!(options?.modifiedQuestion || options?.modifiedParameters),
+      hasModifications: Boolean(options?.modifiedQuestion || options?.modifiedParameters),
     }, 'Replaying run');
 
     // Create replay run
@@ -550,7 +550,7 @@ export class GraphRAGQueryService {
 
     try {
       const params = [entityIds, investigationId];
-      if (tenantId) params.push(tenantId);
+      if (tenantId) {params.push(tenantId);}
 
       const result = await this.pool.query(query, params);
 
@@ -658,6 +658,6 @@ export class GraphRAGQueryService {
     if (text.length <= maxLength) {
       return text;
     }
-    return text.substring(0, maxLength - 3) + '...';
+    return `${text.substring(0, maxLength - 3)  }...`;
   }
 }

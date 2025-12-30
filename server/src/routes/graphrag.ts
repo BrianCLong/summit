@@ -130,8 +130,8 @@ function applyResponseLimits(response: any): any {
   // Truncate answer text if too long
   if (response.answer?.answerText?.length > MAX_ANSWER_LENGTH) {
     response.answer.answerText =
-      response.answer.answerText.substring(0, MAX_ANSWER_LENGTH) +
-      '... [truncated]';
+      `${response.answer.answerText.substring(0, MAX_ANSWER_LENGTH) 
+      }... [truncated]`;
   }
 
   // Limit raw context sizes

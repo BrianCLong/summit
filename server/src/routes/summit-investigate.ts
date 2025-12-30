@@ -26,7 +26,7 @@ router.post('/verification/submit', async (req, res) => {
 
 router.get('/verification/:id', (req, res) => {
   const result = verificationSwarmService.getResult(req.params.id);
-  if (!result) return res.status(404).json({ error: 'Not found or pending' });
+  if (!result) {return res.status(404).json({ error: 'Not found or pending' });}
   res.json(result);
 });
 

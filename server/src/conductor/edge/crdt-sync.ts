@@ -623,10 +623,10 @@ export class CRDTSyncEngine {
 
         for (const opJson of nodeOperations) {
           operations.push(JSON.parse(opJson));
-          if (operations.length >= limit) break;
+          if (operations.length >= limit) {break;}
         }
 
-        if (operations.length >= limit) break;
+        if (operations.length >= limit) {break;}
       }
     }
 
@@ -652,7 +652,7 @@ export class CRDTSyncEngine {
     const entityKey = `entity:${operation.entityType}:${operation.entityId}`;
     const meta = await this.redis.hgetall(`${entityKey}:meta`);
 
-    if (!meta.lastModified) return [];
+    if (!meta.lastModified) {return [];}
 
     // Look for operations on same entity around the same time
     const timeWindow = 60000; // 1 minute window

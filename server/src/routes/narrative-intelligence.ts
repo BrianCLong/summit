@@ -54,7 +54,7 @@ router.get('/narrative/:id/graph', ensureAuthenticated, async (req: Request, res
 router.post('/analyze/sentiment', ensureAuthenticated, async (req: Request, res: Response) => {
     try {
         const { text, topic } = req.body;
-        if (!text) return res.status(400).json({ error: 'Text required' });
+        if (!text) {return res.status(400).json({ error: 'Text required' });}
 
         const sentiment = sentimentService.analyzeSentiment(text);
         const emotion = sentimentService.analyzeEmotion(text);

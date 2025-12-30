@@ -5,7 +5,7 @@ export class PhoneticMatchers {
    * Computes the Soundex code for a word.
    */
   public static soundex(word: string): string {
-    if (!word) return '';
+    if (!word) {return '';}
     // natural.Soundex.process returns a string
     return natural.SoundEx.process(word);
   }
@@ -14,7 +14,7 @@ export class PhoneticMatchers {
    * Computes the Metaphone code for a word.
    */
   public static metaphone(word: string): string {
-    if (!word) return '';
+    if (!word) {return '';}
     return natural.Metaphone.process(word);
   }
 

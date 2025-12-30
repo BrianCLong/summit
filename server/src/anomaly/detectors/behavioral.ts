@@ -51,7 +51,7 @@ export class BehavioralDetector implements Detector {
   }
 
   private detectFlapping(sequence: string[]): boolean {
-    if (sequence.length < 4) return false;
+    if (sequence.length < 4) {return false;}
     const last4 = sequence.slice(-4);
     // A B A B pattern
     return last4[0] === last4[2] && last4[1] === last4[3] && last4[0] !== last4[1];

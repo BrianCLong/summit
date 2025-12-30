@@ -181,7 +181,7 @@ export default function CopilotSidebar({
     useLazyQuery(GENERATE_NARRATIVE);
 
   const handlePreview = () => {
-    if (!query.trim()) return;
+    if (!query.trim()) {return;}
 
     previewQuery({
       variables: {
@@ -196,7 +196,7 @@ export default function CopilotSidebar({
   };
 
   const handleExecute = () => {
-    if (!preview || !preview.allowed) return;
+    if (!preview || !preview.allowed) {return;}
 
     executeQuery({
       variables: {

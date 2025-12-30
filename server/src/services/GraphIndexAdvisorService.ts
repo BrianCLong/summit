@@ -150,16 +150,16 @@ class GraphIndexAdvisorService {
         const [label, property] = key.split(':');
 
         // If index exists, skip
-        if (existingIndexes.has(key)) continue;
+        if (existingIndexes.has(key)) {continue;}
 
         // Skip internal properties often indexed by ID constraints anyway (like id, uuid) if handled elsewhere.
-        if (property === 'id' || property === 'uuid') continue;
+        if (property === 'id' || property === 'uuid') {continue;}
 
         // Heuristic: Suggest if accessed frequently
         if (count >= 5) {
           let priority: 'HIGH' | 'MEDIUM' | 'LOW' = 'LOW';
-          if (count > 50) priority = 'HIGH';
-          else if (count > 20) priority = 'MEDIUM';
+          if (count > 50) {priority = 'HIGH';}
+          else if (count > 20) {priority = 'MEDIUM';}
 
           recommendations.push({
             label,

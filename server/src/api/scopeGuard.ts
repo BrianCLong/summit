@@ -3,10 +3,10 @@
 type Scope = 'read:graph'|'write:case'|'run:analytics'|'export:bundle'|'manage:keys';
 
 export function checkScope(userScopes: string[], scope: string): boolean {
-  if (userScopes.includes(scope)) return true;
+  if (userScopes.includes(scope)) {return true;}
   // Check for wildcard scope
   const [resource] = scope.split(':');
-  if (userScopes.includes(`${resource}:*`)) return true;
+  if (userScopes.includes(`${resource}:*`)) {return true;}
   return false;
 }
 

@@ -71,7 +71,7 @@ export class ScimService {
     }
 
     private parseFilter(filter: string | undefined): { field: string, value: string } | null {
-        if (!filter) return null;
+        if (!filter) {return null;}
         // Simple regex for 'field eq "value"'
         const match = filter.match(/([\w.]+)[\s]+eq[\s]+"([^"]+)"/);
         if (match) {
@@ -83,14 +83,14 @@ export class ScimService {
     private parseSort(sortBy: string | undefined, sortOrder: string | undefined): { sortBy: 'email' | 'firstName' | 'lastName' | 'createdAt', sortOrder: 'asc' | 'desc' } {
         let mappedSort: 'email' | 'firstName' | 'lastName' | 'createdAt' = 'createdAt';
         if (sortBy) {
-            if (sortBy === 'userName') mappedSort = 'email'; // Approximate
-            else if (sortBy === 'name.givenName') mappedSort = 'firstName';
-            else if (sortBy === 'name.familyName') mappedSort = 'lastName';
-            else if (sortBy === 'emails') mappedSort = 'email';
+            if (sortBy === 'userName') {mappedSort = 'email';} // Approximate
+            else if (sortBy === 'name.givenName') {mappedSort = 'firstName';}
+            else if (sortBy === 'name.familyName') {mappedSort = 'lastName';}
+            else if (sortBy === 'emails') {mappedSort = 'email';}
         }
 
         let mappedOrder: 'asc' | 'desc' = 'desc';
-        if (sortOrder && sortOrder.toLowerCase() === 'asc') mappedOrder = 'asc';
+        if (sortOrder && sortOrder.toLowerCase() === 'asc') {mappedOrder = 'asc';}
 
         return { sortBy: mappedSort, sortOrder: mappedOrder };
     }
@@ -137,7 +137,7 @@ export class ScimService {
              } else {
                  // If specific filter was requested but no exact match found, return empty
                  // Only if we are sure the search param was used.
-                 if (search) users = [];
+                 if (search) {users = [];}
              }
         }
 
@@ -155,7 +155,7 @@ export class ScimService {
 
     async getUser(tenantId: string, userId: string): Promise<ScimUser | null> {
         const result = await userManagementService.getUser(tenantId, userId, 'scim-service');
-        if (!result.data) return null;
+        if (!result.data) {return null;}
         return this.mapUserToScim(result.data);
     }
 
@@ -178,7 +178,7 @@ export class ScimService {
         }, 'scim-service');
 
         if (!result.data.user) {
-             throw new Error("Failed to create user: " + result.data.message);
+             throw new Error(`Failed to create user: ${  result.data.message}`);
         }
 
         return this.mapUserToScim(result.data.user);
@@ -197,7 +197,7 @@ export class ScimService {
         }, 'scim-service');
 
          if (!result.data.user) {
-             throw new Error("Failed to update user: " + result.data.message);
+             throw new Error(`Failed to update user: ${  result.data.message}`);
         }
 
         return this.mapUserToScim(result.data.user);
@@ -206,7 +206,7 @@ export class ScimService {
     async patchUser(tenantId: string, userId: string, patch: ScimPatchRequest): Promise<ScimUser> {
         // Fetch current user to apply patch
         const currentUserData = await this.getUser(tenantId, userId);
-        if (!currentUserData) throw new Error("User not found");
+        if (!currentUserData) {throw new Error("User not found");}
 
         const updateData: any = {};
 
@@ -225,10 +225,10 @@ export class ScimService {
                      // Assuming email logic.
                  } else if (!op.path && typeof op.value === 'object') {
                      // Full object merge
-                     if (op.value.active !== undefined) updateData.isActive = op.value.active;
+                     if (op.value.active !== undefined) {updateData.isActive = op.value.active;}
                      if (op.value.name) {
-                         if (op.value.name.givenName) updateData.firstName = op.value.name.givenName;
-                         if (op.value.name.familyName) updateData.lastName = op.value.name.familyName;
+                         if (op.value.name.givenName) {updateData.firstName = op.value.name.givenName;}
+                         if (op.value.name.familyName) {updateData.lastName = op.value.name.familyName;}
                      }
                  }
              }
@@ -237,7 +237,7 @@ export class ScimService {
         if (Object.keys(updateData).length > 0) {
             const result = await userManagementService.updateUser(tenantId, userId, updateData, 'scim-service');
             if (!result.data.user) {
-                throw new Error("Failed to patch user: " + result.data.message);
+                throw new Error(`Failed to patch user: ${  result.data.message}`);
             }
             return this.mapUserToScim(result.data.user);
         }
@@ -275,7 +275,7 @@ export class ScimService {
 
             // Sorting
             let orderBy = 'created_at';
-            if (sortBy === 'displayName') orderBy = 'display_name';
+            if (sortBy === 'displayName') {orderBy = 'display_name';}
             const direction = (sortOrder && sortOrder.toLowerCase() === 'asc') ? 'ASC' : 'DESC';
             query += ` ORDER BY ${orderBy} ${direction}`;
 
@@ -312,7 +312,7 @@ export class ScimService {
         const client = await this.pool.connect();
         try {
             const res = await client.query('SELECT * FROM scim_groups WHERE id = $1 AND tenant_id = $2', [groupId, tenantId]);
-            if (res.rows.length === 0) return null;
+            if (res.rows.length === 0) {return null;}
 
             const membersRes = await client.query(
                 'SELECT user_id FROM scim_group_members WHERE group_id = $1',
@@ -362,7 +362,7 @@ export class ScimService {
 
              // Check existence
              const check = await client.query('SELECT id FROM scim_groups WHERE id = $1 AND tenant_id = $2', [groupId, tenantId]);
-             if (check.rows.length === 0) throw new Error("Group not found");
+             if (check.rows.length === 0) {throw new Error("Group not found");}
 
              // Update Metadata
              await client.query(
@@ -408,7 +408,7 @@ export class ScimService {
         try {
             // Verify group exists
             const check = await client.query('SELECT id FROM scim_groups WHERE id = $1 AND tenant_id = $2', [groupId, tenantId]);
-            if (check.rows.length === 0) throw new Error("Group not found");
+            if (check.rows.length === 0) {throw new Error("Group not found");}
 
             await client.query('BEGIN');
 

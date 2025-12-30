@@ -3,7 +3,7 @@ import { register as defaultRegistry, Registry } from 'prom-client';
 // Lazy-load the legacy registry to avoid top-level await issues in test environments
 let cachedLegacy: Registry | null | undefined;
 async function getLegacyRegistry(): Promise<Registry | null> {
-  if (cachedLegacy !== undefined) return cachedLegacy;
+  if (cachedLegacy !== undefined) {return cachedLegacy;}
   try {
     const mod: any = await import('../monitoring/metrics.js');
     cachedLegacy = (mod.registry ?? mod.default ?? null) as Registry | null;
@@ -15,7 +15,7 @@ async function getLegacyRegistry(): Promise<Registry | null> {
 
 let cachedMerged: Registry | null = null;
 async function getMerged(): Promise<Registry> {
-  if (cachedMerged) return cachedMerged;
+  if (cachedMerged) {return cachedMerged;}
   const legacy = await getLegacyRegistry();
   if (!legacy || legacy === (defaultRegistry as unknown as Registry)) {
     cachedMerged = defaultRegistry;
@@ -49,6 +49,6 @@ export async function defaultMetricsText(): Promise<string> {
 }
 export async function legacyMetricsText(): Promise<string> {
   const legacy = await getLegacyRegistry();
-  if (!legacy) return '# no legacy registry';
+  if (!legacy) {return '# no legacy registry';}
   return legacy.metrics();
 }

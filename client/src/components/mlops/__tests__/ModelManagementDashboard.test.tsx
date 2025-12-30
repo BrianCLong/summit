@@ -209,7 +209,7 @@ describe('ModelManagementDashboard', () => {
 
     // Should show performance metrics
     const hasText = (t: string) => (_: string, node: Element | null) =>
-      !!node && node.textContent?.includes(t);
+      Boolean(node) && node.textContent?.includes(t);
     expect(screen.getByText(hasText('Accuracy: 94.2%'))).toBeInTheDocument();
     expect(screen.getByText(hasText('Precision: 92.8%'))).toBeInTheDocument();
     expect(screen.getByText(hasText('Recall: 95.6%'))).toBeInTheDocument();

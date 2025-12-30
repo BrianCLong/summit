@@ -61,7 +61,7 @@ export class PricingEngine {
       const client = await this.pool.connect();
       try {
           const res = await client.query(`SELECT * FROM plans WHERE id = $1`, [planId]);
-          if (res.rows.length === 0) return null;
+          if (res.rows.length === 0) {return null;}
           return this.mapRowToPlan(res.rows[0]);
       } finally {
           client.release();
@@ -90,7 +90,7 @@ export class PricingEngine {
     const { plan, overrides } = await this.getEffectivePlan(tenantId);
 
     const limitConfig = plan.limits[kind];
-    if (!limitConfig) return 0;
+    if (!limitConfig) {return 0;}
 
     // Check overrides
     // TODO: Merge logic for overrides
@@ -126,7 +126,7 @@ export class PricingEngine {
         const totalQty = parseFloat(row.total_quantity);
         const limitConfig = plan.limits[kind];
 
-        if (!limitConfig) continue;
+        if (!limitConfig) {continue;}
 
         const included = limitConfig.monthlyIncluded || 0;
         const billableQty = Math.max(0, totalQty - included);

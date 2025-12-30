@@ -21,7 +21,7 @@ export function chunkText(text: string, maxTokens: number = 500, overlap: number
     chunks.push(text.slice(start, end).trim());
 
     start = end - charOverlap;
-    if (start < 0) start = 0; // Should not happen with logic above but safe guard
+    if (start < 0) {start = 0;} // Should not happen with logic above but safe guard
 
     // Prevent infinite loops if overlap >= limit (config error)
     if (end <= start) {
@@ -30,7 +30,7 @@ export function chunkText(text: string, maxTokens: number = 500, overlap: number
     }
 
     // Safety check for infinite loops or massive arrays
-    if (chunks.length > 10000) break;
+    if (chunks.length > 10000) {break;}
   }
 
   return chunks;

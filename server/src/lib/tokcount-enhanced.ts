@@ -130,7 +130,7 @@ function applyBillingRounding(
     roundingUnit?: number;
   },
 ): number {
-  if (!rules) return tokens;
+  if (!rules) {return tokens;}
 
   let billableTokens = Math.max(tokens, rules.minBillableTokens || 0);
 
@@ -258,14 +258,14 @@ function serializePayload(payload: Record<string, unknown>): string {
   }
 
   if (payload.systemPrompt) {
-    text = payload.systemPrompt + '\n' + text;
+    text = `${payload.systemPrompt  }\n${  text}`;
   }
 
   if (payload.tools && Array.isArray(payload.tools)) {
     const toolsText = payload.tools
       .map((tool: unknown) => JSON.stringify(tool))
       .join('\n');
-    text += '\nTools: ' + toolsText;
+    text += `\nTools: ${  toolsText}`;
   }
 
   return text || JSON.stringify(payload);
@@ -388,7 +388,7 @@ export async function reconcileActualUsage(
     source: 'provider_api' | 'usage_logs' | 'billing_data';
   },
 ): Promise<ReconciliationResult | null> {
-  if (!actualData) return null;
+  if (!actualData) {return null;}
 
   try {
     let actualTokens = actualData.tokens;
@@ -427,7 +427,7 @@ export async function reconcileActualUsage(
       }
     }
 
-    if (!actualTokens || !actualCost) return null;
+    if (!actualTokens || !actualCost) {return null;}
 
     return {
       ...estimated,

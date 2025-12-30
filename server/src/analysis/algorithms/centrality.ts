@@ -19,10 +19,10 @@ export function degreeCentrality(
 
   graph.edges.forEach(edge => {
     if (direction === 'out' || direction === 'both') {
-        if (scores[edge.source] !== undefined) scores[edge.source]++;
+        if (scores[edge.source] !== undefined) {scores[edge.source]++;}
     }
     if (direction === 'in' || direction === 'both') {
-        if (scores[edge.target] !== undefined) scores[edge.target]++;
+        if (scores[edge.target] !== undefined) {scores[edge.target]++;}
     }
   });
 

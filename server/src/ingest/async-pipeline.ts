@@ -325,7 +325,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
       (job) =>
         job.tenantId === payload.tenantId &&
         (job.payloadHash === payloadHash ||
-          (!!idempotencyKey && job.idempotencyKey === idempotencyKey)),
+          (Boolean(idempotencyKey) && job.idempotencyKey === idempotencyKey)),
     );
 
     if (duplicateJob) {
@@ -392,7 +392,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
 
   async markJobProcessing(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
-    if (!job) return;
+    if (!job) {return;}
     this.jobs.set(jobId, {
       ...job,
       status: 'PROCESSING',
@@ -403,7 +403,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
 
   async markJobCompleted(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
-    if (!job) return;
+    if (!job) {return;}
     this.jobs.set(jobId, {
       ...job,
       status: 'COMPLETED',
@@ -414,7 +414,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
 
   async markJobFailed(jobId: string, error: string): Promise<void> {
     const job = this.jobs.get(jobId);
-    if (!job) return;
+    if (!job) {return;}
     this.jobs.set(jobId, {
       ...job,
       status: 'FAILED',
@@ -425,7 +425,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
 
   async markOutboxProcessed(outboxId: number): Promise<void> {
     const evt = this.outbox.get(outboxId);
-    if (!evt) return;
+    if (!evt) {return;}
     this.outbox.set(outboxId, { ...evt, processedAt: new Date() });
   }
 
@@ -435,7 +435,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
     error?: string,
   ): Promise<void> {
     const evt = this.outbox.get(outboxId);
-    if (!evt) return;
+    if (!evt) {return;}
     this.outbox.set(outboxId, {
       ...evt,
       nextAttemptAt,
@@ -506,7 +506,7 @@ export class AsyncIngestWorker {
   }
 
   start() {
-    if (this.timer) return;
+    if (this.timer) {return;}
     this.timer = setInterval(() => {
       this.processOnce().catch((err) => {
         logger.error({ err }, 'Async ingest worker tick failed');

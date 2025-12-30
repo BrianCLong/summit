@@ -666,8 +666,8 @@ describe('Data Integrity', () => {
 
     // Simulation flag should affect trust level
     const getTrustLevel = (metadata: DataMetadata): 'high' | 'medium' | 'low' => {
-      if (metadata.isSimulated) return 'low';
-      if (metadata.classification === 'SECRET') return 'high';
+      if (metadata.isSimulated) {return 'low';}
+      if (metadata.classification === 'SECRET') {return 'high';}
       return 'medium';
     };
 

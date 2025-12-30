@@ -54,7 +54,7 @@ export class NegotiationEngine {
 
   public async submitProposal(negotiationId: string, agentId: string, content: any): Promise<Negotiation> {
     const negotiation = this.negotiations.get(negotiationId);
-    if (!negotiation) throw new Error('Negotiation not found');
+    if (!negotiation) {throw new Error('Negotiation not found');}
 
     if (negotiation.status === NegotiationStatus.COMPLETED || negotiation.status === NegotiationStatus.FAILED) {
         throw new Error('Negotiation is closed');
@@ -98,7 +98,7 @@ export class NegotiationEngine {
 
   public resolveNegotiation(negotiationId: string, success: boolean, finalAgreement?: any): Negotiation {
       const negotiation = this.negotiations.get(negotiationId);
-      if (!negotiation) throw new Error('Negotiation not found');
+      if (!negotiation) {throw new Error('Negotiation not found');}
 
       negotiation.status = success ? NegotiationStatus.COMPLETED : NegotiationStatus.FAILED;
       negotiation.finalAgreement = finalAgreement;

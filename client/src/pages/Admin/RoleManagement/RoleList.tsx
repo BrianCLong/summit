@@ -143,7 +143,7 @@ export default function RoleList() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) {return 'N/A';}
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -425,7 +425,7 @@ export default function RoleList() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)}>
+      <Dialog open={Boolean(deleteConfirm)} onClose={() => setDeleteConfirm(null)}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>

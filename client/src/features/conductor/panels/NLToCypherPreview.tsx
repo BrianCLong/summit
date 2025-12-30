@@ -19,7 +19,7 @@ async function fetchNL2Cypher(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ task }),
     });
-    if (!res.ok) throw new Error('nl2cypher api error');
+    if (!res.ok) {throw new Error('nl2cypher api error');}
     return res.json();
   }
   // Fallback: dev mock

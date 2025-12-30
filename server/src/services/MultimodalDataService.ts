@@ -1181,7 +1181,7 @@ export class MultimodalDataService {
             RETURNING *
         `;
         const result = await this.db.query(query, [verified, userId, id]);
-        if (result.rows.length === 0) throw new Error(`Match ${id} not found`);
+        if (result.rows.length === 0) {throw new Error(`Match ${id} not found`);}
         return this.mapRowToCrossModalMatch(result.rows[0]);
     } catch (error) {
         logger.error(error, `Failed to verify relationship ${id}:`);

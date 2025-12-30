@@ -86,7 +86,7 @@ export class RenewalService {
             [contract.id, eventType]
         );
 
-        if (existing.rows.length > 0) return;
+        if (existing.rows.length > 0) {return;}
 
         logger.info(`Sending ${daysRemaining}-day renewal notice for tenant ${contract.tenant_id}`);
 

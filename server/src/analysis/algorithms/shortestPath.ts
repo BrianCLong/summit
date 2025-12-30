@@ -21,7 +21,7 @@ export function shortestPath(
   const adj = new Map<NodeId, { target: NodeId, edge: GraphEdge }[]>();
   graph.nodes.forEach(n => adj.set(n.id, []));
   graph.edges.forEach(e => {
-     if (!adj.has(e.source)) adj.set(e.source, []);
+     if (!adj.has(e.source)) {adj.set(e.source, []);}
      adj.get(e.source)?.push({ target: e.target, edge: e });
   });
 
@@ -39,7 +39,7 @@ export function shortestPath(
       };
     }
 
-    if (current.dist >= maxDepth) continue;
+    if (current.dist >= maxDepth) {continue;}
 
     const neighbors = adj.get(current.id) || [];
     for (const { target, edge } of neighbors) {

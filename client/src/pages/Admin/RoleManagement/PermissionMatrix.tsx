@@ -70,8 +70,8 @@ export default function PermissionMatrix({
   );
 
   const getPermissionStatus = (permId: string) => {
-    if (directPermissions.has(permId)) return 'direct';
-    if (inheritedPermissions.has(permId)) return 'inherited';
+    if (directPermissions.has(permId)) {return 'direct';}
+    if (inheritedPermissions.has(permId)) {return 'inherited';}
     return 'none';
   };
 
@@ -156,7 +156,7 @@ export default function PermissionMatrix({
               const categoryPerms = permissionsByCategory[category] || [];
               const grantedCount = countCategoryPermissions(category);
 
-              if (categoryPerms.length === 0) return null;
+              if (categoryPerms.length === 0) {return null;}
 
               return (
                 <Box key={category} mb={3}>

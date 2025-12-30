@@ -222,7 +222,7 @@ export async function preloadAllowlist(
             memoryCache.set(hash, query);
         }
     }
-    if (promises.length > 0) await Promise.all(promises);
+    if (promises.length > 0) {await Promise.all(promises);}
     logger.info({ count: Object.keys(queries).length }, 'Preloaded APQ allowlist');
 }
 

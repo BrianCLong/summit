@@ -29,21 +29,21 @@ export async function compareToGolden(
       const key = p.split('.').pop() || '';
       const tol = (tolerances && tolerances[key]) || 0;
       if (Math.abs(a - b) > tol)
-        diffs.push(`${p}: ${a} vs ${b} (> tol ${tol})`);
+        {diffs.push(`${p}: ${a} vs ${b} (> tol ${tol})`);}
       return;
     }
     if (Array.isArray(a) && Array.isArray(b)) {
       if (a.length !== b.length)
-        diffs.push(`${p}: len ${a.length} vs ${b.length}`);
+        {diffs.push(`${p}: len ${a.length} vs ${b.length}`);}
       a.forEach((v, i) => cmp(v, b[i], `${p}[${i}]`));
       return;
     }
     if (a && b && typeof a === 'object' && typeof b === 'object') {
       const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-      for (const k of keys) cmp(a[k], b[k], p ? `${p}.${k}` : k);
+      for (const k of keys) {cmp(a[k], b[k], p ? `${p}.${k}` : k);}
       return;
     }
-    if (a !== b) diffs.push(`${p}: ${a} vs ${b}`);
+    if (a !== b) {diffs.push(`${p}: ${a} vs ${b}`);}
   }
   cmp(actual, baseline.artifacts, '');
   return { ok: diffs.length === 0, diffs };

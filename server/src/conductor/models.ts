@@ -8,7 +8,7 @@ async function verifyCosign(_uri: string) {
 }
 
 export async function registerModel(input: any, actor: string) {
-  if (!(await verifyCosign(input.uri))) throw new Error('unsigned model');
+  if (!(await verifyCosign(input.uri))) {throw new Error('unsigned model');}
   const {
     rows: [m],
   } = await pg.query(
@@ -35,7 +35,7 @@ export async function knn(tenant: string, entityId: string, k: number) {
     `SELECT vec, version FROM embeddings WHERE tenant=$1 AND entity_id=$2 ORDER BY updated_at DESC LIMIT 1`,
     [tenant, entityId],
   );
-  if (!cur) return [];
+  if (!cur) {return [];}
   const { rows } = await pg.query(
     `SELECT entity_id, 1 - (embeddings.vec <=> $1::vector) AS score, meta
      FROM embeddings WHERE tenant=$2 AND entity_id <> $3

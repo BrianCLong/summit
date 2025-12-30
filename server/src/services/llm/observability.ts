@@ -10,8 +10,8 @@ export class ConsoleObservability implements Observability {
     logLLMCall(request: LLMRequest, result: LLMResult, durationMs: number): void {
         console.log(JSON.stringify({
             event: 'llm_call',
-            request: { ...request, prompt: request.prompt ? request.prompt.substring(0, 50) + '...' : undefined }, // Truncate prompt for logs
-            result: { ...result, text: result.text ? result.text.substring(0, 50) + '...' : undefined },
+            request: { ...request, prompt: request.prompt ? `${request.prompt.substring(0, 50)  }...` : undefined }, // Truncate prompt for logs
+            result: { ...result, text: result.text ? `${result.text.substring(0, 50)  }...` : undefined },
             durationMs,
             timestamp: new Date().toISOString()
         }));

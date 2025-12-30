@@ -182,14 +182,14 @@ export function verifyChain(events: any[], publicKey: KeyObject): boolean {
     const hash = createHash('sha256')
       .update(prevHash + payloadStr)
       .digest('hex');
-    if (hash !== e.eventHash) return false;
+    if (hash !== e.eventHash) {return false;}
     const ok = verify(
       null,
       Buffer.from(e.eventHash),
       publicKey,
       Buffer.from(e.signature, 'base64'),
     );
-    if (!ok) return false;
+    if (!ok) {return false;}
     prevHash = e.eventHash;
   }
   return true;

@@ -39,7 +39,7 @@ export async function createApolloClient() {
       max: 2,
       retryIf: (error, _operation) => {
         // Only retry on network errors, not GraphQL errors
-        return !!error && !error.result;
+        return Boolean(error) && !error.result;
       },
     },
   });
@@ -126,7 +126,7 @@ export async function createApolloClient() {
           entities: {
             keyArgs: ['filter', 'sort', 'tenant'],
             merge(existing = { items: [] }, incoming) {
-              if (!incoming?.items) return existing;
+              if (!incoming?.items) {return existing;}
               return {
                 ...incoming,
                 items: [...(existing.items || []), ...incoming.items],
@@ -136,8 +136,8 @@ export async function createApolloClient() {
           investigations: {
             keyArgs: ['after', 'status', 'tenant'],
             merge(existing, incoming) {
-              if (!incoming) return existing;
-              if (!existing) return incoming;
+              if (!incoming) {return existing;}
+              if (!existing) {return incoming;}
 
               return {
                 ...incoming,

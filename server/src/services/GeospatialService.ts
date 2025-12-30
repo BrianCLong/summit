@@ -47,7 +47,7 @@ export class GeospatialService {
   }
 
   private getPool() {
-      if (this.testPool) return this.testPool;
+      if (this.testPool) {return this.testPool;}
       return getPostgresPool();
   }
 
@@ -170,7 +170,7 @@ export class GeospatialService {
   async geocode(address: string): Promise<{lat: number, lon: number} | null> {
     // Mock implementation
     console.log(`Geocoding address: ${address}`);
-    if (!address) return null;
+    if (!address) {return null;}
     // Return a dummy location (San Francisco)
     return { lat: 37.7749, lon: -122.4194 };
   }
@@ -189,7 +189,7 @@ export class GeospatialService {
    * Nearest Neighbor heuristic
    */
   optimizeRoute(stops: {lat: number, lon: number, id: string}[]): {lat: number, lon: number, id: string}[] {
-    if (stops.length <= 1) return stops;
+    if (stops.length <= 1) {return stops;}
 
     const unvisited = [...stops];
     const optimized = [unvisited.shift()!]; // Start with the first one

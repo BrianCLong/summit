@@ -74,7 +74,7 @@ export class SIEMPlatform {
 
   private async correlate(newEvent: SIEMEvent) {
     for (const rule of this.rules) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       // Filter events matching the rule conditions within the time window
       const windowStart = new Date(Date.now() - rule.windowSeconds * 1000);
@@ -123,7 +123,7 @@ export class SIEMPlatform {
   private matchesConditions(event: SIEMEvent, conditions: RuleCondition[]): boolean {
     return conditions.every(condition => {
       const val = (event as any)[condition.field]; // Simple field access
-      if (val === undefined) return false;
+      if (val === undefined) {return false;}
 
       switch (condition.operator) {
         case 'equals': return val === condition.value;

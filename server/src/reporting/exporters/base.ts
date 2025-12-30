@@ -16,6 +16,6 @@ export function normalizeTabularData(data: unknown): TabularRow[] {
   if (Array.isArray(data)) {
     return data.map((row) => (typeof row === 'object' ? (row as TabularRow) : { value: row }));
   }
-  if (typeof data === 'object') return [(data || {}) as TabularRow];
+  if (typeof data === 'object') {return [(data || {}) as TabularRow];}
   return [{ value: data }];
 }

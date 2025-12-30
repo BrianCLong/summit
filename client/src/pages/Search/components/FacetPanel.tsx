@@ -185,15 +185,15 @@ export default function FacetPanel({ onFiltersChange }: FacetPanelProps) {
 
   const getActiveFilterCount = () => {
     let count = 0;
-    if (filters.entityTypes.length > 0) count++;
-    if (filters.dateRange.start || filters.dateRange.end) count++;
-    if (filters.riskScore[0] > 0 || filters.riskScore[1] < 100) count++;
-    if (filters.classifications.length > 0) count++;
-    if (filters.tags.length > 0) count++;
-    if (filters.sources.length > 0) count++;
-    if (filters.status.length > 0) count++;
-    if (filters.hasAttachments) count++;
-    if (filters.isBookmarked) count++;
+    if (filters.entityTypes.length > 0) {count++;}
+    if (filters.dateRange.start || filters.dateRange.end) {count++;}
+    if (filters.riskScore[0] > 0 || filters.riskScore[1] < 100) {count++;}
+    if (filters.classifications.length > 0) {count++;}
+    if (filters.tags.length > 0) {count++;}
+    if (filters.sources.length > 0) {count++;}
+    if (filters.status.length > 0) {count++;}
+    if (filters.hasAttachments) {count++;}
+    if (filters.isBookmarked) {count++;}
     return count;
   };
 

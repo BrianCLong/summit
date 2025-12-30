@@ -183,8 +183,8 @@ function getOrCreateGauge(
 }
 
 function asNumber(value: string | number | null | undefined): number {
-  if (value === null || value === undefined) return 0;
-  if (typeof value === 'number') return value;
+  if (value === null || value === undefined) {return 0;}
+  if (typeof value === 'number') {return value;}
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
@@ -554,7 +554,7 @@ export async function generateDbHealthReport(
   const now = options.now ?? new Date();
 
   let usedPgstattuple = false;
-  let bloatNotes: string[] = [];
+  const bloatNotes: string[] = [];
   let bloatEstimates: { tables: BloatEstimate[]; indexes: BloatEstimate[] };
 
   const extensionAvailable = allowExtensions && (await pgstattupleAvailable(pool));

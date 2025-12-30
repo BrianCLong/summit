@@ -809,7 +809,7 @@ export class CIBudgetService extends EventEmitter {
     },
   ): Promise<void> {
     const budget = this.tenantBudgets.get(tenantId);
-    if (!budget) return;
+    if (!budget) {return;}
 
     // Update daily usage
     budget.usage.today.totalBuilds++;
@@ -958,7 +958,7 @@ export class CIBudgetService extends EventEmitter {
     );
 
     const budget = this.tenantBudgets.get(tenantId);
-    if (!budget || dailyUsage.rows.length === 0) return;
+    if (!budget || dailyUsage.rows.length === 0) {return;}
 
     const row = dailyUsage.rows[0];
 
@@ -999,7 +999,7 @@ export class CIBudgetService extends EventEmitter {
     tenantId: string,
     budget: TenantCIBudget,
   ): Promise<void> {
-    if (!budget.alerts.enabled) return;
+    if (!budget.alerts.enabled) {return;}
 
     const dailyUtilization = this.calculateUtilization(
       budget.usage.today,

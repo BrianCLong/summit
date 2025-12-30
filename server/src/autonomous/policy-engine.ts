@@ -437,8 +437,8 @@ export class PolicyEngine {
 
     // Budget risk
     if (context.action.budgets) {
-      if (context.action.budgets.usd > 50) risk += 10;
-      if (context.action.budgets.usd > 100) risk += 20;
+      if (context.action.budgets.usd > 50) {risk += 10;}
+      if (context.action.budgets.usd > 100) {risk += 20;}
     }
 
     return Math.min(100, Math.max(0, risk));
@@ -453,10 +453,10 @@ export class PolicyEngine {
     riskScore: number,
   ): boolean {
     // Always require approval if policy explicitly denies
-    if (!decision.allowed) return true;
+    if (!decision.allowed) {return true;}
 
     // High-risk operations always require approval
-    if (riskScore >= 70) return true;
+    if (riskScore >= 70) {return true;}
 
     // Production deployments require approval
     if (

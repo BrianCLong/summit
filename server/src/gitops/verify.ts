@@ -11,7 +11,7 @@ export async function verifyPackage(pkgDir: string) {
   const disabled =
     (process.env.COSIGN_DISABLED || '').toLowerCase() === 'true' ||
     (process.env.NODE_ENV || 'development') !== 'production';
-  if (disabled) return { ok: true } as const;
+  if (disabled) {return { ok: true } as const;}
   await new Promise<void>((res, rej) =>
     execFile('cosign', ['verify-blob', '--signature', sig, entry], (e) =>
       e ? rej(e) : res(),

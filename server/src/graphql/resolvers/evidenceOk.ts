@@ -33,13 +33,13 @@ export const evidenceOkResolvers = {
       const ERROR_RATE_BUDGET = 0.02;
       const GRAPHQL_COST_BUDGET = 2.0;
       if (snapshot.p95Ms > READ_P95_BUDGET)
-        reasons.push(`p95 ${snapshot.p95Ms}ms > ${READ_P95_BUDGET}ms`);
+        {reasons.push(`p95 ${snapshot.p95Ms}ms > ${READ_P95_BUDGET}ms`);}
       if (snapshot.errorRate > ERROR_RATE_BUDGET)
-        reasons.push(`errorRate ${snapshot.errorRate} > ${ERROR_RATE_BUDGET}`);
+        {reasons.push(`errorRate ${snapshot.errorRate} > ${ERROR_RATE_BUDGET}`);}
       if ((cost?.graphqlPerMillionUsd ?? 0) > GRAPHQL_COST_BUDGET)
-        reasons.push(
+        {reasons.push(
           `graphql cost ${cost.graphqlPerMillionUsd} > ${GRAPHQL_COST_BUDGET}`,
-        );
+        );}
       return { ok: reasons.length === 0, reasons, snapshot, cost };
     },
   },

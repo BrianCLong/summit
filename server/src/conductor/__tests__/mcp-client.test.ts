@@ -107,7 +107,7 @@ describe('MCPClient', () => {
     test('disconnects from server', async () => {
       // First connect
       mockWs.once.mockImplementation((event: string, callback: any) => {
-        if (event === 'open') setTimeout(callback, 0);
+        if (event === 'open') {setTimeout(callback, 0);}
         return mockWs;
       });
       await client.connect('test-server');
@@ -122,7 +122,7 @@ describe('MCPClient', () => {
     beforeEach(async () => {
       // Setup successful connection
       mockWs.once.mockImplementation((event: string, callback: any) => {
-        if (event === 'open') setTimeout(callback, 0);
+        if (event === 'open') {setTimeout(callback, 0);}
         return mockWs;
       });
       await client.connect('test-server');
@@ -207,7 +207,7 @@ describe('MCPClient', () => {
       });
 
       mockWs.once.mockImplementation((event: string, callback: any) => {
-        if (event === 'open') setTimeout(callback, 0);
+        if (event === 'open') {setTimeout(callback, 0);}
         return mockWs;
       });
       await clientWithTimeout.connect('test-server');
@@ -228,7 +228,7 @@ describe('MCPClient', () => {
   describe('server info', () => {
     beforeEach(async () => {
       mockWs.once.mockImplementation((event: string, callback: any) => {
-        if (event === 'open') setTimeout(callback, 0);
+        if (event === 'open') {setTimeout(callback, 0);}
         return mockWs;
       });
       await client.connect('test-server');
@@ -274,7 +274,7 @@ describe('MCPClient', () => {
 
       // After connecting
       mockWs.once.mockImplementation((event: string, callback: any) => {
-        if (event === 'open') setTimeout(callback, 0);
+        if (event === 'open') {setTimeout(callback, 0);}
         return mockWs;
       });
       await client.connect('test-server');

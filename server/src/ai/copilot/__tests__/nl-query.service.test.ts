@@ -273,7 +273,7 @@ describe('NLQueryService', () => {
     });
 
     it('should handle very long prompts', async () => {
-      const longPrompt = 'show ' + 'all '.repeat(500) + 'nodes';
+      const longPrompt = `show ${  'all '.repeat(500)  }nodes`;
 
       await expect(
         service.compileQuery({

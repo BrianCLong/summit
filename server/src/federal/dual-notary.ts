@@ -129,7 +129,7 @@ export class DualNotaryService {
       }
 
       // Create temporary files for OpenSSL TSA operations
-      const tempDir = '/tmp/tsa-' + Date.now();
+      const tempDir = `/tmp/tsa-${  Date.now()}`;
       await fs.mkdir(tempDir, { recursive: true });
 
       const rootBinPath = `${tempDir}/root.bin`;
@@ -339,7 +339,7 @@ export class DualNotaryService {
       if (notarized.tsaResponse) {
         try {
           // Create temporary file for TSA verification
-          const tempDir = '/tmp/tsa-verify-' + Date.now();
+          const tempDir = `/tmp/tsa-verify-${  Date.now()}`;
           await fs.mkdir(tempDir, { recursive: true });
 
           try {
@@ -425,7 +425,7 @@ export class DualNotaryService {
     recommendedMode: 'HSM_ONLY' | 'DUAL_PATH' | 'UNAVAILABLE';
   } {
     const hsmAvailable = this.config.hsmEnabled && this.pkcs11Ctx !== null;
-    const tsaAvailable = this.config.tsaEnabled && !!this.config.tsa.url;
+    const tsaAvailable = this.config.tsaEnabled && Boolean(this.config.tsa.url);
 
     let recommendedMode: 'HSM_ONLY' | 'DUAL_PATH' | 'UNAVAILABLE';
 

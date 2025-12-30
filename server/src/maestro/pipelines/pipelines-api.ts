@@ -49,9 +49,9 @@ router.post(
   async (req, res) => {
     const parse = PipelineCreate.safeParse(req.body || {});
     if (!parse.success)
-      return res
+      {return res
         .status(400)
-        .json({ error: 'invalid_input', details: parse.error.issues });
+        .json({ error: 'invalid_input', details: parse.error.issues });}
     const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
     const created = await pipelinesRepo.create(
       parse.data.name,
@@ -169,7 +169,7 @@ router.get(
   async (req, res) => {
     const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
     const got = await pipelinesRepo.get(req.params.id, tenantId);
-    if (!got) return res.status(404).json({ error: 'not_found' });
+    if (!got) {return res.status(404).json({ error: 'not_found' });}
     res.json(got);
   },
 );
@@ -180,12 +180,12 @@ router.put(
   async (req, res) => {
     const parse = PipelineUpdate.safeParse(req.body || {});
     if (!parse.success)
-      return res
+      {return res
         .status(400)
-        .json({ error: 'invalid_input', details: parse.error.issues });
+        .json({ error: 'invalid_input', details: parse.error.issues });}
     const tenantId = (req as any).tenant || (req as any).user?.tenantId || 'default';
     const upd = await pipelinesRepo.update(req.params.id, parse.data, tenantId);
-    if (!upd) return res.status(404).json({ error: 'not_found' });
+    if (!upd) {return res.status(404).json({ error: 'not_found' });}
     res.json(upd);
   },
 );
@@ -206,7 +206,7 @@ router.put(
     const tenantId =
       (req as any).tenant || (req as any).user?.tenantId || 'default';
     const pipeline = await pipelinesRepo.get(req.params.id, tenantId);
-    if (!pipeline) return res.status(404).json({ error: 'not_found' });
+    if (!pipeline) {return res.status(404).json({ error: 'not_found' });}
 
     const nextSpec = {
       ...(pipeline.spec || {}),
@@ -255,15 +255,15 @@ router.post('/pipelines/hints', async (req, res) => {
   const hints: string[] = [];
   // Static heuristics
   if ((spec as any).nodes?.length > 8)
-    hints.push(
+    {hints.push(
       'Consider breaking into stages; >8 nodes may impact readability and retries',
-    );
+    );}
   if (
     (spec as any).nodes?.some(
       (n: any) => n.type === 'llm' && n.temperature > 0.7,
     )
   )
-    hints.push('High temperature; consider lower for determinism in CI flows');
+    {hints.push('High temperature; consider lower for determinism in CI flows');}
   // OPA policy hints (if engine available)
   try {
     const mod = await import('../../conductor/governance/opa-integration.js');
@@ -282,7 +282,7 @@ router.post('/pipelines/hints', async (req, res) => {
         context,
       );
       if (decision?.conditions?.length)
-        hints.push(...decision.conditions.map((w: any) => String(w)));
+        {hints.push(...decision.conditions.map((w: any) => String(w)));}
     }
   } catch {
     /* ignore OPA absence */

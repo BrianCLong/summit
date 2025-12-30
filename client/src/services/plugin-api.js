@@ -41,11 +41,11 @@ export const PluginAPI = {
    */
   async listPlugins(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.category) queryParams.set('category', params.category);
-    if (params.status) queryParams.set('status', params.status);
-    if (params.search) queryParams.set('search', params.search);
-    if (params.page) queryParams.set('page', String(params.page));
-    if (params.pageSize) queryParams.set('pageSize', String(params.pageSize));
+    if (params.category) {queryParams.set('category', params.category);}
+    if (params.status) {queryParams.set('status', params.status);}
+    if (params.search) {queryParams.set('search', params.search);}
+    if (params.page) {queryParams.set('page', String(params.page));}
+    if (params.pageSize) {queryParams.set('pageSize', String(params.pageSize));}
 
     const response = await fetch(`${API_BASE}?${queryParams}`, {
       headers: getHeaders(),

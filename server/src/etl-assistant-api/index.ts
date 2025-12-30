@@ -361,7 +361,7 @@ async function inferSchemaInProcess(
 }
 
 function inferFieldType(values: any[]): string {
-  if (values.length === 0) return 'unknown';
+  if (values.length === 0) {return 'unknown';}
 
   // Check for email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -449,7 +449,7 @@ function generateMappings(fields: any[]): any[] {
 }
 
 function determinePrimaryEntity(mappings: any[]): string | null {
-  if (mappings.length === 0) return null;
+  if (mappings.length === 0) {return null;}
 
   const entityCounts: Record<string, number> = {};
   for (const mapping of mappings) {
@@ -566,16 +566,16 @@ function detectPIIField(fieldName: string, values: any[]): any | null {
 }
 
 function calculateOverallRisk(piiMatches: any[]): string {
-  if (piiMatches.length === 0) return 'none';
+  if (piiMatches.length === 0) {return 'none';}
 
   const hasCritical = piiMatches.some((m) => m.severity === 'critical');
-  if (hasCritical) return 'critical';
+  if (hasCritical) {return 'critical';}
 
   const hasHigh = piiMatches.some((m) => m.severity === 'high');
-  if (hasHigh) return 'high';
+  if (hasHigh) {return 'high';}
 
   const hasMedium = piiMatches.some((m) => m.severity === 'medium');
-  if (hasMedium) return 'medium';
+  if (hasMedium) {return 'medium';}
 
   return 'low';
 }

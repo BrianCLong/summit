@@ -774,7 +774,7 @@ Check for hallucinations, citation accuracy, and quality.`;
    * Check cache for existing result
    */
   private async checkCache(request: SemanticRAGRequest): Promise<SemanticRAGResponse | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     const cacheKey = this.buildCacheKey(request);
 
@@ -797,7 +797,7 @@ Check for hallucinations, citation accuracy, and quality.`;
     request: SemanticRAGRequest,
     response: SemanticRAGResponse,
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const cacheKey = this.buildCacheKey(request);
     const ttl = 300; // 5 minutes

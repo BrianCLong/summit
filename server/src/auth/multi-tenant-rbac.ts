@@ -257,7 +257,7 @@ export class MultiTenantRBACManager {
 
       // Resolve inherited permissions
       const resolveInherited = (role: string, visited: Set<string>): void => {
-        if (visited.has(role)) return; // Prevent cycles
+        if (visited.has(role)) {return;} // Prevent cycles
         visited.add(role);
 
         const inherited = DEFAULT_ROLES[role];
@@ -321,7 +321,7 @@ export class MultiTenantRBACManager {
     permission: string,
     tenantId?: string
   ): boolean {
-    if (!this.config.enabled) return true;
+    if (!this.config.enabled) {return true;}
 
     const effectiveTenantId = tenantId || user.tenantId;
     const cacheKey = `${user.id}:${effectiveTenantId}:${permission}`;
@@ -355,7 +355,7 @@ export class MultiTenantRBACManager {
       }
 
       const roleDef = this.roleDefinitions.get(role.role);
-      if (!roleDef) continue;
+      if (!roleDef) {continue;}
 
       // Wildcard check
       if (roleDef.permissions.has('*')) {

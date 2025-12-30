@@ -15,11 +15,11 @@ export class InMemoryEventStore implements MaestroEventStore {
 
   async query(tenantId: string, filters?: Partial<MaestroEvent>): Promise<MaestroEvent[]> {
     return this.events.filter(e => {
-      if (e.tenantId !== tenantId) return false;
+      if (e.tenantId !== tenantId) {return false;}
       if (filters) {
         for (const key in filters) {
           // @ts-ignore
-          if (e[key] !== filters[key]) return false;
+          if (e[key] !== filters[key]) {return false;}
         }
       }
       return true;

@@ -25,7 +25,7 @@ class ThreatFeedService {
   }
 
   updateBehaviorModels(environment, feeds) {
-    if (!environment || !Array.isArray(environment.nodes)) return;
+    if (!environment || !Array.isArray(environment.nodes)) {return;}
     environment.nodes.forEach((node) => {
       const match = feeds.find((f) => f.targetId === node.id);
       if (match) {

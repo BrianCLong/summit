@@ -66,7 +66,7 @@ export class PlaybookManager {
 
     async executePlaybook(playbookId: string, context: Record<string, any>, tenantId: string): Promise<{ success: boolean, mitigationId?: string }> {
         const playbook = this.playbooks.find(p => p.id === playbookId);
-        if (!playbook) throw new Error('Playbook not found');
+        if (!playbook) {throw new Error('Playbook not found');}
 
         // Log the execution as a mitigation node
         const mitigation = await this.getSecuriteyes().createNode<Mitigation>(NODE_LABELS.MITIGATION, {

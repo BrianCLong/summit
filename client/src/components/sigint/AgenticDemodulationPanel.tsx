@@ -72,8 +72,8 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
 
   const formatDuration = (start: number, end?: number): string => {
     const duration = (end || Date.now()) - start;
-    if (duration < 1000) return `${duration}ms`;
-    if (duration < 60000) return `${(duration / 1000).toFixed(1)}s`;
+    if (duration < 1000) {return `${duration}ms`;}
+    if (duration < 60000) {return `${(duration / 1000).toFixed(1)}s`;}
     return `${Math.floor(duration / 60000)}m ${Math.floor((duration % 60000) / 1000)}s`;
   };
 

@@ -288,7 +288,7 @@ export class ImageProcessingPipeline {
   private async extractExifData(
     exifBuffer?: Buffer,
   ): Promise<Record<string, unknown> | undefined> {
-    if (!exifBuffer) return undefined;
+    if (!exifBuffer) {return undefined;}
 
     try {
       const decoded = exifReader(exifBuffer);
@@ -310,7 +310,7 @@ export class ImageProcessingPipeline {
     metadata: sharp.Metadata,
     config: Required<ImageProcessingOptions>,
   ): Promise<FacialRecognitionResult | undefined> {
-    if (!config.facialRecognitionHook) return undefined;
+    if (!config.facialRecognitionHook) {return undefined;}
 
     try {
       const result = await config.facialRecognitionHook(imagePath, {
@@ -329,9 +329,9 @@ export class ImageProcessingPipeline {
   }
 
   private formatFromMime(mimeType: string): keyof FormatEnum {
-    if (mimeType.includes('png')) return 'png';
-    if (mimeType.includes('webp')) return 'webp';
-    if (mimeType.includes('avif')) return 'avif';
+    if (mimeType.includes('png')) {return 'png';}
+    if (mimeType.includes('webp')) {return 'webp';}
+    if (mimeType.includes('avif')) {return 'avif';}
     return 'jpeg';
   }
 
@@ -370,7 +370,7 @@ export class ImageProcessingPipeline {
       }
     }
 
-    if (!watermark.text) return undefined;
+    if (!watermark.text) {return undefined;}
 
     const fontSize = watermark.size ?? 42;
     const margin = watermark.margin ?? 24;

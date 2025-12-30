@@ -57,7 +57,7 @@ function inflateNodes(batch: any[], existingCount: number): Node[] {
 }
 
 function stitchEdges(nodes: Node[], existingEdges: Edge[]): Edge[] {
-  if (nodes.length < 2) return existingEdges;
+  if (nodes.length < 2) {return existingEdges;}
   const startIdx = existingEdges.length;
   const nextEdges: Edge[] = nodes.slice(1).map((node, idx) => ({
     id: `edge-${startIdx + idx}`,
@@ -102,7 +102,7 @@ export const useAnalysisStore = (create as any)((set: any, get: any) => ({
 
     const params = new URLSearchParams({ stream: 'true', limit: '200' });
     const { lastCursor } = get();
-    if (lastCursor) params.set('cursor', lastCursor);
+    if (lastCursor) {params.set('cursor', lastCursor);}
 
     const source = new EventSource(`/api/entities?${params.toString()}`);
     streamSource = source;

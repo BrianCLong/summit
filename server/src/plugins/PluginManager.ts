@@ -406,16 +406,16 @@ export class PluginManager {
     tenantId: string
   ): Promise<void> {
     const subscribers = this.eventSubscriptions.get(event);
-    if (!subscribers || subscribers.size === 0) return;
+    if (!subscribers || subscribers.size === 0) {return;}
 
     for (const pluginId of subscribers) {
       try {
         const plugin = this.registry.getPluginInstance(pluginId);
-        if (!plugin?.onEvent) continue;
+        if (!plugin?.onEvent) {continue;}
 
         // Check if plugin is enabled for tenant
         const configResult = await this.registry.getTenantConfig(pluginId, tenantId, 'system');
-        if (!configResult.data?.enabled) continue;
+        if (!configResult.data?.enabled) {continue;}
 
         const context: PluginContext = {
           tenantId,

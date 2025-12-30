@@ -48,7 +48,7 @@ Answer:`;
         answerText = result;
     } catch (e: any) {
         console.error("LLM Error", e);
-        answerText = "Error generating answer: " + e.message;
+        answerText = `Error generating answer: ${  e.message}`;
     }
 
     // 5. Build Response
@@ -57,7 +57,7 @@ Answer:`;
         documentId: c.documentId,
         collectionId: c.collectionId,
         score: c.score,
-        snippet: c.text.substring(0, 100) + "..."
+        snippet: `${c.text.substring(0, 100)  }...`
     }));
 
     return {

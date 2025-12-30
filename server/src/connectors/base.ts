@@ -114,7 +114,7 @@ export abstract class BaseConnector extends EventEmitter {
    * Validate configuration
    */
   validateConfig(): boolean {
-    return !!this.config.id && !!this.config.type;
+    return Boolean(this.config.id) && Boolean(this.config.type);
   }
 
   /**

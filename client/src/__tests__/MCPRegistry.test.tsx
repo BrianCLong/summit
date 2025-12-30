@@ -14,16 +14,16 @@ describe('MCPRegistry page', () => {
         return new Response(JSON.stringify([]), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         }) as any;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       return new Response('Not Found', { status: 404 }) as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     }) as any;
   });
   afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     global.fetch = origFetch as any;
   });
 

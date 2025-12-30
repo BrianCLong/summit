@@ -151,7 +151,7 @@ class GeointService {
   buildTimeSeries(locationHistory, intervalMinutes = 60) {
     try {
       if (!Array.isArray(locationHistory) || locationHistory.length === 0)
-        return [];
+        {return [];}
       const sorted = [...locationHistory].sort(
         (a, b) => new Date(a.timestamp) - new Date(b.timestamp),
       );
@@ -171,7 +171,7 @@ class GeointService {
           (1000 * 60 * 60);
         const speed = dtHrs > 0 ? distKm / dtHrs : 0;
         if (!bins.has(key))
-          bins.set(key, { distanceKm: 0, samples: 0, maxSpeed: 0, speeds: [] });
+          {bins.set(key, { distanceKm: 0, samples: 0, maxSpeed: 0, speeds: [] });}
         const b = bins.get(key);
         b.distanceKm += distKm;
         b.samples += 1;
@@ -212,7 +212,7 @@ class GeointService {
       const noise = [];
 
       for (let i = 0; i < points.length; i++) {
-        if (visited.has(i)) continue;
+        if (visited.has(i)) {continue;}
 
         const neighbors = this.getNeighbors(points, i, epsilon);
 
@@ -248,7 +248,7 @@ class GeointService {
     const currentPoint = points[pointIndex];
 
     for (let i = 0; i < points.length; i++) {
-      if (i === pointIndex) continue;
+      if (i === pointIndex) {continue;}
       const distance = this.calculateDistance(currentPoint, points[i], 'km');
       if (distance <= epsilon) {
         neighbors.push(i);

@@ -97,7 +97,7 @@ class CoherenceSubscriptionManager {
         payload: ActivityUpdate,
         variables: { tenantId: string; activityTypes?: string[] },
       ) => {
-        if (payload.tenantId !== variables.tenantId) return false;
+        if (payload.tenantId !== variables.tenantId) {return false;}
 
         if (variables.activityTypes?.length) {
           return variables.activityTypes.includes(payload.fingerprint.type);
@@ -116,7 +116,7 @@ class CoherenceSubscriptionManager {
         payload: NarrativeUpdate,
         variables: { tenantId: string; minSeverity?: string },
       ) => {
-        if (payload.tenantId !== variables.tenantId) return false;
+        if (payload.tenantId !== variables.tenantId) {return false;}
 
         if (variables.minSeverity) {
           const severityLevels = { low: 1, medium: 2, high: 3 };

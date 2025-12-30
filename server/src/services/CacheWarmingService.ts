@@ -84,7 +84,7 @@ export class CacheWarmingService {
   }
 
   private percentile(values: number[], p: number): number {
-    if (!values.length) return 0;
+    if (!values.length) {return 0;}
     const sorted = [...values].sort((a, b) => a - b);
     const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p));
     return sorted[idx];
@@ -633,7 +633,7 @@ export class CacheWarmingService {
    * Event-driven warming on investigation open
    */
   async onInvestigationOpened(investigationId: string, tenantId: string): Promise<void> {
-    if (!this.config.enableEventDriven) return;
+    if (!this.config.enableEventDriven) {return;}
 
     logger.info(`[CACHE WARM] Investigation opened: ${investigationId}`);
 
@@ -651,7 +651,7 @@ export class CacheWarmingService {
     investigationId: string,
     tenantId: string,
   ): Promise<void> {
-    if (!this.config.enableEventDriven) return;
+    if (!this.config.enableEventDriven) {return;}
 
     logger.debug(`[CACHE WARM] Entity created: ${entityId}`);
 

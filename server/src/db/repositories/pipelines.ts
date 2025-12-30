@@ -50,7 +50,7 @@ export async function getPipelineDef(id: string) {
       `SELECT id, name, nodes, edges, updated_at FROM pipeline_defs WHERE id=$1`,
       [id],
     );
-    if (!res.rows.length) return null;
+    if (!res.rows.length) {return null;}
     const r = res.rows[0];
     return {
       id: r.id,

@@ -233,33 +233,33 @@ export class EventBuilder {
   }
 
   public correlationId(id: string): this {
-    if (!this.event.metadata) this.event.metadata = {};
+    if (!this.event.metadata) {this.event.metadata = {};}
     this.event.metadata.correlationId = id;
     return this;
   }
 
   public source(source: string): this {
-    if (!this.event.metadata) this.event.metadata = {};
+    if (!this.event.metadata) {this.event.metadata = {};}
     this.event.metadata.source = source;
     return this;
   }
 
   public addLink(rel: string, href: string, title?: string): this {
-    if (!this.event.metadata) this.event.metadata = {};
-    if (!this.event.metadata.links) this.event.metadata.links = [];
+    if (!this.event.metadata) {this.event.metadata = {};}
+    if (!this.event.metadata.links) {this.event.metadata.links = [];}
     (this.event.metadata.links as Array<any>).push({ rel, href, title });
     return this;
   }
 
   public build(): CanonicalEvent {
     // Validate required fields
-    if (!this.event.type) throw new Error('Event type is required');
-    if (!this.event.actor) throw new Error('Event actor is required');
-    if (!this.event.subject) throw new Error('Event subject is required');
-    if (!this.event.context) throw new Error('Event context is required');
-    if (!this.event.severity) throw new Error('Event severity is required');
-    if (!this.event.title) throw new Error('Event title is required');
-    if (!this.event.message) throw new Error('Event message is required');
+    if (!this.event.type) {throw new Error('Event type is required');}
+    if (!this.event.actor) {throw new Error('Event actor is required');}
+    if (!this.event.subject) {throw new Error('Event subject is required');}
+    if (!this.event.context) {throw new Error('Event context is required');}
+    if (!this.event.severity) {throw new Error('Event severity is required');}
+    if (!this.event.title) {throw new Error('Event title is required');}
+    if (!this.event.message) {throw new Error('Event message is required');}
 
     return this.event as CanonicalEvent;
   }

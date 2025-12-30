@@ -42,7 +42,7 @@ export function healthIntegrationsRouter() {
           headers: { Authorization: `Basic ${auth}` },
         });
         out.jira.ok = r.ok;
-        if (!r.ok) out.jira.note = `HTTP ${r.status}`;
+        if (!r.ok) {out.jira.note = `HTTP ${r.status}`;}
       } else {
         out.jira.note = 'missing env';
       }
@@ -62,7 +62,7 @@ export function healthIntegrationsRouter() {
         body: JSON.stringify({ query: q }),
       });
       out.maestro.ok = rsp.ok;
-      if (!rsp.ok) out.maestro.note = `HTTP ${rsp.status}`;
+      if (!rsp.ok) {out.maestro.note = `HTTP ${rsp.status}`;}
     } catch {
       out.maestro.note = 'unreachable';
     }

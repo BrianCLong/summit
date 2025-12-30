@@ -362,8 +362,8 @@ export class CoherenceEcosystem {
       notificationSettings: {
         scoreThreshold: 0.8,
         riskThreshold: 0.7,
-        enableSlack: !!this.config.notifications?.slack?.webhookUrl,
-        enableEmail: !!this.config.notifications?.email?.smtpHost,
+        enableSlack: Boolean(this.config.notifications?.slack?.webhookUrl),
+        enableEmail: Boolean(this.config.notifications?.email?.smtpHost),
       },
     };
 

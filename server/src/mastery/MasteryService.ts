@@ -22,7 +22,7 @@ export class MasteryService {
 
   startLab(labId: string, userId: string, tenantId: string): LabRun {
     const lab = this.labs.get(labId);
-    if (!lab) throw new Error('Lab not found');
+    if (!lab) {throw new Error('Lab not found');}
 
     const runId = randomUUID();
 
@@ -76,13 +76,13 @@ export class MasteryService {
 
   async validateStep(runId: string, stepId: string): Promise<{ success: boolean; message?: string }> {
     const run = this.runs.get(runId);
-    if (!run) throw new Error('Run not found');
+    if (!run) {throw new Error('Run not found');}
 
     const lab = this.labs.get(run.labId);
-    if (!lab) throw new Error('Lab definition not found');
+    if (!lab) {throw new Error('Lab definition not found');}
 
     const stepDef = lab.steps.find(s => s.id === stepId);
-    if (!stepDef) throw new Error('Step definition not found');
+    if (!stepDef) {throw new Error('Step definition not found');}
 
     // Logic to validate
     const validation = stepDef.validation;
@@ -124,8 +124,8 @@ export class MasteryService {
             return timeMatch && actorMatch && payloadMatch && metadataMatch;
         });
 
-        if (match) success = true;
-        else message = `Action ${validation.config.actionType} not found for user since lab started.`;
+        if (match) {success = true;}
+        else {message = `Action ${validation.config.actionType} not found for user since lab started.`;}
 
         } else if (validation.type === 'custom_check') {
             if (validation.config.checkName === 'all_claims_cited') {
@@ -219,7 +219,7 @@ export class MasteryService {
 
   async issueCertificate(userId: string, tenantId: string, certName: string) {
     const existingCerts = await this.getUserCertificates(userId, tenantId);
-    if (existingCerts.some(c => c.name === certName)) return;
+    if (existingCerts.some(c => c.name === certName)) {return;}
 
     const certId = randomUUID();
     const cert: Certificate = {
@@ -251,7 +251,7 @@ export class MasteryService {
   }
 
   async getUserCertificates(userId: string, tenantId?: string): Promise<Certificate[]> {
-    if (!tenantId) return []; // Needs tenantId for ledger query
+    if (!tenantId) {return [];} // Needs tenantId for ledger query
     try {
         const entries = await provenanceLedger.getEntries(tenantId, {
             actionType: 'CERTIFICATE_ISSUED',
@@ -260,7 +260,7 @@ export class MasteryService {
         return entries
             .filter(e => e.actorId === userId || (e.payload as any).certificate?.userId === userId)
             .map(e => (e.payload as any).certificate as Certificate)
-            .filter(c => !!c);
+            .filter(c => Boolean(c));
     } catch (e) {
         console.error('Failed to fetch user certificates', e);
         return [];

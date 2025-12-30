@@ -8,7 +8,7 @@ let subscriberStarted = false;
 
 async function broadcastInvalidation(patterns: string[]) {
   const redis = getRedisClient();
-  if (!redis) return;
+  if (!redis) {return;}
   try {
     await redis.publish(INVALIDATION_CHANNEL, JSON.stringify({ patterns }));
   } catch { }
@@ -29,22 +29,22 @@ async function performInvalidation(redis: any, patterns: string[]): Promise<void
         : rest && rest !== '*' ? `idx:${prefix}:${rest}` : `idx:${prefix}`;
     try {
       const members = await redis.sMembers(idxKey);
-      for (const k of members || []) toDelete.add(k);
-      if (members?.length) await redis.sRem(idxKey, members);
+      for (const k of members || []) {toDelete.add(k);}
+      if (members?.length) {await redis.sRem(idxKey, members);}
     } catch { }
   }
-  if (toDelete.size > 0) await redis.del(...Array.from(toDelete));
+  if (toDelete.size > 0) {await redis.del(...Array.from(toDelete));}
 }
 
 export async function startCacheInvalidationListener(): Promise<void> {
-  if (subscriberStarted) return;
+  if (subscriberStarted) {return;}
   const base = getRedisClient() as any;
-  if (!base || typeof base.duplicate !== 'function') return;
+  if (!base || typeof base.duplicate !== 'function') {return;}
   try {
     const sub = base.duplicate();
-    if (!sub) return;
+    if (!sub) {return;}
     subscriberStarted = true;
-    if (typeof sub.connect === 'function') await sub.connect();
+    if (typeof sub.connect === 'function') {await sub.connect();}
     sub.on('message', async (_channel: string, payload: string) => {
       try {
         const parsed = JSON.parse(payload || '{}');

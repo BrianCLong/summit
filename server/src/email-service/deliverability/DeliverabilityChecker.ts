@@ -267,11 +267,9 @@ export class DeliverabilityChecker {
     const wordCount = text.split(/\s+/).length;
     const linkCount = (html.match(/<a/gi) || []).length;
     const imageCount = (html.match(/<img/gi) || []).length;
-    const hasUnsubscribeLink = !!(
-      message.unsubscribeUrl ||
+    const hasUnsubscribeLink = Boolean(message.unsubscribeUrl ||
       message.listUnsubscribe ||
-      html.toLowerCase().includes('unsubscribe')
-    );
+      html.toLowerCase().includes('unsubscribe'));
     const hasPhysicalAddress = /\d+\s+[\w\s]+,\s*\w+\s+\d{5}/.test(html);
 
     return {
@@ -345,13 +343,13 @@ export class DeliverabilityChecker {
     score -= spamScore.score * 5;
 
     // Deduct for missing authentication
-    if (!authentication.spfConfigured) score -= 10;
-    if (!authentication.dkimConfigured) score -= 10;
-    if (!authentication.dmarcConfigured) score -= 5;
+    if (!authentication.spfConfigured) {score -= 10;}
+    if (!authentication.dkimConfigured) {score -= 10;}
+    if (!authentication.dmarcConfigured) {score -= 5;}
 
     // Deduct for missing compliance elements
-    if (!contentAnalysis.hasUnsubscribeLink) score -= 15;
-    if (!contentAnalysis.hasPhysicalAddress) score -= 10;
+    if (!contentAnalysis.hasUnsubscribeLink) {score -= 15;}
+    if (!contentAnalysis.hasPhysicalAddress) {score -= 10;}
 
     return Math.max(0, Math.min(100, score));
   }

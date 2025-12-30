@@ -6,11 +6,11 @@ function encodeCursor(offset, limit) {
 }
 
 function decodeCursor(cursor, fallback) {
-  if (!cursor || typeof cursor !== 'string') return fallback;
+  if (!cursor || typeof cursor !== 'string') {return fallback;}
   try {
     const raw = Buffer.from(cursor, 'base64url').toString('utf8');
     const parsed = JSON.parse(raw);
-    if (parsed.v !== CURSOR_VERSION) return fallback;
+    if (parsed.v !== CURSOR_VERSION) {return fallback;}
     const offset = Number.isFinite(parsed.offset) ? parsed.offset : fallback.offset;
     const limit = Number.isFinite(parsed.limit) ? parsed.limit : fallback.limit;
     return { offset, limit };
@@ -21,7 +21,7 @@ function decodeCursor(cursor, fallback) {
 
 function normalizeLimit(limit, defaultValue, max = 1000) {
   const asNumber = Number(limit);
-  if (!Number.isFinite(asNumber) || asNumber <= 0) return defaultValue;
+  if (!Number.isFinite(asNumber) || asNumber <= 0) {return defaultValue;}
   return Math.min(asNumber, max);
 }
 

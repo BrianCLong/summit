@@ -107,7 +107,7 @@ class TasksRepo {
       values.push(data.error_message);
     }
 
-    if (sets.length === 0) return this.get(id, tenantId);
+    if (sets.length === 0) {return this.get(id, tenantId);}
 
     // Prevent overwriting a terminal state (cancelled) with a new state unless explicitly handled
     // However, if we are marking as failed, we might want to overwrite running.

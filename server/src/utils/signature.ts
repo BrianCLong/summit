@@ -26,7 +26,7 @@ export function hmacHex(
 export function safeEqual(a: string, b: string): boolean {
   const ab = Buffer.from(a, 'utf8');
   const bb = Buffer.from(b, 'utf8');
-  if (ab.length !== bb.length) return false;
+  if (ab.length !== bb.length) {return false;}
   try {
     return crypto.timingSafeEqual(ab, bb);
   } catch {

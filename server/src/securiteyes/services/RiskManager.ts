@@ -28,14 +28,14 @@ export class RiskManager {
         // The mock in test might need to be awaited or is returning undefined unexpectedly.
         // Let's ensure we are using the service correctly.
         const service = this.getSecuriteyes();
-        let profile = await service.getOrCreateRiskProfile(principalId, tenantId);
+        const profile = await service.getOrCreateRiskProfile(principalId, tenantId);
 
         if (!profile) {
             // If the service failed to return/create, we can't update risk.
              throw new Error(`Could not retrieve risk profile for ${principalId}`);
         }
         let newScore = profile.riskScore;
-        let factor = 'unknown';
+        const factor = 'unknown';
 
         switch (event.severity) {
             case 'critical': newScore += 50; break;

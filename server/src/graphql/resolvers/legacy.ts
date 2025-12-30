@@ -123,7 +123,7 @@ export const legacyResolvers = {
       { input }: { input: CreateInvestigationInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -178,7 +178,7 @@ export const legacyResolvers = {
       { input }: { input: CreateEntityInput },
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const driver = getNeo4jDriver();
       const session = driver.session();
@@ -251,7 +251,7 @@ export const legacyResolvers = {
       { investigationId, text }: ImportEntitiesArgs,
       { user }: Context,
     ) => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       // Simple entity extraction
       const emailPattern =
@@ -306,7 +306,7 @@ export const legacyResolvers = {
       context: Context,
     ) => {
       const { user } = context;
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
 
       const namePattern = /\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)*\b/g;
       const names = Array.from(new Set(text.match(namePattern) || []));

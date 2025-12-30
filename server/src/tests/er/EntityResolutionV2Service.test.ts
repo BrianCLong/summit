@@ -125,11 +125,11 @@ describe('EntityResolutionV2Service', () => {
               records: [
                 {
                   get: (key: string) => {
-                    if (key === 'decisionId') return 'dec-1';
-                    if (key === 'mergeId') return 'merge-1';
-                    if (key === 'masterId') return 'm1';
-                    if (key === 'mergeIds') return ['d1'];
-                    if (key === 'created') return false;
+                    if (key === 'decisionId') {return 'dec-1';}
+                    if (key === 'mergeId') {return 'merge-1';}
+                    if (key === 'masterId') {return 'm1';}
+                    if (key === 'mergeIds') {return ['d1'];}
+                    if (key === 'created') {return false;}
                     return null;
                   },
                 },

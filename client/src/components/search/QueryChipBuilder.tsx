@@ -54,7 +54,7 @@ export function QueryChipBuilder({
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
   const addChip = useCallback(() => {
-    if (!newChip.field || !newChip.operator || !newChip.value) return;
+    if (!newChip.field || !newChip.operator || !newChip.value) {return;}
 
     const chip: QueryChip = {
       id: `chip-${Date.now()}-${Math.random().toString(36).slice(2)}`,

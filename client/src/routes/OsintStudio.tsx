@@ -68,7 +68,7 @@ export default function OsintStudio() {
   const [addItem] = useMutation(ADD_ITEM_M); // This will now use the actual addCaseItem mutation
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
     cyRef.current = cytoscape({
       container: containerRef.current,
       elements: [],
@@ -138,7 +138,7 @@ export default function OsintStudio() {
   }
 
   useEffect(() => {
-    if (!data?.osintItems) return;
+    if (!data?.osintItems) {return;}
     const nodes = data.osintItems.map((d: any) => ({
       data: {
         id: d.hash,
@@ -245,7 +245,7 @@ export default function OsintStudio() {
                 selected?.license && selected.license.allowExport === false
               }
               onClick={() => {
-                if (!selected) return;
+                if (!selected) {return;}
                 $(document).trigger('intelgraph:toast', ['Preparing export…']);
                 // Export single selected for MVP; multi-select can follow
                 fetch('/graphql', {
@@ -260,7 +260,7 @@ export default function OsintStudio() {
                   .then((r) => r.json())
                   .then((res: any) => {
                     const url = res?.data?.exportOsintBundle?.url;
-                    if (url) window.open(url, '_blank');
+                    if (url) {window.open(url, '_blank');}
                   });
               }}
             >

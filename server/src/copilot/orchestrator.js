@@ -97,7 +97,7 @@ function emit(runId, taskId, level, message, payload) {
     payload: payload || null,
   };
   store.pushEvent(runId, ev);
-  if (io) io.to(`copilot:run:${runId}`).emit('copilot:event', ev);
+  if (io) {io.to(`copilot:run:${runId}`).emit('copilot:event', ev);}
 }
 
 module.exports = { startRun, setIO };

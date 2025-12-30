@@ -31,7 +31,7 @@ router.post(
   express.raw({ type: '*/*', limit: '1mb' }),
   async (req: Request, res: Response) => {
     if (!secret)
-      return res.status(503).json({ ok: false, error: 'n8n disabled' });
+      {return res.status(503).json({ ok: false, error: 'n8n disabled' });}
     if (allowedIps.length && !allowedIps.includes(req.ip)) {
       return res.status(403).json({ ok: false, error: 'ip blocked' });
     }
@@ -43,7 +43,7 @@ router.post(
         JSON.stringify(req.body || {});
     (req as any).rawBody = raw;
     if (!verifySig(raw, sig))
-      return res.status(401).json({ ok: false, error: 'bad signature' });
+      {return res.status(401).json({ ok: false, error: 'bad signature' });}
 
     const provenance = ProvenanceLedgerService.getInstance();
     let payload: any = {};
@@ -55,7 +55,7 @@ router.post(
     (req as any).body = payload;
     const { runId, artifact, content, meta } = (payload || {}) as any;
     if (!runId)
-      return res.status(400).json({ ok: false, error: 'runId required' });
+      {return res.status(400).json({ ok: false, error: 'runId required' });}
 
     try {
       await provenance.recordProvenanceEntry({

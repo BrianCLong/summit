@@ -77,7 +77,7 @@ export class LLMAnalystService {
    */
   approveProduct(id: string): GeneratedProduct {
     const product = this.products.get(id);
-    if (!product) throw new Error('Product not found');
+    if (!product) {throw new Error('Product not found');}
     product.status = 'APPROVED';
     this.products.set(id, product);
     return product;

@@ -13,7 +13,7 @@ function sortByPriorityStable(impls, key) {
   return [...impls].sort((a, b) => {
     const pa = a?.[`${key}Priority`] ?? 0;
     const pb = b?.[`${key}Priority`] ?? 0;
-    if (pb !== pa) return pb - pa; // higher priority first
+    if (pb !== pa) {return pb - pa;} // higher priority first
     return String(a?.name ?? '').localeCompare(String(b?.name ?? '')); // stable tiebreak
   });
 }

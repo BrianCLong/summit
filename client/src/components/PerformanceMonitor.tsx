@@ -28,7 +28,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     const now = performance.now();
 
     // Memory usage (if available)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const memory = (performance as any).memory;
     const memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // MB
 
@@ -41,7 +41,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     ).length;
 
     // Error count from console (simplified tracking)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const errorCount = (window as any).__performanceErrors || 0;
 
     // Render time (using performance marks if available)
@@ -59,7 +59,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
   }, [sampleInterval]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const interval = setInterval(() => {
       const newMetrics = collectMetrics();
@@ -99,7 +99,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
         }
       : null;
 
-  if (!enabled || !currentMetrics) return null;
+  if (!enabled || !currentMetrics) {return null;}
 
   return (
     <>
@@ -191,7 +191,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
                 <div className="h-16 bg-gray-50 rounded relative overflow-hidden">
                   <svg width="100%" height="100%" className="absolute">
                     {metrics.slice(-20).map((metric, i, arr) => {
-                      if (i === 0) return null;
+                      if (i === 0) {return null;}
                       const prevMetric = arr[i - 1];
                       const x1 = ((i - 1) / (arr.length - 1)) * 100;
                       const x2 = (i / (arr.length - 1)) * 100;
@@ -237,9 +237,9 @@ export const usePerformanceTracking = () => {
   }, []);
 
   const trackError = useCallback((error: Error) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     (window as any).__performanceErrors =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       ((window as any).__performanceErrors || 0) + 1;
     console.error('[Performance] Error tracked:', error);
   }, []);

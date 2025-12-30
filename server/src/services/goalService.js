@@ -61,7 +61,7 @@ class GoalService {
    */
   static updateGoal(id, updateData) {
     const goal = goals.get(id);
-    if (!goal) return null;
+    if (!goal) {return null;}
 
     const updatedGoal = {
       ...goal,

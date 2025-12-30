@@ -507,10 +507,10 @@ export class ChaosController extends EventEmitter {
 
     // Find applicable experiments
     const activeExperiments = Array.from(this.experiments.values()).filter(e => {
-      if (!e.enabled) return false;
-      if (e.tenantId && e.tenantId !== context.tenantId) return false;
-      if (e.maxInjections && e.injectionCount >= e.maxInjections) return false;
-      if (e.endTime && new Date() > e.endTime) return false;
+      if (!e.enabled) {return false;}
+      if (e.tenantId && e.tenantId !== context.tenantId) {return false;}
+      if (e.maxInjections && e.injectionCount >= e.maxInjections) {return false;}
+      if (e.endTime && new Date() > e.endTime) {return false;}
       return true;
     });
 

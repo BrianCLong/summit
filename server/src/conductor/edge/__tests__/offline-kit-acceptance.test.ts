@@ -537,7 +537,7 @@ describe('Offline Kit - Acceptance Criteria', () => {
       console.log('Step 5: Verifying complete workflow...');
       const allChecks = {
         computationVerified: computationResult.metadata.verified,
-        operationCreated: !!opId,
+        operationCreated: Boolean(opId),
         policyCompliant: !simulation.leakageDetected,
         syncSuccessful: syncResult.success,
         syncVerified: syncResult.verified,

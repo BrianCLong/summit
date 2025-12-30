@@ -169,9 +169,9 @@ export class DefaultPatternMinerService implements PatternMinerService {
   }
 
   private scoreToConfidence(score: number): 'low' | 'medium' | 'high' | 'very_high' {
-    if (score >= 0.85) return 'very_high';
-    if (score >= 0.7) return 'high';
-    if (score >= 0.5) return 'medium';
+    if (score >= 0.85) {return 'very_high';}
+    if (score >= 0.7) {return 'high';}
+    if (score >= 0.5) {return 'medium';}
     return 'low';
   }
 }
@@ -298,13 +298,13 @@ export class PatternMinerStepExecutor extends BaseStepExecutor {
   }
 
   private calculateQualityScore(matches: CampaignMatch[]): number {
-    if (matches.length === 0) return 0;
+    if (matches.length === 0) {return 0;}
 
     let score = 0;
     for (const match of matches) {
       score += match.score * 0.4;
-      if (match.actorProfile) score += 0.3;
-      if (match.matchedTTPs.length > 0) score += 0.3;
+      if (match.actorProfile) {score += 0.3;}
+      if (match.matchedTTPs.length > 0) {score += 0.3;}
     }
     return Math.min(score / matches.length, 1.0);
   }

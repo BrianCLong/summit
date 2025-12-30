@@ -34,11 +34,11 @@ export class PredictiveOpsService {
     try {
       // 1. Check Capacity Saturation
       const capacitySignal = await this.checkCapacitySaturation(tenantId);
-      if (capacitySignal) signals.push(capacitySignal);
+      if (capacitySignal) {signals.push(capacitySignal);}
 
       // 2. Check Error Rate Inflection
       const errorSignal = await this.checkErrorRateInflection(tenantId);
-      if (errorSignal) signals.push(errorSignal);
+      if (errorSignal) {signals.push(errorSignal);}
 
       // 3. Check Approval Queue Backlog
       // TODO: Implement queue backlog check once ApprovalService is ready

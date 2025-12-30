@@ -304,7 +304,7 @@ class MultimodalFusionLayer {
   }
 
   toPgVector(vector) {
-    if (!Array.isArray(vector)) return null;
+    if (!Array.isArray(vector)) {return null;}
     return `[${vector.join(',')}]`;
   }
 

@@ -11,7 +11,7 @@ class ExternalAPIService {
       wikipedia_search: {
         info: 'Wikipedia OpenSearch',
         handler: async ({ term }) => {
-          if (!term) throw new Error('term required');
+          if (!term) {throw new Error('term required');}
           const url = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(term)}&limit=10&namespace=0&format=json`;
           const res = await fetch(url);
           return await res.json();
@@ -20,10 +20,10 @@ class ExternalAPIService {
       virustotal_url: {
         info: 'VirusTotal URL report (requires apiKey)',
         handler: async ({ url }) => {
-          if (!url) throw new Error('url required');
+          if (!url) {throw new Error('url required');}
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('virustotal');
-          if (!apiKey) throw new Error('API key for virustotal not configured');
+          if (!apiKey) {throw new Error('API key for virustotal not configured');}
           const resp = await fetch('https://www.virustotal.com/api/v3/urls', {
             method: 'POST',
             headers: {
@@ -34,7 +34,7 @@ class ExternalAPIService {
           });
           const data = await resp.json();
           const id = data?.data?.id;
-          if (!id) return data;
+          if (!id) {return data;}
           const rep = await fetch(
             `https://www.virustotal.com/api/v3/analyses/${encodeURIComponent(id)}`,
             { headers: { 'x-apikey': apiKey } },
@@ -48,11 +48,11 @@ class ExternalAPIService {
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('openweather');
           if (!apiKey)
-            throw new Error('API key for openweather not configured');
+            {throw new Error('API key for openweather not configured');}
           let url = `https://api.openweathermap.org/data/2.5/weather?appid=${encodeURIComponent(apiKey)}&units=metric`;
-          if (q) url += `&q=${encodeURIComponent(q)}`;
+          if (q) {url += `&q=${encodeURIComponent(q)}`;}
           if (lat != null && lon != null)
-            url += `&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
+            {url += `&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;}
           const res = await fetch(url);
           return await res.json();
         },
@@ -60,10 +60,10 @@ class ExternalAPIService {
       shodan_host: {
         info: 'Shodan host information (requires apiKey)',
         handler: async ({ ip }) => {
-          if (!ip) throw new Error('ip required');
+          if (!ip) {throw new Error('ip required');}
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('shodan');
-          if (!apiKey) throw new Error('API key for shodan not configured');
+          if (!apiKey) {throw new Error('API key for shodan not configured');}
           const url = `https://api.shodan.io/shodan/host/${encodeURIComponent(ip)}?key=${encodeURIComponent(apiKey)}`;
           const res = await fetch(url);
           return await res.json();
@@ -72,10 +72,10 @@ class ExternalAPIService {
       greynoise_ip: {
         info: 'GreyNoise IP context (requires apiKey)',
         handler: async ({ ip }) => {
-          if (!ip) throw new Error('ip required');
+          if (!ip) {throw new Error('ip required');}
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('greynoise');
-          if (!apiKey) throw new Error('API key for greynoise not configured');
+          if (!apiKey) {throw new Error('API key for greynoise not configured');}
           const res = await fetch(
             `https://api.greynoise.io/v3/community/${encodeURIComponent(ip)}`,
             { headers: { key: apiKey } },
@@ -86,10 +86,10 @@ class ExternalAPIService {
       hibp_breach: {
         info: 'HaveIBeenPwned breached account (requires apiKey)',
         handler: async ({ account }) => {
-          if (!account) throw new Error('account required');
+          if (!account) {throw new Error('account required');}
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('hibp');
-          if (!apiKey) throw new Error('API key for hibp not configured');
+          if (!apiKey) {throw new Error('API key for hibp not configured');}
           const res = await fetch(
             `https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(account)}`,
             {
@@ -99,17 +99,17 @@ class ExternalAPIService {
               },
             },
           );
-          if (res.status === 404) return []; // not found is normal
+          if (res.status === 404) {return [];} // not found is normal
           return await res.json();
         },
       },
       opencage_geocode: {
         info: 'OpenCage geocoding (requires apiKey)',
         handler: async ({ q }) => {
-          if (!q) throw new Error('q required');
+          if (!q) {throw new Error('q required');}
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('opencage');
-          if (!apiKey) throw new Error('API key for opencage not configured');
+          if (!apiKey) {throw new Error('API key for opencage not configured');}
           const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(q)}&key=${encodeURIComponent(apiKey)}`;
           const res = await fetch(url);
           return await res.json();
@@ -118,10 +118,10 @@ class ExternalAPIService {
       gnews_search: {
         info: 'GNews search (requires apiKey)',
         handler: async ({ q }) => {
-          if (!q) throw new Error('q required');
+          if (!q) {throw new Error('q required');}
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('gnews');
-          if (!apiKey) throw new Error('API key for gnews not configured');
+          if (!apiKey) {throw new Error('API key for gnews not configured');}
           const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(q)}&token=${encodeURIComponent(apiKey)}`;
           const res = await fetch(url);
           return await res.json();
@@ -155,7 +155,7 @@ class ExternalAPIService {
       nominatim_search: {
         info: 'OpenStreetMap Nominatim geocode',
         handler: async ({ q }) => {
-          if (!q) throw new Error('q required');
+          if (!q) {throw new Error('q required');}
           const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`;
           const res = await fetch(url, {
             headers: { 'User-Agent': 'IntelGraph/1.0' },
@@ -167,7 +167,7 @@ class ExternalAPIService {
         info: 'Open-Meteo Air Quality (no auth)',
         handler: async ({ latitude, longitude }) => {
           if (latitude == null || longitude == null)
-            throw new Error('latitude and longitude required');
+            {throw new Error('latitude and longitude required');}
           const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone&timezone=UTC`;
           const res = await fetch(url);
           return await res.json();
@@ -187,7 +187,7 @@ class ExternalAPIService {
         handler: async ({ date }) => {
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('nasa_apod');
-          if (!apiKey) throw new Error('API key for nasa_apod not configured');
+          if (!apiKey) {throw new Error('API key for nasa_apod not configured');}
           const url = `https://api.nasa.gov/planetary/apod?api_key=${encodeURIComponent(apiKey)}${date ? `&date=${encodeURIComponent(date)}` : ''}`;
           const res = await fetch(url);
           return await res.json();
@@ -198,7 +198,7 @@ class ExternalAPIService {
 
   async query(provider, params = {}) {
     const map = this.providers();
-    if (!map[provider]) throw new Error('Unknown provider');
+    if (!map[provider]) {throw new Error('Unknown provider');}
     const out = await map[provider].handler(params || {});
     return { provider, params, result: out };
   }

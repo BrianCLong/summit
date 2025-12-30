@@ -107,9 +107,9 @@ export class FederationService {
 
   static async processRequest(requestId: string, actorId: string = 'system'): Promise<DeconflictionRequest> {
     const request = this.requests.get(requestId);
-    if (!request) throw new Error("Request not found");
+    if (!request) {throw new Error("Request not found");}
 
-    if (request.status !== 'PENDING') return request;
+    if (request.status !== 'PENDING') {return request;}
 
     // Execute Overlap Logic
     const targetTokens = TokenStore.getTokens(request.targetTenantId);

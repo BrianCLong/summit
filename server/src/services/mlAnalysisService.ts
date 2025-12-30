@@ -337,7 +337,7 @@ export class MLAnalysisService {
     const typeGroups = entities.reduce(
       (groups, entity) => {
         const type = entity.type;
-        if (!groups[type]) groups[type] = [];
+        if (!groups[type]) {groups[type] = [];}
         groups[type].push(entity);
         return groups;
       },

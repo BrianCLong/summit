@@ -114,7 +114,7 @@ export class QueryOptimizer {
   private readonly resultCachePrefix = 'query_result';
   private readonly defaultTTL = 3600; // 1 hour
   private indexHints: Map<string, string[]> = new Map();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   private queryPatterns: Map<string, QueryPlan> = new Map();
 
   constructor() {
@@ -181,7 +181,7 @@ export class QueryOptimizer {
           span.setAttributes({
             optimization_count: plan.optimizations.length,
             estimated_cost: plan.estimatedCost,
-            cache_enabled: !!plan.cacheStrategy?.enabled,
+            cache_enabled: Boolean(plan.cacheStrategy?.enabled),
           });
 
           return plan;
@@ -282,7 +282,7 @@ export class QueryOptimizer {
 
   // Helper to convert Neo4j Integers to standard JS numbers/strings
   public transformNeo4jIntegers(obj: any): any {
-    if (obj === null || obj === undefined) return obj;
+    if (obj === null || obj === undefined) {return obj;}
 
     if (neo4j.isInt(obj)) {
       return obj.inSafeRange() ? obj.toNumber() : obj.toString();
@@ -749,7 +749,7 @@ export class QueryOptimizer {
     switch (optimization.name) {
       case 'add_limit':
         if (!query.toLowerCase().includes('limit')) {
-          rewrittenQuery = query + ' LIMIT 1000';
+          rewrittenQuery = `${query  } LIMIT 1000`;
         }
         break;
 
@@ -796,9 +796,9 @@ export class QueryOptimizer {
     // Base TTL on query complexity and data volatility
     let ttl = 300; // 5 minutes base
 
-    if (analysis.complexity < 10) ttl = 1800; // 30 minutes for simple queries
-    if (analysis.aggregationCount > 0) ttl = 600; // 10 minutes for aggregations
-    if (analysis.hasWildcard) ttl = 60; // 1 minute for wildcard queries
+    if (analysis.complexity < 10) {ttl = 1800;} // 30 minutes for simple queries
+    if (analysis.aggregationCount > 0) {ttl = 600;} // 10 minutes for aggregations
+    if (analysis.hasWildcard) {ttl = 60;} // 1 minute for wildcard queries
 
     return ttl;
   }

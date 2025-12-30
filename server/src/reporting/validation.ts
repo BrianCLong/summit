@@ -31,9 +31,9 @@ const deliveryInstructionSchema = z
   })
   .superRefine((value, ctx) => {
     const channelConfigs: Record<DeliveryChannel, boolean> = {
-      email: !!value.email,
-      slack: !!value.slack,
-      webhook: !!value.webhook,
+      email: Boolean(value.email),
+      slack: Boolean(value.slack),
+      webhook: Boolean(value.webhook),
     };
 
     for (const channel of value.channels) {
@@ -76,7 +76,7 @@ export function validateTemplate(template: ReportTemplate): ReportTemplate {
 export function validateDeliveryInstruction(
   instruction: DeliveryInstruction | undefined,
 ): DeliveryInstruction | undefined {
-  if (!instruction) return undefined;
+  if (!instruction) {return undefined;}
   return deliveryInstructionSchema.parse(instruction);
 }
 

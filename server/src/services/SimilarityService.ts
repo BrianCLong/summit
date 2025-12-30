@@ -106,7 +106,7 @@ export class SimilarityService {
           investigationId: validated.investigationId,
           entityId: validated.entityId,
           tenantId: validated.tenantId,
-          hasText: !!validated.text,
+          hasText: Boolean(validated.text),
           topK: validated.topK,
         });
 

@@ -35,7 +35,7 @@ export function registerPresenceHandlers(socket: Socket): void {
     actionType: string,
     status: string,
   ): Promise<void> => {
-    if (!tenantId) return;
+    if (!tenantId) {return;}
     try {
       await emitAuditEvent(
         {
@@ -91,7 +91,7 @@ export function registerPresenceHandlers(socket: Socket): void {
 
   socket.on('presence:update', (status: string): void => {
     const map = presence.get(workspaceId);
-    if (!map) return;
+    if (!map) {return;}
     map.set(user.id, {
       userId: user.id,
       username,
@@ -104,9 +104,9 @@ export function registerPresenceHandlers(socket: Socket): void {
 
   socket.on('disconnect', (): void => {
     const map = presence.get(workspaceId);
-    if (!map) return;
+    if (!map) {return;}
     map.delete(user.id);
-    if (map.size === 0) presence.delete(workspaceId);
+    if (map.size === 0) {presence.delete(workspaceId);}
     socket
       .to(`workspace:${workspaceId}`)
       .emit('presence:update', Array.from(map.values()));

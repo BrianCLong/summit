@@ -387,7 +387,7 @@ class JWTSecurityManager {
   }> {
     try {
       const redisHealthy = (await this.redis.ping()) === 'PONG';
-      const hasCurrentKey = !!this.currentKey;
+      const hasCurrentKey = Boolean(this.currentKey);
       const keyValid =
         this.currentKey && this.currentKey.expiresAt > new Date();
 

@@ -315,28 +315,28 @@ export class WorkflowExecutor extends EventEmitter {
 
     for (const executionId of executionIds) {
       const execution = await this.loadExecution(executionId);
-      if (!execution) continue;
+      if (!execution) {continue;}
 
       // Apply filters
       if (
         filters.workflow_name &&
         execution.workflow_name !== filters.workflow_name
       )
-        continue;
-      if (filters.status && execution.status !== filters.status) continue;
+        {continue;}
+      if (filters.status && execution.status !== filters.status) {continue;}
       if (filters.user_id && execution.metadata.user_id !== filters.user_id)
-        continue;
+        {continue;}
       if (
         filters.tenant_id &&
         execution.metadata.tenant_id !== filters.tenant_id
       )
-        continue;
+        {continue;}
 
       total++;
 
       // Apply pagination
-      if (filters.offset && total <= filters.offset) continue;
-      if (filters.limit && executions.length >= filters.limit) break;
+      if (filters.offset && total <= filters.offset) {continue;}
+      if (filters.limit && executions.length >= filters.limit) {break;}
 
       executions.push(execution);
     }
@@ -497,7 +497,7 @@ export class WorkflowExecutor extends EventEmitter {
       }
 
       const task = workflow.tasks.find((t) => t.name === taskName);
-      if (!task) continue;
+      if (!task) {continue;}
 
       // Check if dependencies are satisfied
       const dependenciesSatisfied = (task.depends_on || []).every((dep) =>
@@ -705,7 +705,7 @@ export class WorkflowExecutor extends EventEmitter {
     execution: WorkflowExecution,
     workflow: WorkflowDefinition,
   ): Promise<void> {
-    if (!workflow.on_success) return;
+    if (!workflow.on_success) {return;}
 
     for (const action of workflow.on_success) {
       try {
@@ -731,7 +731,7 @@ export class WorkflowExecutor extends EventEmitter {
     execution: WorkflowExecution,
     workflow: WorkflowDefinition,
   ): Promise<void> {
-    if (!workflow.on_failure) return;
+    if (!workflow.on_failure) {return;}
 
     for (const action of workflow.on_failure) {
       try {
@@ -792,8 +792,8 @@ export class WorkflowExecutor extends EventEmitter {
    */
   private parseCronToInterval(cron: string): number {
     // Simplified parsing - in production use proper cron library
-    if (cron === '*/5 * * * *') return 5 * 60 * 1000; // Every 5 minutes
-    if (cron === '0 */6 * * *') return 6 * 60 * 60 * 1000; // Every 6 hours
+    if (cron === '*/5 * * * *') {return 5 * 60 * 1000;} // Every 5 minutes
+    if (cron === '0 */6 * * *') {return 6 * 60 * 60 * 1000;} // Every 6 hours
     return 0;
   }
 
@@ -819,16 +819,16 @@ export class WorkflowExecutor extends EventEmitter {
     const key = `workflow:execution:${executionId}`;
     const data = await this.redis.get(key);
 
-    if (!data) return null;
+    if (!data) {return null;}
 
     try {
       const execution = JSON.parse(data) as WorkflowExecution;
       // Convert date strings back to Date objects
       execution.triggered_at = new Date(execution.triggered_at);
       if (execution.started_at)
-        execution.started_at = new Date(execution.started_at);
+        {execution.started_at = new Date(execution.started_at);}
       if (execution.completed_at)
-        execution.completed_at = new Date(execution.completed_at);
+        {execution.completed_at = new Date(execution.completed_at);}
 
       return execution;
     } catch (error) {

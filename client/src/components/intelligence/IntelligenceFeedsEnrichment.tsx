@@ -790,7 +790,7 @@ const IntelligenceFeedsEnrichment: React.FC<
 
   // Real-time updates simulation
   useEffect(() => {
-    if (!realTimeMode) return;
+    if (!realTimeMode) {return;}
 
     const interval = setInterval(() => {
       // Simulate new intelligence data
@@ -1443,7 +1443,7 @@ const IntelligenceFeedsEnrichment: React.FC<
                             <strong>{key.replace('_', ' ')}:</strong>
                             <span>
                               {typeof value === 'object'
-                                ? JSON.stringify(value).substring(0, 50) + '...'
+                                ? `${JSON.stringify(value).substring(0, 50)  }...`
                                 : String(value)}
                             </span>
                           </div>

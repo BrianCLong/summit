@@ -146,7 +146,7 @@ export class RedisRunbookExecutionRepository implements RunbookExecutionReposito
    * Get multiple executions by IDs
    */
   private async getMultiple(ids: string[]): Promise<RunbookExecution[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {return [];}
 
     const pipeline = this.redis.pipeline();
     ids.forEach((id) => pipeline.get(this.keyPrefix + id));
@@ -221,7 +221,7 @@ export class RedisRunbookExecutionLogRepository implements RunbookExecutionLogRe
       const [executionId, logId] = ref.split(':');
       const entries = await this.listByExecution(executionId);
       const entry = entries.find((e) => e.logId === logId);
-      if (entry) results.push(entry);
+      if (entry) {results.push(entry);}
     }
 
     return results;
@@ -487,10 +487,10 @@ export class RunbookStateManager {
     execution.lastUpdatedAt = finishedAt;
 
     // Merge evidence, citations, proofs, kpis
-    if (evidence) execution.evidence.push(...evidence);
-    if (citations) execution.citations.push(...citations);
-    if (proofs) execution.proofs.push(...proofs);
-    if (kpis) Object.assign(execution.kpis, kpis);
+    if (evidence) {execution.evidence.push(...evidence);}
+    if (citations) {execution.citations.push(...citations);}
+    if (proofs) {execution.proofs.push(...proofs);}
+    if (kpis) {Object.assign(execution.kpis, kpis);}
 
     await this.executionRepo.update(execution);
 
@@ -753,7 +753,7 @@ export class InMemoryRunbookExecutionLogRepository implements RunbookExecutionLo
   async verifyChain(executionId: string): Promise<{ valid: boolean; error?: string }> {
     const entries = await this.listByExecution(executionId);
 
-    if (entries.length === 0) return { valid: true };
+    if (entries.length === 0) {return { valid: true };}
 
     for (let i = 0; i < entries.length; i++) {
       if (i === 0 && entries[i].previousHash !== 'genesis') {

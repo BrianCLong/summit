@@ -4,7 +4,7 @@ import path from 'path';
 import { FunnelService } from '../FunnelService.js';
 import { Funnel } from '../types.js';
 
-const TEST_LOG_DIR = path.join(__dirname, 'test_logs_funnels_' + Date.now());
+const TEST_LOG_DIR = path.join(__dirname, `test_logs_funnels_${  Date.now()}`);
 
 describe('FunnelService', () => {
     let service: FunnelService;

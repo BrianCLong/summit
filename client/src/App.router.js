@@ -186,9 +186,9 @@ function NavigationDrawer({ open, onClose }) {
   };
 
   const items = navigationItems.filter((item) => {
-    if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
+    if (item.roles && !item.roles.some((r) => hasRole(r))) {return false;}
     if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
-      return false;
+      {return false;}
     return true;
   });
 

@@ -6,8 +6,8 @@ const { evaluateOPA } = require('../services/AccessControl'); // Import OPA eval
 
 // Placeholder for ensureRole - replace with actual implementation if it exists elsewhere
 function ensureRole(user, allowedRoles = []) {
-  if (!user) throw new Error('Not authenticated');
-  if (allowedRoles.length === 0) return true;
+  if (!user) {throw new Error('Not authenticated');}
+  if (allowedRoles.length === 0) {return true;}
   const role = (user.role || '').toUpperCase();
   if (!allowedRoles.map((r) => r.toUpperCase()).includes(role)) {
     const err = new Error('Forbidden');

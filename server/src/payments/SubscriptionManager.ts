@@ -96,7 +96,7 @@ export class SubscriptionManager {
     startTrial?: boolean;
   }): Promise<Subscription> {
     const plan = this.plans.get(params.planId);
-    if (!plan) throw new Error('plan_not_found');
+    if (!plan) {throw new Error('plan_not_found');}
 
     const now = new Date();
     const periodEnd = new Date(now);
@@ -130,7 +130,7 @@ export class SubscriptionManager {
     immediately = false,
   ): Promise<Subscription> {
     const sub = this.subscriptions.get(subscriptionId);
-    if (!sub) throw new Error('subscription_not_found');
+    if (!sub) {throw new Error('subscription_not_found');}
 
     if (immediately) {
       sub.status = 'cancelled';
@@ -147,10 +147,10 @@ export class SubscriptionManager {
     newPlanId: string,
   ): Promise<Subscription> {
     const sub = this.subscriptions.get(subscriptionId);
-    if (!sub) throw new Error('subscription_not_found');
+    if (!sub) {throw new Error('subscription_not_found');}
 
     const plan = this.plans.get(newPlanId);
-    if (!plan) throw new Error('plan_not_found');
+    if (!plan) {throw new Error('plan_not_found');}
 
     sub.planId = newPlanId;
     sub.updatedAt = new Date();

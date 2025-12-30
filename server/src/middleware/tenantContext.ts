@@ -23,8 +23,8 @@ type TenantResolutionOptions = TenantContextOptions & {
 const ROUTE_TENANT_KEYS = ['tenantId', 'tenant_id', 'tenant'];
 
 const coerceStringArray = (value: unknown): string[] => {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.map(String);
+  if (!value) {return [];}
+  if (Array.isArray(value)) {return value.map(String);}
   return [String(value)];
 };
 
@@ -32,7 +32,7 @@ const pickRouteTenant = (req: Request, keys: string[]): string | undefined => {
   const params = (req.params || {}) as Record<string, unknown>;
   for (const key of keys) {
     const candidate = params[key];
-    if (candidate) return String(candidate);
+    if (candidate) {return String(candidate);}
   }
   return undefined;
 };

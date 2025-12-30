@@ -87,8 +87,8 @@ export class IntentRouter {
     }
 
     // Mock specific known entities for demo
-    if (query.includes('CISA')) entities.push('CISA');
-    if (query.includes('APT29')) entities.push('APT29');
+    if (query.includes('CISA')) {entities.push('CISA');}
+    if (query.includes('APT29')) {entities.push('APT29');}
 
     return Array.from(new Set(entities));
   }

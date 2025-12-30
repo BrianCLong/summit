@@ -17,7 +17,7 @@ export function computeTrustScore(base: number, signals: Signal[]): number {
   let score = base;
   for (const s of signals) {
     const age = now - new Date(s.created_at).getTime();
-    if (age <= weekMs) score -= weight(String(s.severity).toUpperCase());
+    if (age <= weekMs) {score -= weight(String(s.severity).toUpperCase());}
   }
   return Math.min(1, Math.max(0, parseFloat(score.toFixed(4))));
 }

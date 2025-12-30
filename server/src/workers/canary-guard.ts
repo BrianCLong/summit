@@ -3,10 +3,10 @@ import { evaluateCanary } from '../conductor/rollback.js';
 
 async function promQuery(expr: string): Promise<number> {
   const base = process.env.PROMETHEUS_URL;
-  if (!base) throw new Error('PROMETHEUS_URL not set');
+  if (!base) {throw new Error('PROMETHEUS_URL not set');}
   const url = `${base}/api/v1/query?query=${encodeURIComponent(expr)}`;
   const r = await fetch(url);
-  if (!r.ok) throw new Error(`prom ${r.status}`);
+  if (!r.ok) {throw new Error(`prom ${r.status}`);}
   const j = (await r.json()) as { data?: { result?: Array<{ value?: [unknown, string] }> } };
   const v = j.data?.result?.[0]?.value?.[1];
   return Number(v || 0);

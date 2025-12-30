@@ -78,7 +78,7 @@ function SharedCursors({
   };
 
   useEffect(() => {
-    if (!websocketService) return;
+    if (!websocketService) {return;}
 
     // Listen for cursor updates from other users
     const handleCursorUpdate = (data) => {
@@ -124,12 +124,12 @@ function SharedCursors({
   }, [websocketService, currentUser, onUserActivity]);
 
   useEffect(() => {
-    if (!containerRef?.current || !websocketService || !currentUser) return;
+    if (!containerRef?.current || !websocketService || !currentUser) {return;}
 
     const container = containerRef.current;
 
     const handleMouseMove = (event) => {
-      if (!isActive) return;
+      if (!isActive) {return;}
 
       const rect = container.getBoundingClientRect();
       const x = event.clientX - rect.left;
@@ -208,7 +208,7 @@ function SharedCursors({
     return () => clearInterval(cleanup);
   }, []);
 
-  if (!containerRef?.current) return null;
+  if (!containerRef?.current) {return null;}
 
   return (
     <>

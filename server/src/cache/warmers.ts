@@ -30,8 +30,8 @@ let lastResults: WarmResult[] = [];
 let warmInterval: NodeJS.Timeout | null = null;
 
 function shouldRunWarmer(warmer: CacheWarmer, patterns: string[]): boolean {
-  if (!patterns.length) return true;
-  if (!warmer.patterns || !warmer.patterns.length) return true;
+  if (!patterns.length) {return true;}
+  if (!warmer.patterns || !warmer.patterns.length) {return true;}
   return warmer.patterns.some((p) => patterns.includes(p) || p === '*');
 }
 
@@ -42,7 +42,7 @@ interface RedisClient {
 }
 
 async function acquireLock(redis: RedisClient | null, ttlMs: number, lockKey: string, lockId: string): Promise<boolean> {
-  if (!redis) return true;
+  if (!redis) {return true;}
   try {
     const res = await redis.set(lockKey, lockId, { PX: ttlMs, NX: true });
     return res === 'OK';
@@ -52,10 +52,10 @@ async function acquireLock(redis: RedisClient | null, ttlMs: number, lockKey: st
 }
 
 async function releaseLock(redis: RedisClient | null, lockKey: string, lockId: string): Promise<void> {
-  if (!redis) return;
+  if (!redis) {return;}
   try {
     const existing = await redis.get(lockKey);
-    if (existing === lockId) await redis.del(lockKey);
+    if (existing === lockId) {await redis.del(lockKey);}
   } catch {}
 }
 
@@ -92,12 +92,12 @@ export async function runWarmers(
   const lockTtlMs = config.cache.warmerIntervalSeconds * 1000;
 
   const lockAcquired = await acquireLock(redis, lockTtlMs, lockKey, lockId);
-  if (!lockAcquired) return [];
+  if (!lockAcquired) {return [];}
 
   const results: WarmResult[] = [];
   try {
     for (const warmer of warmers) {
-      if (!shouldRunWarmer(warmer, patterns)) continue;
+      if (!shouldRunWarmer(warmer, patterns)) {continue;}
       try {
         await cached(
           warmer.keyParts,
@@ -135,14 +135,14 @@ export async function runWarmers(
 }
 
 export function scheduleWarmersAfterInvalidation(patterns: string[]) {
-  if (!config.cache.warmersEnabled) return;
+  if (!config.cache.warmersEnabled) {return;}
   setTimeout(() => {
     runWarmers('invalidation', patterns).catch(() => {});
   }, 200);
 }
 
 export async function initializeCacheWarmers(): Promise<void> {
-  if (initialized || !config.cache.warmersEnabled) return;
+  if (initialized || !config.cache.warmersEnabled) {return;}
   initialized = true;
 
   registerCacheWarmer({

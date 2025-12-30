@@ -17,7 +17,7 @@ jest.mock('ioredis', () => {
     incr: jest.fn().mockResolvedValue(1),
     decr: jest.fn().mockResolvedValue(0),
     get: jest.fn().mockImplementation((key) => {
-        if (key.includes('cost')) return Promise.resolve(global.mockCost || '0');
+        if (key.includes('cost')) {return Promise.resolve(global.mockCost || '0');}
         return Promise.resolve('0');
     }),
     expire: jest.fn(),

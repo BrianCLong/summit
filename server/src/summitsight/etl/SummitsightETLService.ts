@@ -22,7 +22,7 @@ export class SummitsightETLService {
   async ingestRun(data: FactRun): Promise<void> {
     try {
       // Basic normalization or validation could happen here
-      if (!data.tenant_id) throw new Error("Tenant ID required for ingestion");
+      if (!data.tenant_id) {throw new Error("Tenant ID required for ingestion");}
       await this.dataService.recordRun(data);
     } catch (error) {
       console.error('Failed to ingest run:', error);

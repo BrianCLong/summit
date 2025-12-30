@@ -22,7 +22,7 @@ export class DriftDetectionService {
     }
 
     public startMonitoring(intervalMs: number = 3600000): void { // Default 1 hour
-        if (this.monitoringInterval) return;
+        if (this.monitoringInterval) {return;}
 
         logger.info('Starting Drift Detection Monitoring');
 
@@ -93,7 +93,7 @@ export class DriftDetectionService {
 
     public checkBehavioralDrift(agentId: string, currentMetrics: { successRate: number; errorRate: number }): void {
         const baseline = this.baselineAgentMetrics.get(agentId);
-        if (!baseline) return;
+        if (!baseline) {return;}
 
         if (currentMetrics.successRate < baseline.successRate * 0.9) {
              logger.warn({ agentId, current: currentMetrics.successRate, baseline: baseline.successRate }, 'BEHAVIORAL DRIFT: Success Rate Drop');

@@ -16,7 +16,7 @@ class AgentControlPlane {
     // "Governance-First" implies strictness, but let's allow if no blocking policies found.
 
     for (const policy of policies) {
-      if (!policy.isBlocking) continue;
+      if (!policy.isBlocking) {continue;}
 
       if (policy.policyType === 'MANUAL_APPROVAL') {
         // Mock check: if 'approved' is not in context, deny
@@ -54,8 +54,8 @@ class AgentControlPlane {
     if (recentErrors.length > 0) {
         // Average the error rate
         const avgError = recentErrors.reduce((acc, m) => acc + m.value, 0) / recentErrors.length;
-        if (avgError > 0.1) return { score: 50, status: 'DEGRADED' };
-        if (avgError > 0.5) return { score: 10, status: 'CRITICAL' };
+        if (avgError > 0.1) {return { score: 50, status: 'DEGRADED' };}
+        if (avgError > 0.5) {return { score: 10, status: 'CRITICAL' };}
     }
 
     return { score: 100, status: 'HEALTHY' };

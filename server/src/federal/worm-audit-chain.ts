@@ -162,7 +162,7 @@ export class WORMAuditChainService {
   }
 
   private async processPendingEntries(): Promise<void> {
-    if (this.pendingEntries.length === 0) return;
+    if (this.pendingEntries.length === 0) {return;}
 
     const span = otelService.createSpan('worm_audit.process_entries');
 
@@ -333,8 +333,8 @@ export class WORMAuditChainService {
   }
 
   private buildMerkleTree(leafHashes: string[]): string[] {
-    if (leafHashes.length === 0) return [];
-    if (leafHashes.length === 1) return leafHashes;
+    if (leafHashes.length === 0) {return [];}
+    if (leafHashes.length === 1) {return leafHashes;}
 
     let level = [...leafHashes];
     const tree: string[] = [];
@@ -553,7 +553,7 @@ export class WORMAuditChainService {
   }
 
   private verifyMerkleTree(tree: string[], leafHashes: string[]): boolean {
-    if (tree.length === 0 || leafHashes.length === 0) return false;
+    if (tree.length === 0 || leafHashes.length === 0) {return false;}
 
     // Rebuild tree and compare root
     const rebuiltTree = this.buildMerkleTree(leafHashes);

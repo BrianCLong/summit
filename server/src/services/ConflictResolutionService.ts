@@ -94,9 +94,9 @@ export class ConflictResolutionService {
         // If both are found, lower index wins (higher priority)
         // If one is not found, the found one wins
         // If neither found, default to A
-        if (idxA !== -1 && idxB !== -1) return idxA < idxB ? valA : valB;
-        if (idxA !== -1) return valA;
-        if (idxB !== -1) return valB;
+        if (idxA !== -1 && idxB !== -1) {return idxA < idxB ? valA : valB;}
+        if (idxA !== -1) {return valA;}
+        if (idxB !== -1) {return valB;}
         return valA;
 
       case ConflictResolutionStrategy.MANUAL:

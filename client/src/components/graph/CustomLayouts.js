@@ -100,10 +100,10 @@ export const d3HierarchicalLayout = {
     const levels = [];
 
     const traverse = (node, level) => {
-      if (visited.has(node.id())) return;
+      if (visited.has(node.id())) {return;}
       visited.add(node.id());
 
-      if (!levels[level]) levels[level] = [];
+      if (!levels[level]) {levels[level] = [];}
       levels[level].push(node);
 
       // Traverse connected nodes
@@ -181,7 +181,7 @@ export const d3CircularClusterLayout = {
 
         while (queue.length > 0) {
           const current = queue.shift();
-          if (visited.has(current.id())) continue;
+          if (visited.has(current.id())) {continue;}
 
           visited.add(current.id());
           cluster.push(current);
@@ -221,11 +221,11 @@ export const d3TimelineLayout = {
       let timestamp = null;
 
       // Try to extract timestamp from various properties
-      if (data.timestamp) timestamp = new Date(data.timestamp);
-      else if (data.created_at) timestamp = new Date(data.created_at);
-      else if (data.date) timestamp = new Date(data.date);
+      if (data.timestamp) {timestamp = new Date(data.timestamp);}
+      else if (data.created_at) {timestamp = new Date(data.created_at);}
+      else if (data.date) {timestamp = new Date(data.date);}
       else if (data.properties && data.properties.date)
-        timestamp = new Date(data.properties.date);
+        {timestamp = new Date(data.properties.date);}
 
       return {
         node,
@@ -618,7 +618,7 @@ export class GraphExporter {
       return `CREATE (n${data.source})-[:${data.type} {${propsString}}]->(n${data.target})`;
     });
 
-    return [...nodeStatements, ...edgeStatements].join(';\n') + ';';
+    return `${[...nodeStatements, ...edgeStatements].join(';\n')  };`;
   }
 }
 

@@ -37,7 +37,7 @@ export default function RelationshipModal({
   const [loadTypes, { data }] = useLazyQuery(GET_REL_TYPES);
 
   useEffect(() => {
-    if (open) loadTypes();
+    if (open) {loadTypes();}
   }, [open]);
 
   const types = (data?.relationshipTypes || []).map((t) => t.name);
@@ -51,7 +51,7 @@ export default function RelationshipModal({
           value={type}
           onChange={(e, v) => {
             setType(v || 'RELATED_TO');
-            if (!label) setLabel(v || 'RELATED_TO');
+            if (!label) {setLabel(v || 'RELATED_TO');}
           }}
           renderInput={(p) => (
             <TextField {...p} label="Type" size="small" sx={{ mt: 1 }} />

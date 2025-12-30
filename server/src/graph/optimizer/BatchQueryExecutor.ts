@@ -30,7 +30,7 @@ export class BatchQueryExecutor {
       this.timer = null;
     }
 
-    if (this.queue.length === 0) return;
+    if (this.queue.length === 0) {return;}
 
     const batch = this.queue.splice(0, this.batchSize);
 

@@ -18,7 +18,7 @@ export class SuppressionService {
   public isSuppressed(ruleId: string, entityKey: string, timestamp: number = Date.now()): boolean {
     return this.rules.some(s => {
       const inWindow = timestamp >= s.startTime && timestamp <= s.endTime;
-      if (!inWindow) return false;
+      if (!inWindow) {return false;}
 
       const ruleMatch = !s.targetRuleId || s.targetRuleId === ruleId;
       const keyMatch = !s.targetEntityKey || s.targetEntityKey === entityKey;

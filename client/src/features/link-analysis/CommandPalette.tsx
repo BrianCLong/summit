@@ -18,13 +18,13 @@ export const CommandPalette: React.FC = () => {
         e.preventDefault();
         setOpen((v) => !v);
       }
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {setOpen(false);}
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  if (!open) return null;
+  if (!open) {return null;}
 
   return (
     <div

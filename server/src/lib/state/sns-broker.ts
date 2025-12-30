@@ -49,7 +49,7 @@ export class SnsMessageBroker implements MessageBroker {
     // In this architecture, we subscribe to the Queue, which is subscribed to SNS.
     // We just filter messages by channel if necessary.
 
-    if (this.isPolling) return; // Already polling
+    if (this.isPolling) {return;} // Already polling
     this.isPolling = true;
 
     this.pollQueue(channel, callback);

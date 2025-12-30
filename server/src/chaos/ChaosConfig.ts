@@ -251,8 +251,8 @@ export function validateExperiment(experiment: ChaosExperiment): string[] {
     case 'latency':
     case 'timeout': {
       const config = experiment.config as LatencyConfig;
-      if (config.minMs < 0) errors.push('Minimum latency must be non-negative');
-      if (config.maxMs < config.minMs) errors.push('Maximum latency must be >= minimum');
+      if (config.minMs < 0) {errors.push('Minimum latency must be non-negative');}
+      if (config.maxMs < config.minMs) {errors.push('Maximum latency must be >= minimum');}
       break;
     }
     case 'failure': {
@@ -288,7 +288,7 @@ export function isEndpointProtected(
   config: ChaosGlobalConfig
 ): boolean {
   return config.protectedEndpoints.some(pattern => {
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+    const regex = new RegExp(`^${  pattern.replace(/\*/g, '.*')  }$`);
     return regex.test(endpoint);
   });
 }

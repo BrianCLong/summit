@@ -139,7 +139,7 @@ export class GitHubActionsOIDC {
 
   private parseEnvList(envVar: string): string[] {
     const value = process.env[envVar];
-    if (!value) return [];
+    if (!value) {return [];}
     return value.split(',').map(s => s.trim()).filter(Boolean);
   }
 

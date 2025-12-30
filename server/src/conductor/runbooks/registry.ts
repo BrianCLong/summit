@@ -500,14 +500,14 @@ export class RunbookRegistry {
           0,
           0,
         );
-        if (versions.length === 0) return null;
+        if (versions.length === 0) {return null;}
         targetVersion = versions[0];
       }
 
       const key = `runbook:${id}:${targetVersion}`;
       const data = await this.redis.get(key);
 
-      if (!data) return null;
+      if (!data) {return null;}
 
       const runbook: Runbook = JSON.parse(data);
 

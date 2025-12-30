@@ -71,7 +71,7 @@ export default function AdminRoles() {
                     size="small"
                     value={u.role}
                     onChange={(e) => updateRole(u.id, e.target.value)}
-                    disabled={!!saving[u.id]}
+                    disabled={Boolean(saving[u.id])}
                   >
                     {ROLES.map((r) => (
                       <MenuItem key={r} value={r}>

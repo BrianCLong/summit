@@ -103,7 +103,7 @@ async function deleteByIds(
   target: PurgeTarget,
   ids: unknown[],
 ): Promise<number> {
-  if (!ids.length) return 0;
+  if (!ids.length) {return 0;}
   const query: QueryConfig = {
     text: `DELETE FROM ${target.table} WHERE ${target.idColumn} = ANY($1)`,
     values: [ids],
@@ -117,7 +117,7 @@ async function anonymizeByIds(
   target: PurgeTarget,
   ids: unknown[],
 ): Promise<number> {
-  if (!ids.length) return 0;
+  if (!ids.length) {return 0;}
   const anonymize = target.anonymize ?? {};
   const entries = Object.entries(anonymize);
   if (!entries.length) {

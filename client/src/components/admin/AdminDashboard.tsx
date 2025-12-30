@@ -235,7 +235,7 @@ export default function AdminDashboard() {
   const [impersonatedUser, setImpersonatedUser] = useState('');
 
   const filteredAudit = useMemo(() => {
-    if (auditSeverity === 'all') return auditLog;
+    if (auditSeverity === 'all') {return auditLog;}
     return auditLog.filter((entry) => entry.severity === auditSeverity);
   }, [auditSeverity]);
 
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
 
   const handleImpersonate = () => {
     const target = users.find((u) => u.email === impersonatedUser);
-    if (!target) return;
+    if (!target) {return;}
     setSelectedUserIds([target.id]);
   };
 

@@ -191,7 +191,7 @@ class PoolMonitor {
   }
 
   start() {
-    if (this.intervalId) return;
+    if (this.intervalId) {return;}
     this.intervalId = setInterval(
       () => this.check(),
       POOL_MONITOR_INTERVAL_MS,
@@ -751,7 +751,7 @@ async function withManagedClient<T>(
   options: { skipRelease?: boolean } = {}
 ): Promise<T> {
   const startWait = performance.now();
-  let client = (await poolWrapper.pool.connect()) as ExtendedPoolClient;
+  const client = (await poolWrapper.pool.connect()) as ExtendedPoolClient;
   const waitTime = performance.now() - startWait;
 
   // Track wait times? (Could add to metrics if needed)
@@ -981,7 +981,7 @@ function delayAsync(duration: number): Promise<void> {
 }
 
 function percentile(values: number[], p: number): number {
-  if (values.length === 0) return 0;
+  if (values.length === 0) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const idx = Math.min(sorted.length - 1, Math.floor(sorted.length * p));
   return sorted[idx];
@@ -993,7 +993,7 @@ function recordQueryCapture(
   poolName: string,
   label: string,
 ): void {
-  if (!QUERY_CAPTURE_ENABLED) return;
+  if (!QUERY_CAPTURE_ENABLED) {return;}
 
   const key = normalizedQuery.name || getPreparedStatementName(normalizedQuery.text);
   const existing = queryCapture.get(key) ?? {
@@ -1048,7 +1048,7 @@ function snapshotQueryCapture(): QueryCaptureSnapshot {
 }
 
 function logQueryCaptureSnapshot(reason: string): void {
-  if (!QUERY_CAPTURE_ENABLED || queryCapture.size === 0) return;
+  if (!QUERY_CAPTURE_ENABLED || queryCapture.size === 0) {return;}
 
   const snapshot = snapshotQueryCapture();
   logger.info(

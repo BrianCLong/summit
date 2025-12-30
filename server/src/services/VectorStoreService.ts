@@ -197,7 +197,7 @@ export class VectorStoreService {
     const chunks: string[] = [];
 
     // Split by paragraphs
-    let rawChunks = text.split(/\n\s*\n/);
+    const rawChunks = text.split(/\n\s*\n/);
 
     // Merge small paragraphs, split large ones
     let currentChunk = '';
@@ -206,7 +206,7 @@ export class VectorStoreService {
         if ((currentChunk.length + raw.length) < maxChars) {
             currentChunk += (currentChunk ? '\n\n' : '') + raw;
         } else {
-            if (currentChunk) chunks.push(currentChunk);
+            if (currentChunk) {chunks.push(currentChunk);}
 
             // If raw itself is too big, hard split it
             if (raw.length > maxChars) {
@@ -223,7 +223,7 @@ export class VectorStoreService {
         }
     }
 
-    if (currentChunk) chunks.push(currentChunk);
+    if (currentChunk) {chunks.push(currentChunk);}
 
     return chunks;
   }

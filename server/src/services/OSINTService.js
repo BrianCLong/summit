@@ -11,11 +11,11 @@ class OSINTService {
 
   async enrichFromWikipedia({ entityId, title }) {
     const t = title?.trim();
-    if (!t && !entityId) throw new Error('Provide title or entityId');
+    if (!t && !entityId) {throw new Error('Provide title or entityId');}
     let page;
     try {
       const res = await fetch(
-        'https://en.wikipedia.org/w/api.php?' +
+        `https://en.wikipedia.org/w/api.php?${ 
           new URLSearchParams({
             action: 'query',
             prop: 'extracts|info',
@@ -24,7 +24,7 @@ class OSINTService {
             inprop: 'url',
             format: 'json',
             titles: t,
-          }),
+          })}`,
       );
       const data = await res.json();
       const pages = data?.query?.pages || {};
@@ -33,7 +33,7 @@ class OSINTService {
       this.logger.error('Wikipedia fetch failed', e);
       throw e;
     }
-    if (!page) throw new Error('No page');
+    if (!page) {throw new Error('No page');}
 
     // Persist to Neo4j
     const session = this.driver.session();

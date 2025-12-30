@@ -17,7 +17,7 @@ router.post('/spread', async (req, res) => {
       probability = 0.2,
     } = req.body || {};
     if (!investigationId)
-      return res.status(400).json({ error: 'investigationId required' });
+      {return res.status(400).json({ error: 'investigationId required' });}
     const driver = getNeo4jDriver();
     const session = driver.session();
     try {

@@ -8,8 +8,8 @@ function escape(str) {
 }
 
 function sanitize(value) {
-  if (typeof value === 'string') return escape(value);
-  if (Array.isArray(value)) return value.map(sanitize);
+  if (typeof value === 'string') {return escape(value);}
+  if (Array.isArray(value)) {return value.map(sanitize);}
   if (value && typeof value === 'object') {
     const result = {};
     for (const [key, val] of Object.entries(value)) {
@@ -21,8 +21,8 @@ function sanitize(value) {
 }
 
 function sanitizeRequest(req, res, next) {
-  if (req.body) req.body = sanitize(req.body);
-  if (req.query) req.query = sanitize(req.query);
+  if (req.body) {req.body = sanitize(req.body);}
+  if (req.query) {req.query = sanitize(req.query);}
   next();
 }
 

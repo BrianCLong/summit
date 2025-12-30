@@ -33,7 +33,7 @@ export function registerMaestroHandlers(io: Server, socket: MaestroSocket) {
 
   // Agent Execution Progress
   socket.on('maestro:subscribe_run', async (payload: RunSubscriptionPayload) => {
-    if (!payload || typeof payload !== 'object' || !payload.runId) return;
+    if (!payload || typeof payload !== 'object' || !payload.runId) {return;}
     const { runId } = payload;
     try {
       const room = runRoom(runId);
@@ -47,7 +47,7 @@ export function registerMaestroHandlers(io: Server, socket: MaestroSocket) {
   });
 
   socket.on('maestro:unsubscribe_run', async (payload: RunSubscriptionPayload) => {
-    if (!payload || typeof payload !== 'object' || !payload.runId) return;
+    if (!payload || typeof payload !== 'object' || !payload.runId) {return;}
     const { runId } = payload;
     const room = runRoom(runId);
     await socket.leave(room);
@@ -56,7 +56,7 @@ export function registerMaestroHandlers(io: Server, socket: MaestroSocket) {
 
   // Real-time Log Streaming
   socket.on('maestro:subscribe_logs', async (payload: LogSubscriptionPayload) => {
-    if (!payload || typeof payload !== 'object' || !payload.runId) return;
+    if (!payload || typeof payload !== 'object' || !payload.runId) {return;}
     const { runId } = payload;
     try {
       const room = logsRoom(runId);
@@ -70,7 +70,7 @@ export function registerMaestroHandlers(io: Server, socket: MaestroSocket) {
   });
 
   socket.on('maestro:unsubscribe_logs', async (payload: LogSubscriptionPayload) => {
-    if (!payload || typeof payload !== 'object' || !payload.runId) return;
+    if (!payload || typeof payload !== 'object' || !payload.runId) {return;}
     const { runId } = payload;
     const room = logsRoom(runId);
     await socket.leave(room);

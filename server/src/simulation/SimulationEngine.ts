@@ -503,8 +503,8 @@ export class SimulationEngine {
 
   private getFireResistance(asset: DigitalTwinAsset): number {
     const materials = asset.metadata.materials || [];
-    if (materials.includes('concrete') || materials.includes('steel')) return 0.9;
-    if (materials.includes('brick')) return 0.7;
+    if (materials.includes('concrete') || materials.includes('steel')) {return 0.9;}
+    if (materials.includes('brick')) {return 0.7;}
     return 0.3;
   }
 
@@ -518,7 +518,7 @@ export class SimulationEngine {
   }
 
   private predictMaintenance(asset: DigitalTwinAsset): MaintenancePrediction | null {
-    if (asset.healthScore > 80) return null;
+    if (asset.healthScore > 80) {return null;}
 
     const daysToFailure = Math.max(30, asset.healthScore * 3);
     const failureDate = new Date(Date.now() + daysToFailure * 24 * 60 * 60 * 1000);

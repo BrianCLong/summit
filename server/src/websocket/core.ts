@@ -111,7 +111,7 @@ export class WebSocketCore {
         'SELECT 1 FROM investigation_members WHERE user_id = $1 AND investigation_id = $2',
         [userId, investigationId]
       );
-      if (result.rowCount > 0) return true;
+      if (result.rowCount > 0) {return true;}
 
       // Check if user is owner/creator of the investigation (assuming 'investigations' table)
       const invResult = await pool.query(
@@ -159,7 +159,7 @@ export class WebSocketCore {
         // Users can only subscribe to their tenant's topics
         subscribe: async (ctx: any) => {
           const topics = ctx.resource.topics || (ctx.resource.topic ? [ctx.resource.topic] : []);
-          if (topics.length === 0) return false;
+          if (topics.length === 0) {return false;}
 
           for (const topic of topics) {
              // Investigation Room Authorization
@@ -168,7 +168,7 @@ export class WebSocketCore {
                  // Check if user has explicit access to this investigation
                  // Fallback to role check if DB check fails (or mock for now)
                  const hasAccess = await this.checkInvestigationAccess(ctx.user.userId, invId);
-                 if (!hasAccess) return false;
+                 if (!hasAccess) {return false;}
              }
              // General Tenant Check (topics shouldn't cross tenant boundary)
              // Note: core logic prefixes tenantId, so clients send raw topic.
@@ -338,8 +338,8 @@ export class WebSocketCore {
           const meshRoute = this.getServiceMeshRoute(req);
 
           console.log(
-            `WebSocket upgrade: ${claims.userId}@${claims.tenantId}` +
-              (meshRoute ? ` via ${meshRoute}` : ''),
+            `WebSocket upgrade: ${claims.userId}@${claims.tenantId}${ 
+              meshRoute ? ` via ${meshRoute}` : ''}`,
           );
 
           res.upgrade(
@@ -424,7 +424,7 @@ export class WebSocketCore {
       /* WebSocket open handler */
       open: (ws: any) => {
         const connection = ws as WebSocketConnection;
-        const connectionId = connection.userId + '@' + connection.tenantId;
+        const connectionId = `${connection.userId  }@${  connection.tenantId}`;
         const manager = this.connectionPool.registerConnection(
           connectionId,
           ws,
@@ -452,8 +452,8 @@ export class WebSocketCore {
         }
 
         console.log(
-          `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
-            (connection.meshRoute ? ` via ${connection.meshRoute}` : ''),
+          `WebSocket opened: ${connection.userId}@${connection.tenantId}${ 
+            connection.meshRoute ? ` via ${connection.meshRoute}` : ''}`,
         );
 
         const welcomeMessage = {
@@ -473,7 +473,7 @@ export class WebSocketCore {
       /* WebSocket close handler */
       close: (ws: any, code, message) => {
         const connection = ws as WebSocketConnection;
-        const connectionId = connection.userId + '@' + connection.tenantId;
+        const connectionId = `${connection.userId  }@${  connection.tenantId}`;
 
         this.connections.delete(connectionId);
         activeConnections.dec({ tenant: connection.tenantId });
@@ -552,7 +552,7 @@ export class WebSocketCore {
     connection: WebSocketConnection,
     msg: WebSocketMessage,
   ) {
-    const connectionId = connection.userId + '@' + connection.tenantId;
+    const connectionId = `${connection.userId  }@${  connection.tenantId}`;
 
     switch (msg.type) {
       case 'subscribe':

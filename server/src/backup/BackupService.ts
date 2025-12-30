@@ -83,7 +83,7 @@ export class BackupService {
       logger.info(`Verifying backup integrity for ${filepath}...`);
       try {
           const stats = await fs.stat(filepath);
-          if (stats.size === 0) throw new Error('Backup file is empty');
+          if (stats.size === 0) {throw new Error('Backup file is empty');}
 
           if (filepath.endsWith('.gz')) {
               await execAsync(`gzip -t "${filepath}"`);
@@ -172,14 +172,14 @@ export class BackupService {
           const nodeResult = await session.run('MATCH (n) RETURN n');
           for (const record of nodeResult.records) {
               const node = record.get('n');
-              const line = JSON.stringify({ type: 'node', labels: node.labels, props: node.properties }) + '\n';
+              const line = `${JSON.stringify({ type: 'node', labels: node.labels, props: node.properties })  }\n`;
               writeTarget.write(line);
           }
 
           const relResult = await session.run('MATCH ()-[r]->() RETURN r');
           for (const record of relResult.records) {
               const rel = record.get('r');
-              const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
+              const line = `${JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties })  }\n`;
               writeTarget.write(line);
           }
 
@@ -220,7 +220,7 @@ export class BackupService {
      logger.info('Starting Redis backup...');
      try {
        const client = this.redis.getClient();
-       if (!client) throw new Error('Redis client not available');
+       if (!client) {throw new Error('Redis client not available');}
 
        // Check if cluster or standalone
        const isCluster = (client as any).constructor.name === 'Cluster';
@@ -273,7 +273,7 @@ export class BackupService {
 
   async runAllBackups(): Promise<Record<string, string>> {
      const results: Record<string, string> = {};
-     const uploadToS3 = !!process.env.S3_BACKUP_BUCKET;
+     const uploadToS3 = Boolean(process.env.S3_BACKUP_BUCKET);
 
      try {
         results.postgres = await this.backupPostgres({ compress: true, uploadToS3 });

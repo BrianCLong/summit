@@ -367,12 +367,12 @@ export class MonitoringObservabilityService extends EventEmitter {
 
   public finishTrace(traceId: string, spanId?: string, error?: Error): void {
     const spans = this.traces.get(traceId);
-    if (!spans) return;
+    if (!spans) {return;}
 
     const span = spanId
       ? spans.find((s) => s.id === spanId)
       : spans[spans.length - 1];
-    if (!span) return;
+    if (!span) {return;}
 
     span.endTime = new Date();
     span.duration = span.endTime.getTime() - span.startTime.getTime();
@@ -444,7 +444,7 @@ export class MonitoringObservabilityService extends EventEmitter {
 
   public acknowledgeAlert(alertId: string, userId: string): boolean {
     const alert = this.alerts.get(alertId);
-    if (!alert || alert.acknowledged) return false;
+    if (!alert || alert.acknowledged) {return false;}
 
     alert.acknowledged = true;
     alert.acknowledgedBy = userId;
@@ -456,7 +456,7 @@ export class MonitoringObservabilityService extends EventEmitter {
 
   public resolveAlert(alertId: string): boolean {
     const alert = this.alerts.get(alertId);
-    if (!alert || alert.resolved) return false;
+    if (!alert || alert.resolved) {return false;}
 
     alert.resolved = true;
     alert.resolvedAt = new Date();

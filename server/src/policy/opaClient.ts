@@ -31,8 +31,8 @@ type CacheEntry = { expiresAt: number; decision: OpaDecision };
 const decisionCache = new Map<string, CacheEntry>();
 
 function stableStringify(obj: unknown): string {
-  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
-  if (Array.isArray(obj)) return `[${obj.map((v) => stableStringify(v)).join(',')}]`;
+  if (obj === null || typeof obj !== 'object') {return JSON.stringify(obj);}
+  if (Array.isArray(obj)) {return `[${obj.map((v) => stableStringify(v)).join(',')}]`;}
   const sorted = Object.keys(obj as Record<string, unknown>)
     .sort()
     .map((k) => `${JSON.stringify(k)}:${stableStringify((obj as any)[k])}`)
@@ -75,9 +75,9 @@ async function executeWithRetry(
   while (attempt <= options.maxRetries) {
     try {
       const res = await fetchWithTimeout(url, body, options.timeoutMs);
-      if (!res.ok) throw new Error(`OPA ${res.status}`);
+      if (!res.ok) {throw new Error(`OPA ${res.status}`);}
       const j = await res.json();
-      const allow = !!(j.result?.allow ?? j.result === true);
+      const allow = Boolean(j.result?.allow ?? j.result === true);
       const reason = j.result?.reason || undefined;
 
       if (process.env.POLICY_DEBUG === '1') {
@@ -95,7 +95,7 @@ async function executeWithRetry(
       return { allow, reason };
     } catch (error: any) {
       lastError = error;
-      if (attempt >= options.maxRetries) break;
+      if (attempt >= options.maxRetries) {break;}
       const backoff = options.baseBackoffMs * Math.pow(2, attempt);
       await new Promise((res) => setTimeout(res, backoff));
       attempt += 1;

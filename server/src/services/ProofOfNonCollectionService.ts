@@ -272,7 +272,7 @@ export class ProofOfNonCollectionService {
         const assertions: Record<string, any> = {};
         for (const categoryName of dataCategories) {
           const category = DATA_CATEGORIES.find((cat) => cat.name === categoryName);
-          if (!category) continue;
+          if (!category) {continue;}
 
           const categoryAnalysis = await this.analyzeCategoryCollection(
             category,
@@ -546,7 +546,7 @@ export class ProofOfNonCollectionService {
       const wasAccessed = this.checkCategoryAccess(category, sample);
       const wasCollected = wasAccessed; // Simplified - in production would check actual data collection
 
-      if (wasAccessed) accessedCount++;
+      if (wasAccessed) {accessedCount++;}
       if (wasCollected) {
         collectedCount++;
         violations.push({
@@ -620,9 +620,9 @@ export class ProofOfNonCollectionService {
     // Simplified confidence calculation
     // In production would use proper statistical methods (Wilson score, etc.)
 
-    if (sampleSize < 100) return 0.7;
-    if (sampleSize < 1000) return 0.9;
-    if (sampleSize >= 1000 && violationsFound === 0) return 0.99;
+    if (sampleSize < 100) {return 0.7;}
+    if (sampleSize < 1000) {return 0.9;}
+    if (sampleSize >= 1000 && violationsFound === 0) {return 0.99;}
 
     return 0.95;
   }

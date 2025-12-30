@@ -57,7 +57,7 @@ export function makeFakeTransport(
 
       seq.forEach((evt, idx) => {
         const run = () => {
-          if (!cancelled && handler) handler(evt);
+          if (!cancelled && handler) {handler(evt);}
         };
         if (mode === 'timer') {
           const id = scheduleTimer(run, idx * spacingMs);

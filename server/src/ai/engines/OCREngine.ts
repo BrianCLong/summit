@@ -362,7 +362,7 @@ export class OCREngine {
     allResults: OCRResult[],
     confidenceThreshold: number,
   ): OCRResult[] {
-    if (allResults.length === 0) return [];
+    if (allResults.length === 0) {return [];}
 
     // Group results by spatial overlap
     const groups: OCRResult[][] = [];
@@ -429,7 +429,7 @@ export class OCREngine {
     const x2 = Math.min(box1.x + box1.width, box2.x + box2.width);
     const y2 = Math.min(box1.y + box1.height, box2.y + box2.height);
 
-    if (x2 <= x1 || y2 <= y1) return 0;
+    if (x2 <= x1 || y2 <= y1) {return 0;}
 
     const intersectionArea = (x2 - x1) * (y2 - y1);
     const box1Area = box1.width * box1.height;
@@ -443,7 +443,7 @@ export class OCREngine {
    * Calculate text similarity between multiple texts
    */
   private calculateTextSimilarity(texts: string[]): number {
-    if (texts.length < 2) return 1.0;
+    if (texts.length < 2) {return 1.0;}
 
     const normalized = texts.map((t) => t.toLowerCase().trim());
     let totalSimilarity = 0;
@@ -468,7 +468,7 @@ export class OCREngine {
    */
   private levenshteinSimilarity(str1: string, str2: string): number {
     const maxLength = Math.max(str1.length, str2.length);
-    if (maxLength === 0) return 1.0;
+    if (maxLength === 0) {return 1.0;}
 
     const distance = this.levenshteinDistance(str1, str2);
     return (maxLength - distance) / maxLength;
@@ -569,7 +569,7 @@ export class OCREngine {
     const threshold = 10; // pixels
 
     const alignedElements = allResults.filter((other) => {
-      if (other === result) return false;
+      if (other === result) {return false;}
 
       const sameRow =
         Math.abs(result.boundingBox.y - other.boundingBox.y) < threshold;
@@ -591,7 +591,7 @@ export class OCREngine {
     threshold: number,
   ): boolean {
     return allResults.some((other) => {
-      if (other === result) return false;
+      if (other === result) {return false;}
 
       const distance = Math.sqrt(
         Math.pow(result.boundingBox.x - other.boundingBox.x, 2) +

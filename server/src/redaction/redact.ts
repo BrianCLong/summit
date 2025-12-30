@@ -67,7 +67,7 @@ export class RedactionService {
           rules: Array.isArray(policy.rules)
             ? policy.rules.join(',')
             : Object.keys(policy.rules).join(','),
-          has_k_anon: !!policy.kAnonThreshold,
+          has_k_anon: Boolean(policy.kAnonThreshold),
         });
 
         try {
@@ -189,18 +189,18 @@ export class RedactionService {
 
     // Handle array-based rules (check against field metadata)
     const metadata = FIELD_METADATA[field];
-    if (!metadata) return 'unknown';
+    if (!metadata) {return 'unknown';}
 
     for (const rule of policy.rules) {
       switch (rule) {
         case 'pii':
-          if (metadata.pii) return 'pii';
+          if (metadata.pii) {return 'pii';}
           break;
         case 'financial':
-          if (metadata.financial) return 'financial';
+          if (metadata.financial) {return 'financial';}
           break;
         case 'sensitive':
-          if (metadata.sensitive) return 'sensitive';
+          if (metadata.sensitive) {return 'sensitive';}
           break;
       }
     }
@@ -237,17 +237,17 @@ export class RedactionService {
   }
 
   private redactString(value: string, rule: string, mask: string): string {
-    if (typeof value !== 'string') return mask;
+    if (typeof value !== 'string') {return mask;}
 
     switch (rule) {
       case 'pii':
         // Partial redaction for PII (show first/last chars)
-        if (value.length <= 4) return mask;
+        if (value.length <= 4) {return mask;}
         return value.charAt(0) + mask + value.charAt(value.length - 1);
 
       case 'financial':
         // Show only last 4 digits for financial data
-        if (value.length <= 4) return mask;
+        if (value.length <= 4) {return mask;}
         return mask + value.slice(-4);
 
       case 'sensitive':
@@ -304,7 +304,7 @@ export class RedactionService {
 
     if (typeof value === 'string') {
       // Generalize strings (e.g., specific location to region)
-      return value.split(' ')[0] + ' [REGION]';
+      return `${value.split(' ')[0]  } [REGION]`;
     }
 
     return value;

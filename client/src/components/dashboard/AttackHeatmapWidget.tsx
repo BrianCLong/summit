@@ -152,7 +152,7 @@ export default function AttackHeatmapWidget({
   };
 
   const handleExport = () => {
-    if (!data?.attackCoverage) return;
+    if (!data?.attackCoverage) {return;}
 
     const exportData = {
       timestamp: new Date().toISOString(),

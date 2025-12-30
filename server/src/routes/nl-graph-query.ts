@@ -156,7 +156,7 @@ router.post(
           prompt: prompt.substring(0, 100), // Log first 100 chars
           tenantId: schemaContext.tenantId,
           userId: schemaContext.userId,
-          hasParameters: !!parameters,
+          hasParameters: Boolean(parameters),
           verbose,
         },
         'NL query compilation request received',

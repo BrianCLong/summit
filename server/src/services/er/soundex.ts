@@ -1,6 +1,6 @@
 
 export function soundex(name: string): string {
-  let s = name.toUpperCase().replace(/[^A-Z]/g, '');
+  const s = name.toUpperCase().replace(/[^A-Z]/g, '');
   if (!s) {
     return '';
   }
@@ -36,7 +36,7 @@ export function soundex(name: string): string {
   let lastCode = getCode(firstChar);
 
   for (let i = 1; i < s.length; i++) {
-    if (result.length >= 4) break;
+    if (result.length >= 4) {break;}
 
     const char = s[i];
     const code = getCode(char);

@@ -29,18 +29,18 @@ export class PrecedentService {
   async search(query: PrecedentSearchQuery): Promise<OmbudsDecision[]> {
     const all = await ombudsService.getAllDecisions();
     return all.filter(d => {
-      if (query.trigger && d.trigger !== query.trigger) return false;
-      if (query.ruling && d.ruling !== query.ruling) return false;
-      if (query.startDate && d.createdAt < query.startDate) return false;
-      if (query.endDate && d.createdAt > query.endDate) return false;
+      if (query.trigger && d.trigger !== query.trigger) {return false;}
+      if (query.ruling && d.ruling !== query.ruling) {return false;}
+      if (query.startDate && d.createdAt < query.startDate) {return false;}
+      if (query.endDate && d.createdAt > query.endDate) {return false;}
       if (query.tags && query.tags.length > 0) {
         // Match ALL tags for filtering
         const hasAllTags = query.tags.every(t => d.tags.includes(t));
-        if (!hasAllTags) return false;
+        if (!hasAllTags) {return false;}
       }
       if (query.textQuery) {
-        const text = (d.rationale.summary + ' ' + d.rationale.text).toLowerCase();
-        if (!text.includes(query.textQuery.toLowerCase())) return false;
+        const text = (`${d.rationale.summary  } ${  d.rationale.text}`).toLowerCase();
+        if (!text.includes(query.textQuery.toLowerCase())) {return false;}
       }
       return true;
     });

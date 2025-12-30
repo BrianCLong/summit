@@ -82,7 +82,7 @@ export class BackfillRunner<TRow, TCursor = string> {
        WHERE migration_key = $1 AND job_name = $2`,
       [migrationKey, jobName],
     );
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) {return null;}
     const row = result.rows[0];
     return {
       migrationKey: row.migration_key,

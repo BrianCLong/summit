@@ -223,7 +223,7 @@ export function usePluginConfig(pluginId) {
 
   const saveConfig = useCallback(
     async (newConfig, enabled = true) => {
-      if (!pluginId) return;
+      if (!pluginId) {return;}
 
       try {
         setSaving(true);

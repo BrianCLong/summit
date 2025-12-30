@@ -208,7 +208,7 @@ export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
 
   // Generate demo samples for visualization if no live data
   const displaySamples = useMemo(() => {
-    if (samples.length > 0) return samples;
+    if (samples.length > 0) {return samples;}
 
     // Generate synthetic waveform for demo
     const now = Date.now();

@@ -56,8 +56,8 @@ export default function FederatedSearchPanel() {
       // Attempt to flatten a common result shape if present
       const data = res?.results || res?.data || res;
       let items = [];
-      if (Array.isArray(data)) items = data;
-      else if (Array.isArray(data?.items)) items = data.items;
+      if (Array.isArray(data)) {items = data;}
+      else if (Array.isArray(data?.items)) {items = data.items;}
       if (items.length && typeof items[0] === 'object') {
         const cols = Object.keys(items[0])
           .slice(0, 8)
@@ -117,7 +117,7 @@ export default function FederatedSearchPanel() {
                     key={i.id}
                     control={
                       <Checkbox
-                        checked={!!selected[i.id]}
+                        checked={Boolean(selected[i.id])}
                         onChange={(e) =>
                           setSelected({ ...selected, [i.id]: e.target.checked })
                         }
@@ -139,7 +139,7 @@ export default function FederatedSearchPanel() {
                 <Button
                   size="small"
                   onClick={() => {
-                    if (!presetName) return;
+                    if (!presetName) {return;}
                     const presets = JSON.parse(
                       localStorage.getItem('fed_presets') || '{}',
                     );

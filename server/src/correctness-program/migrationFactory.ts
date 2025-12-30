@@ -27,7 +27,7 @@ export class MigrationFactory {
 
   advance(manifest: MigrationManifest, processedBatch: { id: string; success: boolean; error?: string }[]) {
     const progress = this.progress.get(manifest.id);
-    if (!progress) throw new Error(`Migration ${manifest.id} not started`);
+    if (!progress) {throw new Error(`Migration ${manifest.id} not started`);}
 
     processedBatch.forEach((item) => {
       if (item.success) {
@@ -82,7 +82,7 @@ export class MigrationFactory {
 
   verify(manifestId: string, verificationPassed: boolean) {
     const progress = this.progress.get(manifestId);
-    if (!progress) throw new Error(`Migration ${manifestId} not started`);
+    if (!progress) {throw new Error(`Migration ${manifestId} not started`);}
     if (!verificationPassed) {
       progress.errors.push('Verification failed, keeping on dual-run');
       progress.stage = 'failed';
@@ -93,7 +93,7 @@ export class MigrationFactory {
 
   progressReport(manifestId: string) {
     const progress = this.progress.get(manifestId);
-    if (!progress) throw new Error(`Migration ${manifestId} not started`);
+    if (!progress) {throw new Error(`Migration ${manifestId} not started`);}
     const total = progress.checkpoint.total ?? progress.checkpoint.processed + progress.checkpoint.failed;
     const percent = total === 0 ? 0 : (progress.checkpoint.processed / total) * 100;
     return {

@@ -33,14 +33,14 @@ interface ExportOptions {
   includeMetadata?: boolean;
   includeAnalytics?: boolean;
   dateRange?: [string, string];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   filterCriteria?: any;
 }
 
 interface DataExportProps {
   investigationId?: string;
   selectedEntities?: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   onExportComplete?: (result: any) => void;
   showReports?: boolean;
 }
@@ -66,7 +66,7 @@ function DataExport({
     dateRange: ['', ''],
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [exportHistory, setExportHistory] = useState<any[]>([]);
 
   const [exportData, { loading: exportLoading }] = useMutation(EXPORT_DATA);
@@ -127,11 +127,11 @@ function DataExport({
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {return '0 Bytes';}
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
   };
 
   return (
@@ -191,7 +191,7 @@ function DataExport({
                 name="exportFormat"
                 value={format.value}
                 checked={exportFormat === format.value}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 onChange={(e) => setExportFormat(e.target.value as any)}
                 style={{ display: 'none' }}
               />
@@ -427,7 +427,7 @@ function DataExport({
           >
             <select
               value={reportTemplate}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               
               onChange={(e) => setReportTemplate(e.target.value as any)}
               style={{
                 flex: 1,

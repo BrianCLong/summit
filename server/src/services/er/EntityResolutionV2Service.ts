@@ -281,7 +281,7 @@ export class EntityResolutionV2Service {
 
     const nameMatch = (entityA.properties.name && entityA.properties.name === entityB.properties.name) ? 1.0 : 0.0;
     features['name_exact'] = nameMatch;
-    if (nameMatch) rationale.push('Exact name match');
+    if (nameMatch) {rationale.push('Exact name match');}
 
     let geoMatch = 0;
     for (const ga of signalsA.geo) {
@@ -305,8 +305,8 @@ export class EntityResolutionV2Service {
 
     const overlap = this.checkTemporalOverlap(entityA.properties, entityB.properties);
     features['temporal_overlap'] = overlap ? 1 : 0;
-    if (overlap) rationale.push('Temporal validity overlap');
-    else if (entityA.properties.validFrom && entityB.properties.validFrom) rationale.push('No temporal overlap');
+    if (overlap) {rationale.push('Temporal validity overlap');}
+    else if (entityA.properties.validFrom && entityB.properties.validFrom) {rationale.push('No temporal overlap');}
 
     const score = (phoneticMatch * EXPLAIN_WEIGHTS.phonetic)
       + (nameMatch * EXPLAIN_WEIGHTS.name_exact)
@@ -361,7 +361,7 @@ export class EntityResolutionV2Service {
   }
 
   private checkTemporalOverlap(t1: Bitemporal, t2: Bitemporal): boolean {
-    if (!t1.validFrom && !t1.validTo && !t2.validFrom && !t2.validTo) return true;
+    if (!t1.validFrom && !t1.validTo && !t2.validFrom && !t2.validTo) {return true;}
 
     const start1 = t1.validFrom ? new Date(t1.validFrom).getTime() : -Infinity;
     const end1 = t1.validTo ? new Date(t1.validTo).getTime() : Infinity;
@@ -644,7 +644,7 @@ export class EntityResolutionV2Service {
           mergeId: persistedMergeId,
           idempotent: true,
           guardrails: guardrailResult,
-          overrideUsed: !!req.guardrailOverrideReason,
+          overrideUsed: Boolean(req.guardrailOverrideReason),
         };
       }
 
@@ -797,7 +797,7 @@ export class EntityResolutionV2Service {
         snapshotId,
         idempotent: false,
         guardrails: guardrailResult,
-        overrideUsed: !!req.guardrailOverrideReason,
+        overrideUsed: Boolean(req.guardrailOverrideReason),
       };
     } catch (e) {
       await tx.rollback();

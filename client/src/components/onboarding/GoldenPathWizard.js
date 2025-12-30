@@ -239,7 +239,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
 
   // Step 2: Add Entities
   const handleAddEntity = async () => {
-    if (!wizardData.investigation) return;
+    if (!wizardData.investigation) {return;}
 
     try {
       const { data } = await createEntity({
@@ -324,7 +324,7 @@ const GoldenPathWizard = ({ open, onClose, onComplete }) => {
 
   // Step 4: Start Copilot
   const handleStartCopilot = async () => {
-    if (!wizardData.investigation) return;
+    if (!wizardData.investigation) {return;}
 
     try {
       const { data } = await startCopilotRun({

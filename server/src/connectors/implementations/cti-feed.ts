@@ -50,7 +50,7 @@ export class CTIFeedConnector extends BaseConnector {
             const rl = readline.createInterface({ input: response.data });
 
             rl.on('line', (line: string) => {
-                if (!line || line.startsWith('#')) return; // Skip comments
+                if (!line || line.startsWith('#')) {return;} // Skip comments
                 stream.push(this.wrapEvent({ raw: line }));
                 this.metrics.recordsProcessed++;
             });

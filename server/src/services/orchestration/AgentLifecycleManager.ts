@@ -89,7 +89,7 @@ export class AgentLifecycleManager extends EventEmitter {
     const TIMEOUT_MS = 60000; // 1 minute timeout
 
     for (const agent of this.agents.values()) {
-      if (agent.status === 'terminated') continue;
+      if (agent.status === 'terminated') {continue;}
 
       if (now - agent.lastHeartbeat.getTime() > TIMEOUT_MS) {
         if (agent.status !== 'offline') {

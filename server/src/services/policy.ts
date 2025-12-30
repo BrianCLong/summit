@@ -1,6 +1,6 @@
 export const policy = {
   assert(user: any, scope: string[], ctx: any) {
-    if (!user) throw new Error('unauthorized');
+    if (!user) {throw new Error('unauthorized');}
 
     // Classification levels
     const classificationLevels: { [key: string]: number } = {

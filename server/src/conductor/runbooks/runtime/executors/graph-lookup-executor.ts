@@ -132,7 +132,7 @@ export class DefaultInfrastructureEnrichmentService implements InfrastructureEnr
   private deduplicateInfrastructure(infra: InfrastructureNode[]): InfrastructureNode[] {
     const seen = new Set<string>();
     return infra.filter((node) => {
-      if (seen.has(node.id)) return false;
+      if (seen.has(node.id)) {return false;}
       seen.add(node.id);
       return true;
     });
@@ -256,13 +256,13 @@ export class GraphLookupStepExecutor extends BaseStepExecutor {
   }
 
   private calculateQualityScore(infrastructure: InfrastructureNode[]): number {
-    if (infrastructure.length === 0) return 0;
+    if (infrastructure.length === 0) {return 0;}
 
     let score = 0;
     for (const node of infrastructure) {
-      if (node.properties && Object.keys(node.properties).length > 0) score += 0.4;
-      if (node.relationships.length > 0) score += 0.3;
-      if (node.value) score += 0.3;
+      if (node.properties && Object.keys(node.properties).length > 0) {score += 0.4;}
+      if (node.relationships.length > 0) {score += 0.3;}
+      if (node.value) {score += 0.3;}
     }
     return score / infrastructure.length;
   }

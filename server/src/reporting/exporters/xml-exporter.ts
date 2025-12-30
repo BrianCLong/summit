@@ -61,7 +61,7 @@ export class XmlExporter implements ReportExporter {
 
     // Ensure it starts with a letter or underscore
     if (!/^[a-zA-Z_]/.test(safe)) {
-      safe = '_' + safe;
+      safe = `_${  safe}`;
     }
 
     return safe || 'item'; // Fallback for empty strings

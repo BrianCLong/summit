@@ -41,8 +41,8 @@ export const KeyManagementAPI = {
    */
   async listKeys(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.purpose) queryParams.set('purpose', params.purpose);
-    if (params.status) queryParams.set('status', params.status);
+    if (params.purpose) {queryParams.set('purpose', params.purpose);}
+    if (params.status) {queryParams.set('status', params.status);}
 
     const response = await fetch(`${API_BASE}/keys?${queryParams}`, {
       headers: getHeaders(),

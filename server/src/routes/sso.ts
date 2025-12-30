@@ -67,7 +67,7 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
 
   // Get current tenant config
   const tenant = await tenantService.getTenant(id);
-  if (!tenant) return res.status(404).json({ error: 'Tenant not found' });
+  if (!tenant) {return res.status(404).json({ error: 'Tenant not found' });}
 
   const newConfig = {
     ...tenant.config,

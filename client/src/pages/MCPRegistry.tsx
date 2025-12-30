@@ -87,11 +87,11 @@ export default function MCPRegistry() {
   };
 
   const deleteServer = async (id: string) => {
-    if (!confirm('Delete this MCP server?')) return;
+    if (!confirm('Delete this MCP server?')) {return;}
     const res = await fetch(`/api/maestro/v1/mcp/servers/${id}`, {
       method: 'DELETE',
     });
-    if (res.status === 204) fetchServers();
+    if (res.status === 204) {fetchServers();}
   };
 
   return (

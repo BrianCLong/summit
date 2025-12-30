@@ -524,9 +524,9 @@ export class TenantCostService extends EventEmitter {
     const metrics: ServiceCostMetrics[] = result.rows.map((row: Record<string, string>) => {
       // Calculate duration scaling for time-based costs (like storage per hour)
       let durationHours = 1;
-      if (period === 'day') durationHours = 24;
-      if (period === 'week') durationHours = 24 * 7;
-      if (period === 'month') durationHours = 24 * 30;
+      if (period === 'day') {durationHours = 24;}
+      if (period === 'week') {durationHours = 24 * 7;}
+      if (period === 'month') {durationHours = 24 * 30;}
 
       const costs =
         parseFloat(row.compute_units) * this.getCostRate('compute') +
@@ -631,7 +631,7 @@ export class TenantCostService extends EventEmitter {
     metrics: TenantCostMetrics,
   ): Promise<void> {
     const budget = this.budgets.get(tenantId);
-    if (!budget || !budget.alerts.enabled) return;
+    if (!budget || !budget.alerts.enabled) {return;}
 
     const dailyCosts = await this.getDailyCosts(tenantId);
     const monthlyCosts = await this.getMonthlyCosts(tenantId);
@@ -741,7 +741,7 @@ export class TenantCostService extends EventEmitter {
     currentMetrics: TenantCostMetrics,
   ): Promise<void> {
     const cached = this.costCache.get(tenantId) || [];
-    if (cached.length < 3) return; // Need history for comparison
+    if (cached.length < 3) {return;} // Need history for comparison
 
     const recentCosts = cached.slice(-3).map((m) => m.costs.total);
     const averageRecent =
@@ -868,7 +868,7 @@ export class TenantCostService extends EventEmitter {
     slope: number;
     trend: 'increasing' | 'decreasing' | 'stable';
   } {
-    if (data.length < 2) return { slope: 0, trend: 'stable' };
+    if (data.length < 2) {return { slope: 0, trend: 'stable' };}
 
     const n = data.length;
     const x = data.map((_, i) => i);
@@ -882,9 +882,9 @@ export class TenantCostService extends EventEmitter {
     const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
 
     let trend: 'increasing' | 'decreasing' | 'stable';
-    if (Math.abs(slope) < 0.01) trend = 'stable';
-    else if (slope > 0) trend = 'increasing';
-    else trend = 'decreasing';
+    if (Math.abs(slope) < 0.01) {trend = 'stable';}
+    else if (slope > 0) {trend = 'increasing';}
+    else {trend = 'decreasing';}
 
     return { slope, trend };
   }
@@ -914,7 +914,7 @@ export class TenantCostService extends EventEmitter {
     data: TenantCostMetrics[],
     slope: number,
   ): number {
-    if (data.length < 3) return 0.5;
+    if (data.length < 3) {return 0.5;}
 
     // Calculate R-squared for confidence
     const yActual = data.map((d) => d.costs.total);
@@ -952,9 +952,9 @@ export class TenantCostService extends EventEmitter {
         (recent.costs.network - previous.costs.network) /
         previous.costs.network;
 
-      if (computeChange > 0.1) factors.push('Increasing compute usage');
-      if (storageChange > 0.1) factors.push('Growing storage requirements');
-      if (networkChange > 0.1) factors.push('Higher network traffic');
+      if (computeChange > 0.1) {factors.push('Increasing compute usage');}
+      if (storageChange > 0.1) {factors.push('Growing storage requirements');}
+      if (networkChange > 0.1) {factors.push('Higher network traffic');}
     }
 
     return factors;
@@ -1186,7 +1186,7 @@ export class TenantCostService extends EventEmitter {
     amountUsd: number,
     metadata: { requestId: string; operation: string },
   ): void {
-    if (!this.config.enabled) return;
+    if (!this.config.enabled) {return;}
     this.emit('doclingCost', { tenantId, amountUsd, metadata });
     logger.info('Recorded docling cost', { tenantId, amountUsd, metadata });
     // Also record as a generic resource usage for service breakdown

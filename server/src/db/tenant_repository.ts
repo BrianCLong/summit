@@ -48,7 +48,7 @@ export class TenantRepository<T> {
 
   async update(tenantId: TenantId, id: string, data: Partial<T>): Promise<T | null> {
       const keys = Object.keys(data);
-      if (keys.length === 0) return this.findById(tenantId, id);
+      if (keys.length === 0) {return this.findById(tenantId, id);}
 
       const setClause = keys.map((k, i) => `${k} = $${i + 3}`).join(', ');
 

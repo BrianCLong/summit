@@ -32,7 +32,7 @@ export default function Cases() {
   const [summary, setSummary] = useState('');
 
   const onCreate = async () => {
-    if (!name) return;
+    if (!name) {return;}
     await createCase({ variables: { input: { name, priority, summary } } });
     setName('');
     setPriority('');

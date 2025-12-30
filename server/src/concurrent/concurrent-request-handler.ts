@@ -591,7 +591,7 @@ class LoadBalancer {
   }
 
   async getOptimalWorker(workers: Worker[]): Promise<Worker | null> {
-    if (workers.length === 0) return null;
+    if (workers.length === 0) {return null;}
 
     switch (this.config.algorithm) {
       case 'round-robin':

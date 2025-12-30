@@ -76,7 +76,7 @@ const AdvancedCollaborativeGraph = ({
   const [newComment, setNewComment] = useState('');
 
   const handleExport = async () => {
-    if (!cy) return;
+    if (!cy) {return;}
     const image = cy.png({ full: true });
     const metadata = {
       entities: entities.length,
@@ -191,7 +191,7 @@ const AdvancedCollaborativeGraph = ({
 
   // Initialize Cytoscape
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
 
     const cytoscapeInstance = cytoscape({
       container: containerRef.current,
@@ -286,7 +286,7 @@ const AdvancedCollaborativeGraph = ({
 
   // Socket event handlers
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {return;}
 
     const handleConnect = () => {
       setIsConnected(true);
@@ -302,7 +302,7 @@ const AdvancedCollaborativeGraph = ({
     const handleUserJoined = (data) => {
       setCollaborators((prev) => {
         const existing = prev.find((c) => c.userId === data.userId);
-        if (existing) return prev;
+        if (existing) {return prev;}
         return [
           ...prev,
           { userId: data.userId, username: data.username, joinedAt: data.ts },
@@ -320,7 +320,7 @@ const AdvancedCollaborativeGraph = ({
     };
 
     const handleCursorUpdate = (data) => {
-      if (!showCursors) return;
+      if (!showCursors) {return;}
       setUserCursors((prev) => {
         const newCursors = new Map(prev);
         newCursors.set(data.userId, {
@@ -394,15 +394,15 @@ const AdvancedCollaborativeGraph = ({
   );
 
   const zoomIn = useCallback(() => {
-    if (cy) cy.zoom(cy.zoom() * 1.25);
+    if (cy) {cy.zoom(cy.zoom() * 1.25);}
   }, [cy]);
 
   const zoomOut = useCallback(() => {
-    if (cy) cy.zoom(cy.zoom() * 0.8);
+    if (cy) {cy.zoom(cy.zoom() * 0.8);}
   }, [cy]);
 
   const centerGraph = useCallback(() => {
-    if (cy) cy.fit();
+    if (cy) {cy.fit();}
   }, [cy]);
 
   const addComment = useCallback(() => {

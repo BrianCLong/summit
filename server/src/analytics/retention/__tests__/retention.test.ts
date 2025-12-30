@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { RetentionService } from '../RetentionService.js';
 
-const TEST_LOG_DIR = path.join(__dirname, 'test_logs_retention_' + Date.now());
+const TEST_LOG_DIR = path.join(__dirname, `test_logs_retention_${  Date.now()}`);
 
 describe('RetentionService', () => {
     let service: RetentionService;

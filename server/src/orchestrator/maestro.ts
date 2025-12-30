@@ -435,7 +435,7 @@ class MaestroOrchestrator {
 
   async getTaskStatus(taskId: string) {
     const job = await maestroQueue.getJob(taskId);
-    if (!job) return null;
+    if (!job) {return null;}
 
     return {
       id: job.id,

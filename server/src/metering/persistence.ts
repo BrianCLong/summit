@@ -31,11 +31,11 @@ export class FileMeterStore {
         .update(this.lastHash + lineContent)
         .digest('hex');
 
-    const line = stringify({
+    const line = `${stringify({
         data: event,
         hash: newHash,
         prevHash: this.lastHash
-    }) + '\n';
+    })  }\n`;
 
     await fs.promises.appendFile(this.logPath, line, 'utf8');
     this.lastHash = newHash;
@@ -52,7 +52,7 @@ export class FileMeterStore {
       let calculatedLastHash = '';
       for (let i = 0; i < lines.length; i++) {
           try {
-              if (!lines[i].trim()) continue;
+              if (!lines[i].trim()) {continue;}
               const record = JSON.parse(lines[i]);
               // Use stable stringify for verification too
               const eventStr = stringify(record.data);

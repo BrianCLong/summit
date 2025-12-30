@@ -7,7 +7,7 @@ export type ArimaOptions = {
 };
 
 export function arimaForecast(series: number[], horizon: number, options: ArimaOptions = {}): number[] {
-  if (!series.length || horizon <= 0) return [];
+  if (!series.length || horizon <= 0) {return [];}
   const difference = options.difference ?? 1;
   const movingAverageFactor = options.movingAverageFactor ?? 0.4;
   const volatilityPadding = options.volatilityPadding ?? 1.25;
@@ -45,9 +45,9 @@ export function prophetForecast(
   horizon: number,
   options: ProphetOptions = {},
 ): ForecastPoint[] {
-  if (!rows.length || horizon <= 0) return [];
+  if (!rows.length || horizon <= 0) {return [];}
   const series = rows.map((row) => row.values[field]).filter((value): value is number => typeof value === 'number');
-  if (!series.length) return [];
+  if (!series.length) {return [];}
 
   const seasonality = options.seasonality ?? Math.max(4, Math.floor(series.length / 4));
   const confidence = options.confidence ?? 0.2;
@@ -103,13 +103,13 @@ function computeSeasonality(series: number[], seasonality: number) {
     buckets[idx % seasonality].push(value);
   });
   return buckets.map((bucket) => {
-    if (!bucket.length) return 0;
+    if (!bucket.length) {return 0;}
     return bucket.reduce((acc, value) => acc + value, 0) / bucket.length;
   });
 }
 
 function standardDeviation(series: number[]) {
-  if (!series.length) return 0;
+  if (!series.length) {return 0;}
   const mean = series.reduce((acc, value) => acc + value, 0) / series.length;
   const variance = series.reduce((acc, value) => acc + (value - mean) ** 2, 0) / series.length;
   return Math.sqrt(variance);

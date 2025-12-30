@@ -363,7 +363,7 @@ export class StixSigningService {
     try {
       const bufA = Buffer.from(a);
       const bufB = Buffer.from(b);
-      if (bufA.length !== bufB.length) return false;
+      if (bufA.length !== bufB.length) {return false;}
       return timingSafeEqual(bufA, bufB);
     } catch {
       return false;

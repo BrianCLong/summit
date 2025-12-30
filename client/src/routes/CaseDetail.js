@@ -102,10 +102,10 @@ function CaseDetail() {
   const [removeCaseItem] = useMutation(REMOVE_CASE_ITEM);
   const [exportCaseBundle] = useMutation(EXPORT_CASE_BUNDLE);
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">Error: {error.message}</Alert>;
+  if (loading) {return <CircularProgress />;}
+  if (error) {return <Alert severity="error">Error: {error.message}</Alert>;}
   if (!data || !data.case)
-    return <Alert severity="info">Case not found.</Alert>;
+    {return <Alert severity="info">Case not found.</Alert>;}
 
   const { case: caseData } = data;
 

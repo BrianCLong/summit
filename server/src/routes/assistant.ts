@@ -40,7 +40,7 @@ const llm = new MockLLM(); // swap with real adapter(s)
 
 export function mountAssistant(app: Express, io?: any) {
   const write = (res: Response, obj: any) =>
-    res.write(JSON.stringify(obj) + '\n');
+    res.write(`${JSON.stringify(obj)  }\n`);
 
   // POST /assistant/stream -> chunked text
   app.post(
@@ -135,7 +135,7 @@ export function mountAssistant(app: Express, io?: any) {
           // investigationId: (req as any).investigationId, // Placeholder for investigationId
         });
       } catch (e: any) {
-        if (!res.headersSent) res.status(500);
+        if (!res.headersSent) {res.status(500);}
         res.end();
         httpErrors.inc();
         end();

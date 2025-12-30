@@ -246,7 +246,7 @@ export class DataResidencyService {
           JSON.stringify({
             provider: validatedConfig.provider,
             region: validatedConfig.region,
-            keyId: validatedConfig.keyId.substring(0, 8) + '***',
+            keyId: `${validatedConfig.keyId.substring(0, 8)  }***`,
           }),
         ],
       );
@@ -496,7 +496,7 @@ export class DataResidencyService {
       console.error('Transfer compliance check failed:', error);
       return {
         compliant: false,
-        reason: 'Transfer compliance check failed: ' + error.message,
+        reason: `Transfer compliance check failed: ${  error.message}`,
       };
     } finally {
       span?.end();
@@ -531,7 +531,7 @@ export class DataResidencyService {
             ? {
                 provider: kmsConfig.provider,
                 region: kmsConfig.region,
-                keyId: kmsConfig.keyId.substring(0, 8) + '***',
+                keyId: `${kmsConfig.keyId.substring(0, 8)  }***`,
               }
             : null,
         },
@@ -886,7 +886,7 @@ export class DataResidencyService {
       [tenantId],
     );
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
 
     const row = result.rows[0];
     return {
@@ -907,7 +907,7 @@ export class DataResidencyService {
       [tenantId],
     );
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
 
     const row = result.rows[0];
     return {
@@ -923,7 +923,7 @@ export class DataResidencyService {
     classification: DataClassification,
     config: ResidencyConfig | null,
   ): boolean {
-    if (!config) return false;
+    if (!config) {return false;}
 
     // Check if data classification is allowed in tenant's region
     if (classification.residencyRequirements.length > 0) {
@@ -1070,9 +1070,9 @@ export class DataResidencyService {
     kmsConfig: KMSConfig | null,
     encryptionStats: any,
   ): string {
-    if (!residencyConfig) return 'non-compliant';
-    if (residencyConfig.encryptionRequired && !kmsConfig) return 'partial';
-    if (encryptionStats.encryptionRate < 95) return 'partial';
+    if (!residencyConfig) {return 'non-compliant';}
+    if (residencyConfig.encryptionRequired && !kmsConfig) {return 'partial';}
+    if (encryptionStats.encryptionRate < 95) {return 'partial';}
     return 'compliant';
   }
 

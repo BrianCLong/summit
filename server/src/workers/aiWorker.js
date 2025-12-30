@@ -34,7 +34,7 @@ function startAIWorker() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ entityId }),
           });
-          if (!res.ok) throw new Error(`AI service status ${res.status}`);
+          if (!res.ok) {throw new Error(`AI service status ${res.status}`);}
           result = await res.json();
         } catch (e) {
           // Fallback stub

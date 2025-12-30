@@ -61,7 +61,7 @@ export class DeepfakeHunterService extends EventEmitter {
 
     if (request.type === 'TEXT') { // or if we transcribe audio
        // Simulate fetching text content
-       const content = "Simulated content from " + request.url;
+       const content = `Simulated content from ${  request.url}`;
 
        // Translate if needed
        if (request.language && request.language !== 'en') {

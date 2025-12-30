@@ -105,7 +105,7 @@ export class MerkleTreeBuilder {
     }
 
     // Reconstruct the path to root
-    let currentHash = leafHash;
+    const currentHash = leafHash;
     let currentIndex = leafIndex;
     let levelSize = tree.leaves.length;
 

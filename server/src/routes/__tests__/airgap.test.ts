@@ -87,8 +87,8 @@ describe('Airgap Export/Import', () => {
     });
 
     afterAll(async () => {
-        if (existsSync(validBundlePath)) unlinkSync(validBundlePath);
-        if (existsSync(tamperedBundlePath)) unlinkSync(tamperedBundlePath);
+        if (existsSync(validBundlePath)) {unlinkSync(validBundlePath);}
+        if (existsSync(tamperedBundlePath)) {unlinkSync(tamperedBundlePath);}
         await closeConnections();
     });
 

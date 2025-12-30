@@ -20,7 +20,7 @@ export abstract class BaseProvider implements ProviderAdapter {
     // Basic estimation
     const model = request.model || this.capabilities[0].name;
     const capability = this.capabilities.find(c => c.name === model);
-    if (!capability) return Infinity;
+    if (!capability) {return Infinity;}
 
     // Very rough estimate of input tokens
     const inputLength = request.messages.reduce((acc, m) => acc + m.content.length, 0);

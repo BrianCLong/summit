@@ -216,7 +216,7 @@ tokcountRouter.get('/api/tokcount/budget', (req: Request, res: Response) => {
   res.json({
     limit: budgetLimit,
     warningThreshold,
-    configured: !!process.env.TOKEN_BUDGET_LIMIT,
+    configured: Boolean(process.env.TOKEN_BUDGET_LIMIT),
     environment: process.env.NODE_ENV || 'development',
   });
 });

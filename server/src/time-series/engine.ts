@@ -97,7 +97,7 @@ export class TimeSeriesEngine {
   }
 
   private detectAnomalies(series: TimeSeriesRow[], config: AnomalyConfig) {
-    if (!series.length) return [];
+    if (!series.length) {return [];}
     const strategy = config.strategy ?? 'zscore';
     if (strategy === 'seasonal') {
       return seasonalEwmaAnomalies(series, config.field, config.seasonality ?? 24, 0.3, config.threshold ?? 3.0);
@@ -107,7 +107,7 @@ export class TimeSeriesEngine {
 
   private runForecast(series: TimeSeriesRow[], config: ForecastConfig) {
     const values = series.map((row) => row.values[config.field]).filter((value): value is number => typeof value === 'number');
-    if (!values.length) return [];
+    if (!values.length) {return [];}
     if (config.model === 'prophet') {
       return prophetForecast(series, config.field, config.horizon);
     }
@@ -123,7 +123,7 @@ export class TimeSeriesEngine {
   }
 
   private applyDownsampling(series: TimeSeriesRow[], config?: DownsampleConfig) {
-    if (!config || !series.length) return series;
+    if (!config || !series.length) {return series;}
     if (config.strategy === 'average' && config.bucketSize) {
       return downsampleAverage(series, config.bucketSize);
     }

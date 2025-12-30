@@ -31,7 +31,7 @@ airgapRouter.post('/export', async (req: any, res) => {
     } catch (e: any) {
         res.status(500).json({ error: e.message });
     } finally {
-        if (session) await session.close();
+        if (session) {await session.close();}
     }
 });
 
@@ -63,7 +63,7 @@ airgapRouter.post('/import', async (req: any, res) => {
 airgapRouter.get('/imports/:id', async (req: any, res) => {
     try {
         const result = await service.getImport(req.params.id, req.tenantId);
-        if (!result) return res.status(404).json({ error: 'Import not found' });
+        if (!result) {return res.status(404).json({ error: 'Import not found' });}
         res.json(result);
     } catch (e: any) {
         res.status(500).json({ error: e.message });

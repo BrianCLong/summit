@@ -95,7 +95,7 @@ class ReportService {
     });
     try {
       const page = await browser.newPage();
-      await page.goto('file://' + htmlRes.path, { waitUntil: 'networkidle0' });
+      await page.goto(`file://${  htmlRes.path}`, { waitUntil: 'networkidle0' });
       await page.pdf({ path: pdfPath, format: 'A4', printBackground: true });
     } finally {
       await browser.close();
@@ -206,7 +206,7 @@ class ReportService {
       });
       try {
         const page = await browser.newPage();
-        await page.goto('file://' + htmlPath, { waitUntil: 'networkidle0' });
+        await page.goto(`file://${  htmlPath}`, { waitUntil: 'networkidle0' });
         await page.pdf({ path: pdfPath, format: 'A4', printBackground: true });
       } finally {
         await browser.close();
@@ -264,30 +264,30 @@ class ReportService {
   }) {
     let primary;
     if (format === 'pdf')
-      primary = await this.generatePDFReport({
+      {primary = await this.generatePDFReport({
         investigationId,
         title,
         findings,
         evidence,
         metadata,
-      });
+      });}
     else if (format === 'md' || format === 'markdown')
-      primary = await this.generateMarkdownReport({
+      {primary = await this.generateMarkdownReport({
         investigationId,
         title,
         findings,
         evidence,
         metadata,
-      });
+      });}
     else
-      primary = await this.generateHTMLReport({
+      {primary = await this.generateHTMLReport({
         investigationId,
         title,
         findings,
         evidence,
         metadata,
-      });
-    if (!zip) return primary;
+      });}
+    if (!zip) {return primary;}
     const json = JSON.stringify(
       {
         investigationId,
@@ -308,20 +308,20 @@ class ReportService {
       .map((e) => `evidence,${JSON.stringify(String(e))}`)
       .join('\n');
     const csv =
-      csvHeader +
+      `${csvHeader +
       csvFindings +
       (csvFindings && csvEvidence ? '\n' : '') +
-      csvEvidence +
-      '\n';
+      csvEvidence 
+      }\n`;
     const items = [];
     if (primary.contentType === 'application/pdf' && primary.source)
-      items.push({ path: primary.source.path });
+      {items.push({ path: primary.source.path });}
     items.push({ path: primary.path });
     items.push({ name: 'report.json', content: json });
     items.push({ name: 'report.csv', content: csv });
     const zipRes = await this.zipFiles(
       items,
-      (title || 'report') + '-' + Date.now(),
+      `${title || 'report'  }-${  Date.now()}`,
     );
     return { ...zipRes, items: [primary] };
   }
@@ -344,7 +344,7 @@ class ReportService {
     const metricRow = (label, value, unit = '') => `
       <div class="metric-row">
         <span class="metric-label">${esc(label)}</span>
-        <span class="metric-value">${esc(value)}${unit ? ' <span class="unit">' + esc(unit) + '</span>' : ''}</span>
+        <span class="metric-value">${esc(value)}${unit ? ` <span class="unit">${  esc(unit)  }</span>` : ''}</span>
       </div>`;
 
     const section = (name, data) => {
@@ -423,7 +423,7 @@ class ReportService {
         // Render statement with citations if present
         let html = esc(x.text);
         if (x.citations && x.citations.length) {
-          html += ' <span class="citations">[' + x.citations.map(c => typeof c === 'string' ? esc(c) : esc(c.locator)).join(', ') + ']</span>';
+          html += ` <span class="citations">[${  x.citations.map(c => typeof c === 'string' ? esc(c) : esc(c.locator)).join(', ')  }]</span>`;
         }
         return `<li>${html}</li>`;
       }

@@ -755,8 +755,8 @@ function EnhancedGraphExplorer() {
       const d = e.data || e;
       const vf = new Date(d.validFrom || d.properties?.since || '2000-01-01');
       const vt = new Date(d.validTo || d.properties?.until || '2100-01-01');
-      if (vf < min) min = vf;
-      if (vt > max) max = vt;
+      if (vf < min) {min = vf;}
+      if (vt > max) {max = vt;}
     });
     if (min <= max) {
       const s = min.toISOString().slice(0, 10);
@@ -771,12 +771,12 @@ function EnhancedGraphExplorer() {
 
   // RAF playback for smoother animation
   useEffect(() => {
-    if (!playing) return;
+    if (!playing) {return;}
     const stepMs = stepDays * 24 * 3600 * 1000;
     const winMs = windowDays * 24 * 3600 * 1000;
     let last = performance.now();
     const loop = (now) => {
-      if (!playing) return;
+      if (!playing) {return;}
       if (now - last > 800) {
         // ~1 Hz
         const f = new Date(timeFrom);
@@ -890,7 +890,7 @@ function EnhancedGraphExplorer() {
 
     // When a new edge is drawn, create relationship in backend if requested
     cy.on('ehcomplete', async (event, sourceNode, targetNode, addedEdge) => {
-      if (!newRelConfig.active) return;
+      if (!newRelConfig.active) {return;}
       try {
         await createRel({
           variables: {
@@ -1051,7 +1051,7 @@ function EnhancedGraphExplorer() {
   };
 
   const updateCytoscapeData = () => {
-    if (!cy) return;
+    if (!cy) {return;}
 
     const elements = [
       ...nodes.map((node) => ({ data: node.data || node })),
@@ -1069,7 +1069,7 @@ function EnhancedGraphExplorer() {
   };
 
   const applyFilters = () => {
-    if (!cy) return;
+    if (!cy) {return;}
 
     cy.elements().removeClass('hidden');
 
@@ -1192,7 +1192,7 @@ function EnhancedGraphExplorer() {
 
   const highlightConnectedElements = useCallback(
     (node) => {
-      if (!cy) return;
+      if (!cy) {return;}
 
       cy.elements().removeClass('highlighted dimmed');
 
@@ -1212,7 +1212,7 @@ function EnhancedGraphExplorer() {
 
   const highlightEdge = useCallback(
     (edge) => {
-      if (!cy) return;
+      if (!cy) {return;}
 
       cy.elements().removeClass('highlighted dimmed');
 
@@ -1227,7 +1227,7 @@ function EnhancedGraphExplorer() {
   );
 
   const clearHighlights = useCallback(() => {
-    if (!cy) return;
+    if (!cy) {return;}
     cy.elements().removeClass('highlighted dimmed');
   }, [cy]);
 
@@ -1332,19 +1332,19 @@ function EnhancedGraphExplorer() {
   };
 
   const handleZoomIn = () => {
-    if (cy) cy.zoom(cy.zoom() * 1.2);
+    if (cy) {cy.zoom(cy.zoom() * 1.2);}
   };
 
   const handleZoomOut = () => {
-    if (cy) cy.zoom(cy.zoom() / 1.2);
+    if (cy) {cy.zoom(cy.zoom() / 1.2);}
   };
 
   const handleCenter = () => {
-    if (cy) cy.fit();
+    if (cy) {cy.fit();}
   };
 
   const addSuggestionEdges = (list) => {
-    if (!cy) return;
+    if (!cy) {return;}
     const toAdd = [];
     list.forEach((s) => {
       const id = `sug:${s.source}:${s.target}`;
@@ -1361,7 +1361,7 @@ function EnhancedGraphExplorer() {
         });
       }
     });
-    if (toAdd.length) cy.add(toAdd);
+    if (toAdd.length) {cy.add(toAdd);}
   };
 
   const onRunSuggestions = async () => {
@@ -1392,7 +1392,7 @@ function EnhancedGraphExplorer() {
         },
       });
       const el = cy?.getElementById(`sug:${s.source}:${s.target}`);
-      if (el && el.nonempty()) el.remove();
+      if (el && el.nonempty()) {el.remove();}
       setSuggestions((prev) =>
         prev.filter((x) => !(x.source === s.source && x.target === s.target)),
       );
@@ -1410,7 +1410,7 @@ function EnhancedGraphExplorer() {
   };
 
   const handleExport = (format) => {
-    if (!cy) return;
+    if (!cy) {return;}
 
     switch (format) {
       case 'png':
@@ -1914,7 +1914,7 @@ function EnhancedGraphExplorer() {
                   >
                     <ListItemText
                       primary={`${s.source} ↔ ${s.target}`}
-                      secondary={`score: ${s.score.toFixed(2)}${s.reason ? ' — ' + s.reason : ''}`}
+                      secondary={`score: ${s.score.toFixed(2)}${s.reason ? ` — ${  s.reason}` : ''}`}
                     />
                   </ListItem>
                 ))}

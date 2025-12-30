@@ -121,7 +121,7 @@ export class KubeBenchmarkValidator {
           for (const result of (test.results || [])) {
              total++;
              const status = result.status.toLowerCase() === 'pass' ? 'pass' : 'fail';
-             if (status === 'pass') passed++; else failed++;
+             if (status === 'pass') {passed++;} else {failed++;}
 
              items.push({
                id: result.test_number,
@@ -172,7 +172,7 @@ export class KubeBenchmarkValidator {
          for (const control of (res.controls || [])) {
              total++;
              const status = control.status.status.toLowerCase() === 'passed' ? 'pass' : 'fail';
-             if (status === 'pass') passed++; else failed++;
+             if (status === 'pass') {passed++;} else {failed++;}
 
              items.push({
                id: control.controlID,

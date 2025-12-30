@@ -41,7 +41,7 @@ export function reportWebVitals() {
 export function reportWebVitalsToAnalytics() {
   const isProduction = import.meta.env.PROD;
 
-  if (!isProduction) return;
+  if (!isProduction) {return;}
 
   function sendToAnalytics(metric) {
     const { name, value, rating, id, delta } = metric;
@@ -123,10 +123,10 @@ export const PERFORMANCE_THRESHOLDS = {
  */
 export function getPerformanceRating(metricName, value) {
   const threshold = PERFORMANCE_THRESHOLDS[metricName];
-  if (!threshold) return 'unknown';
+  if (!threshold) {return 'unknown';}
 
-  if (value <= threshold.good) return 'good';
-  if (value <= threshold.needsImprovement) return 'needs-improvement';
+  if (value <= threshold.good) {return 'good';}
+  if (value <= threshold.needsImprovement) {return 'needs-improvement';}
   return 'poor';
 }
 
@@ -160,7 +160,7 @@ export function measurePerformance(name, startMark, endMark) {
  * Log bundle loading times
  */
 export function logBundlePerformance() {
-  if (!performance.getEntriesByType) return;
+  if (!performance.getEntriesByType) {return;}
 
   const resources = performance.getEntriesByType('resource');
   const jsResources = resources.filter((r) => r.name.endsWith('.js'));

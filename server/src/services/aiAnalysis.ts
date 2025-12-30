@@ -395,9 +395,9 @@ export class AIAnalysisService {
     let confidence = 0.7; // Base confidence
 
     // Adjust based on length and complexity
-    if (entityText.length > 20) confidence -= 0.1;
-    if (entityText.includes('.')) confidence += 0.1; // Abbreviations
-    if (entityText.match(/^[A-Z]/)) confidence += 0.1; // Proper capitalization
+    if (entityText.length > 20) {confidence -= 0.1;}
+    if (entityText.includes('.')) {confidence += 0.1;} // Abbreviations
+    if (entityText.match(/^[A-Z]/)) {confidence += 0.1;} // Proper capitalization
 
     // Type-specific adjustments
     switch (entityType) {
@@ -424,7 +424,7 @@ export class AIAnalysisService {
     const seen = new Set<string>();
     return entities.filter((entity) => {
       const key = `${entity.text.toLowerCase()}-${entity.label}`;
-      if (seen.has(key)) return false;
+      if (seen.has(key)) {return false;}
       seen.add(key);
       return true;
     });
@@ -439,7 +439,7 @@ export class AIAnalysisService {
     const seen = new Set<string>();
     return relationships.filter((rel) => {
       const key = `${rel.source.toLowerCase()}-${rel.type}-${rel.target.toLowerCase()}`;
-      if (seen.has(key)) return false;
+      if (seen.has(key)) {return false;}
       seen.add(key);
       return true;
     });

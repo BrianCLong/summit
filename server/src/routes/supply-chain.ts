@@ -32,7 +32,7 @@ router.post('/vendors', async (req: Request, res: Response) => {
 
 router.get('/vendors/:id', async (req: Request, res: Response) => {
   const vendor = await vendorService.getVendor(req.params.id);
-  if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+  if (!vendor) {return res.status(404).json({ error: 'Vendor not found' });}
   res.json(vendor);
 });
 
@@ -49,19 +49,19 @@ router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
   const { sbomJson, productName, version } = req.body;
 
   const vendor = await vendorService.getVendor(id);
-  if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+  if (!vendor) {return res.status(404).json({ error: 'Vendor not found' });}
 
   try {
     const sbom = await sbomParser.parse(sbomJson, id, productName, version);
     const vulns = await vulnService.scanComponents(sbom.components);
     sbom.vulnerabilities = vulns;
 
-    if (!sbomStore[id]) sbomStore[id] = [];
+    if (!sbomStore[id]) {sbomStore[id] = [];}
     sbomStore[id].push(sbom);
 
     res.status(201).json({ sbom, vulnerabilityCount: vulns.length });
   } catch (error: any) {
-    res.status(500).json({ error: 'Failed to process SBOM: ' + error.message });
+    res.status(500).json({ error: `Failed to process SBOM: ${  error.message}` });
   }
 });
 
@@ -73,7 +73,7 @@ router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
   const { contractText } = req.body;
 
   const vendor = await vendorService.getVendor(id);
-  if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+  if (!vendor) {return res.status(404).json({ error: 'Vendor not found' });}
 
   try {
     const analysis = await contractAnalyzer.analyze(contractText, id);
@@ -90,7 +90,7 @@ router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
 router.get('/vendors/:id/risk', async (req: Request, res: Response) => {
   const { id } = req.params;
   const vendor = await vendorService.getVendor(id);
-  if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+  if (!vendor) {return res.status(404).json({ error: 'Vendor not found' });}
 
   const sboms = sbomStore[id] || [];
   const contract = contractStore[id];

@@ -66,7 +66,7 @@ export class CorrelationEngine {
 
     private calculatePearsonCorrelation(x: number[], y: number[]): number {
         const n = x.length;
-        if (n === 0) return 0;
+        if (n === 0) {return 0;}
 
         const sumX = x.reduce((a, b) => a + b, 0);
         const sumY = y.reduce((a, b) => a + b, 0);
@@ -77,7 +77,7 @@ export class CorrelationEngine {
         const numerator = n * sumXY - sumX * sumY;
         const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
 
-        if (denominator === 0) return 0;
+        if (denominator === 0) {return 0;}
         return numerator / denominator;
     }
 

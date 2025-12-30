@@ -161,7 +161,7 @@ class CircuitBreaker extends EventEmitter {
    * Determine if circuit should trip based on failure rate and volume
    */
   shouldTrip() {
-    if (this.state === 'OPEN') return false;
+    if (this.state === 'OPEN') {return false;}
 
     const now = Date.now();
     const windowStart = now - this.monitoringWindow;

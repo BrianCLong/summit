@@ -282,7 +282,7 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
   // Handle mouse movement for cursor tracking
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (!workspaceRef.current) return;
+      if (!workspaceRef.current) {return;}
 
       const rect = workspaceRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -305,7 +305,7 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
   // Handle annotation creation
   const handleAnnotationStart = useCallback(
     (e: React.MouseEvent, type: LiveAnnotation['type']) => {
-      if (!workspaceRef.current) return;
+      if (!workspaceRef.current) {return;}
 
       const rect = workspaceRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -328,12 +328,12 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
 
   const handleAnnotationComplete = useCallback(
     (content?: string) => {
-      if (!newAnnotation) return;
+      if (!newAnnotation) {return;}
 
       const annotation: LiveAnnotation = {
         ...newAnnotation,
         content,
-        isPersistent: !!content,
+        isPersistent: Boolean(content),
       } as LiveAnnotation;
 
       setAnnotations((prev) => [...prev, annotation]);
@@ -379,10 +379,10 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
 
   const formatTimeAgo = (timestamp: number) => {
     const minutes = Math.floor((Date.now() - timestamp) / 60000);
-    if (minutes < 1) return 'just now';
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 1) {return 'just now';}
+    if (minutes < 60) {return `${minutes}m ago`;}
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) {return `${hours}h ago`;}
     return `${Math.floor(hours / 24)}d ago`;
   };
 
@@ -524,7 +524,7 @@ const CollaborativeWorkspace: React.FC<CollaborativeWorkspaceProps> = ({
       >
         {/* Live Cursors */}
         {Object.entries(cursorPositions).map(([userId, pos]) => {
-          if (userId === currentUser.id) return null;
+          if (userId === currentUser.id) {return null;}
           return (
             <div
               key={userId}

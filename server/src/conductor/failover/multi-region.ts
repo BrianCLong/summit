@@ -198,7 +198,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
    */
   private async monitorReplicationLag(): Promise<void> {
     for (const region of this.regions.values()) {
-      if (!region.replication.enabled) continue;
+      if (!region.replication.enabled) {continue;}
 
       try {
         const replicationStatus = await this.getReplicationStatus(region.id);
@@ -229,10 +229,10 @@ export class MultiRegionFailoverManager extends EventEmitter {
    * Evaluate if automatic failover is needed
    */
   private async evaluateFailoverNeed(): Promise<void> {
-    if (this.failoverInProgress) return;
+    if (this.failoverInProgress) {return;}
 
     const activeRegionHealth = this.regionHealth.get(this.currentActiveRegion);
-    if (!activeRegionHealth) return;
+    if (!activeRegionHealth) {return;}
 
     // Check if active region is unhealthy
     if (
@@ -273,7 +273,7 @@ export class MultiRegionFailoverManager extends EventEmitter {
       )
       .map(([regionId]) => regionId);
 
-    if (healthyRegions.length === 0) return null;
+    if (healthyRegions.length === 0) {return null;}
 
     // Sort by priority (lower number = higher priority)
     const sortedRegions = healthyRegions

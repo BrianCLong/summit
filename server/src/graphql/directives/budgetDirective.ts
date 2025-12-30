@@ -141,7 +141,7 @@ async function withOTEL<T>(
     },
   };
 
-  if (ctx) ctx.span = span;
+  if (ctx) {ctx.span = span;}
 
   try {
     const result = await fn(span);
@@ -177,7 +177,7 @@ export function budgetDirective(directiveName = 'budget') {
           fieldConfig,
           directiveName,
         )?.[0] as BudgetDirectiveArgs;
-        if (!directive) return fieldConfig;
+        if (!directive) {return fieldConfig;}
 
         const { capUSD, tokenCeiling, provider, model } = directive;
         const originalResolve = fieldConfig.resolve ?? defaultFieldResolver;

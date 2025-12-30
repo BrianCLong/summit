@@ -241,7 +241,7 @@ export class EnhancedAutonomousOrchestrator {
 
           // Get run details
           const run = await this.getRun(runId);
-          if (!run) throw new Error('Run not found');
+          if (!run) {throw new Error('Run not found');}
 
           // Generate execution plan
           const tasks = await this.generateTasks(run);

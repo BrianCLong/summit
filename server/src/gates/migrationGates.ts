@@ -744,17 +744,17 @@ export class MigrationGatesSystem extends EventEmitter {
   }
 
   private validateGate(gate: MigrationGate): void {
-    if (!gate.id) throw new Error('Gate ID is required');
-    if (!gate.name) throw new Error('Gate name is required');
+    if (!gate.id) {throw new Error('Gate ID is required');}
+    if (!gate.name) {throw new Error('Gate name is required');}
     if (!gate.conditions || gate.conditions.length === 0) {
       throw new Error('Gate must have at least one condition');
     }
 
     for (const condition of gate.conditions) {
-      if (!condition.id) throw new Error('Condition ID is required');
-      if (!condition.type) throw new Error('Condition type is required');
+      if (!condition.id) {throw new Error('Condition ID is required');}
+      if (!condition.type) {throw new Error('Condition type is required');}
       if (condition.weight < 0)
-        throw new Error('Condition weight must be non-negative');
+        {throw new Error('Condition weight must be non-negative');}
     }
   }
 

@@ -12,7 +12,7 @@ router.post(
   express.raw({ type: '*/*', limit: '1mb' }),
   (req, res) => {
     const secret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET;
-    if (!secret) return res.status(503).send('webhook disabled');
+    if (!secret) {return res.status(503).send('webhook disabled');}
     try {
       const sig = req.header('Stripe-Signature') || '';
       const event = stripe.webhooks.constructEvent(

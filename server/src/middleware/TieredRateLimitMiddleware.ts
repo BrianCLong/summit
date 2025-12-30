@@ -372,14 +372,14 @@ export class AdvancedRateLimiter {
 
   private getUserIdFromRequest(req: Request): string {
     const user = (req as any).user;
-    if (user?.id) return `user:${user.id}`;
-    if (user?.sub) return `user:${user.sub}`;
+    if (user?.id) {return `user:${user.id}`;}
+    if (user?.sub) {return `user:${user.sub}`;}
     return `ip:${req.ip}`;
   }
 
   private getPriorityFromRequest(req: Request): RequestPriority {
     const p = req.headers['x-request-priority'] as RequestPriority;
-    if (p && Object.values(RequestPriority).includes(p)) return p;
+    if (p && Object.values(RequestPriority).includes(p)) {return p;}
     return RequestPriority.NORMAL;
   }
 

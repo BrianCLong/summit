@@ -477,10 +477,10 @@ class AdvancedAnalyticsService extends EventEmitter {
         activityFrequency: entityProperties.activityFrequency || 0,
       },
       multimodalFeatures: {
-        hasTextContent: !!entityProperties.textContent,
-        hasImageContent: !!entityProperties.imageContent,
-        hasAudioContent: !!entityProperties.audioContent,
-        hasVideoContent: !!entityProperties.videoContent,
+        hasTextContent: Boolean(entityProperties.textContent),
+        hasImageContent: Boolean(entityProperties.imageContent),
+        hasAudioContent: Boolean(entityProperties.audioContent),
+        hasVideoContent: Boolean(entityProperties.videoContent),
         contentTypes: entityProperties.contentTypes || [],
       },
     };
@@ -493,31 +493,31 @@ class AdvancedAnalyticsService extends EventEmitter {
 
     // PERSON classification logic
     scores.PERSON = 0;
-    if (features.textFeatures.containsTitle) scores.PERSON += 0.3;
+    if (features.textFeatures.containsTitle) {scores.PERSON += 0.3;}
     if (
       features.textFeatures.wordCount >= 2 &&
       features.textFeatures.wordCount <= 4
     )
-      scores.PERSON += 0.2;
-    if (features.multimodalFeatures.hasImageContent) scores.PERSON += 0.15;
+      {scores.PERSON += 0.2;}
+    if (features.multimodalFeatures.hasImageContent) {scores.PERSON += 0.15;}
 
     // ORGANIZATION classification logic
     scores.ORGANIZATION = 0;
-    if (features.textFeatures.hasSpecialChars) scores.ORGANIZATION += 0.2;
+    if (features.textFeatures.hasSpecialChars) {scores.ORGANIZATION += 0.2;}
     if (features.networkFeatures.connectionCount > 10)
-      scores.ORGANIZATION += 0.25;
-    if (features.textFeatures.labelLength > 20) scores.ORGANIZATION += 0.15;
+      {scores.ORGANIZATION += 0.25;}
+    if (features.textFeatures.labelLength > 20) {scores.ORGANIZATION += 0.15;}
 
     // LOCATION classification logic
     scores.LOCATION = 0;
-    if (features.textFeatures.hasNumericContent) scores.LOCATION += 0.2;
-    if (features.networkFeatures.centrality > 0.5) scores.LOCATION += 0.15;
+    if (features.textFeatures.hasNumericContent) {scores.LOCATION += 0.2;}
+    if (features.networkFeatures.centrality > 0.5) {scores.LOCATION += 0.15;}
 
     // EVENT classification logic
     scores.EVENT = 0;
-    if (features.temporalFeatures?.creationDate) scores.EVENT += 0.2;
-    if (features.multimodalFeatures.hasVideoContent) scores.EVENT += 0.15;
-    if (features.textFeatures.wordCount > 5) scores.EVENT += 0.1;
+    if (features.temporalFeatures?.creationDate) {scores.EVENT += 0.2;}
+    if (features.multimodalFeatures.hasVideoContent) {scores.EVENT += 0.15;}
+    if (features.textFeatures.wordCount > 5) {scores.EVENT += 0.1;}
 
     // Find best classification
     const sortedScores = Object.entries(scores)
@@ -675,9 +675,9 @@ class AdvancedAnalyticsService extends EventEmitter {
 
     const factors = [];
     if (historicalPattern.trend !== 'STABLE')
-      factors.push(`${historicalPattern.trend} trend`);
+      {factors.push(`${historicalPattern.trend} trend`);}
     if (historicalPattern.seasonality)
-      factors.push('Seasonal patterns detected');
+      {factors.push('Seasonal patterns detected');}
     factors.push(
       `Based on ${Math.round(historicalPattern.frequency * 4)} events per month`,
     );
@@ -713,7 +713,7 @@ class AdvancedAnalyticsService extends EventEmitter {
           entityId,
           investigationId,
         });
-        if (result.records.length === 0) continue;
+        if (result.records.length === 0) {continue;}
 
         const record = result.records[0];
         const entity = record.get('e').properties;
@@ -1047,8 +1047,8 @@ class AdvancedAnalyticsService extends EventEmitter {
     // Simplified BFS shortest path
     const graph = {};
     edges.forEach((edge) => {
-      if (!graph[edge.source]) graph[edge.source] = [];
-      if (!graph[edge.target]) graph[edge.target] = [];
+      if (!graph[edge.source]) {graph[edge.source] = [];}
+      if (!graph[edge.target]) {graph[edge.target] = [];}
       graph[edge.source].push(edge.target);
       graph[edge.target].push(edge.source);
     });
@@ -1147,11 +1147,11 @@ class AdvancedAnalyticsService extends EventEmitter {
   generateLinkPredictionReasoning(features) {
     const reasons = [];
     if (features.commonNeighbors > 2)
-      reasons.push(`${features.commonNeighbors} shared connections`);
+      {reasons.push(`${features.commonNeighbors} shared connections`);}
     if (features.jaccardCoefficient > 0.3)
-      reasons.push('High network similarity');
+      {reasons.push('High network similarity');}
     if (features.shortestPathLength <= 2)
-      reasons.push('Close network proximity');
+      {reasons.push('Close network proximity');}
     return reasons.join(', ');
   }
 
@@ -1197,8 +1197,8 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   // Additional utility methods would be implemented here...
   isBehaviorTypeMatch(relationshipType, behaviorType) {
-    if (!relationshipType || !behaviorType) return false;
-    if (relationshipType === behaviorType) return true;
+    if (!relationshipType || !behaviorType) {return false;}
+    if (relationshipType === behaviorType) {return true;}
 
     const mappings = {
       ACTIVITY: ['ACCESSED', 'CREATED', 'MODIFIED', 'VIEWED'],
@@ -1210,7 +1210,7 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   createTimeWindows(data, windowDays) {
-    if (data.length === 0) return [];
+    if (data.length === 0) {return [];}
 
     const windows = [];
     const startDate = data[0].timestamp;
@@ -1236,23 +1236,23 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   calculateTrend(values) {
-    if (values.length < 2) return 'UNKNOWN';
+    if (values.length < 2) {return 'UNKNOWN';}
 
     let increasing = 0;
     let decreasing = 0;
 
     for (let i = 1; i < values.length; i++) {
-      if (values[i] > values[i - 1]) increasing++;
-      else if (values[i] < values[i - 1]) decreasing++;
+      if (values[i] > values[i - 1]) {increasing++;}
+      else if (values[i] < values[i - 1]) {decreasing++;}
     }
 
-    if (increasing > decreasing * 1.5) return 'INCREASING';
-    if (decreasing > increasing * 1.5) return 'DECREASING';
+    if (increasing > decreasing * 1.5) {return 'INCREASING';}
+    if (decreasing > increasing * 1.5) {return 'DECREASING';}
     return 'STABLE';
   }
 
   calculateVariance(values) {
-    if (values.length === 0) return 0;
+    if (values.length === 0) {return 0;}
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
     return (
       values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
@@ -1262,7 +1262,7 @@ class AdvancedAnalyticsService extends EventEmitter {
 
   detectSeasonality(frequencies) {
     // Simplified seasonality detection
-    if (frequencies.length < 4) return null;
+    if (frequencies.length < 4) {return null;}
 
     // Look for weekly patterns (every 7 periods)
     if (frequencies.length >= 7) {
@@ -1276,7 +1276,7 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   calculateAutocorrelation(series, lag) {
-    if (series.length <= lag) return 0;
+    if (series.length <= lag) {return 0;}
 
     const n = series.length - lag;
     const mean = series.reduce((sum, val) => sum + val, 0) / series.length;
@@ -1311,7 +1311,7 @@ class AdvancedAnalyticsService extends EventEmitter {
   calculateActivityRisk(relationships) {
     const recentActivity = relationships.filter((r) => {
       const timestamp = r.properties?.timestamp;
-      if (!timestamp) return false;
+      if (!timestamp) {return false;}
       const date = new Date(timestamp);
       const daysSince = (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24);
       return daysSince <= 7; // Last 7 days
@@ -1347,7 +1347,7 @@ class AdvancedAnalyticsService extends EventEmitter {
 
     const recentConnections = relationships.filter((r) => {
       const timestamp = r.properties?.timestamp;
-      if (!timestamp) return false;
+      if (!timestamp) {return false;}
       return now - new Date(timestamp).getTime() < recentThreshold;
     });
 
@@ -1355,10 +1355,10 @@ class AdvancedAnalyticsService extends EventEmitter {
   }
 
   determineRiskLevel(totalRisk) {
-    if (totalRisk >= 0.8) return 'CRITICAL';
-    if (totalRisk >= 0.6) return 'HIGH';
-    if (totalRisk >= 0.4) return 'MEDIUM';
-    if (totalRisk >= 0.2) return 'LOW';
+    if (totalRisk >= 0.8) {return 'CRITICAL';}
+    if (totalRisk >= 0.6) {return 'HIGH';}
+    if (totalRisk >= 0.4) {return 'MEDIUM';}
+    if (totalRisk >= 0.2) {return 'LOW';}
     return 'MINIMAL';
   }
 
@@ -1385,8 +1385,8 @@ class AdvancedAnalyticsService extends EventEmitter {
     const graph = {};
 
     edges.forEach((edge) => {
-      if (!graph[edge.source]) graph[edge.source] = [];
-      if (!graph[edge.target]) graph[edge.target] = [];
+      if (!graph[edge.source]) {graph[edge.source] = [];}
+      if (!graph[edge.target]) {graph[edge.target] = [];}
 
       graph[edge.source].push({ node: edge.target, weight: edge.weight });
       graph[edge.target].push({ node: edge.source, weight: edge.weight });
@@ -1516,7 +1516,7 @@ class AdvancedAnalyticsService extends EventEmitter {
       for (const e of edges) {
         const ps = positions[e.source];
         const pt = positions[e.target];
-        if (!ps || !pt) continue;
+        if (!ps || !pt) {continue;}
         const dx = pt.x - ps.x;
         const dy = pt.y - ps.y;
         positions[e.source].x += dx * attraction;

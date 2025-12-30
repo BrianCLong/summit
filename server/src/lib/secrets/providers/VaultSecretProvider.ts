@@ -21,7 +21,7 @@ export class VaultSecretProvider implements SecretProvider {
   }
 
   async getSecret(key: string): Promise<string | null> {
-    if (!this.initialized) await this.initialize();
+    if (!this.initialized) {await this.initialize();}
 
     // Check cache
     if (this.cache.has(key)) {

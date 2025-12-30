@@ -510,7 +510,7 @@ export class GCSConnector extends EventEmitter {
 
         span.setAttributes({
           objects_count: objects.length,
-          has_next_page: !!metadata.nextPageToken,
+          has_next_page: Boolean(metadata.nextPageToken),
         });
 
         return {

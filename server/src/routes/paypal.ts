@@ -13,7 +13,7 @@ router.post(
   async (_req, res) => {
     // PayPal recommends server-side verify via API; stubbed route
     const secret = process.env.PAYPAL_WEBHOOK_ID;
-    if (!secret) return res.status(503).send('webhook disabled');
+    if (!secret) {return res.status(503).send('webhook disabled');}
     return res.sendStatus(200);
   },
 );

@@ -430,7 +430,7 @@ export class FinOpsObservabilityService {
 
       return {
         slowQueries: slowQueryRows.map((row) => ({
-          query: row.query_preview + '...',
+          query: `${row.query_preview  }...`,
           avgLatency: parseFloat(row.avg_latency),
           count: parseInt(row.count),
           totalCost: parseFloat(row.total_cost || 0),

@@ -194,15 +194,15 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 }
 
 function calculateRiskLevel(score: number): RiskLevel {
-  if (score >= 80) return 'critical';
-  if (score >= 60) return 'high';
-  if (score >= 40) return 'medium';
+  if (score >= 80) {return 'critical';}
+  if (score >= 60) {return 'high';}
+  if (score >= 40) {return 'medium';}
   return 'low';
 }
 
 function calculateConfidence(score: number): PredictionConfidence {
-  if (score >= 0.8) return 'high';
-  if (score >= 0.6) return 'medium';
+  if (score >= 0.8) {return 'high';}
+  if (score >= 0.6) {return 'medium';}
   return 'low';
 }
 

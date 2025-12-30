@@ -111,7 +111,7 @@ export class ApiKeyService {
   async createApiKey(input: CreateApiKeyInput): Promise<{ apiKey: ApiKey; token: string }> {
     const token = this.generateKey();
     const keyHash = this.hashKey(token);
-    const prefix = token.substring(0, 8) + '...';
+    const prefix = `${token.substring(0, 8)  }...`;
 
     let expiresAt: Date | null = null;
     if (input.expiresInDays) {

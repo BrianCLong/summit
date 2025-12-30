@@ -222,7 +222,7 @@ export class PlaybookExecutorService {
           reject(new Error(`Playbook run not found: ${runKey}`));
           return;
         }
-        if (record.status === 'running') return;
+        if (record.status === 'running') {return;}
         clearInterval(interval);
         resolve(this.getCompletedOrThrow(runKey));
       }, 25);

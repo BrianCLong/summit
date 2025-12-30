@@ -52,7 +52,7 @@ export default function pbacPlugin() {
                   });
                 }
               } catch (e) {
-                if (e instanceof GraphQLError) throw e;
+                if (e instanceof GraphQLError) {throw e;}
                 // If AccessControl throws unexpectedly, default to deny-safe
                 throw new GraphQLError('Forbidden', {
                   extensions: { code: 'FORBIDDEN' },

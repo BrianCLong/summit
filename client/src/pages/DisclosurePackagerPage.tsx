@@ -100,9 +100,9 @@ const DisclosurePackagerPage: React.FC = () => {
   const pollingRef = useRef<number | null>(null);
 
   const activeJobEta = useMemo(() => {
-    if (!activeJob?.createdAt) return null;
+    if (!activeJob?.createdAt) {return null;}
     if (!activeJob.completedAt || activeJob.status === 'running')
-      return 'Export is running — target p95 < 2 minutes for 10k events.';
+      {return 'Export is running — target p95 < 2 minutes for 10k events.';}
     const started = new Date(activeJob.createdAt).getTime();
     const finished = new Date(activeJob.completedAt).getTime();
     const diffSeconds = Math.max(0, Math.round((finished - started) / 1000));

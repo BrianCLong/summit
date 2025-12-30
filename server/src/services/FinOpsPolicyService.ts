@@ -81,7 +81,7 @@ export class FinOpsPolicyService {
       const violations: string[] = [];
 
       for (const policy of policies) {
-          if (!policy.enabled) continue;
+          if (!policy.enabled) {continue;}
 
           for (const rule of policy.rules) {
               if (this.isViolation(rule, metrics)) {
@@ -109,7 +109,7 @@ export class FinOpsPolicyService {
       const threshold = parseFloat(thresholdStr);
       const metricValue = metrics[metricName];
 
-      if (metricValue === undefined) return false;
+      if (metricValue === undefined) {return false;}
 
       switch (operator) {
           case '<': return metricValue < threshold;

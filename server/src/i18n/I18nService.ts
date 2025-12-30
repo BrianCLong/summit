@@ -569,7 +569,7 @@ export class I18nService {
     preferences: Partial<UserLocalePreferences>
   ): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     await pool.query(
       `INSERT INTO user_locale_preferences (
@@ -615,14 +615,14 @@ export class I18nService {
     }
 
     const pool = getPostgresPool();
-    if (!pool) return null;
+    if (!pool) {return null;}
 
     const result = await pool.query(
       'SELECT * FROM user_locale_preferences WHERE user_id = $1 AND tenant_id = $2',
       [userId, tenantId]
     );
 
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) {return null;}
 
     const row = result.rows[0];
     const preferences: UserLocalePreferences = {
@@ -691,9 +691,9 @@ export class I18nService {
 
   private resolvePluralForm(forms: PluralForms, count: number, locale: SupportedLocale): string {
     // Simplified plural resolution
-    if (count === 0 && forms.zero) return forms.zero;
-    if (count === 1) return forms.one;
-    if (count === 2 && forms.two) return forms.two;
+    if (count === 0 && forms.zero) {return forms.zero;}
+    if (count === 1) {return forms.one;}
+    if (count === 2 && forms.two) {return forms.two;}
     return forms.other;
   }
 

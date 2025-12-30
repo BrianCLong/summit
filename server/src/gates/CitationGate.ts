@@ -129,12 +129,12 @@ export class CitationGate {
   }
 
   private static isUncited(item: string | Statement): boolean {
-    if (typeof item === 'string') return true; // Strings are uncited by definition in this new world
+    if (typeof item === 'string') {return true;} // Strings are uncited by definition in this new world
     return !item.citations || item.citations.length === 0;
   }
 
   private static toStatement(item: string | Statement): Statement {
-    if (typeof item === 'string') return { text: item, citations: [] };
+    if (typeof item === 'string') {return { text: item, citations: [] };}
     return item;
   }
 }

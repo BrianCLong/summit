@@ -627,8 +627,8 @@ export class SLSA3Verifier {
 
         if (result.valid) {
           validCount++;
-          if (result.level === 'SLSA_3') slsa3Count++;
-          if (result.level === 'SLSA_4') slsa4Count++;
+          if (result.level === 'SLSA_3') {slsa3Count++;}
+          if (result.level === 'SLSA_4') {slsa4Count++;}
         }
       } catch (error: any) {
         results.push({

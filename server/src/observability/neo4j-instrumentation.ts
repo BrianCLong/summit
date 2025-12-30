@@ -31,7 +31,7 @@ export function instrumentNeo4jDriver(driver: Driver): Driver {
   // Wrap session creation
   const originalSession = driver.session.bind(driver);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   (driver as any).session = function (config?: any): Session {
     const session = originalSession(config);
     const mode = config?.defaultAccessMode === neo4j.session.WRITE ? 'write' : 'read';
@@ -53,7 +53,7 @@ export function instrumentNeo4jDriver(driver: Driver): Driver {
 
     // Wrap session run method with metrics
     const originalRun = session.run.bind(session);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     session.run = async function (query: string, parameters?: any) {
       const operation = extractCypherOperation(query);
       const startTime = Date.now();
@@ -65,7 +65,7 @@ export function instrumentNeo4jDriver(driver: Driver): Driver {
           span.setAttributes({
             'db.system': 'neo4j',
             'db.operation': operation,
-            'db.statement': query.length > 500 ? query.substring(0, 500) + '...' : query,
+            'db.statement': query.length > 500 ? `${query.substring(0, 500)  }...` : query,
             'db.neo4j.access_mode': mode,
           });
 
@@ -132,7 +132,7 @@ function wrapTransactionMethods(session: Session, mode: string): void {
   // Wrap readTransaction
   const originalReadTransaction = session.readTransaction?.bind(session);
   if (originalReadTransaction) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     session.readTransaction = async function (transactionWork: any) {
       const startTime = Date.now();
       try {
@@ -151,7 +151,7 @@ function wrapTransactionMethods(session: Session, mode: string): void {
   // Wrap writeTransaction
   const originalWriteTransaction = session.writeTransaction?.bind(session);
   if (originalWriteTransaction) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     session.writeTransaction = async function (transactionWork: any) {
       const startTime = Date.now();
       try {
@@ -175,17 +175,17 @@ function extractCypherOperation(query: string): string {
   const normalizedQuery = query.trim().toLowerCase();
 
   // Match patterns
-  if (normalizedQuery.startsWith('match')) return 'match';
-  if (normalizedQuery.startsWith('create')) return 'create';
-  if (normalizedQuery.startsWith('merge')) return 'merge';
-  if (normalizedQuery.startsWith('delete')) return 'delete';
-  if (normalizedQuery.startsWith('remove')) return 'remove';
-  if (normalizedQuery.startsWith('set')) return 'set';
-  if (normalizedQuery.includes('call db.index')) return 'index';
-  if (normalizedQuery.startsWith('call')) return 'procedure';
-  if (normalizedQuery.startsWith('with')) return 'with';
-  if (normalizedQuery.startsWith('unwind')) return 'unwind';
-  if (normalizedQuery.startsWith('return')) return 'return';
+  if (normalizedQuery.startsWith('match')) {return 'match';}
+  if (normalizedQuery.startsWith('create')) {return 'create';}
+  if (normalizedQuery.startsWith('merge')) {return 'merge';}
+  if (normalizedQuery.startsWith('delete')) {return 'delete';}
+  if (normalizedQuery.startsWith('remove')) {return 'remove';}
+  if (normalizedQuery.startsWith('set')) {return 'set';}
+  if (normalizedQuery.includes('call db.index')) {return 'index';}
+  if (normalizedQuery.startsWith('call')) {return 'procedure';}
+  if (normalizedQuery.startsWith('with')) {return 'with';}
+  if (normalizedQuery.startsWith('unwind')) {return 'unwind';}
+  if (normalizedQuery.startsWith('return')) {return 'return';}
 
   // Check for multi-clause queries
   if (normalizedQuery.includes('create') && normalizedQuery.includes('match')) {

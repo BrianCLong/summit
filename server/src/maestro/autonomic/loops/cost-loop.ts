@@ -19,7 +19,7 @@ export class CostOptimizationLoop implements ControlLoop {
   }
 
   public async analyze(): Promise<boolean> {
-    if (this.currentSpend > this.dailyBudget * 0.9) return true;
+    if (this.currentSpend > this.dailyBudget * 0.9) {return true;}
     return false;
   }
 

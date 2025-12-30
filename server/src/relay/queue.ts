@@ -29,8 +29,8 @@ function signEnv({
     .createHash('sha256')
     .update(JSON.stringify(payload))
     .digest('hex');
-  const data = id + '|' + createdAt + '|' + hash;
-  if (!key) return '';
+  const data = `${id  }|${  createdAt  }|${  hash}`;
+  if (!key) {return '';}
   const signer = crypto.createSign('RSA-SHA256');
   signer.update(data);
   signer.end();
@@ -75,7 +75,7 @@ export async function poll(siteId: string, max = 50) {
 }
 
 export async function ack(dbIds: number[]) {
-  if (!dbIds?.length) return;
+  if (!dbIds?.length) {return;}
   await pg.query(
     `UPDATE sync_outbox SET status='ACK' WHERE id = ANY($1::bigint[])`,
     [dbIds],

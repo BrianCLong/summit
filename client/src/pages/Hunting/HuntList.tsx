@@ -274,7 +274,7 @@ export default function HuntList() {
       field: 'lastRun',
       headerName: 'Last Run',
       width: 160,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       valueFormatter: (params: any) => new Date(params.value).toLocaleString(),
     },
     {
@@ -303,9 +303,9 @@ export default function HuntList() {
 
   const filteredHunts =
     hunts?.filter((hunt) => {
-      if (selectedTab === 1 && hunt.status !== 'RUNNING') return false;
-      if (selectedTab === 2 && hunt.status !== 'SCHEDULED') return false;
-      if (selectedTab === 3 && hunt.findings === 0) return false;
+      if (selectedTab === 1 && hunt.status !== 'RUNNING') {return false;}
+      if (selectedTab === 2 && hunt.status !== 'SCHEDULED') {return false;}
+      if (selectedTab === 3 && hunt.findings === 0) {return false;}
       return true;
     }) || [];
 

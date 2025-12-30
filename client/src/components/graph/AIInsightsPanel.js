@@ -38,7 +38,7 @@ export default function AIInsightsPanel({ open, onClose }) {
       setConnected(false);
     }
     function onInsight(_evt, payload) {
-      if (!payload?.entityId) return;
+      if (!payload?.entityId) {return;}
       dispatch(
         g.insightReceived({
           entityId: payload.entityId,

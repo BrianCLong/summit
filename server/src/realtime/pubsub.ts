@@ -5,7 +5,7 @@ export const pubsub = {
     this.io = io;
   },
   publish(channel: string, payload: any) {
-    if (this.io) this.io.to(channel).emit('event', payload);
+    if (this.io) {this.io.to(channel).emit('event', payload);}
   },
   asyncIterator(channel: string) {
     // Bridge to GraphQL subscription layer in your app

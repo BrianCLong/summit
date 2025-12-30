@@ -115,7 +115,7 @@ async function analyzeSlowQueries() {
         }
 
     } catch (err) {
-        logger.warn('Could not list running queries (requires admin/enterprise privileges): ' + err.message);
+        logger.warn(`Could not list running queries (requires admin/enterprise privileges): ${  err.message}`);
     }
 
     // Profiling known critical patterns with EXPLAIN snapshots

@@ -60,7 +60,7 @@ export default class InvestigativeThreadQualityAgent {
   }
 
   private scoreCoherence(messages: ThreadMessage[]): number {
-    if (messages.length <= 1) return 1;
+    if (messages.length <= 1) {return 1;}
     let total = 0;
     let count = 0;
     for (let i = 1; i < messages.length; i++) {
@@ -71,7 +71,7 @@ export default class InvestigativeThreadQualityAgent {
   }
 
   private scoreEvidence(messages: ThreadMessage[]): number {
-    if (!messages.length) return 0;
+    if (!messages.length) {return 0;}
     const supported = messages.filter(
       (m) =>
         (m.evidence && m.evidence.length > 0) || /\bhttps?:\/\//.test(m.text),
@@ -80,7 +80,7 @@ export default class InvestigativeThreadQualityAgent {
   }
 
   private scoreRedundancy(messages: ThreadMessage[]): number {
-    if (!messages.length) return 0;
+    if (!messages.length) {return 0;}
     const texts = messages.map((m) => m.text.trim().toLowerCase());
     const unique = new Set(texts);
     return 1 - unique.size / texts.length;

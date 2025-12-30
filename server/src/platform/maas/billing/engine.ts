@@ -6,7 +6,7 @@ export class BillingEngine {
 
   generateInvoice(tenantId: string, planId: string, periodStart: Date, periodEnd: Date): Invoice {
     const plan = this.plans.get(planId);
-    if (!plan) throw new Error(`Plan ${planId} not found`);
+    if (!plan) {throw new Error(`Plan ${planId} not found`);}
 
     const tenantUsage = this.usageRecords.filter(r =>
       r.tenantId === tenantId &&

@@ -36,8 +36,8 @@ export class DSLParser {
             // Merge target node info into traversal step
             if (targetNode.type || targetNode.filter) {
                 traversal.target = {};
-                if (targetNode.type) traversal.target.type = targetNode.type;
-                if (targetNode.filter) traversal.target.filter = targetNode.filter;
+                if (targetNode.type) {traversal.target.type = targetNode.type;}
+                if (targetNode.filter) {traversal.target.filter = targetNode.filter;}
             }
 
             query.traverse.push(traversal);
@@ -81,7 +81,7 @@ export class DSLParser {
             const props: Record<string, any> = {};
             while (this.peek() !== ')') {
                 const keyMatch = this.matchRegex(/^([a-zA-Z0-9_]+)/);
-                if (!keyMatch) throw new Error(`Expected property key at ${this.pos}`);
+                if (!keyMatch) {throw new Error(`Expected property key at ${this.pos}`);}
                 const key = keyMatch[1];
 
                 this.consume('=');
@@ -123,26 +123,26 @@ export class DSLParser {
         }
 
         // Parse Edge: [FOLLOWS] or just FOLLOWS or nothing for any
-        let edgeTypes: string[] = [];
+        const edgeTypes: string[] = [];
         if (this.peek() === '[') {
             this.consume('[');
             const type = this.matchRegex(/^([a-zA-Z0-9_]+)/);
-            if (type) edgeTypes.push(type[1]);
+            if (type) {edgeTypes.push(type[1]);}
             this.consume(']');
         } else {
              // Try match raw edge type if not wrapped in []?
              // Syntax: -> FOLLOWS ->
              const type = this.matchRegex(/^([a-zA-Z0-9_]+)/);
-             if (type) edgeTypes.push(type[1]);
+             if (type) {edgeTypes.push(type[1]);}
         }
 
         // Check end of arrow
         if (this.match('->')) {
-            if (direction === 'in') direction = 'both'; // <-->
-            else direction = 'out';
+            if (direction === 'in') {direction = 'both';} // <-->
+            else {direction = 'out';}
         } else if (this.match('-')) {
-             if (direction === 'in') direction = 'in'; // <--
-             else direction = 'both'; // -- (undirected/both)
+             if (direction === 'in') {direction = 'in';} // <--
+             else {direction = 'both';} // -- (undirected/both)
         }
 
         this.consumeWhitespace();
@@ -158,7 +158,7 @@ export class DSLParser {
         }
         // numeric
         const num = this.matchRegex(/^([0-9]+)/);
-        if (num) return parseInt(num[1], 10);
+        if (num) {return parseInt(num[1], 10);}
 
         throw new Error(`Unexpected value at ${this.pos}`);
     }

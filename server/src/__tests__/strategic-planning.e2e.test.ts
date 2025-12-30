@@ -73,9 +73,9 @@ describe('Strategic Planning Module - E2E', () => {
       ];
 
       const calculateRiskLevel = (score: number): string => {
-        if (score >= 20) return 'CRITICAL';
-        if (score >= 12) return 'HIGH';
-        if (score >= 6) return 'MEDIUM';
+        if (score >= 20) {return 'CRITICAL';}
+        if (score >= 12) {return 'HIGH';}
+        if (score >= 6) {return 'MEDIUM';}
         return 'LOW';
       };
 

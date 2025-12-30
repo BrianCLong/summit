@@ -141,19 +141,19 @@ router.post('/reviewers/invite', (req, res) => {
 
 router.post('/reviewers/invite/:id/resend', (req, res) => {
   const invite = resendInvite(req.params.id);
-  if (!invite) return res.status(404).json({ error: 'not_found' });
+  if (!invite) {return res.status(404).json({ error: 'not_found' });}
   res.json(invite);
 });
 
 router.post('/reviewers/invite/:id/revoke', (req, res) => {
   const invite = revokeInvite(req.params.id);
-  if (!invite) return res.status(404).json({ error: 'not_found' });
+  if (!invite) {return res.status(404).json({ error: 'not_found' });}
   res.json(invite);
 });
 
 router.post('/reviewers/invite/:id/accept', (req, res) => {
   const result = acceptReviewerInvite(req.params.id);
-  if (!result) return res.status(404).json({ error: 'not_found' });
+  if (!result) {return res.status(404).json({ error: 'not_found' });}
   res.json(result);
 });
 

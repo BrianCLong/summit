@@ -32,7 +32,7 @@ class DoclingGraphRepository {
   private initialized = false;
 
   private async ensureConstraints() {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
     await neo.run(
       `CREATE CONSTRAINT IF NOT EXISTS ON (f:DocFragment) ASSERT f.id IS UNIQUE`,
     );

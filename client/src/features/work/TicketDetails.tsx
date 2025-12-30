@@ -44,8 +44,8 @@ export default function TicketDetails() {
     })();
   }, [provider, externalId]);
 
-  if (loading) return <div className="p-4">Loading…</div>;
-  if (!ticket) return <div className="p-4">Not found.</div>;
+  if (loading) {return <div className="p-4">Loading…</div>;}
+  if (!ticket) {return <div className="p-4">Not found.</div>;}
 
   const title = encodeURIComponent(`[${ticket.provider}] ${ticket.title}`);
   const body = encodeURIComponent(

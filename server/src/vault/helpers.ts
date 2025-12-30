@@ -4,7 +4,7 @@ const VAULT_ADDR = process.env.VAULT_ADDR || '';
 const VAULT_TOKEN = process.env.VAULT_TOKEN || '';
 
 async function vfetch(path: string, init?: any) {
-  const url = `${VAULT_ADDR}${path.startsWith('/v1') ? path : '/v1' + path}`;
+  const url = `${VAULT_ADDR}${path.startsWith('/v1') ? path : `/v1${  path}`}`;
   const res = await fetch(url, {
     ...(init || {}),
     headers: {
@@ -13,12 +13,12 @@ async function vfetch(path: string, init?: any) {
       ...(init?.headers || {}),
     },
   });
-  if (!res.ok) throw new Error(`Vault error ${res.status}`);
+  if (!res.ok) {throw new Error(`Vault error ${res.status}`);}
   return res.json();
 }
 
 export async function vaultReadKvV2(path: string): Promise<any> {
-  const j = await vfetch(`/v1/${path.startsWith('kv/') ? path : 'kv/' + path}`);
+  const j = await vfetch(`/v1/${path.startsWith('kv/') ? path : `kv/${  path}`}`);
   return j.data?.data ?? j.data;
 }
 

@@ -380,7 +380,7 @@ export class PolicySimulationService {
   async getDraft(draftId: string): Promise<PolicyDraft | undefined> {
       const pool = getPostgresPool();
       const res = await pool.query('SELECT * FROM policy_drafts WHERE draft_id = $1', [draftId]);
-      if (res.rows.length === 0) return undefined;
+      if (res.rows.length === 0) {return undefined;}
       const row = res.rows[0];
       return {
           draftId: row.draft_id,
@@ -398,7 +398,7 @@ export class PolicySimulationService {
   // P3.2: Replay Against Historical Events
   async replayHistorical(draftId: string, timeWindowHours: number = 24): Promise<SimulationResult> {
       const draft = await this.getDraft(draftId);
-      if (!draft) throw new Error("Draft not found");
+      if (!draft) {throw new Error("Draft not found");}
 
       let events: AccessEvent[] = [];
       try {
@@ -448,7 +448,7 @@ export class PolicySimulationService {
   // P4.2: Approval Gate
   async publishDraft(draftId: string, approverId: string): Promise<PolicyDraft> {
       const draft = await this.getDraft(draftId);
-      if (!draft) throw new Error("Draft not found");
+      if (!draft) {throw new Error("Draft not found");}
 
       // Check if already approved by this user
       if (!draft.approvals.includes(approverId)) {

@@ -148,7 +148,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
 
   // Detect event clusters
   const eventClusters = useMemo(() => {
-    if (!showClusters) return [];
+    if (!showClusters) {return [];}
 
     const clusters: TimeCluster[] = [];
     const clusterWindow = timeSpan * 0.02; // 2% of total time span
@@ -208,7 +208,7 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
 
   // Detect temporal anomalies
   const anomalies = useMemo(() => {
-    if (!showAnomalies) return [];
+    if (!showAnomalies) {return [];}
 
     const anomalousEvents: TimelineEvent[] = [];
     const timeWindow = timeSpan * 0.01; // 1% of time span
@@ -346,10 +346,10 @@ const TemporalAnalysis: React.FC<TemporalAnalysisProps> = ({
   // Drawing function
   const draw = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     // Clear canvas
     ctx.clearRect(0, 0, width, height);

@@ -53,8 +53,8 @@ export const assertIndexUsage = (
 
     search(plan);
 
-    if (matches.length === 0) return true;
-    if (!expectation.index) return false;
+    if (matches.length === 0) {return true;}
+    if (!expectation.index) {return false;}
 
     return !matches.some(
       (node) => node['Index Name'] === expectation.index,

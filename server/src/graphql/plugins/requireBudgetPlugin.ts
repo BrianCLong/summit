@@ -107,9 +107,9 @@ export function requireBudgetPlugin(
               continue; // Field doesn't exist (will error elsewhere)
             }
 
-            const hasBudgetDirective = !!field.astNode?.directives?.some(
+            const hasBudgetDirective = Boolean(field.astNode?.directives?.some(
               (directive) => directive.name.value === 'budget',
-            );
+            ));
 
             const fieldInfo: MutationFieldInfo = {
               fieldName,

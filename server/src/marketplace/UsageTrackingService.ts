@@ -325,7 +325,7 @@ class AlertManager {
     tenantId: string,
     quotaStatus: QuotaStatus[]
   ): UsageAlert[] {
-    if (!this.config.enableAlerts) return [];
+    if (!this.config.enableAlerts) {return [];}
 
     const newAlerts: UsageAlert[] = [];
 
@@ -738,7 +738,7 @@ export class UsageTrackingService extends EventEmitter {
   // --------------------------------------------------------------------------
 
   private flushEvents(): void {
-    if (this.eventBuffer.length === 0) return;
+    if (this.eventBuffer.length === 0) {return;}
 
     const events = [...this.eventBuffer];
     this.eventBuffer = [];
@@ -880,7 +880,7 @@ export class UsageTrackingService extends EventEmitter {
     metrics: Map<string, MetricSummary>
   ): QuotaStatus[] {
     const config = this.pluginConfigs.get(pluginId);
-    if (!config?.includedQuota) return [];
+    if (!config?.includedQuota) {return [];}
 
     const quotaStatus: QuotaStatus[] = [];
 

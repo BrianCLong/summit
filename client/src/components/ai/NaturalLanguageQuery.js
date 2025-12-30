@@ -345,7 +345,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   };
 
   const executeQuery = async (queryText = query) => {
-    if (!queryText.trim() || !cy) return;
+    if (!queryText.trim() || !cy) {return;}
 
     setLoading(true);
     setResults(null);
@@ -393,7 +393,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
   };
 
   const executeGraphQuery = async (parsedQuery) => {
-    if (!cy) throw new Error('Graph not available');
+    if (!cy) {throw new Error('Graph not available');}
 
     const results = {
       action: parsedQuery.action,
@@ -541,11 +541,11 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         const searchResults = cy.nodes().filter((node) => {
           const nodeData = node.data();
           const searchText = (
-            nodeData.label +
-            ' ' +
-            (nodeData.type || '') +
-            ' ' +
-            JSON.stringify(nodeData.properties || {})
+            `${nodeData.label 
+            } ${ 
+            nodeData.type || '' 
+            } ${ 
+            JSON.stringify(nodeData.properties || {})}`
           ).toLowerCase();
 
           return parsedQuery.keywords.some((keyword) =>
@@ -581,7 +581,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
         return { nodes: path, edges, length: path.length - 1 };
       }
 
-      if (visited.has(node.id())) continue;
+      if (visited.has(node.id())) {continue;}
       visited.add(node.id());
 
       node.connectedEdges().forEach((edge) => {
@@ -630,7 +630,7 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
       }
     });
 
-    if (distances.length === 0) return 0;
+    if (distances.length === 0) {return 0;}
     const avgDistance = distances.reduce((a, b) => a + b, 0) / distances.length;
     return avgDistance > 0 ? 1 / avgDistance : 0;
   };

@@ -111,8 +111,8 @@ export class SummitMLPipeline extends EventEmitter {
 
     // 1. Base score from classification
     const cls = classification || await this.classifyEntity(entity);
-    if (cls.type === 'MILITARY_UNIT') score += 50;
-    if (cls.type === 'STATE_ACTOR') score += 30;
+    if (cls.type === 'MILITARY_UNIT') {score += 50;}
+    if (cls.type === 'STATE_ACTOR') {score += 30;}
     if (cls.tags.includes('propaganda_spreader')) {
       score += 40;
       factors.push('Propaganda Activity');
@@ -138,9 +138,9 @@ export class SummitMLPipeline extends EventEmitter {
     score = Math.min(100, score);
 
     let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
-    if (score >= 80) riskLevel = 'CRITICAL';
-    else if (score >= 60) riskLevel = 'HIGH';
-    else if (score >= 30) riskLevel = 'MEDIUM';
+    if (score >= 80) {riskLevel = 'CRITICAL';}
+    else if (score >= 60) {riskLevel = 'HIGH';}
+    else if (score >= 30) {riskLevel = 'MEDIUM';}
 
     return {
       entityId: entity.id || uuidv4(),

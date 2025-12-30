@@ -82,8 +82,8 @@ async function checkNeo4j() {
     const responseTime = performance.now() - start;
     dbQueryDuration.labels('neo4j', 'health').observe(responseTime / 1000);
     dbQueriesTotal.labels('neo4j', 'health', 'error').inc();
-    if (session) await session.close();
-    if (driver) await driver.close();
+    if (session) {await session.close();}
+    if (driver) {await driver.close();}
     return {
       status: 'unhealthy',
       error: error.message,

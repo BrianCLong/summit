@@ -4,7 +4,7 @@ import { AppError } from '../lib/errors.js';
 import { logger } from '../config/logger.js';
 import { getPostgresPool } from '../db/postgres.js';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 type ZodSchema = any; // z.ZodSchema - using any for zod 3.25+ compatibility
 
 // --- Types ---

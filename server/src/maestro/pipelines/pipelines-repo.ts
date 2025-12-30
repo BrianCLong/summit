@@ -21,7 +21,7 @@ export class PipelinesRepo {
     return this.pool;
   }
   private async ensureTable() {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
     // The table creation is handled by migrations now, but we keep this for initial setup if no migrations are run
     await this.getPool().query(`
       CREATE TABLE IF NOT EXISTS pipelines (

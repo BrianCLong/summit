@@ -93,7 +93,7 @@ export class EdgeFleetService extends EventEmitter {
    */
   async deployFleet(fleetId: string, missionContext: MissionContext): Promise<boolean> {
     const fleet = this.fleets.get(fleetId);
-    if (!fleet) throw new Error('Fleet not found');
+    if (!fleet) {throw new Error('Fleet not found');}
 
     logger.info(`Deploying fleet ${fleetId} for mission ${missionContext.type}`);
 
@@ -130,7 +130,7 @@ export class EdgeFleetService extends EventEmitter {
    */
   async recordActivity(fleetId: string, activity: any): Promise<void> {
     const fleet = this.fleets.get(fleetId);
-    if (!fleet) throw new Error('Fleet not found');
+    if (!fleet) {throw new Error('Fleet not found');}
 
     // Assurance check: Detect hallucinations or adversarial content if it's an output
     if (activity.type === 'OUTPUT') {
@@ -156,10 +156,10 @@ export class EdgeFleetService extends EventEmitter {
    */
   async syncLogs(fleetId: string): Promise<number> {
     const fleet = this.fleets.get(fleetId);
-    if (!fleet) throw new Error('Fleet not found');
+    if (!fleet) {throw new Error('Fleet not found');}
 
     const count = fleet.logsBuffer.length;
-    if (count === 0) return 0;
+    if (count === 0) {return 0;}
 
     logger.info(`Syncing ${count} logs for fleet ${fleetId}`);
 
@@ -174,7 +174,7 @@ export class EdgeFleetService extends EventEmitter {
   private verifySLSA(manifest: AgentManifest): boolean {
       // Mock SLSA verification logic
       // In prod, verify signature matches manifest content and signer is trusted
-      return manifest.slsaLevel >= 3 && !!manifest.signature;
+      return manifest.slsaLevel >= 3 && Boolean(manifest.signature);
   }
 
   private checkOPAPolicy(fleet: Fleet, mission: MissionContext): boolean {

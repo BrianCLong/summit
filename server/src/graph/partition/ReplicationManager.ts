@@ -16,7 +16,7 @@ export class ReplicationManager {
     }
 
     public startReplicationCycle(intervalMs: number = 60000) {
-        if (this.interval) return;
+        if (this.interval) {return;}
 
         logger.info(`Starting air-gapped replication cycle every ${intervalMs}ms`);
         this.interval = setInterval(async () => {

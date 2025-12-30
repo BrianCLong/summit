@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 type Connector = { id: string; name: string };
 
 export default function IngestWizard() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
   const [connectors, setConnectors] = useState<Connector[]>([]);
   const [selected, setSelected] = useState<string>('');
@@ -16,13 +16,13 @@ export default function IngestWizard() {
   } | null>(null);
   const [schema, setSchema] = useState<{
     required?: string[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     properties?: Record<string, any>;
   }>({});
   const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch(api + '/ingest/connectors')
+    fetch(`${api  }/ingest/connectors`)
       .then((r) => r.json())
       .then((d) => setConnectors(d.items || []))
       .catch(() => setStatus('Connectors API not reachable'));
@@ -34,17 +34,17 @@ export default function IngestWizard() {
     setErrors([]);
     try {
       const body = { connector: selected, config: JSON.parse(config || '{}') };
-      const res = await fetch(api + '/ingest/start', {
+      const res = await fetch(`${api  }/ingest/start`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
       if (data.job_id) {
-        setStatus('Started job ' + data.job_id);
+        setStatus(`Started job ${  data.job_id}`);
         setJobId(data.job_id);
         poll(data.job_id);
-      } else setStatus('Failed to start');
+      } else {setStatus('Failed to start');}
     } catch (e) {
       setStatus(String(e));
     }
@@ -53,11 +53,11 @@ export default function IngestWizard() {
   async function poll(id: string) {
     let active = true;
     const tick = async () => {
-      if (!active) return;
+      if (!active) {return;}
       try {
-        const d = await (await fetch(api + '/ingest/progress/' + id)).json();
+        const d = await (await fetch(`${api  }/ingest/progress/${  id}`)).json();
         setProgress({ status: d.status, progress: d.progress });
-        if (d.status === 'completed' || d.status === 'failed') return;
+        if (d.status === 'completed' || d.status === 'failed') {return;}
       // eslint-disable-next-line no-empty
       } catch {}
       setTimeout(tick, 1000);
@@ -69,10 +69,10 @@ export default function IngestWizard() {
   }
 
   async function cancel() {
-    if (!jobId) return;
+    if (!jobId) {return;}
     try {
-      await fetch(api + '/ingest/cancel/' + jobId, { method: 'POST' });
-      setStatus('Canceled job ' + jobId);
+      await fetch(`${api  }/ingest/cancel/${  jobId}`, { method: 'POST' });
+      setStatus(`Canceled job ${  jobId}`);
       setJobId('');
       setProgress(null);
     } catch (e) {
@@ -87,10 +87,10 @@ export default function IngestWizard() {
     setJobId('');
     setProgress(null);
     try {
-      const sch = await (await fetch(api + '/ingest/schema/' + id)).json();
+      const sch = await (await fetch(`${api  }/ingest/schema/${  id}`)).json();
       setSchema(sch || {});
       const props = sch?.properties || {};
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const blank: any = {};
       Object.keys(props).forEach((k) => (blank[k] = ''));
       setConfig(JSON.stringify(blank, null, 2));
@@ -104,7 +104,7 @@ export default function IngestWizard() {
     setStatus('');
     try {
       const cfg = JSON.parse(config || '{}');
-      const res = await fetch(api + '/ingest/dry-run/' + selected, {
+      const res = await fetch(`${api  }/ingest/dry-run/${  selected}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(cfg),
@@ -162,24 +162,24 @@ export default function IngestWizard() {
               const val = cfg[k] ?? '';
               const type = meta?.type || 'string';
               const label = meta?.title || k;
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               
               function onChange(v: any) {
                 const next = { ...cfg, [k]: v };
                 setConfig(JSON.stringify(next, null, 2));
               }
               if (type === 'boolean')
-                return (
+                {return (
                   <div key={k} style={{ marginBottom: 6 }}>
                     <label>
                       <input
                         type="checkbox"
-                        checked={!!val}
+                        checked={Boolean(val)}
                         onChange={(e) => onChange(e.target.checked)}
                       />{' '}
                       {label}
                     </label>
                   </div>
-                );
+                );}
               return (
                 <div key={k} style={{ marginBottom: 6 }}>
                   <label>{label}</label>
@@ -200,12 +200,12 @@ export default function IngestWizard() {
             })}
           </div>
         )}
-        {!!schema?.required?.length && (
+        {Boolean(schema?.required?.length) && (
           <div style={{ marginTop: 6, fontSize: 12, color: '#666' }}>
             Required: {schema.required.join(', ')}
           </div>
         )}
-        {!!errors.length && (
+        {Boolean(errors.length) && (
           <div style={{ marginTop: 6, fontSize: 12, color: '#a00' }}>
             Missing: {errors.join(', ')}
           </div>

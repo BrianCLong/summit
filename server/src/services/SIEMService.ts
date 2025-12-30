@@ -415,10 +415,10 @@ class SIEMService {
    */
   private async flushBuffer(providerId: string): Promise<void> {
     const buffer = this.eventBuffer.get(providerId) || [];
-    if (buffer.length === 0) return;
+    if (buffer.length === 0) {return;}
 
     const provider = this.providers.get(providerId);
-    if (!provider) return;
+    if (!provider) {return;}
 
     // Clear buffer immediately to prevent duplicates
     this.eventBuffer.set(providerId, []);
@@ -441,10 +441,10 @@ class SIEMService {
    */
   private async sendBatch(batch: SIEMBatch): Promise<void> {
     const provider = this.providers.get(batch.providerId);
-    if (!provider) return;
+    if (!provider) {return;}
 
     const circuitBreaker = this.circuitBreakers.get(batch.providerId);
-    if (!circuitBreaker) return;
+    if (!circuitBreaker) {return;}
 
     try {
       await circuitBreaker.execute(async () => {
@@ -588,7 +588,7 @@ class SIEMService {
 
     await axios.post(
       `${provider.config.url}/_bulk`,
-      bulkBody.map((item) => JSON.stringify(item)).join('\n') + '\n',
+      `${bulkBody.map((item) => JSON.stringify(item)).join('\n')  }\n`,
       {
         headers: {
           'Content-Type': 'application/x-ndjson',
@@ -874,7 +874,7 @@ class SIEMService {
    */
   updateProvider(providerId: string, updates: Partial<SIEMProvider>): boolean {
     const provider = this.providers.get(providerId);
-    if (!provider) return false;
+    if (!provider) {return false;}
 
     const updatedProvider = { ...provider, ...updates };
     this.providers.set(providerId, updatedProvider);
@@ -893,7 +893,7 @@ class SIEMService {
    */
   async testProvider(providerId: string): Promise<boolean> {
     const provider = this.providers.get(providerId);
-    if (!provider) return false;
+    if (!provider) {return false;}
 
     try {
       const testEvent: SIEMEvent = {

@@ -9,9 +9,9 @@ export function replayGuard() {
       req.header('Stripe-Signature') || req.header('X-Hub-Signature-256') || '';
     const key = `${req.originalUrl}:${sig}`;
     const now = Date.now();
-    for (const [k, v] of seen) if (v < now) seen.delete(k);
-    if (sig && seen.has(key)) return res.status(409).send('replay detected');
-    if (sig) seen.set(key, now + TTL_MS);
+    for (const [k, v] of seen) {if (v < now) {seen.delete(k);}}
+    if (sig && seen.has(key)) {return res.status(409).send('replay detected');}
+    if (sig) {seen.set(key, now + TTL_MS);}
     next();
   };
 }

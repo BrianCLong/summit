@@ -193,7 +193,7 @@ export class RedactionMiddleware {
     }
 
     // Deep clone data
-    let redactedData = JSON.parse(JSON.stringify(data));
+    const redactedData = JSON.parse(JSON.stringify(data));
 
     // Recursively redact fields
     const processValue = async (
@@ -462,9 +462,9 @@ export class RedactionMiddleware {
       'ipAddress',
     ];
 
-    if (criticalTypes.includes(piiType)) return 'critical';
-    if (highTypes.includes(piiType)) return 'high';
-    if (mediumTypes.includes(piiType)) return 'medium';
+    if (criticalTypes.includes(piiType)) {return 'critical';}
+    if (highTypes.includes(piiType)) {return 'high';}
+    if (mediumTypes.includes(piiType)) {return 'medium';}
     return 'low';
   }
 

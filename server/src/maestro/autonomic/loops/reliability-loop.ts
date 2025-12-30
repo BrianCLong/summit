@@ -14,14 +14,14 @@ export class ReliabilityLoop implements ControlLoop {
   }
 
   public async analyze(): Promise<boolean> {
-    if (!this.currentHealth) return false;
+    if (!this.currentHealth) {return false;}
 
     // Check for critical system health
-    if (this.currentHealth.system.status === HealthStatus.CRITICAL) return true;
+    if (this.currentHealth.system.status === HealthStatus.CRITICAL) {return true;}
 
     // Check for specific alerts
     const hasBreach = this.currentAlerts.some(a => a.level === SLOAlertLevel.BREACH || a.level === SLOAlertLevel.BUDGET_EXHAUSTED);
-    if (hasBreach) return true;
+    if (hasBreach) {return true;}
 
     return false;
   }
@@ -43,7 +43,7 @@ export class ReliabilityLoop implements ControlLoop {
       reasons.push('System critical, disabling heavy features.');
     }
 
-    if (actions.length === 0) return null;
+    if (actions.length === 0) {return null;}
 
     return {
       id: `plan-${Date.now()}`,

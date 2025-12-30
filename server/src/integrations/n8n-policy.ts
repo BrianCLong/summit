@@ -60,10 +60,10 @@ export async function checkN8nTriggerAllowed(params: {
   try {
     const opaBase = process.env.OPA_BASE_URL || '';
     if (!opaBase)
-      return {
+      {return {
         allow: prefixAllowed || explicitAllowed,
         reason: 'no opa configured',
-      };
+      };}
     const input = {
       input: {
         tenantId: params.tenantId || 'unknown',
@@ -81,7 +81,7 @@ export async function checkN8nTriggerAllowed(params: {
       { timeout: 5000 },
     );
     const result = resp.data?.result || {};
-    return { allow: !!result.allow, reason: result.reason || 'opa' };
+    return { allow: Boolean(result.allow), reason: result.reason || 'opa' };
   } catch (e) {
     logger.warn({ err: e }, 'OPA evaluation failed; default deny');
     return { allow: false, reason: 'opa evaluation failed' };

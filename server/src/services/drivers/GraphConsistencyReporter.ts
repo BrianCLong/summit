@@ -37,7 +37,7 @@ export class GraphConsistencyReporter {
              console.log(`- ID: ${m.id}`);
              console.log(`  Diff: ${JSON.stringify(m.diff)}`);
         });
-        if (report.details.mismatches.length > 5) console.log(`... and ${report.details.mismatches.length - 5} more`);
+        if (report.details.mismatches.length > 5) {console.log(`... and ${report.details.mismatches.length - 5} more`);}
       }
 
       if (report.details.orphan_edges.length > 0) {
@@ -48,7 +48,7 @@ export class GraphConsistencyReporter {
       if (report.actions_taken.length > 0) {
         console.log(`\nActions Taken (${report.actions_taken.length}):`);
         report.actions_taken.slice(0, 10).forEach(a => console.log(`- ${a}`));
-        if (report.actions_taken.length > 10) console.log(`... and ${report.actions_taken.length - 10} more`);
+        if (report.actions_taken.length > 10) {console.log(`... and ${report.actions_taken.length - 10} more`);}
       }
       console.log('--------------------------------');
     }

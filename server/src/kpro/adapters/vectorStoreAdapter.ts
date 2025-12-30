@@ -74,7 +74,7 @@ export class PineconeVectorStoreAdapter implements VectorStoreAdapter {
   }
 
   async fetchByIds(ids: string[]): Promise<VectorDocument[]> {
-    if (!ids.length) return [];
+    if (!ids.length) {return [];}
     const res = await this.fetch(`${this.baseUrl}/vectors/fetch`, {
       method: 'POST',
       headers: this.headers(),
@@ -95,7 +95,7 @@ export class PineconeVectorStoreAdapter implements VectorStoreAdapter {
   }
 
   async upsert(documents: VectorDocument[]): Promise<void> {
-    if (!documents.length) return;
+    if (!documents.length) {return;}
     const res = await this.fetch(`${this.baseUrl}/vectors/upsert`, {
       method: 'POST',
       headers: this.headers(),
@@ -122,7 +122,7 @@ export class PineconeVectorStoreAdapter implements VectorStoreAdapter {
         namespace: this.namespace,
         pagination: { limit: 1000 },
       };
-      if (next) payload.pagination.next = next;
+      if (next) {payload.pagination.next = next;}
       const res = await this.fetch(`${this.baseUrl}/vectors/list`, {
         method: 'POST',
         headers: this.headers(),
@@ -176,7 +176,7 @@ export class WeaviateVectorStoreAdapter implements VectorStoreAdapter {
 
   private headers(): HeadersInit {
     const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
+    if (this.apiKey) {headers['Authorization'] = `Bearer ${this.apiKey}`;}
     return headers;
   }
 
@@ -209,7 +209,7 @@ export class WeaviateVectorStoreAdapter implements VectorStoreAdapter {
           headers: this.headers(),
         },
       );
-      if (res.status === 404) continue;
+      if (res.status === 404) {continue;}
       if (!res.ok) {
         const body = await res.text();
         throw new Error(`Weaviate fetch failed: ${res.status} ${body}`);
@@ -225,7 +225,7 @@ export class WeaviateVectorStoreAdapter implements VectorStoreAdapter {
   }
 
   async upsert(documents: VectorDocument[]): Promise<void> {
-    if (!documents.length) return;
+    if (!documents.length) {return;}
     const res = await this.fetch(`${this.baseUrl}/v1/batch/objects`, {
       method: 'POST',
       headers: this.headers(),

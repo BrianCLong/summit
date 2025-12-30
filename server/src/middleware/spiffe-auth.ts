@@ -299,7 +299,7 @@ export class SpiffeAuthService {
   }
 
   private startSVIDRefresh() {
-    if (!this.localSVID) return;
+    if (!this.localSVID) {return;}
 
     // Calculate refresh time (50% of SVID lifetime)
     const now = new Date().getTime();

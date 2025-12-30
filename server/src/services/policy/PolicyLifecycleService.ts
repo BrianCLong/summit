@@ -186,7 +186,7 @@ export class PolicyLifecycleService {
          [tenantId]
     );
 
-    if (res.rows.length === 0) return null;
+    if (res.rows.length === 0) {return null;}
     return res.rows[0].content as EnterprisePolicy;
   }
 
@@ -199,7 +199,7 @@ export class PolicyLifecycleService {
     const versionA = res.rows.find((r: any) => r.id === versionIdA)?.content;
     const versionB = res.rows.find((r: any) => r.id === versionIdB)?.content;
 
-    if (!versionA || !versionB) throw new Error('Versions not found');
+    if (!versionA || !versionB) {throw new Error('Versions not found');}
 
     return diff(versionA, versionB);
   }

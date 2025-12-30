@@ -19,7 +19,7 @@ export class DeliveryService {
     instruction?: DeliveryInstruction,
   ): Promise<DeliveryResult | undefined> {
     const validated = validateDeliveryInstruction(instruction);
-    if (!validated) return undefined;
+    if (!validated) {return undefined;}
 
     const attempts: DeliveryAttempt[] = [];
     const tasks = validated.channels.map((channel) => {
@@ -38,7 +38,7 @@ export class DeliveryService {
     const settled = await Promise.allSettled(tasks.map((entry) => entry.task));
     settled.forEach((result, index) => {
       const channel = tasks[index]?.channel;
-      if (!channel) return;
+      if (!channel) {return;}
       if (result.status === 'fulfilled') {
         attempts.push({ channel, status: 'sent' });
       } else {

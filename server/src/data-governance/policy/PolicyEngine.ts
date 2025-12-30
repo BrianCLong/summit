@@ -78,18 +78,18 @@ export class PolicyEngine {
 
           switch (rule.operator) {
               case 'equals':
-                  if (assetValue !== rule.value) return false;
+                  if (assetValue !== rule.value) {return false;}
                   break;
               case 'contains':
                   if (Array.isArray(assetValue)) {
-                      if (!assetValue.includes(rule.value)) return false;
+                      if (!assetValue.includes(rule.value)) {return false;}
                   } else if (typeof assetValue === 'string') {
-                      if (!assetValue.includes(rule.value)) return false;
+                      if (!assetValue.includes(rule.value)) {return false;}
                   }
                   break;
               case 'exists':
-                  if (assetValue === undefined || assetValue === null) return false;
-                  if (Array.isArray(assetValue) && assetValue.length === 0) return false;
+                  if (assetValue === undefined || assetValue === null) {return false;}
+                  if (Array.isArray(assetValue) && assetValue.length === 0) {return false;}
                   break;
           }
       }

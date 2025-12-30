@@ -38,8 +38,8 @@ export function PartnerBillingPanel({ tenantId }: BillingPanelProps) {
       const params = new URLSearchParams({
         format,
       });
-      if (start) params.append('start', start);
-      if (end) params.append('end', end);
+      if (start) {params.append('start', start);}
+      if (end) {params.append('end', end);}
 
       const response = await fetch(`/api/tenants/${tenantId}/billing/report?${params.toString()}`);
       if (!response.ok) {
@@ -68,7 +68,7 @@ export function PartnerBillingPanel({ tenantId }: BillingPanelProps) {
       link.click();
       window.URL.revokeObjectURL(url);
       setMessage('JSON export downloaded');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     } catch (error: any) {
       setMessage(error.message);
     } finally {

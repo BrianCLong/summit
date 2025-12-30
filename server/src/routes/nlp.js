@@ -13,7 +13,7 @@ router.post('/tag', async (req, res) => {
   try {
     const { text } = req.body || {};
     if (!text || typeof text !== 'string')
-      return res.status(400).json({ error: 'text required' });
+      {return res.status(400).json({ error: 'text required' });}
     const result = await svc.analyzeText(text, {});
     await writeAudit({
       userId: req.user?.id,

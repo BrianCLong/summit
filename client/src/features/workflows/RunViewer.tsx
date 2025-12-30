@@ -178,7 +178,7 @@ export default function RunViewer() {
     const visited = new Set<string>();
 
     const calculateLevel = (stepId: string): number => {
-      if (visited.has(stepId)) return levels.get(stepId) || 0;
+      if (visited.has(stepId)) {return levels.get(stepId) || 0;}
       visited.add(stepId);
 
       const step = stepMap.get(stepId);

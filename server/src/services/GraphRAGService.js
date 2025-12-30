@@ -302,7 +302,7 @@ class GraphRAGService {
    * Keyword-based fallback search
    */
   async keywordSearch(session, keywords, investigationId) {
-    if (!keywords.length) return [];
+    if (!keywords.length) {return [];}
 
     const query = `
       CALL db.index.fulltext.queryNodes('entity_search', $searchTerm) 
@@ -355,7 +355,7 @@ class GraphRAGService {
 
     for (const item of rankedContext) {
       const itemTokens = this.estimateTokens(item.content);
-      if (totalTokens + itemTokens > this.config.maxContextSize) break;
+      if (totalTokens + itemTokens > this.config.maxContextSize) {break;}
 
       totalTokens += itemTokens;
       finalContext.push(item);
@@ -476,7 +476,7 @@ RESPONSE:`;
     // Simple relevance scoring - could be enhanced
     const responseWords = response.toLowerCase().split(/\s+/);
     const contextWords = context.flatMap((c) =>
-      (c.content + ' ' + c.label).toLowerCase().split(/\s+/),
+      (`${c.content  } ${  c.label}`).toLowerCase().split(/\s+/),
     );
 
     const matches = responseWords.filter((word) => contextWords.includes(word));

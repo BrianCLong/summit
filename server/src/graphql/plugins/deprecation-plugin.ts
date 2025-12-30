@@ -29,7 +29,7 @@ export function deprecationTrackingPlugin(
     async requestDidStart(): Promise<GraphQLRequestListener<any>> {
       return {
         async willSendResponse({ request, response, contextValue }) {
-          if (!request.query || !contextValue.schema) return;
+          if (!request.query || !contextValue.schema) {return;}
 
           try {
             // Extract deprecated fields from the query
@@ -38,7 +38,7 @@ export function deprecationTrackingPlugin(
               contextValue.schema
             );
 
-            if (deprecatedFields.length === 0) return;
+            if (deprecatedFields.length === 0) {return;}
 
             // Log deprecated field usage
             if (logUsage) {
@@ -52,7 +52,7 @@ export function deprecationTrackingPlugin(
             }
 
             // Add deprecation warnings to response extensions
-            if (!response.body || response.body.kind !== 'single') return;
+            if (!response.body || response.body.kind !== 'single') {return;}
 
             if (!response.body.singleResult.extensions) {
               response.body.singleResult.extensions = {};
@@ -155,7 +155,7 @@ function parseDeprecationReason(deprecationReason: string): {
   sunsetDate?: string;
   replacement?: string;
 } {
-  let reason = deprecationReason;
+  const reason = deprecationReason;
   let sunsetDate: string | undefined;
   let replacement: string | undefined;
 

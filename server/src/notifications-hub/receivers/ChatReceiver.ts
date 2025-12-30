@@ -41,7 +41,7 @@ async function simulateDelay(
   defaultMin = 50,
   defaultMax = 150,
 ): Promise<void> {
-  if (!simulation?.enabled) return;
+  if (!simulation?.enabled) {return;}
 
   const min = simulation.minLatencyMs ?? defaultMin;
   const max = simulation.maxLatencyMs ?? defaultMax;

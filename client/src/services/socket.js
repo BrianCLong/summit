@@ -25,7 +25,7 @@ export function calculateBackoffDelay(
   { baseMs, maxMs, factor, jitter } = DEFAULT_BACKOFF,
 ) {
   const rawDelay = Math.min(maxMs, baseMs * Math.pow(factor, attempt));
-  if (!jitter) return rawDelay;
+  if (!jitter) {return rawDelay;}
   const spread = rawDelay * 0.6;
   return Math.round(rawDelay * 0.7 + Math.random() * spread);
 }
@@ -45,8 +45,8 @@ function clearReconnectTimer() {
 }
 
 function scheduleReconnect(reason) {
-  if (manuallyClosed) return;
-  if (reconnectTimer) return;
+  if (manuallyClosed) {return;}
+  if (reconnectTimer) {return;}
 
   const token = getToken();
   if (!token) {
@@ -112,7 +112,7 @@ function attachLifecycleHandlers() {
 
 function buildSocket() {
   const token = getToken();
-  if (!token) return null;
+  if (!token) {return null;}
 
   const url = import.meta.env.VITE_WS_URL || 'http://localhost:4000';
 
@@ -131,7 +131,7 @@ function buildSocket() {
 
 // Create (or return existing) socket.io client with auth token
 export function getSocket() {
-  if (socket) return socket;
+  if (socket) {return socket;}
   manuallyClosed = false;
   reconnectAttempts = 0;
   clearReconnectTimer();
@@ -148,7 +148,7 @@ export function disconnectSocket() {
 }
 
 function scheduleFlush() {
-  if (flushTimer || pendingOps.length === 0) return;
+  if (flushTimer || pendingOps.length === 0) {return;}
   flushTimer = setTimeout(() => {
     if (socket && pendingOps.length) {
       socket.emit('collab:batch', pendingOps);

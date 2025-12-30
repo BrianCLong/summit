@@ -16,7 +16,7 @@ export async function auditAIOperation(
   actorId: string,
   meta: any = {},
 ) {
-  if (!auditRepo) return;
+  if (!auditRepo) {return;}
 
   try {
     await auditRepo.insert({
@@ -131,7 +131,7 @@ export async function auditWebhookReceived(
   await auditAIOperation('AI_WEBHOOK_RECEIVED', 'ml-service', {
     jobId,
     kind,
-    signaturePresent: !!signature,
+    signaturePresent: Boolean(signature),
     signatureValid: true, // This would be set by the webhook handler
     ipAddress,
     timestamp: Date.now(),
@@ -158,7 +158,7 @@ export async function getAuditTrail(
   entityId: string,
   limit: number = 100,
 ) {
-  if (!auditRepo) return [];
+  if (!auditRepo) {return [];}
 
   try {
     return await auditRepo.findByType(
@@ -173,7 +173,7 @@ export async function getAuditTrail(
 
 // Get recent security events
 export async function getRecentSecurityEvents(hours: number = 24) {
-  if (!auditRepo) return [];
+  if (!auditRepo) {return [];}
 
   try {
     const events = await auditRepo.findRecent(hours);
@@ -186,7 +186,7 @@ export async function getRecentSecurityEvents(hours: number = 24) {
 
 // Generate audit reports
 export async function generateAuditReport(startDate: string, endDate: string) {
-  if (!auditRepo) return null;
+  if (!auditRepo) {return null;}
 
   try {
     const events = await auditRepo.findRecent(24 * 7); // Last week

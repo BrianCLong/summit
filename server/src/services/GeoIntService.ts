@@ -68,7 +68,7 @@ class GeoIntService {
    * Detects changes between two images (simulated).
    */
   public async detectChange(beforeImageUrl: string, afterImageUrl: string): Promise<any> {
-    if (!beforeImageUrl || !afterImageUrl) throw new Error("Missing image URLs");
+    if (!beforeImageUrl || !afterImageUrl) {throw new Error("Missing image URLs");}
 
     // Mock simulation
     return {
@@ -107,7 +107,7 @@ class GeoIntService {
   public analyzeMovement(trackPoints: GeoPoint[]): any {
     const parseResult = TrackSchema.safeParse(trackPoints);
     if (!parseResult.success) {
-        throw new Error("Invalid track data: " + parseResult.error.message);
+        throw new Error(`Invalid track data: ${  parseResult.error.message}`);
     }
 
     let totalDistance = 0;
@@ -131,7 +131,7 @@ class GeoIntService {
             timeDiff = (new Date(p2.timestamp).getTime() - new Date(p1.timestamp).getTime()) / 1000;
             if (timeDiff > 0) {
                 speed = dist / timeDiff; // m/s
-                if (speed > maxSpeed) maxSpeed = speed;
+                if (speed > maxSpeed) {maxSpeed = speed;}
             }
         }
 
@@ -183,7 +183,7 @@ class GeoIntService {
    * Uses simulated Perlin-like noise to create terrain data.
    */
   public getElevationProfile(path: GeoPoint[]): { distance: number, elevation: number, lat: number, lon: number }[] {
-      if (path.length < 2) return [];
+      if (path.length < 2) {return [];}
 
       const profile = [];
       let currentDist = 0;
@@ -216,7 +216,7 @@ class GeoIntService {
              // Simple random walk for elevation simulation
              const change = (Math.random() - 0.5) * 20; // +/- 10m change
              currentElev += change;
-             if (currentElev < 0) currentElev = 0;
+             if (currentElev < 0) {currentElev = 0;}
 
              // Interpolate lat/lon
              const lat = p1.lat + (p2.lat - p1.lat) * fraction;

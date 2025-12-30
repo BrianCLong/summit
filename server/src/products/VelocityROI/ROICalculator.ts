@@ -17,7 +17,7 @@ export class ROICalculator {
      */
     calculateROI(): { savings: number; efficiencyGainPercent: number } {
         const metrics = this.tracker.getMetrics();
-        if (metrics.length === 0) return { savings: 0, efficiencyGainPercent: 0 };
+        if (metrics.length === 0) {return { savings: 0, efficiencyGainPercent: 0 };}
 
         const avgAiRate = metrics.reduce((acc, m) => acc + m.aiAssistanceRate, 0) / metrics.length;
 

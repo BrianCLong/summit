@@ -3,7 +3,7 @@ import { AggregationWindow, TimeSeriesRow } from '../types.js';
 export type AggregationReducer = AggregationWindow['function'];
 
 export function aggregateRows(rows: TimeSeriesRow[], windowMs: number, reducer: AggregationReducer): TimeSeriesRow[] {
-  if (!rows.length || windowMs <= 0) return [];
+  if (!rows.length || windowMs <= 0) {return [];}
   const buckets = new Map<number, Record<string, number[]>>();
 
   rows.forEach((row) => {
@@ -58,12 +58,12 @@ function reduceBucket(bucket: Record<string, number[]>, reducer: AggregationRedu
 function median(values: number[]) {
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  if (!sorted.length) return 0;
+  if (!sorted.length) {return 0;}
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 }
 
 function percentile(values: number[], p: number) {
-  if (!values.length) return 0;
+  if (!values.length) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const idx = Math.min(sorted.length - 1, Math.max(0, Math.floor(p * sorted.length)));
   return sorted[idx];

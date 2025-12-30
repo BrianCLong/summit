@@ -21,7 +21,7 @@ const defaultMap: InvalidationMap = {
 function rootMutationFields(operation: any): string[] {
   const sels = operation?.selectionSet?.selections || [];
   const names = new Set<string>();
-  for (const s of sels) if (s?.name?.value) names.add(s.name.value);
+  for (const s of sels) {if (s?.name?.value) {names.add(s.name.value);}}
   return [...names];
 }
 
@@ -35,10 +35,10 @@ export function invalidationPlugin(
       return {
         async didResolveOperation(ctx: any) {
           try {
-            if (ctx.operation?.operation !== 'mutation') return;
+            if (ctx.operation?.operation !== 'mutation') {return;}
             const roots = rootMutationFields(ctx.operation);
             const hits = new Set<string>();
-            for (const r of roots) (map[r] || []).forEach((p) => hits.add(p));
+            for (const r of roots) {(map[r] || []).forEach((p) => hits.add(p));}
             if (hits.size) {
               mutate = true;
               patterns = [...hits];
@@ -47,10 +47,10 @@ export function invalidationPlugin(
         },
         async willSendResponse(ctx: any) {
           try {
-            if (!mutate) return;
+            if (!mutate) {return;}
             const hasErrors =
               Array.isArray(ctx?.errors) && ctx.errors.length > 0;
-            if (!hasErrors && patterns.length) await emitInvalidation(patterns);
+            if (!hasErrors && patterns.length) {await emitInvalidation(patterns);}
           } catch {}
         },
       };

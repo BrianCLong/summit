@@ -668,8 +668,8 @@ export class ComplianceMonitoringService {
   }
 
   private getRegulationForCheck(checkName: string): string {
-    if (checkName.startsWith('gdpr_')) return 'GDPR';
-    if (checkName.startsWith('hipaa_')) return 'HIPAA';
+    if (checkName.startsWith('gdpr_')) {return 'GDPR';}
+    if (checkName.startsWith('hipaa_')) {return 'HIPAA';}
     return 'General';
   }
 

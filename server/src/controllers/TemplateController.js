@@ -39,7 +39,7 @@ class TemplateController {
     try {
       const template = this.templates.getTemplate(req.params.id);
       if (!template)
-        return res.status(404).json({ error: 'Template not found' });
+        {return res.status(404).json({ error: 'Template not found' });}
       res.json(template);
     } catch (err) {
       console.error('Error getting template', err);
@@ -51,7 +51,7 @@ class TemplateController {
     try {
       const updated = this.templates.updateTemplate(req.params.id, req.body);
       if (!updated)
-        return res.status(404).json({ error: 'Template not found' });
+        {return res.status(404).json({ error: 'Template not found' });}
       res.json(updated);
     } catch (err) {
       console.error('Error updating template', err);
@@ -62,7 +62,7 @@ class TemplateController {
   async delete(req, res) {
     try {
       const ok = this.templates.deleteTemplate(req.params.id);
-      if (!ok) return res.status(404).json({ error: 'Template not found' });
+      if (!ok) {return res.status(404).json({ error: 'Template not found' });}
       res.json({ success: true });
     } catch (err) {
       console.error('Error deleting template', err);

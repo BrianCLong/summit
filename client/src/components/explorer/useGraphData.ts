@@ -191,12 +191,12 @@ export function useGraphData({
   });
 
   const nodes = useMemo(() => {
-    if (!data?.graphData?.nodes) return [];
+    if (!data?.graphData?.nodes) {return [];}
     return data.graphData.nodes.map(transformToGraphNode);
   }, [data?.graphData?.nodes]);
 
   const edges = useMemo(() => {
-    if (!data?.graphData?.edges) return [];
+    if (!data?.graphData?.edges) {return [];}
     return data.graphData.edges.map(transformToGraphEdge);
   }, [data?.graphData?.edges]);
 
@@ -238,7 +238,7 @@ export function useEntityDetails(entityId: string | null): UseEntityDetailsResul
   );
 
   const entity = useMemo(() => {
-    if (!data?.getEntityDetails) return null;
+    if (!data?.getEntityDetails) {return null;}
     return transformToGraphNode(data.getEntityDetails);
   }, [data?.getEntityDetails]);
 
@@ -264,7 +264,7 @@ export function useEntitySearch(): UseEntitySearchResult {
   });
 
   const results = useMemo(() => {
-    if (!data?.searchEntities) return [];
+    if (!data?.searchEntities) {return [];}
     return data.searchEntities.map(transformToGraphNode);
   }, [data?.searchEntities]);
 
@@ -320,7 +320,7 @@ export function useEnrichment(entityId: string | null): UseEnrichmentResult {
   });
 
   const enrichment = useMemo(() => {
-    if (!data?.entityEnrichment) return null;
+    if (!data?.entityEnrichment) {return null;}
     const e = data.entityEnrichment;
     return {
       entityId: e.entityId,

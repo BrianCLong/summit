@@ -98,7 +98,7 @@ export class CIBDetectionService {
       .filter(f => members.includes(f.id))
       .map(f => f.fingerprint);
 
-    if (clusterFingerprints.length === 0) return { isBot: false, confidence: 0, signature: { clicksPerMinute: 0, attentionSpan: 0, editRate: 0 }, reason: 'empty' };
+    if (clusterFingerprints.length === 0) {return { isBot: false, confidence: 0, signature: { clicksPerMinute: 0, attentionSpan: 0, editRate: 0 }, reason: 'empty' };}
 
     // Average fingerprint
     const avgFingerprint = clusterFingerprints.reduce((acc, curr) => ({
@@ -112,7 +112,7 @@ export class CIBDetectionService {
     avgFingerprint.editRate /= clusterFingerprints.length;
 
     let botScore = 0;
-    let reasons: string[] = [];
+    const reasons: string[] = [];
 
     // Heuristic 1: High frequency activity
     if (avgFingerprint.clicksPerMinute > 60) {

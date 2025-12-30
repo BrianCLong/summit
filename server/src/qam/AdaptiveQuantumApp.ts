@@ -714,7 +714,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
     const relevantHistory = this.performanceHistory.filter((p) =>
       p.parameters.gates.includes(gate),
     );
-    if (relevantHistory.length === 0) return 0.5; // Default performance
+    if (relevantHistory.length === 0) {return 0.5;} // Default performance
 
     return (
       relevantHistory.reduce((sum, p) => sum + p.reward, 0) /
@@ -754,13 +754,13 @@ export class AdaptiveQuantumApp extends EventEmitter {
 
   private getRecentAvgReward(): number {
     const recent = this.performanceHistory.slice(-10);
-    if (recent.length === 0) return 0.5;
+    if (recent.length === 0) {return 0.5;}
     return recent.reduce((sum, p) => sum + p.reward, 0) / recent.length;
   }
 
   private getRecentAvgLatency(): number {
     const recent = this.performanceHistory.slice(-10);
-    if (recent.length === 0) return 1000;
+    if (recent.length === 0) {return 1000;}
     return (
       recent.reduce((sum, p) => sum + p.feedback.latency, 0) / recent.length
     );
@@ -768,7 +768,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
 
   private getRecentSuccessRate(): number {
     const recent = this.performanceHistory.slice(-10);
-    if (recent.length === 0) return 0.8;
+    if (recent.length === 0) {return 0.8;}
     const successes = recent.filter((p) => p.results.success).length;
     return successes / recent.length;
   }

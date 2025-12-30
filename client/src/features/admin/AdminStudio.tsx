@@ -71,7 +71,7 @@ export default function AdminStudio() {
   const load = React.useCallback(async () => {
     setLoading(true);
     const q = tenantId ? `?tenantId=${encodeURIComponent(tenantId)}` : '';
-    const r = await fetch('/api/admin/config' + q);
+    const r = await fetch(`/api/admin/config${  q}`);
     const j = await r.json();
     setCfg(j);
     setLoading(false);
@@ -140,7 +140,7 @@ export default function AdminStudio() {
       const r = await fetch('/api/admin/opa/validate');
       const j = await r.json();
       setOpaStatus(j);
-      if (j?.ok && !opaSince) setOpaSince(new Date().toLocaleTimeString());
+      if (j?.ok && !opaSince) {setOpaSince(new Date().toLocaleTimeString());}
     } catch {
       setOpaStatus({ ok: false, message: 'request failed' });
     }
@@ -226,7 +226,7 @@ export default function AdminStudio() {
       setErrors([]);
 
       const q = tenantId ? `?tenantId=${encodeURIComponent(tenantId)}` : '';
-      const response = await fetch('/api/admin/config' + q, {
+      const response = await fetch(`/api/admin/config${  q}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(cfg),
@@ -248,7 +248,7 @@ export default function AdminStudio() {
         setTimeout(() => setSaveMessage(''), 3000);
       }
     } catch (error) {
-      setErrors(['Network error: ' + (error as Error).message]);
+      setErrors([`Network error: ${  (error as Error).message}`]);
     }
   };
   const renderTabContent = () => {
@@ -535,12 +535,12 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                       style={{ display: 'flex', flexDirection: 'column' }}
                     >
                       <span style={{ fontWeight: 600 }}>{k}</span>
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                      { }
                       {typeof (cfg as any)[k] === 'boolean' ? (
                         <input
                           type="checkbox"
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          checked={!!(cfg as any)[k]}
+                           
+                          checked={Boolean((cfg as any)[k])}
                           onChange={(e) =>
                             setCfg({
                               ...cfg,
@@ -550,7 +550,7 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
                         />
                       ) : (
                         <input
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                           
                           value={String((cfg as any)[k])}
                           onChange={(e) =>
                             setCfg({
@@ -620,10 +620,10 @@ kubectl set env deployment/intelgraph-api PQ_BYPASS=1
           <label>
             <input
               type="checkbox"
-              checked={!!cfg?.TEMPORAL_ENABLED}
+              checked={Boolean(cfg?.TEMPORAL_ENABLED)}
               onChange={async (e) => {
                 const enabled = e.target.checked;
-                if (cfg) setCfg({ ...cfg, TEMPORAL_ENABLED: enabled });
+                if (cfg) {setCfg({ ...cfg, TEMPORAL_ENABLED: enabled });}
                 await fetch('/api/admin/temporal/toggle', {
                   method: 'POST',
                   headers: { 'content-type': 'application/json' },

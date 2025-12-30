@@ -129,7 +129,7 @@ export function KShortestPathsPanel({
   const canSearch = sourceId && targetId && sourceId !== targetId;
 
   const handleSearch = useCallback(() => {
-    if (!canSearch) return;
+    if (!canSearch) {return;}
 
     const newOperationId = `path-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     setOperationId(newOperationId);

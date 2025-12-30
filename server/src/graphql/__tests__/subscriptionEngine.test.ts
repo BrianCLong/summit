@@ -19,7 +19,7 @@ describe('SubscriptionEngine', () => {
     const consumer = (async () => {
       for await (const event of iterator as any) {
         received.push(event.payload);
-        if (received.length === 1) break;
+        if (received.length === 1) {break;}
       }
     })();
 
@@ -59,7 +59,7 @@ describe('SubscriptionEngine', () => {
     const consumer = (async () => {
       for await (const batch of iterator as any) {
         batches.push(batch.map((event) => event.payload.id));
-        if (batches.length === 2) break;
+        if (batches.length === 2) {break;}
       }
     })();
 

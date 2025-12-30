@@ -6,7 +6,7 @@ class MultimodalSentimentService {
   }
 
   analyzeText(text) {
-    if (!text) return { score: 0, comparative: 0 };
+    if (!text) {return { score: 0, comparative: 0 };}
     const res = this.sentiment.analyze(text);
     return { score: res.score, comparative: res.comparative };
   }
@@ -31,10 +31,10 @@ class MultimodalSentimentService {
     inputs.forEach((inp, idx) => {
       const kind = String(inp.kind || 'text').toLowerCase();
       let r = { score: 0, comparative: 0 };
-      if (kind === 'text') r = this.analyzeText(inp.text || '');
-      else if (kind === 'image') r = this.analyzeImage(inp);
-      else if (kind === 'audio') r = this.analyzeAudio(inp);
-      else if (kind === 'video') r = this.analyzeVideo(inp);
+      if (kind === 'text') {r = this.analyzeText(inp.text || '');}
+      else if (kind === 'image') {r = this.analyzeImage(inp);}
+      else if (kind === 'audio') {r = this.analyzeAudio(inp);}
+      else if (kind === 'video') {r = this.analyzeVideo(inp);}
       results.push({
         id: inp.id || String(idx + 1),
         kind,

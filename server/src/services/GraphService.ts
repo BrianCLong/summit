@@ -22,7 +22,7 @@ function flattenAttributes(attributes: Record<string, unknown>, prefix = 'attr_'
     for (const [k, v] of Object.entries(attributes)) {
         const safeKey = sanitizeKey(k);
         // Neo4j only stores primitives or arrays of primitives
-        if (v === null || v === undefined) continue;
+        if (v === null || v === undefined) {continue;}
         if (typeof v === 'object' && !Array.isArray(v)) {
             // Nested objects stringified? or just ignored for MVP?
             // Let's stringify nested objects
@@ -76,7 +76,7 @@ export class Neo4jGraphService implements GraphService {
       tenantId,
     });
 
-    if (result.length === 0) return null;
+    if (result.length === 0) {return null;}
 
     const raw = result[0].entity;
     return {
@@ -149,7 +149,7 @@ export class Neo4jGraphService implements GraphService {
     let cypher = `MATCH (a:Entity {tenantId: $tenantId})-[r]-(b:Entity {tenantId: $tenantId})`;
     const params: any = { tenantId };
 
-    let whereClauses: string[] = [];
+    const whereClauses: string[] = [];
 
     if (query.ids && query.ids.length > 0) {
       whereClauses.push(`r.id IN $ids`);
@@ -183,7 +183,7 @@ export class Neo4jGraphService implements GraphService {
     }
 
     if (whereClauses.length > 0) {
-      cypher += ` WHERE ` + whereClauses.join(' AND ');
+      cypher += ` WHERE ${  whereClauses.join(' AND ')}`;
     }
 
     cypher += ` RETURN r { .*, fromEntityId: a.id, toEntityId: b.id, type: type(r) } as edge`;

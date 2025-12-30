@@ -58,7 +58,7 @@ export class PostgresTaskQueue implements TaskQueue {
     `;
 
     const res = await this.pool.query(query, [workerTypes]);
-    if (res.rowCount === 0) return null;
+    if (res.rowCount === 0) {return null;}
 
     return this.mapRowToTask(res.rows[0]);
   }
@@ -87,7 +87,7 @@ export class PostgresTaskQueue implements TaskQueue {
 
   async get(taskId: string): Promise<Task | null> {
     const res = await this.pool.query(`SELECT * FROM maestro_tasks WHERE id = $1`, [taskId]);
-    if (res.rowCount === 0) return null;
+    if (res.rowCount === 0) {return null;}
     return this.mapRowToTask(res.rows[0]);
   }
 

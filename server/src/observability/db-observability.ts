@@ -217,7 +217,7 @@ export class DbObservabilityService {
 
       if (param.type === 'number') {
         const num = Number(value);
-        if (Number.isNaN(num)) throw new Error(`Parameter ${param.name} must be a number`);
+        if (Number.isNaN(num)) {throw new Error(`Parameter ${param.name} must be a number`);}
         if (param.min !== undefined && num < param.min) {
           throw new Error(`Parameter ${param.name} must be >= ${param.min}`);
         }
@@ -310,7 +310,7 @@ export class DbObservabilityService {
   ) {
     try {
       const audit = this.getAudit?.() as { recordEvent?: (event: unknown) => Promise<void> } | undefined;
-      if (!audit?.recordEvent) return;
+      if (!audit?.recordEvent) {return;}
       await audit.recordEvent({
         eventType: 'db_observability',
         level: outcome === 'success' ? 'info' : 'warn',

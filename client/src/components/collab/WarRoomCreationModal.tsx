@@ -28,7 +28,7 @@ interface WarRoomCreationModalProps {
   onClose: () => void;
   // The type for 'data' would come from generated types.
   // Using 'any' for now.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   onSuccess: (data: any) => void;
 }
 

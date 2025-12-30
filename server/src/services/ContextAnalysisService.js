@@ -368,7 +368,7 @@ class ContextAnalysisService {
     const magnitude1 = Math.sqrt(vector1.reduce((sum, a) => sum + a * a, 0));
     const magnitude2 = Math.sqrt(vector2.reduce((sum, a) => sum + a * a, 0));
 
-    if (magnitude1 === 0 || magnitude2 === 0) return 0;
+    if (magnitude1 === 0 || magnitude2 === 0) {return 0;}
     return dotProduct / (magnitude1 * magnitude2);
   }
 
@@ -461,7 +461,7 @@ class ContextAnalysisService {
     const words = tokens.filter((token) => /^[a-zA-Z]+$/.test(token));
     const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
 
-    if (sentences.length === 0 || words.length === 0) return 0;
+    if (sentences.length === 0 || words.length === 0) {return 0;}
 
     const avgSentenceLength = words.length / sentences.length;
     const avgSyllables =
@@ -495,7 +495,7 @@ class ContextAnalysisService {
    */
   countSyllables(word) {
     word = word.toLowerCase();
-    if (word.length <= 3) return 1;
+    if (word.length <= 3) {return 1;}
     word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
     word = word.replace(/^y/, '');
     const matches = word.match(/[aeiouy]{1,2}/g);

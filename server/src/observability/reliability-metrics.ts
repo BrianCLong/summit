@@ -75,10 +75,10 @@ export function resetReliabilityMetrics() {
 }
 
 function classifyStatus(statusCode: number): string {
-  if (statusCode >= 500) return '5xx';
-  if (statusCode >= 400) return '4xx';
-  if (statusCode >= 300) return '3xx';
-  if (statusCode >= 200) return '2xx';
+  if (statusCode >= 500) {return '5xx';}
+  if (statusCode >= 400) {return '4xx';}
+  if (statusCode >= 300) {return '3xx';}
+  if (statusCode >= 200) {return '2xx';}
   return '1xx';
 }
 

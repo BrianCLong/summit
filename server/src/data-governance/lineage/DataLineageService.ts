@@ -66,7 +66,7 @@ export class DataLineageService {
         'SELECT * FROM lineage_nodes WHERE asset_id = $1 AND tenant_id = $2',
         [assetId, tenantId]
     );
-    if (nodeRes.rows.length === 0) return { nodes: [], edges: [] };
+    if (nodeRes.rows.length === 0) {return { nodes: [], edges: [] };}
     const rootNode = nodeRes.rows[0];
 
     // Find edges connected to this node

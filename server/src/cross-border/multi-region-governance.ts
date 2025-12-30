@@ -211,7 +211,7 @@ export class MultiRegionGovernance {
 
     for (const region of candidateOrder) {
       const health = this.regionHealth.get(region);
-      if (!health) continue;
+      if (!health) {continue;}
 
       const canWrite = health.status === 'healthy' && health.allowsWrites;
       const canRead = health.status !== 'down';

@@ -226,7 +226,7 @@ export class EnhancedOnboardingService {
     }
 
     // Update step progress
-    let stepProgress = progress.stepProgress.get(stepId) || {
+    const stepProgress = progress.stepProgress.get(stepId) || {
       stepId,
       status: 'in_progress' as OnboardingStepStatus,
       timeSpent: 0,
@@ -315,7 +315,7 @@ export class EnhancedOnboardingService {
     }
 
     // Update step progress
-    let stepProgress = progress.stepProgress.get(stepId) || {
+    const stepProgress = progress.stepProgress.get(stepId) || {
       stepId,
       status: 'in_progress' as OnboardingStepStatus,
       timeSpent: 0,
@@ -555,14 +555,14 @@ export class EnhancedOnboardingService {
 
   private async getProgress(tenantId: string, userId: string): Promise<UserOnboardingProgress | null> {
     const pool = getPostgresPool();
-    if (!pool) return null;
+    if (!pool) {return null;}
 
     const result = await pool.query(
       'SELECT * FROM onboarding_progress WHERE tenant_id = $1 AND user_id = $2',
       [tenantId, userId]
     );
 
-    if (result.rowCount === 0) return null;
+    if (result.rowCount === 0) {return null;}
 
     const row = result.rows[0];
     return {
@@ -583,7 +583,7 @@ export class EnhancedOnboardingService {
 
   private async saveProgress(progress: UserOnboardingProgress): Promise<void> {
     const pool = getPostgresPool();
-    if (!pool) throw new Error('Database not available');
+    if (!pool) {throw new Error('Database not available');}
 
     await pool.query(
       `INSERT INTO onboarding_progress (

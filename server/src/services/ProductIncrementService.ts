@@ -651,7 +651,7 @@ export class ProductIncrementService {
    */
   async getIncrementStatistics(id: string): Promise<IncrementStatistics | null> {
     const summary = await this.repo.getIncrementSummary(id);
-    if (!summary) return null;
+    if (!summary) {return null;}
 
     const now = new Date();
     let daysRemaining: number | null = null;
@@ -730,15 +730,15 @@ export class ProductIncrementService {
    */
   async getBurndownData(incrementId: string): Promise<BurndownDataPoint[]> {
     const increment = await this.repo.findIncrementById(incrementId);
-    if (!increment) return [];
+    if (!increment) {return [];}
 
     const snapshots = await this.repo.getMetricsHistory(incrementId);
-    if (snapshots.length === 0) return [];
+    if (snapshots.length === 0) {return [];}
 
     const startDate = increment.actualStartDate || increment.plannedStartDate;
     const endDate = increment.plannedEndDate;
 
-    if (!startDate || !endDate) return [];
+    if (!startDate || !endDate) {return [];}
 
     const totalDays = Math.ceil(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),

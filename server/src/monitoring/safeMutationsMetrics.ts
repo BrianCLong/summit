@@ -486,7 +486,7 @@ export class MetricsCollector {
    * Start periodic metrics collection
    */
   start(): void {
-    if (this.intervalId) return;
+    if (this.intervalId) {return;}
 
     this.intervalId = setInterval(async () => {
       try {

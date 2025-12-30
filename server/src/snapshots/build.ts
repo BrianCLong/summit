@@ -21,7 +21,7 @@ export async function buildSnapshot({
     }
   }
   const bytes = Buffer.concat(chunks);
-  const digest = 'sha256:' + createHash('sha256').update(bytes).digest('hex');
+  const digest = `sha256:${  createHash('sha256').update(bytes).digest('hex')}`;
   const signature = 'unsigned';
   const outFile = `/tmp/rb_${Date.now()}.bin`;
   await fs.writeFile(outFile, bytes);

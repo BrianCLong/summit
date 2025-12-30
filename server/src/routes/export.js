@@ -98,7 +98,7 @@ router.get('/entities', async (req, res) => {
       writableStream.write('],"edges":[');
 
       const edgeWhere = where.replace(/e\./g, 'a.');
-      const edgesQuery = `MATCH (a:Entity)-[r:RELATIONSHIP]->(b:Entity) ${edgeWhere ? edgeWhere + ' AND b.investigation_id = a.investigation_id' : ''} RETURN a,r,b`;
+      const edgesQuery = `MATCH (a:Entity)-[r:RELATIONSHIP]->(b:Entity) ${edgeWhere ? `${edgeWhere  } AND b.investigation_id = a.investigation_id` : ''} RETURN a,r,b`;
       const edgesResult = await session.run(edgesQuery, params);
 
       for (let i = 0; i < edgesResult.records.length; i++) {
@@ -147,17 +147,17 @@ router.get('/entities', async (req, res) => {
         redactData(rec.get('e').properties, req.user),
       );
       writableStream.write(
-        nodeParser.parse(
+        `${nodeParser.parse(
           nodes.map((n) => ({
             ...n,
             properties: JSON.stringify(n.properties || {}),
           })),
-        ) + '\n\n',
+        )  }\n\n`,
       );
 
       writableStream.write('# Edges\n');
       const edgeWhere = where.replace(/e\./g, 'a.');
-      const edgesQuery = `MATCH (a:Entity)-[r:RELATIONSHIP]->(b:Entity) ${edgeWhere ? edgeWhere + ' AND b.investigation_id = a.investigation_id' : ''} RETURN a,r,b`;
+      const edgesQuery = `MATCH (a:Entity)-[r:RELATIONSHIP]->(b:Entity) ${edgeWhere ? `${edgeWhere  } AND b.investigation_id = a.investigation_id` : ''} RETURN a,r,b`;
       const edgesResult = await session.run(edgesQuery, params);
       const edges = edgesResult.records.map((rec) => {
         const r = rec.get('r');
@@ -176,12 +176,12 @@ router.get('/entities', async (req, res) => {
       });
 
       writableStream.write(
-        edgeParser.parse(
+        `${edgeParser.parse(
           edges.map((e) => ({
             ...e,
             properties: JSON.stringify(e.properties || {}),
           })),
-        ) + '\n',
+        )  }\n`,
       );
       writableStream.end();
     }

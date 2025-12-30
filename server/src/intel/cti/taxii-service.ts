@@ -201,7 +201,7 @@ export class TaxiiService {
    */
   getCollectionMetadata(collectionId: string): TaxiiCollection | null {
     const collection = this.collections.get(collectionId);
-    if (!collection) return null;
+    if (!collection) {return null;}
 
     return {
       id: collection.id,
@@ -362,10 +362,10 @@ export class TaxiiService {
     version?: string,
   ): TaxiiEnvelope | null {
     const store = this.objectStore.get(collectionId);
-    if (!store) return null;
+    if (!store) {return null;}
 
     const stored = store.get(objectId);
-    if (!stored) return null;
+    if (!stored) {return null;}
 
     if (version && stored.version !== version) {
       return null;

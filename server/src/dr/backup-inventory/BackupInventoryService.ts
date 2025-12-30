@@ -63,7 +63,7 @@ export class BackupInventoryService {
 
   public async updateTarget(id: string, updates: Partial<Omit<BackupTarget, 'id' | 'createdAt' | 'updatedAt'>>): Promise<BackupTarget | undefined> {
     const existing = this.targets.get(id);
-    if (!existing) return undefined;
+    if (!existing) {return undefined;}
 
     const updated: BackupTarget = {
       ...existing,
@@ -85,7 +85,7 @@ export class BackupInventoryService {
 
   public async reportStatus(id: string, success: boolean, timestamp: Date = new Date()): Promise<BackupTarget | undefined> {
     const target = this.targets.get(id);
-    if (!target) return undefined;
+    if (!target) {return undefined;}
 
     const updates: Partial<BackupTarget> = {};
     if (success) {

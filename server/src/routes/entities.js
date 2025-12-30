@@ -63,7 +63,7 @@ router.get('/', async (req, res) => {
     );
     params.q = q;
   }
-  if (where.length) clauses.push('WHERE ' + where.join(' AND '));
+  if (where.length) {clauses.push(`WHERE ${  where.join(' AND ')}`);}
   clauses.push('RETURN e ORDER BY e.createdAt DESC SKIP $skip LIMIT $limit');
   const cypher = clauses.join('\n');
 
@@ -82,7 +82,7 @@ router.get('/', async (req, res) => {
     });
 
     const sendBatch = async (offset) => {
-      if (!active) return;
+      if (!active) {return;}
       const result = await session.run(cypher, { ...params, skip: offset });
       const items = result.records.map((r) => r.get('e').properties);
       const pageInfo = buildPageInfo(offset, params.limit, items.length);
@@ -143,7 +143,7 @@ router.get('/:id', async (req, res) => {
       { id },
     );
     if (result.records.length === 0)
-      return res.status(404).json({ error: 'Not found' });
+      {return res.status(404).json({ error: 'Not found' });}
     const entity = result.records[0].get('e').properties;
     await logAudit(req, 'VIEW', id, null);
     res.json(entity);
@@ -162,7 +162,7 @@ router.post('/', authorize('write_graph'), async (req, res) => {
     properties = {},
     position,
   } = req.body || {};
-  if (!label) return res.status(400).json({ error: 'label required' });
+  if (!label) {return res.status(400).json({ error: 'label required' });}
   const id = uuidv4();
   const now = new Date().toISOString();
   const driver = getNeo4jDriver();
@@ -212,7 +212,7 @@ router.patch('/:id', authorize('write_graph'), async (req, res) => {
       { id, label, description, properties, position, verified, now },
     );
     if (result.records.length === 0)
-      return res.status(404).json({ error: 'Not found' });
+      {return res.status(404).json({ error: 'Not found' });}
     const entity = result.records[0].get('e').properties;
     await logAudit(req, 'UPDATE', id, { label, description });
     res.json(entity);
@@ -235,7 +235,7 @@ router.delete('/:id', authorize('write_graph'), async (req, res) => {
     const c = result.records[0].get('c').toInt
       ? result.records[0].get('c').toInt()
       : result.records[0].get('c');
-    if (c === 0) return res.status(404).json({ error: 'Not found' });
+    if (c === 0) {return res.status(404).json({ error: 'Not found' });}
     await logAudit(req, 'DELETE', id, null);
     res.status(204).end();
   } catch (e) {

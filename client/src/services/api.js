@@ -9,14 +9,14 @@ export async function apiFetch(path, opts = {}) {
     'Content-Type': 'application/json',
     ...(opts.headers || {}),
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) {headers['Authorization'] = `Bearer ${token}`;}
   const res = await fetch(`${apiBase()}${path}`, { ...opts, headers });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`API ${res.status}: ${text}`);
   }
   const contentType = res.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) return res.json();
+  if (contentType.includes('application/json')) {return res.json();}
   return res.text();
 }
 
@@ -76,12 +76,12 @@ export const ExportAPI = {
     const url = new URL(`${apiBase()}/api/export/graph`);
     url.searchParams.set('format', format);
     if (investigationId)
-      url.searchParams.set('investigationId', investigationId);
+      {url.searchParams.set('investigationId', investigationId);}
     const res = await fetch(url.toString(), {
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     });
-    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
-    if (format === 'json') return res.json();
+    if (!res.ok) {throw new Error(`Export failed: ${res.status}`);}
+    if (format === 'json') {return res.json();}
     const blob = await res.blob();
     return blob;
   },
@@ -95,7 +95,7 @@ export const ExportAPI = {
       },
       body: JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error(`Export failed: ${res.status}`);
+    if (!res.ok) {throw new Error(`Export failed: ${res.status}`);}
     return res.blob();
   },
 };
@@ -111,8 +111,8 @@ export const ActivityAPI = {
     const qs = new URLSearchParams();
     qs.set('page', String(page));
     qs.set('pageSize', String(pageSize));
-    if (action) qs.set('action', action);
-    if (resource) qs.set('resource', resource);
+    if (action) {qs.set('action', action);}
+    if (resource) {qs.set('resource', resource);}
     return apiFetch(`/api/activity${all ? '/all' : ''}?${qs.toString()}`);
   },
 };
@@ -165,7 +165,7 @@ export const WebhookAPI = {
 export const TemplatesAPI = {
   list: ({ scope } = {}) => {
     const qs = new URLSearchParams();
-    if (scope) qs.set('scope', scope);
+    if (scope) {qs.set('scope', scope);}
     const query = qs.toString();
     return apiFetch(`/api/templates${query ? `?${query}` : ''}`);
   },

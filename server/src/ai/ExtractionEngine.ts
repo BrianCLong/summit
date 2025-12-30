@@ -977,7 +977,7 @@ export class ExtractionEngine {
     entity2: ExtractedEntity,
   ): boolean {
     // Same entity type
-    if (entity1.entityType !== entity2.entityType) return false;
+    if (entity1.entityType !== entity2.entityType) {return false;}
 
     // Text similarity
     if (entity1.extractedText && entity2.extractedText) {
@@ -985,7 +985,7 @@ export class ExtractionEngine {
         entity1.extractedText,
         entity2.extractedText,
       );
-      if (textSimilarity > 0.8) return true;
+      if (textSimilarity > 0.8) {return true;}
     }
 
     // Spatial overlap for bounding boxes
@@ -994,7 +994,7 @@ export class ExtractionEngine {
         entity1.boundingBox,
         entity2.boundingBox,
       );
-      if (spatialOverlap > 0.5) return true;
+      if (spatialOverlap > 0.5) {return true;}
     }
 
     // Temporal overlap
@@ -1003,7 +1003,7 @@ export class ExtractionEngine {
         entity1.temporalRange,
         entity2.temporalRange,
       );
-      if (temporalOverlap > 0.7) return true;
+      if (temporalOverlap > 0.7) {return true;}
     }
 
     return false;
@@ -1034,7 +1034,7 @@ export class ExtractionEngine {
     const x2 = Math.min(box1.x + box1.width, box2.x + box2.width);
     const y2 = Math.min(box1.y + box1.height, box2.y + box2.height);
 
-    if (x2 <= x1 || y2 <= y1) return 0;
+    if (x2 <= x1 || y2 <= y1) {return 0;}
 
     const intersectionArea = (x2 - x1) * (y2 - y1);
     const box1Area = box1.width * box1.height;
@@ -1054,7 +1054,7 @@ export class ExtractionEngine {
     const start = Math.max(range1.startTime, range2.startTime);
     const end = Math.min(range1.endTime, range2.endTime);
 
-    if (end <= start) return 0;
+    if (end <= start) {return 0;}
 
     const intersectionDuration = end - start;
     const range1Duration = range1.endTime - range1.startTime;

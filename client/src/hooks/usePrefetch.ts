@@ -30,7 +30,7 @@ export function useGraphWorkbenchPrefetch(investigationId?: string) {
   // const client = useApolloClient();
 
   useEffect(() => {
-    if (!investigationId) return;
+    if (!investigationId) {return;}
     // Placeholder - no prefetching until GraphQL is available
     console.log('🚀 GraphWorkbench prefetch: GraphQL schema not available');
   }, [investigationId]);

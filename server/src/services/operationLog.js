@@ -30,7 +30,7 @@ class OperationLogManager {
     const recorded = [];
 
     batch.forEach((op) => {
-      if (!op?.opId || state.byId.has(op.opId)) return;
+      if (!op?.opId || state.byId.has(op.opId)) {return;}
       const vector = this.mergeVector(state, authorId || clientId || 'unknown');
       const entry = {
         opId: op.opId,
@@ -62,7 +62,7 @@ class OperationLogManager {
   }
 
   pushUndo(state, clientId, entry) {
-    if (!clientId) return;
+    if (!clientId) {return;}
     const undoStack = state.undoStacks.get(clientId) || [];
     undoStack.push(entry);
     state.undoStacks.set(clientId, undoStack);
@@ -73,7 +73,7 @@ class OperationLogManager {
     const state = this.getState(investigationId);
     const undoStack = state.undoStacks.get(clientId) || [];
     const target = undoStack.pop();
-    if (!target) return null;
+    if (!target) {return null;}
 
     const vector = this.mergeVector(state, authorId || clientId || 'unknown');
     let revertEvent = target.event;
@@ -130,7 +130,7 @@ class OperationLogManager {
     const state = this.getState(investigationId);
     const redoStack = state.redoStacks.get(clientId) || [];
     const target = redoStack.pop();
-    if (!target) return null;
+    if (!target) {return null;}
 
     const vector = this.mergeVector(state, authorId || clientId || 'unknown');
     const reapplied = {

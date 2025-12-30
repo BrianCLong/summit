@@ -44,7 +44,7 @@ export class OracleService {
    */
   private async executeSimulation(runId: string) {
     const simulation = this.activeSimulations.get(runId);
-    if (!simulation) return;
+    if (!simulation) {return;}
 
     // Phase 1: Running simulations (simulated time)
     await new Promise(resolve => setTimeout(resolve, 2000));

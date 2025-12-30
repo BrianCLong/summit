@@ -56,7 +56,7 @@ export class DataCatalogService {
     const pool = getPostgresPool();
     const result = await pool.query('SELECT * FROM data_catalog_assets WHERE id = $1', [id]);
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
     return this.mapRowToAsset(result.rows[0]);
   }
 
@@ -64,7 +64,7 @@ export class DataCatalogService {
     const pool = getPostgresPool();
     const result = await pool.query('SELECT * FROM data_catalog_assets WHERE urn = $1', [urn]);
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
     return this.mapRowToAsset(result.rows[0]);
   }
 
@@ -83,7 +83,7 @@ export class DataCatalogService {
   async updateAsset(id: string, updates: Partial<DataAsset>): Promise<DataAsset | null> {
     const pool = getPostgresPool();
     const current = await this.getAsset(id);
-    if (!current) return null;
+    if (!current) {return null;}
 
     const updated = { ...current, ...updates, updatedAt: new Date() };
 

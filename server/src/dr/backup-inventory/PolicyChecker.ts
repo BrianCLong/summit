@@ -54,7 +54,7 @@ export class PolicyChecker {
     // Deterministic ordering: ruleId then targetId
     findings.sort((a, b) => {
       const ruleCompare = a.ruleId.localeCompare(b.ruleId);
-      if (ruleCompare !== 0) return ruleCompare;
+      if (ruleCompare !== 0) {return ruleCompare;}
       return a.targetId.localeCompare(b.targetId);
     });
 

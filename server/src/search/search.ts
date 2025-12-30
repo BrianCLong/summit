@@ -97,7 +97,7 @@ export async function searchAll(input: SearchInput) {
       where.push(`created_at <= $4`);
       params.to = input.time.to;
     }
-    const sql = `SELECT id, title, status, created_at FROM cases ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY created_at DESC LIMIT 100`;
+    const sql = `SELECT id, title, status, created_at FROM cases ${where.length ? `WHERE ${  where.join(' AND ')}` : ''} ORDER BY created_at DESC LIMIT 100`;
     const base = await managedPg.query(sql, Object.values(params));
 
     // Keyword search expansion uses the local driver, but we want to use the helper.

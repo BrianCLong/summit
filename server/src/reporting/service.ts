@@ -33,7 +33,7 @@ export class ReportingService {
       validatedRequest.context,
     );
     const exporter = exporterMap[validatedRequest.template.format];
-    if (!exporter) throw new Error(`No exporter for format ${validatedRequest.template.format}`);
+    if (!exporter) {throw new Error(`No exporter for format ${validatedRequest.template.format}`);}
 
     let prepared: unknown = renderResult.rendered;
     try {

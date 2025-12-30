@@ -4,7 +4,7 @@ export class StringNormalizer {
    * and removing punctuation.
    */
   public static normalize(text: string): string {
-    if (!text) return '';
+    if (!text) {return '';}
     return text
       .toLowerCase()
       .trim()
@@ -17,7 +17,7 @@ export class StringNormalizer {
    * This is a simplified implementation.
    */
   public static normalizePhone(phone: string): string {
-    if (!phone) return '';
+    if (!phone) {return '';}
     // Remove all non-digit characters
     const digits = phone.replace(/\D/g, '');
 
@@ -31,7 +31,7 @@ export class StringNormalizer {
    * Standardizes addresses (simplified).
    */
   public static normalizeAddress(address: string): string {
-    if (!address) return '';
+    if (!address) {return '';}
     let normalized = address.toLowerCase().trim();
 
     // Common abbreviations

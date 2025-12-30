@@ -56,7 +56,7 @@ export class YjsHandler {
 
   async handleMessage(ws: any, message: Uint8Array) {
     const docName = this.wsDocMap.get(ws);
-    if (!docName) return;
+    if (!docName) {return;}
 
     const doc = await this.getDoc(docName);
     const decoder = decoding.createDecoder(message);

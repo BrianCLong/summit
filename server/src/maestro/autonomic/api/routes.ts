@@ -42,7 +42,7 @@ router.post('/simulate', async (req, res) => {
   const snapshot = signalsService.generateHealthSnapshot(tenantId || 'default');
   if (signalOverride) {
       // Apply overrides deep merge style (simplified)
-      if (signalOverride.systemStatus) snapshot.system.status = signalOverride.systemStatus;
+      if (signalOverride.systemStatus) {snapshot.system.status = signalOverride.systemStatus;}
   }
 
   // Run loops against it

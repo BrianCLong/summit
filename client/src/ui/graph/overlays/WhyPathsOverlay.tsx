@@ -30,7 +30,7 @@ const WhyPathsOverlay: FC<Props> = ({ cy, paths, open }) => {
   const times = useRef<number[]>([]);
 
   useEffect(() => {
-    if (!cy || !open) return;
+    if (!cy || !open) {return;}
     const start = performance.now();
 
     const limited = paths.slice(0, 200); // cap to 200 elements
@@ -61,10 +61,10 @@ const WhyPathsOverlay: FC<Props> = ({ cy, paths, open }) => {
     times.current.push(ms);
     const sorted = [...times.current].sort((a, b) => a - b);
     const p95 = sorted[Math.floor(sorted.length * 0.95)] || 0;
-    if (p95 > 50) console.warn('ui_overlay_render_ms p95>50ms');
+    if (p95 > 50) {console.warn('ui_overlay_render_ms p95>50ms');}
   }, [cy, paths, open]);
 
-  if (!open) return null;
+  if (!open) {return null;}
 
   return (
     <Box

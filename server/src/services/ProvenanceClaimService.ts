@@ -221,7 +221,7 @@ export class ProvenanceClaimService {
       `SELECT id FROM claim_evidence_links WHERE claim_id=$1 AND evidence_id=$2 AND relation_type=$3`,
       [input.claim_id, input.evidence_id, input.relation_type]
     );
-    if (check.rows.length > 0) return check.rows[0];
+    if (check.rows.length > 0) {return check.rows[0];}
 
     const res = await client.query(
       `INSERT INTO claim_evidence_links
@@ -332,8 +332,8 @@ export class ProvenanceClaimService {
   }
 
   private computeMerkleRoot(hashes: string[]): string {
-    if (hashes.length === 0) return '';
-    if (hashes.length === 1) return hashes[0];
+    if (hashes.length === 0) {return '';}
+    if (hashes.length === 1) {return hashes[0];}
 
     const nextLevel: string[] = [];
     for (let i = 0; i < hashes.length; i += 2) {

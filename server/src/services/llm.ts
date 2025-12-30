@@ -15,7 +15,7 @@ export class MockLLM implements LLMClient {
   ): AsyncGenerator<string> {
     const out = `I understand your query: ${input}`;
     for (const token of out.match(/.{1,8}/g) || []) {
-      if (signal.aborted) return;
+      if (signal.aborted) {return;}
       await new Promise((r) => setTimeout(r, 10));
       yield token;
     }
@@ -33,7 +33,7 @@ export function generatorToReadable(gen: AsyncGenerator<string>): Readable {
   });
   (async () => {
     try {
-      for await (const chunk of gen) r.push(chunk);
+      for await (const chunk of gen) {r.push(chunk);}
       r.push(null);
     } catch (e) {
       r.destroy(e as Error);

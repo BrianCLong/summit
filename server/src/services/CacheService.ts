@@ -71,7 +71,7 @@ export class CacheService {
    * ```
    */
   async get<T>(key: string): Promise<T | null> {
-    if (!this.enabled) return null;
+    if (!this.enabled) {return null;}
 
     try {
       // CacheManager handles JSON parsing internally
@@ -103,7 +103,7 @@ export class CacheService {
    * ```
    */
   async set(key: string, value: any, ttl?: number): Promise<void> {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     try {
       const expiry = ttl || this.defaultTtl;
@@ -127,7 +127,7 @@ export class CacheService {
    * ```
    */
   async del(key: string): Promise<void> {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
     try {
       await this.cacheManager.delete(this.getKey(key));
       this.metrics.incrementCounter('ops_total', { operation: 'del', status: 'success' });
@@ -148,7 +148,7 @@ export class CacheService {
    * ```
    */
   async invalidatePattern(pattern: string): Promise<void> {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     try {
         const fullPattern = this.getKey(pattern);

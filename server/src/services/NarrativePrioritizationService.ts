@@ -92,11 +92,11 @@ export class NarrativePrioritizationService {
     const lowerText = text.toLowerCase();
 
     for (const word of urgentKeywords) {
-      if (lowerText.includes(word)) score += 0.1;
+      if (lowerText.includes(word)) {score += 0.1;}
     }
 
     for (const word of highImpactKeywords) {
-      if (lowerText.includes(word)) score += 0.15;
+      if (lowerText.includes(word)) {score += 0.15;}
     }
 
     // Cap at 1.0
@@ -104,7 +104,7 @@ export class NarrativePrioritizationService {
   }
 
   private async analyzeGraphSignal(entities: string[]): Promise<number> {
-    if (!entities || entities.length === 0) return 0.1;
+    if (!entities || entities.length === 0) {return 0.1;}
 
     const driver = getNeo4jDriver();
     const session = driver.session();
@@ -131,7 +131,7 @@ export class NarrativePrioritizationService {
 
         const result = await session.run(query, { entities });
 
-        if (result.records.length === 0) return 0.2;
+        if (result.records.length === 0) {return 0.2;}
 
         const rawScore = result.records[0].get('graphScore');
         const score = rawScore !== null ? rawScore : 0.2;
@@ -160,9 +160,9 @@ export class NarrativePrioritizationService {
   }
 
   private mapScoreToPriority(score: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    if (score >= 0.8) return 'CRITICAL';
-    if (score >= 0.6) return 'HIGH';
-    if (score >= 0.4) return 'MEDIUM';
+    if (score >= 0.8) {return 'CRITICAL';}
+    if (score >= 0.6) {return 'HIGH';}
+    if (score >= 0.4) {return 'MEDIUM';}
     return 'LOW';
   }
 }

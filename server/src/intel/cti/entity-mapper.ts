@@ -49,8 +49,8 @@ const generateStixId = (type: string): StixIdentifier =>
   `${type}--${randomUUID()}` as StixIdentifier;
 
 const toIsoString = (date: Date | string | undefined): string => {
-  if (!date) return isoNow();
-  if (typeof date === 'string') return date;
+  if (!date) {return isoNow();}
+  if (typeof date === 'string') {return date;}
   return date.toISOString();
 };
 

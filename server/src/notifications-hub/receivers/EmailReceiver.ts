@@ -192,7 +192,7 @@ export class EmailReceiver extends BaseReceiver {
     const messageBody = template?.message || event.message;
     const callToAction = template?.callToAction || event.subject.url;
 
-    let html = `
+    const html = `
 <!DOCTYPE html>
 <html>
 <head>

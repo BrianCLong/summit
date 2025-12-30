@@ -677,9 +677,9 @@ export function estimateTaskCost(task: string, expertType: ExpertType): number {
   const wordCount = task.split(' ').length;
   let complexityMultiplier = 1.0;
 
-  if (wordCount > 100) complexityMultiplier = 2.0;
-  else if (wordCount > 50) complexityMultiplier = 1.5;
-  else if (wordCount > 20) complexityMultiplier = 1.2;
+  if (wordCount > 100) {complexityMultiplier = 2.0;}
+  else if (wordCount > 50) {complexityMultiplier = 1.5;}
+  else if (wordCount > 20) {complexityMultiplier = 1.2;}
 
   return baseCost * complexityMultiplier;
 }

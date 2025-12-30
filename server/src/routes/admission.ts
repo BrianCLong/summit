@@ -8,7 +8,7 @@ const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 router.post('/event', express.json({ limit: '1mb' }), async (req, res) => {
   try {
     const { decision, policy, resource, details } = req.body || {};
-    if (!decision) return res.status(400).json({ error: 'decision required' });
+    if (!decision) {return res.status(400).json({ error: 'decision required' });}
     await pg.query(
       `INSERT INTO admission_events(decision, policy, resource, details) VALUES ($1,$2,$3,$4)`,
       [decision, policy || null, resource || null, details || null],

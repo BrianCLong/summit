@@ -97,18 +97,18 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 }
 
 function calculateSeverity(anomalyScore: number): AnomalySeverity {
-  if (anomalyScore >= 0.9) return 'critical';
-  if (anomalyScore >= 0.7) return 'high';
-  if (anomalyScore >= 0.5) return 'medium';
-  if (anomalyScore >= 0.3) return 'low';
+  if (anomalyScore >= 0.9) {return 'critical';}
+  if (anomalyScore >= 0.7) {return 'high';}
+  if (anomalyScore >= 0.5) {return 'medium';}
+  if (anomalyScore >= 0.3) {return 'low';}
   return 'info';
 }
 
 function calculateSuggestedAction(severity: AnomalySeverity, anomalyType: AnomalyType): SuggestedAction {
-  if (severity === 'critical') return 'block';
-  if (severity === 'high') return 'investigate';
-  if (severity === 'medium') return 'review';
-  if (anomalyType === 'behavioral') return 'review';
+  if (severity === 'critical') {return 'block';}
+  if (severity === 'high') {return 'investigate';}
+  if (severity === 'medium') {return 'review';}
+  if (anomalyType === 'behavioral') {return 'review';}
   return 'monitor';
 }
 
@@ -255,7 +255,7 @@ class IsolationForestDetector {
   }
 
   private averagePathLength(n: number): number {
-    if (n <= 1) return 0;
+    if (n <= 1) {return 0;}
     return 2 * (Math.log(n - 1) + 0.5772156649) - (2 * (n - 1) / n);
   }
 

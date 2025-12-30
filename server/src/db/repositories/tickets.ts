@@ -65,7 +65,7 @@ async function ensureTable() {
 
 export async function upsertTickets(items: Ticket[]) {
   await ensureTable();
-  if (!items?.length) return { upserted: 0 };
+  if (!items?.length) {return { upserted: 0 };}
   const pool = getPostgresPool();
   const sql = `
     INSERT INTO maestro_tickets (provider, external_id, title, status, assignee, labels, priority, sprint, project, repo, url, created_at, updated_at)
@@ -221,7 +221,7 @@ export async function listTicketDeployments(
 // Mappers from webhooks
 export function mapGitHubIssue(payload: any): Ticket | null {
   const issue = payload?.issue;
-  if (!issue) return null;
+  if (!issue) {return null;}
   return {
     provider: 'github',
     external_id: String(issue.id),
@@ -243,7 +243,7 @@ export function mapGitHubIssue(payload: any): Ticket | null {
 
 export function mapJiraIssue(payload: any): Ticket | null {
   const issue = payload?.issue;
-  if (!issue) return null;
+  if (!issue) {return null;}
   const fields = issue.fields || {};
   return {
     provider: 'jira',

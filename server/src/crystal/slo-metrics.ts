@@ -11,7 +11,7 @@ class PercentileTracker {
   }
 
   record(value: number) {
-    if (!Number.isFinite(value)) return;
+    if (!Number.isFinite(value)) {return;}
     this.samples.push(value);
     if (this.samples.length > this.maxSamples) {
       this.samples.shift();
@@ -19,7 +19,7 @@ class PercentileTracker {
   }
 
   percentile(p: number): number {
-    if (this.samples.length === 0) return 0;
+    if (this.samples.length === 0) {return 0;}
     const sorted = [...this.samples].sort((a, b) => a - b);
     const rank = (p / 100) * (sorted.length - 1);
     const lower = Math.floor(rank);
@@ -92,9 +92,9 @@ export class SLOMetrics {
     durationMs: number,
   ) {
     gatewayHistogram.observe({ operation, method: operation }, durationMs);
-    if (operation === 'read') this.gatewayRead.record(durationMs);
-    else if (operation === 'write') this.gatewayWrite.record(durationMs);
-    else this.subscription.record(durationMs);
+    if (operation === 'read') {this.gatewayRead.record(durationMs);}
+    else if (operation === 'write') {this.gatewayWrite.record(durationMs);}
+    else {this.subscription.record(durationMs);}
   }
 
   observeGraph(hops: number, durationMs: number) {

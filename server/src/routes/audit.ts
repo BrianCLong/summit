@@ -50,7 +50,7 @@ auditRouter.get('/incidents/:id/audit-bundle.zip', async (req: AuthenticatedRequ
       (req.headers['x-tenant'] as any) ||
       '',
   );
-  if (!tenant) return res.status(400).json({ error: 'tenant_required' });
+  if (!tenant) {return res.status(400).json({ error: 'tenant_required' });}
   const { id } = req.params as { id: string };
   const pg = getPostgresPool();
   const prov = new ProvenanceRepo(pg);
@@ -115,7 +115,7 @@ auditRouter.get('/investigations/:id/audit-bundle.zip', async (req: Authenticate
       (req.headers['x-tenant'] as any) ||
       '',
   );
-  if (!tenant) return res.status(400).json({ error: 'tenant_required' });
+  if (!tenant) {return res.status(400).json({ error: 'tenant_required' });}
   const { id } = req.params as { id: string };
   const pg = getPostgresPool();
   const prov = new ProvenanceRepo(pg);

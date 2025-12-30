@@ -58,7 +58,7 @@ const MODEL_VERSION = 'isolation-forest-lite-v1';
 const DEFAULT_CONTAMINATION = 0.15;
 
 function quantile(values: number[], q: number) {
-  if (!values.length) return 0;
+  if (!values.length) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const pos = (sorted.length - 1) * q;
   const base = Math.floor(pos);
@@ -69,7 +69,7 @@ function quantile(values: number[], q: number) {
 }
 
 function medianAbsoluteDeviation(values: number[], med: number) {
-  if (!values.length) return 0;
+  if (!values.length) {return 0;}
   const deviations = values.map((value) => Math.abs(value - med));
   return median(deviations);
 }
@@ -101,8 +101,8 @@ export function features(graph: Neo4jGraph): NodeFeatures[] {
   return graph.nodes.map((node) => {
     const nodeEdges = adjacency.get(node.id) ?? [];
     const neighborIds = nodeEdges.reduce<string[]>((acc, edge) => {
-      if (edge.source !== node.id) acc.push(edge.source);
-      if (edge.target !== node.id) acc.push(edge.target);
+      if (edge.source !== node.id) {acc.push(edge.source);}
+      if (edge.target !== node.id) {acc.push(edge.target);}
       return acc;
     }, []);
 

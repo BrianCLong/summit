@@ -18,11 +18,11 @@ const formatProperties = (properties: any) => {
 };
 
 const resolveEntityType = (labels: string[]) => {
-  if (labels.includes('Person')) return 'Person';
-  if (labels.includes('Org')) return 'Org';
-  if (labels.includes('Asset')) return 'Asset';
-  if (labels.includes('Event')) return 'Event';
-  if (labels.includes('Indicator')) return 'Indicator';
+  if (labels.includes('Person')) {return 'Person';}
+  if (labels.includes('Org')) {return 'Org';}
+  if (labels.includes('Asset')) {return 'Asset';}
+  if (labels.includes('Event')) {return 'Event';}
+  if (labels.includes('Indicator')) {return 'Indicator';}
   return null;
 };
 

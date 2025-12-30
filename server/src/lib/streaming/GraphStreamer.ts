@@ -66,7 +66,7 @@ export class GraphStreamer extends EventEmitter {
     const redis = getRedisClient();
     const pendingData = await redis.get(`stream_pending:${streamId}`);
 
-    if (!pendingData) return;
+    if (!pendingData) {return;}
 
     await redis.del(`stream_pending:${streamId}`);
     const { query, params, config } = JSON.parse(pendingData) as {
@@ -250,7 +250,7 @@ export class GraphStreamer extends EventEmitter {
   // Helper to convert Neo4j Integers to standard JS numbers/strings
   // Duplicated from QueryOptimizer for independence
   private transformNeo4jIntegers(obj: unknown): unknown {
-    if (obj === null || obj === undefined) return obj;
+    if (obj === null || obj === undefined) {return obj;}
 
     if (neo4j.isInt(obj)) {
       return obj.inSafeRange() ? obj.toNumber() : obj.toString();

@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 
 export default function TTPTriagePanel({ open, onClose, selectedEntity }) {
-  if (!open || !selectedEntity) return null;
+  if (!open || !selectedEntity) {return null;}
 
   return (
     <Paper

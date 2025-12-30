@@ -152,7 +152,7 @@ export class RedisBucket {
       connectTimeout: 5000,
       commandTimeout: 2000,
       retryStrategy: (times) => {
-        if (times > 3) return null;
+        if (times > 3) {return null;}
         return times * 2 * 1000;
       },
     });
@@ -175,7 +175,7 @@ export class RedisBucket {
    * Initialize Redis connection and load Lua scripts
    */
   async init(): Promise<void> {
-    if (this.connected) return;
+    if (this.connected) {return;}
 
     try {
       if (!this.client.isOpen) {
@@ -319,7 +319,7 @@ export class RedisBucket {
         const operation = result[i + 2];
 
         results.push({ operation, tokens, approved });
-        if (!approved) allApproved = false;
+        if (!approved) {allApproved = false;}
       }
 
       return {

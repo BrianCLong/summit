@@ -64,7 +64,7 @@ export class PaymentProcessor {
 
   async confirmPayment(intentId: string): Promise<PaymentIntent> {
     const intent = this.intents.get(intentId);
-    if (!intent) throw new Error('payment_intent_not_found');
+    if (!intent) {throw new Error('payment_intent_not_found');}
 
     intent.status = 'processing';
     intent.updatedAt = new Date();
@@ -80,7 +80,7 @@ export class PaymentProcessor {
 
   async cancelPayment(intentId: string): Promise<PaymentIntent> {
     const intent = this.intents.get(intentId);
-    if (!intent) throw new Error('payment_intent_not_found');
+    if (!intent) {throw new Error('payment_intent_not_found');}
     if (intent.status === 'succeeded') {
       throw new Error('cannot_cancel_succeeded_payment');
     }
@@ -92,7 +92,7 @@ export class PaymentProcessor {
 
   async refund(request: RefundRequest): Promise<{ id: string; status: string }> {
     const intent = this.intents.get(request.paymentIntentId);
-    if (!intent) throw new Error('payment_intent_not_found');
+    if (!intent) {throw new Error('payment_intent_not_found');}
     if (intent.status !== 'succeeded') {
       throw new Error('can_only_refund_succeeded_payments');
     }

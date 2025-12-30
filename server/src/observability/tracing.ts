@@ -113,7 +113,7 @@ export class TracingService {
       logger.info({
         serviceName: this.config.serviceName,
         environment: this.config.environment,
-        jaegerEnabled: !!this.config.jaegerEndpoint,
+        jaegerEnabled: Boolean(this.config.jaegerEndpoint),
         prometheusPort: this.config.prometheusPort,
       }, 'OpenTelemetry tracing initialized');
     } catch (error) {

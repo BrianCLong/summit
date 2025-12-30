@@ -209,7 +209,7 @@ const ThreatIntelligenceHub: React.FC<ThreatIntelligenceHubProps> = ({
 
   // Auto-refresh logic
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!autoRefresh) {return;}
 
     const interval = setInterval(() => {
       setLastUpdated(new Date());

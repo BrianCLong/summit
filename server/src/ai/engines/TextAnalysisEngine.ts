@@ -710,7 +710,7 @@ export class TextAnalysisEngine {
   ): number {
     const { wordCount, sentenceCount } = statistics;
 
-    if (sentenceCount === 0 || wordCount === 0) return 0;
+    if (sentenceCount === 0 || wordCount === 0) {return 0;}
 
     // Count syllables (simplified approach)
     const syllableCount = this.countSyllables(text);
@@ -737,8 +737,8 @@ export class TextAnalysisEngine {
       let syllables = vowelGroups.length;
 
       // Adjust for common patterns
-      if (word.endsWith('e') && syllables > 1) syllables--;
-      if (syllables === 0) syllables = 1;
+      if (word.endsWith('e') && syllables > 1) {syllables--;}
+      if (syllables === 0) {syllables = 1;}
 
       syllableCount += syllables;
     }

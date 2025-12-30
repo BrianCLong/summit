@@ -48,7 +48,7 @@ export class CdnUploadService {
   async uploadFiles(
     requests: CdnUploadRequest[],
   ): Promise<Record<string, string>> {
-    if (!this.config.enabled) return {};
+    if (!this.config.enabled) {return {};}
 
     const uploads = requests.map(async (request) => {
       const key = this.buildKey(request.key || path.basename(request.localPath));

@@ -28,7 +28,7 @@ export class SLOPolicyEngine {
 
   public evaluate(tenantId: string): SLOAlert[] {
     const contract = this.contracts.get(tenantId);
-    if (!contract) return [];
+    if (!contract) {return [];}
 
     const alerts: SLOAlert[] = [];
     const health = this.signalsService.generateHealthSnapshot(tenantId);
@@ -44,7 +44,7 @@ export class SLOPolicyEngine {
         slo.window
       );
 
-      if (series.datapoints.length === 0) continue;
+      if (series.datapoints.length === 0) {continue;}
 
       // Calculate current value (e.g., avg latency, or success rate)
       const currentValue = this.calculateMetricValue(series.datapoints, slo.targetType);
@@ -81,7 +81,7 @@ export class SLOPolicyEngine {
   }
 
   private calculateMetricValue(datapoints: { value: number }[], type: string): number {
-    if (datapoints.length === 0) return 0;
+    if (datapoints.length === 0) {return 0;}
     const sum = datapoints.reduce((a, b) => a + b.value, 0);
     return sum / datapoints.length;
   }

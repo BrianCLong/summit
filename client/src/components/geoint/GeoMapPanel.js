@@ -31,7 +31,7 @@ function HeatLayer({ points = [] }) {
       }
     } catch {}
     return () => {
-      if (layer) map.removeLayer(layer);
+      if (layer) {map.removeLayer(layer);}
     };
   }, [map, points]);
   return null;

@@ -32,7 +32,7 @@ export class InvariantRegistry {
 
   validateStateTransition(machineId: string, from: string, to: string, payload?: any) {
     const machine = this.stateMachines.get(machineId);
-    if (!machine) throw new Error(`Unknown state machine ${machineId}`);
+    if (!machine) {throw new Error(`Unknown state machine ${machineId}`);}
     const transition = machine.transitions.find((t) => t.from === from && t.to === to);
     if (!transition || !transition.allowed) {
       throw new Error(`Transition from ${from} to ${to} is not allowed for ${machineId}`);

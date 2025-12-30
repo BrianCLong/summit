@@ -142,7 +142,7 @@ class CSVImportService {
   }
 
   async countParquetRows(job) {
-    if (!parquet) throw new Error('Parquet support not installed');
+    if (!parquet) {throw new Error('Parquet support not installed');}
     const reader = await parquet.ParquetReader.openFile(job.filePath);
     const cursor = reader.getCursor();
     let count = 0;
@@ -221,7 +221,7 @@ class CSVImportService {
   }
 
   async processParquetData(job, session) {
-    if (!parquet) throw new Error('Parquet support not installed');
+    if (!parquet) {throw new Error('Parquet support not installed');}
     const batchSize = 1000;
     let batch = [];
     const startRow = job.stats.processedRows || 0;
@@ -358,11 +358,11 @@ class CSVImportService {
    * Process a batch of rows with Neo4j
    */
   async processBatch(batch, job, session) {
-    if (batch.length === 0) return;
+    if (batch.length === 0) {return;}
 
     // Group by entity type for efficient processing
     const byType = batch.reduce((acc, item) => {
-      if (!acc[item.type]) acc[item.type] = [];
+      if (!acc[item.type]) {acc[item.type] = [];}
       acc[item.type].push(item);
       return acc;
     }, {});
@@ -525,7 +525,7 @@ class CSVImportService {
     `;
 
     const result = await this.pg.query(query, [jobId]);
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
 
     const row = result.rows[0];
     return {

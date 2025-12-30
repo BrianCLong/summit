@@ -38,7 +38,7 @@ const CLASSIFICATION_CLEARANCE: Record<string, number> = {
 };
 
 function normalizeClearance(user?: LicenseAwareUser): number {
-  if (!user) return 0;
+  if (!user) {return 0;}
 
   if (typeof user.clearanceLevel === 'number') {
     return user.clearanceLevel;

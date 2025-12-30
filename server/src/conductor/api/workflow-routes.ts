@@ -242,13 +242,13 @@ router.get(
         offset: parseInt(offset as string),
       };
 
-      if (workflow_name) filters.workflow_name = workflow_name;
-      if (status) filters.status = status;
+      if (workflow_name) {filters.workflow_name = workflow_name;}
+      if (status) {filters.status = status;}
 
       // Apply tenant isolation
       if (user.roles?.includes('admin')) {
         // Admins can specify tenant_id or see all
-        if (tenant_id) filters.tenant_id = tenant_id;
+        if (tenant_id) {filters.tenant_id = tenant_id;}
       } else {
         // Regular users only see their tenant's executions
         filters.tenant_id = user.tenantId;

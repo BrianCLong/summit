@@ -53,7 +53,7 @@ export default function ExecutorsPage() {
           status: 'ready',
         }),
       });
-      if (!r.ok) throw new Error('create failed');
+      if (!r.ok) {throw new Error('create failed');}
       await load();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'create failed');

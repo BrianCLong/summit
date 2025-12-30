@@ -45,7 +45,7 @@ export class FileSourceConnector extends BaseSourceConnector {
       let records: any[] = [];
       if (this.config.format === 'json') {
         records = JSON.parse(content);
-        if (!Array.isArray(records)) records = [records];
+        if (!Array.isArray(records)) {records = [records];}
       } else if (this.config.format === 'text') {
         records = [{ content, filename: fileToProcess }];
       }

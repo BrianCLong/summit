@@ -20,8 +20,8 @@ export class SAMLProvider implements SSOProvider {
   }
 
   validateConfig(): void {
-    if (!this.config.entryPoint) throw new Error('Missing entryPoint for SAML');
-    if (!this.config.cert) throw new Error('Missing cert for SAML');
+    if (!this.config.entryPoint) {throw new Error('Missing entryPoint for SAML');}
+    if (!this.config.cert) {throw new Error('Missing cert for SAML');}
   }
 
   async generateAuthUrl(callbackUrl: string, relayState?: string): Promise<string> {
@@ -65,10 +65,10 @@ export class SAMLProvider implements SSOProvider {
     if (this.config.groupMap) {
       for (const group of groups) {
         const mapped = this.config.groupMap[group];
-        if (mapped) roles.push(...mapped);
+        if (mapped) {roles.push(...mapped);}
       }
     }
-    if (roles.length === 0) roles.push('VIEWER');
+    if (roles.length === 0) {roles.push('VIEWER');}
 
     return {
       id: String(profile.nameID),

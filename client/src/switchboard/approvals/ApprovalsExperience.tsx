@@ -73,7 +73,7 @@ export default function ApprovalsExperience() {
   const hasDualClaim = abac.claims.includes('approval:dual-control');
 
   const handleDecision = async (action: 'approve' | 'deny') => {
-    if (!detail) return;
+    if (!detail) {return;}
     const trimmed = rationale.trim();
     if (trimmed.length < 8) {
       setFormError('Add a rationale with at least 8 characters to satisfy audit policy.');
@@ -104,7 +104,7 @@ export default function ApprovalsExperience() {
       );
       setRationale('');
       await refresh();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     } catch (err: any) {
       setFormError(err?.message || 'Unable to submit decision');
     } finally {

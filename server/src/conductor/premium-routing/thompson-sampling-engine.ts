@@ -635,10 +635,10 @@ export class ThompsonSamplingEngine {
     // Higher weight for more specific/constrainted contexts
     let weight = 0.1; // Base weight
 
-    if (contextFeatures.qualityRequirement > 0.8) weight += 0.1;
-    if (contextFeatures.urgency === 'critical') weight += 0.15;
-    if (contextFeatures.queryComplexity > 0.7) weight += 0.1;
-    if (contextFeatures.budgetConstraint < 10) weight += 0.05;
+    if (contextFeatures.qualityRequirement > 0.8) {weight += 0.1;}
+    if (contextFeatures.urgency === 'critical') {weight += 0.15;}
+    if (contextFeatures.queryComplexity > 0.7) {weight += 0.1;}
+    if (contextFeatures.budgetConstraint < 10) {weight += 0.05;}
 
     return Math.min(0.5, weight); // Max 50% contextual weighting
   }

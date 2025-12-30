@@ -232,7 +232,7 @@ export default function IntelligentCopilot() {
   }, [messages]);
 
   const handleSendMessage = async (text = inputValue) => {
-    if (!text.trim() || isLoading) return;
+    if (!text.trim() || isLoading) {return;}
 
     const userMessage = {
       id: Date.now(),
@@ -250,9 +250,9 @@ export default function IntelligentCopilot() {
       () => {
         const query = text.toLowerCase();
         let aiResponse =
-          'I understand you want to know about: ' +
-          text +
-          "\n\nI'm still learning about this topic. Try asking about network analysis, threat assessment, pattern prediction, or investigation summaries for more detailed insights.";
+          `I understand you want to know about: ${ 
+          text 
+          }\n\nI'm still learning about this topic. Try asking about network analysis, threat assessment, pattern prediction, or investigation summaries for more detailed insights.`;
 
         // Find matching response
         for (const [key, response] of Object.entries(intelligentResponses)) {
@@ -281,7 +281,7 @@ export default function IntelligentCopilot() {
   };
 
   const handleGenerate = async () => {
-    if (!notes.trim()) return;
+    if (!notes.trim()) {return;}
     const { data } = await generateEntities({
       variables: { investigationId: 'demo', text: notes },
     });

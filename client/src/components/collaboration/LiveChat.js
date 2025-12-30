@@ -99,7 +99,7 @@ function LiveChat({
     useLazyQuery(CHAT_MESSAGES_QUERY);
 
   useEffect(() => {
-    if (!websocketService) return;
+    if (!websocketService) {return;}
 
     // Join investigation chat room
     websocketService.emit('join_investigation_chat', {
@@ -252,7 +252,7 @@ function LiveChat({
   }, [isExpanded]);
 
   const sendMessage = () => {
-    if (!newMessage.trim() || !websocketService) return;
+    if (!newMessage.trim() || !websocketService) {return;}
 
     const message = {
       id: Date.now().toString(),
@@ -465,7 +465,7 @@ function LiveChat({
               size="small"
               onClick={() => {
                 setIsExpanded(!isExpanded);
-                if (onToggleMinimize) onToggleMinimize(!isExpanded);
+                if (onToggleMinimize) {onToggleMinimize(!isExpanded);}
               }}
             >
               {isExpanded ? <Minimize /> : <ExpandMore />}
@@ -523,7 +523,7 @@ function LiveChat({
           }}
           onClick={() => {
             setIsExpanded(true);
-            if (onToggleMinimize) onToggleMinimize(false);
+            if (onToggleMinimize) {onToggleMinimize(false);}
           }}
         >
           <Badge badgeContent={unreadCount} color="error">

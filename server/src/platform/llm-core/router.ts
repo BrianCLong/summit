@@ -40,7 +40,7 @@ export class RouterService {
         if (rule.maxBudgetPerCall) {
           // simple check, assumes 1k in/out roughly
           const estimatedCost = profile.costPer1KTokensInput + profile.costPer1KTokensOutput;
-          if (estimatedCost > rule.maxBudgetPerCall) continue;
+          if (estimatedCost > rule.maxBudgetPerCall) {continue;}
         }
         selectedProfile = profile;
         break;
@@ -51,7 +51,7 @@ export class RouterService {
     if (!selectedProfile) {
       const fallbackId = rule.fallbackModels[0];
       const fallback = this.profiles.get(fallbackId);
-      if (!fallback) throw new Error('No valid model found after fallback');
+      if (!fallback) {throw new Error('No valid model found after fallback');}
       selectedProfile = fallback;
     }
 

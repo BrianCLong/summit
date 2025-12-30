@@ -70,7 +70,7 @@ export const resolvers = {
     ...(documentResolvers.Query || {}),
     ...(erResolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {throw new Error('Not authenticated');}
       return user;
     },
     copilotGoals: async (_: any, { investigationId }: CopilotGoalsArgs) => {

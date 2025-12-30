@@ -198,10 +198,10 @@ export class ERClient {
     limit?: number;
   }): Promise<{ entries: AuditEntry[]; count: number }> {
     const params = new URLSearchParams();
-    if (options?.tenantId) params.append('tenantId', options.tenantId);
-    if (options?.actor) params.append('actor', options.actor);
-    if (options?.event) params.append('event', options.event);
-    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.tenantId) {params.append('tenantId', options.tenantId);}
+    if (options?.actor) {params.append('actor', options.actor);}
+    if (options?.event) {params.append('event', options.event);}
+    if (options?.limit) {params.append('limit', options.limit.toString());}
 
     const query = params.toString();
     return this.request('GET', `/audit${query ? `?${query}` : ''}`);

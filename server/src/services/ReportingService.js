@@ -1185,7 +1185,7 @@ class ReportingService extends EventEmitter {
 
   async extendTemplate(baseTemplateId, customization) {
     const base = this.reportTemplates.get(baseTemplateId);
-    if (!base) throw new Error('Base template not found');
+    if (!base) {throw new Error('Base template not found');}
     const sections = [
       ...base.sections,
       ...(customization.additionalSections || []),
@@ -1522,8 +1522,8 @@ class ReportingService extends EventEmitter {
 
   getPDFStyles() {
     return (
-      this.getHTMLStyles() +
-      `
+      `${this.getHTMLStyles() 
+      }
       @page { margin: 1in; }
       body { font-size: 12pt; }
       .report-section { page-break-inside: avoid; }
@@ -1550,7 +1550,7 @@ class ReportingService extends EventEmitter {
       if (Array.isArray(t.parameters)) {
         t.parameters.forEach((p) => {
           if (p.name === 'includeVisualization')
-            paramsObj.includeVisualization = true;
+            {paramsObj.includeVisualization = true;}
         });
       }
       return { ...t, exportFormats: formats, parameters: paramsObj };
@@ -1755,7 +1755,7 @@ class ReportingService extends EventEmitter {
   async retryReportGeneration(reportId) {
     const report =
       this.reports?.get?.(reportId) || this.activeReports?.get?.(reportId);
-    if (!report) return { success: false, error: 'Report not found' };
+    if (!report) {return { success: false, error: 'Report not found' };}
     report.retryCount = (report.retryCount || 0) + 1;
     report.status = 'GENERATING';
     return { success: true };

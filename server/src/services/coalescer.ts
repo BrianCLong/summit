@@ -4,8 +4,8 @@ let t: NodeJS.Timeout | null = null;
 
 export function enqueue(task: Task, maxDelayMs = 20, maxBatch = 200) {
   q.push(task);
-  if (!t) t = setTimeout(flush, maxDelayMs);
-  if (q.length >= maxBatch) flush();
+  if (!t) {t = setTimeout(flush, maxDelayMs);}
+  if (q.length >= maxBatch) {flush();}
 }
 async function flush() {
   const batch = q.splice(0, q.length);
@@ -14,8 +14,8 @@ async function flush() {
   const audits = batch.filter((b) => b.type === 'audit').map((b) => b.payload);
   const cites = batch.filter((b) => b.type === 'cite').map((b) => b.payload);
   // write in groups (PG COPY / Neo4j UNWIND)
-  if (audits.length) await writeAudits(audits);
-  if (cites.length) await writeCites(cites);
+  if (audits.length) {await writeAudits(audits);}
+  if (cites.length) {await writeCites(cites);}
 }
 
 import { runCypher } from '../graph/neo4j'; // Import runCypher
@@ -56,7 +56,7 @@ async function writeCites(cites: any[]) {
   console.log('Writing cites:', cites.length);
   // Implement actual cite writing logic here
   // Example: UNWIND for CITED relationships
-  if (cites.length === 0) return;
+  if (cites.length === 0) {return;}
 
   const entityCites = cites.filter((c) => c.kind === 'entity');
   const documentCites = cites.filter((c) => c.kind === 'document');

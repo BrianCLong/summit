@@ -38,9 +38,9 @@ const GraphStylePanel = ({
     : null;
 
   const statusLabel = (() => {
-    if (status === 'loading') return 'Loading saved styles…';
-    if (status === 'saving') return 'Saving changes…';
-    if (status === 'failed') return 'Unable to sync preferences';
+    if (status === 'loading') {return 'Loading saved styles…';}
+    if (status === 'saving') {return 'Saving changes…';}
+    if (status === 'failed') {return 'Unable to sync preferences';}
     return null;
   })();
 

@@ -42,8 +42,8 @@ const mockMeasureEntries: PerformanceMeasure[] = [
 // Mock performance.getEntriesByType
 const originalGetEntriesByType = performance.getEntriesByType;
 performance.getEntriesByType = jest.fn((type: string) => {
-  if (type === 'resource') return mockResourceEntries;
-  if (type === 'measure') return mockMeasureEntries;
+  if (type === 'resource') {return mockResourceEntries;}
+  if (type === 'measure') {return mockMeasureEntries;}
   return [];
 });
 

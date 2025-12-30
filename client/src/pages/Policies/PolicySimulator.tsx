@@ -175,7 +175,7 @@ const PolicySimulator: React.FC = () => {
     const policyValid = validateJson(policyJson, 'policy');
     const contextValid = validateJson(contextJson, 'context');
 
-    if (!policyValid || !contextValid) return;
+    if (!policyValid || !contextValid) {return;}
 
     try {
       const policy = JSON.parse(policyJson);
@@ -204,7 +204,7 @@ const PolicySimulator: React.FC = () => {
     const currentValid = validateJson(policyJson, 'policy');
     const newValid = validateJson(comparePolicyJson, 'compare');
 
-    if (!currentValid || !newValid) return;
+    if (!currentValid || !newValid) {return;}
 
     try {
       const currentPolicy = JSON.parse(policyJson);
@@ -287,7 +287,7 @@ const PolicySimulator: React.FC = () => {
                       value=""
                       onChange={(e) => {
                         const policy = activePolicies.find((p) => p.id === e.target.value);
-                        if (policy) handleLoadPolicy(policy, 'main');
+                        if (policy) {handleLoadPolicy(policy, 'main');}
                       }}
                       label="Load from..."
                     >
@@ -380,7 +380,7 @@ const PolicySimulator: React.FC = () => {
                       value={comparePolicy || ''}
                       onChange={(e) => {
                         const policy = activePolicies.find((p) => p.id === e.target.value);
-                        if (policy) handleLoadPolicy(policy, 'compare');
+                        if (policy) {handleLoadPolicy(policy, 'compare');}
                       }}
                       label="Load from..."
                     >

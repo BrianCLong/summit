@@ -49,7 +49,7 @@ export class AudioSentimentAnalyzer {
     const normRMS = Math.min(rms * 10, 1.0); // Assume typical RMS is low
     const normPitch = Math.min(pitch / 1000, 1.0);
 
-    let scores: EmotionScores = {
+    const scores: EmotionScores = {
       neutral: 0.2,
       happy: 0.2,
       sad: 0.2,
@@ -87,8 +87,8 @@ export class AudioSentimentAnalyzer {
     const neutral = scores.neutral;
 
     let sentimentLabel: 'positive' | 'negative' | 'neutral' = 'neutral';
-    if (positive > negative && positive > neutral) sentimentLabel = 'positive';
-    if (negative > positive && negative > neutral) sentimentLabel = 'negative';
+    if (positive > negative && positive > neutral) {sentimentLabel = 'positive';}
+    if (negative > positive && negative > neutral) {sentimentLabel = 'negative';}
 
     return {
       timestamp: Date.now(),

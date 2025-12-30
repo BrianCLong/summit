@@ -33,10 +33,10 @@ export function PipelinesPage() {
 
   React.useEffect(() => {
     const query = new URLSearchParams(params);
-    if (search) query.set('q', search);
-    else query.delete('q');
-    if (ownerFilter) query.set('owner', ownerFilter);
-    else query.delete('owner');
+    if (search) {query.set('q', search);}
+    else {query.delete('q');}
+    if (ownerFilter) {query.set('owner', ownerFilter);}
+    else {query.delete('owner');}
     setParams(query, { replace: true });
   }, [search, ownerFilter, params, setParams]);
 
@@ -58,7 +58,7 @@ export function PipelinesPage() {
 
   const rowRenderer: any = ({ index, key, style }: any) => {
     const pipeline = filtered[index];
-    if (!pipeline) return null;
+    if (!pipeline) {return null;}
     return (
       <button
         key={key}

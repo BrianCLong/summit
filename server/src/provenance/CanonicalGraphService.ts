@@ -44,7 +44,7 @@ export class CanonicalGraphService {
    */
   async projectEntry(entry: ProvenanceEntry): Promise<void> {
     const nodeType = this.determineNodeType(entry);
-    if (!nodeType) return; // Skip non-canonical entries
+    if (!nodeType) {return;} // Skip non-canonical entries
 
     const session = neo.session();
     try {
@@ -272,7 +272,7 @@ export class CanonicalGraphService {
       const systemFields = new Set(['id', 'tenantId', 'nodeType', 'subType', 'label', 'timestamp', 'metadata', 'hash', 'sourceEntryId']);
 
       Object.keys(startNode).forEach(key => {
-          if (systemFields.has(key)) return;
+          if (systemFields.has(key)) {return;}
 
           const val1 = (startNode as any)[key];
           const val2 = (endNode as any)[key];
@@ -415,13 +415,13 @@ export class CanonicalGraphService {
   private determineNodeType(entry: ProvenanceEntry): ProvenanceNodeType | null {
     const type = entry.resourceType.toLowerCase();
 
-    if (['document', 'configuration', 'policy', 'prompt'].includes(type)) return 'Input';
-    if (['evaluation', 'approval', 'decision', 'prediction'].includes(type)) return 'Decision';
-    if (['run', 'job', 'task', 'action', 'ingest'].includes(type)) return 'Action';
-    if (['metric', 'alert', 'report', 'state', 'outcome'].includes(type)) return 'Outcome';
+    if (['document', 'configuration', 'policy', 'prompt'].includes(type)) {return 'Input';}
+    if (['evaluation', 'approval', 'decision', 'prediction'].includes(type)) {return 'Decision';}
+    if (['run', 'job', 'task', 'action', 'ingest'].includes(type)) {return 'Action';}
+    if (['metric', 'alert', 'report', 'state', 'outcome'].includes(type)) {return 'Outcome';}
 
-    if (entry.actionType === 'EVALUATE') return 'Decision';
-    if (entry.actionType === 'EXECUTE') return 'Action';
+    if (entry.actionType === 'EVALUATE') {return 'Decision';}
+    if (entry.actionType === 'EXECUTE') {return 'Action';}
 
     return null;
   }
@@ -430,9 +430,9 @@ export class CanonicalGraphService {
     const ids: string[] = [];
     const payload = entry.payload as any;
 
-    if (payload.sourceId) ids.push(payload.sourceId);
-    if (Array.isArray(payload.sourceIds)) ids.push(...payload.sourceIds);
-    if (payload.previousState?.id) ids.push(payload.previousState.id);
+    if (payload.sourceId) {ids.push(payload.sourceId);}
+    if (Array.isArray(payload.sourceIds)) {ids.push(...payload.sourceIds);}
+    if (payload.previousState?.id) {ids.push(payload.previousState.id);}
 
     if (entry.metadata?.derivedFrom) {
         if (Array.isArray(entry.metadata.derivedFrom)) {
@@ -452,12 +452,12 @@ export class CanonicalGraphService {
       // Action -> Outcome: PRODUCED
       // Outcome -> Decision: AFFECTED (Feedback)
 
-      if (sourceType === 'Input' && targetType === 'Decision') return 'FED_INTO';
-      if (sourceType === 'Input' && targetType === 'Action') return 'USED_BY';
-      if (sourceType === 'Decision' && targetType === 'Action') return 'TRIGGERED';
-      if (sourceType === 'Action' && targetType === 'Outcome') return 'PRODUCED';
-      if (sourceType === 'Outcome' && targetType === 'Decision') return 'AFFECTED';
-      if (sourceType === 'Action' && targetType === 'Input') return 'GENERATED';
+      if (sourceType === 'Input' && targetType === 'Decision') {return 'FED_INTO';}
+      if (sourceType === 'Input' && targetType === 'Action') {return 'USED_BY';}
+      if (sourceType === 'Decision' && targetType === 'Action') {return 'TRIGGERED';}
+      if (sourceType === 'Action' && targetType === 'Outcome') {return 'PRODUCED';}
+      if (sourceType === 'Outcome' && targetType === 'Decision') {return 'AFFECTED';}
+      if (sourceType === 'Action' && targetType === 'Input') {return 'GENERATED';}
 
       return 'DERIVED_FROM';
   }
@@ -467,28 +467,28 @@ export class CanonicalGraphService {
     const props: Record<string, any> = {};
 
     if (nodeType === 'Decision') {
-        if (payload.result) props.result = payload.result;
-        if (payload.confidence) props.confidence = payload.confidence;
-        if (payload.evaluator) props.evaluator = payload.evaluator;
-        if (payload.outcome && !props.result) props.result = payload.outcome;
+        if (payload.result) {props.result = payload.result;}
+        if (payload.confidence) {props.confidence = payload.confidence;}
+        if (payload.evaluator) {props.evaluator = payload.evaluator;}
+        if (payload.outcome && !props.result) {props.result = payload.outcome;}
     }
 
     if (nodeType === 'Action') {
-        if (payload.status) props.status = payload.status;
-        if (payload.durationMs) props.durationMs = payload.durationMs;
-        if (payload.startedAt) props.startedAt = payload.startedAt;
-        if (payload.completedAt) props.completedAt = payload.completedAt;
+        if (payload.status) {props.status = payload.status;}
+        if (payload.durationMs) {props.durationMs = payload.durationMs;}
+        if (payload.startedAt) {props.startedAt = payload.startedAt;}
+        if (payload.completedAt) {props.completedAt = payload.completedAt;}
     }
 
     if (nodeType === 'Input') {
-        if (payload.uri) props.uri = payload.uri;
-        if (payload.version) props.version = payload.version;
-        if (payload.path) props.uri = payload.path;
+        if (payload.uri) {props.uri = payload.uri;}
+        if (payload.version) {props.version = payload.version;}
+        if (payload.path) {props.uri = payload.path;}
     }
 
     if (nodeType === 'Outcome') {
-        if (payload.value) props.value = payload.value;
-        if (payload.dimension) props.dimension = payload.dimension;
+        if (payload.value) {props.value = payload.value;}
+        if (payload.dimension) {props.dimension = payload.dimension;}
     }
 
     return props;

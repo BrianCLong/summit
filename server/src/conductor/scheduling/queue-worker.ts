@@ -83,7 +83,7 @@ export class QueueWorker {
         let taskProcessed = false;
 
         for (const queueName of this.config.queueNames) {
-          if (!this.isRunning) break;
+          if (!this.isRunning) {break;}
 
           const task = await costAwareScheduler.getNextTask(queueName);
 

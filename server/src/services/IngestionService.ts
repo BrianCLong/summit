@@ -42,7 +42,7 @@ export class IngestionService {
      if (!this.queue) {
         // Try to re-init if redis wasn't ready
         this.initialize();
-        if (!this.queue) throw new Error('Ingestion queue not initialized');
+        if (!this.queue) {throw new Error('Ingestion queue not initialized');}
      }
      await this.queue.add('ingest-file', file, {
         attempts: 3,

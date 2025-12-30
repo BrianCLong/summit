@@ -165,8 +165,8 @@ export class CoherenceSignalIngest {
         // Determine status based on signal count and score
         let status = 'low';
         if (signalCount >= 10) {
-          if (score >= 0.8) status = 'high';
-          else if (score >= 0.5) status = 'medium';
+          if (score >= 0.8) {status = 'high';}
+          else if (score >= 0.5) {status = 'medium';}
         }
 
         // Update materialized view in Postgres

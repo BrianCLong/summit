@@ -24,7 +24,7 @@ export function mountLiveNamespace(io: Server): void {
       const workspaceId = socket.handshake.auth?.workspaceId as
         | string
         | undefined;
-      if (!token || !workspaceId) return next(new Error('UNAUTHORIZED'));
+      if (!token || !workspaceId) {return next(new Error('UNAUTHORIZED'));}
       const user = await verifyToken(token);
       socket.data.user = user;
       socket.join(workspaceId);

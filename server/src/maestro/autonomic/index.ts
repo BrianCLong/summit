@@ -41,7 +41,7 @@ export class AutonomicLayer {
   }
 
   public start() {
-    if (this.intervalId) return;
+    if (this.intervalId) {return;}
     console.log('[AutonomicLayer] Starting control loops...');
     this.intervalId = setInterval(() => this.runControlLoops(), this.loopIntervalMs);
   }

@@ -22,8 +22,8 @@ export const buildCorsOptions = (env: MinimalEnv = cfg): CorsOptions => {
 
   return {
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (!isProd) return callback(null, true);
+      if (!origin) {return callback(null, true);}
+      if (!isProd) {return callback(null, true);}
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }

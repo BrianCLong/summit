@@ -24,7 +24,7 @@ export class KeyService {
     return new Promise((resolve, reject) => {
       const salt = crypto.randomBytes(16).toString('hex');
       crypto.scrypt(key, salt, 64, (err, derivedKey) => {
-        if (err) reject(err);
+        if (err) {reject(err);}
         resolve(`${salt}:${derivedKey.toString('hex')}`);
       });
     });
@@ -35,11 +35,11 @@ export class KeyService {
    */
   static async verifyKey(key: string, hash: string): Promise<boolean> {
     const [salt, storedHash] = hash.split(':');
-    if (!salt || !storedHash) return false;
+    if (!salt || !storedHash) {return false;}
 
     return new Promise((resolve, reject) => {
       crypto.scrypt(key, salt, 64, (err, derivedKey) => {
-        if (err) reject(err);
+        if (err) {reject(err);}
         resolve(derivedKey.toString('hex') === storedHash);
       });
     });

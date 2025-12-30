@@ -75,20 +75,20 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 };
 
 export function normalizePermission(permission: Permission): Permission | null {
-  if (!permission) return null;
+  if (!permission) {return null;}
   const lower = permission.toString().toLowerCase();
 
   const canonical = Object.values(PERMISSIONS).find((candidate) => candidate === lower);
-  if (canonical) return canonical;
+  if (canonical) {return canonical;}
 
   const alias = PERMISSION_ALIASES[permission] || PERMISSION_ALIASES[lower];
-  if (alias) return alias;
+  if (alias) {return alias;}
 
   return permission;
 }
 
 export function permissionsForRole(role?: string | null): Permission[] {
-  if (!role) return [];
+  if (!role) {return [];}
   const normalizedRole = role.toUpperCase() as Role;
   return ROLE_PERMISSIONS[normalizedRole] || [];
 }
@@ -97,20 +97,20 @@ export function userHasPermission(
   user: { role?: string; permissions?: Permission[] } | null | undefined,
   permission: Permission,
 ): boolean {
-  if (!user || !user.role) return false;
+  if (!user || !user.role) {return false;}
   const normalizedPermission = normalizePermission(permission);
   const normalizedRole = user.role.toUpperCase();
 
-  if (normalizedRole === 'ADMIN') return true;
-  if (!normalizedPermission) return false;
+  if (normalizedRole === 'ADMIN') {return true;}
+  if (!normalizedPermission) {return false;}
 
-  if (user.permissions?.includes('*')) return true;
+  if (user.permissions?.includes('*')) {return true;}
 
   const userExplicitPermissions = (user.permissions || [])
     .map((perm) => normalizePermission(perm))
     .filter(Boolean) as Permission[];
 
-  if (userExplicitPermissions.includes(normalizedPermission)) return true;
+  if (userExplicitPermissions.includes(normalizedPermission)) {return true;}
 
   const rolePermissions = permissionsForRole(user.role);
   return rolePermissions.includes('*') || rolePermissions.includes(normalizedPermission);

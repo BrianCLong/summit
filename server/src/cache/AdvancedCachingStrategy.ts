@@ -133,7 +133,7 @@ class L1Cache<T> {
 
   get(key: string): CacheEntry<T> | undefined {
     const entry = this.cache.get(key);
-    if (!entry) return undefined;
+    if (!entry) {return undefined;}
 
     // Check expiration
     if (entry.expiresAt < Date.now()) {
@@ -722,10 +722,10 @@ export class CacheManager extends EventEmitter {
    * Add key to tag sets for invalidation tracking
    */
   private async addToTagSets(key: string, tags: string[], ttl: number): Promise<void> {
-    if (!this.redisClient) return;
+    if (!this.redisClient) {return;}
 
     const pipeline = this.redisClient.pipeline?.();
-    if (!pipeline) return;
+    if (!pipeline) {return;}
 
     for (const tag of tags) {
       const tagSetKey = `${this.config.keyPrefix}tag:${tag}:${key}`;
@@ -739,7 +739,7 @@ export class CacheManager extends EventEmitter {
    * Publish invalidation event to other instances
    */
   private async publishInvalidation(keys: string[]): Promise<void> {
-    if (!this.redisClient) return;
+    if (!this.redisClient) {return;}
 
     try {
       await this.redisClient.publish(
@@ -755,7 +755,7 @@ export class CacheManager extends EventEmitter {
    * Setup subscription for cache invalidation from other instances
    */
   private setupCacheInvalidationSubscription(): void {
-    if (!this.redisClient) return;
+    if (!this.redisClient) {return;}
 
     // Create separate connection for subscription
     // In production, you'd clone the connection

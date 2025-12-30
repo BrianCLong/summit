@@ -32,7 +32,7 @@ interface Notification {
   timestamp: string;
   actionId?: string;
   investigationId?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   metadata?: any;
   expiresAt?: string;
 }
@@ -110,7 +110,7 @@ function NotificationSystem({
     // Create a subtle notification sound using Web Audio API
     try {
       const audioContext = new (window.AudioContext ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
@@ -134,9 +134,9 @@ function NotificationSystem({
   };
 
   const getNotificationIcon = (type: string, severity: string) => {
-    if (severity === 'error') return '❌';
-    if (severity === 'warning') return '⚠️';
-    if (severity === 'success') return '✅';
+    if (severity === 'error') {return '❌';}
+    if (severity === 'warning') {return '⚠️';}
+    if (severity === 'success') {return '✅';}
 
     switch (type) {
       case 'action_safety':

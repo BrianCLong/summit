@@ -19,7 +19,7 @@ const SENSITIVE_KEYS = new Set([
 ]);
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
-  if (value === null || typeof value !== 'object') return false;
+  if (value === null || typeof value !== 'object') {return false;}
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
 };
@@ -39,8 +39,8 @@ const isResponseLike = (value: unknown): value is { statusCode?: number; getHead
 };
 
 const redactValue = (value: unknown, seen: WeakSet<object>): unknown => {
-  if (value === null || typeof value !== 'object') return value;
-  if (seen.has(value as object)) return undefined;
+  if (value === null || typeof value !== 'object') {return value;}
+  if (seen.has(value as object)) {return undefined;}
   seen.add(value as object);
 
   if (Array.isArray(value)) {
@@ -72,7 +72,7 @@ const redactValue = (value: unknown, seen: WeakSet<object>): unknown => {
 };
 
 const serialize = (value: unknown): Record<string, unknown> => {
-  if (value instanceof Error) return { error: stdSerializers.err(value) };
+  if (value instanceof Error) {return { error: stdSerializers.err(value) };}
 
   if (isRequestLike(value)) {
     const req = value as any;
@@ -104,10 +104,10 @@ const serialize = (value: unknown): Record<string, unknown> => {
 };
 
 const extractMessage = (first: unknown, rest: unknown[]): string => {
-  if (typeof first === 'string') return first;
+  if (typeof first === 'string') {return first;}
 
   const firstStringInRest = rest.find((entry) => typeof entry === 'string');
-  if (typeof firstStringInRest === 'string') return firstStringInRest;
+  if (typeof firstStringInRest === 'string') {return firstStringInRest;}
 
   if (isPlainObject(first) && typeof (first as any).message === 'string') {
     return (first as any).message;
@@ -128,9 +128,9 @@ export const formatLogEvent = (level: LogLevel, args: unknown[]): LogEvent => {
     }
   };
 
-  if (first !== undefined) addContext(first);
+  if (first !== undefined) {addContext(first);}
   rest.forEach((value) => {
-    if (value && typeof value === 'object') addContext(value);
+    if (value && typeof value === 'object') {addContext(value);}
   });
 
   const mergedContext = Object.assign({}, ...contextParts);

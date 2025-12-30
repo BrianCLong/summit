@@ -83,7 +83,7 @@ export class ArtifactVerifier {
         // But the requirement is "provably blocked".
         if (e.message.includes('command not found')) {
             // Fallback for environment without cosign
-            if (imageRef.includes('unsigned')) return { allowed: false, reason: 'Signature missing (Mock)' };
+            if (imageRef.includes('unsigned')) {return { allowed: false, reason: 'Signature missing (Mock)' };}
             return { allowed: true, reason: 'Signature verified (Mock - cosign missing)' };
         }
         return { allowed: false, reason: `Cosign verification failed: ${e.message}` };
@@ -92,7 +92,7 @@ export class ArtifactVerifier {
 
   private async checkAttestation(imageRef: string): Promise<VerificationResult> {
      if (process.env.SIMULATE_VERIFICATION === 'true') {
-        if (imageRef.includes('no-attest')) return { allowed: false, reason: 'Attestation missing (SIMULATED)' };
+        if (imageRef.includes('no-attest')) {return { allowed: false, reason: 'Attestation missing (SIMULATED)' };}
         return { allowed: true, reason: 'Attestation verified (SIMULATED)' };
      }
 
@@ -102,7 +102,7 @@ export class ArtifactVerifier {
 
   private async checkSbom(imageRef: string): Promise<VerificationResult> {
     if (process.env.SIMULATE_VERIFICATION === 'true') {
-        if (imageRef.includes('no-sbom')) return { allowed: false, reason: 'SBOM missing (SIMULATED)' };
+        if (imageRef.includes('no-sbom')) {return { allowed: false, reason: 'SBOM missing (SIMULATED)' };}
         return { allowed: true, reason: 'SBOM verified (SIMULATED)' };
     }
     // Real implementation would check for SBOM attachment

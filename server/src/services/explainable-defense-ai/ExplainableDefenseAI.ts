@@ -724,8 +724,8 @@ export class ExplainableDefenseAI extends EventEmitter {
       `This ${params.decisionType.toLowerCase().replace('_', ' ')} decision reached "${params.outcome}" ` +
       `with ${(params.confidence * 100).toFixed(0)}% confidence. ` +
       `The primary factors were: ${topFeatures.map((f) => f.feature).join(', ')}. ` +
-      `Analysis was based on ${params.supportingEvidence.length} supporting evidence items` +
-      (params.contraEvidence.length > 0 ? ` and ${params.contraEvidence.length} contrary indicators.` : '.');
+      `Analysis was based on ${params.supportingEvidence.length} supporting evidence items${ 
+      params.contraEvidence.length > 0 ? ` and ${params.contraEvidence.length} contrary indicators.` : '.'}`;
 
     return {
       id: randomUUID(),
@@ -819,7 +819,7 @@ export class ExplainableDefenseAI extends EventEmitter {
   }
 
   private calculateFeatureConfidence(features: FeatureContribution[]): number {
-    if (features.length === 0) return 0;
+    if (features.length === 0) {return 0;}
     const totalWeight = features.reduce((sum, f) => sum + f.weight, 0);
     const weightedSum = features.reduce((sum, f) => sum + f.contribution * f.weight, 0);
     return Math.min(0.99, weightedSum / totalWeight);
@@ -895,10 +895,10 @@ export class ExplainableDefenseAI extends EventEmitter {
   }
 
   private summarizeResult(result: unknown): string {
-    if (typeof result === 'string') return result;
-    if (typeof result === 'number') return result.toString();
-    if (typeof result === 'boolean') return result ? 'Positive' : 'Negative';
-    if (Array.isArray(result)) return `${result.length} items`;
+    if (typeof result === 'string') {return result;}
+    if (typeof result === 'number') {return result.toString();}
+    if (typeof result === 'boolean') {return result ? 'Positive' : 'Negative';}
+    if (Array.isArray(result)) {return `${result.length} items`;}
     return 'Complex result';
   }
 
@@ -934,8 +934,8 @@ export class ExplainableDefenseAI extends EventEmitter {
   }
 
   private computeMerkleRoot(hashes: string[]): string {
-    if (hashes.length === 0) return this.hashContent('');
-    if (hashes.length === 1) return hashes[0];
+    if (hashes.length === 0) {return this.hashContent('');}
+    if (hashes.length === 1) {return hashes[0];}
 
     const nextLevel: string[] = [];
     for (let i = 0; i < hashes.length; i += 2) {

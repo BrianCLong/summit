@@ -566,7 +566,7 @@ export class AuthService {
    */
   async verifyToken(token: string): Promise<User | null> {
     try {
-      if (!token) return null;
+      if (!token) {return null;}
 
       const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
       const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
@@ -791,10 +791,10 @@ export class AuthService {
    * ```
    */
   hasPermission(user: User | null, permission: string): boolean {
-    if (!user || !user.role) return false;
+    if (!user || !user.role) {return false;}
     const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()];
-    if (!userPermissions) return false;
-    if (userPermissions.includes('*')) return true; // Admin or super role
+    if (!userPermissions) {return false;}
+    if (userPermissions.includes('*')) {return true;} // Admin or super role
     return userPermissions.includes(permission);
   }
 
@@ -806,7 +806,7 @@ export class AuthService {
    * @returns {boolean} True if the user has the scope, false otherwise.
    */
   hasScope(user: User | null, scope: string): boolean {
-    if (!user || !user.scopes) return false;
+    if (!user || !user.scopes) {return false;}
     return checkScope(user.scopes, scope);
   }
 

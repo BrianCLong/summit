@@ -1020,7 +1020,7 @@ export function getFrameworkControlId(
   framework: ComplianceFramework
 ): string | undefined {
   const control = CONTROL_MAPPINGS[controlId];
-  if (!control) return undefined;
+  if (!control) {return undefined;}
 
   const mapping = control.frameworkMappings.find((m) => m.framework === framework);
   return mapping?.controlId;

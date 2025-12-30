@@ -55,7 +55,7 @@ class RetryPolicy {
   }
 
   shouldRetry(error, attempt) {
-    if (attempt >= this.maxAttempts) return false;
+    if (attempt >= this.maxAttempts) {return false;}
 
     // Don't retry client errors (4xx)
     if (error.status && error.status >= 400 && error.status < 500) {

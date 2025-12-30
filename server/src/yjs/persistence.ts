@@ -27,7 +27,7 @@ export class RedisPersistence {
     // For now, we focus on persistence.
     ydoc.on('update', async (update: Uint8Array, origin: any) => {
       // If the update comes from persistence, don't save it back
-      if (origin === 'persistence') return;
+      if (origin === 'persistence') {return;}
 
       // Store the update
       await this.redis.rpush(

@@ -139,7 +139,7 @@ export class RedactionService {
       const result = this.redactCitation(citation);
       redactedCitations.push(result.content);
       decisions.push(...result.decisions);
-      if (result.wasRedacted) redactedCount++;
+      if (result.wasRedacted) {redactedCount++;}
     }
 
     // Redact answer text (remove any inline sensitive content)
@@ -149,7 +149,7 @@ export class RedactionService {
       answer.citations.flatMap((c) => c.policyLabels || []),
     );
     decisions.push(...answerResult.decisions);
-    if (answerResult.wasRedacted) redactedCount++;
+    if (answerResult.wasRedacted) {redactedCount++;}
 
     // Update provenance to remove redacted references
     const redactedProvenance = this.redactProvenance(

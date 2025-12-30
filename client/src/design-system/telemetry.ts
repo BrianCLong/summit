@@ -71,7 +71,7 @@ export class DesignSystemTelemetry {
   }
 
   async flush() {
-    if (!this.buffer.length) return;
+    if (!this.buffer.length) {return;}
     const snapshot = [...this.buffer];
     this.buffer = [];
     await this.transport.send(snapshot);

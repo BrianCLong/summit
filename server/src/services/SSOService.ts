@@ -19,10 +19,10 @@ export class SSOService {
 
   async getAuthUrl(tenantId: string, callbackBaseUrl: string): Promise<{ url: string, state: string }> {
     const tenant = await this.tenantService.getTenant(tenantId);
-    if (!tenant) throw new Error('Tenant not found');
+    if (!tenant) {throw new Error('Tenant not found');}
 
     const ssoConfig = (tenant.config as any).sso as SSOConfig;
-    if (!ssoConfig) throw new Error('SSO not configured for this tenant');
+    if (!ssoConfig) {throw new Error('SSO not configured for this tenant');}
 
     const provider = this.getProvider(ssoConfig);
     const callbackUrl = `${callbackBaseUrl}/auth/sso/${tenantId}/callback`;
@@ -36,10 +36,10 @@ export class SSOService {
 
   async handleCallback(tenantId: string, callbackBaseUrl: string, body: any, query: any): Promise<{ user: any, token: string, refreshToken: string }> {
     const tenant = await this.tenantService.getTenant(tenantId);
-    if (!tenant) throw new Error('Tenant not found');
+    if (!tenant) {throw new Error('Tenant not found');}
 
     const ssoConfig = (tenant.config as any).sso as SSOConfig;
-    if (!ssoConfig) throw new Error('SSO not configured for this tenant');
+    if (!ssoConfig) {throw new Error('SSO not configured for this tenant');}
 
     const provider = this.getProvider(ssoConfig);
     const callbackUrl = `${callbackBaseUrl}/auth/sso/${tenantId}/callback`;

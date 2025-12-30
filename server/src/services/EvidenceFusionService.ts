@@ -123,7 +123,7 @@ export class EvidenceFusionService extends EventEmitter {
   async linkEvidence(items: EvidenceItem[]): Promise<{ source: string, target: string, relation: string }[]> {
       // Simple O(N^2) comparison for the mock
       // In prod, this uses vector search / GraphRAG
-      if (items.length < 2) return [];
+      if (items.length < 2) {return [];}
 
       const links = [];
       // Just a mock implementation returning a fixed link for demonstration

@@ -17,7 +17,7 @@ export async function installStep(name: string, version: string) {
     process.env.MARKETPLACE_REGISTRY || `ghcr.io/intelgraph/${name}:${version}`;
   if (!offline) {
     if (!(await verifyCosign(ref)))
-      throw new Error('signature verification failed');
+      {throw new Error('signature verification failed');}
     try {
       await exec('oras', ['pull', ref, '-o', pluginsDir]);
     } catch (e) {

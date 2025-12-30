@@ -9,7 +9,7 @@ export async function encryptForTenant(
 ) {
   const vault = process.env.VAULT_ADDR;
   const token = process.env.VAULT_TOKEN;
-  if (!vault || !token) throw new Error('Vault configuration missing');
+  if (!vault || !token) {throw new Error('Vault configuration missing');}
   const res = await fetch(`${vault}/v1/transit/encrypt/${tenant}-dek`, {
     method: 'POST',
     headers: { 'X-Vault-Token': token, 'content-type': 'application/json' },
@@ -19,7 +19,7 @@ export async function encryptForTenant(
     }),
   });
   const j = await res.json();
-  if (!res.ok) throw new Error(j?.errors?.join(';') || 'vault encrypt failed');
+  if (!res.ok) {throw new Error(j?.errors?.join(';') || 'vault encrypt failed');}
   return Buffer.from(j.data.ciphertext);
 }
 

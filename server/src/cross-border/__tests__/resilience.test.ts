@@ -68,7 +68,7 @@ describe('CircuitBreaker', () => {
       let callCount = 0;
       const fn = async () => {
         callCount++;
-        if (callCount <= 2) throw new Error('fail');
+        if (callCount <= 2) {throw new Error('fail');}
         return 'success';
       };
 
@@ -315,7 +315,7 @@ describe('retryWithBackoff', () => {
     const result = await retryWithBackoff(
       async () => {
         attempts++;
-        if (attempts < 3) throw new Error('fail');
+        if (attempts < 3) {throw new Error('fail');}
         return 'success';
       },
       { maxRetries: 3, baseDelayMs: 10 }

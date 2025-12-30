@@ -68,7 +68,7 @@ export class FiduciaryService {
     // VERY simplified simulation logic
     if (input.grants) {
       for (const grant of input.grants) {
-        let holder = simTable.holders.find(h => h.id === grant.holderId);
+        const holder = simTable.holders.find(h => h.id === grant.holderId);
         if (!holder) {
           // potentially create new holder, skipping for brevity
           continue;

@@ -241,7 +241,7 @@ const entityResolvers = {
           const sliced = docs.slice(offset);
           const ids = sliced.map((d: any) => d.metadata.graphId).filter(Boolean);
 
-          if (ids.length === 0) return [];
+          if (ids.length === 0) {return [];}
 
           // Use DataLoader to batch fetch entities - prevents N+1 queries
           const entities = await Promise.all(
@@ -259,7 +259,7 @@ const entityResolvers = {
           throw new Error(`Failed to perform semantic search: ${message}`);
         } finally {
           await neo4jSession.close();
-          if (pgClient) pgClient.release();
+          if (pgClient) {pgClient.release();}
         }
       },
       60

@@ -12,7 +12,7 @@ router.post(
   express.raw({ type: '*/*', limit: '2mb' }),
   async (_req, res) => {
     const secret = process.env.SEGMENT_WEBHOOK_SECRET;
-    if (!secret) return res.status(503).send('webhook disabled');
+    if (!secret) {return res.status(503).send('webhook disabled');}
     // Implement Segment HMAC verify if needed; stubbed
     return res.sendStatus(200);
   },

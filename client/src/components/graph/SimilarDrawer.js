@@ -14,7 +14,7 @@ const Q = gql`
 export default function SimilarDrawer({ open, onClose, entityId, cy }) {
   const [run, { data, loading }] = useLazyQuery(Q);
   React.useEffect(() => {
-    if (open && entityId) run({ variables: { id: entityId, k: 20 } });
+    if (open && entityId) {run({ variables: { id: entityId, k: 20 } });}
   }, [open, entityId]);
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>

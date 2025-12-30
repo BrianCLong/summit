@@ -21,7 +21,7 @@ describe('RunSearch', () => {
     mockedUseAuthorization.mockReturnValue({
       canAccess: jest.fn().mockReturnValue(true),
       tenant: 'tenant-scope',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     } as any);
 
     const mockFetch = jest.fn(() =>
@@ -36,7 +36,7 @@ describe('RunSearch', () => {
     fireEvent.click(screen.getByTestId('run-search-submit'));
 
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const firstCall = (mockFetch as any).mock.calls[0];
     const requestInit = firstCall[1];
     const body = JSON.parse(requestInit.body as string);
@@ -47,7 +47,7 @@ describe('RunSearch', () => {
     mockedUseAuthorization.mockReturnValue({
       canAccess: jest.fn().mockReturnValue(false),
       tenant: 'tenant-scope',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     } as any);
 
     const mockFetch = jest.fn();

@@ -40,14 +40,14 @@ function EntityFilterPanel() {
     const confParam = searchParams.get('confidence');
     const startParam = searchParams.get('startDate');
     const endParam = searchParams.get('endDate');
-    if (q) setQuery(q);
-    if (tagsParam) setTags(tagsParam.split(',').filter(Boolean));
+    if (q) {setQuery(q);}
+    if (tagsParam) {setTags(tagsParam.split(',').filter(Boolean));}
     if (confParam) {
       const [min, max] = confParam.split('-').map(Number);
-      if (!isNaN(min) && !isNaN(max)) setConfidence([min, max]);
+      if (!isNaN(min) && !isNaN(max)) {setConfidence([min, max]);}
     }
-    if (startParam) setStartDate(new Date(startParam));
-    if (endParam) setEndDate(new Date(endParam));
+    if (startParam) {setStartDate(new Date(startParam));}
+    if (endParam) {setEndDate(new Date(endParam));}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -62,9 +62,9 @@ function EntityFilterPanel() {
       signal: controller.signal,
     })
       .then((data) => {
-        if (!active) return;
-        if (Array.isArray(data)) setEntityOptions(data);
-        else if (Array.isArray(data?.entities)) setEntityOptions(data.entities);
+        if (!active) {return;}
+        if (Array.isArray(data)) {setEntityOptions(data);}
+        else if (Array.isArray(data?.entities)) {setEntityOptions(data.entities);}
       })
       .catch(() => {});
     return () => {
@@ -75,24 +75,24 @@ function EntityFilterPanel() {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (query) params.set('entity', query);
-    if (tags.length) params.set('tags', tags.join(','));
+    if (query) {params.set('entity', query);}
+    if (tags.length) {params.set('tags', tags.join(','));}
     if (confidence[0] !== 0 || confidence[1] !== 1)
-      params.set('confidence', `${confidence[0]}-${confidence[1]}`);
-    if (startDate) params.set('startDate', startDate.toISOString());
-    if (endDate) params.set('endDate', endDate.toISOString());
+      {params.set('confidence', `${confidence[0]}-${confidence[1]}`);}
+    if (startDate) {params.set('startDate', startDate.toISOString());}
+    if (endDate) {params.set('endDate', endDate.toISOString());}
     setSearchParams(params, { replace: true });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, tags, confidence, startDate, endDate]);
 
   const resultsLink = useMemo(() => {
     const params = new URLSearchParams();
-    if (query) params.set('entity', query);
-    if (tags.length) params.set('tags', tags.join(','));
+    if (query) {params.set('entity', query);}
+    if (tags.length) {params.set('tags', tags.join(','));}
     if (confidence[0] !== 0 || confidence[1] !== 1)
-      params.set('confidence', `${confidence[0]}-${confidence[1]}`);
-    if (startDate) params.set('startDate', startDate.toISOString());
-    if (endDate) params.set('endDate', endDate.toISOString());
+      {params.set('confidence', `${confidence[0]}-${confidence[1]}`);}
+    if (startDate) {params.set('startDate', startDate.toISOString());}
+    if (endDate) {params.set('endDate', endDate.toISOString());}
     params.set('page', '1');
     return `/entities?${params.toString()}`;
   }, [query, tags, confidence, startDate, endDate]);
@@ -143,14 +143,14 @@ function EntityFilterPanel() {
               label="Start Date"
               value={startDate}
               onChange={(date: Date | null) => setStartDate(date)}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               
               renderInput={(params: any) => <TextField {...params} />}
             />
             <DatePicker
               label="End Date"
               value={endDate}
               onChange={(date: Date | null) => setEndDate(date)}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               
               renderInput={(params: any) => <TextField {...params} />}
             />
           </Stack>

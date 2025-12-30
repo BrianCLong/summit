@@ -212,10 +212,10 @@ class OIDCAuthService {
       body.append('grant_type', 'authorization_code');
       body.append('client_id', config.clientId);
       if (config.clientSecret)
-        body.append('client_secret', config.clientSecret);
+        {body.append('client_secret', config.clientSecret);}
       body.append('code', code);
       body.append('redirect_uri', config.redirectUri);
-      if (codeVerifier) body.append('code_verifier', codeVerifier);
+      if (codeVerifier) {body.append('code_verifier', codeVerifier);}
 
       const tokenResponse = await axios.post(
         config.tokenEndpoint!,
@@ -275,12 +275,12 @@ class OIDCAuthService {
       const secret =
         process.env.PKCE_STATE_SECRET || process.env.JWT_SECRET || 'change-me';
       const [payload, sig] = state.split('.');
-      if (!payload || !sig) return null;
+      if (!payload || !sig) {return null;}
       const expected = crypto
         .createHmac('sha256', secret)
         .update(payload)
         .digest('base64url');
-      if (expected !== sig) return null;
+      if (expected !== sig) {return null;}
       return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
     } catch {
       return null;

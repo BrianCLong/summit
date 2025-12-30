@@ -21,8 +21,8 @@ export class QueryCache {
     }
 
     let ttl = this.defaultTTL;
-    if (analysis.complexity < 10) ttl = 1800; // 30 mins
-    if (analysis.aggregationCount > 0) ttl = 600; // 10 mins
+    if (analysis.complexity < 10) {ttl = 1800;} // 30 mins
+    if (analysis.aggregationCount > 0) {ttl = 600;} // 10 mins
 
     const keyPattern = `${this.cachePrefix}:${context.tenantId}:${context.queryType}`;
     const invalidationRules = analysis.affectedLabels.map(l => `${l}:*`);
@@ -71,7 +71,7 @@ export class QueryCache {
       const pattern = `${this.cachePrefix}:${tenantId}:*`;
       const stream = redis.scanStream({ match: pattern, count: 100 });
       stream.on('data', (keys) => {
-          if (keys.length) redis.del(...keys);
+          if (keys.length) {redis.del(...keys);}
       });
   }
 }

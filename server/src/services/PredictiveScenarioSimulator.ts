@@ -87,7 +87,7 @@ export class PredictiveScenarioSimulator extends EventEmitter {
                     scenarios: [{
                         name: "Simulation Error",
                         probability: 0,
-                        narrative: "Failed to parse simulation output: " + response.substring(0, 100) + "...",
+                        narrative: `Failed to parse simulation output: ${  response.substring(0, 100)  }...`,
                         keyEvents: [],
                         riskLevel: 'LOW'
                     }],

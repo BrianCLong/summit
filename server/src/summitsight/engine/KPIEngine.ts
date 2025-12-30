@@ -22,7 +22,7 @@ export class KPIEngine {
   async getKPIStatus(kpiId: string, tenantId?: string) {
     const defs = await this.dataService.getKPIDefinitions();
     const def = defs.find(d => d.kpi_id === kpiId);
-    if (!def) throw new Error(`KPI ${kpiId} not found`);
+    if (!def) {throw new Error(`KPI ${kpiId} not found`);}
 
     const values = await this.dataService.getKPIValues(kpiId, tenantId, 'daily', 1);
     const latest = values[0];
@@ -36,7 +36,7 @@ export class KPIEngine {
   }
 
   private evaluateThreshold(def: KPIDefinition, value: number | null): 'green' | 'yellow' | 'red' | 'unknown' {
-    if (value === null) return 'unknown';
+    if (value === null) {return 'unknown';}
 
     // Logic depends on direction
     const higherBetter = def.direction === 'higher_is_better';
@@ -44,12 +44,12 @@ export class KPIEngine {
     // Simple logic for now: if threshold exists
     if (def.threshold_red !== undefined && def.threshold_yellow !== undefined) {
         if (higherBetter) {
-            if (value < def.threshold_red) return 'red';
-            if (value < def.threshold_yellow) return 'yellow';
+            if (value < def.threshold_red) {return 'red';}
+            if (value < def.threshold_yellow) {return 'yellow';}
             return 'green';
         } else {
-            if (value > def.threshold_red) return 'red';
-            if (value > def.threshold_yellow) return 'yellow';
+            if (value > def.threshold_red) {return 'red';}
+            if (value > def.threshold_yellow) {return 'yellow';}
             return 'green';
         }
     }

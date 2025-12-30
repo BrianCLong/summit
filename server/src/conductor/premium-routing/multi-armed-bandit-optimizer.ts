@@ -519,7 +519,7 @@ export class MultiArmedBanditOptimizer {
 
   // Utility methods for exploration factor calculation
   private calculateUCBExploration(arm: BanditArm, totalPulls: number): number {
-    if (arm.pulls === 0) return 1.0;
+    if (arm.pulls === 0) {return 1.0;}
     return Math.sqrt((this.C * Math.log(totalPulls)) / arm.pulls);
   }
 
@@ -568,7 +568,7 @@ export class MultiArmedBanditOptimizer {
       (arm) => arm.contextType === contextType,
     );
 
-    if (contextArms.length === 0) return 0;
+    if (contextArms.length === 0) {return 0;}
 
     const recentRegrets = contextArms.map((arm) => {
       const recentRewards = arm.rewards.slice(-10); // Last 10 rewards
@@ -589,7 +589,7 @@ export class MultiArmedBanditOptimizer {
 
   // Statistical utility methods
   private calculateVariance(rewards: number[]): number {
-    if (rewards.length < 2) return 0;
+    if (rewards.length < 2) {return 0;}
 
     const mean = rewards.reduce((sum, r) => sum + r, 0) / rewards.length;
     const squaredDiffs = rewards.map((r) => Math.pow(r - mean, 2));
@@ -772,7 +772,7 @@ export class MultiArmedBanditOptimizer {
 
   private async calculateOptimalArm(): Promise<void> {
     const arms = Array.from(this.arms.values());
-    if (arms.length === 0) return;
+    if (arms.length === 0) {return;}
 
     let bestArm = arms[0];
     let bestReward = bestArm.averageReward;

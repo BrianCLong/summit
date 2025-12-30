@@ -16,7 +16,7 @@ import {
   Typography,
 } from '@mui/material';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 const AnyGrid = Grid as any;
 
 import {
@@ -173,12 +173,12 @@ export default function ApprovalsList() {
     : '';
 
   const handleRationaleChange = (value: string) => {
-    if (!selected?.id) return;
+    if (!selected?.id) {return;}
     setRationaleById((prev) => ({ ...prev, [selected.id]: value }));
   };
 
   const handleDecision = async (action: 'approve' | 'deny') => {
-    if (!selected?.id) return;
+    if (!selected?.id) {return;}
     if (!rationale.trim()) {
       setShowValidation(true);
       return;

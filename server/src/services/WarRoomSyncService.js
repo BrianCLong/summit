@@ -110,10 +110,10 @@ class WarRoomSyncService {
    */
   async leaveWarRoom(socket, roomId, userId) {
     const room = this.warRooms.get(roomId);
-    if (!room) return;
+    if (!room) {return;}
 
     const participant = room.participants.get(userId);
-    if (!participant) return;
+    if (!participant) {return;}
 
     // Release any locks held by this user
     for (const [nodeId, lock] of room.locks.entries()) {
@@ -490,7 +490,7 @@ class WarRoomSyncService {
    */
   broadcastOperation(roomId, operation, excludeUserId = null) {
     const room = this.warRooms.get(roomId);
-    if (!room) return;
+    if (!room) {return;}
 
     const broadcastData = {
       roomId,
@@ -511,10 +511,10 @@ class WarRoomSyncService {
    */
   handleCursorMove(roomId, userId, cursor) {
     const room = this.warRooms.get(roomId);
-    if (!room) return;
+    if (!room) {return;}
 
     const participant = room.participants.get(userId);
-    if (!participant) return;
+    if (!participant) {return;}
 
     participant.cursor = cursor;
     participant.lastActivity = Date.now();
@@ -543,7 +543,7 @@ class WarRoomSyncService {
    */
   lockNode(roomId, userId, nodeId, operation) {
     const room = this.warRooms.get(roomId);
-    if (!room) return false;
+    if (!room) {return false;}
 
     const existingLock = room.locks.get(nodeId);
     if (existingLock && existingLock.userId !== userId) {
@@ -576,7 +576,7 @@ class WarRoomSyncService {
    */
   unlockNode(roomId, userId, nodeId) {
     const room = this.warRooms.get(roomId);
-    if (!room) return;
+    if (!room) {return;}
 
     const lock = room.locks.get(nodeId);
     if (lock && lock.userId === userId) {
@@ -596,7 +596,7 @@ class WarRoomSyncService {
    */
   getRoomStats(roomId) {
     const room = this.warRooms.get(roomId);
-    if (!room) return null;
+    if (!room) {return null;}
 
     return {
       roomId,
@@ -732,7 +732,7 @@ class WarRoomSyncService {
    */
   async archiveWarRoom(roomId) {
     const room = this.warRooms.get(roomId);
-    if (!room) return;
+    if (!room) {return;}
 
     await this.saveGraphState(roomId, room.graphState);
 

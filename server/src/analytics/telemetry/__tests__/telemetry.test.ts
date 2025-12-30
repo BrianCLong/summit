@@ -7,7 +7,7 @@ import { TelemetryService } from '../TelemetryService.js';
 import { ALLOWLIST } from '../allowlist.js';
 
 // Use a unique directory for this test run to avoid conflicts
-const TEST_LOG_DIR = path.join(__dirname, 'test_logs_' + Date.now());
+const TEST_LOG_DIR = path.join(__dirname, `test_logs_${  Date.now()}`);
 const SALT = 'test-salt';
 
 describe('Telemetry Scrubber', () => {

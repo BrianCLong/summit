@@ -197,8 +197,8 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                     },
                   };
                 }
-                if (field === 'sourceType') return 'TEXT';
-                if (field === 'targetType') return 'IMAGE';
+                if (field === 'sourceType') {return 'TEXT';}
+                if (field === 'targetType') {return 'IMAGE';}
               },
             },
           ],
@@ -313,8 +313,8 @@ describe('Multimodal Data Service - P0 Critical MVP1', () => {
                   },
                 };
               }
-              if (field === 'mediaSources') return [];
-              if (field === 'crossModalMatches') return [];
+              if (field === 'mediaSources') {return [];}
+              if (field === 'crossModalMatches') {return [];}
             },
           },
         ],

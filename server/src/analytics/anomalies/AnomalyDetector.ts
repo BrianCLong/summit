@@ -8,14 +8,14 @@ export class AnomalyDetector {
         currentValue: number,
         threshold: number = 3
     ): AnomalyEvent | null {
-        if (history.length < 5) return null; // Not enough data
+        if (history.length < 5) {return null;} // Not enough data
 
         const values = history.map(p => p.value);
         const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
         const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
         const stdDev = Math.sqrt(variance);
 
-        if (stdDev === 0) return null; // No variance
+        if (stdDev === 0) {return null;} // No variance
 
         const zScore = (currentValue - mean) / stdDev;
 
@@ -41,7 +41,7 @@ export class AnomalyDetector {
         currentValue: number,
         threshold: number = 3
     ): AnomalyEvent | null {
-        if (history.length < 5) return null;
+        if (history.length < 5) {return null;}
 
         const values = history.map(p => p.value);
 
@@ -56,7 +56,7 @@ export class AnomalyDetector {
         const madMid = Math.floor(residuals.length / 2);
         const mad = residuals.length % 2 !== 0 ? residuals[madMid] : (residuals[madMid - 1] + residuals[madMid]) / 2;
 
-        if (mad === 0) return null;
+        if (mad === 0) {return null;}
 
         // Modified Z-score = 0.6745 * (x - median) / MAD
         const score = 0.6745 * (currentValue - median) / mad;
@@ -82,10 +82,10 @@ export class AnomalyDetector {
         currentValue: number,
         threshold: number = 2.0 // e.g. 200% increase
     ): AnomalyEvent | null {
-         if (history.length < 1) return null;
+         if (history.length < 1) {return null;}
 
          const lastValue = history[history.length - 1].value;
-         if (lastValue === 0) return null;
+         if (lastValue === 0) {return null;}
 
          const ratio = currentValue / lastValue;
 

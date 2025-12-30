@@ -24,7 +24,7 @@ router.get('/recipes', (_req, res) => {
 router.post('/recipes/run', express.json(), async (req, res) => {
   try {
     const { name, inputs } = req.body || {};
-    if (!name) return res.status(400).json({ error: 'name required' });
+    if (!name) {return res.status(400).json({ error: 'name required' });}
 
     // Use the same validation logic as GraphQL resolver
     const recipeFiles = [

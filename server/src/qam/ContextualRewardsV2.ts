@@ -328,8 +328,8 @@ export class ContextualRewardsV2 extends EventEmitter {
     const metrics: RouteMetrics[] = [];
 
     for (const [key, routeMetric] of this.routeMetrics) {
-      if (route && routeMetric.route !== route) continue;
-      if (provider && routeMetric.provider !== provider) continue;
+      if (route && routeMetric.route !== route) {continue;}
+      if (provider && routeMetric.provider !== provider) {continue;}
       metrics.push({ ...routeMetric });
     }
 
@@ -408,9 +408,9 @@ export class ContextualRewardsV2 extends EventEmitter {
   private getPerformanceLevel(
     score: number,
   ): 'excellent' | 'good' | 'fair' | 'poor' {
-    if (score >= 0.9) return 'excellent';
-    if (score >= 0.75) return 'good';
-    if (score >= 0.5) return 'fair';
+    if (score >= 0.9) {return 'excellent';}
+    if (score >= 0.75) {return 'good';}
+    if (score >= 0.5) {return 'fair';}
     return 'poor';
   }
 
@@ -569,7 +569,7 @@ export class ContextualRewardsV2 extends EventEmitter {
       reward1.dominates = [];
 
       for (let j = 0; j < recentRewards.length; j++) {
-        if (i === j) continue;
+        if (i === j) {continue;}
 
         const reward2 = recentRewards[j];
 
@@ -652,7 +652,7 @@ export class ContextualRewardsV2 extends EventEmitter {
   }
 
   private calculateHypervolume(solutions: MultiObjectiveReward[]): number {
-    if (solutions.length === 0) return 0;
+    if (solutions.length === 0) {return 0;}
 
     // Simplified hypervolume calculation
     // In practice, would use more sophisticated algorithms for higher dimensions
@@ -673,7 +673,7 @@ export class ContextualRewardsV2 extends EventEmitter {
   }
 
   private calculateSpread(solutions: MultiObjectiveReward[]): number {
-    if (solutions.length < 2) return 0;
+    if (solutions.length < 2) {return 0;}
 
     // Calculate diversity of solutions in objective space
     const objectives = [
@@ -696,7 +696,7 @@ export class ContextualRewardsV2 extends EventEmitter {
   }
 
   private calculateConvergence(solutions: MultiObjectiveReward[]): number {
-    if (solutions.length === 0) return 0;
+    if (solutions.length === 0) {return 0;}
 
     // Measure how close solutions are to theoretical optimum
     const averageComposite =
@@ -780,7 +780,7 @@ export class ContextualRewardsV2 extends EventEmitter {
   private calculateHypervolumeIncrease(
     windowRewards: MultiObjectiveReward[],
   ): number {
-    if (windowRewards.length < 2) return 0;
+    if (windowRewards.length < 2) {return 0;}
 
     const firstHalf = windowRewards.slice(
       0,
@@ -866,12 +866,12 @@ export class ContextualRewardsV2 extends EventEmitter {
     const strengths: string[] = [];
     const scores = metrics.averageScores;
 
-    if (scores.latency > 0.8) strengths.push('Low Latency');
-    if (scores.cost > 0.8) strengths.push('Cost Effective');
-    if (scores.quality > 0.8) strengths.push('High Quality');
-    if (scores.reliability > 0.8) strengths.push('Reliable');
-    if (scores.security > 0.8) strengths.push('Secure');
-    if (metrics.consistencyScore > 0.8) strengths.push('Consistent');
+    if (scores.latency > 0.8) {strengths.push('Low Latency');}
+    if (scores.cost > 0.8) {strengths.push('Cost Effective');}
+    if (scores.quality > 0.8) {strengths.push('High Quality');}
+    if (scores.reliability > 0.8) {strengths.push('Reliable');}
+    if (scores.security > 0.8) {strengths.push('Secure');}
+    if (metrics.consistencyScore > 0.8) {strengths.push('Consistent');}
 
     return strengths;
   }
@@ -880,12 +880,12 @@ export class ContextualRewardsV2 extends EventEmitter {
     const weaknesses: string[] = [];
     const scores = metrics.averageScores;
 
-    if (scores.latency < 0.5) weaknesses.push('High Latency');
-    if (scores.cost < 0.5) weaknesses.push('Expensive');
-    if (scores.quality < 0.5) weaknesses.push('Low Quality');
-    if (scores.reliability < 0.5) weaknesses.push('Unreliable');
-    if (scores.security < 0.5) weaknesses.push('Security Issues');
-    if (metrics.consistencyScore < 0.5) weaknesses.push('Inconsistent');
+    if (scores.latency < 0.5) {weaknesses.push('High Latency');}
+    if (scores.cost < 0.5) {weaknesses.push('Expensive');}
+    if (scores.quality < 0.5) {weaknesses.push('Low Quality');}
+    if (scores.reliability < 0.5) {weaknesses.push('Unreliable');}
+    if (scores.security < 0.5) {weaknesses.push('Security Issues');}
+    if (metrics.consistencyScore < 0.5) {weaknesses.push('Inconsistent');}
 
     return weaknesses;
   }
@@ -924,9 +924,9 @@ export class ContextualRewardsV2 extends EventEmitter {
     const convergence = this.currentParetoFront.convergence;
     let status = 'poor';
 
-    if (convergence > 0.9) status = 'excellent';
-    else if (convergence > 0.7) status = 'good';
-    else if (convergence > 0.5) status = 'fair';
+    if (convergence > 0.9) {status = 'excellent';}
+    else if (convergence > 0.7) {status = 'good';}
+    else if (convergence > 0.5) {status = 'fair';}
 
     return {
       convergence,

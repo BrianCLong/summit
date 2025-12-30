@@ -81,7 +81,7 @@ export class SecretDriftDetector {
       // Skip test files to avoid false positives in mocks, although leaking real secrets in tests is bad too.
       // But snapshots might contain them?
       // Let's scan everything for now, maybe exclude node_modules or dist.
-      if (filePath.includes('node_modules') || filePath.includes('.git')) return;
+      if (filePath.includes('node_modules') || filePath.includes('.git')) {return;}
 
       const content = fs.readFileSync(filePath, 'utf-8');
 
@@ -94,7 +94,7 @@ export class SecretDriftDetector {
             lines.forEach((line, idx) => {
                 if (line.includes(value)) {
                      // Check if it's the config file itself or the .env loading part
-                     if (filePath.endsWith('config.ts') || filePath.endsWith('.env')) return;
+                     if (filePath.endsWith('config.ts') || filePath.endsWith('.env')) {return;}
 
                      leaks.push({ secret: key, file: filePath, line: idx + 1 });
                 }
@@ -128,7 +128,7 @@ export class SecretDriftDetector {
 
     Object.keys(EnvSchema.shape).forEach(key => {
         const val = env[key];
-        if (!val) return;
+        if (!val) {return;}
 
         // 1. Insecure defaults
         if (val.includes('changeme') || val.includes('devpassword') || val === 'secret') {
@@ -152,9 +152,9 @@ export class SecretDriftDetector {
    * Enforces removal of unused keys from the .env file.
    */
   public enforceRemoval(keysToRemove: string[]): void {
-      if (!fs.existsSync(this.envFilePath)) return;
+      if (!fs.existsSync(this.envFilePath)) {return;}
 
-      let content = fs.readFileSync(this.envFilePath, 'utf-8');
+      const content = fs.readFileSync(this.envFilePath, 'utf-8');
       const lines = content.split('\n');
       const newLines = lines.filter(line => {
           const key = line.split('=')[0].trim();

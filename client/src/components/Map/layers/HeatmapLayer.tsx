@@ -58,7 +58,7 @@ export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({
   const heatLayerRef = useRef<L.HeatLayer | null>(null);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map) {return;}
 
     // Default gradient (blue to red)
     const defaultGradient = {
@@ -98,7 +98,7 @@ export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({
 
   // Update heatmap when points change
   useEffect(() => {
-    if (!heatLayerRef.current) return;
+    if (!heatLayerRef.current) {return;}
 
     const heatPoints: Array<[number, number, number]> = points.map((point) => [
       point.latitude,

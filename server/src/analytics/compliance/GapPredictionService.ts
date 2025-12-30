@@ -146,9 +146,9 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 
 function calculateSeverity(confidenceScore: number, impactScore: number): RiskLevel {
   const combined = (confidenceScore * 0.4) + (impactScore * 0.6);
-  if (combined >= 0.8) return 'critical';
-  if (combined >= 0.6) return 'high';
-  if (combined >= 0.4) return 'medium';
+  if (combined >= 0.8) {return 'critical';}
+  if (combined >= 0.6) {return 'high';}
+  if (combined >= 0.4) {return 'medium';}
   return 'low';
 }
 
@@ -211,7 +211,7 @@ class TrendAnalyzer {
    * Detect anomalies in time series
    */
   detectAnomalies(values: number[]): number[] {
-    if (values.length < 5) return [];
+    if (values.length < 5) {return [];}
 
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
     const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
@@ -232,8 +232,8 @@ class TrendAnalyzer {
    * Predict future value based on trend
    */
   predictFutureValue(values: number[], daysAhead: number): number {
-    if (values.length === 0) return 0;
-    if (values.length === 1) return values[0];
+    if (values.length === 0) {return 0;}
+    if (values.length === 1) {return values[0];}
 
     const { slope } = this.analyzeTrend(values);
     const lastValue = values[values.length - 1];
@@ -598,7 +598,7 @@ export class GapPredictionService extends EventEmitter {
     predictions.sort((a, b) => {
       const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
       const severityDiff = severityOrder[a.predictedSeverity] - severityOrder[b.predictedSeverity];
-      if (severityDiff !== 0) return severityDiff;
+      if (severityDiff !== 0) {return severityDiff;}
       return a.daysUntilLikely - b.daysUntilLikely;
     });
 

@@ -91,9 +91,9 @@ const getIOCIcon = (type: IOC['type']) => {
 };
 
 const getRiskColor = (risk: number): ChipProps['color'] => {
-  if (risk >= 80) return 'error';
-  if (risk >= 60) return 'warning';
-  if (risk >= 40) return 'info';
+  if (risk >= 80) {return 'error';}
+  if (risk >= 60) {return 'warning';}
+  if (risk >= 40) {return 'info';}
   return 'success';
 };
 
@@ -386,9 +386,9 @@ export default function IOCList() {
 
   const filteredIOCs =
     iocs?.filter((ioc) => {
-      if (selectedTab === 1 && ioc.status !== 'ACTIVE') return false;
-      if (selectedTab === 2 && ioc.risk < 70) return false;
-      if (selectedTab === 3 && ioc.status !== 'INVESTIGATING') return false;
+      if (selectedTab === 1 && ioc.status !== 'ACTIVE') {return false;}
+      if (selectedTab === 2 && ioc.risk < 70) {return false;}
+      if (selectedTab === 3 && ioc.status !== 'INVESTIGATING') {return false;}
       return true;
     }) || [];
 

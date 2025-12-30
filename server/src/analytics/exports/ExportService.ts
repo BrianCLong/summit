@@ -10,7 +10,7 @@ export class ExportService {
     }
 
     public exportToCSV(data: Record<string, any>[]): string {
-        if (data.length === 0) return '';
+        if (data.length === 0) {return '';}
 
         // 1. Enforce k-anonymity (filter out rows representing small groups if data is aggregated)
         // OR checks if total result set is too small?
@@ -25,7 +25,7 @@ export class ExportService {
             // Prompt says: "Export only aggregated data; enforce minimum k-anonymity thresholds (e.g., suppress cells with count < K)"
         });
 
-        if (safeData.length === 0) return '';
+        if (safeData.length === 0) {return '';}
 
         const headers = Object.keys(safeData[0]).sort(); // Stable headers
         const headerRow = headers.join(',');

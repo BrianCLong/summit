@@ -329,7 +329,7 @@ export class VerdictExplainerService implements IVerdictExplainerService {
 
     // Truncate if maxLength specified
     if (context.maxLength && finalDetailedExplanation.length > context.maxLength) {
-      finalDetailedExplanation = finalDetailedExplanation.substring(0, context.maxLength - 3) + '...';
+      finalDetailedExplanation = `${finalDetailedExplanation.substring(0, context.maxLength - 3)  }...`;
     }
 
     const explanation: ExplainedVerdict = {
@@ -710,9 +710,9 @@ Generate the explanation now:
     let confidence = verdict.provenance?.confidence || 0.8;
 
     // Adjust based on explanation quality
-    if (explanation.length > 200) confidence += 0.05;
-    if (verdict.reasons.length > 0) confidence += 0.05;
-    if (verdict.policyIds.length > 0) confidence += 0.05;
+    if (explanation.length > 200) {confidence += 0.05;}
+    if (verdict.reasons.length > 0) {confidence += 0.05;}
+    if (verdict.policyIds.length > 0) {confidence += 0.05;}
 
     return Math.min(confidence, 1.0);
   }

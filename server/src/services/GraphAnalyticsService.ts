@@ -62,7 +62,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
         const session = this.deps.getDriver().session();
         try {
           const result = await session.run(cypher, { from, to, tenantId });
-          if (result.records.length === 0) return null;
+          if (result.records.length === 0) {return null;}
 
           const path = result.records[0].get('p');
           const nodes: Entity[] = [];
@@ -88,9 +88,9 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
                  metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
              });
 
-             if (!nodes.find(n => n.id === startNode.id)) nodes.push(mapNode(startNode));
-             if (!nodes.find(n => n.id === endNode.id)) nodes.push(mapNode(endNode));
-             if (!edges.find(e => e.id === rel.id)) edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));
+             if (!nodes.find(n => n.id === startNode.id)) {nodes.push(mapNode(startNode));}
+             if (!nodes.find(n => n.id === endNode.id)) {nodes.push(mapNode(endNode));}
+             if (!edges.find(e => e.id === rel.id)) {edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));}
           });
 
           return { nodes, edges, cost: path.length };
@@ -130,7 +130,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
       `;
 
       const result = await this.deps.runCypher<{ nodes: any[], edges: any[] }>(cypher, { tenantId, seedIds });
-      if (result.length === 0) return { nodes: [], edges: [] };
+      if (result.length === 0) {return { nodes: [], edges: [] };}
 
       const row = result[0];
 
@@ -284,14 +284,14 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
             // Simple Union-Find to group into communities
             const parent = new Map<string, string>();
             const find = (id: string): string => {
-                if (!parent.has(id)) parent.set(id, id);
-                if (parent.get(id) !== id) parent.set(id, find(parent.get(id)!));
+                if (!parent.has(id)) {parent.set(id, id);}
+                if (parent.get(id) !== id) {parent.set(id, find(parent.get(id)!));}
                 return parent.get(id)!;
             };
             const union = (id1: string, id2: string) => {
                 const root1 = find(id1);
                 const root2 = find(id2);
-                if (root1 !== root2) parent.set(root1, root2);
+                if (root1 !== root2) {parent.set(root1, root2);}
             };
 
             result.forEach(r => union(r.id1, r.id2));
@@ -300,7 +300,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
             const clusters = new Map<string, string[]>();
             parent.forEach((_, id) => {
                 const root = find(id);
-                if (!clusters.has(root)) clusters.set(root, []);
+                if (!clusters.has(root)) {clusters.set(root, []);}
                 clusters.get(root)?.push(id);
             });
 

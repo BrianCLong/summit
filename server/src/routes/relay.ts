@@ -30,14 +30,14 @@ r.post('/push', verifySiteAuth, async (req: any, res) => {
       logs = [],
       metrics = {},
     } = req.body || {};
-    if (!ticketId) return res.status(400).json({ error: 'ticketId required' });
+    if (!ticketId) {return res.status(400).json({ error: 'ticketId required' });}
     const {
       rows: [t],
     } = await pg.query(
       `SELECT status FROM remote_tickets WHERE ticket_id=$1 AND site_id=$2`,
       [ticketId, siteId],
     );
-    if (t?.status === 'DONE') return res.json({ ok: true, idempotent: true });
+    if (t?.status === 'DONE') {return res.json({ ok: true, idempotent: true });}
     await pg.query(
       `UPDATE remote_tickets SET status='DONE', result=$1, completed_at=now() WHERE ticket_id=$2 AND site_id=$3`,
       [{ artifacts, logs, metrics }, ticketId, siteId],

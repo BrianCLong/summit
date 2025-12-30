@@ -159,7 +159,7 @@ export class ElectronicWarfareService extends EventEmitter {
    */
   public analyzeSignal(signalId: string): InterceptReport | null {
     const signal = this.signals.get(signalId);
-    if (!signal) return null;
+    if (!signal) {return null;}
 
     // Simulate analysis logic based on signal properties
     const isRadar = signal.type === 'RADAR' || signal.frequency > 1000;
@@ -281,7 +281,7 @@ export class ElectronicWarfareService extends EventEmitter {
     durationSeconds: number = 60
   ): JammingMission {
     const asset = this.assets.get(assetId);
-    if (!asset) throw new Error('Asset not found');
+    if (!asset) {throw new Error('Asset not found');}
     if (!asset.capabilities.includes(effect)) {
       throw new Error(`Asset ${asset.name} does not support effect ${effect}`);
     }
@@ -370,7 +370,7 @@ export class ElectronicWarfareService extends EventEmitter {
     measure: 'FREQ_HOPPING' | 'EMISSION_CONTROL' | 'ANTIJAM_FILTERS'
   ): void {
     const asset = this.assets.get(assetId);
-    if (!asset) throw new Error('Asset not found');
+    if (!asset) {throw new Error('Asset not found');}
 
     if (!asset.activeProtection.includes(measure)) {
       asset.activeProtection.push(measure);
@@ -385,7 +385,7 @@ export class ElectronicWarfareService extends EventEmitter {
    */
   public deactivateProtection(assetId: string, measure: string): void {
     const asset = this.assets.get(assetId);
-    if (!asset) return;
+    if (!asset) {return;}
 
     asset.activeProtection = asset.activeProtection.filter((m) => m !== measure);
     this.assets.set(assetId, asset);

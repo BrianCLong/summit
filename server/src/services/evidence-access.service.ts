@@ -386,7 +386,7 @@ export class EvidenceAccessService {
     when: Date,
   ): Promise<void> {
     const record = await this.adapter.get(evidenceId);
-    if (!record) return;
+    if (!record) {return;}
 
     record.lastAccessedAt = when;
     await this.adapter.save(record);

@@ -37,7 +37,7 @@ async function runEval() {
             console.log(`A: ${content}`);
             console.log(`Result: ${pass ? 'PASS' : 'FAIL'} (Expected '${item.expectedKeyword}')`);
 
-            if (pass) passed++;
+            if (pass) {passed++;}
         } catch (e: any) {
             console.error(`Error processing ${item.question}:`, e.message);
         }

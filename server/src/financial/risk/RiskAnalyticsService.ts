@@ -647,10 +647,10 @@ export class RiskAnalyticsService {
   }
 
   private getRiskLevel(score: number): RiskLevel {
-    if (score < 20) return 'minimal';
-    if (score < 40) return 'low';
-    if (score < 60) return 'moderate';
-    if (score < 80) return 'high';
+    if (score < 20) {return 'minimal';}
+    if (score < 40) {return 'low';}
+    if (score < 60) {return 'moderate';}
+    if (score < 80) {return 'high';}
     return 'severe';
   }
 
@@ -843,7 +843,7 @@ export class RiskAnalyticsService {
 
   private calculateBeta(returns: number[], benchmarkReturns: number[]): number {
     const n = Math.min(returns.length, benchmarkReturns.length);
-    if (n < 2) return 1;
+    if (n < 2) {return 1;}
 
     const meanReturn = returns.slice(0, n).reduce((sum, r) => sum + r, 0) / n;
     const meanBenchmark = benchmarkReturns.slice(0, n).reduce((sum, r) => sum + r, 0) / n;
@@ -860,7 +860,7 @@ export class RiskAnalyticsService {
   }
 
   private calculateMaxDrawdown(history: PriceHistory[]): number {
-    if (history.length === 0) return 0;
+    if (history.length === 0) {return 0;}
 
     let peak = history[0].price;
     let maxDrawdown = 0;

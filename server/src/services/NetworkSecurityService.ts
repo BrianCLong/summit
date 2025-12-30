@@ -76,7 +76,7 @@ export class NetworkSecurityService extends EventEmitter {
   }
 
   private async flushBuffer(): Promise<AnomalyResult | null> {
-    if (this.flowBuffer.length === 0) return null;
+    if (this.flowBuffer.length === 0) {return null;}
 
     const batch = [...this.flowBuffer];
     this.flowBuffer = []; // Clear buffer

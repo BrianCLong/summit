@@ -40,7 +40,7 @@ export default function CostExplorer() {
     try {
       setLoading(true);
       const response = await fetch('/api/admin/budget/status');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
       const data = await response.json();
       setBudgets(data.tenants || []);
       setError('');
@@ -62,7 +62,7 @@ export default function CostExplorer() {
       });
 
       const response = await fetch(`/api/admin/budget/ledger?${params}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
       const data = await response.json();
       setLedgerEntries(data.entries || []);
     } catch (err) {
@@ -87,10 +87,10 @@ export default function CostExplorer() {
       b.tenant_id,
       b.daily_spent_usd.toFixed(2),
       b.daily_limit_usd.toFixed(2),
-      (b.utilization_daily * 100).toFixed(1) + '%',
+      `${(b.utilization_daily * 100).toFixed(1)  }%`,
       b.monthly_spent_usd.toFixed(2),
       b.monthly_limit_usd.toFixed(2),
-      (b.utilization_monthly * 100).toFixed(1) + '%',
+      `${(b.utilization_monthly * 100).toFixed(1)  }%`,
       b.status,
     ]);
 

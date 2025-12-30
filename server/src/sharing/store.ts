@@ -81,14 +81,14 @@ export const createShareLink = (input: {
 };
 
 export const listShareLinks = (scope?: SharingScope) => {
-  if (!scope) return Array.from(shareLinks.values());
+  if (!scope) {return Array.from(shareLinks.values());}
   const scopeHash = computeScopeHash(scope);
   return Array.from(shareLinks.values()).filter((link) => link.scopeHash === scopeHash);
 };
 
 export const revokeShareLink = (id: string, reason?: string) => {
   const link = shareLinks.get(id);
-  if (!link) return undefined;
+  if (!link) {return undefined;}
   const now = new Date();
   link.revokedAt = now;
   shareLinks.set(id, link);
@@ -122,14 +122,14 @@ export const createInvite = (input: {
 };
 
 export const listInvites = (scope?: SharingScope) => {
-  if (!scope) return Array.from(reviewerInvites.values());
+  if (!scope) {return Array.from(reviewerInvites.values());}
   const scopeHash = computeScopeHash(scope);
   return Array.from(reviewerInvites.values()).filter((invite) => computeScopeHash(invite.scope) === scopeHash);
 };
 
 export const revokeInvite = (id: string) => {
   const invite = reviewerInvites.get(id);
-  if (!invite) return undefined;
+  if (!invite) {return undefined;}
   invite.status = 'revoked';
   reviewerInvites.set(id, invite);
   recordAudit('reviewer.invite_revoked', { id });
@@ -138,14 +138,14 @@ export const revokeInvite = (id: string) => {
 
 export const resendInvite = (id: string) => {
   const invite = reviewerInvites.get(id);
-  if (!invite) return undefined;
+  if (!invite) {return undefined;}
   recordAudit('reviewer.invite_resent', { id });
   return invite;
 };
 
 export const acceptInvite = (id: string) => {
   const invite = reviewerInvites.get(id);
-  if (!invite || invite.status !== 'pending' || invite.expiresAt.getTime() < Date.now()) return undefined;
+  if (!invite || invite.status !== 'pending' || invite.expiresAt.getTime() < Date.now()) {return undefined;}
   invite.status = 'accepted';
   invite.acceptedAt = new Date();
   reviewerInvites.set(id, invite);
@@ -173,7 +173,7 @@ export const listFeedback = (shareLinkId: string) =>
 
 export const softDeleteFeedback = (id: string) => {
   const record = feedback.get(id);
-  if (!record) return undefined;
+  if (!record) {return undefined;}
   record.deletedAt = new Date();
   feedback.set(id, record);
   return record;
@@ -192,7 +192,7 @@ export const computePlan = (input: {
   labelId?: string;
 }): PlanResult => {
   const warnings: string[] = [];
-  if (!input.permissions.includes('view')) warnings.push('view permission missing');
+  if (!input.permissions.includes('view')) {warnings.push('view permission missing');}
   const plan = {
     resources: input.resources,
     permissions: input.permissions,

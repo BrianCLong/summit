@@ -503,7 +503,7 @@ export class MigrationManager {
 
       child.on('error', reject);
       child.on('exit', (code) => {
-        if (code === 0) return resolve();
+        if (code === 0) {return resolve();}
         reject(new Error(`${command} exited with code ${code}`));
       });
     });

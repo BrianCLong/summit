@@ -171,7 +171,7 @@ function RoutingPreview({
     useLazyQuery(PREVIEW_ROUTING);
 
   const handlePreview = useCallback(() => {
-    if (!taskInput.trim()) return;
+    if (!taskInput.trim()) {return;}
 
     previewRouting({
       variables: {
@@ -433,7 +433,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
   const [executionLog, setExecutionLog] = useState<string[]>([]);
 
   const handleExecute = useCallback(async () => {
-    if (!taskInput.trim()) return;
+    if (!taskInput.trim()) {return;}
 
     setExecutionLog((prev) => [
       ...prev,
@@ -467,7 +467,7 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
   }, [taskInput, conduct]);
 
   const downloadEvidence = useCallback(() => {
-    if (!data?.conduct?.evidence) return;
+    if (!data?.conduct?.evidence) {return;}
 
     const blob = new Blob([JSON.stringify(data.conduct.evidence, null, 2)], {
       type: 'application/json',
@@ -651,7 +651,7 @@ function MCPRegistry() {
     setError(null);
     try {
       const res = await fetch('/api/maestro/v1/mcp/servers');
-      if (!res.ok) throw new Error(`Failed ${res.status}`);
+      if (!res.ok) {throw new Error(`Failed ${res.status}`);}
       const servers = await res.json();
       setData({
         mcpServers: servers.map((s: MCPServer) => ({
@@ -798,7 +798,7 @@ export default function ConductorStudio() {
   const loadSessions = useCallback(async () => {
     try {
       const res = await fetch(`/api/maestro/v1/runs/demo-run/mcp/sessions`);
-      if (res.ok) setSessions(await res.json());
+      if (res.ok) {setSessions(await res.json());}
     } catch {
       /* noop */
     }
@@ -809,7 +809,7 @@ export default function ConductorStudio() {
       const res = await await fetch(
         `/api/maestro/v1/runs/demo-run/mcp/invocations`,
       );
-      if (res.ok) setInvocations(await res.json());
+      if (res.ok) {setInvocations(await res.json());}
     } catch {
       /* noop */
     }

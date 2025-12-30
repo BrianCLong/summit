@@ -517,8 +517,8 @@ export class FederatedOrchestrationService {
       createHash('sha256').update(JSON.stringify(claim)).digest('hex'),
     );
 
-    if (hashes.length === 0) return '';
-    if (hashes.length === 1) return hashes[0];
+    if (hashes.length === 0) {return '';}
+    if (hashes.length === 1) {return hashes[0];}
 
     // Build Merkle tree (simplified)
     while (hashes.length > 1) {

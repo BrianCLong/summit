@@ -251,7 +251,7 @@ export class WarRoomCoordinator extends EventEmitter {
     critical: boolean = false,
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
-    if (!session) return;
+    if (!session) {return;}
 
     const participant = session.participants.find((p) => p.userId === userId);
     if (!participant || !participant.permissions.includes('write_timeline')) {
@@ -286,7 +286,7 @@ export class WarRoomCoordinator extends EventEmitter {
     >,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
-    if (!session) throw new Error('Session not found');
+    if (!session) {throw new Error('Session not found');}
 
     const participant = session.participants.find((p) => p.userId === userId);
     if (!participant || !participant.permissions.includes('make_decisions')) {
@@ -336,7 +336,7 @@ export class WarRoomCoordinator extends EventEmitter {
     >,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
-    if (!session) throw new Error('Session not found');
+    if (!session) {throw new Error('Session not found');}
 
     const participant = session.participants.find(
       (p) => p.userId === assignerUserId,
@@ -383,7 +383,7 @@ export class WarRoomCoordinator extends EventEmitter {
     artifact: Omit<WarRoomArtifact, 'id' | 'uploadedBy' | 'uploadedAt'>,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
-    if (!session) throw new Error('Session not found');
+    if (!session) {throw new Error('Session not found');}
 
     const participant = session.participants.find((p) => p.userId === userId);
     if (!participant || !participant.permissions.includes('upload_artifacts')) {
@@ -426,7 +426,7 @@ export class WarRoomCoordinator extends EventEmitter {
     execution: RunbookExecution,
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
-    if (!session) return;
+    if (!session) {return;}
 
     this.addTimelineEvent(session, {
       type: 'system',
@@ -458,7 +458,7 @@ export class WarRoomCoordinator extends EventEmitter {
     escalationLevel: 'management' | 'executive' | 'external',
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
-    if (!session) throw new Error('Session not found');
+    if (!session) {throw new Error('Session not found');}
 
     const participant = session.participants.find((p) => p.userId === userId);
     if (
@@ -504,7 +504,7 @@ export class WarRoomCoordinator extends EventEmitter {
     },
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
-    if (!session) throw new Error('Session not found');
+    if (!session) {throw new Error('Session not found');}
 
     if (session.commander !== commanderId) {
       throw new Error('Only commander can resolve war room');
@@ -651,7 +651,7 @@ export class WarRoomCoordinator extends EventEmitter {
 
   private broadcastToSession(sessionId: string, message: WarRoomMessage): void {
     const connections = this.connections.get(sessionId);
-    if (!connections) return;
+    if (!connections) {return;}
 
     const messageStr = JSON.stringify(message);
     connections.forEach((ws) => {
@@ -741,7 +741,7 @@ export class WarRoomCoordinator extends EventEmitter {
     status: WarRoomParticipant['status'],
   ): Promise<void> {
     const session = this.sessions.get(sessionId);
-    if (!session) return;
+    if (!session) {return;}
 
     const participant = session.participants.find((p) => p.userId === userId);
     if (participant) {

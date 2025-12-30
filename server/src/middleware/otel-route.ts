@@ -13,12 +13,12 @@ export function otelRoute(spanName: string) {
       (req.baseUrl || '') + (req.route?.path || req.path),
     );
     const user: any = (req as any).user || {};
-    if (user?.id) span.setAttribute('user.id', String(user.id));
+    if (user?.id) {span.setAttribute('user.id', String(user.id));}
     // Try to capture runId in params when present
-    if (req.params?.id) span.setAttribute('run.id', req.params.id);
+    if (req.params?.id) {span.setAttribute('run.id', req.params.id);}
     const endSpan = () => {
       span.setAttribute('http.status_code', res.statusCode);
-      if (res.statusCode >= 500) span.setStatus({ code: SpanStatusCode.ERROR });
+      if (res.statusCode >= 500) {span.setStatus({ code: SpanStatusCode.ERROR });}
       span.end();
       res.removeListener('finish', endSpan);
       res.removeListener('close', endSpan);

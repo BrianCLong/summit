@@ -136,7 +136,7 @@ export class BudgetTracker extends EventEmitter {
    */
   private updateForecast(tenantId: string, domain: CostDomain): void {
     const budget = budgetStore[tenantId]?.[domain];
-    if (!budget) return;
+    if (!budget) {return;}
 
     const costs = costStore[tenantId] || [];
     const domainCosts = costs.filter(c => c.domain === domain && c.timestamp >= budget.periodStart);
@@ -152,7 +152,7 @@ export class BudgetTracker extends EventEmitter {
     const elapsedTime = now.getTime() - startTime;
     const totalPeriodTime = budget.periodEnd.getTime() - startTime;
 
-    if (elapsedTime <= 0) return;
+    if (elapsedTime <= 0) {return;}
 
     const burnRate = budget.currentSpending / elapsedTime; // Cost per millisecond
     const projectedTotal = burnRate * totalPeriodTime;
@@ -209,7 +209,7 @@ export class BudgetTracker extends EventEmitter {
     // Check for high spending domains
     for (const [domainKey, budget] of Object.entries(report)) {
         const domain = domainKey as CostDomain;
-        if (!budget) continue;
+        if (!budget) {continue;}
 
         const ratio = budget.currentSpending / budget.limit;
 

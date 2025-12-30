@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
 export default function AdminPanel() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [tenants, setTenants] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [users, setUsers] = useState<any[]>([]);
   const [flags, setFlags] = useState<Record<string, boolean>>({});
   const [status, setStatus] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [audit, setAudit] = useState<any[]>([]);
   const [q, setQ] = useState('');
   const [policy, setPolicy] = useState('');
@@ -21,11 +21,11 @@ export default function AdminPanel() {
 
   async function refresh() {
     try {
-      const t = await (await fetch(api + '/admin/tenants')).json();
+      const t = await (await fetch(`${api  }/admin/tenants`)).json();
       setTenants(t.items || []);
-      const u = await (await fetch(api + '/admin/users')).json();
+      const u = await (await fetch(`${api  }/admin/users`)).json();
       setUsers(u.items || []);
-      const f = await (await fetch(api + '/admin/flags')).json();
+      const f = await (await fetch(`${api  }/admin/flags`)).json();
       setFlags(f.flags || {});
       await loadAudit();
       await loadPolicy();
@@ -36,7 +36,7 @@ export default function AdminPanel() {
 
   async function toggleFlag(k: string) {
     const v = !flags[k];
-    await fetch(api + '/admin/flags/' + k, {
+    await fetch(`${api  }/admin/flags/${  k}`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ value: v }),
@@ -46,22 +46,22 @@ export default function AdminPanel() {
   async function loadAudit() {
     const a = await (
       await fetch(
-        api +
-          '/admin/audit?limit=200' +
-          (q ? `&query=${encodeURIComponent(q)}` : ''),
+        `${api 
+          }/admin/audit?limit=200${ 
+          q ? `&query=${encodeURIComponent(q)}` : ''}`,
       )
     ).json();
     setAudit(a.items || []);
   }
   async function loadPolicy() {
     try {
-      const txt = await (await fetch(api + '/admin/policy')).text();
+      const txt = await (await fetch(`${api  }/admin/policy`)).text();
       setPolicy(txt);
     // eslint-disable-next-line no-empty
     } catch {}
   }
   async function savePolicy() {
-    await fetch(api + '/admin/policy', {
+    await fetch(`${api  }/admin/policy`, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ content: policy }),
@@ -102,7 +102,7 @@ export default function AdminPanel() {
               <label>
                 <input
                   type="checkbox"
-                  checked={!!v}
+                  checked={Boolean(v)}
                   onChange={() => toggleFlag(k)}
                 />{' '}
                 {k}

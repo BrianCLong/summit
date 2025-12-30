@@ -840,7 +840,7 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   private async flushEventBuffer(): Promise<void> {
-    if (this.eventBuffer.length === 0) return;
+    if (this.eventBuffer.length === 0) {return;}
 
     const eventsToFlush = this.eventBuffer.splice(0);
 
@@ -1063,7 +1063,7 @@ export class AdvancedAuditSystem extends EventEmitter {
     violations: ComplianceReport['violations'],
     framework: ComplianceFramework,
   ): number {
-    if (events.length === 0) return 100;
+    if (events.length === 0) {return 100;}
 
     const criticalViolations = violations.filter(
       (v) => v.severity === 'critical',
@@ -1203,7 +1203,7 @@ export class AdvancedAuditSystem extends EventEmitter {
   }
 
   private async processRealTimeAlerts(event: AuditEvent): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     // Implement real-time alerting logic
     if (event.level === 'critical' || event.eventType === 'security_alert') {

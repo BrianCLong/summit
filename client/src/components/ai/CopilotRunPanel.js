@@ -26,7 +26,7 @@ export default function CopilotRunPanel({ goalId }) {
   useEffect(() => {
     // jQuery-powered Socket.IO init
     socketRef.current = io('/', { path: '/realtime', autoConnect: true });
-    $(socketRef.current).on('connect', function () {
+    $(socketRef.current).on('connect', () => {
       setConnected(true);
     });
     socketRef.current.on('copilot:event', (ev) =>

@@ -14,7 +14,7 @@ const apiKeyRepo = new TenantRepository<ApiKey>('api_keys');
 // Middleware to build Principal from req.user
 // This bridges the gap between old `req.user` (from AuthService) and new `Principal`
 const buildPrincipal = (req: any, res: Response, next: any) => {
-    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    if (!req.user) {return res.status(401).json({ error: 'Unauthorized' });}
 
     // In a real implementation, we would fetch the user's tenant memberships here.
     // For now, we construct a Principal based on available info.
@@ -87,7 +87,7 @@ router.get('/tenants/current', ensureAuthenticated, buildPrincipal, async (req: 
              // Fallback to raw query if tenant_id vs id is confusing in repo
              const pool = getPostgresPool();
              const result = await pool.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
-             if (result.rows.length === 0) return res.status(404).json({ error: 'Tenant not found' });
+             if (result.rows.length === 0) {return res.status(404).json({ error: 'Tenant not found' });}
              res.json(result.rows[0]);
              return;
         }

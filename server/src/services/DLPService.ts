@@ -709,7 +709,7 @@ class DLPService {
     result: DLPScanResult,
     context: DLPContext,
   ): Promise<void> {
-    if (!action.notification) return;
+    if (!action.notification) {return;}
 
     const message = {
       title: 'DLP Policy Violation Detected',

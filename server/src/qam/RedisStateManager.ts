@@ -232,7 +232,7 @@ export class RedisStateManager extends EventEmitter {
         size: serializedData.length,
         compressed,
         encrypted,
-        merkleRoot: merkleRoot.slice(0, 16) + '...',
+        merkleRoot: `${merkleRoot.slice(0, 16)  }...`,
       });
 
       return snapshot;
@@ -259,12 +259,12 @@ export class RedisStateManager extends EventEmitter {
       } else {
         // Get latest state
         const latestId = await this.getLatestStateId(appId, tenantId);
-        if (!latestId) return null;
+        if (!latestId) {return null;}
         redisKey = this.buildRedisKey(appId, tenantId, latestId);
       }
 
       const redisValue = await this.redisClient.get(redisKey);
-      if (!redisValue) return null;
+      if (!redisValue) {return null;}
 
       const storedData = JSON.parse(redisValue);
       let data = storedData.data;
@@ -353,20 +353,20 @@ export class RedisStateManager extends EventEmitter {
       for (const key of keys) {
         try {
           const redisValue = await this.redisClient.get(key);
-          if (!redisValue) continue;
+          if (!redisValue) {continue;}
 
           const storedData = JSON.parse(redisValue);
 
           // Apply filters
           if (query.fromDate && new Date(storedData.timestamp) < query.fromDate)
-            continue;
+            {continue;}
           if (query.toDate && new Date(storedData.timestamp) > query.toDate)
-            continue;
+            {continue;}
           if (
             query.tags &&
             !query.tags.every((tag) => storedData.tags.includes(tag))
           )
-            continue;
+            {continue;}
 
           // Create lightweight snapshot (without loading full data)
           const snapshot: StateSnapshot = {
@@ -667,7 +667,7 @@ export class RedisStateManager extends EventEmitter {
     const pattern = `${this.config.keyPrefix}:index:${tenantId}:${appId}:*`;
     const keys = await this.redisClient.keys(pattern);
 
-    if (keys.length === 0) return null;
+    if (keys.length === 0) {return null;}
 
     // Sort by timestamp to get latest
     const states = await Promise.all(
@@ -678,7 +678,7 @@ export class RedisStateManager extends EventEmitter {
     );
 
     const validStates = states.filter((s) => s !== null);
-    if (validStates.length === 0) return null;
+    if (validStates.length === 0) {return null;}
 
     validStates.sort(
       (a, b) =>

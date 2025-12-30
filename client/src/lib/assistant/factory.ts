@@ -12,7 +12,7 @@ export function makeAssistantTransport(
   mode: Mode,
   opts: TransportOpts,
 ): AssistantTransport {
-  if (mode === 'sse') return createSseTransport(opts);
-  if (mode === 'socket') return createSocketIoTransport(opts);
+  if (mode === 'sse') {return createSseTransport(opts);}
+  if (mode === 'socket') {return createSocketIoTransport(opts);}
   return createFetchStreamTransport(opts);
 }

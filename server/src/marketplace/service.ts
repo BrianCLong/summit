@@ -71,7 +71,7 @@ export class MarketplaceService {
    */
   public async reviewPlugin(pluginId: string, reviewer: string, action: 'APPROVE_FOR_TESTING' | 'REJECT', notes?: string): Promise<RegisteredPlugin> {
     const plugin = this.plugins.get(pluginId);
-    if (!plugin) throw new Error("Plugin not found");
+    if (!plugin) {throw new Error("Plugin not found");}
 
     if (action === 'REJECT') {
         plugin.status = PluginStatus.REJECTED;
@@ -96,7 +96,7 @@ export class MarketplaceService {
    */
   public async approvePlugin(pluginId: string, approver: string): Promise<RegisteredPlugin> {
     const plugin = this.plugins.get(pluginId);
-    if (!plugin) throw new Error("Plugin not found");
+    if (!plugin) {throw new Error("Plugin not found");}
 
     if (plugin.status !== PluginStatus.IN_REVIEW) {
         throw new Error("Plugin must be in review before approval");
@@ -119,7 +119,7 @@ export class MarketplaceService {
 
   public async revokePlugin(pluginId: string, actor: string, reason: string): Promise<RegisteredPlugin> {
     const plugin = this.plugins.get(pluginId);
-    if (!plugin) throw new Error("Plugin not found");
+    if (!plugin) {throw new Error("Plugin not found");}
 
     plugin.status = PluginStatus.REVOKED;
     plugin.updatedAt = new Date();
@@ -140,7 +140,7 @@ export class MarketplaceService {
 
   public verifySignature(pkg: PluginPackage): boolean {
     // Placeholder for cryptographic verification
-    return !!pkg.signature;
+    return Boolean(pkg.signature);
   }
 
   public audit(artifactId: string, event: string, payload: any) {

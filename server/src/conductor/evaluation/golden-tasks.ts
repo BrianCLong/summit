@@ -919,28 +919,28 @@ export class EvaluationEngine extends EventEmitter {
     // Simple schema validation (in production, use a proper JSON schema validator)
     try {
       if (schema.type === 'object') {
-        if (typeof data !== 'object' || data === null) return false;
+        if (typeof data !== 'object' || data === null) {return false;}
 
         if (schema.required) {
           for (const requiredField of schema.required) {
-            if (!(requiredField in data)) return false;
+            if (!(requiredField in data)) {return false;}
           }
         }
 
         if (schema.properties) {
           for (const [key, propSchema] of Object.entries(schema.properties)) {
             if (key in data) {
-              if (!this.validateJsonSchema(data[key], propSchema)) return false;
+              if (!this.validateJsonSchema(data[key], propSchema)) {return false;}
             }
           }
         }
       } else if (schema.type === 'array') {
-        if (!Array.isArray(data)) return false;
-        if (schema.minItems && data.length < schema.minItems) return false;
+        if (!Array.isArray(data)) {return false;}
+        if (schema.minItems && data.length < schema.minItems) {return false;}
 
         if (schema.items) {
           for (const item of data) {
-            if (!this.validateJsonSchema(item, schema.items)) return false;
+            if (!this.validateJsonSchema(item, schema.items)) {return false;}
           }
         }
       } else if (schema.type) {
@@ -987,17 +987,17 @@ export class EvaluationEngine extends EventEmitter {
     let score = 0;
 
     // Check for function definition
-    if (code.includes('def fibonacci')) score += 0.3;
+    if (code.includes('def fibonacci')) {score += 0.3;}
 
     // Check for recursive structure
     if (code.includes('fibonacci(') && code.includes('fibonacci('))
-      score += 0.3;
+      {score += 0.3;}
 
     // Check for base case
-    if (code.includes('n <= 1') || code.includes('n < 2')) score += 0.2;
+    if (code.includes('n <= 1') || code.includes('n < 2')) {score += 0.2;}
 
     // Check for return statement
-    if (code.includes('return')) score += 0.2;
+    if (code.includes('return')) {score += 0.2;}
 
     return Math.min(1, score);
   }
@@ -1015,8 +1015,8 @@ export class EvaluationEngine extends EventEmitter {
     let score = 0.5;
     const feedback = 'Automated evaluation';
 
-    if (outputStr.length > 100) score += 0.2;
-    if (outputStr.includes('threat') || outputStr.includes('APT')) score += 0.3;
+    if (outputStr.length > 100) {score += 0.2;}
+    if (outputStr.includes('threat') || outputStr.includes('APT')) {score += 0.3;}
 
     return { score: Math.min(1, score), feedback };
   }

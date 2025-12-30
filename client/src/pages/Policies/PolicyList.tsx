@@ -197,7 +197,7 @@ const PolicyList: React.FC = () => {
   }, [handleMenuClose]);
 
   const handleDeleteConfirm = useCallback(async () => {
-    if (!policyToDelete) return;
+    if (!policyToDelete) {return;}
     const success = await operations.deletePolicy(policyToDelete.id);
     setDeleteDialogOpen(false);
     setPolicyToDelete(null);
@@ -217,7 +217,7 @@ const PolicyList: React.FC = () => {
   }, [handleMenuClose]);
 
   const handleSubmitConfirm = useCallback(async () => {
-    if (!policyToSubmit) return;
+    if (!policyToSubmit) {return;}
     const result = await operations.submitForApproval(policyToSubmit.id, submitReason);
     setSubmitDialogOpen(false);
     setPolicyToSubmit(null);
@@ -238,7 +238,7 @@ const PolicyList: React.FC = () => {
   }, [handleMenuClose]);
 
   const handleApproveConfirm = useCallback(async () => {
-    if (!policyToApprove) return;
+    if (!policyToApprove) {return;}
     const result = await operations.approvePolicy(policyToApprove.id, approveNotes);
     setApproveDialogOpen(false);
     setPolicyToApprove(null);

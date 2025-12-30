@@ -227,7 +227,7 @@ describe('Provenance Ledger Beta - End-to-End', () => {
     // ========================================================================
     // FINAL SUMMARY
     // ========================================================================
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log('🎉 END-TO-END TEST COMPLETED SUCCESSFULLY');
     console.log('='.repeat(60));
     console.log(`\n📊 Summary:`);

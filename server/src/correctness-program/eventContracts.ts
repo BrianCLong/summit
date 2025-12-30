@@ -23,9 +23,9 @@ export class EventContractRegistry {
 
   validateEnvelope(envelope: EventEnvelope): EventHandlingResult {
     const schemas = this.schemas.get(envelope.name);
-    if (!schemas) throw new Error(`No schema registered for ${envelope.name}`);
+    if (!schemas) {throw new Error(`No schema registered for ${envelope.name}`);}
     const schema = schemas.find((s) => s.version === envelope.version);
-    if (!schema) throw new Error(`Schema version ${envelope.version} not found for ${envelope.name}`);
+    if (!schema) {throw new Error(`Schema version ${envelope.version} not found for ${envelope.name}`);}
 
     const requiredFields = schema.fields.filter((f) => f.required);
     requiredFields.forEach((field) => {
@@ -36,7 +36,7 @@ export class EventContractRegistry {
 
     if (!schema.piiSafe) {
       const containsPii = Object.keys(envelope.payload).some((key) => key.toLowerCase().includes('email'));
-      if (containsPii) throw new Error(`Event ${envelope.name} payload failed PII hygiene check`);
+      if (containsPii) {throw new Error(`Event ${envelope.name} payload failed PII hygiene check`);}
     }
 
     const dedupeKey = envelope.dedupeKey || envelope.id;

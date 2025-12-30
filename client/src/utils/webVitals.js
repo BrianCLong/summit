@@ -14,7 +14,7 @@ const isProduction = import.meta.env.PROD;
  * Send metrics to backend monitoring service
  */
 function sendToBackend(metric) {
-  if (!isProduction) return;
+  if (!isProduction) {return;}
 
   try {
     fetch('/monitoring/web-vitals', {
@@ -40,7 +40,7 @@ function sendToBackend(metric) {
  * Log metrics to console in development
  */
 function logToConsole(metric) {
-  if (!isDevelopment) return;
+  if (!isDevelopment) {return;}
 
   const { name, value, rating, delta } = metric;
 
@@ -67,7 +67,7 @@ function handleMetric(metric) {
  * Log bundle loading performance
  */
 function logBundlePerformance() {
-  if (!isDevelopment || !performance.getEntriesByType) return;
+  if (!isDevelopment || !performance.getEntriesByType) {return;}
 
   const resources = performance.getEntriesByType('resource');
   const jsResources = resources.filter((r) => r.name.endsWith('.js'));

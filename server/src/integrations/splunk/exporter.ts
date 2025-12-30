@@ -11,7 +11,7 @@ export class SplunkSIEMSink implements SIEMSink {
   }
 
   async send(events: SIEMEvent[]): Promise<void> {
-    if (!this.config.enabled) return;
+    if (!this.config.enabled) {return;}
 
     // Transform events to Splunk HEC format
     const payload = events.map(e => ({

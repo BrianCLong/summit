@@ -105,7 +105,7 @@ export class MemeTrackingService {
   private hammingDistance(h1: string, h2: string): number {
     let dist = 0;
     for (let i = 0; i < Math.min(h1.length, h2.length); i++) {
-        if (h1[i] !== h2[i]) dist++;
+        if (h1[i] !== h2[i]) {dist++;}
     }
     return dist;
   }

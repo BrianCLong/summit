@@ -169,14 +169,14 @@ export function getAPIVersion(req: Request): APIVersion {
  * @returns Normalized version string
  */
 function normalizeVersion(version: string): string {
-  if (!version) return '';
+  if (!version) {return '';}
 
   // Convert to lowercase and remove whitespace
   let normalized = version.toLowerCase().trim();
 
   // Add 'v' prefix if missing
   if (!normalized.startsWith('v')) {
-    normalized = 'v' + normalized;
+    normalized = `v${  normalized}`;
   }
 
   // Remove trailing '.0' (e.g., 'v1.0' -> 'v1')

@@ -47,7 +47,7 @@ export default function GeoMapPage() {
     [nodes],
   );
   const locPoints = useMemo(() => {
-    if (!timeWindow) return locPointsRaw;
+    if (!timeWindow) {return locPointsRaw;}
     // Filter by timestamp if available on node properties
     const [startMs, endMs] = [
       Date.parse(timeWindow.start),
@@ -65,7 +65,7 @@ export default function GeoMapPage() {
         const ts = n.properties?.timestamp
           ? Date.parse(n.properties.timestamp)
           : null;
-        if (!ts || isNaN(ts)) return true; // if no timestamp, keep by default
+        if (!ts || isNaN(ts)) {return true;} // if no timestamp, keep by default
         return ts >= startMs && ts <= endMs;
       })
       .map((n) => ({
@@ -75,7 +75,7 @@ export default function GeoMapPage() {
   }, [locPointsRaw, baseNodes, timeWindow]);
 
   function convexHull(points) {
-    if (points.length < 3) return points;
+    if (points.length < 3) {return points;}
     const pts = points
       .map((p) => ({ x: p.longitude, y: p.latitude }))
       .sort((a, b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
@@ -87,7 +87,7 @@ export default function GeoMapPage() {
         lower.length >= 2 &&
         cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0
       )
-        lower.pop();
+        {lower.pop();}
       lower.push(p);
     }
     const upper = [];
@@ -97,7 +97,7 @@ export default function GeoMapPage() {
         upper.length >= 2 &&
         cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0
       )
-        upper.pop();
+        {upper.pop();}
       upper.push(p);
     }
     upper.pop();
@@ -135,7 +135,7 @@ export default function GeoMapPage() {
   };
 
   useEffect(() => {
-    if (locPoints.length) runClusters();
+    if (locPoints.length) {runClusters();}
   }, [locPoints.length]);
 
   return (

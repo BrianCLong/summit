@@ -19,7 +19,7 @@ class SocialService {
         ext_id: it.guid || it.link,
         source: 'rss',
         author: it.author,
-        text: it.title + '\n' + (it.description || ''),
+        text: `${it.title  }\n${  it.description || ''}`,
         url: it.link,
         posted_at: it.pubDate,
         metadata: it,

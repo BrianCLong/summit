@@ -81,8 +81,8 @@ export class EraseService {
         const span = otelService.createSpan('erase.approve_request');
         try {
             const request = await this.getRequest(requestId);
-            if (!request) throw new Error('Request not found');
-            if (request.status !== 'pending_approval') throw new Error(`Cannot approve request in status ${request.status}`);
+            if (!request) {throw new Error('Request not found');}
+            if (request.status !== 'pending_approval') {throw new Error(`Cannot approve request in status ${request.status}`);}
 
             // Add approval
             const newApproval: Approval = {
@@ -128,8 +128,8 @@ export class EraseService {
         const span = otelService.createSpan('erase.execute_purge');
         try {
             const request = await this.getRequest(requestId);
-            if (!request) throw new Error('Request not found');
-            if (request.status !== 'approved') throw new Error('Request must be approved before execution');
+            if (!request) {throw new Error('Request not found');}
+            if (request.status !== 'approved') {throw new Error('Request must be approved before execution');}
 
             // 1. Mark processing
             await this.pool.query('UPDATE erase_requests SET status = \'processing\' WHERE id = $1', [requestId]);
@@ -191,7 +191,7 @@ export class EraseService {
 
     public async getRequest(id: string): Promise<EraseRequest | null> {
         const res = await this.pool.query('SELECT * FROM erase_requests WHERE id = $1', [id]);
-        if (res.rows.length === 0) return null;
+        if (res.rows.length === 0) {return null;}
         return this.mapRowToRequest(res.rows[0]);
     }
 

@@ -390,7 +390,7 @@ export class LinUCBOptimizer extends EventEmitter {
     contextFeatures: number[],
   ): number {
     const armState = this.arms.get(armId);
-    if (!armState) return 1.0; // High confidence for unknown arms
+    if (!armState) {return 1.0;} // High confidence for unknown arms
 
     try {
       // Calculate x^T * A^(-1) * x
@@ -470,7 +470,7 @@ export class LinUCBOptimizer extends EventEmitter {
    * Calculate current exploration rate
    */
   private calculateExplorationRate(): number {
-    if (this.totalPulls === 0) return 1.0;
+    if (this.totalPulls === 0) {return 1.0;}
 
     // Decaying exploration rate based on confidence
     const baseRate = Math.pow(this.config.decayFactor!, this.totalPulls);
@@ -483,7 +483,7 @@ export class LinUCBOptimizer extends EventEmitter {
    * Get average confidence across all arms
    */
   private getAverageConfidence(): number {
-    if (this.arms.size === 0) return 1.0;
+    if (this.arms.size === 0) {return 1.0;}
 
     const lastContext =
       this.getLastContext() || new Array(this.contextDimension).fill(0);
@@ -554,7 +554,7 @@ export class LinUCBOptimizer extends EventEmitter {
    * Get best performing arm
    */
   private getBestArm(): { armId: number; averageReward: number } | null {
-    if (this.arms.size === 0) return null;
+    if (this.arms.size === 0) {return null;}
 
     let bestArm = -1;
     let bestReward = -Infinity;
@@ -654,7 +654,7 @@ export class LinUCBOptimizer extends EventEmitter {
   }
 
   private arraysEqual(a: number[], b: number[]): boolean {
-    if (a.length !== b.length) return false;
+    if (a.length !== b.length) {return false;}
     return a.every((val, i) => Math.abs(val - b[i]) < 1e-10);
   }
 
@@ -667,7 +667,7 @@ export class LinUCBOptimizer extends EventEmitter {
   }
 
   private calculateRewardVariance(): number {
-    if (this.recentRewards.length < 2) return 0;
+    if (this.recentRewards.length < 2) {return 0;}
 
     const mean =
       this.recentRewards.reduce((sum, r) => sum + r, 0) /

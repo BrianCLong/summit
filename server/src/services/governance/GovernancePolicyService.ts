@@ -52,7 +52,7 @@ export class GovernancePolicyService {
 
   public updatePolicy(id: string, updates: Partial<Omit<GovernancePolicy, 'id' | 'createdAt' | 'version'>>): GovernancePolicy {
     const policy = this.policies.get(id);
-    if (!policy) throw new Error(`Policy ${id} not found`);
+    if (!policy) {throw new Error(`Policy ${id} not found`);}
 
     const updatedPolicy = {
       ...policy,

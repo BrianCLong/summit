@@ -340,7 +340,7 @@ export class WebOrchestrator {
       const remaining = plan.interfaces.filter(
         (iface) => !selected.includes(iface),
       );
-      if (remaining.length === 0) break;
+      if (remaining.length === 0) {break;}
 
       // Thompson Sampling: sample from beta distribution for each interface
       let bestInterface = remaining[0];
@@ -669,9 +669,9 @@ export class WebOrchestrator {
     queryType: string,
     purpose: string,
   ): 'consensus' | 'authority' | 'recent' | 'comprehensive' {
-    if (purpose === 'intelligence_analysis') return 'comprehensive';
-    if (queryType === 'current_events') return 'recent';
-    if (queryType === 'technical_docs') return 'authority';
+    if (purpose === 'intelligence_analysis') {return 'comprehensive';}
+    if (queryType === 'current_events') {return 'recent';}
+    if (queryType === 'technical_docs') {return 'authority';}
     return 'consensus';
   }
 

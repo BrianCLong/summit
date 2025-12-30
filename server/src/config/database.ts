@@ -5,7 +5,7 @@ import logger from '../utils/logger.js';
 import ioredis from 'ioredis';
 
 // Handle optional Redis dependency gracefully
-let Redis = ioredis;
+const Redis = ioredis;
 import {
   getPostgresPool as getManagedPostgresPool,
   closePostgresPool as closeManagedPostgresPool,
@@ -113,7 +113,7 @@ function registerNeo4jReadyHook(): void {
 }
 
 async function createNeo4jConstraints(): Promise<void> {
-  if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
+  if (!neo4jDriver) {throw new Error('Neo4j driver not initialized');}
   if (isNeo4jMockMode()) {
     logger.debug('Skipping Neo4j constraint creation in mock mode.');
     return;
@@ -263,12 +263,12 @@ async function connectRedis(): Promise<Redis | null> {
 }
 
 function getNeo4jDriver(): Neo4jDriver {
-  if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
+  if (!neo4jDriver) {throw new Error('Neo4j driver not initialized');}
   return neo4jDriver;
 }
 
 function getPostgresPool(): ManagedPostgresPool {
-  if (!postgresPool) throw new Error('PostgreSQL pool not initialized');
+  if (!postgresPool) {throw new Error('PostgreSQL pool not initialized');}
   return postgresPool;
 }
 

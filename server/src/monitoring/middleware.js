@@ -101,7 +101,7 @@ function graphqlMetricsMiddleware() {
 
         willSendResponse(requestContext) {
           const metricData = requestContext.metrics;
-          if (!metricData) return;
+          if (!metricData) {return;}
 
           const duration = (Date.now() - metricData.startTime) / 1000;
           const hasErrors =

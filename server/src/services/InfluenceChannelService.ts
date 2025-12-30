@@ -157,7 +157,7 @@ export class InfluenceChannelService extends EventEmitter {
 
     const windowSize = 5;
     const recent = history.slice(-windowSize);
-    if (recent.length === 0) return;
+    if (recent.length === 0) {return;}
 
     const avgPosts = recent.reduce((sum, m) => sum + m.postCount, 0) / recent.length;
 
@@ -169,7 +169,7 @@ export class InfluenceChannelService extends EventEmitter {
    */
   private async scanForAnomalies(channelId: string): Promise<void> {
     const history = this.activityHistory.get(channelId);
-    if (!history || history.length < 10) return; // Need baseline
+    if (!history || history.length < 10) {return;} // Need baseline
 
     const latest = history[history.length - 1];
 
@@ -191,14 +191,14 @@ export class InfluenceChannelService extends EventEmitter {
    * Calculates Z-score and compares against threshold.
    */
   private detectZScoreAnomaly(baselineData: number[], value: number): boolean {
-    if (baselineData.length === 0) return false;
+    if (baselineData.length === 0) {return false;}
 
     const mean = baselineData.reduce((a, b) => a + b, 0) / baselineData.length;
     const std = Math.sqrt(
       baselineData.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / baselineData.length
     );
 
-    if (std === 0) return value !== mean; // If no variance, any difference is technically an anomaly, but careful with noise.
+    if (std === 0) {return value !== mean;} // If no variance, any difference is technically an anomaly, but careful with noise.
 
     const zScore = (value - mean) / std;
     return Math.abs(zScore) > this.ANOMALY_THRESHOLD;

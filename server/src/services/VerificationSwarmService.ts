@@ -117,7 +117,7 @@ export class VerificationSwarmService extends EventEmitter {
   // --- Agent Implementations (Simulated with LLM prompts) ---
 
   private async runPhotoAnalyst(request: VerificationRequest): Promise<{ status?: string; raw?: string; error?: string }> {
-    if (request.type !== 'IMAGE' && request.type !== 'VIDEO') return { status: 'skipped' };
+    if (request.type !== 'IMAGE' && request.type !== 'VIDEO') {return { status: 'skipped' };}
 
     const prompt = `
       You are 'PhotoAnalyst', an expert in digital forensics.

@@ -337,11 +337,11 @@ export class SafetyV2Service {
     // Blast radius based on action type and target resources
     let blastRadius = 0.1; // Base blast radius
 
-    if (request.targetResources.length > 10) blastRadius += 0.2;
-    if (request.targetResources.length > 100) blastRadius += 0.3;
+    if (request.targetResources.length > 10) {blastRadius += 0.2;}
+    if (request.targetResources.length > 100) {blastRadius += 0.3;}
 
-    if (request.metadata?.external) blastRadius += 0.3;
-    if (request.metadata?.containsPII) blastRadius += 0.2;
+    if (request.metadata?.external) {blastRadius += 0.3;}
+    if (request.metadata?.containsPII) {blastRadius += 0.2;}
 
     // Action-specific blast radius
     const highBlastActions = ['delete', 'publish', 'execute', 'transfer'];
@@ -354,9 +354,9 @@ export class SafetyV2Service {
     // Reversibility (1 = irreversible, 0 = fully reversible)
     let reversibility = request.metadata?.reversible === false ? 0.8 : 0.2;
 
-    if (request.actionType.includes('delete')) reversibility += 0.3;
-    if (request.actionType.includes('publish')) reversibility += 0.2;
-    if (request.actionType.includes('transfer')) reversibility += 0.4;
+    if (request.actionType.includes('delete')) {reversibility += 0.3;}
+    if (request.actionType.includes('publish')) {reversibility += 0.2;}
+    if (request.actionType.includes('transfer')) {reversibility += 0.4;}
 
     // Tenant posture (get from tenant configuration)
     const tenantPosture = await this.getTenantSecurityPosture(request.tenantId);
@@ -385,7 +385,7 @@ export class SafetyV2Service {
     const tenantGuardrails = await this.getTenantGuardrails(tenantId);
 
     for (const guardrail of tenantGuardrails.values()) {
-      if (!guardrail.enabled) continue;
+      if (!guardrail.enabled) {continue;}
 
       let violationScore = 0;
       let matchCount = 0;
@@ -426,7 +426,7 @@ export class SafetyV2Service {
     inputText: string,
     outputText: string,
   ): Promise<number> {
-    if (!outputText) return 1.0; // No output to evaluate
+    if (!outputText) {return 1.0;} // No output to evaluate
 
     // Simple citation coverage analysis
     const factualIndicators = [
@@ -458,17 +458,17 @@ export class SafetyV2Service {
     factualIndicators.forEach((indicator) => {
       const regex = new RegExp(indicator, 'gi');
       const matches = outputText.match(regex);
-      if (matches) factualClaims += matches.length;
+      if (matches) {factualClaims += matches.length;}
     });
 
     // Count citations
     citationPatterns.forEach((pattern) => {
       const regex = new RegExp(pattern, 'gi');
       const matches = outputText.match(regex);
-      if (matches) citations += matches.length;
+      if (matches) {citations += matches.length;}
     });
 
-    if (factualClaims === 0) return 1.0; // No factual claims to cite
+    if (factualClaims === 0) {return 1.0;} // No factual claims to cite
 
     const coverage = Math.min(1.0, citations / factualClaims);
     return coverage;
@@ -512,7 +512,7 @@ export class SafetyV2Service {
     toxicWords.forEach((word) => {
       const regex = new RegExp(`\\b${word}\\b`, 'gi');
       const matches = text.match(regex);
-      if (matches) score += matches.length * 0.2;
+      if (matches) {score += matches.length * 0.2;}
     });
 
     return Math.min(1.0, score);
@@ -534,7 +534,7 @@ export class SafetyV2Service {
     biasIndicators.forEach((indicator) => {
       const regex = new RegExp(indicator, 'gi');
       const matches = text.match(regex);
-      if (matches) score += matches.length * 0.3;
+      if (matches) {score += matches.length * 0.3;}
     });
 
     return Math.min(1.0, score);
@@ -548,7 +548,7 @@ export class SafetyV2Service {
     for (const pattern of piiPatterns) {
       const regex = new RegExp(pattern, 'gi');
       const matches = text.match(regex);
-      if (matches) score += matches.length * 0.4;
+      if (matches) {score += matches.length * 0.4;}
     }
 
     return Math.min(1.0, score);
@@ -569,7 +569,7 @@ export class SafetyV2Service {
     jailbreakPatterns.forEach((pattern) => {
       const regex = new RegExp(pattern, 'gi');
       const matches = text.match(regex);
-      if (matches) score += matches.length * 0.5;
+      if (matches) {score += matches.length * 0.5;}
     });
 
     return Math.min(1.0, score);
@@ -584,7 +584,7 @@ export class SafetyV2Service {
     for (const pattern of injectionPatterns) {
       const regex = new RegExp(pattern, 'gi');
       const matches = text.match(regex);
-      if (matches) score += matches.length * 0.6;
+      if (matches) {score += matches.length * 0.6;}
     }
 
     return Math.min(1.0, score);
@@ -605,7 +605,7 @@ export class SafetyV2Service {
     misinformationIndicators.forEach((indicator) => {
       const regex = new RegExp(indicator, 'gi');
       const matches = text.match(regex);
-      if (matches) score += matches.length * 0.3;
+      if (matches) {score += matches.length * 0.3;}
     });
 
     return Math.min(1.0, score);

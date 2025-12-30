@@ -64,7 +64,7 @@ export class PolicyEngine extends EventEmitter {
   }
 
   public async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
 
     try {
       // Use process.cwd() to be safe against location changes
@@ -97,7 +97,7 @@ export class PolicyEngine extends EventEmitter {
    * Evaluate a policy decision
    */
   public async evaluate(context: PolicyContext): Promise<PolicyDecision> {
-    if (!this.initialized) await this.initialize();
+    if (!this.initialized) {await this.initialize();}
 
     // Determine environment mode
     const env = context.environment || process.env.NODE_ENV || 'dev';

@@ -66,7 +66,7 @@ const TimelineView = () => {
   }, [events, filterTypes, filterTags]);
 
   useEffect(() => {
-    if (!events.length) return;
+    if (!events.length) {return;}
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
@@ -128,7 +128,7 @@ const TimelineView = () => {
 
   const handleExportPNG = () => {
     const svgElement = svgRef.current;
-    if (!svgElement) return;
+    if (!svgElement) {return;}
     const serializer = new XMLSerializer();
     const svgString = serializer.serializeToString(svgElement);
     const canvas = document.createElement('canvas');
@@ -144,14 +144,14 @@ const TimelineView = () => {
       a.click();
     };
     img.src =
-      'data:image/svg+xml;base64,' +
-      window.btoa(unescape(encodeURIComponent(svgString)));
+      `data:image/svg+xml;base64,${ 
+      window.btoa(unescape(encodeURIComponent(svgString)))}`;
   };
 
   const handleExportJSON = () => {
     const dataStr =
-      'data:text/json;charset=utf-8,' +
-      encodeURIComponent(JSON.stringify(events, null, 2));
+      `data:text/json;charset=utf-8,${ 
+      encodeURIComponent(JSON.stringify(events, null, 2))}`;
     const a = document.createElement('a');
     a.href = dataStr;
     a.download = 'timeline.json';

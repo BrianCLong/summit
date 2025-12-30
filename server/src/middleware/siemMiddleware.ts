@@ -208,7 +208,7 @@ function processResponse(
   res: Response,
   config: SIEMMiddlewareOptions,
 ): void {
-  if (!req.siem || req.siem.skipLogging) return;
+  if (!req.siem || req.siem.skipLogging) {return;}
 
   const duration = Date.now() - req.siem.startTime;
 
@@ -556,7 +556,7 @@ function sanitizeHeaders(headers: any): Record<string, string> {
 }
 
 function sanitizeObject(obj: any): any {
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== 'object') {return obj;}
 
   const sanitized: any = {};
   const sensitiveKeys = ['password', 'token', 'secret', 'key', 'auth'];
@@ -567,7 +567,7 @@ function sanitizeObject(obj: any): any {
     ) {
       sanitized[key] = '[REDACTED]';
     } else if (typeof value === 'string' && value.length > 200) {
-      sanitized[key] = value.substring(0, 200) + '...';
+      sanitized[key] = `${value.substring(0, 200)  }...`;
     } else {
       sanitized[key] = value;
     }
@@ -577,11 +577,11 @@ function sanitizeObject(obj: any): any {
 }
 
 function sanitizeBody(body: any): any {
-  if (!body) return null;
+  if (!body) {return null;}
 
   const bodyStr = JSON.stringify(body);
   if (bodyStr.length > 1024) {
-    return bodyStr.substring(0, 1024) + '... [TRUNCATED]';
+    return `${bodyStr.substring(0, 1024)  }... [TRUNCATED]`;
   }
 
   return sanitizeObject(body);
@@ -608,11 +608,11 @@ function getRequiredPermissions(path: string): string[] {
 }
 
 function getDataType(path: string): string {
-  if (path.includes('/entities')) return 'entities';
-  if (path.includes('/relationships')) return 'relationships';
-  if (path.includes('/investigations')) return 'investigations';
-  if (path.includes('/graph')) return 'graph';
-  if (path.includes('/graphql')) return 'graphql';
+  if (path.includes('/entities')) {return 'entities';}
+  if (path.includes('/relationships')) {return 'relationships';}
+  if (path.includes('/investigations')) {return 'investigations';}
+  if (path.includes('/graph')) {return 'graph';}
+  if (path.includes('/graphql')) {return 'graphql';}
   return 'unknown';
 }
 

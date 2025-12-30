@@ -12,7 +12,7 @@ export default function useCollaborationLog(investigationId, currentUser) {
   const appliedOps = useRef(new Set());
 
   const upsertEntry = useCallback((entry) => {
-    if (!entry?.opId) return;
+    if (!entry?.opId) {return;}
     opCache.current.set(entry.opId, entry);
     setHistory((prev) => {
       const existingIndex = prev.findIndex((item) => item.opId === entry.opId);
@@ -27,13 +27,13 @@ export default function useCollaborationLog(investigationId, currentUser) {
 
   useEffect(() => {
     const socket = getSocket();
-    if (!socket || !investigationId) return undefined;
+    if (!socket || !investigationId) {return undefined;}
 
     socket.emit('collab:history', { investigationId });
 
     const handleOp = (entry) => {
-      if (entry?.investigationId !== investigationId) return;
-      if (appliedOps.current.has(entry.opId) && entry.status !== 'reapplied') return;
+      if (entry?.investigationId !== investigationId) {return;}
+      if (appliedOps.current.has(entry.opId) && entry.status !== 'reapplied') {return;}
       upsertEntry(entry);
       if (entry.authorId === currentUser?.id) {
         setUndoStack((prev) => [...prev, entry]);
@@ -43,7 +43,7 @@ export default function useCollaborationLog(investigationId, currentUser) {
     };
 
     const handleHistory = (payload) => {
-      if (payload?.investigationId !== investigationId) return;
+      if (payload?.investigationId !== investigationId) {return;}
       opCache.current = new Map(
         (payload.entries || []).map((entry) => [entry.opId, entry]),
       );
@@ -73,7 +73,7 @@ export default function useCollaborationLog(investigationId, currentUser) {
 
   const recordOperation = useCallback(
     (event, payload = {}) => {
-      if (!investigationId) return null;
+      if (!investigationId) {return null;}
       const opId = sendCollabEvent(event, {
         investigationId,
         baseVersion: history.length,
@@ -102,13 +102,13 @@ export default function useCollaborationLog(investigationId, currentUser) {
 
   const requestUndo = useCallback(() => {
     const socket = getSocket();
-    if (!socket || !investigationId) return;
+    if (!socket || !investigationId) {return;}
     socket.emit('collab:undo', { investigationId });
   }, [investigationId]);
 
   const requestRedo = useCallback(() => {
     const socket = getSocket();
-    if (!socket || !investigationId) return;
+    if (!socket || !investigationId) {return;}
     socket.emit('collab:redo', { investigationId });
   }, [investigationId]);
 
@@ -120,7 +120,7 @@ export default function useCollaborationLog(investigationId, currentUser) {
   const nextUnapplied = useCallback(
     (applier) => {
       const pending = timeline.find((entry) => !appliedOps.current.has(entry.opId));
-      if (!pending) return null;
+      if (!pending) {return null;}
       appliedOps.current.add(pending.opId);
       applier?.(pending);
       return pending;

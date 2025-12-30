@@ -339,8 +339,8 @@ export class ServiceResilienceManager {
       const metrics = cb.getMetrics();
       circuitBreakers[name] = metrics;
 
-      if (metrics.state === 'OPEN') openCircuits++;
-      if (metrics.state === 'HALF_OPEN') halfOpenCircuits++;
+      if (metrics.state === 'OPEN') {openCircuits++;}
+      if (metrics.state === 'HALF_OPEN') {halfOpenCircuits++;}
     }
 
     const bulkheads = this.bulkheadIsolator.getPoolStats();

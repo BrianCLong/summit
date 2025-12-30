@@ -168,7 +168,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
 
   // Voice control logic
   const startVoice = useCallback(() => {
-    if (!voiceEnabled) return;
+    if (!voiceEnabled) {return;}
     setIsListening(true);
     if (
       (window as any).SpeechRecognition ||
@@ -223,9 +223,9 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
 
   // ✅ subscribe exactly once per transport; no dependency on streamBuf
   useEffect(() => {
-    if (!transport) return;
+    if (!transport) {return;}
     const unsubscribe = transport.on((evt) => {
-      if (abortRef.current?.signal.aborted) return;
+      if (abortRef.current?.signal.aborted) {return;}
 
       switch (evt.type) {
         case 'status':
@@ -286,7 +286,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
   const handleSendMessage = useCallback(
     async (text?: string) => {
       const messageText = text || inputValue;
-      if (!messageText.trim()) return;
+      if (!messageText.trim()) {return;}
 
       const userMessage: Message = {
         id: `msg-${clock.now()}`,
@@ -296,7 +296,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
       };
 
       setMessages((prev) => [...prev, userMessage]);
-      if (!text) setInputValue(''); // Only clear if using current input
+      if (!text) {setInputValue('');} // Only clear if using current input
 
       if (transport) {
         // Use transport for testable async behavior
@@ -309,7 +309,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
           // Typing indicator delay – purely cosmetic, test-controlled
           pushTimer(
             clock.setTimeout(() => {
-              if (!abortRef.current?.signal.aborted) setStatus('streaming');
+              if (!abortRef.current?.signal.aborted) {setStatus('streaming');}
             }, typingDelayMs),
           );
 

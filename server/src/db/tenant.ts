@@ -81,7 +81,7 @@ export const withTenant = (
       // No following clause, append to end
       // Check if the query ends with a semicolon
       if (newQuery.endsWith(';')) {
-        newQuery = newQuery.slice(0, -1) + ` AND tenant_id = $${paramIndex};`;
+        newQuery = `${newQuery.slice(0, -1)  } AND tenant_id = $${paramIndex};`;
       } else {
         newQuery += ` AND tenant_id = $${paramIndex}`;
       }
@@ -98,7 +98,7 @@ export const withTenant = (
     } else {
        // No clauses, append to end
        if (newQuery.endsWith(';')) {
-         newQuery = newQuery.slice(0, -1) + ` WHERE tenant_id = $${paramIndex};`;
+         newQuery = `${newQuery.slice(0, -1)  } WHERE tenant_id = $${paramIndex};`;
        } else {
          newQuery += ` WHERE tenant_id = $${paramIndex}`;
        }

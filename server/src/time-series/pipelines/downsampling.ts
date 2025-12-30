@@ -1,7 +1,7 @@
 import { TimeSeriesRow } from '../types.js';
 
 export function downsampleAverage(rows: TimeSeriesRow[], bucketSize: number): TimeSeriesRow[] {
-  if (!rows.length || bucketSize <= 1) return rows;
+  if (!rows.length || bucketSize <= 1) {return rows;}
   const buckets: TimeSeriesRow[] = [];
 
   for (let i = 0; i < rows.length; i += bucketSize) {
@@ -19,7 +19,7 @@ export function largestTriangleThreeBuckets(rows: TimeSeriesRow[], threshold: nu
   }
 
   const sampled: TimeSeriesRow[] = [rows[0]];
-  let bucketSize = (rows.length - 2) / (threshold - 2);
+  const bucketSize = (rows.length - 2) / (threshold - 2);
   let a = 0;
 
   for (let i = 0; i < threshold - 2; i += 1) {

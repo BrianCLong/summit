@@ -2,7 +2,7 @@
 // Implementing simple Autoregressive (AR) and Exponential Smoothing
 
 export const simpleMovingAverage = (data: number[], window: number): number[] => {
-    if (data.length < window) return [];
+    if (data.length < window) {return [];}
     const result: number[] = [];
     for (let i = window; i <= data.length; i++) {
         const sum = data.slice(i - window, i).reduce((a, b) => a + b, 0);
@@ -12,7 +12,7 @@ export const simpleMovingAverage = (data: number[], window: number): number[] =>
 };
 
 export const exponentialSmoothing = (data: number[], alpha: number): number[] => {
-    if (data.length === 0) return [];
+    if (data.length === 0) {return [];}
     const result = [data[0]]; // Initialize with first observation
     for (let i = 1; i < data.length; i++) {
         const st = alpha * data[i] + (1 - alpha) * result[i - 1];
@@ -24,7 +24,7 @@ export const exponentialSmoothing = (data: number[], alpha: number): number[] =>
 // Simple linear regression for trend
 export const linearTrendForecast = (data: number[], horizon: number): number[] => {
     const n = data.length;
-    if (n < 2) return Array(horizon).fill(data[0] || 0);
+    if (n < 2) {return Array(horizon).fill(data[0] || 0);}
 
     let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
     for (let i = 0; i < n; i++) {

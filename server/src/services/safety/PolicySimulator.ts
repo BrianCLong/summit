@@ -25,11 +25,11 @@ export class PolicySimulator {
       const oldDecision = this.evaluate(oldPolicy, action);
       const newDecision = this.evaluate(newPolicy, action);
 
-      if (oldDecision) allowedByOld++;
-      if (newDecision) allowedByNew++;
+      if (oldDecision) {allowedByOld++;}
+      if (newDecision) {allowedByNew++;}
 
-      if (oldDecision && !newDecision) newDenials++;
-      if (!oldDecision && newDecision) newAllowances++;
+      if (oldDecision && !newDecision) {newDenials++;}
+      if (!oldDecision && newDecision) {newAllowances++;}
     }
 
     return `Policy Simulation Diff:
@@ -46,7 +46,7 @@ Impact Analysis:
 
   private evaluate(policy: Policy, action: string): boolean {
     // Simple mock logic: if policy has "ALLOW ALL" or specifically "ALLOW <action>"
-    if (policy.rules.includes('ALLOW ALL')) return true;
+    if (policy.rules.includes('ALLOW ALL')) {return true;}
     return policy.rules.includes(`ALLOW ${action}`);
   }
 }

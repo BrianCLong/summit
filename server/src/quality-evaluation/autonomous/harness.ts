@@ -17,7 +17,7 @@ export class EvaluationHarness {
     const { timeoutMs, maxSteps } = request.constraints;
 
     // 1. Validate constraints
-    if (timeoutMs > 30000) throw new Error("Timeout exceeds hard cap of 30s");
+    if (timeoutMs > 30000) {throw new Error("Timeout exceeds hard cap of 30s");}
 
     // 2. Setup execution context (Simulation of a sandbox)
     const context = {
@@ -115,7 +115,7 @@ export class EvaluationHarness {
     // Extremely basic safe evaluation for demo purposes
     // Supports: "exists", "maxLength <N>", "contains <STR>"
 
-    if (logic === 'exists') return target !== null && target !== undefined;
+    if (logic === 'exists') {return target !== null && target !== undefined;}
 
     if (logic.startsWith('maxLength')) {
       const max = parseInt(logic.split(' ')[1]);

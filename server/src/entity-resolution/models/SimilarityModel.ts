@@ -94,7 +94,7 @@ export class WeightedRuleBasedModel implements SimilarityModel {
       .map(f => f.name);
 
     let explanation = `Score ${score.toFixed(2)} based on: ${topFactors.join(', ')}`;
-    if (topFactors.length === 0) explanation = "No strong matches found.";
+    if (topFactors.length === 0) {explanation = "No strong matches found.";}
 
     return {
       score,

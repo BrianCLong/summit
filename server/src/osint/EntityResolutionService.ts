@@ -20,7 +20,7 @@ export class EntityResolutionService {
 
     // Check match by name (simplified) AND tenant isolation
     const match = EntityResolutionService.existingProfiles.find(p => {
-        if (p.tenantId !== profile.tenantId) return false;
+        if (p.tenantId !== profile.tenantId) {return false;}
 
         const pName = p.properties.name as string;
         return pName && nameToMatch && pName.toLowerCase() === nameToMatch.toLowerCase();

@@ -22,10 +22,10 @@ export async function cached<T>(
 ): Promise<T> {
   const r = getRedis();
   const cachedVal = await r.get(key);
-  if (cachedVal) return safeJsonParse<T>(cachedVal);
+  if (cachedVal) {return safeJsonParse<T>(cachedVal);}
 
   // Dogpile protection: check if request is already in flight locally
-  if (inflight.has(key)) return inflight.get(key) as Promise<T>;
+  if (inflight.has(key)) {return inflight.get(key) as Promise<T>;}
 
   const p = (async (): Promise<T> => {
     const v = await fn();

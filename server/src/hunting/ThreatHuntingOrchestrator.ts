@@ -84,7 +84,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
    * Initialize the orchestrator
    */
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {return;}
 
     try {
       await this.templateEngine.initialize();
@@ -262,7 +262,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
         }
       }
 
-      if (context.status === 'cancelled') return;
+      if (context.status === 'cancelled') {return;}
 
       // Phase 2: Generate Cypher queries
       context.status = 'executing_queries';
@@ -280,7 +280,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
           (execution.metrics.llmTokensUsed || 0) + queriesResult.tokensUsed.total;
       }
 
-      if (context.status === 'cancelled') return;
+      if (context.status === 'cancelled') {return;}
 
       // Phase 3: Execute queries in parallel
       execution.queryResults = await this.executeQueries(
@@ -288,7 +288,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
         context.configuration.maxResultsPerQuery
       );
 
-      if (context.status === 'cancelled') return;
+      if (context.status === 'cancelled') {return;}
 
       // Phase 4: Analyze results
       context.status = 'analyzing_results';
@@ -308,7 +308,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
           (execution.metrics.llmTokensUsed || 0) + analysisResult.tokensUsed.total;
       }
 
-      if (context.status === 'cancelled') return;
+      if (context.status === 'cancelled') {return;}
 
       // Phase 5: Enrich findings
       context.status = 'enriching_findings';
@@ -324,7 +324,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
         0
       );
 
-      if (context.status === 'cancelled') return;
+      if (context.status === 'cancelled') {return;}
 
       // Phase 6: Auto-remediation (if enabled)
       if (context.configuration.autoRemediate) {
@@ -682,7 +682,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
     ];
 
     const currentIndex = phases.indexOf(execution.context.status);
-    if (currentIndex === -1) return 0;
+    if (currentIndex === -1) {return 0;}
 
     return (currentIndex / (phases.length - 1)) * 100;
   }
@@ -737,7 +737,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
    * Estimate remaining time
    */
   private estimateRemainingTime(execution: HuntExecution, progress: number): number {
-    if (progress >= 100) return 0;
+    if (progress >= 100) {return 0;}
 
     const elapsed = Date.now() - execution.startTime;
     const progressDecimal = progress / 100;

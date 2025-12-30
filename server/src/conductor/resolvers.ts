@@ -119,7 +119,7 @@ export const conductorResolvers = {
         routingDecision.expert,
         estimatedCost,
         {
-          isEmergency: !!input.emergency_justification,
+          isEmergency: Boolean(input.emergency_justification),
           userId: securityContext.userId,
         },
       );

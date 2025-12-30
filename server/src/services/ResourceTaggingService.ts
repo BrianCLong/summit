@@ -379,12 +379,12 @@ export class ResourceTaggingService {
       const currentTotal = parseFloat(currentResult.rows[0]?.total || '0');
       const previousTotal = parseFloat(previousResult.rows[0]?.total || '0');
 
-      if (previousTotal === 0) return 'stable';
+      if (previousTotal === 0) {return 'stable';}
 
       const change = (currentTotal - previousTotal) / previousTotal;
 
-      if (change > 0.1) return 'increasing';
-      if (change < -0.1) return 'decreasing';
+      if (change > 0.1) {return 'increasing';}
+      if (change < -0.1) {return 'decreasing';}
       return 'stable';
     } catch (error) {
       logger.error({ error }, 'Failed to calculate trend');

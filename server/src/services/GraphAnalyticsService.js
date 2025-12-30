@@ -331,7 +331,7 @@ class GraphAnalyticsService {
       const nodeArray = Array.from(nodes);
       const nodeCount = nodeArray.length;
 
-      if (nodeCount === 0) return [];
+      if (nodeCount === 0) {return [];}
 
       // Initialize PageRank values
       let pageRank = {};

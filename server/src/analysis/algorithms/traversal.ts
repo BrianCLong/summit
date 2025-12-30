@@ -8,11 +8,11 @@ function buildAdjacencyList(graph: Graph, direction: 'in' | 'out' | 'both' = 'ou
 
   graph.edges.forEach(edge => {
     if (direction === 'out' || direction === 'both') {
-      if (!adj.has(edge.source)) adj.set(edge.source, []);
+      if (!adj.has(edge.source)) {adj.set(edge.source, []);}
       adj.get(edge.source)?.push(edge.target);
     }
     if (direction === 'in' || direction === 'both') {
-      if (!adj.has(edge.target)) adj.set(edge.target, []);
+      if (!adj.has(edge.target)) {adj.set(edge.target, []);}
       adj.get(edge.target)?.push(edge.source);
     }
   });
@@ -51,7 +51,7 @@ export function kHopNeighborhood(
         }
       }
     }
-    if (nextQueue.length === 0) break;
+    if (nextQueue.length === 0) {break;}
     queue = nextQueue;
   }
 

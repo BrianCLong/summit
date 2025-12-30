@@ -482,7 +482,7 @@ export class TenantIsolationMiddleware {
       },
 
       applyFieldMask(responseBody: any, fieldMask: string[]): any {
-        if (!responseBody || !fieldMask.length) return responseBody;
+        if (!responseBody || !fieldMask.length) {return responseBody;}
 
         // Recursively remove masked fields
         const maskFields = (obj: any): any => {

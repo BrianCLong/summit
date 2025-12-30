@@ -112,15 +112,15 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
   }, []);
 
   const formatFrequency = (hz: number): string => {
-    if (hz >= 1e9) return `${(hz / 1e9).toFixed(3)} GHz`;
-    if (hz >= 1e6) return `${(hz / 1e6).toFixed(3)} MHz`;
-    if (hz >= 1e3) return `${(hz / 1e3).toFixed(1)} kHz`;
+    if (hz >= 1e9) {return `${(hz / 1e9).toFixed(3)} GHz`;}
+    if (hz >= 1e6) {return `${(hz / 1e6).toFixed(3)} MHz`;}
+    if (hz >= 1e3) {return `${(hz / 1e3).toFixed(1)} kHz`;}
     return `${hz} Hz`;
   };
 
   const formatBandwidth = (hz: number): string => {
-    if (hz >= 1e6) return `${(hz / 1e6).toFixed(1)}M`;
-    if (hz >= 1e3) return `${(hz / 1e3).toFixed(0)}k`;
+    if (hz >= 1e6) {return `${(hz / 1e6).toFixed(1)}M`;}
+    if (hz >= 1e3) {return `${(hz / 1e3).toFixed(0)}k`;}
     return `${hz}`;
   };
 

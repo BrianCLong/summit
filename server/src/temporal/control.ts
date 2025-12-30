@@ -10,7 +10,7 @@ export function setTemporalHandle(
 
 export async function enableTemporal() {
   if (process.env.TEMPORAL_ENABLED === 'true')
-    return { ok: true, message: 'already enabled' } as any;
+    {return { ok: true, message: 'already enabled' } as any;}
   process.env.TEMPORAL_ENABLED = 'true';
   handle = await startTemporalWorker();
   return { ok: true } as any;
@@ -18,7 +18,7 @@ export async function enableTemporal() {
 
 export async function disableTemporal() {
   if (process.env.TEMPORAL_ENABLED !== 'true')
-    return { ok: true, message: 'already disabled' } as any;
+    {return { ok: true, message: 'already disabled' } as any;}
   process.env.TEMPORAL_ENABLED = 'false';
   try {
     await handle?.stop();

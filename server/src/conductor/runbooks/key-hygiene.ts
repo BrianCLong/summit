@@ -576,7 +576,7 @@ export class KeyHygieneManager {
         LIMIT 1
       `);
 
-      if (result.rows.length === 0) return null;
+      if (result.rows.length === 0) {return null;}
 
       const row = result.rows[0];
       return {
@@ -607,7 +607,7 @@ export class KeyHygieneManager {
         [fingerprint],
       );
 
-      if (result.rows.length === 0) return null;
+      if (result.rows.length === 0) {return null;}
 
       const row = result.rows[0];
       return {
@@ -670,7 +670,7 @@ export class KeyHygieneManager {
         [runbookId, version],
       );
 
-      if (result.rows.length === 0) return null;
+      if (result.rows.length === 0) {return null;}
 
       const row = result.rows[0];
       return {

@@ -57,11 +57,11 @@ export class ResourceCostAnalyzerService {
 
         // Fallback inference if serviceName not set (backward compatibility)
         if (serviceName === 'General') {
-          if (opt.id.includes('docling')) serviceName = 'DoclingService';
-          else if (opt.id.includes('db-pool')) serviceName = 'DatabaseService';
-          else if (opt.id.includes('ai-batch')) serviceName = 'LLMService';
-          else if (opt.type.includes('storage')) serviceName = 'StorageService';
-          else if (opt.type.includes('query')) serviceName = 'DatabaseService';
+          if (opt.id.includes('docling')) {serviceName = 'DoclingService';}
+          else if (opt.id.includes('db-pool')) {serviceName = 'DatabaseService';}
+          else if (opt.id.includes('ai-batch')) {serviceName = 'LLMService';}
+          else if (opt.type.includes('storage')) {serviceName = 'StorageService';}
+          else if (opt.type.includes('query')) {serviceName = 'DatabaseService';}
         }
 
         return {

@@ -21,7 +21,7 @@ export async function startKafkaSource(src: {
   group: string;
   runbook: string;
 }) {
-  if (!kafka) throw new Error('kafkajs not available');
+  if (!kafka) {throw new Error('kafkajs not available');}
   const consumer = kafka.consumer({ groupId: src.group });
   await consumer.connect();
   await consumer.subscribe({ topic: src.topic, fromBeginning: false });
@@ -30,7 +30,7 @@ export async function startKafkaSource(src: {
       const key = message.key?.toString() || `${partition}:${message.offset}`;
       const off = Number(message.offset);
       const ok = await claimOffset(src, partition, off);
-      if (!ok) return; // already processed
+      if (!ok) {return;} // already processed
       await triggerRunbook(src.runbook, {
         eventKey: key,
         value: message.value?.toString(),
@@ -60,7 +60,7 @@ export async function webhookHandler(req: any, res: any) {
   const sig =
     req.headers['x-hub-signature-256'] || req.headers['x-intelgraph-signature'];
   if (!verifyHmac(sig, req.rawBody, process.env.WEBHOOK_SECRET!))
-    return res.status(401).end();
+    {return res.status(401).end();}
   await triggerRunbook(req.query.runbook, {
     eventKey: req.headers['x-event-id'],
     value: req.body,
@@ -68,16 +68,16 @@ export async function webhookHandler(req: any, res: any) {
   res.sendStatus(202);
 }
 function verifyHmac(sig: string, body: Buffer, secret: string) {
-  if (!sig || !body || !secret) return false;
+  if (!sig || !body || !secret) {return false;}
 
   // Extract the hash from the signature (e.g., "sha256=abcd1234...")
   const parts = sig.split('=');
-  if (parts.length !== 2) return false;
+  if (parts.length !== 2) {return false;}
 
   const [algorithm, providedHash] = parts;
 
   // Support both sha256 and sha1 (though sha256 is preferred)
-  if (algorithm !== 'sha256' && algorithm !== 'sha1') return false;
+  if (algorithm !== 'sha256' && algorithm !== 'sha1') {return false;}
 
   // Compute the expected HMAC
   const hmac = createHmac(algorithm, secret);

@@ -36,7 +36,7 @@ function sanitize(value: any): any {
     sanitized = SanitizationUtils.removeDangerousContent(sanitized);
     return sanitized;
   }
-  if (Array.isArray(value)) return value.map(sanitize);
+  if (Array.isArray(value)) {return value.map(sanitize);}
   if (value && typeof value === 'object') {
     const result: Record<string, any> = {};
     for (const [key, val] of Object.entries(value)) {

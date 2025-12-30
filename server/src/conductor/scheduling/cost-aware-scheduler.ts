@@ -122,7 +122,7 @@ class QueueManager {
       0,
     );
 
-    if (tasks.length === 0) return null;
+    if (tasks.length === 0) {return null;}
 
     // Atomically remove from queue and update metrics
     const task = JSON.parse(tasks[0]);

@@ -58,7 +58,7 @@ export class CoordinationService {
 
   validateAction(coordinationId: string, agentId: string, role: CoordinationRole): boolean {
     const context = budgetManager.get(coordinationId);
-    if (!context) return false;
+    if (!context) {return false;}
 
     // Auto-register if not present (assuming implicit permission for now to unblock execution)
     // In a stricter system, this would be a separate explicit 'Delegate' step.
@@ -67,7 +67,7 @@ export class CoordinationService {
     }
 
     // Verify agent has the role
-    if (context.roles[agentId] !== role) return false;
+    if (context.roles[agentId] !== role) {return false;}
 
     // Budget check
     const budgetCheck = budgetManager.checkBudget(coordinationId);
@@ -83,7 +83,7 @@ export class CoordinationService {
 
   registerAgent(coordinationId: string, agentId: string, role: CoordinationRole) {
     const context = budgetManager.get(coordinationId);
-    if (!context) throw new Error('Context not found');
+    if (!context) {throw new Error('Context not found');}
 
     // Verify role allowed by schema
     if (!context.schema.roles.includes(role)) {
@@ -113,7 +113,7 @@ export class CoordinationService {
 
   killCoordination(coordinationId: string, reason: string) {
     const context = budgetManager.get(coordinationId);
-    if (!context || context.status !== 'ACTIVE') return;
+    if (!context || context.status !== 'ACTIVE') {return;}
 
     context.status = 'TERMINATED';
     context.endTime = new Date();

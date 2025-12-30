@@ -35,7 +35,7 @@ const navItems = [
 function useBasePath() {
   const location = useLocation();
   const segments = location.pathname.split('/').filter(Boolean);
-  if (segments.length === 0) return '/';
+  if (segments.length === 0) {return '/';}
   if (
     [
       'dashboard',
@@ -127,11 +127,11 @@ function LeftNav({ basePath }: { basePath: string }) {
 
 function useViewKey() {
   const location = useLocation();
-  if (location.pathname.includes('pipelines')) return 'pipelines';
-  if (location.pathname.includes('runs')) return 'runs';
-  if (location.pathname.includes('releases')) return 'releases';
-  if (location.pathname.includes('observability')) return 'observability';
-  if (location.pathname.includes('admin')) return 'admin';
+  if (location.pathname.includes('pipelines')) {return 'pipelines';}
+  if (location.pathname.includes('runs')) {return 'runs';}
+  if (location.pathname.includes('releases')) {return 'releases';}
+  if (location.pathname.includes('observability')) {return 'observability';}
+  if (location.pathname.includes('admin')) {return 'admin';}
   return 'dashboard';
 }
 

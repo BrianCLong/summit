@@ -152,7 +152,7 @@ export class CollaborationHub {
     },
   ): void {
     const { workspaceId, userId, userName } = payload;
-    if (!workspaceId || !userId) return;
+    if (!workspaceId || !userId) {return;}
 
     const workspace = this.getOrCreateWorkspace(workspaceId);
     const presence: PresenceState = {
@@ -187,10 +187,10 @@ export class CollaborationHub {
 
   private handleLeave(socket: Socket): void {
     const workspaceId = this.socketWorkspace.get(socket.id);
-    if (!workspaceId) return;
+    if (!workspaceId) {return;}
 
     const workspace = this.workspaceState.get(workspaceId);
-    if (!workspace) return;
+    if (!workspace) {return;}
 
     const departingUser = [...workspace.members.values()].find(
       (member) => member.workspaceId === workspaceId,
@@ -222,7 +222,7 @@ export class CollaborationHub {
     payload: { workspaceId: string; channel: string; userId: string; userName: string },
   ): void {
     const { workspaceId, channel, userId, userName } = payload;
-    if (!workspaceId || !channel || !userId) return;
+    if (!workspaceId || !channel || !userId) {return;}
 
     this.handlePresenceChannelLeave(socket);
 
@@ -255,11 +255,11 @@ export class CollaborationHub {
 
   private handlePresenceChannelLeave(socket: Socket): void {
     const presenceInfo = this.socketPresenceChannel.get(socket.id);
-    if (!presenceInfo) return;
+    if (!presenceInfo) {return;}
 
     const { workspaceId, channel, userId } = presenceInfo;
     const channelMembers = this.getPresenceChannel(workspaceId, channel);
-    if (!channelMembers) return;
+    if (!channelMembers) {return;}
 
     channelMembers.delete(userId);
     if (channelMembers.size === 0) {
@@ -289,20 +289,20 @@ export class CollaborationHub {
     },
   ): void {
     const presenceInfo = this.socketPresenceChannel.get(socket.id);
-    if (!presenceInfo) return;
+    if (!presenceInfo) {return;}
 
     const { workspaceId, channel, userId } = presenceInfo;
-    if (workspaceId !== payload.workspaceId || channel !== payload.channel) return;
+    if (workspaceId !== payload.workspaceId || channel !== payload.channel) {return;}
 
     const lastUpdate = this.lastPresenceUpdate.get(socket.id) ?? 0;
-    if (Date.now() - lastUpdate < this.presenceThrottleMs) return;
+    if (Date.now() - lastUpdate < this.presenceThrottleMs) {return;}
     this.lastPresenceUpdate.set(socket.id, Date.now());
 
     const channelMembers = this.getPresenceChannel(workspaceId, channel);
-    if (!channelMembers) return;
+    if (!channelMembers) {return;}
 
     const presence = channelMembers.get(userId);
-    if (!presence) return;
+    if (!presence) {return;}
 
     const updated: PresenceChannelState = {
       ...presence,
@@ -330,10 +330,10 @@ export class CollaborationHub {
   ): void {
     const { workspaceId, userId } = payload;
     const workspace = this.workspaceState.get(workspaceId);
-    if (!workspace) return;
+    if (!workspace) {return;}
 
     const presence = workspace.members.get(userId);
-    if (!presence) return;
+    if (!presence) {return;}
 
     const updated: PresenceState = {
       ...presence,
@@ -365,7 +365,7 @@ export class CollaborationHub {
   ): void {
     const { workspaceId, userId, message } = payload;
     const workspace = this.workspaceState.get(workspaceId);
-    if (!workspace || !message) return;
+    if (!workspace || !message) {return;}
 
     const chat: ChatMessage = {
       id: randomUUID(),
@@ -403,7 +403,7 @@ export class CollaborationHub {
   ): void {
     const { workspaceId, userId, targetId } = payload;
     const workspace = this.workspaceState.get(workspaceId);
-    if (!workspace || !targetId) return;
+    if (!workspace || !targetId) {return;}
 
     const annotationId = payload.annotationId ?? randomUUID();
     const existing = workspace.annotations.get(annotationId);
@@ -458,7 +458,7 @@ export class CollaborationHub {
   ): void {
     const { workspaceId, entityId, userId, version, changes } = payload;
     const workspace = this.workspaceState.get(workspaceId);
-    if (!workspace || !entityId) return;
+    if (!workspace || !entityId) {return;}
 
     const entityState = workspace.entities.get(entityId) ?? {
       version: 0,

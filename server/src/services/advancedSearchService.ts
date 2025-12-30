@@ -709,7 +709,7 @@ export class AdvancedSearchService extends EventEmitter {
   ): Promise<SearchResult[]> {
     const mockResults: SearchResult[] = [];
 
-    if (!query.timeRange) return mockResults;
+    if (!query.timeRange) {return mockResults;}
 
     for (let i = 0; i < Math.min(120, Math.random() * 180 + 25); i++) {
       const timestamp = new Date(
@@ -750,7 +750,7 @@ export class AdvancedSearchService extends EventEmitter {
   ): Promise<SearchResult[]> {
     const mockResults: SearchResult[] = [];
 
-    if (!query.geoLocation) return mockResults;
+    if (!query.geoLocation) {return mockResults;}
 
     for (let i = 0; i < Math.min(60, Math.random() * 100 + 10); i++) {
       const distance = Math.random() * query.geoLocation.radius;
@@ -813,7 +813,7 @@ export class AdvancedSearchService extends EventEmitter {
     results: SearchResult[],
     sort: SortCriteria[],
   ): SearchResult[] {
-    if (sort.length === 0) return results;
+    if (sort.length === 0) {return results;}
 
     return results.sort((a, b) => {
       for (const criteria of sort.sort((x, y) => x.priority - y.priority)) {
@@ -1114,10 +1114,10 @@ export class AdvancedSearchService extends EventEmitter {
   }
 
   private compareValues(a: any, b: any): number {
-    if (a === b) return 0;
-    if (a == null) return -1;
-    if (b == null) return 1;
-    if (typeof a === 'number' && typeof b === 'number') return a - b;
+    if (a === b) {return 0;}
+    if (a == null) {return -1;}
+    if (b == null) {return 1;}
+    if (typeof a === 'number' && typeof b === 'number') {return a - b;}
     return String(a).localeCompare(String(b));
   }
 

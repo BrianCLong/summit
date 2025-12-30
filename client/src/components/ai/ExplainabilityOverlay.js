@@ -6,7 +6,7 @@ export default function ExplainabilityOverlay({
   opacity = 0.4,
   children,
 }) {
-  if (!open) return null;
+  if (!open) {return null;}
 
   return (
     <Box

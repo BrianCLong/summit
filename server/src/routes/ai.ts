@@ -46,7 +46,7 @@ const videoAnalysisQueue = new Queue('videoAnalysisQueue', {
 
 const buildBackgroundKey = (req: AuthenticatedRequest, scope: string) => {
   const user = req.user;
-  if (user) return `user:${user.id || user.sub}:${scope}`;
+  if (user) {return `user:${user.id || user.sub}:${scope}`;}
   return `ip:${req.ip}:${scope}`;
 };
 

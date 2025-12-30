@@ -172,7 +172,7 @@ export class CypherTemplateEngine {
    */
   private parseTemplateSection(section: string, filePath: string): CypherTemplate | null {
     const lines = section.trim().split('\n');
-    if (lines.length < 2) return null;
+    if (lines.length < 2) {return null;}
 
     const name = lines[0].trim();
     const descriptionMatch = section.match(/\/\/\s*(.+?)(?:\n|$)/g);
@@ -192,7 +192,7 @@ export class CypherTemplateEngine {
     const queryStart = section.indexOf('MATCH');
     const query = queryStart >= 0 ? section.slice(queryStart).trim() : '';
 
-    if (!query) return null;
+    if (!query) {return null;}
 
     // Determine category from file path
     const category = this.inferCategory(filePath, name);
@@ -261,15 +261,15 @@ export class CypherTemplateEngine {
     const lowerPath = filePath.toLowerCase();
     const lowerName = name.toLowerCase();
 
-    if (lowerPath.includes('ioc') || lowerName.includes('ioc')) return 'ioc_hunting';
-    if (lowerName.includes('lateral') || lowerName.includes('movement')) return 'lateral_movement';
-    if (lowerName.includes('credential') || lowerName.includes('privilege')) return 'credential_access';
-    if (lowerName.includes('exfil') || lowerName.includes('staging')) return 'data_exfiltration';
-    if (lowerName.includes('persistence') || lowerName.includes('backdoor')) return 'persistence';
-    if (lowerName.includes('beacon') || lowerName.includes('c2')) return 'command_and_control';
-    if (lowerName.includes('infrastructure') || lowerName.includes('diamond')) return 'infrastructure';
-    if (lowerName.includes('supply') || lowerName.includes('vendor')) return 'supply_chain';
-    if (lowerName.includes('insider') || lowerName.includes('user')) return 'insider_threat';
+    if (lowerPath.includes('ioc') || lowerName.includes('ioc')) {return 'ioc_hunting';}
+    if (lowerName.includes('lateral') || lowerName.includes('movement')) {return 'lateral_movement';}
+    if (lowerName.includes('credential') || lowerName.includes('privilege')) {return 'credential_access';}
+    if (lowerName.includes('exfil') || lowerName.includes('staging')) {return 'data_exfiltration';}
+    if (lowerName.includes('persistence') || lowerName.includes('backdoor')) {return 'persistence';}
+    if (lowerName.includes('beacon') || lowerName.includes('c2')) {return 'command_and_control';}
+    if (lowerName.includes('infrastructure') || lowerName.includes('diamond')) {return 'infrastructure';}
+    if (lowerName.includes('supply') || lowerName.includes('vendor')) {return 'supply_chain';}
+    if (lowerName.includes('insider') || lowerName.includes('user')) {return 'insider_threat';}
 
     return 'general';
   }
@@ -403,10 +403,10 @@ export class CypherTemplateEngine {
   private getDefaultForType(type: TemplateParameter['type'], name: string): unknown {
     switch (type) {
       case 'number':
-        if (name.includes('hours')) return 24;
-        if (name.includes('days')) return 7;
-        if (name.includes('threshold')) return 10;
-        if (name.includes('hops') || name.includes('depth')) return 3;
+        if (name.includes('hours')) {return 24;}
+        if (name.includes('days')) {return 7;}
+        if (name.includes('threshold')) {return 10;}
+        if (name.includes('hops') || name.includes('depth')) {return 3;}
         return 100;
       case 'boolean':
         return true;

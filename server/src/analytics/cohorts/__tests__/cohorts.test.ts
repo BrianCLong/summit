@@ -4,7 +4,7 @@ import path from 'path';
 import { CohortEvaluator } from '../CohortEvaluator.js';
 import { Cohort } from '../types.js';
 
-const TEST_LOG_DIR = path.join(__dirname, 'test_logs_cohorts_' + Date.now());
+const TEST_LOG_DIR = path.join(__dirname, `test_logs_cohorts_${  Date.now()}`);
 
 describe('CohortEvaluator', () => {
     let evaluator: CohortEvaluator;

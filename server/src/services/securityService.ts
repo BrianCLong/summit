@@ -760,20 +760,20 @@ export class SecurityService extends EventEmitter {
     let risk = 0;
 
     // User-based risk factors
-    if (user.failedLoginAttempts > 0) risk += user.failedLoginAttempts * 0.1;
-    if (!user.mfaEnabled) risk += 0.2;
-    if (user.role === 'ADMIN') risk += 0.1; // Higher scrutiny for admins
+    if (user.failedLoginAttempts > 0) {risk += user.failedLoginAttempts * 0.1;}
+    if (!user.mfaEnabled) {risk += 0.2;}
+    if (user.role === 'ADMIN') {risk += 0.1;} // Higher scrutiny for admins
 
     // IP-based risk factors
-    if (!this.isInternalIP(ipAddress)) risk += 0.3;
-    if (this.isSuspiciousIP(ipAddress)) risk += 0.5;
+    if (!this.isInternalIP(ipAddress)) {risk += 0.3;}
+    if (this.isSuspiciousIP(ipAddress)) {risk += 0.5;}
 
     // Time-based risk factors
     const hour = new Date().getHours();
-    if (hour < 6 || hour > 22) risk += 0.2; // After hours access
+    if (hour < 6 || hour > 22) {risk += 0.2;} // After hours access
 
     // Device-based risk factors
-    if (this.isUnknownDevice(userAgent)) risk += 0.3;
+    if (this.isUnknownDevice(userAgent)) {risk += 0.3;}
 
     return Math.min(risk, 1.0); // Cap at 1.0
   }
@@ -810,7 +810,7 @@ export class SecurityService extends EventEmitter {
         );
       });
 
-      if (!allowed) return false;
+      if (!allowed) {return false;}
     }
 
     // Device restrictions
@@ -821,7 +821,7 @@ export class SecurityService extends EventEmitter {
       const allowed = deviceRestrictions.some(restriction =>
         restriction.allowedDeviceTypes?.includes(deviceType)
       );
-      if (!allowed) return false;
+      if (!allowed) {return false;}
     }
 
     return true;
@@ -915,8 +915,8 @@ export class SecurityService extends EventEmitter {
   }
 
   private detectDeviceType(userAgent: string): DeviceType {
-    if (userAgent.includes('Mobile')) return 'MOBILE';
-    if (userAgent.includes('Tablet')) return 'TABLET';
+    if (userAgent.includes('Mobile')) {return 'MOBILE';}
+    if (userAgent.includes('Tablet')) {return 'TABLET';}
     return 'DESKTOP';
   }
 

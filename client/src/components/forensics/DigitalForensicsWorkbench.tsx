@@ -558,11 +558,11 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {return '0 Bytes';}
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
   };
 
   const getStatusColor = (status: string) => {
@@ -593,18 +593,18 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
   };
 
   const filteredTimelineEvents = timelineEvents.filter((event) => {
-    if (timelineFilter === 'all') return true;
-    if (timelineFilter === 'flagged') return event.flagged;
-    if (timelineFilter === 'high_relevance') return event.relevance === 'high';
+    if (timelineFilter === 'all') {return true;}
+    if (timelineFilter === 'flagged') {return event.flagged;}
+    if (timelineFilter === 'high_relevance') {return event.relevance === 'high';}
     return event.type === timelineFilter;
   });
 
   const filteredEvidenceItems = evidenceItems.filter((item) => {
-    if (evidenceFilter === 'all') return true;
+    if (evidenceFilter === 'all') {return true;}
     if (evidenceFilter === 'pending_analysis')
-      return item.analysis.status === 'pending';
+      {return item.analysis.status === 'pending';}
     if (evidenceFilter === 'in_analysis')
-      return item.analysis.status === 'in_progress';
+      {return item.analysis.status === 'in_progress';}
     return item.type === evidenceFilter;
   });
 

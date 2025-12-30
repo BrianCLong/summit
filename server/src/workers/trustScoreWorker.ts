@@ -5,7 +5,7 @@ const INTERVAL_MS = Number(process.env.TRUST_WORKER_INTERVAL_MS || 60000);
 let timer: any;
 
 export function startTrustWorker() {
-  if (process.env.ENABLE_TRUST_WORKER !== 'true') return;
+  if (process.env.ENABLE_TRUST_WORKER !== 'true') {return;}
   const tenants = (process.env.TRUST_WORKER_TENANTS || 't0')
     .split(',')
     .map((s) => s.trim())
@@ -31,5 +31,5 @@ export function startTrustWorker() {
 }
 
 export function stopTrustWorker() {
-  if (timer) clearInterval(timer);
+  if (timer) {clearInterval(timer);}
 }

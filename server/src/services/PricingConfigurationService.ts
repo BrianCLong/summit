@@ -44,7 +44,7 @@ export class PricingConfigurationService {
                 [tenantId]
             );
 
-            if (res.rows.length > 0) return res.rows[0].rules;
+            if (res.rows.length > 0) {return res.rows[0].rules;}
 
             // Fallback to global
             const globalRes = await client.query(
@@ -91,7 +91,7 @@ export class PricingConfigurationService {
                 `SELECT * FROM bill_shock_caps WHERE tenant_id = $1`,
                 [tenantId]
             );
-            if (res.rows.length === 0) return null;
+            if (res.rows.length === 0) {return null;}
 
             const row = res.rows[0];
             return {

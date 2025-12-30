@@ -17,8 +17,8 @@ const DEFAULT_ENV_HEADER = 'x-tenant-environment';
 const DEFAULT_PRIVILEGE_HEADER = 'x-tenant-privilege-tier';
 
 const normalizeRoles = (roles: unknown): string[] => {
-  if (!roles) return [];
-  if (Array.isArray(roles)) return roles.map(String);
+  if (!roles) {return [];}
+  if (Array.isArray(roles)) {return roles.map(String);}
   return [String(roles)];
 };
 

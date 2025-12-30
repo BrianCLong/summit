@@ -41,8 +41,8 @@ const anomalySchema = Joi.object({
 });
 
 function ensureRole(user, allowedRoles = []) {
-  if (!user) throw new Error('Not authenticated');
-  if (allowedRoles.length === 0) return true;
+  if (!user) {throw new Error('Not authenticated');}
+  if (allowedRoles.length === 0) {return true;}
   const role = (user.role || '').toUpperCase();
   if (!allowedRoles.map((r) => r.toUpperCase()).includes(role)) {
     const err = new Error('Forbidden');
@@ -125,7 +125,7 @@ const resolvers = {
       try {
         const rlKey = `rl:expand:${user?.id || 'anon'}`;
         const cnt = await redis.incr(rlKey);
-        if (cnt === 1) await redis.expire(rlKey, 60);
+        if (cnt === 1) {await redis.expire(rlKey, 60);}
         if (cnt > (Number(process.env.RL_EXPAND_PER_MIN) || 120)) {
           const err = new Error('Rate limit exceeded');
           err.code = 'RATE_LIMITED';

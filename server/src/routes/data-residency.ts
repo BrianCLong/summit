@@ -158,7 +158,7 @@ router.post('/configure-kms', async (req, res) => {
       configuration: {
         provider: validatedConfig.provider,
         region: validatedConfig.region,
-        keyId: validatedConfig.keyId.substring(0, 8) + '***', // Masked for security
+        keyId: `${validatedConfig.keyId.substring(0, 8)  }***`, // Masked for security
       },
     });
 

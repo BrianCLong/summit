@@ -420,7 +420,7 @@ const MVP0Canvas = ({
 
   // Layout functions
   const runLayout = useCallback(() => {
-    if (!cyRef.current) return;
+    if (!cyRef.current) {return;}
 
     const layoutOptions = {
       fcose: {
@@ -496,8 +496,8 @@ const MVP0Canvas = ({
 
   // Performance status color
   const getPerformanceColor = (fps) => {
-    if (fps >= 55) return 'success';
-    if (fps >= 45) return 'warning';
+    if (fps >= 55) {return 'success';}
+    if (fps >= 45) {return 'warning';}
     return 'error';
   };
 

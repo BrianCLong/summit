@@ -34,9 +34,9 @@ type WithAuthorizationOptions<P> = {
 };
 
 const normalizeAction = (action?: string | null): string | null => {
-  if (!action) return null;
+  if (!action) {return null;}
   const normalized = normalizePermission(action);
-  if (normalized) return normalized;
+  if (normalized) {return normalized;}
   return action.toLowerCase();
 };
 
@@ -62,15 +62,15 @@ const resolveTenantScopes = (
       ? localStorage.getItem('tenantId') || undefined
       : undefined;
 
-  if (preferredTenant) return [preferredTenant];
-  if (storedTenant) return [storedTenant];
+  if (preferredTenant) {return [preferredTenant];}
+  if (storedTenant) {return [storedTenant];}
 
   return ['*'];
 };
 
 const resolveAllowedActions = (user: AuthUser | null | undefined): string[] => {
-  if (!user) return [];
-  if (user.role?.toUpperCase() === 'ADMIN') return ['*'];
+  if (!user) {return [];}
+  if (user.role?.toUpperCase() === 'ADMIN') {return ['*'];}
 
   const fromUser = (user.actionGrants || user.permissions || [])
     .map((action: string) => normalizeAction(action))
@@ -98,17 +98,17 @@ export function useAuthorization(preferredTenant?: string) {
 
   const canAccess = useCallback(
     ({ action, tenantId }: AccessRequest) => {
-      if (!user || !action) return false;
+      if (!user || !action) {return false;}
 
       const normalizedAction = normalizeAction(action);
-      if (!normalizedAction) return false;
+      if (!normalizedAction) {return false;}
 
       const actionAllowed =
         allowedActions.includes('*') || allowedActions.includes(normalizedAction);
 
-      if (!actionAllowed) return false;
+      if (!actionAllowed) {return false;}
 
-      if (!tenantId || tenantScopes.includes('*')) return true;
+      if (!tenantId || tenantScopes.includes('*')) {return true;}
 
       return tenantScopes.some(
         (tenant) => tenant.toLowerCase() === tenantId.toLowerCase(),
@@ -187,7 +187,7 @@ export function withAuthorization<P>(
   options: WithAuthorizationOptions<P>,
 ): (component: ComponentType<P>) => ComponentType<P> {
   return (Component: ComponentType<P>) =>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     function GuardedComponent(props: any) {
       const resolvedTenant =
         typeof options.tenantId === 'function'

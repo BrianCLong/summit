@@ -10,7 +10,7 @@ const copilotResolvers = {
     copilotEvents: async (_, { runId, afterId, limit }, { dataSources }) => {
       const { copilotOrchestrator } = dataSources;
       const run = await copilotOrchestrator.store.getRun(runId);
-      if (!run) throw new Error('Run not found');
+      if (!run) {throw new Error('Run not found');}
 
       return copilotOrchestrator.store.listEvents(runId, { afterId, limit });
     },
@@ -43,7 +43,7 @@ const copilotResolvers = {
       let goal = goalText;
       if (goalId && !goal) {
         const goalData = await getGoalById(goalId);
-        if (!goalData) throw new Error('Goal not found');
+        if (!goalData) {throw new Error('Goal not found');}
         goal = goalData.text;
       }
 
@@ -66,7 +66,7 @@ const copilotResolvers = {
     resumeCopilotRun: async (_, { runId }, { dataSources }) => {
       const { copilotOrchestrator } = dataSources;
       const run = await copilotOrchestrator.store.getRun(runId);
-      if (!run) throw new Error('Run not found');
+      if (!run) {throw new Error('Run not found');}
 
       return copilotOrchestrator.resumeRun(run);
     },
@@ -79,7 +79,7 @@ const copilotResolvers = {
         // Verify run exists
         const { copilotOrchestrator } = dataSources;
         const run = await copilotOrchestrator.store.getRun(runId);
-        if (!run) throw new Error('Run not found');
+        if (!run) {throw new Error('Run not found');}
 
         return pubsub.asyncIterator(`COPILOT_EVENT_${runId}`);
       },

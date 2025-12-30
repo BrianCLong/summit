@@ -58,7 +58,7 @@ export class QueryBudgetGuard {
   }
 
   public checkBudget(tenantId: string, cost: number = 1): boolean {
-    if (!this.enabled) return true;
+    if (!this.enabled) {return true;}
 
     const bucket = this.getBucket(tenantId);
     this.refill(bucket);
@@ -71,7 +71,7 @@ export class QueryBudgetGuard {
   }
 
   public consumeBudget(tenantId: string, cost: number = 1): void {
-    if (!this.enabled) return;
+    if (!this.enabled) {return;}
 
     const bucket = this.getBucket(tenantId);
     // Refill logic is handled in checkBudget, but we should ensure we are up to date
@@ -86,7 +86,7 @@ export class QueryBudgetGuard {
 
   public middleware() {
     return (req: Request, res: Response, next: NextFunction) => {
-      if (!this.enabled) return next();
+      if (!this.enabled) {return next();}
 
       const start = process.hrtime();
 

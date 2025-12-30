@@ -111,7 +111,7 @@ export class SavedQueryService {
       try {
         const res = await this.pool.query(query, [id, tenantId]);
         const found = res.rows[0];
-        if (!found) return null;
+        if (!found) {return null;}
 
         // Authorization check
         if (found.scope === 'private' && found.created_by !== userId) {

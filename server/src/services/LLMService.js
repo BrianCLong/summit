@@ -580,11 +580,11 @@ Answer:`;
         ),
         successRate:
           this.metrics.totalCompletions > 0
-            ? (
+            ? `${(
                 ((this.metrics.totalCompletions - this.metrics.errorCount) /
                   this.metrics.totalCompletions) *
                 100
-              ).toFixed(1) + '%'
+              ).toFixed(1)  }%`
             : '100%',
       },
     };

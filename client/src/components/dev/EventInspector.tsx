@@ -37,7 +37,7 @@ export function EventInspector() {
   );
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const originalLog = console.log;
     const originalError = console.error;

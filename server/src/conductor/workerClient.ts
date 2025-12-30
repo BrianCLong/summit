@@ -12,7 +12,7 @@ let inflight = 0;
 
 function pickTarget(): TargetState | null {
   const healthy = targets.filter((t) => t.healthy);
-  if (!healthy.length) return null;
+  if (!healthy.length) {return null;}
   rr = (rr + 1) % healthy.length;
   return healthy[rr];
 }
@@ -25,7 +25,7 @@ export async function executeOnWorker(
     await new Promise((r) => setTimeout(r, 50));
   }
   const t = pickTarget();
-  if (!t) throw new Error('no healthy workers');
+  if (!t) {throw new Error('no healthy workers');}
   inflight++;
   try {
     // Lazy import generated client at runtime (placeholder path)
@@ -44,7 +44,7 @@ export async function executeOnWorker(
       client.execute(req, (err: any, res: any) => {
         if (err) {
           t.failures++;
-          if (t.failures > 3) t.healthy = false;
+          if (t.failures > 3) {t.healthy = false;}
           reject(err);
         } else {
           t.failures = 0;
@@ -69,7 +69,7 @@ export function startWorkerHealthLoop() {
         t.failures = 0;
       } catch {
         t.failures++;
-        if (t.failures > 3) t.healthy = false;
+        if (t.failures > 3) {t.healthy = false;}
       }
     }
   }, 5000);

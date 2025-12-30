@@ -30,7 +30,7 @@ export class TelemetryLayer {
 
   public async logEvent(event: TelemetryEvent) {
     // 1. Write to JSONL (Async)
-    const line = JSON.stringify(event) + '\n';
+    const line = `${JSON.stringify(event)  }\n`;
     await fs.promises.appendFile(this.logFile, line);
 
     // 2. Update Graph

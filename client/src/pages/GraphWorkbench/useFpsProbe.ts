@@ -7,7 +7,7 @@ export function useFpsProbe(enabled = import.meta.env.DEV) {
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {return;}
 
     const loop = (timestamp: number) => {
       const delta = timestamp - lastFrameRef.current;

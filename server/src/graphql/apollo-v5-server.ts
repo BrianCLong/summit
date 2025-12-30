@@ -67,13 +67,13 @@ const permissions = shield({
     version: true,
     // Protected queries require authentication
     '*': (parent, args, context: GraphQLContext) => {
-      return !!context.user;
+      return Boolean(context.user);
     },
   },
   Mutation: {
     // All mutations require authentication
     '*': (parent, args, context: GraphQLContext) => {
-      return !!context.user;
+      return Boolean(context.user);
     },
   },
 });
@@ -111,7 +111,7 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
     await pgClient.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]);
   } catch (error) {
     logger.error('Failed to initialize Postgres client for request context', error);
-    if (pgClient) pgClient.release();
+    if (pgClient) {pgClient.release();}
     pgClient = undefined;
   }
 
@@ -240,7 +240,7 @@ export function createApolloV5Server(
             async willSendResponse(requestContext) {
               const { response } = requestContext;
               const body = response.body as any;
-              const hasErrors = !!(body.singleResult?.errors?.length || (body.kind === 'single' && body.singleResult?.errors?.length));
+              const hasErrors = Boolean(body.singleResult?.errors?.length || (body.kind === 'single' && body.singleResult?.errors?.length));
 
               const [seconds, nanoseconds] = process.hrtime(start);
               const duration = seconds + nanoseconds / 1e9;

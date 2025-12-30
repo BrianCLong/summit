@@ -284,7 +284,7 @@ export class Neo4jBatchWriter {
     const allResults: BatchResult[] = [];
 
     for (const [type, operations] of this.buffer) {
-      if (operations.length === 0) continue;
+      if (operations.length === 0) {continue;}
 
       // Take operations from buffer
       const batch = operations.splice(0, operations.length);
@@ -621,7 +621,7 @@ export class Neo4jBatchWriter {
 
   private async flushType(type: BatchOperationType): Promise<void> {
     const operations = this.buffer.get(type);
-    if (!operations || operations.length === 0) return;
+    if (!operations || operations.length === 0) {return;}
 
     const batch = operations.splice(0, this.config.maxBatchSize);
     this.stats.bufferSize -= batch.length;
@@ -643,10 +643,10 @@ export class Neo4jBatchWriter {
   // --------------------------------------------------------------------------
 
   private startFlushTimer(): void {
-    if (this.flushTimer) return;
+    if (this.flushTimer) {return;}
 
     this.flushTimer = setInterval(async () => {
-      if (this.isShuttingDown) return;
+      if (this.isShuttingDown) {return;}
 
       const totalBuffered = Array.from(this.buffer.values())
         .reduce((sum, ops) => sum + ops.length, 0);

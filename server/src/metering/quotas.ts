@@ -84,7 +84,7 @@ export class QuotaManager {
     // Since we only have daily rollup, we should sum all days in current month.
     // For this MVP, let's just get today's usage and assume the limit is Daily (or we fetch range).
 
-    const startOfMonth = today.slice(0, 7) + '-01';
+    const startOfMonth = `${today.slice(0, 7)  }-01`;
     const rows = await persistentUsageRepository.list(tenantId, startOfMonth, today);
 
     // Sum usage

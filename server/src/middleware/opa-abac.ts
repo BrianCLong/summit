@@ -84,7 +84,7 @@ export class OPAClient implements IOPAClient {
 
       span.setAttributes({
         'opa.result.type': typeof result,
-        'opa.result.allowed': (typeof result === 'object' && result !== null) ? result.allow : !!result,
+        'opa.result.allowed': (typeof result === 'object' && result !== null) ? result.allow : Boolean(result),
         'opa.response.status': response.status,
       });
 

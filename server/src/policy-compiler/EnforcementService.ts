@@ -122,7 +122,7 @@ export class EnforcementService {
       // For MVP, if target matches a key in retentionRegistry, we enforce.
       const retentionRule = plan.retentionRegistry[context.action.target];
       if (retentionRule) {
-        if (!modifications) modifications = { redactFields: [], filterClauses: [] };
+        if (!modifications) {modifications = { redactFields: [], filterClauses: [] };}
         // Generate a filter clause
         // e.g. "created_at > NOW() - retentionDays"
         modifications.filterClauses.push(`age_in_days <= ${retentionRule.retentionDays}`);

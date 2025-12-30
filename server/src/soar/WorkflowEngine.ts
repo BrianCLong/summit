@@ -26,7 +26,7 @@ export class WorkflowEngine {
       [runId]
     );
 
-    if (rows.length === 0) return;
+    if (rows.length === 0) {return;}
     const run = this.mapRun(rows[0]);
 
     // Fetch playbook
@@ -104,9 +104,9 @@ export class WorkflowEngine {
 
   private async executeStep(step: PlaybookStep, context: any): Promise<any> {
       if (step.type === 'action') {
-          if (!step.actionId) throw new Error('Action ID required');
+          if (!step.actionId) {throw new Error('Action ID required');}
           const action = this.registry.getAction(step.actionId);
-          if (!action) throw new Error(`Action ${step.actionId} not found`);
+          if (!action) {throw new Error(`Action ${step.actionId} not found`);}
 
           // Resolve params (simple variable substitution)
           const params = this.resolveParams(step.params, context);

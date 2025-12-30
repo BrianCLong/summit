@@ -34,7 +34,7 @@ export class VendorService {
 
   async updateVendor(id: string, data: Partial<Vendor>): Promise<Vendor | undefined> {
     const vendor = this.vendors.get(id);
-    if (!vendor) return undefined;
+    if (!vendor) {return undefined;}
 
     const updated: Vendor = {
       ...vendor,

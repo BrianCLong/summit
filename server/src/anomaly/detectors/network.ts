@@ -52,9 +52,9 @@ export class NetworkDetector implements Detector {
 
   private mapToResult(context: DetectionContext, node: AnomalyScore): AnomalyResult {
     let severity = Severity.LOW;
-    if (node.score > 0.9) severity = Severity.CRITICAL;
-    else if (node.score > 0.75) severity = Severity.HIGH;
-    else if (node.score > 0.5) severity = Severity.MEDIUM;
+    if (node.score > 0.9) {severity = Severity.CRITICAL;}
+    else if (node.score > 0.75) {severity = Severity.HIGH;}
+    else if (node.score > 0.5) {severity = Severity.MEDIUM;}
 
     return {
       isAnomaly: node.isAnomaly,

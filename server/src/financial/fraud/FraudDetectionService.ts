@@ -80,19 +80,19 @@ export class FraudDetectionService {
 
     // Run all detection rules
     const structuringAlert = await this.detectStructuring(transaction);
-    if (structuringAlert) alerts.push(structuringAlert);
+    if (structuringAlert) {alerts.push(structuringAlert);}
 
     const velocityAlert = await this.detectVelocityAnomaly(transaction);
-    if (velocityAlert) alerts.push(velocityAlert);
+    if (velocityAlert) {alerts.push(velocityAlert);}
 
     const geographicAlert = await this.detectGeographicAnomaly(transaction);
-    if (geographicAlert) alerts.push(geographicAlert);
+    if (geographicAlert) {alerts.push(geographicAlert);}
 
     const behaviorAlert = await this.detectBehaviorChange(transaction);
-    if (behaviorAlert) alerts.push(behaviorAlert);
+    if (behaviorAlert) {alerts.push(behaviorAlert);}
 
     const sanctionsAlert = await this.checkSanctions(transaction);
-    if (sanctionsAlert) alerts.push(sanctionsAlert);
+    if (sanctionsAlert) {alerts.push(sanctionsAlert);}
 
     // Store alerts
     for (const alert of alerts) {
@@ -236,7 +236,7 @@ export class FraudDetectionService {
    * Detect geographic anomalies - transactions from high-risk countries
    */
   private async detectGeographicAnomaly(transaction: Transaction): Promise<FraudAlert | null> {
-    if (!transaction.counterpartyCountry) return null;
+    if (!transaction.counterpartyCountry) {return null;}
 
     const isHighRisk = this.config.geographicRiskCountries.includes(
       transaction.counterpartyCountry,
@@ -297,7 +297,7 @@ export class FraudDetectionService {
       [transaction.tenantId, transaction.customerId],
     );
 
-    if (!rows[0]?.avg_amount) return null; // New customer, no history
+    if (!rows[0]?.avg_amount) {return null;} // New customer, no history
 
     const avgAmount = parseFloat(rows[0].avg_amount);
     const stddevAmount = parseFloat(rows[0].stddev_amount || '0');
@@ -352,8 +352,8 @@ export class FraudDetectionService {
    * Check transaction against sanctions lists
    */
   private async checkSanctions(transaction: Transaction): Promise<FraudAlert | null> {
-    if (!this.config.sanctionsScreeningEnabled) return null;
-    if (!transaction.counterpartyName) return null;
+    if (!this.config.sanctionsScreeningEnabled) {return null;}
+    if (!transaction.counterpartyName) {return null;}
 
     // Check against sanctions list
     const { rows } = await this.pg.query(
@@ -620,10 +620,10 @@ export class FraudDetectionService {
       riskScore += 10;
     }
 
-    if (riskScore >= 80) return 'severe';
-    if (riskScore >= 60) return 'high';
-    if (riskScore >= 40) return 'moderate';
-    if (riskScore >= 20) return 'low';
+    if (riskScore >= 80) {return 'severe';}
+    if (riskScore >= 60) {return 'high';}
+    if (riskScore >= 40) {return 'moderate';}
+    if (riskScore >= 20) {return 'low';}
     return 'minimal';
   }
 
@@ -980,7 +980,7 @@ export class FraudDetectionService {
 
   private calculateRiskScore(indicators: FraudIndicator[]): number {
     const totalWeight = indicators.reduce((sum, i) => sum + i.weight, 0);
-    if (totalWeight === 0) return 0;
+    if (totalWeight === 0) {return 0;}
 
     // Normalize weights and calculate weighted score
     let score = 0;
@@ -994,10 +994,10 @@ export class FraudDetectionService {
   }
 
   private scoreToRiskLevel(score: number): RiskLevel {
-    if (score >= 80) return 'severe';
-    if (score >= 60) return 'high';
-    if (score >= 40) return 'moderate';
-    if (score >= 20) return 'low';
+    if (score >= 80) {return 'severe';}
+    if (score >= 60) {return 'high';}
+    if (score >= 40) {return 'moderate';}
+    if (score >= 20) {return 'low';}
     return 'minimal';
   }
 

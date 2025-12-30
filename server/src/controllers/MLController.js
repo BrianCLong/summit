@@ -71,7 +71,7 @@ class MLController {
     try {
       const { investigationId, topK = 20 } = req.body || {};
       if (!investigationId)
-        return res.status(400).json({ error: 'investigationId required' });
+        {return res.status(400).json({ error: 'investigationId required' });}
       const driver = getNeo4jDriver();
       const session = driver.session();
       try {
@@ -90,8 +90,8 @@ class MLController {
         // Common neighbors heuristic in-memory
         const nbrs = new Map();
         for (const e of edges) {
-          if (!nbrs.has(e.source)) nbrs.set(e.source, new Set());
-          if (!nbrs.has(e.target)) nbrs.set(e.target, new Set());
+          if (!nbrs.has(e.source)) {nbrs.set(e.source, new Set());}
+          if (!nbrs.has(e.target)) {nbrs.set(e.target, new Set());}
           nbrs.get(e.source).add(e.target);
           nbrs.get(e.target).add(e.source);
         }
@@ -105,7 +105,7 @@ class MLController {
           for (let j = i + 1; j < nodes.length; j++) {
             const u = nodes[i],
               v = nodes[j];
-            if (existingUndir.has(`${u}->${v}`)) continue;
+            if (existingUndir.has(`${u}->${v}`)) {continue;}
             const a = nbrs.get(u) || new Set();
             const b = nbrs.get(v) || new Set();
             const common = [...a].filter((x) => b.has(x)).length;

@@ -70,7 +70,7 @@ describe('Metering Integrity', () => {
         (store as any).lastHash = '';
 
         // Clean up
-        if (fs.existsSync(testLogPath)) fs.unlinkSync(testLogPath);
+        if (fs.existsSync(testLogPath)) {fs.unlinkSync(testLogPath);}
 
         // 1. Append first event
         await store.append({
@@ -109,7 +109,7 @@ describe('Metering Integrity', () => {
         expect(tamperedResult.brokenAtLine).toBe(1); // Line 1 hash mismatch
 
         // Cleanup
-        if (fs.existsSync(testLogPath)) fs.unlinkSync(testLogPath);
+        if (fs.existsSync(testLogPath)) {fs.unlinkSync(testLogPath);}
     });
 
 });

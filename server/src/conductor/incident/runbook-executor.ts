@@ -521,7 +521,7 @@ export class RunbookExecutor extends EventEmitter {
     // Basic guardrails against unsafe tokens
     const forbidden =
       /(process|require|global|window|this|constructor|Function|eval)/i;
-    if (forbidden.test(expr)) throw new Error('Forbidden token in condition');
+    if (forbidden.test(expr)) {throw new Error('Forbidden token in condition');}
     // Expose context as a variable; no with(), no global access
     const fn = new Function(
       'context',
@@ -529,7 +529,7 @@ export class RunbookExecutor extends EventEmitter {
       const ctx=context; const $=get; return !!(${expr});`,
     );
     try {
-      return !!fn(context);
+      return Boolean(fn(context));
     } catch (e: any) {
       throw new Error(`Condition eval error: ${e.message}`);
     }

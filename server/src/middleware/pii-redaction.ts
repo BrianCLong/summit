@@ -1,6 +1,6 @@
 // Simple PII redaction utilities for logs (best-effort)
 export function redactPII(input: unknown): unknown {
-  if (input == null) return input;
+  if (input == null) {return input;}
   try {
     const str = typeof input === 'string' ? input : JSON.stringify(input);
     // Email

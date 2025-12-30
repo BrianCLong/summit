@@ -39,7 +39,7 @@ export default function AdvancedGraphView({
   const cyRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [insightsOpen, setInsightsOpen] = useState(() =>
-    localStorage.getItem('graph.aiPanelOpen') === '0' ? false : true,
+    localStorage.getItem('graph.aiPanelOpen') !== '0',
   );
   const [lodLabels, setLodLabels] = useState(true);
   const [layoutName, setLayoutName] = useState(
@@ -48,7 +48,7 @@ export default function AdvancedGraphView({
   const tooltipRef = useRef(null);
   const overlayCanvasRef = useRef(null);
   const [spriteLabels, setSpriteLabels] = useState(() =>
-    localStorage.getItem('graph.spriteLabels') === '1' ? true : false,
+    localStorage.getItem('graph.spriteLabels') === '1',
   );
   const [edgeInspectorOpen, setEdgeInspectorOpen] = useState(false);
   const [edgeDetail, setEdgeDetail] = useState(null);
@@ -70,23 +70,23 @@ export default function AdvancedGraphView({
         cy.startBatch();
         nSlice.forEach((n) => {
           if (!cy.getElementById(n.id).nonempty())
-            cy.add({ group: 'nodes', data: n });
+            {cy.add({ group: 'nodes', data: n });}
         });
         eSlice.forEach((e) => {
           if (!cy.getElementById(e.id).nonempty())
-            cy.add({ group: 'edges', data: e });
+            {cy.add({ group: 'edges', data: e });}
         });
         cy.endBatch();
         i += chunk;
         j += chunk;
-        if (i < nodes.length || j < edges.length) ric(step);
+        if (i < nodes.length || j < edges.length) {ric(step);}
       }
       ric(step);
     };
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
 
     const cy = cytoscape({
       container: containerRef.current,
@@ -216,7 +216,7 @@ export default function AdvancedGraphView({
       setEdgeInspectorOpen(true);
     });
     cy.on('tap', (evt) => {
-      if (evt.target === cy) dispatch(g.clearSelection());
+      if (evt.target === cy) {dispatch(g.clearSelection());}
     });
     cy.on('cxttap', 'node, edge', (evt) => {
       const pos = evt.renderedPosition || evt.position;
@@ -285,7 +285,7 @@ export default function AdvancedGraphView({
     let lastShow = 0;
     const showTooltip = (text, x, y) => {
       const now = performance.now();
-      if (now - lastShow < 50) return; // throttle ~20fps
+      if (now - lastShow < 50) {return;} // throttle ~20fps
       lastShow = now;
       tooltip.textContent = text;
       tooltip.style.left = `${x + 12}px`;
@@ -333,7 +333,7 @@ export default function AdvancedGraphView({
 
     const onExploreSubgraph = () => {
       const sel = cy.elements(':selected');
-      if (sel.length === 0) return;
+      if (sel.length === 0) {return;}
       const nodes = sel.nodes().map((n) => ({
         data: { ...n.data(), id: n.id() },
         position: n.position(),
@@ -356,14 +356,14 @@ export default function AdvancedGraphView({
       nodes.forEach((n) => {
         const node = cy.getElementById(n.id);
         if (node && node.nonempty()) {
-          if (n.position) node.position(n.position);
-          if (n.data) node.data({ ...node.data(), ...n.data });
+          if (n.position) {node.position(n.position);}
+          if (n.data) {node.data({ ...node.data(), ...n.data });}
         }
       });
       edges.forEach((e) => {
         const edge = cy.getElementById(e.id);
         if (edge && edge.nonempty() && e.data)
-          edge.data({ ...edge.data(), ...e.data });
+          {edge.data({ ...edge.data(), ...e.data });}
       });
     };
     document.addEventListener('graph:syncSubgraph', onSyncSubgraph);
@@ -378,16 +378,16 @@ export default function AdvancedGraphView({
     overlayCanvasRef.current = canvas;
 
     const drawSprites = () => {
-      if (!overlayCanvasRef.current) return;
+      if (!overlayCanvasRef.current) {return;}
       const c = overlayCanvasRef.current;
       const rect = containerRef.current.getBoundingClientRect();
       c.width = rect.width;
       c.height = rect.height;
       const ctx = c.getContext('2d');
       ctx.clearRect(0, 0, c.width, c.height);
-      if (!spriteLabels) return;
+      if (!spriteLabels) {return;}
       const z = cy.zoom();
-      if (z < LABEL_ZOOM_THRESHOLD) return;
+      if (z < LABEL_ZOOM_THRESHOLD) {return;}
       ctx.fillStyle = 'rgba(0,0,0,0.75)';
       ctx.font = '11px sans-serif';
       ctx.textBaseline = 'top';
@@ -552,7 +552,7 @@ export default function AdvancedGraphView({
                 },
               ];
               const cy = cyRef.current;
-              if (!cy) return;
+              if (!cy) {return;}
               addElementsChunked(cy, seedNodes, seedEdges, 1000);
             }}
           >

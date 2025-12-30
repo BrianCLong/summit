@@ -25,7 +25,7 @@ export class CorrelationService {
       list.sort((a, b) => a.timestamp - b.timestamp);
 
       let bucket: AlertEvent[] = [];
-      if (list.length === 0) continue;
+      if (list.length === 0) {continue;}
 
       let start = list[0].timestamp;
 
@@ -61,9 +61,9 @@ export class CorrelationService {
     const end = events[events.length - 1].timestamp;
     let severity: Incident['severity'] = 'low';
 
-    if (events.length >= 5) severity = 'critical';
-    else if (events.length >= 3) severity = 'high';
-    else if (events.length === 2) severity = 'medium';
+    if (events.length >= 5) {severity = 'critical';}
+    else if (events.length >= 3) {severity = 'high';}
+    else if (events.length === 2) {severity = 'medium';}
 
     return {
       id: crypto.randomUUID(),

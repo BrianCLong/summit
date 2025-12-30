@@ -132,7 +132,7 @@ export class CrossBorderMetrics {
 
   incCounter(name: string, labels: MetricLabels = {}, value = 1): void {
     const counter = this.counters.get(name);
-    if (!counter) return;
+    if (!counter) {return;}
 
     const key = this.labelsToKey(labels);
     const current = counter.values.get(key) || 0;
@@ -146,7 +146,7 @@ export class CrossBorderMetrics {
 
   setGauge(name: string, value: number, labels: MetricLabels = {}): void {
     const gauge = this.gauges.get(name);
-    if (!gauge) return;
+    if (!gauge) {return;}
 
     const key = this.labelsToKey(labels);
     gauge.values.set(key, value);
@@ -154,7 +154,7 @@ export class CrossBorderMetrics {
 
   incGauge(name: string, labels: MetricLabels = {}, value = 1): void {
     const gauge = this.gauges.get(name);
-    if (!gauge) return;
+    if (!gauge) {return;}
 
     const key = this.labelsToKey(labels);
     const current = gauge.values.get(key) || 0;
@@ -183,7 +183,7 @@ export class CrossBorderMetrics {
 
   observeHistogram(name: string, value: number, labels: MetricLabels = {}): void {
     const histogram = this.histograms.get(name);
-    if (!histogram) return;
+    if (!histogram) {return;}
 
     const key = this.labelsToKey(labels);
     let data = histogram.values.get(key);
@@ -228,7 +228,7 @@ export class CrossBorderMetrics {
   }
 
   private keyToLabels(key: string): string {
-    if (!key) return '';
+    if (!key) {return '';}
     return `{${key}}`;
   }
 

@@ -46,7 +46,7 @@ const RESERVED_DISCOUNT = Number(process.env.CAPACITY_RESERVED_DISCOUNT || '0.8'
 const DEFAULT_TENANT = 'default';
 
 function normalizeTenant(tenantId?: string | null) {
-  if (tenantId === undefined) return DEFAULT_TENANT;
+  if (tenantId === undefined) {return DEFAULT_TENANT;}
   return tenantId;
 }
 
@@ -253,7 +253,7 @@ function filterEligiblePools(
   pools: PoolInfo[],
   residency?: string,
 ): PoolInfo[] {
-  if (!residency) return pools;
+  if (!residency) {return pools;}
   return pools.filter((p) =>
     p.region.toLowerCase().startsWith(residency.toLowerCase()),
   );
@@ -291,11 +291,11 @@ export async function getEligibleReservedPools(
   const eligible: EligibleReservedPool[] = [];
   for (const row of rows) {
     const reservation = mapRow(row);
-    if (!allowedPoolIds.has(reservation.poolId)) continue;
+    if (!allowedPoolIds.has(reservation.poolId)) {continue;}
     const price = estimatePoolPrice(poolPrices[reservation.poolId], est, RESERVED_DISCOUNT);
-    if (price === null) continue;
+    if (price === null) {continue;}
     const pool = poolMap.get(reservation.poolId);
-    if (!pool) continue;
+    if (!pool) {continue;}
     eligible.push({ reservation, pool, effectivePrice: price });
   }
 

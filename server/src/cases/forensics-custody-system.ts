@@ -164,7 +164,7 @@ export class InMemoryForensicsRepository implements ForensicsRepository {
   }
 
   async listAccessLogs(evidenceId?: string): Promise<AccessLogEntry[]> {
-    if (!evidenceId) return [...this.accessLogs];
+    if (!evidenceId) {return [...this.accessLogs];}
     return this.accessLogs.filter((log) => log.evidenceId === evidenceId);
   }
 
@@ -175,7 +175,7 @@ export class InMemoryForensicsRepository implements ForensicsRepository {
   async listVerifications(
     evidenceId?: string,
   ): Promise<IntegrityVerificationResult[]> {
-    if (!evidenceId) return [...this.verifications];
+    if (!evidenceId) {return [...this.verifications];}
     return this.verifications.filter((entry) => entry.evidenceId === evidenceId);
   }
 
@@ -184,7 +184,7 @@ export class InMemoryForensicsRepository implements ForensicsRepository {
   }
 
   async listLegalHolds(evidenceId?: string): Promise<LegalHoldRecord[]> {
-    if (!evidenceId) return [...this.legalHolds];
+    if (!evidenceId) {return [...this.legalHolds];}
     return this.legalHolds.filter((hold) => hold.evidenceId === evidenceId);
   }
 }
@@ -354,7 +354,7 @@ export class ForensicsCustodySystem {
 
   async verifyCustodyChain(evidenceId: string): Promise<boolean> {
     const events = await this.ledger.list(evidenceId);
-    if (!events.length) return false;
+    if (!events.length) {return false;}
     let prevHash = 'GENESIS';
     for (const event of events) {
       const payload = {
@@ -368,14 +368,14 @@ export class ForensicsCustodySystem {
       const hash = createHash('sha256')
         .update(prevHash + JSON.stringify(payload))
         .digest('hex');
-      if (hash !== event.eventHash) return false;
+      if (hash !== event.eventHash) {return false;}
       const ok = verify(
         null,
         Buffer.from(event.eventHash),
         this.signer.publicKey,
         Buffer.from(event.signature, 'base64'),
       );
-      if (!ok) return false;
+      if (!ok) {return false;}
       prevHash = event.eventHash;
     }
     return true;
@@ -399,16 +399,16 @@ export class ForensicsCustodySystem {
         verified,
         eventCount: events.length,
       });
-      if (verified) verifiedChains += 1;
+      if (verified) {verifiedChains += 1;}
     }
 
     const lastVerification = verifications.reduce<Date | null>((latest, current) => {
-      if (!latest || current.checkedAt > latest) return current.checkedAt;
+      if (!latest || current.checkedAt > latest) {return current.checkedAt;}
       return latest;
     }, null);
 
     const justifiedAccessCount = accessLogs.filter(
-      (log) => !!log.legalBasis && !!log.reason,
+      (log) => Boolean(log.legalBasis) && Boolean(log.reason),
     ).length;
 
     const verifiedEvidence = new Set(

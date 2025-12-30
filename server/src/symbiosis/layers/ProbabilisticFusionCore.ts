@@ -15,7 +15,7 @@ export class ProbabilisticFusionCore {
     // Group by key
     for (const input of inputs) {
       for (const [key, value] of Object.entries(input.facts)) {
-        if (!keyMap.has(key)) keyMap.set(key, []);
+        if (!keyMap.has(key)) {keyMap.set(key, []);}
         keyMap.get(key)!.push({ ...input, facts: { [key]: value } });
       }
     }
@@ -27,7 +27,7 @@ export class ProbabilisticFusionCore {
       } else {
         // Simple weighted fusion
         let bestBelief = beliefs[0];
-        let maxConfidence = -1;
+        const maxConfidence = -1;
 
         // Check for conflicts
         const values = new Set(beliefs.map(b => JSON.stringify(b.facts[key])));

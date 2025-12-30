@@ -439,7 +439,7 @@ if (process.env.TEST_MODE === 'integration') {
         let connectedCount = 0;
         const checkConnected = () => {
           connectedCount++;
-          if (connectedCount === 2) done();
+          if (connectedCount === 2) {done();}
         };
 
         clientSocket1.on('connect', checkConnected);

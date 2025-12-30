@@ -13,7 +13,7 @@ export class SimpleGraphEngine {
     // Initialize adjacency list
     snapshot.nodes.forEach(n => this.adjacencyList.set(n.id, []));
     snapshot.edges.forEach(e => {
-      if (!this.adjacencyList.has(e.source)) this.adjacencyList.set(e.source, []);
+      if (!this.adjacencyList.has(e.source)) {this.adjacencyList.set(e.source, []);}
       this.adjacencyList.get(e.source)?.push(e.target);
 
       // Assuming undirected for some metrics, or directed for others.
@@ -34,12 +34,12 @@ export class SimpleGraphEngine {
   private calculateDensity(): number {
     const n = this.nodes.size;
     const e = this.edges.length;
-    if (n <= 1) return 0;
+    if (n <= 1) {return 0;}
     return e / (n * (n - 1)); // Directed density
   }
 
   private calculateAvgDegree(): number {
-    if (this.nodes.size === 0) return 0;
+    if (this.nodes.size === 0) {return 0;}
     return this.edges.length / this.nodes.size;
   }
 
@@ -58,8 +58,8 @@ export class SimpleGraphEngine {
     // Standard degree centrality in directed graph is often In+Out or split.
     // Let's do total degree.
     this.edges.forEach(e => {
-        if (centrality[e.source] !== undefined) centrality[e.source]++;
-        if (centrality[e.target] !== undefined) centrality[e.target]++;
+        if (centrality[e.source] !== undefined) {centrality[e.source]++;}
+        if (centrality[e.target] !== undefined) {centrality[e.target]++;}
     });
 
     // Normalize
@@ -109,7 +109,7 @@ export class SimpleGraphEngine {
 
   public calculatePageRank(iterations: number = 20, damping: number = 0.85): Record<string, number> {
     const N = this.nodes.size;
-    if (N === 0) return {};
+    if (N === 0) {return {};}
 
     let ranks: Record<string, number> = {};
     this.nodes.forEach(n => ranks[n.id] = 1 / N);

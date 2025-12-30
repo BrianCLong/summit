@@ -18,7 +18,7 @@ export class ReconciliationEngine {
 
   async runPair(pairId: string) {
     const pair = this.pairs.get(pairId);
-    if (!pair) throw new Error(`Unknown drift pair ${pairId}`);
+    if (!pair) {throw new Error(`Unknown drift pair ${pairId}`);}
 
     const startedAt = new Date();
     const source = await pair.loadSource();

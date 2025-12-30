@@ -44,8 +44,8 @@ interface Contradiction {
 }
 
 export function merkleRoot(hashes: string[]): string {
-  if (hashes.length === 0) return '';
-  if (hashes.length === 1) return hashes[0];
+  if (hashes.length === 0) {return '';}
+  if (hashes.length === 1) {return hashes[0];}
 
   let layer = hashes.map((h) => Buffer.from(h, 'hex'));
 
@@ -224,7 +224,7 @@ export class ProvenanceLedger {
       [runId],
     );
 
-    if (rows.length === 0) return;
+    if (rows.length === 0) {return;}
 
     const evidenceList: Evidence[] = rows.map((row) => ({
       id: row.id,
@@ -382,7 +382,7 @@ export class ProvenanceLedger {
       [newClaimId],
     );
 
-    if (!newClaimRows.length) return;
+    if (!newClaimRows.length) {return;}
     const newClaim = newClaimRows[0];
 
     // Find potentially contradicting claims (same run, different statements)

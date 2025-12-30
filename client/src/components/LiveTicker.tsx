@@ -47,7 +47,7 @@ export default function LiveTicker() {
   useSubscription(ENTITY_CREATED, {
     onData: ({ data }) => {
       const entity = data.data?.entityCreated;
-      if (!entity) return;
+      if (!entity) {return;}
       setItems((prev) => [
         {
           id: entity.id,
@@ -65,7 +65,7 @@ export default function LiveTicker() {
   useSubscription(RELATIONSHIP_CREATED, {
     onData: ({ data }) => {
       const rel = data.data?.relationshipCreated;
-      if (!rel) return;
+      if (!rel) {return;}
       setItems((prev) => [
         {
           id: rel.id,

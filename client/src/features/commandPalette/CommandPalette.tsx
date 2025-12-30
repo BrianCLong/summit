@@ -96,7 +96,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       .filter(Boolean) as Command[];
 
     resolvedRecents.forEach((cmd) => {
-      if (seen.has(cmd.id)) return;
+      if (seen.has(cmd.id)) {return;}
       seen.add(cmd.id);
       recentCommands.push({ command: cmd, section: 'Recent' });
     });
@@ -151,7 +151,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       onClose();
       return;
     }
-    if (!displayCommands.length) return;
+    if (!displayCommands.length) {return;}
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       setHighlightedIndex((prev) => (prev + 1) % displayCommands.length);

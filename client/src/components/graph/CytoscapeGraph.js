@@ -411,7 +411,7 @@ function CytoscapeGraph() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!selectedNode) return;
+    if (!selectedNode) {return;}
     const fetchSuggestions = async () => {
       try {
         const res = await fetch('/ai/suggest-links', {
@@ -435,7 +435,7 @@ function CytoscapeGraph() {
   }, [selectedNode, nodes, edges]);
 
   useEffect(() => {
-    if (!cy) return;
+    if (!cy) {return;}
     cy.edges('[suggested]').remove();
     suggestedEdges.forEach((e) => {
       cy.add({
@@ -532,7 +532,7 @@ function CytoscapeGraph() {
 
       // LOD update function
       const updateLOD = () => {
-        if (!cytoscapeInstance) return;
+        if (!cytoscapeInstance) {return;}
 
         const zoom = cytoscapeInstance.zoom();
         const numElements = cytoscapeInstance.elements().size();
@@ -598,7 +598,7 @@ function CytoscapeGraph() {
 
   // Collaboration heatmap overlay: subscribe to analytics events and update node styles
   useEffect(() => {
-    if (!cy) return;
+    if (!cy) {return;}
     let socket;
     try {
       const url = import.meta?.env?.VITE_WS_URL || undefined;
@@ -693,7 +693,7 @@ function CytoscapeGraph() {
   ).current; // Debounce for 300ms
   // Apply AI Insights highlighting
   useEffect(() => {
-    if (!cy) return;
+    if (!cy) {return;}
 
     if (
       highlightEnabled &&
@@ -778,7 +778,7 @@ function CytoscapeGraph() {
 
   const highlightConnectedElements = useCallback(
     (node) => {
-      if (!cy) return;
+      if (!cy) {return;}
 
       cy.elements().removeClass('highlighted dimmed');
 
@@ -798,7 +798,7 @@ function CytoscapeGraph() {
 
   const highlightEdge = useCallback(
     (edge) => {
-      if (!cy) return;
+      if (!cy) {return;}
 
       cy.elements().removeClass('highlighted dimmed');
 
@@ -813,7 +813,7 @@ function CytoscapeGraph() {
   );
 
   const clearHighlights = useCallback(() => {
-    if (!cy) return;
+    if (!cy) {return;}
     cy.elements().removeClass('highlighted dimmed');
   }, [cy]);
 
@@ -826,15 +826,15 @@ function CytoscapeGraph() {
   };
 
   const handleZoomIn = () => {
-    if (cy) cy.zoom(cy.zoom() * 1.2);
+    if (cy) {cy.zoom(cy.zoom() * 1.2);}
   };
 
   const handleZoomOut = () => {
-    if (cy) cy.zoom(cy.zoom() / 1.2);
+    if (cy) {cy.zoom(cy.zoom() / 1.2);}
   };
 
   const handleCenter = () => {
-    if (cy) cy.fit();
+    if (cy) {cy.fit();}
   };
 
   const handleAddNode = () => {
@@ -1069,8 +1069,8 @@ function CytoscapeGraph() {
             startIcon={<FilterList />} // Using FilterList icon for LOD for now
             onClick={() =>
               setLodMode((prev) => {
-                if (prev === 'high') return 'medium';
-                if (prev === 'medium') return 'low';
+                if (prev === 'high') {return 'medium';}
+                if (prev === 'medium') {return 'low';}
                 return 'high';
               })
             }
@@ -1319,7 +1319,7 @@ function CytoscapeGraph() {
 
       {/* Notification Snackbar */}
       <Snackbar
-        open={!!notification}
+        open={Boolean(notification)}
         autoHideDuration={4000}
         onClose={() => setNotification(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

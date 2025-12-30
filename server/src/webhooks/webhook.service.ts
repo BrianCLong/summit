@@ -173,7 +173,7 @@ export class WebhookService {
       [webhookId, tenantId],
       { tenantId }
     );
-    return !!result;
+    return Boolean(result);
   }
 
   /**

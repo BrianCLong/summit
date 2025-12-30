@@ -22,7 +22,7 @@ function simulateAccess(roleVector = {}, action) {
 router.post('/simulate', async (req, res) => {
   try {
     const { roleVector = {}, action } = req.body || {};
-    if (!action) return res.status(400).json({ error: 'action required' });
+    if (!action) {return res.status(400).json({ error: 'action required' });}
     const result = simulateAccess(roleVector, action);
     res.json(result);
   } catch (e) {

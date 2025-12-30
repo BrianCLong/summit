@@ -342,11 +342,11 @@ class PriorityCalculator {
       (new Date(item.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
 
-    if (daysUntilDeadline <= 0) return 100; // Overdue
-    if (daysUntilDeadline <= 7) return 90;
-    if (daysUntilDeadline <= 14) return 75;
-    if (daysUntilDeadline <= 30) return 60;
-    if (daysUntilDeadline <= 60) return 40;
+    if (daysUntilDeadline <= 0) {return 100;} // Overdue
+    if (daysUntilDeadline <= 7) {return 90;}
+    if (daysUntilDeadline <= 14) {return 75;}
+    if (daysUntilDeadline <= 30) {return 60;}
+    if (daysUntilDeadline <= 60) {return 40;}
     return 20;
   }
 }
@@ -400,7 +400,7 @@ class ScheduleOptimizer {
         if (item.deadline) {
           const weekEnd = new Date(timeline[week].endDate);
           const deadline = new Date(item.deadline);
-          if (weekEnd > deadline) continue; // Past deadline
+          if (weekEnd > deadline) {continue;} // Past deadline
         }
 
         // Check capacity

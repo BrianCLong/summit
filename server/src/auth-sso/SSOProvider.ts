@@ -47,7 +47,7 @@ export class OIDCProvider implements AuthSSOProvider {
   }
 
   async generateAuthUrl(tenantId: string, state: string, callbackUrl: string): Promise<string> {
-    if (!this.config) throw new Error('OIDC provider not configured');
+    if (!this.config) {throw new Error('OIDC provider not configured');}
 
     // In a real implementation, we would fetch discovery doc if endpoints are missing
     const authUrl = this.config.authorizationUrl || `${this.config.issuerUrl}/authorize`;
@@ -64,7 +64,7 @@ export class OIDCProvider implements AuthSSOProvider {
   }
 
   async verifyCallback(code: string, tenantId: string, callbackUrl: string): Promise<SSOUserClaims> {
-    if (!this.config) throw new Error('OIDC provider not configured');
+    if (!this.config) {throw new Error('OIDC provider not configured');}
 
     const tokenUrl = this.config.tokenUrl || `${this.config.issuerUrl}/token`;
 
@@ -117,10 +117,10 @@ export class OIDCProvider implements AuthSSOProvider {
       // Try to fetch OIDC discovery document
       const discoveryUrl = `${config.issuerUrl}/.well-known/openid-configuration`;
       const response = await axios.get(discoveryUrl);
-      return response.status === 200 && !!response.data.authorization_endpoint;
+      return response.status === 200 && Boolean(response.data.authorization_endpoint);
     } catch (error) {
       // Fallback: check if endpoints are explicitly provided
-      return !!(config.authorizationUrl && config.tokenUrl);
+      return Boolean(config.authorizationUrl && config.tokenUrl);
     }
   }
 }

@@ -339,7 +339,7 @@ const AdvancedAnalyticsDashboard = () => {
   };
 
   const renderThreatIntelWidget = () => {
-    if (!threatMetrics) return <LinearProgress />;
+    if (!threatMetrics) {return <LinearProgress />;}
 
     const severityData = Object.entries(
       threatMetrics.threatSeverityDistribution || {},
@@ -526,7 +526,7 @@ const AdvancedAnalyticsDashboard = () => {
   };
 
   const renderInvestigationWidget = () => {
-    if (!investigationMetrics) return <LinearProgress />;
+    if (!investigationMetrics) {return <LinearProgress />;}
 
     const statusData = Object.entries(
       investigationMetrics.investigationsByStatus || {},
@@ -655,7 +655,7 @@ const AdvancedAnalyticsDashboard = () => {
   };
 
   const renderPerformanceWidget = () => {
-    if (!performanceData) return <LinearProgress />;
+    if (!performanceData) {return <LinearProgress />;}
 
     return (
       <Grid container spacing={2}>

@@ -2,14 +2,14 @@ import { TrafficFlow, TrafficFeatures, TrafficAnomalyResult } from './traffic-ty
 
 // Helper math functions since we might not have them imported
 function localMedian(values: number[]): number {
-  if (values.length === 0) return 0;
+  if (values.length === 0) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 function medianAbsoluteDeviation(values: number[], med: number): number {
-  if (!values.length) return 0;
+  if (!values.length) {return 0;}
   const deviations = values.map((value) => Math.abs(value - med));
   return localMedian(deviations);
 }
@@ -19,7 +19,7 @@ function robustZ(value: number, med: number, mad: number): number {
 }
 
 function quantile(values: number[], q: number): number {
-  if (!values.length) return 0;
+  if (!values.length) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const pos = (sorted.length - 1) * q;
   const base = Math.floor(pos);
@@ -90,7 +90,7 @@ export class TrafficEngine {
     // Simple DDoS heuristic (Volumetric)
     // Thresholds would normally be dynamic, but hardcoding for MVP
     let duration = (flow.endTime - flow.startTime);
-    if (duration <= 0) duration = 0.001; // Avoid div by zero
+    if (duration <= 0) {duration = 0.001;} // Avoid div by zero
 
     const pps = flow.packets / duration;
     if (pps > 10000) { // Extremely high PPS
@@ -112,7 +112,7 @@ export class TrafficEngine {
    */
   detectBatchAnomalies(flows: TrafficFlow[], contamination = 0.05): Map<string, TrafficAnomalyResult> {
     const results = new Map<string, TrafficAnomalyResult>();
-    if (flows.length === 0) return results;
+    if (flows.length === 0) {return results;}
 
     const featuresList = flows.map(f => this.extractFeatures(f));
 
@@ -197,7 +197,7 @@ export class TrafficEngine {
 
     for (const flow of flows) {
         const key = `${flow.destIp}:${flow.destPort}`;
-        if (!targetCounts.has(key)) targetCounts.set(key, new Set());
+        if (!targetCounts.has(key)) {targetCounts.set(key, new Set());}
         targetCounts.get(key)!.add(flow.sourceIp);
     }
 

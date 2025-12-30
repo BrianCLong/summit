@@ -8,12 +8,12 @@ const DEFAULT_WINDOW_MS = 5 * 60 * 1000;
 const MAX_BUFFER = 500;
 
 function percentile(values: number[], p: number) {
-  if (!values.length) return 0;
+  if (!values.length) {return 0;}
   const sorted = [...values].sort((a, b) => a - b);
   const index = (sorted.length - 1) * p;
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
-  if (lower === upper) return sorted[lower];
+  if (lower === upper) {return sorted[lower];}
   const weight = index - lower;
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
 }
@@ -40,7 +40,7 @@ export class ObservabilityFabric {
     this.buffer = clampWindow(this.buffer, this.windowMs);
 
     const correlationId = signal.correlationId ?? signal.traceId;
-    if (!correlationId) return undefined;
+    if (!correlationId) {return undefined;}
     return this.buildGroup(correlationId);
   }
 
@@ -56,7 +56,7 @@ export class ObservabilityFabric {
 
     for (const item of correlated) {
       services.add(item.service);
-      if (item.traceId) traceIds.add(item.traceId);
+      if (item.traceId) {traceIds.add(item.traceId);}
       windowStart = Math.min(windowStart, item.timestamp);
       windowEnd = Math.max(windowEnd, item.timestamp);
     }
@@ -76,7 +76,7 @@ export class ObservabilityFabric {
     const groups: CorrelatedSignalGroup[] = [];
     for (const item of this.buffer) {
       const id = item.correlationId ?? item.traceId;
-      if (!id || ids.has(id)) continue;
+      if (!id || ids.has(id)) {continue;}
       ids.add(id);
       groups.push(this.buildGroup(id));
     }

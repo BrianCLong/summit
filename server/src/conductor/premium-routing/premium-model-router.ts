@@ -225,7 +225,7 @@ export class PremiumModelRouter {
           request.constraints.requiredCapabilities.every((cap) =>
             model.capabilities.includes(cap),
           );
-        if (!hasAllCapabilities) return false;
+        if (!hasAllCapabilities) {return false;}
       }
 
       // Check provider preferences
@@ -267,7 +267,7 @@ export class PremiumModelRouter {
         model,
         request.context.taskType,
       );
-      if (!taskCompatible) return false;
+      if (!taskCompatible) {return false;}
 
       return true;
     });

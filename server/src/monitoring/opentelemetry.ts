@@ -115,7 +115,7 @@ class OpenTelemetryService {
       );
 
       logger.info(
-        `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, Jaeger Enabled: ${!!this.config.jaegerEndpoint}`,
+        `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, Jaeger Enabled: ${Boolean(this.config.jaegerEndpoint)}`,
       );
     } catch (error) {
       logger.error(
@@ -335,10 +335,10 @@ class OpenTelemetryService {
     tracerActive: boolean;
   } {
     return {
-      enabled: !!this.sdk,
+      enabled: Boolean(this.sdk),
       serviceName: this.config.serviceName,
       environment: this.config.environment,
-      tracerActive: !!this.tracer,
+      tracerActive: Boolean(this.tracer),
     };
   }
 }

@@ -718,8 +718,8 @@ class FederatedSearchService {
 
   countRecords(result) {
     let count = 0;
-    if (result.nodes) count += result.nodes.length;
-    if (result.edges) count += result.edges.length;
+    if (result.nodes) {count += result.nodes.length;}
+    if (result.edges) {count += result.edges.length;}
     return count;
   }
 
@@ -765,7 +765,7 @@ class FederatedSearchService {
   }
 
   calculateAverageResponseTime(successfulResults) {
-    if (successfulResults.length === 0) return 0;
+    if (successfulResults.length === 0) {return 0;}
 
     const totalTime = successfulResults.reduce(
       (sum, result) => sum + result.responseTime,

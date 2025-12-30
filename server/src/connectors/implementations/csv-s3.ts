@@ -39,7 +39,7 @@ export class CSVConnector extends BaseConnector {
   }
 
   async testConnection(): Promise<boolean> {
-     if (this.isS3) return true; // Mock success for S3
+     if (this.isS3) {return true;} // Mock success for S3
      try {
          await fs.promises.access(this.filePath, fs.constants.R_OK);
          return true;

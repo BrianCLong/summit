@@ -417,7 +417,7 @@ export class NlToCypherService {
       return cypher.includes('MATCH') && cypher.includes('RETURN');
     });
 
-    if (similarQueries.length === 0) return null;
+    if (similarQueries.length === 0) {return null;}
 
     const avgTime =
       similarQueries.reduce((sum, q) => sum + q.executionTime, 0) /

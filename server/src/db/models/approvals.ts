@@ -33,7 +33,7 @@ const serializeReason = (input: DualControlApprovalRecord): string | null => {
 const parseReason = (
   reason: string | null,
 ): Pick<DualControlApprovalRecord, 'reason' | 'role' | 'attributes'> => {
-  if (!reason) return {};
+  if (!reason) {return {};}
 
   try {
     const parsed = JSON.parse(reason);

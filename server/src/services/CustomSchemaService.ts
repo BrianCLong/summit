@@ -77,7 +77,7 @@ export async function validateCustomMetadata(
   data: any,
 ): Promise<void> {
   const schema = await getCustomSchema(investigationId);
-  if (!schema || schema.length === 0) return;
+  if (!schema || schema.length === 0) {return;}
   const validator = buildValidator(schema);
   validator.parse(data);
 }

@@ -394,7 +394,7 @@ export async function getInvestigationCaseGraph(
     // ============================================================================
 
     const redactedEntities = entities.map(entity => {
-      if (!entity) return entity;
+      if (!entity) {return entity;}
 
       const redacted = { ...entity };
 
@@ -541,7 +541,7 @@ export async function getInvestigationCaseGraph(
       complianceFrameworks: ['SOX', 'SOC2'],
     });
 
-    throw new Error('An unexpected error occurred. Please contact support with request ID: ' + correlationId);
+    throw new Error(`An unexpected error occurred. Please contact support with request ID: ${  correlationId}`);
   } finally {
     await session.close();
   }

@@ -202,7 +202,7 @@ export class TenantService {
     const pool = getPostgresPool();
     const result = await pool.query('SELECT * FROM tenants WHERE id = $1', [id]);
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
     return this.mapRowToTenant(result.rows[0]);
   }
 
@@ -213,7 +213,7 @@ export class TenantService {
     const pool = getPostgresPool();
     const result = await pool.query('SELECT * FROM tenants WHERE slug = $1', [slug]);
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
     return this.mapRowToTenant(result.rows[0]);
   }
 

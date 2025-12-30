@@ -7,7 +7,7 @@ const SAFE_MODE_FLAG_KEY = 'platform.safe-mode';
 let cachedFeatureFlagService: FeatureFlagService | null | undefined;
 
 const truthy = (value?: string): boolean => {
-  if (!value) return false;
+  if (!value) {return false;}
   const normalized = value.toLowerCase();
   return ['1', 'true', 'yes', 'on', 'enabled'].includes(normalized);
 };
@@ -34,7 +34,7 @@ async function evaluateFlag(
   flagService: FeatureFlagService | undefined,
   key: string,
 ): Promise<boolean> {
-  if (!flagService) return false;
+  if (!flagService) {return false;}
   try {
     return await flagService.isEnabled(key, { key: 'system' }, false);
   } catch (error) {

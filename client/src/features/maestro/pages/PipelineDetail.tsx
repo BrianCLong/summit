@@ -63,7 +63,7 @@ export function PipelineDetailPage() {
 
   const handlePointerMove = React.useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!dragState.current) return;
+      if (!dragState.current) {return;}
       const { startX, startY, origin } = dragState.current;
       const dx = event.clientX - startX;
       const dy = event.clientY - startY;
@@ -140,7 +140,7 @@ export function PipelineDetailPage() {
                 .map((edge) => {
                   const source = nodes.find((node) => node.id === edge.source);
                   const target = nodes.find((node) => node.id === edge.target);
-                  if (!source || !target) return null;
+                  if (!source || !target) {return null;}
                   const isCritical = edge.critical && criticalOnly;
                   return (
                     <line

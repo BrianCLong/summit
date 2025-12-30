@@ -62,7 +62,7 @@ export class SimulationService {
           decision = { allowed: true, decisionId: 'sim-unknown' }; // Should not happen if types are correct
       }
 
-      if (decision.allowed) result.allowed++;
+      if (decision.allowed) {result.allowed++;}
       else {
         result.denied++;
         if (decision.reason) {
@@ -74,8 +74,8 @@ export class SimulationService {
       const isMatch = decision.allowed === event.originalOutcome;
       let diff: 'MATCH' | 'NEW_DENIAL' | 'NEW_ALLOW' = 'MATCH';
       if (!isMatch) {
-        if (decision.allowed) diff = 'NEW_ALLOW';
-        else diff = 'NEW_DENIAL';
+        if (decision.allowed) {diff = 'NEW_ALLOW';}
+        else {diff = 'NEW_DENIAL';}
       }
 
       result.details.push({

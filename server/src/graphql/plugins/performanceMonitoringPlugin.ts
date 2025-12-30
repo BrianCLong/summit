@@ -141,7 +141,7 @@ export function createPerformanceMonitoringPlugin(): ApolloServerPlugin {
             {
               ...metrics,
               user: contextValue?.user?.id,
-              hasErrors: !!(response.body as any).errors,
+              hasErrors: Boolean((response.body as any).errors),
             },
             'GraphQL operation performance'
           );
@@ -226,7 +226,7 @@ function getLoaderCacheSize(loader: any): number {
  * Calculate total batched calls across all DataLoaders
  */
 function calculateTotalBatchedCalls(stats: ReturnType<typeof getDataLoaderStats> | null): number {
-  if (!stats) return 0;
+  if (!stats) {return 0;}
 
   return (
     stats.entity.calls +

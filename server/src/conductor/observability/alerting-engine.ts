@@ -499,7 +499,7 @@ export class AlertingEngine {
 
   private parseDurationToSeconds(duration: string): number {
     const match = duration.match(/^(\d+)([smhd])$/);
-    if (!match) return 300; // 5 minutes default
+    if (!match) {return 300;} // 5 minutes default
 
     const value = parseInt(match[1]);
     const unit = match[2];

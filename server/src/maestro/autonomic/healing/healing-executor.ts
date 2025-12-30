@@ -12,7 +12,7 @@ export class HealingExecutor {
 
   public async evaluateAndExecute(signals: Signal[]) {
     for (const pb of this.playbooks) {
-      if (this.isOnCooldown(pb)) continue;
+      if (this.isOnCooldown(pb)) {continue;}
 
       if (this.checkTriggers(pb, signals)) {
         await this.executePlaybook(pb);
@@ -37,7 +37,7 @@ export class HealingExecutor {
 
     for (const signal of signals) {
       const match = pb.triggers.every(t => {
-        if (signal.type !== t.signalType) return false;
+        if (signal.type !== t.signalType) {return false;}
         switch (t.operator) {
           case 'GT': return signal.value > t.value;
           case 'LT': return signal.value < t.value;
@@ -45,7 +45,7 @@ export class HealingExecutor {
           default: return false;
         }
       });
-      if (match) return true;
+      if (match) {return true;}
     }
     return false;
   }

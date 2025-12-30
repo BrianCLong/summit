@@ -75,7 +75,7 @@ function shouldInject(probability: number): boolean {
 
 function matchesTarget(path: string, targets: string[]): boolean {
   return targets.some(pattern => {
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+    const regex = new RegExp(`^${  pattern.replace(/\*/g, '.*')  }$`);
     return regex.test(path);
   });
 }
@@ -91,8 +91,8 @@ function generateLatency(config: LatencyConfig): number {
     case 'normal': {
       // Box-Muller transform for normal distribution
       let u = 0, v = 0;
-      while (u === 0) u = Math.random();
-      while (v === 0) v = Math.random();
+      while (u === 0) {u = Math.random();}
+      while (v === 0) {v = Math.random();}
       const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
       // Scale to our range (mean at midpoint, ~95% within range)
       const mean = (minMs + maxMs) / 2;

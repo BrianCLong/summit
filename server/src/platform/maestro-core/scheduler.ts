@@ -41,7 +41,7 @@ export class MaestroScheduler {
 
   // Helper to check SLA compliance (could be run periodically)
   checkSLACompliance(task: Task): boolean {
-    if (!task.slaSeconds) return true;
+    if (!task.slaSeconds) {return true;}
     const now = new Date().getTime();
     const created = task.createdAt.getTime();
     const compliance = (now - created) / 1000 <= task.slaSeconds;

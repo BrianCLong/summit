@@ -24,7 +24,7 @@ function deepDiff(before: JsonObject = {}, after: JsonObject = {}): JsonObject {
       bv && av && typeof bv === 'object' && typeof av === 'object';
     if (bothObjects) {
       const nested = deepDiff(bv as JsonObject, av as JsonObject);
-      if (nested && Object.keys(nested).length) changed[k] = nested;
+      if (nested && Object.keys(nested).length) {changed[k] = nested;}
     } else if (JSON.stringify(bv) !== JSON.stringify(av)) {
       changed[k] = { before: bv, after: av };
     }
@@ -110,9 +110,9 @@ async function writeAudit({
       enrichedDetails.after = after ?? null;
       enrichedDetails.diff = deepDiff(before || {}, after || {});
     }
-    if (actorRole) enrichedDetails.actorRole = actorRole;
-    if (sessionId) enrichedDetails.sessionId = sessionId;
-    if (ip) enrichedDetails.ip = ip;
+    if (actorRole) {enrichedDetails.actorRole = actorRole;}
+    if (sessionId) {enrichedDetails.sessionId = sessionId;}
+    if (ip) {enrichedDetails.ip = ip;}
     // Signature for integrity
     const secret = process.env.AUDIT_SIGNING_SECRET;
     if (secret) {

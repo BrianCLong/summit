@@ -51,7 +51,7 @@ router.get('/playbooks/:id', ensureAuthenticated, async (req, res) => {
     try {
         const user = (req as any).user;
         const playbook = await service.getPlaybook(req.params.id, user!.tenantId);
-        if (!playbook) return res.status(404).json({ error: 'Not found' });
+        if (!playbook) {return res.status(404).json({ error: 'Not found' });}
         res.json(playbook);
     } catch (err: any) {
         res.status(500).json({ error: err.message });

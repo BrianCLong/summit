@@ -10,7 +10,7 @@ class ThreatActorProfileService {
 
   // Helper to format node result with labels
   _formatNode(node) {
-    if (!node) return null;
+    if (!node) {return null;}
     return {
       ...node.properties,
       labels: node.labels
@@ -61,11 +61,11 @@ class ThreatActorProfileService {
       `;
 
       const result = await session.run(query, { actorId, ttpId });
-      if (result.records.length === 0) throw new UserFacingError('Actor or TTP not found');
+      if (result.records.length === 0) {throw new UserFacingError('Actor or TTP not found');}
       return this._formatNode(result.records[0].get('t'));
     } catch (error) {
       this.logger.error('Error linking TTP:', error);
-      if (error instanceof UserFacingError) throw error;
+      if (error instanceof UserFacingError) {throw error;}
       throw new UserFacingError('Failed to link TTP');
     } finally {
       await session.close();
@@ -87,11 +87,11 @@ class ThreatActorProfileService {
       `;
 
       const result = await session.run(query, { actorId, infraId });
-      if (result.records.length === 0) throw new UserFacingError('Actor or Infrastructure not found');
+      if (result.records.length === 0) {throw new UserFacingError('Actor or Infrastructure not found');}
       return this._formatNode(result.records[0].get('i'));
     } catch (error) {
       this.logger.error('Error linking Infrastructure:', error);
-      if (error instanceof UserFacingError) throw error;
+      if (error instanceof UserFacingError) {throw error;}
       throw new UserFacingError('Failed to link Infrastructure');
     } finally {
       await session.close();
@@ -114,7 +114,7 @@ class ThreatActorProfileService {
       `;
 
       const result = await session.run(query, { actorId, campaignId, confidence });
-      if (result.records.length === 0) throw new UserFacingError('Actor or Campaign not found');
+      if (result.records.length === 0) {throw new UserFacingError('Actor or Campaign not found');}
 
       return {
         campaign: this._formatNode(result.records[0].get('c')),
@@ -122,7 +122,7 @@ class ThreatActorProfileService {
       };
     } catch (error) {
       this.logger.error('Error adding attribution:', error);
-      if (error instanceof UserFacingError) throw error;
+      if (error instanceof UserFacingError) {throw error;}
       throw new UserFacingError('Failed to add attribution');
     } finally {
       await session.close();
@@ -150,7 +150,7 @@ class ThreatActorProfileService {
 
       const result = await session.run(query, { id });
 
-      if (result.records.length === 0) return null;
+      if (result.records.length === 0) {return null;}
 
       const record = result.records[0];
       const actor = this._formatNode(record.get('a'));
@@ -200,12 +200,12 @@ class ThreatActorProfileService {
         }
       });
 
-      if (result.records.length === 0) throw new UserFacingError('Actor not found');
+      if (result.records.length === 0) {throw new UserFacingError('Actor not found');}
 
       return this._formatNode(result.records[0].get('b'));
     } catch (error) {
       this.logger.error('Error adding behavioral fingerprint:', error);
-      if (error instanceof UserFacingError) throw error;
+      if (error instanceof UserFacingError) {throw error;}
       throw new UserFacingError('Failed to add behavioral fingerprint');
     } finally {
       await session.close();

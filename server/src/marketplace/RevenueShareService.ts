@@ -601,7 +601,7 @@ export class RevenueShareService extends EventEmitter {
     const developerRevenue = new Map<string, number>();
 
     for (const tx of allTransactions) {
-      if (tx.type === 'refund') continue;
+      if (tx.type === 'refund') {continue;}
 
       totalGross += tx.grossAmountCents;
       totalDeveloper += tx.developerShareCents;
@@ -719,7 +719,7 @@ export class RevenueShareService extends EventEmitter {
   private findTransaction(transactionId: string): Transaction | undefined {
     for (const transactions of this.transactions.values()) {
       const found = transactions.find(t => t.id === transactionId);
-      if (found) return found;
+      if (found) {return found;}
     }
     return undefined;
   }
@@ -755,8 +755,8 @@ export class RevenueShareService extends EventEmitter {
 
     for (const transactions of this.transactions.values()) {
       for (const tx of transactions) {
-        if (tx.status === 'completed') total++;
-        if (tx.type === 'refund') refunds++;
+        if (tx.status === 'completed') {total++;}
+        if (tx.type === 'refund') {refunds++;}
       }
     }
 

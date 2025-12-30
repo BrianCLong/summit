@@ -98,7 +98,7 @@ export class PluginRuntime {
       sandbox.fetch = async (url: string, init?: any) => {
         // Here we should check constraints if strictly enforced
         // For now, allow if capability exists
-        if (!base.fetch) throw new Error("Host environment does not support network access");
+        if (!base.fetch) {throw new Error("Host environment does not support network access");}
         return base.fetch(url, init);
       };
     } else {
@@ -111,7 +111,7 @@ export class PluginRuntime {
             readFile: async (path: string) => {
                 // Strictly validate path against constraints if possible
                 // For now, simplistic check
-                if (!base.fs?.readFile) throw new Error("Host environment does not support FS access");
+                if (!base.fs?.readFile) {throw new Error("Host environment does not support FS access");}
                 return base.fs.readFile(path);
             }
         };
@@ -121,7 +121,7 @@ export class PluginRuntime {
     if (capabilities.some(c => c.type === 'vault.read')) {
         sandbox.vault = {
             read: async (path: string) => {
-                if (!base.vault?.read) throw new Error("Host environment does not support Vault access");
+                if (!base.vault?.read) {throw new Error("Host environment does not support Vault access");}
                 return base.vault.read(path);
             }
         };

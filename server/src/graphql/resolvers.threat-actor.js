@@ -24,7 +24,7 @@ const resolvers = {
   Mutation: {
     createThreatActor: async (_, { input }) => {
       // Generate ID if not provided
-      if (!input.id) input.id = `actor-${Date.now()}`;
+      if (!input.id) {input.id = `actor-${Date.now()}`;}
       return await service.upsertThreatActor(input);
     },
     updateThreatActor: async (_, { id, input }) => {
@@ -51,7 +51,7 @@ const resolvers = {
     // Resolvers for nested fields to handle N+1 and partial loading
 
     ttps: async (parent) => {
-       if (parent.ttps) return parent.ttps; // Return if already loaded
+       if (parent.ttps) {return parent.ttps;} // Return if already loaded
        const session = service.driver.session();
        try {
          const result = await session.run(
@@ -65,7 +65,7 @@ const resolvers = {
     },
 
     infrastructure: async (parent) => {
-       if (parent.infrastructure) return parent.infrastructure;
+       if (parent.infrastructure) {return parent.infrastructure;}
        const session = service.driver.session();
        try {
          const result = await session.run(
@@ -79,7 +79,7 @@ const resolvers = {
     },
 
     attributions: async (parent) => {
-       if (parent.attributions) return parent.attributions;
+       if (parent.attributions) {return parent.attributions;}
        const session = service.driver.session();
        try {
          const result = await session.run(
@@ -96,7 +96,7 @@ const resolvers = {
     },
 
     relatedActors: async (parent) => {
-       if (parent.relatedActors) return parent.relatedActors;
+       if (parent.relatedActors) {return parent.relatedActors;}
        const session = service.driver.session();
        try {
          const result = await session.run(
@@ -110,7 +110,7 @@ const resolvers = {
     },
 
     behaviors: async (parent) => {
-       if (parent.behaviors) return parent.behaviors;
+       if (parent.behaviors) {return parent.behaviors;}
        const session = service.driver.session();
        try {
          const result = await session.run(

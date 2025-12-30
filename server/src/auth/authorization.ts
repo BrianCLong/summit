@@ -65,10 +65,10 @@ export class AuthorizationError extends Error {
  * Check if a principal has a specific permission.
  */
 export function hasPermission(principal: Principal, permission: Permission): boolean {
-  if (!principal) return false;
+  if (!principal) {return false;}
 
   // System super-user bypass
-  if (principal.isSystem && principal.roles.includes('system.internal')) return true;
+  if (principal.isSystem && principal.roles.includes('system.internal')) {return true;}
 
   // Check explicit scopes first (e.g. from API Key)
   if (principal.scopes && (principal.scopes.includes(permission) || principal.scopes.includes('*'))) {
@@ -79,8 +79,8 @@ export function hasPermission(principal: Principal, permission: Permission): boo
   for (const role of principal.roles) {
     const rolePerms = ROLE_PERMISSIONS[role];
     if (rolePerms) {
-      if (rolePerms.includes('*')) return true;
-      if (rolePerms.includes(permission)) return true;
+      if (rolePerms.includes('*')) {return true;}
+      if (rolePerms.includes(permission)) {return true;}
     }
   }
 

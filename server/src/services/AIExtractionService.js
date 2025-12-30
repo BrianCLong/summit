@@ -977,13 +977,13 @@ class AIExtractionService extends EventEmitter {
     const used = new Set();
 
     for (let i = 0; i < relationships.length; i++) {
-      if (used.has(i)) continue;
+      if (used.has(i)) {continue;}
 
       const group = [relationships[i]];
       used.add(i);
 
       for (let j = i + 1; j < relationships.length; j++) {
-        if (used.has(j)) continue;
+        if (used.has(j)) {continue;}
 
         const rel1 = relationships[i];
         const rel2 = relationships[j];
@@ -1053,11 +1053,11 @@ class AIExtractionService extends EventEmitter {
 
   getJobStatus(jobId) {
     const activeJob = this.activeJobs.get(jobId);
-    if (activeJob) return activeJob;
+    if (activeJob) {return activeJob;}
 
     // Check queue
     const queuedJob = this.processingQueue.find((job) => job.id === jobId);
-    if (queuedJob) return queuedJob;
+    if (queuedJob) {return queuedJob;}
 
     return this.jobHistory.get(jobId) || null;
   }

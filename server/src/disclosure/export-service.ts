@@ -88,7 +88,7 @@ async function hashFile(filePath: string): Promise<string> {
 }
 
 function merkleFromHashes(hashes: string[]): string {
-  if (hashes.length === 0) return '';
+  if (hashes.length === 0) {return '';}
   let layer = hashes.slice().sort();
   while (layer.length > 1) {
     const next: string[] = [];
@@ -178,7 +178,7 @@ export class DisclosureExportService {
 
   getJob(jobId: string): DisclosureExportJob | undefined {
     const job = this.jobs.get(jobId);
-    if (!job) return undefined;
+    if (!job) {return undefined;}
     return this.publicJob(job);
   }
 
@@ -186,13 +186,13 @@ export class DisclosureExportService {
     jobId: string,
   ): { job: DisclosureExportJob; filePath: string } | undefined {
     const job = this.jobs.get(jobId);
-    if (!job || !job.bundlePath) return undefined;
+    if (!job || !job.bundlePath) {return undefined;}
     return { job: this.publicJob(job), filePath: job.bundlePath };
   }
 
   async processJob(jobId: string): Promise<void> {
     const job = this.jobs.get(jobId);
-    if (!job) return;
+    if (!job) {return;}
 
     job.status = 'running';
     job.startedAt = new Date().toISOString();
@@ -609,7 +609,7 @@ export class DisclosureExportService {
       const subjects = attestation?.subject || [];
       for (const subject of subjects) {
         const digest = subject?.digest?.sha256;
-        if (!digest) continue;
+        if (!digest) {continue;}
         if (!artifactHashes.has(digest)) {
           mismatches.push(subject?.name || 'unknown');
         }

@@ -40,7 +40,7 @@ export default function PolicyPreview() {
   };
 
   const onLanguage = async (_e, val) => {
-    if (!val) return;
+    if (!val) {return;}
     setLanguage(val);
     await loadLanguage(val);
   };

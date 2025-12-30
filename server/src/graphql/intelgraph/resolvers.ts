@@ -151,7 +151,7 @@ export const resolvers = {
       } catch (error) {
         telemetry.subsystems.api.errors.add(1);
         logger.error({ err: error, resolver: 'entityById' }, 'Error resolving entityById');
-        if (error instanceof GraphQLError) throw error;
+        if (error instanceof GraphQLError) {throw error;}
         throw new UserFacingError('Failed to fetch entity', 500, context.requestId || 'unknown');
       } finally {
         telemetry.recordRequest((Date.now() - startTime) / 1000, {
@@ -214,7 +214,7 @@ export const resolvers = {
               const session = context.neo4j.session();
               try {
                 // Main query - Includes degree calculation to avoid N+1
-                const dataQuery = cypherQuery + `
+                const dataQuery = `${cypherQuery  }
                   WITH e
                   ORDER BY e.updated_at DESC
                   SKIP $offset
@@ -224,7 +224,7 @@ export const resolvers = {
                 `;
 
                 // Count query - simplified
-                const countQuery = cypherQuery + ' RETURN count(e) as total';
+                const countQuery = `${cypherQuery  } RETURN count(e) as total`;
 
                 params.offset = pagination.offset;
                 params.limit = pagination.limit;
@@ -344,7 +344,7 @@ export const resolvers = {
         }, 60); // Cache paths for 60s
       } catch (error) {
         logger.error({ err: error, resolver: 'pathBetween' }, 'Error in pathBetween');
-        if (error instanceof GraphQLError) throw error;
+        if (error instanceof GraphQLError) {throw error;}
         throw new UserFacingError('Failed to calculate path', 500, context.requestId);
       } finally {
         telemetry.recordRequest((Date.now() - startTime) / 1000, { resolver: 'pathBetween' });
@@ -609,7 +609,7 @@ export const resolvers = {
         });
       } catch (error) {
         logger.error({ err: error, resolver: 'createClaim' }, 'Error creating claim');
-        if (error instanceof GraphQLError) throw error;
+        if (error instanceof GraphQLError) {throw error;}
         throw new UserFacingError('Failed to create claim', 500, context.requestId);
       } finally {
         telemetry.recordRequest((Date.now() - startTime) / 1000, { resolver: 'createClaim' });
@@ -700,7 +700,7 @@ export const resolvers = {
         });
       } catch (error) {
         logger.error({ err: error, resolver: 'createEvidence' }, 'Error creating evidence');
-        if (error instanceof GraphQLError) throw error;
+        if (error instanceof GraphQLError) {throw error;}
         throw new UserFacingError('Failed to create evidence', 500, context.requestId);
       } finally {
         telemetry.recordRequest((Date.now() - startTime) / 1000, { resolver: 'createEvidence' });
@@ -858,7 +858,7 @@ export const resolvers = {
         });
       } catch (error) {
         logger.error({ err: error, resolver: 'createDecision' }, 'Error creating decision');
-        if (error instanceof GraphQLError) throw error;
+        if (error instanceof GraphQLError) {throw error;}
         throw new UserFacingError('Failed to create decision', 500, context.requestId);
       } finally {
         telemetry.recordRequest((Date.now() - startTime) / 1000, { resolver: 'createDecision' });
@@ -1160,7 +1160,7 @@ export const resolvers = {
   ): Promise<any> => {
     if (context.decisionRepo) {
       const decision = await context.decisionRepo.getDecisionById(id);
-      if (!decision) return null;
+      if (!decision) {return null;}
 
       const [evidence, claims] = await Promise.all([
         context.decisionRepo.getLinkedEvidence(id),

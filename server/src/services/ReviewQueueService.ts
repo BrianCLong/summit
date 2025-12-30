@@ -59,7 +59,7 @@ export class ReviewQueueService {
              RETURNING *`,
             [updates.name ?? null, updates.priorityConfig ?? null, queueId, tenantId]
         );
-        if (result.rowCount === 0) throw new Error('Queue not found');
+        if (result.rowCount === 0) {throw new Error('Queue not found');}
         return this.mapQueueRow(result.rows[0]);
     }
 
@@ -69,7 +69,7 @@ export class ReviewQueueService {
             `DELETE FROM ml_review_queues WHERE id = $1 AND tenant_id = $2`,
             [queueId, tenantId]
         );
-        if (result.rowCount === 0) throw new Error('Queue not found');
+        if (result.rowCount === 0) {throw new Error('Queue not found');}
     }
 
     async listQueues(tenantId: string): Promise<ReviewQueue[]> {
@@ -122,7 +122,7 @@ export class ReviewQueueService {
     }
 
     private sampleItems(items: ReviewItem[], k: number): ReviewItem[] {
-        if (items.length <= k) return items;
+        if (items.length <= k) {return items;}
 
         // Calculate scores
         const scores = items.map(item => {
@@ -160,7 +160,7 @@ export class ReviewQueueService {
         const selectedIndices = new Set<number>();
 
         while (selectedIndices.size < k && selectedIndices.size < items.length) {
-             let r = Math.random();
+             const r = Math.random();
              let cumulative = 0;
              let selected = -1;
 
@@ -178,7 +178,7 @@ export class ReviewQueueService {
                  selected = remaining[Math.floor(Math.random() * remaining.length)];
              } else {
                  for (let i = 0; i < indices.length; i++) {
-                     if (selectedIndices.has(i)) continue;
+                     if (selectedIndices.has(i)) {continue;}
 
                      const normalizedProb = scores[i] / currentTotal;
                      cumulative += normalizedProb;
@@ -232,7 +232,7 @@ export class ReviewQueueService {
     }
 
     async submitBatchDecisions(decisions: Array<{ itemId: string, decision: 'ACCEPTED' | 'REJECTED' | 'ABSTAIN', metadata?: any }>, tenantId: string, reviewerId: string): Promise<void> {
-        if (decisions.length === 0) return;
+        if (decisions.length === 0) {return;}
         const pool = getPostgresPool();
 
         await pool.withTransaction(async (client) => {

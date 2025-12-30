@@ -34,7 +34,7 @@ jest.mock('ioredis', () => {
     }),
     expire: jest.fn().mockResolvedValue(1),
     sadd: jest.fn((key: string, ...values: string[]) => {
-      if (!sets.has(key)) sets.set(key, new Set());
+      if (!sets.has(key)) {sets.set(key, new Set());}
       values.forEach(v => sets.get(key)!.add(v));
       return Promise.resolve(values.length);
     }),

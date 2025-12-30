@@ -88,7 +88,7 @@ export class SSOService {
       [tenantId]
     );
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {return null;}
 
     const row = result.rows[0];
     return {
@@ -146,7 +146,7 @@ export class SSOService {
     const tenantId = stateResult.rows[0].tenant_id;
 
     const config = await this.getSSOConfig(tenantId);
-    if (!config) throw new Error('SSO config missing');
+    if (!config) {throw new Error('SSO config missing');}
 
     const provider = this.getProvider(config);
     const claims = await provider.verifyCallback(code, tenantId, callbackUrl);

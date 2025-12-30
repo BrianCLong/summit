@@ -19,6 +19,6 @@ export function wrapStream<TArgs extends any[]>(
 
   return async function* (...args: TArgs) {
     const results = (await breaker.fire(...args)) as string[];
-    for (const t of results) yield t;
+    for (const t of results) {yield t;}
   };
 }

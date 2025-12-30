@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 // @ts-nocheck
 /**
  * GeoJSON Layer Component
@@ -33,7 +33,7 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
   const layerRef = useRef<L.GeoJSON | null>(null);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map) {return;}
 
     const defaultStyle: L.PathOptions = {
       color: '#3388ff',
@@ -81,7 +81,7 @@ export const GeoJSONLayer: React.FC<GeoJSONLayerProps> = ({
 
   // Update layer when data changes
   useEffect(() => {
-    if (!layerRef.current || !map) return;
+    if (!layerRef.current || !map) {return;}
 
     // Remove old layer
     layerRef.current.remove();
@@ -155,7 +155,7 @@ export const ChoroplethLayer: React.FC<ChoroplethLayerProps> = ({
   };
 
   const onEachFeature = (feature: Feature, layer: any) => {
-    if (!feature.properties) return;
+    if (!feature.properties) {return;}
 
     layer.on({
       mouseover: (e: any) => {

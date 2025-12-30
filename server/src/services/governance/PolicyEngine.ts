@@ -39,14 +39,14 @@ export class PolicyEngine {
       // 2. OPA Check (External Policy)
       const opaResult = await this.evaluateOPA(action, context);
       if (!opaResult.allowed) {
-        await this.logAudit(action, context, { allowed: false, reason: 'OPA_DENIED: ' + opaResult.reason });
+        await this.logAudit(action, context, { allowed: false, reason: `OPA_DENIED: ${  opaResult.reason}` });
         return opaResult;
       }
 
       // 3. Custom Logic / Safety Checks (Internal)
       const safetyResult = this.checkSafety(action, context);
       if (!safetyResult.allowed) {
-        await this.logAudit(action, context, { allowed: false, reason: 'SAFETY_DENIED: ' + safetyResult.reason });
+        await this.logAudit(action, context, { allowed: false, reason: `SAFETY_DENIED: ${  safetyResult.reason}` });
         return safetyResult;
       }
 
@@ -63,7 +63,7 @@ export class PolicyEngine {
     // Simplified RBAC logic
     // In production, this would look up roles and permissions
     const user = context.user;
-    if (!user) return true; // System actions might not have a user
+    if (!user) {return true;} // System actions might not have a user
 
     // Example: only admin can terminate agents
     if (action === 'terminate_agent' && !user.roles?.includes('admin')) {

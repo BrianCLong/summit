@@ -38,7 +38,7 @@ export class IntelCorroborationService {
 
   getAnalystAverage(claimId: string): number | null {
     const agg = this.ratings.get(claimId);
-    if (!agg || agg.count === 0) return null;
+    if (!agg || agg.count === 0) {return null;}
     return agg.sum / agg.count;
   }
 

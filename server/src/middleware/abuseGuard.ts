@@ -229,7 +229,7 @@ export class AbuseGuard {
 
   private isThrottled(tenantId: string): boolean {
     const throttleState = this.throttledTenants.get(tenantId);
-    if (!throttleState) return false;
+    if (!throttleState) {return false;}
 
     if (Date.now() > throttleState.endTime) {
       this.throttledTenants.delete(tenantId);

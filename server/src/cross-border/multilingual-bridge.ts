@@ -165,7 +165,7 @@ export class MultilingualBridge extends EventEmitter {
       const pair = this.supportedPairs.find(
         (p) => p.source === path[i] && p.target === path[i + 1]
       );
-      if (!pair) continue;
+      if (!pair) {continue;}
 
       const stepResult = await this.translateStep(
         currentText,
@@ -341,13 +341,13 @@ export class MultilingualBridge extends EventEmitter {
    * Find translation path between languages
    */
   private findTranslationPath(source: string, target: string): string[] {
-    if (source === target) return [source];
+    if (source === target) {return [source];}
 
     // Direct translation
     const direct = this.supportedPairs.find(
       (p) => p.source === source && p.target === target
     );
-    if (direct) return [source, target];
+    if (direct) {return [source, target];}
 
     // Via English pivot
     const toEnglish = this.supportedPairs.find(

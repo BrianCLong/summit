@@ -28,7 +28,7 @@ export class EvidenceService {
    */
   calculateConfidence(evidence: EvidenceBundle[]): number {
     // Trivial implementation: basic decay or count-based
-    if (evidence.length === 0) return 0.5; // Default uncertain
+    if (evidence.length === 0) {return 0.5;} // Default uncertain
     // More evidence = higher confidence, asymptotically approaching 1.0
     return 1.0 - (0.5 / evidence.length);
   }
@@ -40,11 +40,11 @@ export class EvidenceService {
   resolveConflict(conflict: EpistemicConflict): unknown {
     // 1. Prefer 'maestro' or 'internal' sources
     const trusted = conflict.values.find(v => v.source === 'maestro');
-    if (trusted) return trusted.value;
+    if (trusted) {return trusted.value;}
 
     // 2. Prefer highest confidence
     const sorted = [...conflict.values].sort((a, b) => b.confidence - a.confidence);
-    if (sorted[0].confidence > sorted[1]?.confidence) return sorted[0].value;
+    if (sorted[0].confidence > sorted[1]?.confidence) {return sorted[0].value;}
 
     // 3. Prefer most recent
     const newest = [...conflict.values].sort((a, b) =>

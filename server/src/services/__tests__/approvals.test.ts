@@ -53,7 +53,7 @@ jest.mock('../../db/postgres.js', () => {
           const approval = approvalsStore.find(
             (item) => item.id === params[0] && item.status === 'pending',
           );
-          if (!approval) return buildResponse([]);
+          if (!approval) {return buildResponse([]);}
           approval.status = 'approved';
           approval.approver_id = params[1];
           approval.decision_reason = params[2];
@@ -66,7 +66,7 @@ jest.mock('../../db/postgres.js', () => {
           const approval = approvalsStore.find(
             (item) => item.id === params[0] && item.status === 'pending',
           );
-          if (!approval) return buildResponse([]);
+          if (!approval) {return buildResponse([]);}
           approval.status = 'rejected';
           approval.approver_id = params[1];
           approval.decision_reason = params[2];

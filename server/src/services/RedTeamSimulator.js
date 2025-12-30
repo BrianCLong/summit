@@ -15,7 +15,7 @@ class RedTeamSimulator {
 
   inject(name) {
     const generator = this.scenarios[name];
-    if (!generator) throw new Error(`Unknown scenario: ${name}`);
+    if (!generator) {throw new Error(`Unknown scenario: ${name}`);}
     const payload = generator();
     this.bus.emit('raw-event', { source: 'red-team', data: payload });
     return payload;

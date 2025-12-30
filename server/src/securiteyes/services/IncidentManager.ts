@@ -54,7 +54,7 @@ export class IncidentManager {
             RETURN i, collect(e) as related_entities
         `;
         const result = await runCypher(query, { incidentId, tenantId });
-        if (result.length === 0) return null;
+        if (result.length === 0) {return null;}
 
         const incident = result[0].i.properties;
         const related = result[0].related_entities.map((e: any) => e.properties);

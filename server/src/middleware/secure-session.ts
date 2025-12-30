@@ -16,7 +16,7 @@ function getVaultProvider(): VaultSecretProvider | null {
 }
 
 async function loadSessionSecret(): Promise<string> {
-  if (cachedSecret) return cachedSecret;
+  if (cachedSecret) {return cachedSecret;}
   if (!secretPromise) {
     secretPromise = (async () => {
       const vaultProvider = getVaultProvider();
@@ -56,12 +56,12 @@ function signSession(sessionId: string, secret: string): string {
 
 function validateSessionCookie(cookieValue: string, secret: string): string | null {
   const [sessionId, signature] = cookieValue.split('.');
-  if (!sessionId || !signature) return null;
+  if (!sessionId || !signature) {return null;}
   const expected = signSession(sessionId, secret);
   const [, expectedSignature] = expected.split('.');
   const provided = Buffer.from(signature);
   const target = Buffer.from(expectedSignature);
-  if (provided.length !== target.length) return null;
+  if (provided.length !== target.length) {return null;}
   const valid = crypto.timingSafeEqual(provided, target);
   return valid ? sessionId : null;
 }

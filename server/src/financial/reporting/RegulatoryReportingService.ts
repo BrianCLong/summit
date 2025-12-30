@@ -317,16 +317,16 @@ export class RegulatoryReportingService {
     trade: Record<string, unknown>,
   ): 'customer' | 'broker_dealer' | 'ats' {
     const contraParty = trade.contra_party_type as string;
-    if (contraParty === 'ATS') return 'ats';
-    if (contraParty === 'BD') return 'broker_dealer';
+    if (contraParty === 'ATS') {return 'ats';}
+    if (contraParty === 'BD') {return 'broker_dealer';}
     return 'customer';
   }
 
   private getSpecialConditions(trade: Record<string, unknown>): string[] | undefined {
     const conditions: string[] = [];
-    if (trade.weighted_average) conditions.push('W');
-    if (trade.when_issued) conditions.push('WI');
-    if (trade.special_price) conditions.push('S');
+    if (trade.weighted_average) {conditions.push('W');}
+    if (trade.when_issued) {conditions.push('WI');}
+    if (trade.special_price) {conditions.push('S');}
     return conditions.length > 0 ? conditions : undefined;
   }
 

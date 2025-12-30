@@ -12,7 +12,7 @@ import {
 
 interface ParsedQuery {
   query: DocumentNode;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   variables: Record<string, any>;
 }
 
@@ -45,13 +45,13 @@ export default function MagicSearch() {
   const client = useApolloClient();
   const [input, setInput] = useState('');
   const [graphql, setGraphql] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [results, setResults] = useState<any[]>([]);
   const options = [...ENTITY_SUGGESTIONS, ...RELATION_SUGGESTIONS];
 
   const runSearch = async () => {
     const parsed = parseNaturalQuery(input);
-    if (!parsed) return;
+    if (!parsed) {return;}
     setGraphql(parsed.query.loc?.source.body || '');
     try {
       const { data } = await client.query({
@@ -78,7 +78,7 @@ export default function MagicSearch() {
             placeholder="Ask in natural language"
             helperText={`Try: ${EXAMPLE}`}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') runSearch();
+              if (e.key === 'Enter') {runSearch();}
             }}
             fullWidth
           />

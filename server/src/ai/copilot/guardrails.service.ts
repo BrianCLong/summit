@@ -598,7 +598,7 @@ export class GuardrailsService {
 
     // Truncate if too long
     if (sanitized.length > 500) {
-      sanitized = sanitized.substring(0, 500) + '... [truncated]';
+      sanitized = `${sanitized.substring(0, 500)  }... [truncated]`;
     }
 
     return sanitized;
@@ -650,7 +650,7 @@ export class GuardrailsService {
 
     for (const log of this.riskyPromptLogs) {
       riskLevelCounts[log.riskLevel]++;
-      if (log.blocked) blockedCount++;
+      if (log.blocked) {blockedCount++;}
     }
 
     return {

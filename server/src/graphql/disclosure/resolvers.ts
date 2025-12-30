@@ -65,7 +65,7 @@ export const disclosureResolvers = {
         id: `bundle-${runId}-${stepId}`,
         uri: path,
         sha256,
-        verified: !!signature,
+        verified: Boolean(signature),
       };
     },
     retractSubject: async (_: any, { subject, reason }: any) =>

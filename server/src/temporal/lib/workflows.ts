@@ -65,7 +65,7 @@ export async function orchestrateRun(input: {
           step,
           idx,
         });
-        if (s) s.end();
+        if (s) {s.end();}
       } catch {}
       const r = await executeStep({ runId: input.runId, step, idx });
       results.push(r);
@@ -92,7 +92,7 @@ export async function orchestrateRun(input: {
       }
     } catch {}
     try {
-      if (rootSpan) rootSpan.end();
+      if (rootSpan) {rootSpan.end();}
     } catch {}
     return summary;
   } catch (e: any) {
@@ -113,7 +113,7 @@ export async function orchestrateRun(input: {
       }
     } catch {}
     try {
-      if (rootSpan) rootSpan.end();
+      if (rootSpan) {rootSpan.end();}
     } catch {}
     throw e;
   }

@@ -121,10 +121,10 @@ class AlertingService {
 
   async checkAlerts(metric: string, value: number, tags: Record<string, string> = {}): Promise<void> {
     const rules = this.rules.get(metric);
-    if (!rules || !this.redis) return;
+    if (!rules || !this.redis) {return;}
 
     for (const rule of rules) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       let triggered = false;
       switch (rule.operator) {

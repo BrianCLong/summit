@@ -142,7 +142,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
   }, []);
 
   const handleStartRun = async () => {
-    if (!goalText.trim()) return;
+    if (!goalText.trim()) {return;}
 
     try {
       const { data } = await startRun({
@@ -168,7 +168,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
   };
 
   const handlePauseRun = async () => {
-    if (!selectedRun?.id) return;
+    if (!selectedRun?.id) {return;}
 
     try {
       await pauseRun({
@@ -182,7 +182,7 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
   };
 
   const handleResumeRun = async () => {
-    if (!selectedRun?.id) return;
+    if (!selectedRun?.id) {return;}
 
     try {
       await resumeRun({
@@ -239,12 +239,12 @@ const EnhancedCopilotRunPanel = ({ investigationId, onRunCreated }) => {
   };
 
   const filterEvents = (events) => {
-    if (eventFilter === 'all') return events;
+    if (eventFilter === 'all') {return events;}
     return events.filter((event) => event.level === eventFilter);
   };
 
   const calculateProgress = () => {
-    if (!runData?.copilotRun?.tasks) return 0;
+    if (!runData?.copilotRun?.tasks) {return 0;}
 
     const tasks = runData.copilotRun.tasks;
     const completedTasks = tasks.filter(

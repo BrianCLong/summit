@@ -11,11 +11,11 @@ export default function RunViewer() {
     const tick = async () => {
       try {
         const r = await fetch(`/api/maestro/v1/runs/${encodeURIComponent(id)}`);
-        if (!r.ok) throw new Error(String(r.status));
+        if (!r.ok) {throw new Error(String(r.status));}
         const j = await r.json();
-        if (alive) setData(j);
+        if (alive) {setData(j);}
       } catch (e: any) {
-        if (alive) setErr(String(e));
+        if (alive) {setErr(String(e));}
       }
     };
     tick();

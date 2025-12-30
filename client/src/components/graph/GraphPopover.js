@@ -2,7 +2,7 @@ import React from 'react';
 import { Paper, Typography, Box } from '@mui/material';
 
 function GraphPopover({ data }) {
-  if (!data) return null;
+  if (!data) {return null;}
 
   return (
     <Paper elevation={3} sx={{ p: 1, maxWidth: 300, overflow: 'auto' }}>

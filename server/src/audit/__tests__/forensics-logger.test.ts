@@ -23,7 +23,7 @@ jest.mock('ioredis', () => {
     ping: jest.fn<() => Promise<string>>().mockResolvedValue('PONG'),
     xgroup: jest.fn<() => Promise<string>>().mockResolvedValue('OK'),
     xadd: jest.fn<(stream: string, ...args: any[]) => Promise<string>>((stream: string, ...args: any[]) => {
-      if (!streams.has(stream)) streams.set(stream, []);
+      if (!streams.has(stream)) {streams.set(stream, []);}
       const id = `${Date.now()}-${idCounter++}`;
       const fields = args.slice(args.indexOf('*') + 1);
       streams.get(stream)!.push([id, fields]);

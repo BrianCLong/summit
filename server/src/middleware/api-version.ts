@@ -150,7 +150,7 @@ export function apiVersionMiddleware(req: Request, res: Response, next: NextFunc
 
 function parseVersion(versionStr: string): { major: number; minor: number; patch: number; raw: string } | null {
   const match = versionStr.match(/^v?(\d+)\.(\d+)\.(\d+)$/);
-  if (!match) return null;
+  if (!match) {return null;}
 
   return {
     major: parseInt(match[1], 10),

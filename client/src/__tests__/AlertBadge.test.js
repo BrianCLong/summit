@@ -14,7 +14,7 @@ jest.mock('../services/socket.js', () => {
         delete listeners[evt];
       },
       __emit: (evt, payload) => {
-        if (listeners[evt]) listeners[evt](payload);
+        if (listeners[evt]) {listeners[evt](payload);}
       },
     }),
   };

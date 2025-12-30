@@ -14,7 +14,7 @@ import logger from '../utils/logger.js';
 // Simple implementation of TimeSeriesAnalyzer locally since it might be missing
 class TimeSeriesAnalyzer {
   analyze(dataPoints: number[], options: Record<string, unknown> = {}) {
-    if (!dataPoints || dataPoints.length === 0) return { trend: 'unknown', forecast: [] };
+    if (!dataPoints || dataPoints.length === 0) {return { trend: 'unknown', forecast: [] };}
 
     // Simple Linear Regression
     const n = dataPoints.length;

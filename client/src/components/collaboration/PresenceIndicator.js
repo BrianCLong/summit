@@ -145,7 +145,7 @@ function PresenceIndicator({ socket, investigationId }) {
   const handleUserOnline = (data) => {
     setOnlineUsers((prev) => {
       const exists = prev.find((u) => u.userId === data.userId);
-      if (exists) return prev;
+      if (exists) {return prev;}
       return [
         ...prev,
         {
@@ -177,7 +177,7 @@ function PresenceIndicator({ socket, investigationId }) {
   const handleUserJoinedInvestigation = (data) => {
     setInvestigationParticipants((prev) => {
       const exists = prev.find((p) => p.userId === data.userId);
-      if (exists) return prev;
+      if (exists) {return prev;}
       return [
         ...prev,
         {

@@ -103,7 +103,7 @@ export class AirgapService {
   async getImport(importId: string, tenantId: string) {
       const pool = getPostgresPool();
       const res = await pool.query('SELECT * FROM imported_snapshots WHERE id = $1 AND tenant_id = $2', [importId, tenantId]);
-      if (res.rows.length === 0) return null;
+      if (res.rows.length === 0) {return null;}
       return res.rows[0];
   }
 

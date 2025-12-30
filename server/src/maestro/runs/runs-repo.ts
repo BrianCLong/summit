@@ -134,7 +134,7 @@ class RunsRepo {
       values.push(data.error_message);
     }
 
-    if (sets.length === 0) return this.get(id, tenantId);
+    if (sets.length === 0) {return this.get(id, tenantId);}
 
     const query = `
       UPDATE runs 

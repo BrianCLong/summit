@@ -66,11 +66,11 @@ const TelemetryDisplay: React.FC<TelemetryDisplayProps> = ({ scenarioId }) => {
     pollInterval: 5000, // Poll every 5 seconds for "live" updates
   });
 
-  if (loading) return <CircularProgress />;
+  if (loading) {return <CircularProgress />;}
   if (error)
-    return (
+    {return (
       <Alert severity="error">Error loading telemetry: {error.message}</Alert>
-    );
+    );}
 
   const telemetry = data?.getCrisisTelemetry || [];
 

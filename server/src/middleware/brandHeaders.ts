@@ -19,7 +19,7 @@ export function brandHeaders(): (
     }
     // Brand headers for downstream/UI consumption
     res.setHeader('X-Brand-Name', brand);
-    if (notice) res.setHeader('X-Brand-Notice', notice);
+    if (notice) {res.setHeader('X-Brand-Notice', notice);}
     next();
   };
 }

@@ -28,16 +28,16 @@ router.get('/', async (req, res) => {
     const where = ['user_id = $1'];
     const params = [req.user.id];
     if (action) {
-      where.push('action ILIKE $' + (params.length + 1));
+      where.push(`action ILIKE $${  params.length + 1}`);
       params.push(`%${action}%`);
     }
     if (resource) {
       where.push(
-        '(resource_type ILIKE $' +
-          (params.length + 1) +
-          ' OR resource_id ILIKE $' +
-          (params.length + 2) +
-          ')',
+        `(resource_type ILIKE $${ 
+          params.length + 1 
+          } OR resource_id ILIKE $${ 
+          params.length + 2 
+          })`,
       );
       params.push(`%${resource}%`, `%${resource}%`);
     }
@@ -61,7 +61,7 @@ router.get('/', async (req, res) => {
       });
 
       const pump = async () => {
-        if (!active) return;
+        if (!active) {return;}
         const listRes = await pool.query(listSql, [...params, limit, offset]);
         const pageInfo = buildPageInfo(offset, limit, listRes.rows.length);
         res.write(
@@ -130,7 +130,7 @@ router.get('/all', requireRole('admin'), async (req, res) => {
       );
       params.push(`%${resource}%`, `%${resource}%`);
     }
-    const whereSql = where.length ? 'WHERE ' + where.join(' AND ') : '';
+    const whereSql = where.length ? `WHERE ${  where.join(' AND ')}` : '';
     const listSql = `SELECT id, user_id, action, resource_type, resource_id, details, ip_address, user_agent, created_at
                      FROM audit_logs ${whereSql} ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
     const countSql = `SELECT COUNT(*)::int AS c FROM audit_logs ${whereSql}`;
@@ -150,7 +150,7 @@ router.get('/all', requireRole('admin'), async (req, res) => {
       });
 
       const pump = async () => {
-        if (!active) return;
+        if (!active) {return;}
         const listRes = await pool.query(listSql, [...params, limit, offset]);
         const pageInfo = buildPageInfo(offset, limit, listRes.rows.length);
         res.write(

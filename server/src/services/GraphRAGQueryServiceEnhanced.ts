@@ -188,7 +188,7 @@ export class GraphRAGQueryServiceEnhanced {
       investigationId: request.investigationId,
       question: request.question,
       redactionEnabled: request.redactionPolicy?.enabled,
-      provenanceEnabled: !!request.provenanceContext,
+      provenanceEnabled: Boolean(request.provenanceContext),
       guardrailsEnabled: request.enableGuardrails !== false,
       enableCoVe: request.enableCoVe
     }, 'Starting enhanced GraphRAG query');
@@ -204,7 +204,7 @@ export class GraphRAGQueryServiceEnhanced {
         focusEntityIds: request.focusEntityIds,
         maxHops: request.maxHops,
         redactionEnabled: request.redactionPolicy?.enabled,
-        provenanceEnabled: !!request.provenanceContext,
+        provenanceEnabled: Boolean(request.provenanceContext),
         registerClaim: request.registerClaim,
         enableCoVe: request.enableCoVe,
       },
@@ -214,7 +214,7 @@ export class GraphRAGQueryServiceEnhanced {
       await this.glassBoxService.updateStatus(run.id, 'running');
 
       // Step 1: Guardrails check (if enabled)
-      let guardrailsPassed = true;
+      const guardrailsPassed = true;
       const guardrailWarnings: string[] = [];
 
       if (request.enableGuardrails !== false) {
@@ -643,7 +643,7 @@ export class GraphRAGQueryServiceEnhanced {
                 chainId: chain.id,
                 rootHash: (chain.lineage as any).rootHash || '', // Cast to any as type def is incomplete
                 transformChain: chain.transforms,
-                verifiable: !!(chain.lineage as any).verified, // Cast to any
+                verifiable: Boolean((chain.lineage as any).verified), // Cast to any
               };
 
               // Get associated claims
@@ -720,7 +720,7 @@ export class GraphRAGQueryServiceEnhanced {
           timestamp: new Date().toISOString(),
           evidenceIds: citations
             .map(c => c.evidenceId)
-            .filter((id): id is string => !!id),
+            .filter((id): id is string => Boolean(id)),
           sourceEntityIds: citations.map(c => c.entityId),
         },
       });
@@ -764,13 +764,13 @@ export class GraphRAGQueryServiceEnhanced {
    * Calculate overall confidence from citations
    */
   private calculateOverallConfidence(citations: EnrichedCitationWithProvenance[]): number {
-    if (citations.length === 0) return 0;
+    if (citations.length === 0) {return 0;}
 
     const confidences = citations
       .map(c => c.confidence)
       .filter((c): c is number => c !== undefined);
 
-    if (confidences.length === 0) return 0.7; // Default confidence
+    if (confidences.length === 0) {return 0.7;} // Default confidence
 
     const avg = confidences.reduce((sum, c) => sum + c, 0) / confidences.length;
     return Math.round(avg * 100) / 100;
@@ -868,6 +868,6 @@ export class GraphRAGQueryServiceEnhanced {
     if (text.length <= maxLength) {
       return text;
     }
-    return text.substring(0, maxLength - 3) + '...';
+    return `${text.substring(0, maxLength - 3)  }...`;
   }
 }

@@ -33,9 +33,9 @@ export class LLMSafetyService {
 
     for (const entity of entities) {
         if (entity.severity === 'high' || entity.severity === 'critical') {
-            safePrompt = safePrompt.substring(0, entity.start) +
-                         `[REDACTED:${entity.type}]` +
-                         safePrompt.substring(entity.end);
+            safePrompt = `${safePrompt.substring(0, entity.start) 
+                         }[REDACTED:${entity.type}]${ 
+                         safePrompt.substring(entity.end)}`;
             redacted = true;
         }
     }

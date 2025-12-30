@@ -9,7 +9,7 @@ class DashboardSimulationService {
   private io: Server | null = null;
 
   start() {
-    if (this.interval) return;
+    if (this.interval) {return;}
     logger.info('Starting Dashboard Simulation Service...');
 
     // Try to get IO instance. It might not be ready immediately on server start.
@@ -30,7 +30,7 @@ class DashboardSimulationService {
   }
 
   private runSimulation() {
-    if (!this.io) return;
+    if (!this.io) {return;}
     const ns = this.io.of('/realtime');
 
     this.interval = setInterval(() => {

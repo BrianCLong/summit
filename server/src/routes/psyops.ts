@@ -20,7 +20,7 @@ router.post('/scan', ensureAuthenticated, async (req, res) => {
   try {
     const { content, source } = req.body;
     if (!content)
-      return res.status(400).json({ error: 'Content is required' });
+      {return res.status(400).json({ error: 'Content is required' });}
 
     const threat = await psyOpsService.detectPsychologicalThreats(content, {
       source: source || 'MANUAL_SCAN',

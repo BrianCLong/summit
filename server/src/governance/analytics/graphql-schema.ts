@@ -526,7 +526,7 @@ export const governanceMetricsResolvers = {
 
   ComplianceGap: {
     daysUntilDue: (parent: { dueDate?: number }) => {
-      if (!parent.dueDate) return null;
+      if (!parent.dueDate) {return null;}
       const daysMs = parent.dueDate - Date.now();
       return Math.ceil(daysMs / (24 * 60 * 60 * 1000));
     },
@@ -534,9 +534,9 @@ export const governanceMetricsResolvers = {
 
   RiskScoreData: {
     riskLevel: (parent: { overall: number }) => {
-      if (parent.overall >= 80) return 'LOW';
-      if (parent.overall >= 60) return 'MEDIUM';
-      if (parent.overall >= 40) return 'HIGH';
+      if (parent.overall >= 80) {return 'LOW';}
+      if (parent.overall >= 60) {return 'MEDIUM';}
+      if (parent.overall >= 40) {return 'HIGH';}
       return 'CRITICAL';
     },
   },

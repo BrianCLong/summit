@@ -21,7 +21,7 @@ export class VelocityTracker {
      * Returns the average velocity (PRs/day) over the tracked period.
      */
     getAverageVelocity(): number {
-        if (this.metrics.length === 0) return 0;
+        if (this.metrics.length === 0) {return 0;}
         const totalPRs = this.metrics.reduce((acc, m) => acc + m.prCount, 0);
         return totalPRs / this.metrics.length;
     }
@@ -31,7 +31,7 @@ export class VelocityTracker {
      * @param baselineSwitches Baseline context switches per day.
      */
     getContextSwitchReduction(baselineSwitches: number): number {
-        if (this.metrics.length === 0) return 0;
+        if (this.metrics.length === 0) {return 0;}
         const currentAvg = this.metrics.reduce((acc, m) => acc + m.contextSwitches, 0) / this.metrics.length;
         return ((baselineSwitches - currentAvg) / baselineSwitches) * 100;
     }

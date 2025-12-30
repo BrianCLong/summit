@@ -26,9 +26,9 @@ export class MultimodalSentimentFusion {
 
     // Normalize weights based on available inputs
     const available = {
-      text: !!text,
-      audio: !!audio,
-      visual: !!visual
+      text: Boolean(text),
+      audio: Boolean(audio),
+      visual: Boolean(visual)
     };
 
     const totalWeight =
@@ -47,8 +47,8 @@ export class MultimodalSentimentFusion {
       neutral: 0, happy: 0, sad: 0, angry: 0, fearful: 0
     };
 
-    if (text) this.addScores(fusedEmotions, text.emotions, normWeights.text);
-    if (audio) this.addScores(fusedEmotions, audio.emotions, normWeights.audio);
+    if (text) {this.addScores(fusedEmotions, text.emotions, normWeights.text);}
+    if (audio) {this.addScores(fusedEmotions, audio.emotions, normWeights.audio);}
     if (visual && visual.faces.length > 0) {
       // Average face emotions for frame
       const avgFace = this.averageEmotions(visual.faces.map(f => f.emotions));
@@ -77,8 +77,8 @@ export class MultimodalSentimentFusion {
     const sentimentScore = positive - negative;
 
     let label: 'positive' | 'negative' | 'neutral' = 'neutral';
-    if (sentimentScore > 0.1) label = 'positive';
-    if (sentimentScore < -0.1) label = 'negative';
+    if (sentimentScore > 0.1) {label = 'positive';}
+    if (sentimentScore < -0.1) {label = 'negative';}
 
     // Calculate Coherence (Variance between modalities)
     // Low variance = High coherence
@@ -107,7 +107,7 @@ export class MultimodalSentimentFusion {
 
   private averageEmotions(list: EmotionScores[]): EmotionScores {
     const res: EmotionScores = { neutral: 0, happy: 0, sad: 0, angry: 0, fearful: 0 };
-    if (list.length === 0) return res;
+    if (list.length === 0) {return res;}
 
     for (const item of list) {
       for (const k in res) {
@@ -133,7 +133,7 @@ export class MultimodalSentimentFusion {
 
     const dist = (a: EmotionScores, b: EmotionScores) => {
       let d = 0;
-      for (const k in a) d += Math.pow(a[k] - b[k], 2);
+      for (const k in a) {d += Math.pow(a[k] - b[k], 2);}
       return Math.sqrt(d);
     };
 
@@ -144,7 +144,7 @@ export class MultimodalSentimentFusion {
         count++;
     }
 
-    if (count === 0) return 1;
+    if (count === 0) {return 1;}
     const avgDist = distanceSum / count;
     return Math.max(0, 1 - avgDist); // Normalize roughly
   }

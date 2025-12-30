@@ -149,9 +149,9 @@ export class DefaultReportGeneratorService implements ReportGeneratorService {
   }
 
   private getConfidenceLevel(score: number): string {
-    if (score >= 0.85) return 'very high';
-    if (score >= 0.7) return 'high';
-    if (score >= 0.5) return 'medium';
+    if (score >= 0.85) {return 'very high';}
+    if (score >= 0.7) {return 'high';}
+    if (score >= 0.5) {return 'medium';}
     return 'low';
   }
 }
@@ -262,7 +262,7 @@ export class ReportGeneratorStepExecutor extends BaseStepExecutor {
         {
           confidenceScore: result.confidenceScore,
           qualityScore: result.confidenceScore,
-          hasAttribution: !!result.attributedActor,
+          hasAttribution: Boolean(result.attributedActor),
         }
       );
 
@@ -310,9 +310,9 @@ export class ReportGeneratorStepExecutor extends BaseStepExecutor {
   }
 
   private getConfidenceLevel(score: number): 'low' | 'medium' | 'high' | 'very_high' {
-    if (score >= 0.85) return 'very_high';
-    if (score >= 0.7) return 'high';
-    if (score >= 0.5) return 'medium';
+    if (score >= 0.85) {return 'very_high';}
+    if (score >= 0.7) {return 'high';}
+    if (score >= 0.5) {return 'medium';}
     return 'low';
   }
 

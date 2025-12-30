@@ -28,9 +28,9 @@ export function createReasonForAccessMiddleware(config: ReasonForAccessConfig) {
     res: Response,
     next: NextFunction,
   ) {
-    if (!config.enabled) return next();
+    if (!config.enabled) {return next();}
 
-    if (!isSensitiveRoute(req.path, sensitiveRoutes)) return next();
+    if (!isSensitiveRoute(req.path, sensitiveRoutes)) {return next();}
 
     const reason = (req.headers[HEADER_NAME] as string) || '';
 

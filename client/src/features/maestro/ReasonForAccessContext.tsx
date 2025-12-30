@@ -27,7 +27,7 @@ interface PromptState {
 
 export function useReasonForAccess() {
   const ctx = useContext(ReasonContext);
-  if (!ctx) throw new Error('ReasonForAccessProvider missing');
+  if (!ctx) {throw new Error('ReasonForAccessProvider missing');}
   return ctx;
 }
 
@@ -53,7 +53,7 @@ export function ReasonForAccessProvider({
 
   const submitReason = useCallback(
     (reason: string) => {
-      if (!prompt) return;
+      if (!prompt) {return;}
       const entry: AuditEntry = {
         id: `${prompt.resource}-${Date.now()}`,
         resource: prompt.resource,
@@ -110,7 +110,7 @@ function ReasonForAccessModal({
     }
   }, [open]);
 
-  if (!open) return null;
+  if (!open) {return null;}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur">
@@ -136,7 +136,7 @@ function ReasonForAccessModal({
           value={reason}
           onChange={(event) => {
             setReason(event.target.value);
-            if (event.target.value.trim().length > 0) setError('');
+            if (event.target.value.trim().length > 0) {setError('');}
           }}
         />
         {error ? <p className="mt-1 text-sm text-red-400">{error}</p> : null}

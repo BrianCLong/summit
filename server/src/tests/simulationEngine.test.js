@@ -207,13 +207,13 @@ describe('Simulation Engine Service - P0 Critical MVP1', () => {
             {
               get: (field) => {
                 if (field === 'a')
-                  return { properties: { id: '1', label: 'Entity 1' } };
+                  {return { properties: { id: '1', label: 'Entity 1' } };}
                 if (field === 'b')
-                  return { properties: { id: '2', label: 'Entity 2' } };
+                  {return { properties: { id: '2', label: 'Entity 2' } };}
                 if (field === 'r')
-                  return {
+                  {return {
                     properties: { id: 'rel1', type: 'KNOWS', weight: 0.8 },
-                  };
+                  };}
               },
             },
           ],
@@ -284,12 +284,12 @@ describe('Simulation Engine Service - P0 Critical MVP1', () => {
           records: [
             {
               get: (field) => {
-                if (field === 'a') return { properties: { id: '1' } };
-                if (field === 'b') return { properties: { id: '2' } };
+                if (field === 'a') {return { properties: { id: '1' } };}
+                if (field === 'b') {return { properties: { id: '2' } };}
                 if (field === 'r')
-                  return {
+                  {return {
                     properties: { id: 'rel1', type: 'KNOWS', weight: 0.8 },
-                  };
+                  };}
               },
             },
           ],

@@ -11,17 +11,17 @@ export async function verifySiteAuth(req: any, res: any, next: any) {
       ''
     ).toString();
     const sig = (req.headers['x-sig'] || '').toString();
-    if (!siteId || !sig) return res.status(401).json({ error: 'missing auth' });
+    if (!siteId || !sig) {return res.status(401).json({ error: 'missing auth' });}
     const body = Buffer.from(JSON.stringify(req.body || {}));
     const {
       rows: [s],
     } = await pg.query(`SELECT trust_pubkey FROM sites WHERE id=$1`, [siteId]);
-    if (!s) return res.status(403).json({ error: 'unknown site' });
+    if (!s) {return res.status(403).json({ error: 'unknown site' });}
     const v = crypto.createVerify('RSA-SHA256');
     v.update(body);
     v.end();
     if (!v.verify(s.trust_pubkey, Buffer.from(sig, 'base64')))
-      return res.status(401).json({ error: 'bad sig' });
+      {return res.status(401).json({ error: 'bad sig' });}
     (req as any).siteId = siteId;
     next();
   } catch (e) {

@@ -73,7 +73,7 @@ export async function query<T = any>(
       logger.warn({
         message: 'Slow TimescaleDB query detected',
         duration,
-        query: text.substring(0, 100) + '...',
+        query: `${text.substring(0, 100)  }...`,
         paramCount: params?.length || 0,
         rowCount: result.rowCount,
       });

@@ -38,15 +38,15 @@ export interface AuditTimelineProps {
 }
 
 const defaultApiBase =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
 
 const getFallbackText = (value?: string) => value?.trim() || undefined;
 
 const formatTimestamp = (timestamp?: string) => {
-  if (!timestamp) return 'Unknown time';
+  if (!timestamp) {return 'Unknown time';}
   const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) return 'Unknown time';
+  if (Number.isNaN(date.getTime())) {return 'Unknown time';}
   return date.toISOString();
 };
 
@@ -126,7 +126,7 @@ export const AuditTimeline: React.FC<AuditTimelineProps> = ({
         const data = Array.isArray(payload?.data) ? payload.data : [];
         setEvents(data);
       } catch (err) {
-        if ((err as Error).name === 'AbortError') return;
+        if ((err as Error).name === 'AbortError') {return;}
         setEvents([]);
         setError((err as Error).message || 'Failed to load audit events');
       } finally {

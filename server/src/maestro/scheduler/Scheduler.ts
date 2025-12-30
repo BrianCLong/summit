@@ -79,13 +79,13 @@ export class MaestroScheduler {
    * Processes the queue, assigning runs to executors.
    */
   private async processQueue() {
-    if (this.isProcessing) return;
+    if (this.isProcessing) {return;}
     this.isProcessing = true;
 
     try {
       while (!this.queueHelper.isEmpty()) {
         const item = this.queueHelper.peek();
-        if (!item) break;
+        if (!item) {break;}
 
         // Find any 'ready' executor for the tenant
         const executors = await executorsRepo.list(item.tenantId);

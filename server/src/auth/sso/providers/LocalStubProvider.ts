@@ -8,7 +8,7 @@ export class LocalStubProvider implements SSOProvider {
     // For the stub, we redirect back to our callback with a dummy code.
     const url = new URL(redirectUri);
     url.searchParams.set('code', 'stub_code_123');
-    if (state) url.searchParams.set('state', state);
+    if (state) {url.searchParams.set('state', state);}
     return { url: url.toString(), state: state || '' };
   }
 

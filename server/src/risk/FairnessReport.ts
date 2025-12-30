@@ -9,8 +9,8 @@ export function ksDistance(a: number[], b: number[]): number {
   while (i < sortedA.length && j < sortedB.length) {
     const va = sortedA[i];
     const vb = sortedB[j];
-    if (va <= vb) i++;
-    else j++;
+    if (va <= vb) {i++;}
+    else {j++;}
     const cdfA = i / sortedA.length;
     const cdfB = j / sortedB.length;
     d = Math.max(d, Math.abs(cdfA - cdfB));
@@ -20,7 +20,7 @@ export function ksDistance(a: number[], b: number[]): number {
 
 export function generateReport(data: CohortScores): string {
   const keys = Object.keys(data);
-  if (keys.length < 2) return 'insufficient cohorts';
+  if (keys.length < 2) {return 'insufficient cohorts';}
   const d = ksDistance(data[keys[0]], data[keys[1]]);
   return `KS distance between ${keys[0]} and ${keys[1]}: ${d.toFixed(3)}`;
 }

@@ -106,7 +106,7 @@ export class GlassBoxRunService {
   constructor(pool: Pool, redis?: Redis) {
     this.pool = pool;
     this.redis = redis || null;
-    this.cacheEnabled = !!redis;
+    this.cacheEnabled = Boolean(redis);
   }
 
   /**
@@ -386,7 +386,7 @@ export class GlassBoxRunService {
       runId,
       status,
       durationMs,
-      hasError: !!error,
+      hasError: Boolean(error),
     }, 'Updated run status');
   }
 
@@ -530,7 +530,7 @@ export class GlassBoxRunService {
       originalRunId: runId,
       replayRunId: replayRun.id,
       userId,
-      modified: !!(options?.modifiedPrompt || options?.modifiedParameters),
+      modified: Boolean(options?.modifiedPrompt || options?.modifiedParameters),
     }, 'Replaying run');
 
     return replayRun;

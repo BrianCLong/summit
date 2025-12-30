@@ -174,7 +174,7 @@ export class StixBundleFactory {
     depth: number,
     ctx: { producerRef?: StixIdentifier; tlpMarkingRef?: StixIdentifier },
   ): Promise<Relationship[]> {
-    if (entityIds.length === 0) return [];
+    if (entityIds.length === 0) {return [];}
 
     const session = this.deps.neo4j.session();
     try {
@@ -282,7 +282,7 @@ export function verifyBundleSignature(
     .digest('base64url');
 
   // Constant-time comparison
-  if (signature.length !== expectedSignature.length) return false;
+  if (signature.length !== expectedSignature.length) {return false;}
   let result = 0;
   for (let i = 0; i < signature.length; i++) {
     result |= signature.charCodeAt(i) ^ expectedSignature.charCodeAt(i);

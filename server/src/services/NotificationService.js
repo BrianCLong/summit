@@ -548,7 +548,7 @@ class NotificationService extends EventEmitter {
   }
 
   async processNotificationQueue() {
-    if (this.notificationQueue.length === 0) return;
+    if (this.notificationQueue.length === 0) {return;}
 
     const batch = this.notificationQueue.splice(0, 10); // Process 10 at a time
 
@@ -685,12 +685,12 @@ class NotificationService extends EventEmitter {
         const online =
           sockets.length > 0 &&
           sockets.some((s) => {
-            if (typeof s === 'string') return s === uid;
+            if (typeof s === 'string') {return s === uid;}
             if (s && typeof s === 'object')
-              return s.userId === uid || s.id === uid;
+              {return s.userId === uid || s.id === uid;}
             return false;
           });
-        if (online) delivered += 1;
+        if (online) {delivered += 1;}
         else {
           failed += 1;
           offline.push(uid);
@@ -835,7 +835,7 @@ class NotificationService extends EventEmitter {
   // Alert rule processing
   async evaluateAlertRules(eventData) {
     for (const [ruleId, rule] of this.alertRules) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       try {
         const matches = await this.evaluateRuleConditions(rule, eventData);
@@ -1073,7 +1073,7 @@ class NotificationService extends EventEmitter {
 
     // Resolve recipient to user
     const user = await this.resolveRecipient(recipient, notification.data);
-    if (!user) return deliveries;
+    if (!user) {return deliveries;}
 
     const preferences = await this.getUserNotificationPreferences(user.id);
     const categoryPrefs = preferences.categories[notification.category];
@@ -1081,14 +1081,14 @@ class NotificationService extends EventEmitter {
     const enabledChannels = categoryPrefs?.channels || notification.channels;
 
     for (const channelId of enabledChannels) {
-      if (!preferences.channels[channelId]) continue;
+      if (!preferences.channels[channelId]) {continue;}
 
       const channel = this.alertChannels.get(channelId);
-      if (!channel || !channel.enabled) continue;
+      if (!channel || !channel.enabled) {continue;}
 
       // Check quiet hours
       if (this.isQuietHours(preferences.quietHours)) {
-        if (!['REAL_TIME', 'IN_APP'].includes(channelId)) continue;
+        if (!['REAL_TIME', 'IN_APP'].includes(channelId)) {continue;}
       }
 
       const delivery = {
@@ -1133,7 +1133,7 @@ class NotificationService extends EventEmitter {
 
   getUserSockets(userId) {
     const userRoom = this.socketIO.sockets.adapter.rooms.get(`user_${userId}`);
-    if (!userRoom) return [];
+    if (!userRoom) {return [];}
 
     return Array.from(userRoom)
       .map((socketId) => this.socketIO.sockets.sockets.get(socketId))
@@ -1158,7 +1158,7 @@ class NotificationService extends EventEmitter {
   }
 
   isQuietHours(quietHours) {
-    if (!quietHours.enabled) return false;
+    if (!quietHours.enabled) {return false;}
 
     const now = new Date();
     const currentHour = now.getHours();
@@ -1267,19 +1267,19 @@ class NotificationService extends EventEmitter {
     return true;
   }
   validateEmailDelivery(delivery) {
-    return !!delivery.email;
+    return Boolean(delivery.email);
   }
   validateSMSDelivery(delivery) {
-    return !!delivery.phone;
+    return Boolean(delivery.phone);
   }
   validatePushDelivery(delivery) {
-    return !!delivery.deviceToken;
+    return Boolean(delivery.deviceToken);
   }
   validateWebhookDelivery(delivery) {
-    return !!delivery.webhookUrl;
+    return Boolean(delivery.webhookUrl);
   }
   validateInAppDelivery(delivery) {
-    return !!delivery.userId;
+    return Boolean(delivery.userId);
   }
 }
 

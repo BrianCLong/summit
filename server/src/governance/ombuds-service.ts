@@ -166,7 +166,7 @@ export class OmbudsService {
   async getDecision(decisionId: string): Promise<OmbudsDecision | undefined> {
     const pool = getPostgresPool();
     const res = await pool.query('SELECT * FROM ombuds_decisions WHERE decision_id = $1', [decisionId]);
-    if (res.rows.length === 0) return undefined;
+    if (res.rows.length === 0) {return undefined;}
     return this.mapRowToDecision(res.rows[0]);
   }
 
@@ -211,7 +211,7 @@ export class OmbudsService {
    */
   async generateReceipt(decisionId: string): Promise<object | null> {
     const decision = await this.getDecision(decisionId);
-    if (!decision) return null;
+    if (!decision) {return null;}
 
     return {
       receiptId: `rcpt_${randomUUID()}`,

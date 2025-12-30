@@ -65,7 +65,7 @@ export class WorkflowService {
 
   public async addComment(crId: string, author: string, message: string): Promise<ChangeRequest> {
     const cr = this.changeRequests.get(crId);
-    if (!cr) throw new Error('Change Request not found');
+    if (!cr) {throw new Error('Change Request not found');}
 
     cr.comments.push({ author, message, timestamp: new Date() });
     cr.updatedAt = new Date();
@@ -75,7 +75,7 @@ export class WorkflowService {
 
   public async reviewChangeRequest(id: string, reviewer: string, decision: 'APPROVED' | 'REJECTED', comment?: string): Promise<ChangeRequest> {
     const cr = this.changeRequests.get(id);
-    if (!cr) throw new Error('Change Request not found');
+    if (!cr) {throw new Error('Change Request not found');}
 
     if (comment) {
         await this.addComment(id, reviewer, `[${decision}] ${comment}`);
@@ -93,12 +93,12 @@ export class WorkflowService {
 
   public async mergeChangeRequest(id: string, merger: string): Promise<SchemaVersion> {
     const cr = this.changeRequests.get(id);
-    if (!cr) throw new Error('Change Request not found');
-    if (cr.status !== 'APPROVED') throw new Error('Change Request must be APPROVED to merge');
+    if (!cr) {throw new Error('Change Request not found');}
+    if (cr.status !== 'APPROVED') {throw new Error('Change Request must be APPROVED to merge');}
 
     // 1. Get current active schema
     const currentSchema = this.registry.getLatestSchema();
-    if (!currentSchema) throw new Error('No active schema to base changes on');
+    if (!currentSchema) {throw new Error('No active schema to base changes on');}
 
     // 2. Clone definition
     const newDefinition = JSON.parse(JSON.stringify(currentSchema.definition)) as SchemaDefinition;
@@ -156,7 +156,7 @@ export class WorkflowService {
           case 'ADD_FIELD':
               // targetId is Entity Name
               const targetEntity = definition.entities.find(e => e.name === change.targetId);
-              if (!targetEntity) throw new Error(`Entity ${change.targetId} not found`);
+              if (!targetEntity) {throw new Error(`Entity ${change.targetId} not found`);}
               if (targetEntity.fields.find(f => f.name === change.payload.name)) {
                   throw new Error(`Field ${change.payload.name} already exists on ${change.targetId}`);
               }
@@ -167,9 +167,9 @@ export class WorkflowService {
                // targetId is "EntityName.FieldName"
                const [entName, fieldName] = change.targetId.split('.');
                const modEntity = definition.entities.find(e => e.name === entName);
-               if (!modEntity) throw new Error(`Entity ${entName} not found`);
+               if (!modEntity) {throw new Error(`Entity ${entName} not found`);}
                const fieldIdx = modEntity.fields.findIndex(f => f.name === fieldName);
-               if (fieldIdx === -1) throw new Error(`Field ${fieldName} not found on ${entName}`);
+               if (fieldIdx === -1) {throw new Error(`Field ${fieldName} not found on ${entName}`);}
                modEntity.fields[fieldIdx] = { ...modEntity.fields[fieldIdx], ...change.payload };
                break;
 
@@ -191,7 +191,7 @@ export class WorkflowService {
 
   public calculateImpact(crId: string): any {
       const cr = this.changeRequests.get(crId);
-      if (!cr) return {};
+      if (!cr) {return {};}
 
       const impact = {
           affectedServices: [] as string[],

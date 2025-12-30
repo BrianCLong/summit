@@ -280,10 +280,10 @@ Return valid JSON:
       const sourceTypes = new Set<string>();
       // Simulate detection based on ID prefixes if any, else default
       entityIds.forEach(id => {
-          if (id.startsWith('osint:')) sourceTypes.add('OSINT');
-          else if (id.startsWith('sigint:')) sourceTypes.add('SIGINT');
-          else if (id.startsWith('humint:')) sourceTypes.add('HUMINT');
-          else sourceTypes.add('UNKNOWN');
+          if (id.startsWith('osint:')) {sourceTypes.add('OSINT');}
+          else if (id.startsWith('sigint:')) {sourceTypes.add('SIGINT');}
+          else if (id.startsWith('humint:')) {sourceTypes.add('HUMINT');}
+          else {sourceTypes.add('UNKNOWN');}
       });
 
       return {

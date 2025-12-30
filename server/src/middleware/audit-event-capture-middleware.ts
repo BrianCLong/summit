@@ -359,27 +359,27 @@ export class AuditEventCaptureMiddleware {
    */
   private determineEventType(mutationName: string): string {
     if (mutationName.startsWith('create')) {
-      return mutationName.replace('create', '') + 'Created';
+      return `${mutationName.replace('create', '')  }Created`;
     }
 
     if (mutationName.startsWith('update')) {
-      return mutationName.replace('update', '') + 'Updated';
+      return `${mutationName.replace('update', '')  }Updated`;
     }
 
     if (mutationName.startsWith('delete')) {
-      return mutationName.replace('delete', '') + 'Deleted';
+      return `${mutationName.replace('delete', '')  }Deleted`;
     }
 
     if (mutationName.startsWith('archive')) {
-      return mutationName.replace('archive', '') + 'Archived';
+      return `${mutationName.replace('archive', '')  }Archived`;
     }
 
     if (mutationName.startsWith('close')) {
-      return mutationName.replace('close', '') + 'Closed';
+      return `${mutationName.replace('close', '')  }Closed`;
     }
 
     if (mutationName.startsWith('reopen')) {
-      return mutationName.replace('reopen', '') + 'Reopened';
+      return `${mutationName.replace('reopen', '')  }Reopened`;
     }
 
     // Default: use mutation name as event type

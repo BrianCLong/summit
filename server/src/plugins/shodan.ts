@@ -11,16 +11,16 @@ export const shodanIpLookup = createPlugin<Inputs, Output>(
     const { ip } = inputs;
     const cacheKey = `shodan:ip:${ip}`;
     const cached = await ctx.cache.get(cacheKey);
-    if (cached) return { data: cached, source: 'shodan', fromCache: true };
+    if (cached) {return { data: cached, source: 'shodan', fromCache: true };}
 
     const secret = await vaultReadKvV2('kv/data/plugins/shodan');
     const apiKey =
       secret?.data?.apiKey || secret?.apiKey || process.env.SHODAN_API_KEY;
-    if (!apiKey) throw new Error('Missing Shodan apiKey');
+    if (!apiKey) {throw new Error('Missing Shodan apiKey');}
 
     const url = `https://api.shodan.io/shodan/host/${encodeURIComponent(ip)}?key=${encodeURIComponent(apiKey)}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Shodan error ${res.status}`);
+    if (!res.ok) {throw new Error(`Shodan error ${res.status}`);}
     const json = await res.json();
     await ctx.cache.set(cacheKey, json, 3600);
     return { data: json, source: 'shodan' };

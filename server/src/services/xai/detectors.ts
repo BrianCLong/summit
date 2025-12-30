@@ -701,7 +701,7 @@ export class DetectorService {
   }
 
   private calculateGraphHash(graphData: any): string {
-    if (!graphData) return 'empty';
+    if (!graphData) {return 'empty';}
 
     const nodeCount = (graphData.nodes || []).length;
     const edgeCount = (graphData.edges || []).length;

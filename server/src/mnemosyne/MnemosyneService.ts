@@ -42,7 +42,7 @@ export class MnemosyneService {
    */
   private async simulateBeliefFormation(jobId: string) {
     const job = this.activeJobs.get(jobId);
-    if (!job) return;
+    if (!job) {return;}
 
     // Simulate the 21-day period
     await new Promise(resolve => setTimeout(resolve, 2500));

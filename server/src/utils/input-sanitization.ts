@@ -393,7 +393,7 @@ export function sanitizeFilePath(pathInput: string, allowedBasePath?: string): s
   // If allowed base path is specified, ensure the path is within it
   if (allowedBasePath) {
     // Use dynamic require for path module
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+     
     const pathModule = require('path');
     const { resolve, normalize } = pathModule;
     const normalizedBase = normalize(resolve(allowedBasePath));
@@ -549,13 +549,13 @@ export function validateBoolean(input: unknown): boolean {
 
   if (typeof input === 'string') {
     const lower = input.toLowerCase();
-    if (lower === 'true' || lower === '1') return true;
-    if (lower === 'false' || lower === '0') return false;
+    if (lower === 'true' || lower === '1') {return true;}
+    if (lower === 'false' || lower === '0') {return false;}
   }
 
   if (typeof input === 'number') {
-    if (input === 1) return true;
-    if (input === 0) return false;
+    if (input === 1) {return true;}
+    if (input === 0) {return false;}
   }
 
   throw new Error('Invalid boolean value');

@@ -647,7 +647,7 @@ export class ObjectDetectionEngine {
     const x2 = Math.min(box1.x + box1.width, box2.x + box2.width);
     const y2 = Math.min(box1.y + box1.height, box2.y + box2.height);
 
-    if (x2 <= x1 || y2 <= y1) return 0;
+    if (x2 <= x1 || y2 <= y1) {return 0;}
 
     const intersectionArea = (x2 - x1) * (y2 - y1);
     const box1Area = box1.width * box1.height;

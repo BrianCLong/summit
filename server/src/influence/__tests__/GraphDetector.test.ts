@@ -30,8 +30,8 @@ describe('GraphDetector', () => {
       records: [
         {
           get: (key: string) => {
-            if (key === 'internalInteractions') return { toNumber: () => 30 }; // High interactions
-            if (key === 'actorCount') return { toNumber: () => 6 };
+            if (key === 'internalInteractions') {return { toNumber: () => 30 };} // High interactions
+            if (key === 'actorCount') {return { toNumber: () => 6 };}
             return null;
           }
         }

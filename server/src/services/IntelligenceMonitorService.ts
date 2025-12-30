@@ -66,7 +66,7 @@ class IntelligenceMonitorService {
   }
 
   private startSimulation() {
-    if (this.isRunning) return;
+    if (this.isRunning) {return;}
     this.isRunning = true;
     logger.info('Starting intelligence simulation loop');
 
@@ -86,9 +86,9 @@ class IntelligenceMonitorService {
 
   private generateSimulatedData() {
     const io = getIO();
-    if (!io) return;
+    if (!io) {return;}
 
-    if (this.activeTargets.size === 0) return;
+    if (this.activeTargets.size === 0) {return;}
 
     // Pick a random target
     const targets = Array.from(this.activeTargets.keys());

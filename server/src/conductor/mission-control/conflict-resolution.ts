@@ -299,7 +299,7 @@ export class MissionControlConflictResolver {
       preference: number,
     ) => {
       const key = this.slotKey(slot);
-      if (seen.has(key)) return;
+      if (seen.has(key)) {return;}
       seen.add(key);
       options.push({ slot, label, preference });
     };
@@ -515,8 +515,8 @@ export class MissionControlConflictResolver {
       return 0;
     }
 
-    if (value < 0) return 0;
-    if (value > 1) return 1;
+    if (value < 0) {return 0;}
+    if (value > 1) {return 1;}
     return value;
   }
 

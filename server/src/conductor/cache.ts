@@ -12,9 +12,9 @@ type CacheOptions = {
 
 function redisFromEnv() {
   if (process.env.REDIS_URL)
-    return new (Redis as any)(process.env.REDIS_URL, {
+    {return new (Redis as any)(process.env.REDIS_URL, {
       name: process.env.REDIS_CLIENT_NAME || 'maestro-cache',
-    });
+    });}
   const host = process.env.REDIS_HOST || 'redis';
   const port = Number(process.env.REDIS_PORT || 6379);
   const db = Number(process.env.REDIS_DB || 2);
@@ -105,7 +105,7 @@ export class ConductorCache {
   ): Promise<{ meta: any; body: Buffer } | null> {
     const idxKey = this.indexKey(key);
     const head = await redis.get(idxKey);
-    if (head === '__MISS__') return null;
+    if (head === '__MISS__') {return null;}
     let meta: any | null = null;
     let s3key: string | null = null;
     if (head) {
@@ -117,7 +117,7 @@ export class ConductorCache {
         /* ignore */
       }
     }
-    if (!s3key) return null;
+    if (!s3key) {return null;}
     // try {
     //   await s3.send(new HeadObjectCommand({ Bucket: this.bucket, Key: s3key }));
     //   const obj = await s3.send(new GetObjectCommand({ Bucket: this.bucket, Key: s3key }));

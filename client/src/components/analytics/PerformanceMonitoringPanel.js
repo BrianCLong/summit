@@ -190,14 +190,14 @@ const PerformanceMonitoringPanel = () => {
 
   const getHealthStatus = () => {
     if (!performanceData)
-      return { status: 'unknown', color: 'default', message: 'Loading...' };
+      {return { status: 'unknown', color: 'default', message: 'Loading...' };}
 
     const { metrics } = performanceData;
     const issues = [];
 
-    if (metrics.avgResponseTime > 1000) issues.push('High response time');
-    if (metrics.errorRate > 5) issues.push('High error rate');
-    if (metrics.cacheHitRate < 85) issues.push('Low cache hit rate');
+    if (metrics.avgResponseTime > 1000) {issues.push('High response time');}
+    if (metrics.errorRate > 5) {issues.push('High error rate');}
+    if (metrics.cacheHitRate < 85) {issues.push('Low cache hit rate');}
 
     if (issues.length === 0) {
       return {
@@ -217,7 +217,7 @@ const PerformanceMonitoringPanel = () => {
   };
 
   const renderOverviewTab = () => {
-    if (!performanceData) return <LinearProgress />;
+    if (!performanceData) {return <LinearProgress />;}
 
     const health = getHealthStatus();
     const { metrics, systemHealth } = performanceData;
@@ -571,7 +571,7 @@ const PerformanceMonitoringPanel = () => {
   };
 
   const renderConnectionsTab = () => {
-    if (!performanceData) return <LinearProgress />;
+    if (!performanceData) {return <LinearProgress />;}
 
     return (
       <Grid container spacing={3}>
@@ -666,7 +666,7 @@ const PerformanceMonitoringPanel = () => {
   };
 
   const renderCacheTab = () => {
-    if (!performanceData) return <LinearProgress />;
+    if (!performanceData) {return <LinearProgress />;}
 
     return (
       <Grid container spacing={3}>

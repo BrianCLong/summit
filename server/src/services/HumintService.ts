@@ -324,7 +324,7 @@ export class HumintService {
     // Here we will just do a basic check on the source data
 
     const source = await this.getSource(tenantId, sourceId);
-    if (!source) throw new Error('Source not found');
+    if (!source) {throw new Error('Source not found');}
 
     const flags: string[] = [];
 

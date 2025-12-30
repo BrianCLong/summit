@@ -79,7 +79,7 @@ export function RunViewPage() {
     if (idx >= 0) {
       setHighlightIndex(idx);
       if (containerRef.current)
-        containerRef.current.scrollTo({ top: idx * 22, behavior: 'smooth' });
+        {containerRef.current.scrollTo({ top: idx * 22, behavior: 'smooth' });}
     }
   }, [visibleLogs]);
 

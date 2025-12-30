@@ -395,7 +395,7 @@ function getExportType(format: ExportFormat): 'analysis' | 'report' | 'dataset' 
 }
 
 function calculateMerkleRoot(hashes: string[]): string {
-  if (hashes.length === 0) return '';
+  if (hashes.length === 0) {return '';}
 
   let nodes = hashes.map((h) => Buffer.from(h, 'hex'));
 

@@ -6,10 +6,10 @@ export default function DiagnosticBanner() {
   const wsUrl = (import.meta as any).env?.VITE_WS_URL as string | undefined;
 
   const issues: string[] = [];
-  if (!apiUrl) issues.push('VITE_API_URL is not set');
-  if (!wsUrl) issues.push('VITE_WS_URL is not set');
+  if (!apiUrl) {issues.push('VITE_API_URL is not set');}
+  if (!wsUrl) {issues.push('VITE_WS_URL is not set');}
 
-  if (issues.length === 0) return null;
+  if (issues.length === 0) {return null;}
 
   return (
     <Alert severity="warning" sx={{ mb: 2 }} role="status" aria-live="polite">

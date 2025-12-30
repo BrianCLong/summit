@@ -114,9 +114,9 @@ export class FeatureFlags {
 
   // Helper to parse boolean from env string safely
   private static parseBool(value: string | undefined): boolean | undefined {
-    if (value === undefined || value === '') return undefined;
+    if (value === undefined || value === '') {return undefined;}
     const lower = value.toLowerCase();
-    if (lower === 'true' || lower === '1') return true;
+    if (lower === 'true' || lower === '1') {return true;}
 
     // STRICT: Any non-empty value that isn't "true"/"1" is treated as FALSE,
     // explicitly overriding the default. This matches legacy behavior where

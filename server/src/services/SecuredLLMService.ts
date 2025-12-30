@@ -228,9 +228,9 @@ export class SecuredLLMService {
       });
     }
 
-    let processedMessages = params.messages;
+    const processedMessages = params.messages;
     let auditId: string | undefined;
-    let inputWarnings: string[] = [];
+    const inputWarnings: string[] = [];
 
     // Validate each user message in the conversation
     if (!params.skipGuardrails) {

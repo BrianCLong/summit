@@ -148,7 +148,7 @@ export class ActivityFingerprintIndex {
     tenantId: string,
     signals: any[],
   ): Promise<ActivityFingerprint[]> {
-    if (!signals.length) return [];
+    if (!signals.length) {return [];}
 
     try {
       const fingerprints: ActivityFingerprint[] = [];
@@ -418,7 +418,7 @@ export class ActivityFingerprintIndex {
       signalsByType.has(type),
     );
 
-    if (!hasRequiredTypes) return matches;
+    if (!hasRequiredTypes) {return matches;}
 
     // Collect relevant signals
     const relevantSignals = requiredTypes.flatMap(
@@ -518,14 +518,14 @@ export class ActivityFingerprintIndex {
     pattern: ActivityPattern,
     signatures: BehavioralSignature[],
   ): number {
-    if (!signatures.length) return 0;
+    if (!signatures.length) {return 0;}
 
     const weightedScores = signatures.map((sig) => {
       // Compare actual features with template features
       const templateSig = pattern.signatures.find(
         (ts) => ts.signatureId === sig.signatureId,
       );
-      if (!templateSig) return 0;
+      if (!templateSig) {return 0;}
 
       let featureMatchScore = 0;
       let featureCount = 0;
@@ -621,7 +621,7 @@ export class ActivityFingerprintIndex {
     tenantId: string,
     fingerprints: ActivityFingerprint[],
   ): Promise<void> {
-    if (!fingerprints.length) return;
+    if (!fingerprints.length) {return;}
 
     const session = this.neo4j.getSession();
     try {
@@ -698,7 +698,7 @@ export class ActivityFingerprintIndex {
 
   // Helper methods for behavioral signature calculation
   private calculateIntervalVariance(signals: any[]): number {
-    if (signals.length < 2) return 0;
+    if (signals.length < 2) {return 0;}
 
     const intervals = [];
     for (let i = 1; i < signals.length; i++) {
@@ -738,7 +738,7 @@ export class ActivityFingerprintIndex {
 
   private calculateMethodicalProgression(signals: any[]): number {
     // Simple heuristic: signals with consistent intervals suggest methodical behavior
-    if (signals.length < 3) return 0;
+    if (signals.length < 3) {return 0;}
 
     const intervals = [];
     for (let i = 1; i < signals.length; i++) {
@@ -782,7 +782,7 @@ export class ActivityFingerprintIndex {
   }
 
   private calculateTimeCompression(signals: any[]): number {
-    if (signals.length < 2) return 0;
+    if (signals.length < 2) {return 0;}
 
     const totalDuration =
       new Date(signals[signals.length - 1].ts).getTime() -
@@ -794,11 +794,11 @@ export class ActivityFingerprintIndex {
   }
 
   private calculateEntropy(values: number[]): number {
-    if (!values.length) return 0;
+    if (!values.length) {return 0;}
 
     // Simple entropy calculation based on value distribution
     const sum = values.reduce((s, v) => s + v, 0);
-    if (sum === 0) return 0;
+    if (sum === 0) {return 0;}
 
     const probabilities = values.map((v) => v / sum);
     return -probabilities.reduce((entropy, p) => {

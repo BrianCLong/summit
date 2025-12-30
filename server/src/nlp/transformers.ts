@@ -61,7 +61,7 @@ export class TransformerInferenceService {
   }
 
   private async flushQueue() {
-    if (this.queue.length === 0) return;
+    if (this.queue.length === 0) {return;}
     const batch = this.queue.splice(0, this.maxBatchSize);
     const resolvers = this.queueResolvers.splice(0, this.maxBatchSize);
 

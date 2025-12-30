@@ -20,7 +20,7 @@ const getServices = (req: express.Request) => {
 
 router.get('/preferences', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id; // Assuming auth middleware populates this
-  if (!userId) return res.status(401).send('Unauthorized');
+  if (!userId) {return res.status(401).send('Unauthorized');}
 
   const { notificationService } = getServices(req);
 
@@ -34,7 +34,7 @@ router.get('/preferences', async (req: AuthenticatedRequest, res: Response) => {
 
 router.post('/preferences', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id;
-  if (!userId) return res.status(401).send('Unauthorized');
+  if (!userId) {return res.status(401).send('Unauthorized');}
 
   const { notificationService } = getServices(req);
   const prefs = req.body as UserPreferences;
@@ -51,7 +51,7 @@ router.post('/preferences', async (req: AuthenticatedRequest, res: Response) => 
 
 router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id;
-  if (!userId) return res.status(401).send('Unauthorized');
+  if (!userId) {return res.status(401).send('Unauthorized');}
 
   const { messagingService } = getServices(req);
   const { recipientId, content } = req.body;
@@ -70,7 +70,7 @@ router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
 
 router.get('/messages/:otherUserId', async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.id;
-  if (!userId) return res.status(401).send('Unauthorized');
+  if (!userId) {return res.status(401).send('Unauthorized');}
 
   const { messagingService } = getServices(req);
   const { otherUserId } = req.params;

@@ -16,7 +16,7 @@ export default function ApprovalsPanel() {
       try {
         const r = await fetch('/api/conductor/v1/approvals');
         const j = await r.json();
-        if (alive) setTasks(j.items || []);
+        if (alive) {setTasks(j.items || []);}
       } catch (e) {
         console.error(e);
       }
@@ -93,7 +93,7 @@ export default function ApprovalsPanel() {
     const justification = window.prompt(
       ok ? 'Approval justification' : 'Decline justification',
     );
-    if (!justification) return;
+    if (!justification) {return;}
     const m = ok ? 'approveStep' : 'declineStep';
     const q = `mutation($runId:ID!,$stepId:ID!,$j:String!){ ${m}(runId:$runId, stepId:$stepId, justification:$j) }`;
     try {

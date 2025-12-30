@@ -793,9 +793,9 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
 
   const filteredIncidents = useMemo(() => {
     return incidents.filter((incident) => {
-      if (severityFilter !== 'all' && incident.severity !== severityFilter) return false;
-      if (statusFilter !== 'all' && incident.status !== statusFilter) return false;
-      if (typeFilter !== 'all' && incident.type !== typeFilter) return false;
+      if (severityFilter !== 'all' && incident.severity !== severityFilter) {return false;}
+      if (statusFilter !== 'all' && incident.status !== statusFilter) {return false;}
+      if (typeFilter !== 'all' && incident.type !== typeFilter) {return false;}
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
@@ -809,12 +809,12 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
   }, [incidents, severityFilter, statusFilter, typeFilter, searchQuery]);
 
   const filteredEvidence = useMemo(() => {
-    if (!selectedIncident) return evidence;
+    if (!selectedIncident) {return evidence;}
     return evidence.filter((e) => e.incidentId === selectedIncident.id);
   }, [evidence, selectedIncident]);
 
   const filteredTimeline = useMemo(() => {
-    if (!selectedIncident) return timeline;
+    if (!selectedIncident) {return timeline;}
     return timeline.filter((t) => t.incidentId === selectedIncident.id);
   }, [timeline, selectedIncident]);
 
@@ -823,15 +823,15 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
   // ============================================================================
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {return '0 Bytes';}
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
   };
 
   const formatDuration = (minutes: number): string => {
-    if (minutes < 60) return `${minutes}m`;
+    if (minutes < 60) {return `${minutes}m`;}
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
@@ -844,9 +844,9 @@ const IncidentForensicsDashboard: React.FC<IncidentForensicsDashboardProps> = ({
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffMins < 1) {return 'Just now';}
+    if (diffMins < 60) {return `${diffMins}m ago`;}
+    if (diffHours < 24) {return `${diffHours}h ago`;}
     return `${diffDays}d ago`;
   };
 

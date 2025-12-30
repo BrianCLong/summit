@@ -36,7 +36,7 @@ export default function PerfFixtureRoute() {
 
   const rows = useMemo(() => buildRows(rowCount), [rowCount]);
   const filteredRows = useMemo(() => {
-    if (!debouncedSearch) return rows;
+    if (!debouncedSearch) {return rows;}
     const term = debouncedSearch.toLowerCase();
     return rows.filter(
       (row) =>

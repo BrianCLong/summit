@@ -46,7 +46,7 @@ export class RetentionManager {
       }
 
       const retentionDays = getRetentionDays(policy.retention);
-      if (retentionDays <= 0) continue;
+      if (retentionDays <= 0) {continue;}
 
       // Calculate cutoff date
       const cutoff = new Date();
