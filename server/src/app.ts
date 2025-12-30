@@ -331,7 +331,7 @@ export const createApp = async () => {
   app.use(healthRouter);
 
   // Swagger UI
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/api-docs', ...(swaggerUi.serve as any), swaggerUi.setup(swaggerSpec) as any);
 
 
 

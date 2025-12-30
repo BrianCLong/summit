@@ -138,7 +138,7 @@ router.post('/search/context', ensureAuthenticated, async (req, res) => {
 router.get('/dlq', ensureAuthenticated, async (req, res) => {
     // Only allow admins to view DLQ
     // Role values are conventionally uppercase in this system (e.g. ADMIN)
-    if (req.user?.role !== 'ADMIN') {
+    if ((req.user as any)?.role !== 'ADMIN') {
         return res.status(403).json({ error: 'Forbidden' });
     }
 

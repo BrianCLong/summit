@@ -2,6 +2,14 @@
 import { randomUUID } from 'crypto';
 import { IntelGraphService } from '../../services/IntelGraphService.js';
 import { Decision, Claim } from '../../graph/schema.js';
+import { maestroArtifactService, MaestroArtifactService } from '../../services/MaestroArtifactService.js';
+
+// Stub model service until proper implementation
+const modelService = {
+  async analyze(question: string, context: any): Promise<{ recommendation: string; rationale: string }> {
+    return { recommendation: 'Pending analysis', rationale: 'Model service not configured' };
+  }
+};
 
 /**
  * @interface DecisionAnalysisInput

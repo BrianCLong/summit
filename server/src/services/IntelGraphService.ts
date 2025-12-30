@@ -1,5 +1,5 @@
 // server/src/services/IntelGraphService.ts
-import neo4j, { Driver, session as Neo4jSession } from 'neo4j-driver';
+import neo4j, { Driver, Session } from 'neo4j-driver';
 import { randomUUID } from 'crypto';
 import { getNeo4jDriver } from '../config/database';
 import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema';

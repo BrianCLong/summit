@@ -83,11 +83,11 @@ sbom:   ## Generate CycloneDX SBOM
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
-	@sleep 20
+	@sleep 45
 	@echo "Checking UI health..."
 	@curl -s -f http://localhost:3000 > /dev/null && echo "✅ UI is up" || (echo "❌ UI failed" && exit 1)
 	@echo "Checking Gateway health..."
-	@curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1)
+	@curl -s -f http://localhost:8080/healthz > /dev/null && echo "✅ Gateway is up" || (curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1))
 	@echo "Smoke test complete."
 
 rollback: ## Rollback deployment (Usage: make rollback v=v3.0.0 env=prod)

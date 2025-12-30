@@ -2,7 +2,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import EmbeddingService from '../EmbeddingService.js';
 import logger from '../../utils/logger.js';
-import EntityCorrelationEngine = require('../EntityCorrelationEngine.js');
+// @ts-ignore - CommonJS module import
+import EntityCorrelationEngine from '../EntityCorrelationEngine.js';
 
 /**
  * Advanced Correlation Engine

@@ -5,7 +5,7 @@ import { openApiSpec } from '../services/openapi.js';
 const router = Router();
 
 // Swagger UI
-router.use('/swagger', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+router.use('/swagger', ...(swaggerUi.serve as any), swaggerUi.setup(openApiSpec) as any);
 
 // ReDoc
 router.get('/reference', (req, res) => {

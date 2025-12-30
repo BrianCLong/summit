@@ -29,6 +29,20 @@ export class AppError extends Error {
   }
 }
 
+export class NotFoundError extends AppError {
+  constructor(message: string = 'Resource not found') {
+    super(message, 404, 'NOT_FOUND');
+    this.name = 'NotFoundError';
+  }
+}
+
+export class DatabaseError extends AppError {
+  constructor(message: string = 'Database error') {
+    super(message, 500, 'DATABASE_ERROR');
+    this.name = 'DatabaseError';
+  }
+}
+
 export function mapGraphRAGError(error: unknown): UserFacingError {
   const traceId = randomUUID();
   let summary = 'Unknown error';
