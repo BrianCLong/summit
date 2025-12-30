@@ -51,6 +51,9 @@ const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 
+// Workbench
+import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
+
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -120,6 +123,11 @@ function App() {
                     />
                     <Route path="/maestro/*" element={<MaestroDashboard />} />
                     <Route path="/trust" element={<TrustDashboard />} />
+
+                    {/* Workbench Route - intentionally outside main layout for focus mode, or inside if desired.
+                        The prompts asked for a "shell", usually implying it might stand alone or take over.
+                        I'll put it at /workbench. */}
+                    <Route path="/workbench" element={<WorkbenchShell />} />
 
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
