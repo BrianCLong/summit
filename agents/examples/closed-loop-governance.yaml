@@ -1,0 +1,54 @@
+task_id: TASK-N4-0001
+agent_id: summit-governor
+prompt_ref:
+  id: agent-native-loop-n4
+  version: v1
+  sha256: 419717c7891d6943a948ae678ae59f03092e30a699083765300081a38c30cd94
+  path: prompts/governance/agent-native-loop-n4.md
+declared_scope:
+  paths:
+    - agents/
+    - prompts/
+    - scripts/ci/
+    - docs/ga/
+    - artifacts/
+    - metrics/
+    - .github/
+  domains:
+    - governance
+    - ci
+    - provenance
+  exclusions:
+    - server/
+allowed_operations:
+  - create
+  - edit
+verification_requirements:
+  tier: A
+  artifacts:
+    - ci:pr-metadata
+    - ci:prompt-integrity
+    - evidence:agent-run
+    - evidence:metrics
+    - policy:debt
+    - policy:scope
+    - policy:merge-readiness
+debt_budget:
+  permitted: 0
+  retirement_target: 1
+success_criteria:
+  - Prompt is registered with immutable hash and enforced scope.
+  - PR metadata is machine-validated and exported as an execution record.
+  - CI artifacts capture metrics, debt, and completion status.
+  - Failure classification and remediation hints are documented.
+stop_conditions:
+  - Prompt hash mismatch detected.
+  - Scope violation on diff paths.
+  - Verification tier A artifacts missing.
+  - Debt regression without retirement plan.
+dependencies:
+  - prompts/registry.yaml
+  - scripts/ci/validate-pr-metadata.ts
+  - scripts/ci/verify-prompt-integrity.ts
+approvals:
+  - governance-council
