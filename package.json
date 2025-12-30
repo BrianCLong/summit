@@ -37,6 +37,7 @@
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
     "lint": "eslint . && (ruff check . || true)",
     "lint:strict": "eslint . && (ruff check . || true)",
+    "security:check": "node scripts/security-check.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "test:quarantine": "echo 'Quarantine test placeholder - no flaky tests currently'",
@@ -73,6 +74,8 @@
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
     "compliance:check": "npx tsx scripts/compliance/check_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
+    "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "prepare": "husky"
   },
   "keywords": [
