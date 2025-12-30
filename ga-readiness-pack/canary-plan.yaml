@@ -1,0 +1,31 @@
+# MVP-4 Canary Release Plan
+
+## Strategy
+**Progressive Rollout:** 1% -> 5% -> 25% -> 50% -> 100%
+**Duration:** 2 hours total
+**Automated Rollback:** Triggered on Error Rate > 1% or Latency p95 > 500ms.
+
+## Traffic Steps
+
+| Step | Traffic % | Duration | Success Criteria | Rollback Trigger |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1: Smoke** | 1% | 10m | 200 OK on `/health`, No 5xx | > 1% Error Rate |
+| **Phase 2: Soak** | 5% | 20m | SLOs Green, Latency < 300ms | Latency > 500ms |
+| **Phase 3: Scale** | 25% | 30m | DB CPU < 60%, No Locks | DB CPU > 80% |
+| **Phase 4: Majority** | 50% | 30m | Cache Hit Rate > 80% | Cache Miss > 50% |
+| **Phase 5: Full** | 100% | N/A | All systems stable | N/A |
+
+## Metrics to Watch
+
+*   **API Availability:** `sum(rate(maestro_api_requests_total{status!~"5.."}[1m])) / sum(rate(maestro_api_requests_total[1m]))`
+*   **API Latency:** `histogram_quantile(0.95, sum(rate(maestro_api_request_latency_seconds_bucket[1m])) by (le))`
+*   **Neo4j Connection Pool:** `neo4j_driver_pool_active`
+
+## Configuration
+**Helm Values for Canary:**
+```yaml
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "5"
+```
