@@ -1,3 +1,9 @@
+import type {
+  AnalyticEvidenceTrail,
+  AnalyticGraphState,
+  AnalyticModelUse,
+} from '@ga-graphai/prov-ledger';
+
 export type ThreatSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 
 export interface BehaviorEvent {
@@ -31,6 +37,16 @@ export interface BehaviorInsight {
   rationale: string[];
   zScore?: number;
   trend?: 'spike' | 'drop' | 'drift' | 'oscillation';
+}
+
+export interface AnalyticProvenance {
+  sources: string[];
+  tools: string[];
+  models: AnalyticModelUse[];
+  graphState?: AnalyticGraphState;
+  actor?: string;
+  traceId?: string;
+  producedAt: string;
 }
 
 export interface PatternMatch {
@@ -129,6 +145,8 @@ export interface ThreatAlert {
   triage: TriagePlan;
   createdAt: string;
   ruleIds?: string[];
+  provenance?: AnalyticProvenance;
+  evidence?: AnalyticEvidenceTrail;
 }
 
 export interface ThreatIntelClient {
@@ -150,4 +168,5 @@ export interface ThreatAnalyticsOptions {
   }[];
   rules?: DetectionRule[];
   intel?: ThreatIntelOptions;
+  provenance?: Partial<Omit<AnalyticProvenance, 'producedAt'>>;
 }

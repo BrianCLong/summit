@@ -1,3 +1,4 @@
+import { buildAnalyticEvidenceTrail } from '@ga-graphai/prov-ledger';
 import { AlertManager } from './alert-manager';
 import { BehavioralModel } from './behavioral-model';
 import { CorrelationEngine } from './correlation-engine';
@@ -10,6 +11,7 @@ import { TriageEngine } from './triage';
 import type {
   BehaviorEvent,
   DetectionRule,
+  AnalyticProvenance,
   ThreatAlert,
   ThreatAnalyticsOptions,
   ThreatIntelClient,
@@ -70,6 +72,12 @@ export class ThreatAnalyticsEngine {
 
   private readonly intelOptions: Required<ThreatAnalyticsOptions['intel']>;
 
+  private provenanceContext: NonNullable<ThreatAnalyticsOptions['provenance']> = {
+    sources: [],
+    tools: ['@ga-graphai/threat-analytics'],
+    models: [],
+  } satisfies NonNullable<ThreatAnalyticsOptions['provenance']>;
+
   constructor(options?: ThreatAnalyticsOptions) {
     this.behavior = new BehavioralModel(options?.behavior);
     this.patterns = new PatternRecognizer(options?.patternLibrary ?? defaultPatterns());
@@ -78,6 +86,10 @@ export class ThreatAnalyticsEngine {
       minConfidence: options?.intel?.minConfidence ?? 0,
       now: options?.intel?.now ?? Date.now,
     } satisfies Required<ThreatAnalyticsOptions['intel']>;
+
+    if (options?.provenance) {
+      this.setProvenanceContext(options.provenance);
+    }
   }
 
   registerIntelClient(client: ThreatIntelClient): void {
@@ -86,6 +98,18 @@ export class ThreatAnalyticsEngine {
 
   registerRule(rule: DetectionRule): void {
     this.rules.register(rule);
+  }
+
+  setProvenanceContext(context: NonNullable<ThreatAnalyticsOptions['provenance']>): void {
+    const dedupe = (values: string[] = []) => Array.from(new Set(values));
+    this.provenanceContext = {
+      actor: context.actor ?? this.provenanceContext.actor,
+      traceId: context.traceId ?? this.provenanceContext.traceId,
+      graphState: context.graphState ?? this.provenanceContext.graphState,
+      sources: dedupe([...(this.provenanceContext.sources ?? []), ...(context.sources ?? [])]),
+      tools: dedupe([...(this.provenanceContext.tools ?? []), ...(context.tools ?? [])]),
+      models: context.models ?? this.provenanceContext.models ?? [],
+    };
   }
 
   registerEntity(profile: Parameters<EntityResolver['registerProfile']>[0]): void {
@@ -169,21 +193,22 @@ export class ThreatAnalyticsEngine {
 
     const alerts: ThreatAlert[] = [];
     if (behavior || patternMatches.length > 0 || ruleHits.length > 0 || indicatorHits.length > 0) {
-      alerts.push(
-        this.alerts.raise({
-          entityId: resolved.entityId,
-          title: 'Advanced threat detection alert',
-          description: this.describeAlert(score, patternMatches, indicatorHits),
-          severity: score.severity,
-          score: score.score,
-          indicators: indicatorHits,
-          patternMatches,
-          behavior: behavior ?? undefined,
-          temporal,
-          triage,
-          ruleIds: ruleHits.map((rule) => rule.id),
-        }),
-      );
+      const alert = this.alerts.raise({
+        entityId: resolved.entityId,
+        title: 'Advanced threat detection alert',
+        description: this.describeAlert(score, patternMatches, indicatorHits),
+        severity: score.severity,
+        score: score.score,
+        indicators: indicatorHits,
+        patternMatches,
+        behavior: behavior ?? undefined,
+        temporal,
+        triage,
+        ruleIds: ruleHits.map((rule) => rule.id),
+      });
+
+      const enriched = this.attachProvenance(alert, resolved);
+      alerts.push(enriched);
     }
     return alerts;
   }
@@ -205,5 +230,37 @@ export class ThreatAnalyticsEngine {
       parts.push(`intel hits: ${indicators.map((i) => `${i.type}:${i.value}`).join(', ')}`);
     }
     return parts.join(' | ');
+  }
+
+  private attachProvenance(alert: ThreatAlert, event: BehaviorEvent): ThreatAlert {
+    const producedAt = new Date(this.intelOptions.now()).toISOString();
+    const sources = Array.from(
+      new Set([...(this.provenanceContext.sources ?? []), event.id ?? event.entityId]),
+    );
+    const tools = Array.from(new Set([...(this.provenanceContext.tools ?? []), 'threat-analytics-engine']));
+    const models = this.provenanceContext.models ?? [];
+
+    const provenance: AnalyticProvenance = {
+      sources,
+      tools,
+      models,
+      graphState: this.provenanceContext.graphState,
+      actor: this.provenanceContext.actor ?? event.actor,
+      traceId: this.provenanceContext.traceId ?? event.context?.sessionId,
+      producedAt,
+    };
+
+    const evidence = buildAnalyticEvidenceTrail({
+      outputId: `alert:${alert.id}`,
+      actor: provenance.actor,
+      sources: provenance.sources,
+      tools: provenance.tools,
+      models: provenance.models,
+      graphState: provenance.graphState,
+      traceId: provenance.traceId,
+      producedAt,
+    });
+
+    return { ...alert, provenance, evidence };
   }
 }

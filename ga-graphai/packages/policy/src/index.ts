@@ -1839,3 +1839,10 @@ export {
   loadAuthoritySchemaFromFile,
   validateAuthoritySchema,
 } from './authority-schema-validator';
+export {
+  AgentPolicyOPA,
+  type AgentAccessRequest,
+  type AgentPolicyDecision,
+  type AgentRiskLevel,
+  type AgentProfile,
+} from './agent-opa.js';

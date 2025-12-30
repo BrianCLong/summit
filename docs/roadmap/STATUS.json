@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-30T06:00:00Z",
+  "last_updated": "2025-12-30T19:00:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -57,13 +57,15 @@
           "id": "C1",
           "name": "Policy-as-Code Engine",
           "status": "rc-ready",
-          "owner": "Jules"
+          "owner": "Jules",
+          "notes": ["Added OPA-style agent risk gating for tools and graph access"]
         },
         {
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
-          "owner": "Jules"
+          "owner": "Jules",
+          "notes": ["Extended analytic evidence trails for provenance coverage"]
         }
       ]
     }

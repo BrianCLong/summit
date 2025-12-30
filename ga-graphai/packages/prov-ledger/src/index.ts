@@ -39,6 +39,7 @@ import {
 import type { ExportManifest } from './manifest.js';
 import { createExportManifest, verifyManifest } from './manifest.js';
 import { computeLedgerHash } from './quantum-safe-ledger.js';
+export * from './analytic-evidence.js';
 
 export * from './mul-ledger';
 export * from './quantum-safe-ledger';
