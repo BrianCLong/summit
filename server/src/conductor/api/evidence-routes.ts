@@ -14,6 +14,9 @@ import {
   RunEventRow,
   RunRow,
 } from '../../maestro/evidence/receipt.js';
+import { detectSuspiciousPayload } from '../../security/suspiciousReceipt.js';
+import { isEnabled } from '../../lib/featureFlags.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
@@ -72,6 +75,37 @@ router.post(
       }
 
       const receipt = buildProvenanceReceipt(run, events, artifacts);
+
+      // Security Check: Suspicious Payload Detection
+      if (isEnabled('SUSPICIOUS_DETECT_ENABLED')) {
+        const suspiciousResult = detectSuspiciousPayload(receipt);
+        if (suspiciousResult && suspiciousResult.isSuspicious) {
+          try {
+            // Non-blocking audit event
+            await provenanceLedger.appendEntry({
+              tenantId: run.tenant_id || 'system', // Fallback if run doesn't have tenantId (though it should)
+              actionType: 'SuspiciousPayloadObserved',
+              resourceType: 'ProvenanceReceipt',
+              resourceId: receipt.receiptId,
+              actorId: req.user?.id || 'system',
+              actorType: req.user ? 'user' : 'system',
+              payload: {
+                reason: suspiciousResult.reason,
+                details: suspiciousResult.details,
+                runId: runId
+              },
+              metadata: {
+                detectionSource: 'receipt-ingestion'
+              }
+            });
+            console.warn(`[SuspiciousPayload] Detected suspicious payload in receipt ${receipt.receiptId}: ${suspiciousResult.reason}`);
+          } catch (auditError) {
+            console.error('Failed to emit suspicious payload audit event', auditError);
+            // Don't block the request
+          }
+        }
+      }
+
       const receiptJson = canonicalStringify(receipt);
       const receiptBuffer = Buffer.from(receiptJson);
       const artifactId = randomUUID();
