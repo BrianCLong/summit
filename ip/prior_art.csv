@@ -4,3 +4,8 @@ doc_qa,LayoutLM / DocVQA,"layout-aware text tokens","IntelGraph mapping + teleme
 chart_qa,UniChart / ChartLLM,"chart-specific question answering","tool-orchestrated parsers + numeric verification traces"
 ui_understanding,Screen2Words / NLSA,"UI captioning/navigation","UI graph schema with action affordances and safety guardrails"
 multimodal_rag,MM-RAG (various),"retrieval over images/docs","graph-indexed retrieval with region-level provenance"
+coordination_detection,Twitter botnet studies / network visualization tools,"community detection + centrality scoring","multi-signal coordination fingerprint + counterfactual intervention simulation (ANFIS)"
+threat_intel_lifecycle,FireEye VERIS-inspired scoring,"single-score risk ratings","explicit lifecycle state machine with provenance-weighted decay and transition proofs (ILC-PWD)"
+ontology_contracts,OpenAPI/GraphQL schema governance,"schema validation only","ontology-derived ABI with pre/postcondition action contracts and witnessed execution (OAEAC)"
+investigation_workflow,Case management playbooks / manual macros,"human-authored steps without optimization","automated trace distillation, plan rewrites, and witness chains for replayable macros (ITD-OIP)"
+osint_governance,Generic OSINT scanners,"unbounded active probing and opaque logs","passive-first gating, privacy budgets, and signed scan capsules with replay tokens (FOPB-LG)"
