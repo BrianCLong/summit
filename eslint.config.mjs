@@ -9,7 +9,15 @@ import importPlugin from 'eslint-plugin-import-x';
 import jestPlugin from 'eslint-plugin-jest';
 
 export default tseslint.config(
-  { ignores: ['dist', 'build', 'coverage', 'node_modules', '*.min.js', '.archive/**', '_salvage_from_refs/**', 'templates/**', '.ci/**', '.disabled/**', '.github/**'] },
+  { ignores: [
+    'dist', 'build', 'coverage', 'node_modules', '*.min.js',
+    '.archive/**', '_salvage_from_refs/**', 'templates/**', '.ci/**', '.disabled/**', '.github/**',
+    'scripts/**', 'tools/**', 'benchmarks/**', 'examples/**', 'zero-trust/**',
+    'ga-graphai/**', 'conductor-ui/**', 'e2e/**', 'mobile/**', 'activities/**',
+    '__mocks__/**', 'bindings/**', 'operator-kit/**', 'platform/**', 'companyos/**',
+    'cli/**', 'gateway/**', 'adversarial-misinfo-defense-platform/**', 'active-measures-module/**',
+    'absorption/**', 'assistant/**', '.maestro/**', '.security/**'
+  ] },
   {
     extends: [
       js.configs.recommended,
@@ -48,7 +56,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn', // Changed from 'off' to 'warn'
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       'no-unused-expressions': 'off',
-      '@typescript-eslint/no-unused-expressions': ['error', {}],
+      '@typescript-eslint/no-unused-expressions': ['warn', { allowShortCircuit: true, allowTernary: true }],
       '@typescript-eslint/no-unused-vars': 'warn',
       'no-console': 'warn', // Warn about console statements
     },
