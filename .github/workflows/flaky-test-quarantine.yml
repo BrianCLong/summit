@@ -1,0 +1,175 @@
+name: Flaky Test Quarantine
+
+on:
+  schedule:
+    - cron: "0 9 * * 1-5"
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quarantine-suite:
+    name: Run quarantined specs
+    runs-on: ubuntu-latest
+    outputs:
+      quarantined-failed: ${{ steps.run-quarantine.outputs.quarantine_failed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Execute quarantined suite
+        id: run-quarantine
+        working-directory: server
+        shell: bash
+        run: |
+          set +e
+          pnpm test:quarantine -- --runInBand
+          status=$?
+          if [[ $status -ne 0 ]]; then
+            echo "quarantine_failed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "quarantine_failed=false" >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+
+      - name: Upload flaky JUnit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarantine-junit
+          path: server/evidence/quarantine/flaky-tests.xml
+          if-no-files-found: warn
+
+  quarantine-report:
+    name: Quarantine signal and exit tracking
+    needs: quarantine-suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download quarantine artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: quarantine-junit
+          path: quarantine-artifacts
+
+      - name: Install reporting dependencies
+        run: pip install pyyaml --quiet
+
+      - name: Build quarantine report
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          import yaml
+
+          junit_path = Path('quarantine-artifacts/flaky-tests.xml')
+          kill_list_path = Path('tests/flaky/kill-list.yml')
+          report_dir = Path('quarantine-report')
+          report_dir.mkdir(parents=True, exist_ok=True)
+
+          summary = {
+            'found_report': junit_path.exists(),
+            'quarantined_failures': 0,
+            'quarantined_passes': 0,
+            'exit_candidates': [],
+            'tracked_quarantines': [],
+          }
+
+          tracked = []
+          if kill_list_path.exists():
+            kill_list = yaml.safe_load(kill_list_path.read_text()) or {}
+            tracked = kill_list.get('quarantined_tests', []) or []
+            summary['tracked_quarantines'] = [f"{t.get('test_file')}::{t.get('test_name')}" for t in tracked]
+
+          if junit_path.exists():
+            tree = ET.parse(junit_path)
+            root = tree.getroot()
+            exit_ready = []
+            for testcase in root.iter('testcase'):
+              name = testcase.get('name')
+              classname = testcase.get('classname')
+              signature = f"{classname}::{name}" if classname else name
+              failures = list(testcase.iter('failure'))
+              if failures:
+                summary['quarantined_failures'] += 1
+              else:
+                summary['quarantined_passes'] += 1
+                exit_ready.append(signature)
+            summary['exit_candidates'] = exit_ready
+          else:
+            summary['message'] = 'No junit file found; quarantined suite did not emit a report.'
+
+          Path(report_dir / 'quarantine-status.json').write_text(json.dumps(summary, indent=2))
+          md_lines = [
+            '# Flaky Quarantine Report',
+            '',
+            f"Report available: {'yes' if summary['found_report'] else 'no'}",
+            f"Quarantined failures: {summary['quarantined_failures']}",
+            f"Quarantined passes (eligible for exit checks): {summary['quarantined_passes']}",
+            '',
+            '## Exit candidates',
+          ]
+          if summary['exit_candidates']:
+            md_lines.extend([f"- {name}" for name in summary['exit_candidates']])
+          else:
+            md_lines.append('- None in this run')
+
+          md_lines.append('')
+          md_lines.append('## Tracked quarantines from kill-list')
+          if summary['tracked_quarantines']:
+            md_lines.extend([f"- {name}" for name in summary['tracked_quarantines']])
+          else:
+            md_lines.append('- None recorded')
+
+          (report_dir / 'report.md').write_text('\n'.join(md_lines))
+          print('\n'.join(md_lines))
+          PY
+
+      - name: Upload quarantine insights
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quarantine-report
+          path: quarantine-report
+
+      - name: Post summary
+        if: always()
+        run: |
+          echo "### Quarantine status" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f quarantine-report/quarantine-status.json ]; then
+            failures=$(jq '.quarantined_failures' quarantine-report/quarantine-status.json)
+            passes=$(jq '.quarantined_passes' quarantine-report/quarantine-status.json)
+            echo "- JUnit report present: yes" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Quarantined passes: ${passes}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Quarantined failures: ${failures}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- JUnit report present: no" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "- Details: See quarantine-report/quarantine-status.json" >> "$GITHUB_STEP_SUMMARY"

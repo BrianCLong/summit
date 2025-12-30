@@ -14,6 +14,7 @@
     "test:watch": "jest --config jest.config.js --watch",
     "test:coverage": "jest --coverage",
     "test:quarantine": "jest --config jest.quarantine.config.js --passWithNoTests",
+    "test:integration": "jest --config jest.integration.config.js --runInBand",
     "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
