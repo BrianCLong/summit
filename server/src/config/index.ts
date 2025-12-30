@@ -2,65 +2,45 @@
 import * as dotenv from 'dotenv';
 import { ConfigSchema, type Config } from './schema.js';
 import { z } from 'zod';
+import { loadConfig } from './load.js';
 
 dotenv.config();
 
-const rawConfig = {
-  env: process.env.NODE_ENV,
-  port: process.env.PORT,
-  requireRealDbs: process.env.REQUIRE_REAL_DBS === 'true',
-  neo4j: {
-    uri: process.env.NEO4J_URI,
-    username: process.env.NEO4J_USERNAME,
-    password: process.env.NEO4J_PASSWORD,
-    database: process.env.NEO4J_DATABASE,
-  },
-  postgres: {
-    host: process.env.POSTGRES_HOST,
-    port: process.env.POSTGRES_PORT,
-    database: process.env.POSTGRES_DB,
-    username: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-  },
-  redis: {
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD,
-    db: process.env.REDIS_DB,
-  },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRES_IN,
-    refreshSecret: process.env.JWT_REFRESH_SECRET,
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-  },
-  bcrypt: {
-    rounds: parseInt(process.env.BCRYPT_ROUNDS || '14'),
-  },
-  rateLimit: {
-    windowMs: process.env.RATE_LIMIT_WINDOW_MS,
-    maxRequests: process.env.RATE_LIMIT_MAX_REQUESTS,
-  },
-  cors: {
-    origin: process.env.CORS_ORIGIN,
-  },
-  features: {
-    GRAPH_EXPAND_CACHE: process.env.GRAPH_EXPAND_CACHE !== '0',
-    AI_REQUEST_ENABLED: process.env.AI_REQUEST_ENABLED !== '0',
-  },
-};
+// Load and validate config using JSON Schema (AJV) first
+// This handles strict validation based on CONFIG_VALIDATE_ON_START
+const rawConfig = loadConfig();
 
 let config: Config;
 
-try {
-  // Always validate config to apply defaults and type coercion
-  config = ConfigSchema.parse(rawConfig);
-} catch (error) {
-  if (error instanceof z.ZodError) {
-    console.error('❌ Invalid Configuration:', error.format());
+// Always validate config to apply defaults and type coercion via Zod
+// This ensures the Config type is strictly adhered to for the application
+// However, if strict validation is disabled (via flag), we should attempt to proceed even if Zod complains,
+// provided we can fallback or accept the risk. BUT, Zod is used for type coercion (string -> number).
+// If Zod fails, we likely have garbage data.
+// So we use safeParse.
+const result = ConfigSchema.safeParse(rawConfig);
+
+if (!result.success) {
+  const strict = process.env.CONFIG_VALIDATE_ON_START === 'true';
+  const errors = result.error.format();
+
+  if (strict) {
+    console.error('❌ Invalid Configuration (Zod validation):', errors);
     process.exit(1);
+  } else {
+    console.warn('⚠️ Invalid Configuration detected by Zod (Non-strict mode). proceeding with potentially unstable config:', errors);
+    // In non-strict mode, we might want to return the raw config casted,
+    // OR try to use partial data?
+    // Since existing code expects a fully typed Config object with defaults,
+    // and ConfigSchema applies those defaults, a failure here means even defaults failed
+    // (e.g. invalid type that couldn't be coerced).
+    // If we proceed, we must provide *something*.
+    // We'll return the rawConfig casted as Config, but this is dangerous.
+    // However, "Does not break runtime by default" implies we shouldn't crash if we can avoid it.
+    config = rawConfig as Config;
   }
-  throw error;
+} else {
+  config = result.data;
 }
 
 if (config.requireRealDbs || config.env === 'production') {
@@ -69,15 +49,18 @@ if (config.requireRealDbs || config.env === 'production') {
     'dev_jwt_secret_12345',
     'dev_refresh_secret_67890',
   ];
-  if (
-    devPasswords.includes(config.neo4j.password) ||
-    devPasswords.includes(config.postgres.password) ||
-    devPasswords.includes(config.jwt.secret) ||
-    devPasswords.includes(config.redis.password) ||
-    devPasswords.includes(config.jwt.refreshSecret)
-  ) {
-    console.error('❌ Production/RealDBs mode security violations found.');
-    process.exit(1);
+  // Check if config.neo4j exists before accessing (in case of non-strict bypass above)
+  if (config.neo4j && config.postgres && config.jwt && config.redis) {
+    if (
+      devPasswords.includes(config.neo4j.password) ||
+      devPasswords.includes(config.postgres.password) ||
+      devPasswords.includes(config.jwt.secret) ||
+      devPasswords.includes(config.redis.password) ||
+      devPasswords.includes(config.jwt.refreshSecret)
+    ) {
+      console.error('❌ Production/RealDBs mode security violations found.');
+      process.exit(1);
+    }
   }
 }
 
