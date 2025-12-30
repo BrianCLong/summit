@@ -1,0 +1,17 @@
+exceptions:
+  - id: LEGACY-PIPELINE-001
+    justification: Legacy ingestion pipeline uses deprecated cipher pending migration
+    approved_by: security-council
+    created_at: 2025-12-01
+    expires_at: 2026-03-01
+    scope: services/ingestion
+    risk: medium
+    mitigation: New pipeline roll-out scheduled with telemetry gating
+  - id: MODEL-GUARD-DRIFT-ALERT
+    justification: Temporary relaxed threshold for drift detector during model retraining window
+    approved_by: ai-governance-board
+    created_at: 2025-12-15
+    expires_at: 2026-01-31
+    scope: ai/runtime
+    risk: low
+    mitigation: Retraining completion will restore strict threshold and regenerate baseline
