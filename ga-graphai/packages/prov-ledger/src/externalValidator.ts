@@ -1,5 +1,6 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import type { EvidenceBundle } from 'common-types';
+import { stableHash } from '@ga-graphai/data-integrity';
 import type { ExportManifest } from './manifest.js';
 import { verifyManifest } from './manifest.js';
 
@@ -163,8 +164,26 @@ export class ProvenanceBundleValidator {
 }
 
 export function hashBundle(bundle: EvidenceBundle): string {
-  const hash = createHash('sha256');
-  hash.update(bundle.headHash ?? '');
-  hash.update(JSON.stringify(bundle.entries));
-  return hash.digest('hex');
+  if (!bundle.headHash) {
+    throw new Error('Evidence bundle is missing required headHash');
+  }
+
+  const seenEntries = new Set<string>();
+  const canonicalEntries = bundle.entries.map((entry) => {
+    const entryKey = entry.hash ?? stableHash(entry);
+    if (seenEntries.has(entryKey)) {
+      throw new Error(`Evidence bundle contains duplicate entry: ${entryKey}`);
+    }
+    seenEntries.add(entryKey);
+    return {
+      ...entry,
+      previousHash: entry.previousHash ?? null,
+    };
+  });
+
+  return stableHash({
+    domain: 'prov-ledger:evidence-bundle:v1',
+    headHash: bundle.headHash,
+    entries: canonicalEntries,
+  });
 }
