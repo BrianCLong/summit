@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: EPNL Evaluator API
+  version: 1.0.0
+paths:
+  /epnl/replay:
+    post:
+      summary: Execute EPNL replay manifest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                replayToken:
+                  type: string
+                manifest:
+                  type: object
+      responses:
+        '200':
+          description: Replay executed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  witnessChain:
+                    type: array
+                    items:
+                      type: string
+                  metrics:
+                    type: object
