@@ -6,7 +6,7 @@ import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema'
 import { AppError, NotFoundError, DatabaseError } from '../lib/errors';
 import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger';
 import { Counter, Histogram } from 'prom-client';
-import { z } from 'zod';
+import * as z from 'zod';
 
 // --- Zod Validation Schemas for Service Layer ---
 const CreateEntitySchema = z.object({ name: z.string().min(1), description: z.string().optional() });
