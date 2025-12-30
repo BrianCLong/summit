@@ -1,12 +1,17 @@
 package export
 
+import future.keywords.if
+import future.keywords.contains
+
 # Decision entrypoint
 # Returns an object: {"effect": "allow"|"deny"|"step_up"|"allow_with_redactions", "redact_fields": [..], "reasons": [..], "simulated": bool, "note": string}
 
 default decision := {"effect": "deny", "redact_fields": [], "reasons": ["no_rules_evaluated"], "simulated": false}
 
 export_allowed_roles := { "admin", "exporter" }
-is_sensitive := input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
+
+is_sensitive if { input.bundle.sensitivity == "Sensitive" }
+is_sensitive if { input.bundle.sensitivity == "Restricted" }
 
 has_export_perm if {
   some p
