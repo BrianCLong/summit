@@ -1,4 +1,4 @@
-import MiniSearch from 'minisearch';
+import MiniSearch, { SearchResult } from 'minisearch';
 import { createHash } from 'crypto';
 import { computePolicyScopeId } from './psid';
 import {

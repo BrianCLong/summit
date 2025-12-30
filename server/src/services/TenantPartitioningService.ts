@@ -1013,19 +1013,20 @@ export class TenantPartitioningService extends EventEmitter {
       this.emit('migrationCompleted', { tenantId, plan, duration });
     } catch (error) {
       // Migration failed - attempt rollback
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Migration failed, attempting rollback', {
         tenantId,
-        error: error.message,
+        error: errorMessage,
       });
 
       partition.migration.status = 'failed';
 
       try {
-        await this.rollbackMigration(plan, error.message);
+        await this.rollbackMigration(plan, errorMessage);
       } catch (rollbackError) {
         logger.error('Rollback failed', {
           tenantId,
-          error: rollbackError.message,
+          error: rollbackError instanceof Error ? rollbackError.message : String(rollbackError),
         });
       }
 
@@ -1035,7 +1036,7 @@ export class TenantPartitioningService extends EventEmitter {
         status: 'failed',
       });
 
-      this.emit('migrationFailed', { tenantId, plan, error: error.message });
+      this.emit('migrationFailed', { tenantId, plan, error: errorMessage });
     } finally {
       this.activeMigrations.delete(tenantId);
       this.metrics.setGauge('active_migrations', this.activeMigrations.size);
@@ -1078,7 +1079,7 @@ export class TenantPartitioningService extends EventEmitter {
         logger.error('Rollback step failed', {
           tenantId,
           step: step.name,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
         // Continue with other rollback steps
       }

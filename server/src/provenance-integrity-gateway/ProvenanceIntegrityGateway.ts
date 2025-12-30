@@ -11,7 +11,7 @@
  */
 
 import { EventEmitter } from 'events';
-import pino from 'pino';
+import { default as pino } from 'pino';
 import { C2PAValidationService, c2paValidationService, type C2PAValidationServiceConfig } from './C2PAValidationService.js';
 import { ContentSigningService, contentSigningService, type ContentSigningServiceConfig } from './ContentSigningService.js';
 import { DeepfakeDetectionService, deepfakeDetectionService, type DeepfakeDetectionConfig } from './DeepfakeDetectionService.js';

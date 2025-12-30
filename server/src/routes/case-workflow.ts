@@ -19,8 +19,8 @@ function extractAuthContext(req: AuthenticatedRequest): { userId: string; tenant
     return null;
   }
 
-  const userId = req.user.id;
-  const tenantId = req.user.tenantId || req.tenant?.id || req.tenant?.tenantId;
+  const userId = req.user!.id;
+  const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
 
   if (!tenantId) {
     return null;
@@ -49,8 +49,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      const userId = req.user.id;
-      const tenantId = req.user.tenantId || req.tenant?.id || req.tenant?.tenantId;
+      const userId = req.user!.id;
+      const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
 
       if (!tenantId) {
         return res.status(400).json({ error: 'Tenant ID is required' });
@@ -109,8 +109,8 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      const userId = req.user.id;
-      const tenantId = req.user.tenantId || req.tenant?.id || req.tenant?.tenantId;
+      const userId = req.user!.id;
+      const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
 
       if (!tenantId) {
         return res.status(400).json({ error: 'Tenant ID is required' });

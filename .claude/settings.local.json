@@ -288,7 +288,18 @@
       "Bash(registered\" errors that occur when multiple test files import modules\nthat register Prometheus metrics.\n\nMock includes:\n- Counter, Gauge, Histogram, Summary classes\n- Registry class with all required methods\n- collectDefaultMetrics mock\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(gitleaks detect:*)",
       "Bash(node:*)",
-      "Bash(pnpm why:*)"
+      "Bash(pnpm why:*)",
+      "Bash(git fetch:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git update-index:*)",
+      "Bash(for pr in 15082 15081 15098 15097)",
+      "Bash(do echo \"PR #$pr:\" gh pr checks $pr)",
+      "Bash(gh pr ready:*)",
+      "Bash(for pr in 15128 15111 15110 15109 15103 15102)",
+      "Bash(GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.ignorecase GIT_CONFIG_VALUE_0=true git rebase:*)",
+      "Bash(do gh pr ready $pr)",
+      "Bash(docker run:*)",
+      "Bash(do sed -i '' \"s/import pino from ''pino'';/import { default as pino } from ''pino'';/g\" \"$f\")"
     ],
     "deny": [],
     "ask": []

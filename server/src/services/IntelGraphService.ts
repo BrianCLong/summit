@@ -6,7 +6,7 @@ import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema'
 import { AppError, NotFoundError, DatabaseError } from '../lib/errors';
 import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger';
 import { Counter, Histogram } from 'prom-client';
-import * as z from 'zod';
+import { z } from 'zod';
 
 // --- Zod Validation Schemas for Service Layer ---
 const CreateEntitySchema = z.object({ name: z.string().min(1), description: z.string().optional() });
@@ -197,11 +197,71 @@ export class IntelGraphService {
     });
   }
 
+  // --- Generic Graph Methods used by other services (e.g. EntityResolver) ---
+
+  async getNodeById(tenantId: string, nodeId: string): Promise<any> {
+    return this.measure('getNodeById', async (session) => {
+      const result = await session.run('MATCH (n {id: $nodeId, tenantId: $tenantId}) RETURN n', { nodeId, tenantId });
+      return result.records[0]?.get('n').properties;
+    });
+  }
+
+  async ensureNode(tenantId: string, label: string, properties: Record<string, any>): Promise<any> {
+    return this.measure('ensureNode', async (session) => {
+      const props: any = { ...properties, tenantId };
+      // Ensure id exists
+      if (!props.id) props.id = randomUUID();
+
+      const result = await session.run(
+        `MERGE (n:${label} {id: $id, tenantId: $tenantId}) 
+         SET n += $props 
+         RETURN n`,
+        { id: props.id, tenantId, props }
+      );
+      return result.records[0]?.get('n').properties;
+    });
+  }
+
+  async createEdge(tenantId: string, fromNodeId: string, toNodeId: string, relationshipType: string, properties: Record<string, any> = {}): Promise<any> {
+    return this.measure('createEdge', async (session) => {
+      const props = { ...properties, tenantId };
+      const result = await session.run(
+        `MATCH (a {id: $fromNodeId, tenantId: $tenantId}), (b {id: $toNodeId, tenantId: $tenantId})
+         MERGE (a)-[r:${relationshipType}]->(b)
+         SET r += $props
+         RETURN r`,
+        { fromNodeId, toNodeId, tenantId, props }
+      );
+      return result.records[0]?.get('r').properties;
+    });
+  }
+
+  async findSimilarNodes(tenantId: string, label: string, properties: Record<string, any>, limit: number = 100): Promise<any[]> {
+    return this.measure('findSimilarNodes', async (session) => {
+      // Basic implementation for now: exact match on properties provided
+      // In production this might use vector search or fulltext index
+      const whereClauses: string[] = ['n.tenantId = $tenantId'];
+      const params: Record<string, any> = { tenantId, limit: neo4j.int(limit) };
+
+      Object.entries(properties).forEach(([key, value], index) => {
+        whereClauses.push(`n.${key} = $val${index}`);
+        params[`val${index}`] = value;
+      });
+
+      const cypher = `MATCH (n:${label}) WHERE ${whereClauses.join(' AND ')} RETURN n LIMIT $limit`;
+      const result = await session.run(cypher, params);
+      return result.records.map(r => r.get('n').properties);
+    });
+  }
+
   async createDecision(decisionData: z.infer<typeof CreateDecisionSchema>, informedByClaimIds: string[], owner: string, tenantId: string): Promise<Decision> {
     return this.measure('createDecision', async (session) => {
       const { question, recommendation, rationale } = CreateDecisionSchema.parse(decisionData);
       const now = new Date().toISOString();
       const newDecision: Decision = { id: randomUUID(), createdAt: now, updatedAt: now, owner, question, recommendation, rationale };
+
+      // FIX: pass props properly
+      const props = { ...newDecision, tenantId };
 
       const result = await session.run(
         `CREATE (d:Decision $props)
@@ -210,7 +270,7 @@ export class IntelGraphService {
                MATCH (c:Claim {id: claimId, tenantId: $tenantId})
                CREATE (d)-[:INFORMED_BY]->(c)
                RETURN d`,
-        { props: { ...newDecision, tenantId }, informedByClaimIds, tenantId }
+        { props, informedByClaimIds, tenantId }
       );
 
       const createdDecision = result.records[0]?.get('d').properties as Decision;

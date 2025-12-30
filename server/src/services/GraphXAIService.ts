@@ -1,4 +1,3 @@
-import { runCypher } from '../config/database'; // Assuming this helper exists based on memory, or we adapt
 import { AdjacencyList, explainDegreeCentrality, explainCommunity } from '../graph/xai';
 import { getNeo4jDriver } from '../config/database';
 
@@ -63,12 +62,12 @@ export class GraphXAIService {
         const v = record.get('v');
 
         if (u && v) {
-            if (!graph.has(u)) graph.set(u, []);
-            if (!graph.has(v)) graph.set(v, []);
+          if (!graph.has(u)) graph.set(u, []);
+          if (!graph.has(v)) graph.set(v, []);
 
-            // Undirected graph assumption for this explanation
-            graph.get(u)?.push(v);
-            graph.get(v)?.push(u);
+          // Undirected graph assumption for this explanation
+          graph.get(u)?.push(v);
+          graph.get(v)?.push(u);
         }
       });
 
@@ -90,44 +89,44 @@ export class GraphXAIService {
    * Explains community assignment
    */
   async explainNodeCommunity(nodeId: string): Promise<any> {
-     const session = this.driver.session();
-     try {
-         // Fetch neighbors and their labels
-         const result = await session.run(
-             `
+    const session = this.driver.session();
+    try {
+      // Fetch neighbors and their labels
+      const result = await session.run(
+        `
              MATCH (n {id: $nodeId})-->(m)
              RETURN n.id as nid, labels(n) as nlabels, m.id as mid, labels(m) as mlabels
              LIMIT 100
              `,
-             { nodeId }
-         );
+        { nodeId }
+      );
 
-         const graph: AdjacencyList = new Map();
-         const communities = new Map<string, string>();
+      const graph: AdjacencyList = new Map();
+      const communities = new Map<string, string>();
 
-         result.records.forEach((record: any) => {
-             const nid = record.get('nid');
-             const mid = record.get('mid');
-             const nlabels = record.get('nlabels');
-             const mlabels = record.get('mlabels');
+      result.records.forEach((record: any) => {
+        const nid = record.get('nid');
+        const mid = record.get('mid');
+        const nlabels = record.get('nlabels');
+        const mlabels = record.get('mlabels');
 
-             if (!graph.has(nid)) graph.set(nid, []);
-             graph.get(nid)?.push(mid);
+        if (!graph.has(nid)) graph.set(nid, []);
+        graph.get(nid)?.push(mid);
 
-             // Naive community = First Label
-             if (nlabels && nlabels[0]) communities.set(nid, nlabels[0]);
-             if (mlabels && mlabels[0]) communities.set(mid, mlabels[0]);
-         });
+        // Naive community = First Label
+        if (nlabels && nlabels[0]) communities.set(nid, nlabels[0]);
+        if (mlabels && mlabels[0]) communities.set(mid, mlabels[0]);
+      });
 
-         const explanation = explainCommunity(graph, communities, nodeId);
+      const explanation = explainCommunity(graph, communities, nodeId);
 
-         return {
-             target: nodeId,
-             type: 'community_homophily_explanation',
-             breakdown: explanation
-         };
-     } finally {
-         await session.close();
-     }
+      return {
+        target: nodeId,
+        type: 'community_homophily_explanation',
+        breakdown: explanation
+      };
+    } finally {
+      await session.close();
+    }
   }
 }

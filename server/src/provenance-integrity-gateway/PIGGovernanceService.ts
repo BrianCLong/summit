@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import { EventEmitter } from 'events';
 import { Counter, Gauge, Histogram } from 'prom-client';
-import pino from 'pino';
+import { default as pino } from 'pino';
 import { pool } from '../db/pg.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { advancedAuditSystem } from '../audit/advanced-audit-system.js';

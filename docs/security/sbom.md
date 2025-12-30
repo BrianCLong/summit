@@ -1,64 +1,60 @@
-# SBOM Generation
+# Software Bill of Materials (SBOM)
 
-This document describes how to generate Software Bill of Materials (SBOM) for the project.
+This document describes how we generate SBOMs, the policies we evaluate against them, and how to reproduce the same steps locally.
 
-## Overview
+## What we generate in CI
 
-The SBOM generation is automated via GitHub Actions in the `.github/workflows/sbom.yml` workflow. It runs on push to `main` and generates an SPDX JSON report using [Syft](https://github.com/anchore/syft).
+Pull requests targeting `main` now produce a CycloneDX SBOM and upload it as a build artifact. The pipeline:
 
-## Running Locally
+1. Installs [Syft](https://github.com/anchore/syft) on the runner.
+2. Runs [`scripts/generate-sbom.sh`](../../scripts/generate-sbom.sh) to emit `artifacts/sbom/sbom.json` in CycloneDX JSON format.
+3. Executes a warn-only policy evaluation via [`scripts/sbom-policy-check.mjs`](../../scripts/sbom-policy-check.mjs). Any findings are emitted as GitHub Action warnings but do not fail the build while the check is in adoption mode.
+4. Uploads `artifacts/sbom/sbom.json` as the `sbom-cyclonedx` artifact for downstream analysis and compliance evidence.
 
-To generate an SBOM locally, you need to have `syft` installed.
+## Generating locally
 
-### Installation
+### Prerequisites
 
-**macOS (Homebrew):**
+- Node.js 18+ (for the policy script)
+- [Syft](https://github.com/anchore/syft) installed on your PATH
+
+macOS (Homebrew):
+
 ```bash
 brew tap anchore/syft
 brew install syft
 ```
 
-**Linux (curl):**
+Linux (curl):
+
 ```bash
 curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 ```
 
-### Usage
+### Commands
 
-To scan the current directory and generate an SBOM in SPDX JSON format:
-
-```bash
-syft . -o spdx-json=sbom.spdx.json
-```
-
-To view the SBOM in a human-readable table format:
+Generate the SBOM in the standard artifact location:
 
 ```bash
-syft .
+bash scripts/generate-sbom.sh .
 ```
 
-## Interpreting Output
+Run the non-blocking policy evaluation against the generated SBOM:
 
-The SBOM contains a list of all dependencies detected in the repository, including:
-- NPM packages
-- Python packages
-- Go modules
-- Rust crates
-- OS packages (if running in a container)
+```bash
+node scripts/sbom-policy-check.mjs
+```
 
-### Key Fields
+To scan a different path or change the artifact location:
 
-- **name**: The name of the package.
-- **version**: The version of the package.
-- **type**: The ecosystem (e.g., `npm`, `python`, `go`).
-- **purl**: Package URL, a standard identifier for the package.
-- **license**: License information detected for the package.
+```bash
+ARTIFACTS_DIR=my-artifacts bash scripts/generate-sbom.sh ./services/api
+SBOM_FILE=my-artifacts/sbom.json node scripts/sbom-policy-check.mjs
+```
 
-## CI Workflow
+## How the SBOM is used
 
-The workflow `.github/workflows/sbom.yml` performs the following steps:
-1.  Checkouts the code.
-2.  Runs `anchore/sbom-action` to generate `sbom.spdx.json`.
-3.  Uploads the generated file as an artifact named `sbom-spdx-json`.
-
-Artifacts are retained for 14 days.
+- **Supply chain visibility:** The CycloneDX document inventories application and OS dependencies, enabling rapid impact analysis for advisories.
+- **License hygiene:** The policy check flags GPL/AGPL/LGPL usage and missing identifiers as warnings to guide remediation.
+- **Future gating:** The policy step currently runs in warn-only mode to avoid breaking builds; once coverage stabilizes we can flip it to blocking by removing `continue-on-error` in the workflow.
+- **Artifact retention:** SBOM artifacts uploaded from PR workflows provide auditable evidence for compliance reviews and downstream security automation.

@@ -6,9 +6,11 @@ import {
   requireTenantContext,
 } from '../tenancy/getTenantContext.js';
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    tenantContext?: ReturnType<typeof requireTenantContext>;
+declare global {
+  namespace Express {
+    interface Request {
+      tenantContext?: ReturnType<typeof requireTenantContext>;
+    }
   }
 }
 

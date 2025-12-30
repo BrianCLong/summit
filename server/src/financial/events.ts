@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import { z } from 'zod';
 
 /**
  * Order-to-Cash (O2C) Lifecycle Events

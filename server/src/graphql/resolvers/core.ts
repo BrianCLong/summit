@@ -10,7 +10,9 @@ import { InvestigationRepo } from '../../repos/InvestigationRepo.js';
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
-import { z, type ZodError, type ZodType } from 'zod';
+import { z } from 'zod';
+type ZodError = z.ZodError;
+type ZodType = z.ZodType;
 import { resolveTenantId } from '../../tenancy/tenantScope.js';
 
 type CoreContext = {

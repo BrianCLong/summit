@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { GraphQLError } from 'graphql';
-import { ZodError } from 'zod';
+import { z } from 'zod';
+const ZodError = z.ZodError;
 import { logger } from '../config/logger.js';
 import { recordEndpointResult } from '../observability/reliability-metrics.js';
 

@@ -11,6 +11,7 @@ export const handlers: Record<string, EventHandler> = {
       resourceId: event.payload.orderId,
       actorId: event.actor,
       actorType: 'user',
+      timestamp: new Date(),
       payload: event.payload,
       metadata: { timestamp: event.timestamp },
     });
@@ -23,6 +24,7 @@ export const handlers: Record<string, EventHandler> = {
       resourceId: event.payload.orderId,
       actorId: event.actor,
       actorType: 'system',
+      timestamp: new Date(),
       payload: event.payload,
       metadata: { timestamp: event.timestamp, paymentId: event.payload.paymentId },
     });
@@ -35,6 +37,7 @@ export const handlers: Record<string, EventHandler> = {
       resourceId: event.payload.orderId,
       actorId: event.actor,
       actorType: 'job',
+      timestamp: new Date(),
       payload: event.payload,
       metadata: { timestamp: event.timestamp, trackingId: event.payload.trackingId },
     });

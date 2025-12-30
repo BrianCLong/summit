@@ -13,7 +13,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import pino from 'pino';
+import { default as pino } from 'pino';
 import { pool } from '../db/pg.js';
 import type {
   DeepfakeDetectionResult,

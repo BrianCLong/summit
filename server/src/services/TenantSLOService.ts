@@ -484,7 +484,7 @@ export class TenantSLOService extends EventEmitter {
           logger.error('Failed to calculate tenant SLO', {
             tenantId,
             period,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
           span.recordException(error as Error);
           throw error;
@@ -671,7 +671,7 @@ export class TenantSLOService extends EventEmitter {
     } catch (error) {
       logger.error('Failed to store SLO metrics', {
         tenantId: metrics.tenantId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1133,7 +1133,7 @@ export class TenantSLOService extends EventEmitter {
       logger.error('Failed to store SLO alert', {
         alertId: alert.id,
         tenantId: alert.tenantId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1175,7 +1175,7 @@ export class TenantSLOService extends EventEmitter {
         } catch (error) {
           logger.error('Failed to generate tenant dashboard', {
             tenantId,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
           span.recordException(error as Error);
           throw error;
@@ -1322,7 +1322,7 @@ export class TenantSLOService extends EventEmitter {
       logger.error('Failed to store tenant dashboard', {
         dashboardId: dashboard.dashboardId,
         tenantId: dashboard.tenantId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1339,13 +1339,13 @@ export class TenantSLOService extends EventEmitter {
         } catch (error) {
           logger.error('Failed to calculate SLO for tenant', {
             tenantId,
-            error: error.message,
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       }
     } catch (error) {
       logger.error('Failed to calculate all tenant SLOs', {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -1367,7 +1367,7 @@ export class TenantSLOService extends EventEmitter {
       } catch (error) {
         logger.error('Failed to generate hourly report for tenant', {
           tenantId,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
@@ -1380,7 +1380,7 @@ export class TenantSLOService extends EventEmitter {
       } catch (error) {
         logger.error('Failed to update dashboard for tenant', {
           tenantId,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     }
