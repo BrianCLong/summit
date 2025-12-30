@@ -1,11 +1,11 @@
 import { EventEmitter } from 'node:events';
 import type { Pool } from 'pg';
-import { createHash } from 'node:crypto';
+import { createHash, generateKeyPairSync } from 'node:crypto';
 import express, { Router, type RequestHandler } from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { buildSchema, GraphQLError } from 'graphql';
 import type { EvidenceBundle, LedgerEntry, LedgerFactInput } from 'common-types';
-import { createExportManifest } from './manifest.js';
+import { createExportManifest, TransparencyLog } from './manifest.js';
 import {
   AccessTokenService,
   QuantumSafeLedger,
@@ -104,6 +104,11 @@ export interface LedgerServiceOptions {
   tokenSecret?: string;
   identityPublicKey?: bigint;
   now?: () => Date;
+  issuerPrivateKey?: string;
+  issuerPublicKey?: string;
+  issuerKeyId?: string;
+  issuer?: string;
+  transparencyLog?: TransparencyLog;
 }
 
 export class LedgerService {
@@ -113,6 +118,13 @@ export class LedgerService {
   private readonly tokenService: AccessTokenService;
   private readonly now: () => Date;
   private readonly identityPublicKey?: bigint;
+  private readonly manifestSigner: {
+    issuer: string;
+    keyId: string;
+    privateKey: string;
+    publicKey: string;
+  };
+  private readonly transparencyLog: TransparencyLog;
 
   constructor(options: LedgerServiceOptions = {}) {
     this.manifestStore = options.manifestStore ?? new InMemoryManifestStore();
@@ -123,6 +135,20 @@ export class LedgerService {
       now: this.now,
     });
     this.identityPublicKey = options.identityPublicKey;
+    const keyPair = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    const defaultPrivateKey = keyPair.privateKey
+      .export({ format: 'pem', type: 'pkcs1' })
+      .toString();
+    const defaultPublicKey = keyPair.publicKey
+      .export({ format: 'pem', type: 'pkcs1' })
+      .toString();
+    this.manifestSigner = {
+      issuer: options.issuer ?? 'prov-ledger',
+      keyId: options.issuerKeyId ?? 'issuer-key',
+      privateKey: options.issuerPrivateKey ?? defaultPrivateKey,
+      publicKey: options.issuerPublicKey ?? defaultPublicKey,
+    };
+    this.transparencyLog = options.transparencyLog ?? new TransparencyLog(this.now);
   }
 
   issueAccess(actor: string, scope: string): string {
@@ -161,7 +187,16 @@ export class LedgerService {
 
   exportManifest(caseId: string): ManifestRecord {
     const ledger = this.ledger(caseId);
-    const manifest = createExportManifest({ caseId, ledger: ledger.list(500) });
+    const manifest = createExportManifest({
+      caseId,
+      ledger: ledger.list(500),
+      issuer: this.manifestSigner.issuer,
+      keyId: this.manifestSigner.keyId,
+      privateKey: this.manifestSigner.privateKey,
+      publicKey: this.manifestSigner.publicKey,
+      transparencyLog: this.transparencyLog,
+      now: this.now,
+    });
     const record: ManifestRecord = {
       caseId,
       manifest,

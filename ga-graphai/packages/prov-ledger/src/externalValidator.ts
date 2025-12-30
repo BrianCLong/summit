@@ -83,7 +83,9 @@ export class ProvenanceBundleValidator {
       this.buildCustodyEvent('received', 'prov-ledger'),
     ];
 
-    const manifestVerification = verifyManifest(manifest, bundle.entries, bundle);
+    const manifestVerification = verifyManifest(manifest, bundle.entries, {
+      evidence: bundle,
+    });
 
     const payload: ExternalValidationPayload = {
       bundleHash: hashBundle(bundle),

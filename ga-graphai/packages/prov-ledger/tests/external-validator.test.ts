@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, generateKeyPairSync } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { EvidenceBundle, LedgerEntry } from 'common-types';
 import { stableHash } from '@ga-graphai/data-integrity';
@@ -59,6 +59,10 @@ function buildLedgerEntries(): LedgerEntry[] {
 const fixedNow = () => new Date('2024-06-01T12:00:00Z');
 
 describe('ProvenanceBundleValidator', () => {
+  const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const issuerPrivateKey = privateKey.export({ format: 'pem', type: 'pkcs1' }).toString();
+  const issuerPublicKey = publicKey.export({ format: 'pem', type: 'pkcs1' }).toString();
+
   it('submits provenance bundles for third-party verification with custody tracking', async () => {
     const entries = buildLedgerEntries();
     const bundle: EvidenceBundle = {
@@ -66,7 +70,13 @@ describe('ProvenanceBundleValidator', () => {
       headHash: entries.at(-1)?.hash,
       entries,
     };
-    const manifest = createExportManifest({ caseId: 'case-77', ledger: entries });
+    const manifest = createExportManifest({
+      caseId: 'case-77',
+      ledger: entries,
+      privateKey: issuerPrivateKey,
+      publicKey: issuerPublicKey,
+      now: fixedNow,
+    });
 
     const captured: ExternalValidationPayload[] = [];
     const validator: ThirdPartyValidator = {
@@ -117,7 +127,13 @@ describe('ProvenanceBundleValidator', () => {
       headHash: entries.at(-1)?.hash,
       entries,
     };
-    const manifest = createExportManifest({ caseId: 'case-21', ledger: entries });
+    const manifest = createExportManifest({
+      caseId: 'case-21',
+      ledger: entries,
+      privateKey: issuerPrivateKey,
+      publicKey: issuerPublicKey,
+      now: fixedNow,
+    });
     manifest.merkleRoot = 'tampered-root';
 
     const validator: ThirdPartyValidator = {
