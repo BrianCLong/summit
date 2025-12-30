@@ -1,0 +1,25 @@
+name: asset-metadata
+version: 1.0.0
+description: Collect DNS and HTTP metadata for allowlisted assets.
+objectives:
+  - capture-dns
+  - capture-http-headers
+expect:
+  - dns_lookup
+  - http_head
+policy:
+  allowedTools:
+    - dns_lookup
+    - http_head
+  targetAllowlist:
+    - example.com
+    - example.org
+steps:
+  - name: resolve-dns
+    tool: dns_lookup
+    inputs:
+      domain: "{{target}}"
+  - name: fetch-headers
+    tool: http_head
+    inputs:
+      url: "{{target}}"

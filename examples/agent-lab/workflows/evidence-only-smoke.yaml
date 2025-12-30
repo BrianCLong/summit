@@ -1,0 +1,16 @@
+name: evidence-only-smoke
+version: 1.0.0
+description: Demonstrates dry-run and evidence emission without real network traffic.
+objectives:
+  - smoke
+expect:
+  - dns_lookup
+policy:
+  allowedTools:
+    - dns_lookup
+    - http_head
+steps:
+  - name: dry-dns
+    tool: dns_lookup
+    inputs:
+      domain: example.com
