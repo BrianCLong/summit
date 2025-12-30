@@ -9,12 +9,11 @@
  * It sets up global test utilities and configuration.
  */
 
-// Use require for CommonJS compatibility with ts-jest
-const jestGlobals = require('@jest/globals');
-const { jest } = jestGlobals;
-
 // Extend Jest timeout for integration tests
-jest.setTimeout(30000);
+// Note: `jest` is a global injected by Jest - no import needed
+if (typeof jest !== 'undefined') {
+  jest.setTimeout(30000);
+}
 
 // Global test utilities
 declare global {
