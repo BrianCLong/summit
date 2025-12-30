@@ -18,6 +18,7 @@ import {
   GovernanceResult,
 } from '../types/data-envelope';
 import { randomUUID, createHash } from 'crypto';
+import { wrapResolversWithPolicy } from './policyWrapper';
 // Stubbed imports for missing services
 // import { getProvenance } from '../../prov-ledger-service/src/ledger';
 // import { checkLicensesWithContext } from '../../prov-ledger-service/src/ledger';
@@ -437,7 +438,7 @@ function checkLicensesWithContext(licenses: string[], context: any): any {
   };
 }
 
-export const dataEnvelopeResolvers = {
+export const dataEnvelopeResolvers = wrapResolversWithPolicy('DataEnvelope', {
   Query: {
     generateHypothesesWithEnvelope,
     generateNarrativeWithEnvelope,
@@ -446,4 +447,4 @@ export const dataEnvelopeResolvers = {
   Mutation: {
     exportWithProvenance,
   },
-};
+});
