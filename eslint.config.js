@@ -134,7 +134,20 @@ export default [
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/no-require-imports': 'warn', // Relaxed for gradual migration
+      '@typescript-eslint/ban-ts-comment': 'warn', // Relaxed for gradual migration
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/no-namespace': 'warn',
+      '@typescript-eslint/no-this-alias': 'warn',
       'no-useless-escape': 'warn', // Relaxed for gradual migration
+      'no-case-declarations': 'warn',
+      'no-empty': 'warn',
+      'no-useless-catch': 'warn',
+      'no-prototype-builtins': 'warn',
+      'no-fallthrough': 'warn',
+      'no-control-regex': 'warn',
+      'no-constant-binary-expression': 'warn',
+      'no-dupe-keys': 'warn',
+      'no-shadow-restricted-names': 'warn',
 
       // Best Practices
       curly: ['warn', 'all'],
