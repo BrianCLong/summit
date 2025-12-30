@@ -1,0 +1,9 @@
+{
+  "name": "demo-bundle",
+  "version": "1.0.0",
+  "kind": "plugin",
+  "entrypoint": "index.js",
+  "files": ["index.js", "README.md"],
+  "permissions": [],
+  "scopes": []
+}
