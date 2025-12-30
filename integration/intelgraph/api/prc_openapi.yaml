@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: PRC Capsule API
+  version: 1.0.0
+paths:
+  /prc/capsules:
+    post:
+      summary: Submit PRC capsule for execution
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                capsule:
+                  type: object
+                replayToken:
+                  type: string
+      responses:
+        '200':
+          description: Capsule executed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  outputs:
+                    type: object
+                  witnessChain:
+                    type: array
+                    items:
+                      type: string
