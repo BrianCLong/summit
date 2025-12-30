@@ -4,7 +4,7 @@
 // Maestro Runbooks Management
 // =============================================
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import MonacoEditor from 'react-monaco-editor'
+import Editor from '@monaco-editor/react'
 import { useNotification } from '@/contexts/NotificationContext'
 import { useMaestroRunSocket } from '@/hooks/useMaestroRunSocket'
 

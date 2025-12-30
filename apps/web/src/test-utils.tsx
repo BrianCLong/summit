@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -16,7 +16,7 @@ const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const customRender = (ui: React.ReactElement, options?: any) =>
+const customRender = (ui: React.ReactElement, options?: Omit<RenderOptions, 'wrapper'>): RenderResult =>
   render(ui, { wrapper: AllTheProviders, ...options });
 
 // re-export everything

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
-import MonacoEditor from 'react-monaco-editor';
+import Editor from '@monaco-editor/react';
 import ReactJson from 'react-json-view';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';

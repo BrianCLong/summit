@@ -1,5 +1,5 @@
 // @ts-nocheck
-export { Alert, AlertTitle, AlertDescription } from './alert'
+export { Alert, AlertTitle, AlertDescription } from './Alert'
 export { Badge, badgeVariants } from './Badge'
 export { Button, buttonVariants } from './Button'
 export {

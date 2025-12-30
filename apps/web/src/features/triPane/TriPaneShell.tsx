@@ -461,9 +461,9 @@ export function TriPaneShell({
   }, [emitPresenceUpdate])
 
   useEffect(() => {
-    const selection = syncState.graph.selectedEntityId
+    const selection: PresenceChannelSelection | undefined = syncState.graph.selectedEntityId
       ? {
-          pane: 'graph',
+          pane: 'graph' as const,
           id: syncState.graph.selectedEntityId,
           label:
             filteredData.entities.find((entity) => entity.id === syncState.graph.selectedEntityId)?.name ||
@@ -471,7 +471,7 @@ export function TriPaneShell({
         }
       : syncState.timeline.selectedEventId
         ? {
-            pane: 'timeline',
+            pane: 'timeline' as const,
             id: syncState.timeline.selectedEventId,
             label:
               filteredData.timelineEvents.find((event) => event.id === syncState.timeline.selectedEventId)?.title ||
@@ -479,7 +479,7 @@ export function TriPaneShell({
           }
         : syncState.map.selectedLocationId
           ? {
-              pane: 'map',
+              pane: 'map' as const,
               id: syncState.map.selectedLocationId,
             }
           : undefined
