@@ -31,6 +31,10 @@
 - **Governance:** Closure evidence archived in corresponding sprint artifacts under `docs/sprints/` and linked scorecards; no pending compliance or dependency handoffs.
 - **Maintenance posture:** Any future work is net-new scope, not reopenings of the sealed sprints.
 
+### Newly Added Artifact
+
+- **CompanyOS Sprint 28 — Data Spine:** Recorded under `docs/sprints/COMPANYOS_SPRINT_28_DATA_SPINE.md` with evidence folders at `.evidence/sprint-28/` to track catalog, residency, retention, and lineage enforcement.
+
 ### Current Sprint (N+55)
 
 - **Sprint N+55 — Portfolio Pruning & Focus Reinforcement** (`PORTFOLIO_SCORECARD.md`): Reduces surface area, eliminates low-ROI work, and consolidates capabilities.

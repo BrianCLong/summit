@@ -1,0 +1,47 @@
+{
+  "task_id": "TASK-DATA-SPINE-28",
+  "agent_id": "gpt-5.1-codex-max",
+  "prompt_ref": {
+    "id": "docs-data-spine-sprint-plan",
+    "version": "v1",
+    "sha256": "096a81ac38fe14756df20b6330706686d857649c96e32d5be550ce9c37cffb99",
+    "path": "prompts/docs/data-spine-sprint-plan.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/sprints/",
+      "docs/roadmap/STATUS.json",
+      "SPRINT_INDEX.md",
+      ".evidence/sprint-28/",
+      "prompts/docs/",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["documentation", "governance", "data-platform"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/sprints/COMPANYOS_SPRINT_28_DATA_SPINE.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 1
+  },
+  "success_criteria": [
+    "Sprint 28 plan is documented with epics, acceptance criteria, risks, and metrics.",
+    "Evidence directories exist for catalog, residency, retention, and lineage artifacts.",
+    "Roadmap metadata reflects the new plan without altering status counts.",
+    "Prompt registry references the documentation prompt with accurate hash."
+  ],
+  "stop_conditions": [
+    "Requested files fall outside declared scope",
+    "Evidence directories would expose secrets or production data"
+  ],
+  "dependencies": ["prompts/registry.yaml", "agents/task-spec.schema.json"],
+  "approvals": ["Human review per CODEOWNERS"]
+}
