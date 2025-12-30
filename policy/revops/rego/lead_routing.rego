@@ -1,5 +1,7 @@
 package revops.lead_routing
 
+import future.keywords.if
+import future.keywords.contains
 import data.revops.config
 import data.revops.segments
 
@@ -48,14 +50,21 @@ choose_assignee(route_cfg) := assignee if {
   assignee := {"type": "none"}
 }
 
-flags(lead, segment, tenant_id) := out if {
-  default out := []
+# Flags when country is in important countries
+flags(lead, segment, tenant_id) := ["priority_region", segment] if {
   important_countries := config.tenant[tenant_id].lead_routing_flags.important_countries
   some c
   important_countries[c] == lead.country
-  out := ["priority_region", segment]
 }
 
+# Flags when country is not in important countries
+flags(lead, segment, tenant_id) := [] if {
+  input.lead
+  important_countries := config.tenant[tenant_id].lead_routing_flags.important_countries
+  not lead.country in important_countries
+}
+
+# Flags when no lead is provided
 flags(_, _, _) := [] if {
   not input.lead
 }
