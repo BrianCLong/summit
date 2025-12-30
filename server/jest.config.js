@@ -10,7 +10,7 @@ export default {
   extensionsToTreatAsEsm: ['.ts'],
 
   setupFilesAfterEnv: [
-    '<rootDir>/tests/setup/jest.setup.js',
+    '<rootDir>/jest.setup.js',
   ],
 
   testMatch: [
