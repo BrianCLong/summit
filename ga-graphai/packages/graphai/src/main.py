@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from features import build_degree_features
 from analytics import analyze_graph
+from pstr import PstrRequest, PstrResponse, pstr_search
 
 
 class FeatureBuildRequest(BaseModel):
@@ -188,6 +189,11 @@ def graph_analyze(req: GraphAnalysisRequest) -> GraphAnalysisResponse:
         [algo.model_dump() for algo in req.custom_algorithms],
     )
     return GraphAnalysisResponse(**analysis)
+
+
+@app.post("/retrieval/pstr", response_model=PstrResponse)
+def retrieval_pstr(request: PstrRequest) -> PstrResponse:
+    return pstr_search(request)
 
 
 def _score_model(candidate: ModelProfile, request: RouteRequest) -> float:
