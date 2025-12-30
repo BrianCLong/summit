@@ -69,6 +69,11 @@ const FLAG_CATALOG: Record<string, FeatureFlagDefinition> = {
     defaultValue: false,
     description: 'Enables the release criteria engine for case exports.',
   },
+  'SUSPICIOUS_DETECT_ENABLED': {
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Enables detection and auditing of suspicious payloads in receipt ingestion.',
+  },
 };
 
 const envOverrides = parseOverrideString(

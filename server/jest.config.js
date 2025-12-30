@@ -58,7 +58,6 @@ export default {
     '/src/routes/__tests__/compliance.test.ts',
     '/src/graphql/__tests__/permissions.test.ts',
     '/src/publishing/__tests__/',
-    '/src/security/__tests__/',
     '/src/summitsight/',
     // Skip more tests that require infrastructure or have dependency issues
     '/src/hunting/__tests__/',
