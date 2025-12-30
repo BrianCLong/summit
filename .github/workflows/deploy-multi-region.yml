@@ -24,7 +24,7 @@ jobs:
           version: "v3.12.0"
 
       - name: Set up yq
-        uses: mikefarah/yq@v4.30.8
+        uses: mikefarah/yq@v4.50.1
 
       - name: Resolve target regions
         run: |
