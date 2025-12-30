@@ -3,7 +3,7 @@ import type {
   DSARConnector,
   ExportStorage,
   KafkaEventLog,
-} from './types';
+} from './types.js';
 
 export interface PostgresRow {
   table: string;

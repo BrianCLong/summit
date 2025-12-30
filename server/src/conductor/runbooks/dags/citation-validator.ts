@@ -5,7 +5,7 @@
  * Ensures all evidence is properly cited with sources, timestamps, and integrity hashes.
  */
 
-import { Citation, Evidence, createCitationHash } from './types';
+import { Citation, Evidence, createCitationHash } from './types.js';
 
 /**
  * Citation validation result

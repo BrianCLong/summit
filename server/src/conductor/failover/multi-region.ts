@@ -4,7 +4,7 @@
 
 import { EventEmitter } from 'events';
 import Redis from 'ioredis';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export interface RegionConfig {
   id: string;

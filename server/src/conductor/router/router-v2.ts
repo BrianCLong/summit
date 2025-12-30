@@ -8,9 +8,9 @@ import {
   BanditContext,
   ExpertArm,
   RouteDecision,
-} from '../learn/bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { conductorResilienceManager } from '../resilience/circuit-breaker';
+} from '../learn/bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { conductorResilienceManager } from '../resilience/circuit-breaker.js';
 
 export interface RouterQuery {
   id: string;

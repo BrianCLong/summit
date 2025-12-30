@@ -1,11 +1,11 @@
-import { pg } from '../../db/pg';
+import { pg } from '../../db/pg.js';
 import {
   NotFoundError,
   ValidationError,
-} from '../../errors/ErrorHandlingFramework';
-import { CreateEventInput, MemoryEvent } from '../types';
-import { assertSameTenant, getSessionById } from './sessionRepository';
-import { getPageById } from './pageRepository';
+} from '../../errors/ErrorHandlingFramework.js';
+import { CreateEventInput, MemoryEvent } from '../types.js';
+import { assertSameTenant, getSessionById } from './sessionRepository.js';
+import { getPageById } from './pageRepository.js';
 
 export async function createEvent(input: CreateEventInput): Promise<MemoryEvent> {
   if (!input.tenantId) {

@@ -1,7 +1,8 @@
-import pinoHttp from 'pino-http';
+import pinoHttpModule from 'pino-http';
 import pino from 'pino';
 import { randomUUID } from 'crypto';
 
+const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 const logger = (pino as any)();
 
 export const loggingMiddleware = pinoHttp({

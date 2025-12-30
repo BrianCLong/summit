@@ -1,6 +1,6 @@
-import type { GraphStore, AIService } from '../services-types';
-import { createGraphStore } from './services/graph-store';
-import { createAIService } from './services/ai';
+import type { GraphStore, AIService } from '../services-types.js';
+import { createGraphStore } from './services/graph-store.js';
+import { createAIService } from './services/ai.js';
 
 const store: GraphStore = createGraphStore();
 const ai: AIService = createAIService();

@@ -20,7 +20,7 @@ import {
   RunbookLogEventType,
   generateLogId,
   nowISO,
-} from './types';
+} from './types.js';
 
 // ============================================================================
 // Redis-backed Execution Repository

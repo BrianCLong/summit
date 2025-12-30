@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Pool } from 'pg';
 import crypto from 'crypto';
-import { SecretReference, SecretResolver } from './types';
+import { SecretReference, SecretResolver } from './types.js';
 
 export interface RotationPolicy {
   secretId: string;

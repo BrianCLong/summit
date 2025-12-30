@@ -3,7 +3,7 @@ import EWService, {
   JammingMission,
   SpectrumSignal,
   DirectionFindingResult
-} from '../../services/ElectronicWarfareService';
+} from '../../services/ElectronicWarfareService.js';
 
 const resolvers = {
   Query: {

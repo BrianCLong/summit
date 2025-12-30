@@ -13,8 +13,8 @@ import {
   NodeExecutionResult,
   LegalBasis,
   DataLicense,
-} from './types';
-import { CitationValidator } from './citation-validator';
+} from './types.js';
+import { CitationValidator } from './citation-validator.js';
 
 /**
  * Gate Executor

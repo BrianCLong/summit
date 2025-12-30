@@ -1,6 +1,6 @@
-import { BaseProcessor } from './BaseProcessor';
-import { TextProcessor } from './TextProcessor';
-import { PdfProcessor } from './PdfProcessor';
+import { BaseProcessor } from './BaseProcessor.js';
+import { TextProcessor } from './TextProcessor.js';
+import { PdfProcessor } from './PdfProcessor.js';
 import * as path from 'path';
 
 export class ProcessorFactory {

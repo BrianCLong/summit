@@ -4,7 +4,7 @@
 
 import Redis from 'ioredis';
 import { EventEmitter } from 'events';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export type ExpertArm =
   | 'LLM_LIGHT'

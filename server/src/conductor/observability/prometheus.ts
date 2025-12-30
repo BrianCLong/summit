@@ -3,7 +3,7 @@
 
 import * as client from 'prom-client';
 import { register } from '../../monitoring/metrics.js';
-import { ExpertType } from '../types';
+import { ExpertType } from '../types/index.js';
 
 // Conductor-specific Prometheus metrics
 export const conductorRouterDecisionsTotal = new client.Counter({

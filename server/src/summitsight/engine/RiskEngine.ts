@@ -1,5 +1,5 @@
-import { SummitsightDataService } from '../SummitsightDataService';
-import { RiskAssessment } from '../types';
+import { SummitsightDataService } from '../SummitsightDataService.js';
+import { RiskAssessment } from '../types/index.js';
 
 export class RiskEngine {
   private dataService: SummitsightDataService;

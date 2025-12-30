@@ -1,8 +1,8 @@
-import { provenanceLedger } from '../provenance/ledger';
-import { AccessControlService } from './access-control';
-import { DeliveryService } from './delivery-service';
-import { exporterMap } from './exporters';
-import { TemplateEngine, defaultTemplateEngine } from './template-engine';
+import { provenanceLedger } from '../provenance/ledger.js';
+import { AccessControlService } from './access-control.js';
+import { DeliveryService } from './delivery-service.js';
+import { exporterMap } from './exporters/index.js';
+import { TemplateEngine, defaultTemplateEngine } from './template-engine.js';
 import {
   AccessContext,
   ReportArtifact,

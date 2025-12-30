@@ -3,8 +3,8 @@
 // Provides endpoints for compliance monitoring, assessment, and reporting
 
 import express from 'express';
-import { complianceEngine } from './compliance-engine';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { complianceEngine } from './compliance-engine.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export const complianceRouter = express.Router();
 

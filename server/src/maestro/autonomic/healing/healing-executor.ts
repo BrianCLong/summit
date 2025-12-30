@@ -1,6 +1,6 @@
 
-import { SelfHealingPlaybook, PlaybookAction } from './types';
-import { Signal } from '../signals/types';
+import { SelfHealingPlaybook, PlaybookAction } from './types.js';
+import { Signal } from '../signals/types.js';
 
 export class HealingExecutor {
   private playbooks: SelfHealingPlaybook[] = [];

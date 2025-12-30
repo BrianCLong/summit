@@ -2,9 +2,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import yaml from 'js-yaml';
-import Ajv from 'ajv';
+import AjvModule from 'ajv';
 import logger from '../utils/logger.js';
 import type { PromptConfig } from './types.js';
+
+const Ajv = (AjvModule as any).default || AjvModule;
 
 export class PromptRegistry {
   private prompts: Map<string, PromptConfig> = new Map();

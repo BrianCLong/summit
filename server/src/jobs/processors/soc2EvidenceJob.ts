@@ -1,15 +1,15 @@
 // @ts-nocheck
 import { Job } from 'pg-boss';
-import { SOC2ComplianceService } from '../../services/SOC2ComplianceService';
-import { SigningService } from '../../services/SigningService';
-import { getTracer } from '../../observability/tracer';
-import { metrics } from '../../observability/metrics';
-import { WormStorageService } from '../../services/WormStorageService';
-import { generatePdfFromPacket } from '../../utils/pdfGenerator';
-import { ComplianceMonitoringService } from '../../services/ComplianceMonitoringService';
-import { EventSourcingService } from '../../services/EventSourcingService';
-import { UserRepository } from '../../data/UserRepository';
-import { getPostgresPool } from '../../config/database';
+import { SOC2ComplianceService } from '../../services/SOC2ComplianceService.js';
+import { SigningService } from '../../services/SigningService.js';
+import { getTracer } from '../../observability/tracer.js';
+import { metrics } from '../../observability/metrics.js';
+import { WormStorageService } from '../../services/WormStorageService.js';
+import { generatePdfFromPacket } from '../../utils/pdfGenerator.js';
+import { ComplianceMonitoringService } from '../../services/ComplianceMonitoringService.js';
+import { EventSourcingService } from '../../services/EventSourcingService.js';
+import { UserRepository } from '../../data/UserRepository.js';
+import { getPostgresPool } from '../../config/database.js';
 
 interface SOC2JobPayload {
   [key: string]: unknown;

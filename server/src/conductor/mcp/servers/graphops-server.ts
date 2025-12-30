@@ -5,7 +5,7 @@
 
 import WebSocket from 'ws';
 import { randomUUID as uuid } from 'crypto';
-import { MCPRequest, MCPResponse, MCPTool } from '../../types';
+import { MCPRequest, MCPResponse, MCPTool } from '../../types.js';
 
 export interface GraphOpsConfig {
   neo4jUri: string;

@@ -5,8 +5,8 @@
 import { EventEmitter } from 'events';
 import { spawn } from 'child_process';
 import Redis from 'ioredis';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { multiRegionFailoverManager } from '../failover/multi-region';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { multiRegionFailoverManager } from '../failover/multi-region.js';
 
 export interface DeploymentConfig {
   strategy: 'blue-green' | 'canary' | 'rolling';

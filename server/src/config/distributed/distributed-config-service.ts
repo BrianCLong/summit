@@ -2,7 +2,7 @@
 import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
 import { z } from 'zod';
-import { FeatureFlags } from '../featureFlags';
+import { FeatureFlags } from '../featureFlags.js';
 import {
   ABTestConfig,
   ABTestVariant,
@@ -20,7 +20,7 @@ import {
   RepositoryWriter,
   SecretReference,
   SecretResolver,
-} from './types';
+} from './types.js';
 
 const SECRET_REFERENCE_KEY = '__secretRef';
 

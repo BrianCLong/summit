@@ -1,5 +1,5 @@
 import { gql } from 'apollo-server-express';
-import { ProvenanceClaimService } from '../../services/ProvenanceClaimService';
+import { ProvenanceClaimService } from '../../services/ProvenanceClaimService.js';
 
 export const provenanceResolvers = {
   Mutation: {

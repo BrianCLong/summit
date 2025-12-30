@@ -1,7 +1,7 @@
 // Conductor Governance Limits
 // Implements cost controls, rate limiting, and resource quotas for MoE Conductor
 
-import { ExpertType } from '../types';
+import { ExpertType } from '../types/index.js';
 import { createHash } from 'crypto';
 
 export interface CostLimits {

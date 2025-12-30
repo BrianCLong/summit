@@ -1,4 +1,4 @@
-import { MigrationContext } from './types';
+import { MigrationContext } from './types.js';
 
 export class IdempotencyService {
   // In a real implementation, this would use Redis or a DB table

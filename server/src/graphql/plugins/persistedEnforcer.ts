@@ -6,7 +6,7 @@
 import crypto from 'crypto';
 import { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLError } from 'graphql';
-import logger from '../../utils/logger';
+import logger from '../../utils/logger.js';
 
 // Feature flags for rollout phases
 const PQ_PHASE = process.env.PQ_PHASE ?? 'log'; // "log" | "enforce"

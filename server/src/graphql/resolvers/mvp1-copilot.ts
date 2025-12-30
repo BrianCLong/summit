@@ -1,10 +1,10 @@
-import { CopilotIntegrationService } from '../../services/CopilotIntegrationService';
+import { CopilotIntegrationService } from '../../services/CopilotIntegrationService.js';
 import {
   AuthenticationError,
   ForbiddenError,
   UserInputError,
 } from 'apollo-server-express';
-import { FeatureFlags } from '../../config/featureFlags';
+import { FeatureFlags } from '../../config/featureFlags.js';
 
 const copilotService = new CopilotIntegrationService();
 

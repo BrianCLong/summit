@@ -194,4 +194,4 @@ const graphragTypes = gql`
   }
 `;
 
-module.exports = graphragTypes;
+module.exports = { graphragTypes };

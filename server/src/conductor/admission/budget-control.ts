@@ -1,7 +1,7 @@
 // Conductor Budget Hard-Stop Controller
 // Implements budget enforcement with graceful degradation and cost containment
 
-import { ExpertType } from '../types';
+import { ExpertType } from '../types/index.js';
 import Redis from 'ioredis';
 
 export interface BudgetConfig {

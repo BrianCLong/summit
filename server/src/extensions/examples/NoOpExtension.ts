@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ExtensionManifest } from '../types';
+import { ExtensionManifest } from '../types.js';
 
 export const NoOpExtensionManifest: ExtensionManifest = {
   id: 'noop-extension',

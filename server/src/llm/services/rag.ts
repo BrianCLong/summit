@@ -1,6 +1,6 @@
 
-import { SummitLlmOrchestrator } from '../orchestrator';
-import { promptService } from '../prompts/registry';
+import { SummitLlmOrchestrator } from '../orchestrator.js';
+import { promptService } from '../prompts/registry.js';
 
 export interface RagContext {
     documents: string[];

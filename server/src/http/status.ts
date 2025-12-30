@@ -3,8 +3,8 @@
 
 import express from 'express';
 import os from 'os';
-import { createBudgetController } from '../conductor/admission/budget-control';
-import { getConductorHealth } from '../conductor/metrics';
+import { createBudgetController } from '../conductor/admission/budget-control.js';
+import { getConductorHealth } from '../conductor/metrics/index.js';
 import Redis from 'ioredis';
 
 export const statusRouter = express.Router();

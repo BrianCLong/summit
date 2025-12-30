@@ -7,9 +7,9 @@ import {
   costAwareScheduler,
   SchedulingContext,
   BudgetConfig,
-} from './cost-aware-scheduler';
-import { ExpertArm } from '../learn/bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+} from './cost-aware-scheduler.js';
+import { ExpertArm } from '../learn/bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export const schedulerRouter = express.Router();
 

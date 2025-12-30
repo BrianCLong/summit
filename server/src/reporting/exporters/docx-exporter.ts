@@ -8,8 +8,8 @@ import {
   TableRow,
   TextRun,
 } from 'docx';
-import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
-import { ReportArtifact } from '../types';
+import { ExportOptions, ReportExporter, normalizeTabularData } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 export class DocxExporter implements ReportExporter {
   readonly format = 'docx' as const;

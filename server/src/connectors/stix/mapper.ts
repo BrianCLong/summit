@@ -1,4 +1,4 @@
-import { runCypher } from '../../graph/neo4j';
+import { runCypher } from '../../graph/neo4j.js';
 
 export type StixObject = {
   type: string;

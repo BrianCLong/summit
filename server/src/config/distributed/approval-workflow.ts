@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
-import { ConfigVersion, EnvironmentName } from './types';
+import { ConfigVersion, EnvironmentName } from './types.js';
 
 export interface Approval {
   approver: string;

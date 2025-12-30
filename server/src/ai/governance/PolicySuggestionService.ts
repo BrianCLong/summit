@@ -815,6 +815,9 @@ Provide:
         return null;
     }
 
+    // Get related policies - this code path is only reached for gap_detection
+    const relatedPoliciesList = input.existingPolicies || [];
+
     return {
       id,
       suggestionType: input.type,

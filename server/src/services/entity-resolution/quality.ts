@@ -1,5 +1,5 @@
-import { DataQualityMetric } from './models';
-import { getDriver } from '../../graph/neo4j';
+import { DataQualityMetric } from './models.js';
+import { getDriver } from '../../graph/neo4j.js';
 
 export class DataQualityService {
 

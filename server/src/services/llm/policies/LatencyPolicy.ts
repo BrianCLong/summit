@@ -1,5 +1,5 @@
 
-import { RoutingPolicy, LLMProvider, LLMRequest, LLMRouterConfig } from '../interfaces';
+import { RoutingPolicy, LLMProvider, LLMRequest, LLMRouterConfig } from '../interfaces.js';
 
 export class LatencyPolicy implements RoutingPolicy {
   name = 'latency';

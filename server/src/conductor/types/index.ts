@@ -1,7 +1,7 @@
 // Core types for the MoE Conductor system
 // Defines the interfaces for routing, expert selection, and MCP communication
 
-import type { MissionControlConflictContext } from '../mission-control/conflict-resolution';
+import type { MissionControlConflictContext } from '../mission-control/conflict-resolution.js';
 
 export type ExpertType =
   | 'LLM_LIGHT'

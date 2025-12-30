@@ -1,6 +1,9 @@
-import { threatHuntingService } from '../../services/threatHuntingService';
-import STIXImportService from '../../services/STIXImportService.js';
-import { getNeo4jDriver, getPostgresPool } from '../../config/database'; // Assuming these exist
+import { threatHuntingService } from '../../services/threatHuntingService.js';
+import { createRequire } from 'module';
+import { getNeo4jDriver, getPostgresPool } from '../../config/database.js'; // Assuming these exist
+
+const require = createRequire(import.meta.url);
+const STIXImportService = require('../../services/STIXImportService.js');
 
 // Instantiate STIXImportService lazily or here if deps are available
 // Note: In a real app, we might use dependency injection or context

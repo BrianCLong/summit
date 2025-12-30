@@ -6,8 +6,8 @@ import {
   ConductResult,
   RouteDecision,
   ExpertType,
-} from './types';
-import { moERouter } from './router';
+} from './types/index.js';
+import { moERouter } from './router/index.js';
 import {
   mcpClient,
   mcpRegistry,

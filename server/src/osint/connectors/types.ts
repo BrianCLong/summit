@@ -1,5 +1,5 @@
 
-import { OSINTEnrichmentResult } from '../types';
+import { OSINTEnrichmentResult } from '../types.js';
 
 export interface OSINTQuery {
   name?: string;

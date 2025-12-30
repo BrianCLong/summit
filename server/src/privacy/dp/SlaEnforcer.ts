@@ -1,4 +1,4 @@
-import { withinErrorBound } from './ErrorMonitor';
+import { withinErrorBound } from './ErrorMonitor.js';
 
 export class SlaEnforcer {
   constructor(

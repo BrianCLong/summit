@@ -1,6 +1,7 @@
-import PptxGenJS from 'pptxgenjs';
-import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
-import { ReportArtifact } from '../types';
+import PptxGenJSModule from 'pptxgenjs';
+const PptxGenJS = (PptxGenJSModule as any).default || PptxGenJSModule;
+import { ExportOptions, ReportExporter, normalizeTabularData } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 export class PptxExporter implements ReportExporter {
   readonly format = 'pptx' as const;

@@ -14,19 +14,19 @@ import {
   InfrastructureEnrichmentService,
   PatternMinerService,
   ReportGeneratorService,
-} from '../types';
-import { NoOpExecutor } from './base';
-import { IngestStepExecutor, DefaultIndicatorIngestService } from './ingest-executor';
-import { GraphLookupStepExecutor, DefaultInfrastructureEnrichmentService } from './graph-lookup-executor';
-import { PatternMinerStepExecutor, DefaultPatternMinerService } from './pattern-miner-executor';
-import { ReportGeneratorStepExecutor, DefaultReportGeneratorService } from './report-executor';
+} from '../types.js';
+import { NoOpExecutor } from './base.js';
+import { IngestStepExecutor, DefaultIndicatorIngestService } from './ingest-executor.js';
+import { GraphLookupStepExecutor, DefaultInfrastructureEnrichmentService } from './graph-lookup-executor.js';
+import { PatternMinerStepExecutor, DefaultPatternMinerService } from './pattern-miner-executor.js';
+import { ReportGeneratorStepExecutor, DefaultReportGeneratorService } from './report-executor.js';
 import {
   CustomStepExecutor,
   NotifyStepExecutor,
   ValidateStepExecutor,
   TransformStepExecutor,
   EnrichIntelStepExecutor,
-} from './custom-executor';
+} from './custom-executor.js';
 
 /**
  * Default implementation of StepExecutorRegistry

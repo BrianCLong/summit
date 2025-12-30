@@ -1,7 +1,7 @@
 // @ts-nocheck
 import PDFDocument from 'pdfkit';
-import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
-import { ReportArtifact } from '../types';
+import { ExportOptions, ReportExporter, normalizeTabularData } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 function renderTable(doc: PDFDocument, rows: ReturnType<typeof normalizeTabularData>) {
   const keys = Object.keys(rows[0] || { value: 'value' });

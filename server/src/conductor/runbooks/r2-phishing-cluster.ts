@@ -33,9 +33,9 @@ import {
   CryptographicProof,
   LegalBasis,
   DataLicense,
-} from './dags/types';
-import { GateFactory } from './dags/gates';
-import { CitationValidator } from './dags/citation-validator';
+} from './dags/types.js';
+import { GateFactory } from './dags/gates.js';
+import { CitationValidator } from './dags/citation-validator.js';
 
 /**
  * Phishing email artifact

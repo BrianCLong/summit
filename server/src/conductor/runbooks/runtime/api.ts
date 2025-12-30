@@ -16,24 +16,24 @@ import {
   RunbookControlAction,
   RunbookExecution,
   RunbookExecutionLogEntry,
-} from './types';
-import { LegalBasis, DataLicense } from '../dags/types';
+} from './types.js';
+import { LegalBasis, DataLicense } from '../dags/types.js';
 import {
   RunbookStateManager,
   RedisRunbookExecutionRepository,
   RedisRunbookExecutionLogRepository,
   InMemoryRunbookExecutionRepository,
   InMemoryRunbookExecutionLogRepository,
-} from './state-manager';
+} from './state-manager.js';
 import {
   RunbookRuntimeEngine,
   InMemoryRunbookDefinitionRepository,
-} from './engine';
-import { createExecutorRegistry } from './executors/registry';
+} from './engine.js';
+import { createExecutorRegistry } from './executors/registry.js';
 import {
   RapidAttributionRunbook,
   validateRapidAttributionInput,
-} from './rapid-attribution-runbook';
+} from './rapid-attribution-runbook.js';
 
 // ============================================================================
 // Router Setup

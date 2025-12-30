@@ -1,5 +1,5 @@
-import { ConnectorContext } from '../../data-model/types';
-import { SourceConnector } from '../../connectors/types';
+import { ConnectorContext } from '../../data-model/types.js';
+import { SourceConnector } from '../../connectors/types.js';
 
 export type MigrationStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'PARTIAL';
 

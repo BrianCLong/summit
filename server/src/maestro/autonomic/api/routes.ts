@@ -1,13 +1,13 @@
 
 import { Router } from 'express';
-import { SignalsService } from '../signals/signals-service';
-import { SLOPolicyEngine } from '../policy/slo-policy-engine';
-import { ReliabilityLoop } from '../loops/reliability-loop';
-import { CostOptimizationLoop } from '../loops/cost-loop';
-import { GovernanceEngine } from '../governance/governance-engine';
-import { ExperimentationService } from '../experiments/experimentation-service';
-import { HealingExecutor } from '../healing/healing-executor';
-import { SignalType } from '../signals/types';
+import { SignalsService } from '../signals/signals-service.js';
+import { SLOPolicyEngine } from '../policy/slo-policy-engine.js';
+import { ReliabilityLoop } from '../loops/reliability-loop.js';
+import { CostOptimizationLoop } from '../loops/cost-loop.js';
+import { GovernanceEngine } from '../governance/governance-engine.js';
+import { ExperimentationService } from '../experiments/experimentation-service.js';
+import { HealingExecutor } from '../healing/healing-executor.js';
+import { SignalType } from '../signals/types.js';
 
 // Composition Root (Singleton-ish for demo)
 const signalsService = new SignalsService();

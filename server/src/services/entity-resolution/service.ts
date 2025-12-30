@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { EntityInput, ResolutionCandidate, ResolutionDecision, ERConfig, DecisionType } from './models';
-import { ScoringEngine } from './scoring';
-import { provenanceLedger } from '../../provenance/ledger';
-import { getDriver } from '../../graph/neo4j';
+import { EntityInput, ResolutionCandidate, ResolutionDecision, ERConfig, DecisionType } from './models.js';
+import { ScoringEngine } from './scoring.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
+import { getDriver } from '../../graph/neo4j.js';
 import { getTracer } from '../../observability/tracer.js';
 import pLimit from 'p-limit';
 

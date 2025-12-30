@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { getNeo4jDriver } from '../../db/neo4j';
-import { RedisService } from '../../cache/redis';
-import logger from '../../utils/logger';
+import { getNeo4jDriver } from '../../db/neo4j.js';
+import { RedisService } from '../../cache/redis.js';
+import logger from '../../utils/logger.js';
 import { randomUUID as uuidv4 } from 'crypto';
 
 export interface NarrativeImpact {

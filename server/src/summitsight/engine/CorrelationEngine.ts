@@ -1,5 +1,5 @@
-import { SummitsightDataService } from '../SummitsightDataService';
-import { KPIValue } from '../types';
+import { SummitsightDataService } from '../SummitsightDataService.js';
+import { KPIValue } from '../types/index.js';
 
 export interface CorrelationResult {
     metricA: string;

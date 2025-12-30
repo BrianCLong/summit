@@ -3,7 +3,7 @@
 
 import WebSocket from 'ws';
 import { randomUUID as uuid } from 'crypto';
-import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types';
+import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types/index.js';
 import logger from '../../config/logger.js';
 
 export interface MCPClientOptions {

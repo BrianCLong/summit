@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { warRoomService } from '../../collaboration/warRoomService';
-import { collaborationService } from '../../services/collaborationService'; // for pubsub
-import { checkAuth, checkWarRoomAdmin } from '../../middleware/warRoomAuth';
+import { warRoomService } from '../../collaboration/warRoomService.js';
+import { collaborationService } from '../../services/collaborationService.js'; // for pubsub
+import { checkAuth, checkWarRoomAdmin } from '../../middleware/warRoomAuth.js';
 
 export const collaborationResolvers = {
   Query: {
@@ -49,7 +49,7 @@ export const collaborationResolvers = {
     },
     createdBy: async (warRoom: { created_by: number }) => {
       // Assuming a userService exists to fetch user details
-      // import { userService } from '../../services/userService';
+      // import { userService } from '../../services/userService.js';
       // return userService.getUser(warRoom.created_by);
       return { id: warRoom.created_by, name: 'Dummy User' }; // Placeholder
     },

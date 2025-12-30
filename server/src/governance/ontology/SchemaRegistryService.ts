@@ -1,7 +1,7 @@
 
-import { SchemaVersion, SchemaDefinition, Vocabulary, Concept, ChangeRequest, SchemaStatus } from './models';
+import { SchemaVersion, SchemaDefinition, Vocabulary, Concept, ChangeRequest, SchemaStatus } from './models.js';
 import { randomUUID } from 'crypto';
-import { FilePersistenceAdapter, PersistenceAdapter } from './persistence';
+import { FilePersistenceAdapter, PersistenceAdapter } from './persistence.js';
 
 export class SchemaRegistryService {
   private static instance: SchemaRegistryService;

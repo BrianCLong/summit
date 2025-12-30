@@ -1,5 +1,5 @@
 
-import { SignalType } from '../signals/types';
+import { SignalType } from '../signals/types.js';
 
 export interface SLODefinition {
   id: string;

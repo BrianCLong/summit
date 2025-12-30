@@ -2,8 +2,8 @@
 // Cost-Aware Scheduler for Conductor
 // Implements queue-backed execution with budget tracking and graceful degradation
 
-import { ExpertArm } from '../learn/bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { ExpertArm } from '../learn/bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export interface SchedulingContext {

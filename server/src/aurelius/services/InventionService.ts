@@ -1,7 +1,7 @@
 
-import { getNeo4jDriver } from '../../config/database';
-import { PriorArtService } from './PriorArtService';
-import LLMService from '../../services/LLMService';
+import { getNeo4jDriver } from '../../config/database.js';
+import { PriorArtService } from './PriorArtService.js';
+import LLMService from '../../services/LLMService.js';
 
 export class InventionService {
   private static instance: InventionService;

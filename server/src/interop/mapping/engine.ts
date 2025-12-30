@@ -1,4 +1,4 @@
-import { MappingSpec, FieldMapping, TransformType, MappingResult } from './schema';
+import { MappingSpec, FieldMapping, TransformType, MappingResult } from './schema.js';
 
 export class MappingEngine {
   private spec: MappingSpec;

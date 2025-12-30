@@ -1,5 +1,5 @@
 
-import { LlmProvider, ProviderId, ChatCompletionRequest, ChatCompletionResult } from '../types';
+import { LlmProvider, ProviderId, ChatCompletionRequest, ChatCompletionResult } from '../types.js';
 
 export class MockProvider implements LlmProvider {
   id: ProviderId = 'mock';

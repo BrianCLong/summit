@@ -1,5 +1,5 @@
 
-import { SummitLlmOrchestrator } from '../orchestrator';
+import { SummitLlmOrchestrator } from '../orchestrator.js';
 
 const orchestrator = new SummitLlmOrchestrator();
 

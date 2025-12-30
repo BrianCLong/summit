@@ -5,11 +5,11 @@
  * insider threats, foreign intelligence activities, and deception operations.
  */
 
-export * from './ThreatActorModelingService';
-export * from './DeceptionDetectionEngine';
-export * from './AnomalyCorrelationService';
+export * from './ThreatActorModelingService.js';
+export * from './DeceptionDetectionEngine.js';
+export * from './AnomalyCorrelationService.js';
 
 // Re-export singleton instances
-export { threatActorModelingService } from './ThreatActorModelingService';
-export { deceptionDetectionEngine } from './DeceptionDetectionEngine';
-export { anomalyCorrelationService } from './AnomalyCorrelationService';
+export { threatActorModelingService } from './ThreatActorModelingService.js';
+export { deceptionDetectionEngine } from './DeceptionDetectionEngine.js';
+export { anomalyCorrelationService } from './AnomalyCorrelationService.js';

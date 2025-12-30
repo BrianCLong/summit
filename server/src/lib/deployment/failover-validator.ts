@@ -1,5 +1,5 @@
 
-import { MultiRegionProber, RegionConfig, RegionHealthStatus } from './multi-region-prober';
+import { MultiRegionProber, RegionConfig, RegionHealthStatus } from './multi-region-prober.js';
 
 export interface FailoverResult {
   success: boolean;

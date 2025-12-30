@@ -1,4 +1,4 @@
-import { Agent, AgentTask, ConsensusResult, PolicyEvaluationResult } from './types';
+import { Agent, AgentTask, ConsensusResult, PolicyEvaluationResult } from './types.js';
 
 export interface PersistenceLayer {
   saveAgent(agent: Agent): Promise<void>;

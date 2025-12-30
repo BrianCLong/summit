@@ -2,8 +2,8 @@
 // Provides orchestrated response to security and operational incidents
 
 import { EventEmitter } from 'events';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { conductorResilienceManager } from '../resilience/circuit-breaker';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { conductorResilienceManager } from '../resilience/circuit-breaker.js';
 import Redis from 'ioredis';
 
 export interface IncidentContext {

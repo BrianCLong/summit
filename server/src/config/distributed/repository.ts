@@ -4,7 +4,7 @@ import {
   ConfigVersion,
   EnvironmentName,
   RepositoryWriter,
-} from './types';
+} from './types.js';
 
 interface ConfigHistory<TConfig> {
   versions: ConfigVersion<TConfig>[];

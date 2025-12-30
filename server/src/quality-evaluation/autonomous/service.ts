@@ -1,4 +1,4 @@
-import { EvaluationHarness } from './harness';
+import { EvaluationHarness } from './harness.js';
 import {
   EvaluationRequest,
   EvaluationReport,
@@ -7,7 +7,7 @@ import {
   ProhibitedActionType,
   EvaluationCapabilitySchema,
   EvaluationRequestSchema
-} from './types';
+} from './types.js';
 
 export class AutonomousEvaluationService {
   private harness: EvaluationHarness;

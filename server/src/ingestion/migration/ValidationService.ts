@@ -1,4 +1,4 @@
-import { MigrationContext } from './types';
+import { MigrationContext } from './types.js';
 
 export class ValidationService {
   async validateRecord(ctx: MigrationContext, record: any): Promise<{ valid: boolean; errors: string[] }> {

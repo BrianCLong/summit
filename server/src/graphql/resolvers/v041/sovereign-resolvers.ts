@@ -5,10 +5,10 @@
  */
 
 import { ApolloError } from 'apollo-server-express';
-import { Context } from '../../context';
-import { logger } from '../../../config/logger';
-import { auditLogger } from '../../middleware/auditLogger';
-import SovereignSafeguardsService from '../../../services/SovereignSafeguardsService';
+import { Context } from '../../context.js';
+import { logger } from '../../../config/logger.js';
+import { auditLogger } from '../../middleware/auditLogger.js';
+import SovereignSafeguardsService from '../../../services/SovereignSafeguardsService.js';
 
 const sovereignSafeguardsService = new SovereignSafeguardsService();
 

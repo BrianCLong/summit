@@ -3,7 +3,7 @@
 // Enables offline-first operation with eventual consistency across edge nodes
 
 import { createHash, randomUUID } from 'crypto';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export interface CRDTNode {

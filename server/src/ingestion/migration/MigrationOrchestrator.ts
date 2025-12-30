@@ -1,10 +1,10 @@
-import { MigrationConfig, MigrationResult, MigrationContext } from './types';
-import { SourceConnector } from '../../connectors/types';
-import { IdempotencyService } from './IdempotencyService';
-import { ValidationService } from './ValidationService';
-import { MockMigrationConnector } from './connectors/MockMigrationConnector';
-import { MigrationDestination } from './Destination';
-import { MockMigrationDestination } from './destinations/MockMigrationDestination';
+import { MigrationConfig, MigrationResult, MigrationContext } from './types.js';
+import { SourceConnector } from '../../connectors/types.js';
+import { IdempotencyService } from './IdempotencyService.js';
+import { ValidationService } from './ValidationService.js';
+import { MockMigrationConnector } from './connectors/MockMigrationConnector.js';
+import { MigrationDestination } from './Destination.js';
+import { MockMigrationDestination } from './destinations/MockMigrationDestination.js';
 import pino from 'pino';
 
 // @ts-ignore

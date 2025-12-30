@@ -1,5 +1,5 @@
 
-import { ChatCompletionRequest, ChatCompletionResult, ProviderId, ModelId } from '../types';
+import { ChatCompletionRequest, ChatCompletionResult, ProviderId, ModelId } from '../types.js';
 
 export interface LlmPolicy {
   id: string;

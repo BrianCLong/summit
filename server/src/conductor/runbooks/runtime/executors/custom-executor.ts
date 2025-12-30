@@ -6,12 +6,12 @@
  * @module runbooks/runtime/executors/custom-executor
  */
 
-import { BaseStepExecutor } from './base';
+import { BaseStepExecutor } from './base.js';
 import {
   StepExecutorContext,
   StepExecutorResult,
   RunbookActionType,
-} from '../types';
+} from '../types.js';
 
 /**
  * Custom execution function type

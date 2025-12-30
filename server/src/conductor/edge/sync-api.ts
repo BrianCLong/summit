@@ -8,8 +8,8 @@ import {
   CRDTNode,
   SyncRequest,
   SyncResponse,
-} from './crdt-sync';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+} from './crdt-sync.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { randomUUID } from 'crypto';
 
 export const syncRouter = express.Router();

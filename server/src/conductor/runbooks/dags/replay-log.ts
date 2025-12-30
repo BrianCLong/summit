@@ -8,7 +8,7 @@
 
 import { createHash, sign, verify } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { ReplayLogEntry, createReplayLogHash, Evidence } from './types';
+import { ReplayLogEntry, createReplayLogHash, Evidence } from './types.js';
 
 /**
  * Replay Log Manager

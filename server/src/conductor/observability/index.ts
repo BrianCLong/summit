@@ -3,8 +3,8 @@
 // for the Conductor MoE+MCP system
 
 import { trace, _context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
-import { conductorMetrics } from '../metrics';
-import { ExpertType } from '../types';
+import { conductorMetrics } from '../metrics/index.js';
+import { ExpertType } from '../types/index.js';
 
 const tracer = trace.getTracer('conductor', '1.0.0');
 

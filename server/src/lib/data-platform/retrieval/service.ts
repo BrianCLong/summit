@@ -1,5 +1,5 @@
-import { pg } from '../../../db/pg';
-import { RetrievalQuery, RetrievalResponse, RetrievalResultChunk } from '../types';
+import { pg } from '../../../db/pg.js';
+import { RetrievalQuery, RetrievalResponse, RetrievalResultChunk } from '../types.js';
 import EmbeddingService from '../../../services/EmbeddingService.js';
 
 export class RetrievalService {

@@ -1,7 +1,7 @@
 // @ts-nocheck
 // Agent Timeline and HITL API Routes
 import express from 'express';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 const router = express.Router();
 

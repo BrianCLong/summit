@@ -1,4 +1,4 @@
-import logger from '../../utils/logger';
+import logger from '../../utils/logger.js';
 
 export interface ServiceMetrics {
   cpuUsagePercent: number; // Current or average CPU usage (0-100)

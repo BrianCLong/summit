@@ -13,8 +13,8 @@ import {
   StepExecutorContext,
   StepExecutorResult,
   RunbookActionType,
-} from '../types';
-import { Evidence, Citation, CryptographicProof } from '../../dags/types';
+} from '../types.js';
+import { Evidence, Citation, CryptographicProof } from '../../dags/types.js';
 
 /**
  * Abstract base class for step executors

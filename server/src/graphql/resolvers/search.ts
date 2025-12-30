@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { ElasticsearchService } from '../../../apps/search-engine/src/services/ElasticsearchService';
-import { QueryBuilderService } from '../../../apps/search-engine/src/services/QueryBuilderService';
-import { SavedSearchService } from '../../../apps/search-engine/src/services/SavedSearchService';
-import { SearchAnalyticsService } from '../../../apps/search-engine/src/services/SearchAnalyticsService';
-import { IndexingService } from '../../../apps/search-engine/src/services/IndexingService';
-import { SearchQuery } from '../../../apps/search-engine/src/types';
+import { ElasticsearchService } from '../../../apps/search-engine/src/services/ElasticsearchService.js';
+import { QueryBuilderService } from '../../../apps/search-engine/src/services/QueryBuilderService.js';
+import { SavedSearchService } from '../../../apps/search-engine/src/services/SavedSearchService.js';
+import { SearchAnalyticsService } from '../../../apps/search-engine/src/services/SearchAnalyticsService.js';
+import { IndexingService } from '../../../apps/search-engine/src/services/IndexingService.js';
+import { SearchQuery } from '../../../apps/search-engine/src/types.js';
 import logger from '../../config/logger.js';
 
 const searchLogger = logger.child({ name: 'SearchResolvers' });

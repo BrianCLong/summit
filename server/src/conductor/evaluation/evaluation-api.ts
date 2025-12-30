@@ -8,10 +8,10 @@ import {
   GoldenTask,
   EvaluationResult,
   QualityMetrics,
-} from './golden-tasks';
+} from './golden-tasks.js';
 
 // QualityMetrics is calculated dynamically by evaluationEngine.calculateQualityMetrics()
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export const evaluationRouter = express.Router();

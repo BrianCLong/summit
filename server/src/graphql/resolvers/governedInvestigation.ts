@@ -12,10 +12,10 @@
 
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { Driver } from 'neo4j-driver';
-import { OPAClient } from '../../middleware/opa-abac';
-import { WarrantService } from '../../services/WarrantService';
-import { AdvancedAuditSystem } from '../../audit/advanced-audit-system';
-import { GovernanceContext } from '../../middleware/governance';
+import { OPAClient } from '../../middleware/opa-abac.js';
+import { WarrantService } from '../../services/WarrantService.js';
+import { AdvancedAuditSystem } from '../../audit/advanced-audit-system.js';
+import { GovernanceContext } from '../../middleware/governance.js';
 import { Logger } from 'pino';
 
 export interface InvestigationContext {

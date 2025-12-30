@@ -1,10 +1,10 @@
 import { gql } from 'graphql-tag';
 import { coreTypeDefs } from '../schema.core.js';
-import copilotModule from '../schema.copilot.js';
-import graphModule from '../schema.graphops.js';
-import aiModule from '../schema.ai.js';
-import annotationsModule from '../schema.annotations.js';
-import graphragTypesModule from '../types/graphragTypes.js';
+import { copilotTypeDefs } from '../schema.copilot.js';
+import { graphTypeDefs } from '../schema.graphops.js';
+import { aiTypeDefs } from '../schema.ai.js';
+import { annotationsTypeDefs } from '../schema.annotations.js';
+import { graphragTypes } from '../types/graphragTypes.js';
 import { crystalTypeDefs } from '../schema.crystal.js';
 import evidenceTypeDefs from '../schema.evidence.js';
 import evidenceOkTypeDefs from '../schema.evidenceOk.js';
@@ -16,15 +16,6 @@ import { erTypeDefs } from '../schema.er.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
-const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
-const { aiTypeDefs } = aiModule as { aiTypeDefs: any };
-const { annotationsTypeDefs } = annotationsModule as {
-  annotationsTypeDefs: any;
-};
-const graphragTypes =
-  (graphragTypesModule as any).default || graphragTypesModule;
 
 const __filename = fileURLToPath((import.meta as any).url);
 const __dirname = path.dirname(__filename);

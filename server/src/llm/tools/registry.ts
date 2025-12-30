@@ -1,5 +1,5 @@
 
-import { ToolDefinition, ToolCallInvocation } from '../types';
+import { ToolDefinition, ToolCallInvocation } from '../types.js';
 
 export interface ExecutableTool extends ToolDefinition {
   execute(args: Record<string, unknown>, context: { tenantId: string, user?: any }): Promise<any>;

@@ -1,9 +1,7 @@
 // server/src/maestro/pipelines/decision-analysis-pipeline.ts
 import { randomUUID } from 'crypto';
-import { IntelGraphService } from '../../services/IntelGraphService';
-import { modelService } from '../../services/ModelService';
-import { maestroArtifactService } from '../../services/MaestroArtifactService';
-import { Decision, Claim } from '../../graph/schema';
+import { IntelGraphService } from '../../services/IntelGraphService.js';
+import { Decision, Claim } from '../../graph/schema.js';
 
 /**
  * @interface DecisionAnalysisInput

@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
-import type { ExportManifest, SignedExportPack } from './types';
-import { hashDeterministic } from './proofs';
+import type { ExportManifest, SignedExportPack } from './types.js';
+import { hashDeterministic } from './proofs.js';
 
 export class ExportPackSigner {
   constructor(

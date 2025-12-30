@@ -1,7 +1,7 @@
 // Sample Runbooks for Conductor
 // Provides default operational procedures for common scenarios
 
-import { runbookRegistry, Runbook } from './registry';
+import { runbookRegistry, Runbook } from './registry.js';
 
 export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
   {

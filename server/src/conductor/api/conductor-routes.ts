@@ -7,10 +7,10 @@ import { PremiumModelRouter } from '../premium-routing/premium-model-router.js';
 import { ComplianceGate } from '../web-orchestration/compliance-gate.js';
 import { RedisRateLimiter } from '../web-orchestration/redis-rate-limiter.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
-import { policyRoutes } from './policy-routes';
-import { evidenceRoutes } from './evidence-routes';
-import { agentRoutes } from './agent-routes';
-import { servingRoutes } from './serving-routes';
+import { policyRoutes } from './policy-routes.js';
+import { evidenceRoutes } from './evidence-routes.js';
+import { agentRoutes } from './agent-routes.js';
+import { servingRoutes } from './serving-routes.js';
 import {
   authenticateUser,
   requirePermission,

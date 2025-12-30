@@ -1,5 +1,5 @@
 
-import { Signal, SignalType, SignalSeries, HealthSnapshot, ComponentHealth, HealthStatus } from './types';
+import { Signal, SignalType, SignalSeries, HealthSnapshot, ComponentHealth, HealthStatus } from './types.js';
 import { randomUUID } from 'crypto';
 
 export class SignalsService {

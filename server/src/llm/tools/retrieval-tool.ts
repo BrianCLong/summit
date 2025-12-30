@@ -1,5 +1,5 @@
 
-import { ExecutableTool } from './registry';
+import { ExecutableTool } from './registry.js';
 
 export const retrievalTool: ExecutableTool = {
   name: 'retrieval_search',

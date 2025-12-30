@@ -3,8 +3,8 @@
 // Collects feedback signals to improve expert routing decisions
 
 import express from 'express';
-import { adaptiveRouter, RewardSignal, ExpertArm } from './bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { adaptiveRouter, RewardSignal, ExpertArm } from './bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export const rewardRouter = express.Router();

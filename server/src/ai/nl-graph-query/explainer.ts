@@ -3,7 +3,7 @@
  */
 
 import pino from 'pino';
-import type { ExplanationEvidence, QueryExplanation } from './types';
+import type { ExplanationEvidence, QueryExplanation } from './types.js';
 
 const logger = (pino as any)({ name: 'cypher-explainer' });
 

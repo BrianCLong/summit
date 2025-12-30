@@ -1,5 +1,5 @@
-import { pg } from '../../db/pg';
-import { RiskScore, RiskSignal, RiskScoreInput } from '../../risk/types';
+import { pg } from '../../db/pg.js';
+import { RiskScore, RiskSignal, RiskScoreInput } from '../../risk/types.js';
 
 /**
  * Repository for managing Risk Scores and Signals in PostgreSQL.

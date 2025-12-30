@@ -3,7 +3,7 @@ import {
   runWargameOptimizer,
   runSentimentVolatility,
   runStegoAnalyzer,
-} from '../../services/strategicIntelligenceServices';
+} from '../../services/strategicIntelligenceServices.js';
 
 export const strategicIntelligenceResolvers = {
   Mutation: {

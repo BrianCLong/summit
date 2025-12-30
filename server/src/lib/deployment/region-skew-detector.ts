@@ -1,5 +1,5 @@
 
-import { RegionHealthStatus } from './multi-region-prober';
+import { RegionHealthStatus } from './multi-region-prober.js';
 
 export interface SkewResult {
   detected: boolean;

@@ -1,5 +1,5 @@
-import logger from '../../utils/logger';
-import { AgentTask, Agent } from './types';
+import logger from '../../utils/logger.js';
+import { AgentTask, Agent } from './types.js';
 
 // Mock IntelGraphClient based on server/src/maestro/core.ts pattern
 // In a real implementation, we would import the actual client

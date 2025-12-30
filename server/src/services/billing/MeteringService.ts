@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { pool } from '../../db/pg';
-import { provenanceLedger } from '../../provenance/ledger';
-import { BillableEvent, MeteringReceipt, UsagePreview } from '../../lib/billing/types';
-import QuotaManager from '../../lib/resources/quota-manager';
-import { PrometheusMetrics } from '../../utils/metrics';
+import { pool } from '../../db/pg.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
+import { BillableEvent, MeteringReceipt, UsagePreview } from '../../lib/billing/types.js';
+import QuotaManager from '../../lib/resources/quota-manager.js';
+import { PrometheusMetrics } from '../../utils/metrics.js';
 import { randomUUID } from 'crypto';
 
 export class MeteringService {

@@ -1,8 +1,8 @@
-export { DistributedConfigService } from './distributed-config-service';
-export { InMemoryConfigRepository } from './repository';
-export { PostgresConfigRepository } from './postgres-repository';
-export { ConsulConfigRepository } from './consul-repository';
-export { MultiBackendRepository } from './multi-backend-repository';
-export { SecretsManager } from './secrets-manager';
-export { ApprovalWorkflowManager } from './approval-workflow';
-export * from './types';
+export { DistributedConfigService } from './distributed-config-service.js';
+export { InMemoryConfigRepository } from './repository.js';
+export { PostgresConfigRepository } from './postgres-repository.js';
+export { ConsulConfigRepository } from './consul-repository.js';
+export { MultiBackendRepository } from './multi-backend-repository.js';
+export { SecretsManager } from './secrets-manager.js';
+export { ApprovalWorkflowManager } from './approval-workflow.js';
+export * from './types.js';

@@ -4,8 +4,9 @@
  * Supports text, image, audio, and video data sources
  */
 
-import gql from 'graphql-tag';
+import gqlModule from 'graphql-tag';
 
+const gql = (gqlModule as any).default || gqlModule;
 const multimodalTypeDefs = gql`
   # Multimodal Data Types
   enum MediaType {

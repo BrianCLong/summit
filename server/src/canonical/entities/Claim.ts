@@ -5,8 +5,8 @@
  * Represents assertions, allegations, or statements that may be verified
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
-import { PolicyLabel } from './Decision';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { PolicyLabel } from './Decision.js';
 
 export interface ClaimSubject {
   /** Subject entity ID */

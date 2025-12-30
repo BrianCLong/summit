@@ -6,7 +6,7 @@ import {
   ConfigVersion,
   EnvironmentName,
   RepositoryWriter,
-} from './types';
+} from './types.js';
 
 export interface PostgresRepositoryConfig {
   pool: Pool;

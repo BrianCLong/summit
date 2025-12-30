@@ -1,4 +1,4 @@
-import { SymbiosisKPIs, EvolutionProposal } from '../types';
+import { SymbiosisKPIs, EvolutionProposal } from '../types.js';
 
 export class MetaSymbiote {
   private kpis: SymbiosisKPIs;

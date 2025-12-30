@@ -1,5 +1,5 @@
-import { SummitsightDataService } from '../SummitsightDataService';
-import { FactRun, FactTask, FactSecurity, FactOps } from '../types';
+import { SummitsightDataService } from '../SummitsightDataService.js';
+import { FactRun, FactTask, FactSecurity, FactOps } from '../types/index.js';
 
 export class SummitsightETLService {
   private dataService: SummitsightDataService;

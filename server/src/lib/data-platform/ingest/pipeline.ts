@@ -1,4 +1,4 @@
-import { DocumentId, TenantId, CollectionId } from '../types';
+import { DocumentId, TenantId, CollectionId } from '../types.js';
 
 export type PipelineStageName = 'parse' | 'normalize' | 'chunk' | 'embed' | 'store' | 'enrich';
 

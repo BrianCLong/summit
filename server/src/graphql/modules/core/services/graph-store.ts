@@ -1,4 +1,4 @@
-import type { GraphStore } from '../../services-types';
+import type { GraphStore } from '../../services-types.js';
 
 export function createGraphStore(): GraphStore {
   const entities: any[] = [];

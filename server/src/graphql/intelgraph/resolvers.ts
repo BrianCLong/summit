@@ -20,7 +20,7 @@ import type {
   EntityGraph,
   HealthStatus,
   ResolverContext,
-} from './types';
+} from './types.js';
 
 // Initialize CircuitBreaker for Neo4j operations
 const neo4jCircuitBreaker = new CircuitBreaker({

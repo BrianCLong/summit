@@ -1,8 +1,8 @@
 // Real-Time Threat Detection & Behavioral Analytics
 // Advanced security monitoring with machine learning-based anomaly detection
 
-import { ExpertType } from '../types';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { ExpertType } from '../types/index.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export interface UserBehaviorProfile {

@@ -3,7 +3,7 @@
 // Provides secure, version-controlled operational procedures with approval workflows
 
 import { createHash, createSign, createVerify, randomBytes, randomUUID, generateKeyPairSync } from 'crypto';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export interface Runbook {

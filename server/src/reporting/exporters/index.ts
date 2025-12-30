@@ -1,11 +1,11 @@
-import { CsvExporter } from './csv-exporter';
-import { DocxExporter } from './docx-exporter';
-import { ExcelExporter } from './excel-exporter';
-import { JsonExporter } from './json-exporter';
-import { PdfExporter } from './pdf-exporter';
-import { PptxExporter } from './pptx-exporter';
-import { XmlExporter } from './xml-exporter';
-import { ReportExporter } from './base';
+import { CsvExporter } from './csv-exporter.js';
+import { DocxExporter } from './docx-exporter.js';
+import { ExcelExporter } from './excel-exporter.js';
+import { JsonExporter } from './json-exporter.js';
+import { PdfExporter } from './pdf-exporter.js';
+import { PptxExporter } from './pptx-exporter.js';
+import { XmlExporter } from './xml-exporter.js';
+import { ReportExporter } from './base.js';
 
 export const exporters: ReportExporter[] = [
   new JsonExporter(),

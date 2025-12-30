@@ -1,9 +1,9 @@
 import express from 'express';
-import { IncidentService } from '../../services/IncidentService';
-import { JiraAdapter } from '../../integrations/jira/adapter';
-import { ensureAuthenticated as requireAuth } from '../../middleware/auth';
-import { eventService } from '../../events/EventService';
-import { EventType } from '../../integrations/foundation/contracts';
+import { IncidentService } from '../../services/IncidentService.js';
+import { JiraAdapter } from '../../integrations/jira/adapter.js';
+import { ensureAuthenticated as requireAuth } from '../../middleware/auth.js';
+import { eventService } from '../../events/EventService.js';
+import { EventType } from '../../integrations/foundation/contracts.js';
 import { randomUUID } from 'crypto';
 
 const router = express.Router();

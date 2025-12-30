@@ -1,6 +1,6 @@
-import logger from '../../utils/logger';
-import { Agent, AgentTask, TaskPriority } from './types';
-import { AgentLifecycleManager } from './AgentLifecycleManager';
+import logger from '../../utils/logger.js';
+import { Agent, AgentTask, TaskPriority } from './types.js';
+import { AgentLifecycleManager } from './AgentLifecycleManager.js';
 
 export class TaskRouter {
   private static instance: TaskRouter;

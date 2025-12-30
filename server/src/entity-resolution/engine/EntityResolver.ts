@@ -1,10 +1,10 @@
-import { IntelGraphService } from '../../services/IntelGraphService';
-import { MLScorer } from './MLScorer';
-import { ConflictResolver, StrategyType } from './ConflictResolver';
-import { provenanceLedger } from '../../provenance/ledger';
+import { IntelGraphService } from '../../services/IntelGraphService.js';
+import { MLScorer } from './MLScorer.js';
+import { ConflictResolver, StrategyType } from './ConflictResolver.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
 import { randomUUID } from 'crypto';
-import { SimilarityModel } from '../models/SimilarityModel';
-import { NaiveBayesModel } from '../models/NaiveBayesModel';
+import { SimilarityModel } from '../models/SimilarityModel.js';
+import { NaiveBayesModel } from '../models/NaiveBayesModel.js';
 
 export interface EntityResolutionResult {
   matchCandidateId: string;

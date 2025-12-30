@@ -1,5 +1,5 @@
-import logger from '../../utils/logger';
-import { Agent, AgentStatus, AgentCapability, AgentConstraints } from './types';
+import logger from '../../utils/logger.js';
+import { Agent, AgentStatus, AgentCapability, AgentConstraints } from './types.js';
 import { EventEmitter } from 'events';
 
 export class AgentLifecycleManager extends EventEmitter {

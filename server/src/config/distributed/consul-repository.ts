@@ -9,7 +9,7 @@ import {
   ConfigWatcher,
   EnvironmentName,
   RepositoryWriter,
-} from './types';
+} from './types.js';
 
 export interface ConsulRepositoryConfig {
   host?: string;

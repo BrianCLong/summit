@@ -1,5 +1,5 @@
 
-import { SafetyGuardrail, LLMRequest, LLMResult } from '../interfaces';
+import { SafetyGuardrail, LLMRequest, LLMResult } from '../interfaces.js';
 
 export class PIIGuardrail implements SafetyGuardrail {
   name = 'pii-guardrail';

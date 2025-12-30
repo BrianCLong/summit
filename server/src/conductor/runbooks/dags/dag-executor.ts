@@ -21,10 +21,10 @@ import {
   CryptographicProof,
   LegalBasis,
   DataLicense,
-} from './types';
-import { ReplayLog } from './replay-log';
-import { GateExecutor } from './gates';
-import { CitationValidator } from './citation-validator';
+} from './types.js';
+import { ReplayLog } from './replay-log.js';
+import { GateExecutor } from './gates.js';
+import { CitationValidator } from './citation-validator.js';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

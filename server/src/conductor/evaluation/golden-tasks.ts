@@ -3,9 +3,9 @@
 // Continuous quality gates with regression detection and CI integration
 
 import { EventEmitter } from 'events';
-import { ExpertArm } from '../learn/bandit';
-import { adaptiveExpertRouter } from '../router/router-v2';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { ExpertArm } from '../learn/bandit.js';
+import { adaptiveExpertRouter } from '../router/router-v2.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { spawn } from 'child_process';
 import * as path from 'path';

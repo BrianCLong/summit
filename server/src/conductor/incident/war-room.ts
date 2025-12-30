@@ -4,8 +4,8 @@
 import { EventEmitter } from 'events';
 import { WebSocketServer, WebSocket } from 'ws';
 import Redis from 'ioredis';
-import { IncidentContext, IncidentRecord } from './response-engine';
-import { RunbookExecution } from './runbook-executor';
+import { IncidentContext, IncidentRecord } from './response-engine.js';
+import { RunbookExecution } from './runbook-executor.js';
 
 export interface WarRoomSession {
   id: string;

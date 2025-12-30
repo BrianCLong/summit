@@ -1,4 +1,4 @@
-import { ReportArtifact, ReportFormat } from '../types';
+import { ReportArtifact, ReportFormat } from '../types.js';
 
 export interface ExportOptions {
   watermark?: string;

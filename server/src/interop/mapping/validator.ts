@@ -1,4 +1,4 @@
-import { MappingSpecSchema, MappingSpec } from './schema';
+import { MappingSpecSchema, MappingSpec } from './schema.js';
 import { z } from 'zod';
 
 export class SpecValidator {

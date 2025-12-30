@@ -1,8 +1,9 @@
 /**
  * GraphQL type definitions for Graph Neural Network operations
  */
-import gql from 'graphql-tag';
+import gqlModule from 'graphql-tag';
 
+const gql = (gqlModule as any).default || gqlModule;
 const gnnTypes = gql`
   # GNN Model Information
   type GNNModel {

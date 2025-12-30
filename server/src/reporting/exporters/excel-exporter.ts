@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
-import { ExportOptions, ReportExporter, normalizeTabularData } from './base';
-import { ReportArtifact } from '../types';
+import { ExportOptions, ReportExporter, normalizeTabularData } from './base.js';
+import { ReportArtifact } from '../types.js';
 
 export class ExcelExporter implements ReportExporter {
   readonly format = 'xlsx' as const;

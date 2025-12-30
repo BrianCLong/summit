@@ -1,6 +1,6 @@
 
-import { PromptTemplate, PromptService, RenderedPrompt } from './types';
-import { ChatMessage } from '../types';
+import { PromptTemplate, PromptService, RenderedPrompt } from './types.js';
+import { ChatMessage } from '../types.js';
 
 export class InMemoryPromptRegistry implements PromptService {
   private templates: Map<string, PromptTemplate[]> = new Map();

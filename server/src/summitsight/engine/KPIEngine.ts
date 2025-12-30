@@ -1,5 +1,5 @@
-import { SummitsightDataService } from '../SummitsightDataService';
-import { KPIDefinition, KPIValue } from '../types';
+import { SummitsightDataService } from '../SummitsightDataService.js';
+import { KPIDefinition, KPIValue } from '../types/index.js';
 
 export class KPIEngine {
   private dataService: SummitsightDataService;

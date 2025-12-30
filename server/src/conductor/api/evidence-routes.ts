@@ -4,7 +4,7 @@ import express from 'express';
 import * as crypto from 'crypto';
 import { createHash, createHmac, randomBytes, randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import { requirePermission } from '../auth/rbac-middleware.js';
 import {

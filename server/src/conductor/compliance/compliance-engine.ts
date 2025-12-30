@@ -2,7 +2,7 @@
 // Implements SOC2, GDPR, and other regulatory compliance monitoring and enforcement
 
 import { createHash, randomUUID } from 'crypto';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import Redis from 'ioredis';
 
 export interface ComplianceFramework {

@@ -2,9 +2,9 @@
 // GraphQL Resolvers for MoE Conductor
 // Integrates the Conductor system with GraphQL API
 
-import { conductor } from './index';
-import { ConductInput } from './types';
-import { OPAClient, SecurityContext } from './security/opa-client';
+import { conductor } from './index.js';
+import { ConductInput } from './types/index.js';
+import { OPAClient, SecurityContext } from './security/opa-client.js';
 import {
   governanceLimitEngine,
   estimateTaskCost,

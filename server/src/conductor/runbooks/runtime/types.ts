@@ -11,7 +11,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { LegalBasis, DataLicense, Evidence, Citation, CryptographicProof } from '../dags/types';
+import { LegalBasis, DataLicense, Evidence, Citation, CryptographicProof } from '../dags/types.js';
 
 // ============================================================================
 // Step & Runbook Status Types

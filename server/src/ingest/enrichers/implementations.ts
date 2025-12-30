@@ -1,6 +1,6 @@
 
-import { BaseEnricher, EnrichmentResult } from './base';
-import { IngestionEvent } from '../../connectors/types';
+import { BaseEnricher, EnrichmentResult } from './base.js';
+import { IngestionEvent } from '../../connectors/types.js';
 import axios from 'axios';
 
 export class GeoIPEnricher extends BaseEnricher {

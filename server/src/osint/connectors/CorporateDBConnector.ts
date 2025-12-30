@@ -1,6 +1,6 @@
 
-import { OSINTSourceConnector, OSINTQuery } from './types';
-import { OSINTEnrichmentResult, CorporateRecord } from '../types';
+import { OSINTSourceConnector, OSINTQuery } from './types.js';
+import { OSINTEnrichmentResult, CorporateRecord } from '../types.js';
 
 export class CorporateDBConnector implements OSINTSourceConnector {
   id = 'corporate-db-mock';

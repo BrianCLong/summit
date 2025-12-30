@@ -1,10 +1,10 @@
-import { pg } from '../../db/pg';
+import { pg } from '../../db/pg.js';
 import {
   NotFoundError,
   ValidationError,
-} from '../../errors/ErrorHandlingFramework';
-import { CreatePageInput, MemoryPage } from '../types';
-import { assertSameTenant, getSessionById } from './sessionRepository';
+} from '../../errors/ErrorHandlingFramework.js';
+import { CreatePageInput, MemoryPage } from '../types.js';
+import { assertSameTenant, getSessionById } from './sessionRepository.js';
 
 export function toPgVector(value?: number[] | null): string | null {
   if (!value || value.length === 0) return null;

@@ -1,4 +1,4 @@
-import { EntityInput, ResolutionFeature, ERConfig } from './models';
+import { EntityInput, ResolutionFeature, ERConfig } from './models.js';
 
 // Simple Levenshtein distance implementation for string similarity
 function levenshteinDistance(a: string, b: string): number {

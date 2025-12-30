@@ -11,11 +11,11 @@ import logger from '../config/logger';
 import {
   initializeConductorSystem,
   shutdownConductorSystem,
-} from '../conductor/config';
-import GraphOpsServer from '../conductor/mcp/servers/graphops-server';
-import FilesServer from '../conductor/mcp/servers/files-server';
-import { createConductorGraphQLPlugin } from '../conductor/observability';
-import { prometheusConductorMetrics } from '../conductor/observability/prometheus';
+} from '../conductor/config.js';
+import GraphOpsServer from '../conductor/mcp/servers/graphops-server.js';
+import FilesServer from '../conductor/mcp/servers/files-server.js';
+import { createConductorGraphQLPlugin } from '../conductor/observability/index.js';
+import { prometheusConductorMetrics } from '../conductor/observability/prometheus.js';
 
 const conductorLogger = logger.child({ name: 'conductor-bootstrap' });
 

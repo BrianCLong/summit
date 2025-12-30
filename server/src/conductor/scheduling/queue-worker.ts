@@ -2,10 +2,10 @@
 // Queue Worker for Processing Scheduled Tasks
 // Implements worker processes that consume tasks from Redis queues
 
-import { costAwareScheduler, SchedulingContext } from './cost-aware-scheduler';
-import { ExpertArm } from '../learn/bandit';
-import { prometheusConductorMetrics } from '../observability/prometheus';
-import { adaptiveRouter } from '../router/router-v2';
+import { costAwareScheduler, SchedulingContext } from './cost-aware-scheduler.js';
+import { ExpertArm } from '../learn/bandit.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
+import { adaptiveRouter } from '../router/router-v2.js';
 import { performance } from 'perf_hooks';
 
 export interface WorkerConfig {

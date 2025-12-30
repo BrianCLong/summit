@@ -15,8 +15,8 @@ import {
   estimateTokensAndCost,
   reconcileActualUsage,
   Provider,
-} from '../../lib/tokcount-enhanced';
-import logger from '../../utils/logger';
+} from '../../lib/tokcount-enhanced.js';
+import logger from '../../utils/logger.js';
 
 export class BudgetError extends Error {
   constructor(

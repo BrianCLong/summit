@@ -8,8 +8,8 @@ import {
   Runbook,
   RunbookStep,
   ApprovalWorkflow,
-} from './registry';
-import { prometheusConductorMetrics } from '../observability/prometheus';
+} from './registry.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import crypto from 'crypto';
 
 export const runbookRouter = express.Router();

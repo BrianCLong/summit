@@ -26,9 +26,9 @@ import {
   RunbookExecutionLogEntry,
   createInitialExecution,
   nowISO,
-} from './types';
-import { LegalBasis, DataLicense } from '../dags/types';
-import { RunbookStateManager } from './state-manager';
+} from './types.js';
+import { LegalBasis, DataLicense } from '../dags/types.js';
+import { RunbookStateManager } from './state-manager.js';
 
 // ============================================================================
 // Step Executor Registry Implementation

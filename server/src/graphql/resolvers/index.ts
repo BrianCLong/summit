@@ -15,10 +15,10 @@ import ewResolvers from './electronic-warfare.js';
 import { collaborationResolvers } from './collaboration';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
-// import { v040Resolvers } from './v040';
+// import { v040Resolvers } from './v040.js';
 
 // MC Platform v0.4.1 Sovereign Safeguards Resolvers (DISABLED - incomplete)
-// import { v041Resolvers } from './v041';
+// import { v041Resolvers } from './v041.js';
 
 // Instantiate the WargameResolver
 const wargameResolver = new WargameResolver(); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
