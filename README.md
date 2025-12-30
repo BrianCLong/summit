@@ -29,7 +29,7 @@
 
 We follow a **"Golden Path"** philosophy. If the build breaks, we stop and fix it.
 
-**Prerequisites:** Docker Desktop ≥ 4.x, Node 18+, pnpm 9, Python 3.11+.
+**Prerequisites:** Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 9, Python 3.11+.
 
 ```bash
 # 1. Clone & Bootstrap
