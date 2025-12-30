@@ -1,0 +1,32 @@
+name: Docs CI
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "package.json"
+      - ".cspell.json"
+      - "scripts/docs/**"
+      - ".github/workflows/docs-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "README.md"
+      - "package.json"
+      - ".cspell.json"
+      - "scripts/docs/**"
+      - ".github/workflows/docs-ci.yml"
+
+jobs:
+  docs-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run documentation checks
+        run: npm run docs:check

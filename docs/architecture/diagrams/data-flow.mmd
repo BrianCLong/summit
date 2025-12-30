@@ -1,0 +1,20 @@
+sequenceDiagram
+  participant User
+  participant UI as UI (3000)
+  participant GW as Gateway (4000/8080)
+  participant NLQ as AI NLQ
+  participant PC as Policy Compiler
+  participant ER as Entity Resolution
+  participant PG as PostgreSQL
+  participant NEO as Neo4j
+  participant REDIS as Redis
+
+  User->>UI: Request investigation action
+  UI->>GW: GraphQL mutation (launchRun)
+  GW->>PC: Evaluate policy and route
+  GW->>NLQ: Optional NLQ processing
+  GW->>ER: Resolve entities / ingest
+  ER-->>PG: Write structured records
+  ER-->>NEO: Update graph relationships
+  GW-->>REDIS: Cache job metadata / rate limits
+  GW-->>User: Return Run state (QUEUED/RUNNING/SUCCEEDED)
