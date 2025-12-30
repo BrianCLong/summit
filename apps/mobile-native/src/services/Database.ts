@@ -1,6 +1,7 @@
 // @ts-nocheck
 import SQLite from 'react-native-sqlite-storage';
 import { MMKV } from 'react-native-mmkv';
+import Config from 'react-native-config';
 
 import type { Location } from './LocationService';
 
@@ -10,10 +11,36 @@ SQLite.DEBUG(false);
 
 let db: SQLite.SQLiteDatabase | null = null;
 
+// SECURITY: Encryption key must be provided via react-native-config or secure storage
+// For production: Use react-native-keychain or device secure storage
+const getEncryptionKey = (): string => {
+  // Try to get from react-native-config first
+  const configKey = Config.MMKV_ENCRYPTION_KEY;
+
+  if (configKey) {
+    return configKey;
+  }
+
+  // In production, this should throw an error or use device keychain
+  if (Config.ENV === 'production') {
+    throw new Error(
+      'MMKV_ENCRYPTION_KEY not configured. Mobile app encryption keys must be ' +
+      'provisioned through react-native-config or device secure storage (Keychain/Keystore).'
+    );
+  }
+
+  // Development fallback - log warning
+  console.warn(
+    'MMKV_ENCRYPTION_KEY not set - using insecure key for development only. ' +
+    'NEVER deploy to production without proper key management!'
+  );
+  return 'dev-insecure-key-do-not-use-in-production';
+};
+
 // Initialize MMKV for fast key-value storage
 export const storage = new MMKV({
   id: 'intelgraph-storage',
-  encryptionKey: 'your-encryption-key-here', // TODO: Generate secure key
+  encryptionKey: getEncryptionKey(),
 });
 
 // Initialize database

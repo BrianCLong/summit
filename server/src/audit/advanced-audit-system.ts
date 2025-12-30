@@ -266,8 +266,22 @@ export class AdvancedAuditSystem extends EventEmitter {
       // If disabled, we might need a mock or fail. For audit, we should probably fail or warn.
       const redis = getRedisClient();
 
-      const signingKey = process.env.AUDIT_SIGNING_KEY || 'dev-signing-key-do-not-use-in-prod';
-      const encryptionKey = process.env.AUDIT_ENCRYPTION_KEY || 'dev-encryption-key-do-not-use-in-prod';
+      // SECURITY: Audit signing and encryption keys must be set in production
+      const signingKey = process.env.AUDIT_SIGNING_KEY;
+      const encryptionKey = process.env.AUDIT_ENCRYPTION_KEY;
+
+      if (!signingKey || !encryptionKey) {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error(
+            'AUDIT_SIGNING_KEY and AUDIT_ENCRYPTION_KEY environment variables must be set in production. ' +
+            'These keys are critical for audit trail integrity and compliance.'
+          );
+        }
+        logger.warn(
+          'AUDIT_SIGNING_KEY and/or AUDIT_ENCRYPTION_KEY not set - using insecure defaults for development only. ' +
+          'NEVER use these defaults in production!'
+        );
+      }
 
       if (!redis) {
         logger.warn("AdvancedAuditSystem initialized without Redis. Real-time alerting will be disabled.");
@@ -277,8 +291,8 @@ export class AdvancedAuditSystem extends EventEmitter {
         db,
         redis as Redis, // If null, we'll need to handle it in methods
         logger,
-        signingKey,
-        encryptionKey
+        signingKey || 'dev-signing-key-insecure',
+        encryptionKey || 'dev-encryption-key-insecure'
       );
     }
     return AdvancedAuditSystem.instance;
