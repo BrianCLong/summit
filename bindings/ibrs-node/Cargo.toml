@@ -10,7 +10,7 @@ description = "Node.js bindings for the Immutable Business Rules Sandbox"
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = { version = "2", features = ["serde-json"] }
+napi = { version = "3", features = ["serde-json"] }
 napi-derive = "2"
 ibrs = { path = "../../ibrs" }
 serde = { version = "1", features = ["derive"] }
