@@ -1,0 +1,37 @@
+evidence:
+  - id: ci-policy-gate
+    description: PR quality gate output including lint/test/security results
+    source: .github/workflows/pr-quality-gate.yml
+    artifact_path: logs/ci/pr-quality-gate
+    retention: 365d
+    integrity: sha256-with-immutable-storage
+  - id: provenance-ledger
+    description: Immutable provenance ledger events for code and model artifacts
+    source: audit/ga-evidence/provenance-ledger
+    artifact_path: audit/ga-evidence
+    retention: 1825d
+    integrity: append-only-log-with-hash-chains
+  - id: sbom-scan
+    description: SBOMs and dependency vulnerability scan outputs
+    source: sbom-mc-v0.4.5.json
+    artifact_path: audit/compliance/sbom
+    retention: 365d
+    integrity: sha256-with-signed-attestation
+  - id: slo-monitoring
+    description: SLO burn rate and synthetic probe outputs
+    source: slo
+    artifact_path: audit/ga-evidence/slo
+    retention: 180d
+    integrity: tamper-evident-store
+  - id: debt-trend
+    description: Weekly technical debt trend report including AI drift and bias debt
+    source: tech-debt
+    artifact_path: audit/ga-evidence/debt-trends
+    retention: 365d
+    integrity: sha256-with-immutable-storage
+  - id: exception-approvals
+    description: Time-bounded risk acceptances with approvals and expiry metadata
+    source: audit/exceptions.yaml
+    artifact_path: audit/exceptions.yaml
+    retention: 365d
+    integrity: git-history-and-hash
