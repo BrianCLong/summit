@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.intelgraph/schemas/audit_event_v1.json",
+  "title": "Audit Event v1",
+  "description": "Versioned audit event schema capturing policy enforcement decisions with tamper-evident support",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "actor",
+    "action",
+    "resource",
+    "classification",
+    "policy_version",
+    "decision_id",
+    "trace_id",
+    "timestamp"
+  ],
+  "properties": {
+    "version": {
+      "const": "audit_event_v1"
+    },
+    "actor": {
+      "type": "object",
+      "description": "Principal responsible for the action",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["user", "service", "system", "api", "automation"]
+        },
+        "id": {
+          "type": "string",
+          "description": "Stable identifier for the actor"
+        },
+        "name": {
+          "type": "string"
+        },
+        "ip_address": {
+          "type": "string",
+          "format": "ipv4"
+        }
+      }
+    },
+    "action": {
+      "type": "string",
+      "description": "Action verb performed (e.g., policy_decision, export, approve)"
+    },
+    "resource": {
+      "type": "object",
+      "description": "Resource affected by the action",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string" },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "owner": { "type": "string" }
+      }
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["public", "internal", "confidential", "restricted"]
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "Policy version that produced the decision"
+    },
+    "decision_id": {
+      "type": "string",
+      "description": "Opaque decision identifier",
+      "minLength": 8
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "Trace identifier linking audit event to request chain"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "customer": {
+      "type": "string",
+      "description": "Customer or tenant id for export filtering"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional structured context",
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import { randomUUID } from 'crypto';
 import { logger } from '../utils/logger.js';
 import { getVariant, isEnabled } from '../lib/featureFlags.js';
 import { telemetryService } from '../analytics/telemetry/TelemetryService.js';
+import { auditTrailService } from '../services/audit/AuditTrailService.js';
 
 const router = Router();
 
@@ -152,7 +154,7 @@ router.get('/health', asyncHandler(async (_req: Request, res: Response) => {
  *       503:
  *         description: System is degraded
  */
-router.get('/health/detailed', async (_req: Request, res: Response) => {
+router.get('/health/detailed', async (req: Request, res: Response) => {
   telemetryService.track('system_alert', 'system', 'detailed_health_check', 'system', {
       component: 'health_detailed',
       severity: 'info',
@@ -253,6 +255,36 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
   });
   if (cacheStrategy && cacheStrategy !== 'control') {
     health.services['cache-strategy'] = cacheStrategy;
+  }
+
+  const traceIdHeader =
+    (req.headers['x-request-id'] as string | undefined) ||
+    (req.headers['x-trace-id'] as string | undefined) ||
+    randomUUID();
+  const customerId =
+    (req.headers['x-customer-id'] as string | undefined) ||
+    (req.headers['x-tenant-id'] as string | undefined) ||
+    'platform';
+
+  try {
+    await auditTrailService.recordPolicyDecision({
+      customer: customerId,
+      actorId: 'health-monitor',
+      action: 'health_detailed_check',
+      resourceId: 'service-health',
+      resourceType: 'system',
+      classification: 'internal',
+      policyVersion: 'health-monitoring-v1',
+      decisionId: randomUUID(),
+      traceId: traceIdHeader,
+      metadata: {
+        status: health.status,
+        services: health.services,
+        errorCount: errors.length,
+      },
+    });
+  } catch (error) {
+    logger.warn({ error }, 'Failed to append audit trail event for health check');
   }
 
   const statusCode = health.status === 'ok' ? 200 : 503;
