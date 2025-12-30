@@ -17,7 +17,7 @@
 - ✅ **Security Hardening**: Rate limiting, GraphQL complexity limits, IDOR fixes
 - ✅ **Real-Time Systems**: Narrative simulation engine with REST API
 
-**[View Release Notes](CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/MIGRATION-v0.1-to-v2.0.md)** | **[Roadmap](docs/roadmap.md)**
+**[View Release Notes](docs/archive/root-history/CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/archived/MIGRATION-v0.1-to-v2.0.md)** | **[Roadmap](docs/roadmap.md)**
 
 ---
 
