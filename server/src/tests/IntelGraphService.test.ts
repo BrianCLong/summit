@@ -5,6 +5,24 @@ import * as neo4j from '../graph/neo4j.js';
 // Mock neo4j
 jest.mock('../graph/neo4j.js');
 
+// Mock configs and dependencies
+jest.mock('../config/database.js', () => ({
+  getNeo4jDriver: jest.fn(() => ({
+    session: jest.fn(() => ({
+      run: jest.fn(),
+      close: jest.fn().mockResolvedValue(undefined),
+    })),
+  })),
+  getPostgresPool: jest.fn(),
+  getRedisClient: jest.fn(),
+}));
+
+jest.mock('../audit/advanced-audit-system.js', () => ({
+  advancedAuditSystem: {
+    logEvent: jest.fn(),
+  },
+}));
+
 describe('IntelGraphService', () => {
   let service: IntelGraphService;
   const mockRunCypher = neo4j.runCypher as jest.MockedFunction<typeof neo4j.runCypher>;
@@ -52,25 +70,25 @@ describe('IntelGraphService', () => {
   });
 
   describe('createEdge', () => {
-      it('should use MERGE for edges to prevent duplicates', async () => {
-          const tenantId = 't1';
-          mockRunCypher.mockResolvedValue([{ r: { type: 'RELATED_TO' } }] as any[]);
+    it('should use MERGE for edges to prevent duplicates', async () => {
+      const tenantId = 't1';
+      mockRunCypher.mockResolvedValue([{ r: { type: 'RELATED_TO' } }] as any[]);
 
-          await service.createEdge(tenantId, 'a', 'b', 'RELATED_TO');
+      await service.createEdge(tenantId, 'a', 'b', 'RELATED_TO');
 
-          expect(mockRunCypher).toHaveBeenCalledTimes(1);
-          const cypher = mockRunCypher.mock.calls[0][0];
-          expect(cypher).toContain('MERGE (a)-[r:RELATED_TO]->(b)');
-      });
+      expect(mockRunCypher).toHaveBeenCalledTimes(1);
+      const cypher = mockRunCypher.mock.calls[0][0];
+      expect(cypher).toContain('MERGE (a)-[r:RELATED_TO]->(b)');
+    });
   });
 
   describe('Validation', () => {
-      it('should reject invalid labels', async () => {
-          await expect(service.ensureNode('t1', 'Hacker' as any, {})).rejects.toThrow('Invalid node label');
-      });
+    it('should reject invalid labels', async () => {
+      await expect(service.ensureNode('t1', 'Hacker' as any, {})).rejects.toThrow('Invalid node label');
+    });
 
-      it('should reject invalid property keys in search', async () => {
-          await expect(service.searchNodes('t1', 'Person', { 'bad-key!': 'val' })).rejects.toThrow('Invalid property key');
-      });
+    it('should reject invalid property keys in search', async () => {
+      await expect(service.searchNodes('t1', 'Person', { 'bad-key!': 'val' })).rejects.toThrow('Invalid property key');
+    });
   });
 });
