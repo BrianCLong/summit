@@ -5,7 +5,7 @@
  * that use import.meta and other ESM features.
  */
 export default {
-  preset: 'ts-jest/presets/default-esm',
+  // preset: 'ts-jest/presets/default-esm', // Removed due to environment issues
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
 
