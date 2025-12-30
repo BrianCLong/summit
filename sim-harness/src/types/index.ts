@@ -74,6 +74,7 @@ export interface ScenarioData {
     seed?: number;
     generatedAt: string;
     parameters: ScenarioParameters;
+    groundTruth?: GroundTruth;
   };
 }
 
@@ -89,6 +90,12 @@ export interface ScenarioParameters {
   };
   seed?: number;
   customParams?: Record<string, any>;
+}
+
+export interface GroundTruth {
+  keyEntityIndices: number[];
+  criticalRelationshipIndices: number[];
+  citationSources?: number[];
 }
 
 export interface GraphSizeConfig {
@@ -140,12 +147,14 @@ export interface SessionMetrics {
   tasksCompleted: number;
   tasksFailed: number;
   successRate: number;
+  investigationCompleted?: boolean;
 
   // Performance metrics
   timeToFirstInsight?: number;
   timeToKeyFindings?: number;
   totalQueries: number;
   averageQueryTime: number;
+  p95StepLatency?: number;
 
   // Coverage metrics
   entitiesExplored: number;
@@ -153,6 +162,7 @@ export interface SessionMetrics {
   coverageRate: number;
   relationshipsExplored: number;
   relationshipsTotal: number;
+  falseLinkRate?: number;
 
   // Quality metrics
   keyEntitiesFound: number;
@@ -160,6 +170,11 @@ export interface SessionMetrics {
   precision?: number;
   recall?: number;
   f1Score?: number;
+  groundTruthFound?: number;
+  groundTruthTotal?: number;
+  groundTruthCoverage?: number;
+  timeToGroundTruth?: number;
+  citationCorrectnessRate?: number;
 
   // Copilot metrics
   copilotQueriesCount: number;
@@ -173,6 +188,7 @@ export interface SessionMetrics {
     message: string;
     step?: string;
   }>;
+  leakageIncidents?: number;
 }
 
 export interface ComparisonReport {
@@ -200,12 +216,17 @@ export interface AggregatedMetrics {
   totalSessions: number;
   averageSuccessRate: number;
   averageDuration: number;
+  averageTimeToGroundTruth?: number;
   averageCoverageRate: number;
   averagePrecision: number;
   averageRecall: number;
   averageF1Score: number;
   averageQueriesPerSession: number;
   errorRate: number;
+  p95Latency?: number;
+  averageCitationCorrectness?: number;
+  averageFalseLinkRate?: number;
+  averageLeakageIncidents?: number;
 }
 
 export interface HarnessConfig {
@@ -259,5 +280,9 @@ export interface GhostAnalystSession {
     currentStep: number;
     completed: boolean;
     failed: boolean;
+    groundTruthHits: {
+      entities: Set<number>;
+      relationships: Set<number>;
+    };
   };
 }

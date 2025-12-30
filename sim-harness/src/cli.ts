@@ -15,7 +15,9 @@ import {
   ScenarioParameters,
   Workflow,
   WorkflowStep,
+  HarnessConfig,
 } from './index.js';
+import { MissionSuiteRunner } from './metrics/MissionSuiteRunner.js';
 
 const logger = new Logger('CLI');
 
@@ -30,6 +32,8 @@ interface CLIOptions {
   baseline?: string;
   candidate?: string;
   workflow?: string;
+  missionSuite?: string;
+  baselineMetrics?: string;
   help?: boolean;
   version?: boolean;
 }
@@ -70,12 +74,18 @@ function parseArgs(): CLIOptions {
       case '--baseline':
         options.baseline = args[++i];
         break;
+      case '--baseline-metrics':
+        options.baselineMetrics = args[++i];
+        break;
       case '--candidate':
         options.candidate = args[++i];
         break;
       case '--workflow':
       case '-w':
         options.workflow = args[++i];
+        break;
+      case '--mission-suite':
+        options.missionSuite = args[++i];
         break;
       case '--help':
       case '-h':
@@ -111,7 +121,9 @@ Options:
   -r, --report              Generate comparison report
   -o, --output <dir>        Output directory for reports
   --baseline <version>      Baseline version for comparison
+  --baseline-metrics <file> Baseline metrics JSON for mission suite regression detection
   --candidate <version>     Candidate version for comparison
+  --mission-suite <name>    Run a predefined mission suite (investigation-quality, resilience-latency)
   -h, --help                Show this help message
   -v, --version             Show version
 
@@ -358,6 +370,51 @@ async function generateComparisonReport(options: CLIOptions, config: any): Promi
   }
 }
 
+async function runMissionSuite(
+  suiteName: string,
+  config: HarnessConfig,
+  options: CLIOptions
+): Promise<void> {
+  const runner = new MissionSuiteRunner(config);
+  const result = await runner.runSuite(suiteName, {
+    outputDir: options.output || config.reporting.outputDir,
+    baselineMetricsPath: options.baselineMetrics || options.baseline,
+    label: options.candidate || 'candidate',
+  });
+
+  console.log(`\n=== Mission Suite: ${suiteName} ===`);
+  console.log(`Runs: ${result.runs.length}`);
+  console.log(
+    `Average completion: ${(result.aggregated.averageSuccessRate * 100).toFixed(2)}%`
+  );
+  console.log(`Average p95 latency: ${(result.aggregated.p95Latency || 0).toFixed(2)}ms`);
+  console.log(
+    `Citation correctness: ${(result.aggregated.averageCitationCorrectness || 0).toFixed(2)}`
+  );
+  console.log(
+    `False-link rate: ${(result.aggregated.averageFalseLinkRate || 0).toFixed(3)}`
+  );
+  console.log(
+    `Leakage incidents: ${(result.aggregated.averageLeakageIncidents || 0).toFixed(0)}`
+  );
+
+  if (result.regressions.length > 0) {
+    console.log('\n⚠️ Detected regressions:');
+    result.regressions.forEach((issue) => console.log(`  - ${issue}`));
+  } else {
+    console.log('\n✅ No regressions detected');
+  }
+
+  if (result.improvements.length > 0) {
+    console.log('\n💡 Improvements:');
+    result.improvements.forEach((item) => console.log(`  - ${item}`));
+  }
+
+  if (result.reportPath) {
+    console.log(`\nSuite metrics saved to: ${result.reportPath}`);
+  }
+}
+
 async function main(): Promise<void> {
   const options = parseArgs();
 
@@ -373,7 +430,7 @@ async function main(): Promise<void> {
 
   try {
     // Load configuration
-    let config;
+    let config: HarnessConfig;
     if (options.config) {
       config = ConfigLoader.loadFromFile(options.config);
     } else {
@@ -381,6 +438,12 @@ async function main(): Promise<void> {
     }
 
     ConfigLoader.validate(config);
+
+    // Mission suites provide automated regression harnesses
+    if (options.missionSuite) {
+      await runMissionSuite(options.missionSuite, config, options);
+      return;
+    }
 
     // Handle comparison report
     if (options.report && options.baseline && options.candidate) {

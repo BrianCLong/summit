@@ -256,11 +256,28 @@ export class GhostAnalyst {
         currentStep: 0,
         completed: false,
         failed: false,
+        groundTruthHits: {
+          entities: new Set<number>(),
+          relationships: new Set<number>(),
+        },
       },
     };
 
     this.activeSessions.set(sessionId, session);
     this.metricsCollector.startSession(sessionId);
+
+    const groundTruthTotal =
+      (scenarioData.metadata?.groundTruth?.keyEntityIndices.length || 0) +
+      (scenarioData.metadata?.groundTruth?.criticalRelationshipIndices.length || 0);
+
+    if (groundTruthTotal > 0) {
+      this.metricsCollector.updateSessionMetrics(sessionId, {
+        groundTruthTotal,
+        groundTruthCoverage: 0,
+      });
+      session.metrics.groundTruthTotal = groundTruthTotal;
+      session.metrics.groundTruthCoverage = 0;
+    }
 
     this.logger.info(
       `Starting workflow session ${sessionId}: ${workflow.name}`
@@ -269,6 +286,10 @@ export class GhostAnalyst {
     try {
       await this.executeWorkflow(session);
       session.state.completed = true;
+      session.metrics.investigationCompleted = true;
+      this.metricsCollector.updateSessionMetrics(session.id, {
+        investigationCompleted: true,
+      });
       session.metrics = this.metricsCollector.endSession(sessionId);
       this.logger.info(`Workflow session ${sessionId} completed successfully`);
     } catch (error: any) {
@@ -454,6 +475,8 @@ export class GhostAnalyst {
     session.state.entityIds[entityIndex] = entityId;
     session.metrics.entitiesExplored++;
 
+    this.markGroundTruthHit(session, 'entity', entityIndex);
+
     this.logger.debug(`Added entity: ${entity.name} (${entityId})`);
 
     return result;
@@ -497,6 +520,8 @@ export class GhostAnalyst {
     );
     session.state.relationshipIds.push(result.createRelationship.id);
     session.metrics.relationshipsExplored++;
+
+    this.markGroundTruthHit(session, 'relationship', relIndex);
 
     this.logger.debug(`Added relationship: ${relationship.type}`);
 
@@ -708,12 +733,156 @@ export class GhostAnalyst {
       id: session.state.investigationId,
     });
 
+    this.evaluateInvestigationIntegrity(session, result);
+
     this.logger.info('Data export completed');
 
     return result;
   }
 
   // ==================== Helper Methods ====================
+
+  private markGroundTruthHit(
+    session: GhostAnalystSession,
+    type: 'entity' | 'relationship',
+    index: number
+  ): void {
+    const groundTruth = session.scenarioData.metadata?.groundTruth;
+    if (!groundTruth) {
+      return;
+    }
+
+    const tracker = session.state.groundTruthHits;
+    const alreadySeen =
+      type === 'entity'
+        ? tracker.entities.has(index)
+        : tracker.relationships.has(index);
+
+    if (alreadySeen) {
+      return;
+    }
+
+    const targetIndices =
+      type === 'entity'
+        ? groundTruth.keyEntityIndices
+        : groundTruth.criticalRelationshipIndices;
+
+    if (!targetIndices.includes(index)) {
+      return;
+    }
+
+    if (type === 'entity') {
+      tracker.entities.add(index);
+    } else {
+      tracker.relationships.add(index);
+    }
+
+    const found = tracker.entities.size + tracker.relationships.size;
+    const totalTargets =
+      (groundTruth.keyEntityIndices?.length || 0) +
+      (groundTruth.criticalRelationshipIndices?.length || 0);
+
+    const timeToGroundTruth =
+      session.metrics.timeToGroundTruth ||
+      Date.now() - new Date(session.metrics.startTime).getTime();
+
+    const coverage = totalTargets > 0 ? found / totalTargets : 0;
+
+    session.metrics.groundTruthFound = found;
+    session.metrics.groundTruthTotal = totalTargets;
+    session.metrics.groundTruthCoverage = coverage;
+    session.metrics.timeToGroundTruth = timeToGroundTruth;
+
+    this.metricsCollector.updateSessionMetrics(session.id, {
+      groundTruthFound: found,
+      groundTruthTotal: totalTargets,
+      groundTruthCoverage: coverage,
+      timeToGroundTruth,
+    });
+  }
+
+  private evaluateInvestigationIntegrity(
+    session: GhostAnalystSession,
+    exportResult: any
+  ): void {
+    const investigation = exportResult?.investigation;
+    if (!investigation) {
+      return;
+    }
+
+    const entityNameById = new Map(
+      (investigation.entities || []).map((entity: any) => [entity.id, entity.name])
+    );
+
+    const expectedRelationships = new Set(
+      session.scenarioData.relationships.map((rel) => {
+        const fromName = session.scenarioData.entities[rel.from]?.name;
+        const toName = session.scenarioData.entities[rel.to]?.name;
+        return `${rel.type}|${fromName}|${toName}`;
+      })
+    );
+
+    const observedRelationships = (investigation.relationships || []).map(
+      (rel: any) => {
+        const fromName =
+          entityNameById.get(rel.fromEntityId) || rel.fromEntityId || 'unknown';
+        const toName =
+          entityNameById.get(rel.toEntityId) || rel.toEntityId || 'unknown';
+
+        return `${rel.type}|${fromName}|${toName}`;
+      }
+    );
+
+    const truePositives = observedRelationships.filter((key) =>
+      expectedRelationships.has(key)
+    ).length;
+    const falsePositives = observedRelationships.length - truePositives;
+
+    const falseLinkRate =
+      observedRelationships.length > 0
+        ? falsePositives / observedRelationships.length
+        : 0;
+
+    const citationSources = new Set(
+      session.scenarioData.metadata?.groundTruth?.citationSources || []
+    );
+    const exportedDocuments = (investigation.entities || []).filter(
+      (entity: any) => entity.type === 'DOCUMENT'
+    );
+    const citationCorrectnessRate =
+      exportedDocuments.length === 0
+        ? 1
+        : exportedDocuments.filter((_, index) => citationSources.has(index)).length /
+          exportedDocuments.length;
+
+    const leakageIncidents = this.detectLeakage(investigation.entities || []);
+
+    session.metrics.falseLinkRate = falseLinkRate;
+    session.metrics.citationCorrectnessRate = citationCorrectnessRate;
+    session.metrics.leakageIncidents = leakageIncidents;
+
+    this.metricsCollector.updateSessionMetrics(session.id, {
+      falseLinkRate,
+      citationCorrectnessRate,
+      leakageIncidents,
+    });
+  }
+
+  private detectLeakage(entities: any[]): number {
+    const leakagePatterns = /(password|secret|token|apikey|api_key|authorization)/i;
+    let incidents = 0;
+
+    entities.forEach((entity) => {
+      const values = Object.values(entity.properties || {});
+      values.forEach((value) => {
+        if (typeof value === 'string' && leakagePatterns.test(value)) {
+          incidents += 1;
+        }
+      });
+    });
+
+    return incidents;
+  }
 
   private async graphqlRequest(
     query: string,
@@ -755,11 +924,13 @@ export class GhostAnalyst {
       scenarioType: scenarioData.metadata?.parameters.type || 'custom',
       startTime: new Date().toISOString(),
       duration: 0,
+      investigationCompleted: false,
       tasksCompleted: 0,
       tasksFailed: 0,
       successRate: 0,
       totalQueries: 0,
       averageQueryTime: 0,
+      p95StepLatency: 0,
       entitiesExplored: 0,
       entitiesTotal: scenarioData.entities.length,
       coverageRate: 0,
@@ -767,6 +938,14 @@ export class GhostAnalyst {
       relationshipsTotal: scenarioData.relationships.length,
       keyEntitiesFound: 0,
       keyEntitiesExpected: 0,
+      groundTruthFound: 0,
+      groundTruthTotal:
+        (scenarioData.metadata?.groundTruth?.keyEntityIndices.length || 0) +
+        (scenarioData.metadata?.groundTruth?.criticalRelationshipIndices.length || 0),
+      groundTruthCoverage: 0,
+      falseLinkRate: 0,
+      citationCorrectnessRate: 1,
+      leakageIncidents: 0,
       copilotQueriesCount: 0,
       copilotSuccessRate: 0,
       copilotAverageResponseTime: 0,
