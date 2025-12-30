@@ -37,6 +37,10 @@
 - **Focus:** Value Density & Pruning.
 - **Key Artifacts:** `PORTFOLIO_SCORECARD.md`, `PORTFOLIO_DECISIONS.md`, `docs/GOVERNANCE.md` (Updated).
 
+### Upcoming Sprint (26)
+
+- **Sprint 26 — Release Integrity & Audit Readiness** (`sprint/sprint-26-release-integrity-audit-readiness.md`): Evidence-first releases with GA tagging, signing, and auditor-ready bundles while keeping the Golden Path (`make smoke`) green.
+
 ### Previous Sprint (N+7)
 
 - **Sprint N+7 — Partner Scale** (`SPRINT_N+7_PARTNER_SCALE.md`)
