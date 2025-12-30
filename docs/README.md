@@ -40,6 +40,11 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
 - **[suite_unification_architecture.md](suite_unification_architecture.md)** – Blueprint for unifying modules, contracts, identity, billing, UX shell, and governance into a cohesive suite.
 
+## Research & Labs
+
+- **[WeDLM Evaluation Note](research/wedlm.md)** – Overview of the diffusion-based WeDLM model, why it matters for Summit, and a validation plan.
+- **[WeDLM Local Demo Harness](labs/wedlm/README.md)** – Hands-on steps to run the official WeDLM container, web demo, and smoke prompts.
+
 ## Archived & Historical Material
 
 - `docs/archived/` – Historical documents retained for context; not authoritative for current workflows.
