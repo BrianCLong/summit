@@ -166,6 +166,7 @@ export default [
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-namespace': 'warn',
       '@typescript-eslint/no-this-alias': 'warn',
+      '@typescript-eslint/triple-slash-reference': 'warn',
       'no-useless-escape': 'warn', // Relaxed for gradual migration
       'no-case-declarations': 'warn',
       'no-empty': 'warn',

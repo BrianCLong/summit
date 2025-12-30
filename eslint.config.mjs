@@ -72,6 +72,7 @@ export default tseslint.config(
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-namespace': 'warn',
       '@typescript-eslint/no-this-alias': 'warn',
+      '@typescript-eslint/triple-slash-reference': 'warn',
       'no-useless-escape': 'warn',
       'no-case-declarations': 'warn',
       'no-empty': 'warn',
