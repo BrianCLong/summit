@@ -555,9 +555,8 @@ export function createPolicyVerdictLoader(
  */
 export function createVerdictByKeyLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    // @ts-ignore
+): DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null> {
+  return new DataLoader<VerdictLookupKey, PolicyVerdictWithGovernance | null>(
     (keys) => batchLoadVerdictsByKey(keys, context),
     {
       cache: true,
@@ -573,9 +572,8 @@ export function createVerdictByKeyLoader(
  */
 export function createVerdictsBySubjectLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    // @ts-ignore
+): DataLoader<string, PolicyVerdictWithGovernance[]> {
+  return new DataLoader<string, PolicyVerdictWithGovernance[]>(
     (subjectIds) => batchLoadVerdictsBySubject(subjectIds, context),
     {
       cache: true,
@@ -590,9 +588,8 @@ export function createVerdictsBySubjectLoader(
  */
 export function createDeniedVerdictsLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    // @ts-ignore
+): DataLoader<string, PolicyVerdictWithGovernance[]> {
+  return new DataLoader<string, PolicyVerdictWithGovernance[]>(
     (policyIds) => batchLoadDeniedVerdicts(policyIds, context),
     {
       cache: true,
