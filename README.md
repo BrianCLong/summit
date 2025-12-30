@@ -31,6 +31,8 @@ We follow a **"Golden Path"** philosophy. If the build breaks, we stop and fix i
 
 **Prerequisites:** Docker Desktop ≥ 4.x, Node 18+, pnpm 9, Python 3.11+.
 
+### Setup
+
 ```bash
 # 1. Clone & Bootstrap
 git clone https://github.com/BrianCLong/summit.git
@@ -43,6 +45,16 @@ make up
 # 3. Verify (Smoke Test)
 make smoke
 ```
+
+### GA Readiness
+
+This release (MVP-4 GA) includes hardened reliability and observability defaults.
+- **Environment**: Ensure `NODE_ENV=production` in production.
+- **Secrets**: Provide `OPENAI_API_KEY`, `POSTGRES_PASSWORD`, etc. via `.env` or secret manager.
+- **Health Checks**:
+  - `/health`: Basic liveness (200 OK).
+  - `/health/detailed`: Deep dependency checks (Neo4j, Postgres, Redis).
+  - `/health/ready`: Kubernetes readiness probe.
 
 **That's it.** You now have a running stack with API, UI, Graph DB, and Relational DB.
 
