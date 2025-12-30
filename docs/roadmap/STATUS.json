@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T18:00:00Z",
-  "revision_note": "Updated to reflect actual code implementation status per Critical Needs Audit 2025-12-30",
+  "last_updated": "2025-12-30T22:21:04Z",
+  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
   "initiatives": [
     {
       "id": "A",
@@ -84,7 +84,11 @@
           "status": "incomplete",
           "owner": "Jules",
           "evidence": "Audit services exist but logging is console-only (BaseAgentArchetype.ts:343-352)",
-          "blockers": ["Need persistent append-only storage", "No tamper-proof verification", "No centralized log aggregation"],
+          "blockers": [
+            "Need persistent append-only storage",
+            "No tamper-proof verification",
+            "No centralized log aggregation"
+          ],
           "target_completion": "Sprint N+1 (CRITICAL for GA)"
         }
       ]
@@ -100,14 +104,44 @@
           "owner": "Amp"
         }
       ]
+    },
+    {
+      "id": "E",
+      "name": "Graph-XAI Differentiation",
+      "epics": [
+        {
+          "id": "E1",
+          "name": "Research Publications",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Publication plan and themes defined in ga-graphai/docs/explainability.md",
+          "target_completion": "Q3"
+        },
+        {
+          "id": "E2",
+          "name": "Public Explainability Benchmarks",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Benchmark suite, metrics, and harness expectations codified in ga-graphai/docs/explainability.md",
+          "target_completion": "Q2"
+        },
+        {
+          "id": "E3",
+          "name": "Case Studies",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Sector coverage, metrics, and distribution plan defined in ga-graphai/docs/explainability.md",
+          "target_completion": "Q4"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 2,
-    "total": 8,
+    "not_started": 5,
+    "total": 11,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }
