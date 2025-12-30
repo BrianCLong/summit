@@ -1,9 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowImportMeta": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "target": "ES2022",
     "strict": false,
     "noImplicitAny": false,

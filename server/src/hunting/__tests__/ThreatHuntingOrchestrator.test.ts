@@ -59,7 +59,7 @@ jest.mock('../AutoRemediationHooks', () => {
     executePlan: jest.fn(),
     approvePlan: jest.fn((planId: string, userId: string) => {
       const plan = plans.find(p => p.id === planId);
-      if (!plan) throw new Error('Plan not found');
+      if (!plan) return Promise.reject(new Error('Plan not found'));
       plan.status = 'approved';
       plan.approvedBy = userId;
       plan.approvedAt = new Date();

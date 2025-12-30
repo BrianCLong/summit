@@ -23,18 +23,21 @@ import type {
 } from '../types/strategic-planning';
 
 // Mock dependencies
-jest.mock('../config/logger.js', () => ({
-  default: {
-    child: () => ({
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
+jest.mock('../config/logger.js', () => {
+  const loggerMock = {
+    child: jest.fn(function child() {
+      return loggerMock;
     }),
-  },
-}));
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  };
 
-jest.mock('./cacheService.js', () => ({
+  return { default: loggerMock };
+});
+
+jest.mock('./CacheService.js', () => ({
   cacheService: {
     get: jest.fn(),
     set: jest.fn(),
@@ -111,13 +114,13 @@ describe('StrategicPlanningService', () => {
   beforeEach(() => {
     // Create mock client
     mockClient = {
-      query: jest.fn(),
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 } as QueryResult),
       release: jest.fn(),
     } as unknown as jest.Mocked<PoolClient>;
 
     // Create mock pool
     mockPool = {
-      query: jest.fn(),
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 } as QueryResult),
       connect: jest.fn().mockResolvedValue(mockClient),
     } as unknown as jest.Mocked<Pool>;
 
@@ -233,20 +236,23 @@ describe('StrategicPlanningService', () => {
           priority: 'CRITICAL',
         };
 
-        // Mock findPlanById
-        mockPool.query.mockResolvedValueOnce({
-          rows: [mockPlanRow],
-          rowCount: 1,
-        } as QueryResult);
+        (mockPool.query as jest.Mock).mockImplementation(async (query: string) => {
+          if (query.includes('FROM strategic_plans')) {
+            return { rows: [mockPlanRow], rowCount: 1 } as QueryResult;
+          }
 
-        // Mock update
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{ ...mockPlanRow, name: 'Updated Plan Name', priority: 'CRITICAL' }],
-          rowCount: 1,
-        } as QueryResult);
+          if (query.startsWith('UPDATE strategic_plans')) {
+            return {
+              rows: [{ ...mockPlanRow, name: 'Updated Plan Name', priority: 'CRITICAL' }],
+              rowCount: 1,
+            } as QueryResult;
+          }
+
+          return { rows: [], rowCount: 0 } as QueryResult;
+        });
 
         // Mock cache invalidation (del calls)
-        const { cacheService } = await import('./cacheService.js');
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.updatePlan('plan-001', input, testUserId, testTenantId);
@@ -275,17 +281,19 @@ describe('StrategicPlanningService', () => {
           status: 'UNDER_REVIEW',
         };
 
-        mockPool.query.mockResolvedValueOnce({
-          rows: [mockPlanRow],
-          rowCount: 1,
-        } as QueryResult);
+        (mockPool.query as jest.Mock).mockImplementation(async (query: string) => {
+          if (query.includes('FROM strategic_plans')) {
+            return { rows: [mockPlanRow], rowCount: 1 } as QueryResult;
+          }
 
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{ ...mockPlanRow, status: 'UNDER_REVIEW' }],
-          rowCount: 1,
-        } as QueryResult);
+          if (query.startsWith('UPDATE strategic_plans')) {
+            return { rows: [{ ...mockPlanRow, status: 'UNDER_REVIEW' }], rowCount: 1 } as QueryResult;
+          }
 
-        const { cacheService } = await import('./cacheService.js');
+          return { rows: [], rowCount: 0 } as QueryResult;
+        });
+
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.updatePlan('plan-001', input, testUserId, testTenantId);
@@ -316,7 +324,7 @@ describe('StrategicPlanningService', () => {
         } as QueryResult); // DELETE
         mockClient.query.mockResolvedValueOnce(undefined as any); // COMMIT
 
-        const { cacheService } = await import('./cacheService.js');
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.deletePlan('plan-001', testUserId, testTenantId);
@@ -383,7 +391,7 @@ describe('StrategicPlanningService', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 1 } as QueryResult);
 
         // Mock cache invalidation
-        const { cacheService } = await import('./cacheService.js');
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.createObjective(input, testUserId, testTenantId);
@@ -525,7 +533,7 @@ describe('StrategicPlanningService', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 1 } as QueryResult);
 
         // Mock cache invalidation
-        const { cacheService } = await import('./cacheService.js');
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.createInitiative(input, testUserId, testTenantId);
@@ -588,7 +596,7 @@ describe('StrategicPlanningService', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 1 } as QueryResult);
 
         // Mock cache invalidation
-        const { cacheService } = await import('./cacheService.js');
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const eventPromise = new Promise<{ risk: RiskAssessment }>((resolve) => {
@@ -609,11 +617,11 @@ describe('StrategicPlanningService', () => {
   });
 
   describe('Analytics & Progress', () => {
-    describe('getPlanProgress', () => {
-      it('should calculate plan progress correctly', async () => {
-        const planWithRelations = {
-          ...mockPlanRow,
-          objectives: [
+      describe('getPlanProgress', () => {
+        it('should calculate plan progress correctly', async () => {
+          const planWithRelations = {
+            ...mockPlanRow,
+            objectives: [
             { ...mockObjectiveRow, current_value: 50, target_value: 100, status: 'IN_PROGRESS', milestones: [], keyResults: [] },
             { ...mockObjectiveRow, id: 'obj-002', current_value: 100, target_value: 100, status: 'COMPLETED', milestones: [], keyResults: [] },
           ],
@@ -628,124 +636,141 @@ describe('StrategicPlanningService', () => {
             { type: 'BUDGET', allocated: 10000, used: 5000 },
           ],
           kpis: [],
-        };
+          };
 
-        // Mock plan query with all relations
-        mockPool.query.mockResolvedValueOnce({
-          rows: [mockPlanRow],
-          rowCount: 1,
-        } as QueryResult);
+          (mockPool.query as jest.Mock).mockImplementation(async (query: string) => {
+            if (query.includes('FROM strategic_plans')) {
+              return { rows: [mockPlanRow], rowCount: 1 } as QueryResult;
+            }
 
-        // Mock objectives
-        mockPool.query.mockResolvedValueOnce({
-          rows: planWithRelations.objectives.map((o, i) => ({
-            id: `obj-00${i + 1}`,
-            plan_id: 'plan-001',
-            name: 'Objective',
-            description: 'Test',
-            status: o.status,
-            priority: 'HIGH',
-            target_value: o.target_value,
-            current_value: o.current_value,
-            unit: 'percent',
-            start_date: new Date(),
-            target_date: new Date(),
-            aligned_intelligence_priorities: [],
-            success_criteria: [],
-            dependencies: [],
-            created_by: testUserId,
-            created_at: new Date(),
-            updated_at: new Date(),
-          })),
-          rowCount: 2,
-        } as QueryResult);
+            if (query.includes('FROM strategic_objectives')) {
+              return {
+                rows: planWithRelations.objectives.map((o, i) => ({
+                  id: `obj-00${i + 1}`,
+                  plan_id: 'plan-001',
+                  name: 'Objective',
+                  description: 'Test',
+                  status: o.status,
+                  priority: 'HIGH',
+                  target_value: o.target_value,
+                  current_value: o.current_value,
+                  unit: 'percent',
+                  start_date: new Date(),
+                  target_date: new Date(),
+                  aligned_intelligence_priorities: [],
+                  success_criteria: [],
+                  dependencies: [],
+                  created_by: testUserId,
+                  created_at: new Date(),
+                  updated_at: new Date(),
+                })),
+                rowCount: 2,
+              } as QueryResult;
+            }
 
-        // Mock milestones for each objective
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_milestones')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock initiatives
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{
-            id: 'init-001',
-            plan_id: 'plan-001',
-            objective_ids: [],
-            name: 'Initiative',
-            description: 'Test',
-            type: 'ANALYSIS',
-            status: 'IN_PROGRESS',
-            priority: 'HIGH',
-            start_date: new Date(),
-            end_date: new Date(),
-            budget: null,
-            budget_used: null,
-            assigned_to: [],
-            risks: [],
-            dependencies: [],
-            created_by: testUserId,
-            created_at: new Date(),
-            updated_at: new Date(),
-          }],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.includes('FROM strategic_key_results')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock milestones and deliverables for initiative
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_initiatives')) {
+              return {
+                rows: [
+                  {
+                    id: 'init-001',
+                    plan_id: 'plan-001',
+                    objective_ids: [],
+                    name: 'Initiative',
+                    description: 'Test',
+                    type: 'ANALYSIS',
+                    status: 'IN_PROGRESS',
+                    priority: 'HIGH',
+                    start_date: new Date(),
+                    end_date: new Date(),
+                    budget: null,
+                    budget_used: null,
+                    assigned_to: [],
+                    risks: [],
+                    dependencies: [],
+                    created_by: testUserId,
+                    created_at: new Date(),
+                    updated_at: new Date(),
+                  },
+                ],
+                rowCount: 1,
+              } as QueryResult;
+            }
 
-        // Mock risks
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{
-            id: 'risk-001',
-            plan_id: 'plan-001',
-            name: 'Risk',
-            description: 'Test',
-            category: 'OPERATIONAL',
-            likelihood: 4,
-            impact: 4,
-            risk_score: 16,
-            risk_level: 'HIGH',
-            status: 'IDENTIFIED',
-            contingency_plans: [],
-            owner: testUserId,
-            identified_at: new Date(),
-            last_assessed_at: new Date(),
-            review_date: new Date(),
-          }],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.includes('FROM strategic_deliverables')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock mitigations
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_risks')) {
+              return {
+                rows: [
+                  {
+                    id: 'risk-001',
+                    plan_id: 'plan-001',
+                    name: 'Risk',
+                    description: 'Test',
+                    category: 'OPERATIONAL',
+                    likelihood: 4,
+                    impact: 4,
+                    risk_score: 16,
+                    risk_level: 'HIGH',
+                    status: 'IDENTIFIED',
+                    contingency_plans: [],
+                    owner: testUserId,
+                    identified_at: new Date(),
+                    last_assessed_at: new Date(),
+                    review_date: new Date(),
+                  },
+                ],
+                rowCount: 1,
+              } as QueryResult;
+            }
 
-        // Mock stakeholders
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_mitigation_strategies')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock resources
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{
-            id: 'res-001',
-            plan_id: 'plan-001',
-            type: 'BUDGET',
-            name: 'Budget',
-            description: 'Test',
-            allocated: 10000,
-            used: 5000,
-            unit: 'USD',
-            start_date: new Date(),
-            end_date: new Date(),
-            status: 'IN_USE',
-          }],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.includes('FROM strategic_stakeholders')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock KPIs
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_resources')) {
+              return {
+                rows: [
+                  {
+                    id: 'res-001',
+                    plan_id: 'plan-001',
+                    type: 'BUDGET',
+                    name: 'Budget',
+                    description: 'Test',
+                    allocated: 10000,
+                    used: 5000,
+                    unit: 'USD',
+                    start_date: new Date(),
+                    end_date: new Date(),
+                    status: 'IN_USE',
+                  },
+                ],
+                rowCount: 1,
+              } as QueryResult;
+            }
+
+            if (query.includes('FROM strategic_kpis')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
+
+            return { rows: [], rowCount: 0 } as QueryResult;
+          });
 
         // Mock cache
-        const { cacheService } = await import('./cacheService.js');
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.get as jest.Mock).mockResolvedValue(null);
         (cacheService.set as jest.Mock).mockResolvedValue(undefined);
 
@@ -775,7 +800,7 @@ describe('StrategicPlanningService', () => {
           mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
         }
 
-        const { cacheService } = await import('./cacheService.js');
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.get as jest.Mock).mockResolvedValue(null);
         (cacheService.set as jest.Mock).mockResolvedValue(undefined);
 
@@ -790,96 +815,110 @@ describe('StrategicPlanningService', () => {
 
   describe('Plan Approval Workflow', () => {
     describe('approvePlan', () => {
-      it('should approve a plan under review with all requirements met', async () => {
-        const planUnderReview = {
-          ...mockPlanRow,
-          status: 'UNDER_REVIEW',
-        };
+        it('should approve a plan under review with all requirements met', async () => {
+          const planUnderReview = {
+            ...mockPlanRow,
+            status: 'UNDER_REVIEW',
+          };
 
-        // Mock findPlanById
-        mockPool.query.mockResolvedValueOnce({
-          rows: [planUnderReview],
-          rowCount: 1,
-        } as QueryResult);
+          (mockPool.query as jest.Mock).mockImplementation(async (query: string) => {
+            if (query.includes('FROM strategic_plans')) {
+              return { rows: [planUnderReview], rowCount: 1 } as QueryResult;
+            }
 
-        // Mock objectives with milestones
-        mockPool.query.mockResolvedValueOnce({
-          rows: [mockObjectiveRow],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.includes('FROM strategic_objectives')) {
+              return { rows: [mockObjectiveRow], rowCount: 1 } as QueryResult;
+            }
 
-        // Mock milestones for objective
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{
-            id: 'ms-001',
-            parent_id: 'obj-001',
-            parent_type: 'objective',
-            name: 'Milestone',
-            description: 'Test',
-            status: 'PENDING',
-            due_date: new Date(),
-            completed_at: null,
-            completed_by: null,
-            deliverables: [],
-            dependencies: [],
-          }],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.includes('FROM strategic_milestones')) {
+              return {
+                rows: [
+                  {
+                    id: 'ms-001',
+                    parent_id: 'obj-001',
+                    parent_type: 'objective',
+                    name: 'Milestone',
+                    description: 'Test',
+                    status: 'PENDING',
+                    due_date: new Date(),
+                    completed_at: null,
+                    completed_by: null,
+                    deliverables: [],
+                    dependencies: [],
+                  },
+                ],
+                rowCount: 1,
+              } as QueryResult;
+            }
 
-        // Mock key results
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_key_results')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock initiatives
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_initiatives')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock risks
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_risks')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock stakeholders with owner
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{
-            id: 'sh-001',
-            plan_id: 'plan-001',
-            user_id: testUserId,
-            name: 'Test Owner',
-            role: 'OWNER',
-            responsibilities: [],
-            communication_preferences: { frequency: 'WEEKLY', channels: ['email'] },
-            added_at: new Date(),
-            added_by: testUserId,
-          }],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.includes('FROM strategic_stakeholders')) {
+              return {
+                rows: [
+                  {
+                    id: 'sh-001',
+                    plan_id: 'plan-001',
+                    user_id: testUserId,
+                    name: 'Test Owner',
+                    role: 'OWNER',
+                    responsibilities: [],
+                    communication_preferences: { frequency: 'WEEKLY', channels: ['email'] },
+                    added_at: new Date(),
+                    added_by: testUserId,
+                  },
+                ],
+                rowCount: 1,
+              } as QueryResult;
+            }
 
-        // Mock resources
-        mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
+            if (query.includes('FROM strategic_resources')) {
+              return { rows: [], rowCount: 0 } as QueryResult;
+            }
 
-        // Mock KPIs
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{
-            id: 'kpi-001',
-            plan_id: 'plan-001',
-            name: 'Test KPI',
-            description: 'Test',
-            formula: 'test',
-            target_value: 100,
-            current_value: 0,
-            unit: 'percent',
-            frequency: 'MONTHLY',
-            trend: 'STABLE',
-            last_updated: new Date(),
-            history: [],
-          }],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.includes('FROM strategic_kpis')) {
+              return {
+                rows: [
+                  {
+                    id: 'kpi-001',
+                    plan_id: 'plan-001',
+                    name: 'Test KPI',
+                    description: 'Test',
+                    formula: 'test',
+                    target_value: 100,
+                    current_value: 0,
+                    unit: 'percent',
+                    frequency: 'MONTHLY',
+                    trend: 'STABLE',
+                    last_updated: new Date(),
+                    history: [],
+                  },
+                ],
+                rowCount: 1,
+              } as QueryResult;
+            }
 
-        // Mock update
-        mockPool.query.mockResolvedValueOnce({
-          rows: [{ ...planUnderReview, status: 'APPROVED', approved_by: testUserId, approved_at: new Date() }],
-          rowCount: 1,
-        } as QueryResult);
+            if (query.startsWith('UPDATE strategic_plans')) {
+              return {
+                rows: [{ ...planUnderReview, status: 'APPROVED', approved_by: testUserId, approved_at: new Date() }],
+                rowCount: 1,
+              } as QueryResult;
+            }
 
-        const { cacheService } = await import('./cacheService.js');
+            return { rows: [], rowCount: 0 } as QueryResult;
+          });
+
+        const { cacheService } = await import('./CacheService.js');
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.approvePlan('plan-001', testUserId, testTenantId);

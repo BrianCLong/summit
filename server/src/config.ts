@@ -53,6 +53,36 @@ const ENV_VAR_HELP: Record<string, string> = {
 };
 
 export const cfg = (() => {
+  if (process.env.JEST_WORKER_ID) {
+    return Env.parse({
+      NODE_ENV: 'test',
+      PORT: 0,
+      DATABASE_URL: process.env.DATABASE_URL || 'postgres://localhost:5432/test-db',
+      NEO4J_URI: process.env.NEO4J_URI || 'bolt://localhost:7687',
+      NEO4J_USER: process.env.NEO4J_USER || 'neo4j',
+      NEO4J_PASSWORD: process.env.NEO4J_PASSWORD || 'password',
+      REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+      REDIS_PORT: process.env.REDIS_PORT || 6379,
+      REDIS_PASSWORD: process.env.REDIS_PASSWORD || 'password',
+      JWT_SECRET: process.env.JWT_SECRET || 'test-secret-token-please-change-me-123456',
+      JWT_REFRESH_SECRET:
+        process.env.JWT_REFRESH_SECRET || 'test-refresh-token-please-change-me-123456',
+      CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+      RATE_LIMIT_WINDOW_MS: process.env.RATE_LIMIT_WINDOW_MS || 60000,
+      RATE_LIMIT_MAX_REQUESTS: process.env.RATE_LIMIT_MAX_REQUESTS || 100,
+      RATE_LIMIT_MAX_AUTHENTICATED: process.env.RATE_LIMIT_MAX_AUTHENTICATED || 1000,
+      AI_RATE_LIMIT_WINDOW_MS: process.env.AI_RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
+      AI_RATE_LIMIT_MAX_REQUESTS: process.env.AI_RATE_LIMIT_MAX_REQUESTS || 50,
+      BACKGROUND_RATE_LIMIT_WINDOW_MS:
+        process.env.BACKGROUND_RATE_LIMIT_WINDOW_MS || 60_000,
+      BACKGROUND_RATE_LIMIT_MAX_REQUESTS:
+        process.env.BACKGROUND_RATE_LIMIT_MAX_REQUESTS || 120,
+      CACHE_ENABLED: process.env.CACHE_ENABLED || true,
+      CACHE_TTL_DEFAULT: process.env.CACHE_TTL_DEFAULT || 300,
+      L1_CACHE_MAX_BYTES: process.env.L1_CACHE_MAX_BYTES || 1 * 1024 * 1024 * 1024,
+      L1_CACHE_FALLBACK_TTL_SECONDS: process.env.L1_CACHE_FALLBACK_TTL_SECONDS || 300,
+    });
+  }
   const parsed = Env.safeParse(process.env);
   if (!parsed.success) {
     console.error('\n❌ Environment Validation Failed\n');

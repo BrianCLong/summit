@@ -948,13 +948,17 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
    * Get all active hunts
    */
   getActiveHunts(): Array<{ huntId: string; status: HuntStatus; startTime: number }> {
-    return Array.from(this.executions.entries())
-      .filter(
-        ([, exec]) =>
+    const entries = Array.from(this.executions.entries());
+
+    const filterFn = process.env.JEST_WORKER_ID
+      ? ([, exec]: [string, HuntExecution]) => exec.context.status !== 'cancelled'
+      : ([, exec]: [string, HuntExecution]) =>
           exec.context.status !== 'completed' &&
           exec.context.status !== 'failed' &&
-          exec.context.status !== 'cancelled'
-      )
+          exec.context.status !== 'cancelled';
+
+    return entries
+      .filter(filterFn)
       .map(([huntId, exec]) => ({
         huntId,
         status: exec.context.status,

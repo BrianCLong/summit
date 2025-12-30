@@ -33,3 +33,20 @@ export async function startOtel(): Promise<void> {
 export function isOtelStarted() {
   return started;
 }
+
+export function getTracer(name: string = 'intelgraph-api') {
+  return {
+    startSpan: (spanName: string) => ({
+      name: `${name}:${spanName}`,
+      end: () => {},
+    }),
+    withSpan: async <T>(spanName: string, fn: (span: { end: () => void }) => Promise<T>) => {
+      const span = { end: () => {} };
+      try {
+        return await fn(span);
+      } finally {
+        span.end();
+      }
+    },
+  };
+}

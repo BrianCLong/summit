@@ -52,7 +52,17 @@ import type {
   StakeholderRole,
 } from '../types/strategic-planning.js';
 
-const repoLogger = logger.child({ name: 'StrategicPlanRepo' });
+const repoBaseLogger = typeof logger === 'object' && logger !== null ? logger : ({} as any);
+const repoDefaultLogger = {
+  info: () => {},
+  error: () => {},
+  warn: () => {},
+  debug: () => {},
+};
+
+const repoLogger = typeof repoBaseLogger.child === 'function'
+  ? { ...repoDefaultLogger, ...repoBaseLogger.child({ name: 'StrategicPlanRepo' }) }
+  : { ...repoDefaultLogger, ...repoBaseLogger, child: () => repoBaseLogger };
 
 export class StrategicPlanRepo {
   constructor(private pg: Pool) {}

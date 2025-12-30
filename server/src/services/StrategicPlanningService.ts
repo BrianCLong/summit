@@ -44,7 +44,17 @@ import type {
   MilestoneStatus,
 } from '../types/strategic-planning.js';
 
-const serviceLogger = logger.child({ name: 'StrategicPlanningService' });
+const baseLogger = typeof logger === 'object' && logger !== null ? logger : ({} as any);
+const defaultLogger = {
+  info: () => {},
+  error: () => {},
+  warn: () => {},
+  debug: () => {},
+};
+
+const serviceLogger = typeof baseLogger.child === 'function'
+  ? { ...defaultLogger, ...baseLogger.child({ name: 'StrategicPlanningService' }) }
+  : { ...defaultLogger, ...baseLogger, child: () => baseLogger };
 const tracer = getTracer('strategic-planning-service');
 
 // Cache TTL constants (seconds)
