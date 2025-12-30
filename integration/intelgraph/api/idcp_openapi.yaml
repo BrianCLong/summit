@@ -1,0 +1,49 @@
+openapi: 3.1.0
+info:
+  title: IDCP Indicator Deconfliction API
+  version: 1.0.0
+paths:
+  /idcp/deconflict:
+    post:
+      summary: Canonicalize indicators with collision proofs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                indicators:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      value: { type: string }
+                      context: { type: object }
+                      provenance: { type: string }
+              required: [indicators]
+      responses:
+        '200':
+          description: Deconfliction artifact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  canonicalIndicator:
+                    type: object
+                    properties:
+                      equivalenceClasses:
+                        type: array
+                        items: { type: array, items: { type: string } }
+                      collisions:
+                        type: array
+                        items: { type: string }
+                      safeActionEnvelope: { type: object }
+                      collisionProof:
+                        type: object
+                        properties:
+                          merkleRoot: { type: string }
+                          supportSize: { type: integer }
+                      replayToken: { type: string }
+                      attestationQuote: { type: string, nullable: true }

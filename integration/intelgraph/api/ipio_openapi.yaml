@@ -1,0 +1,53 @@
+openapi: 3.1.0
+info:
+  title: IPIO Origin Certificate API
+  version: 1.0.0
+paths:
+  /ipio/origins: 
+    post:
+      summary: Compute origin certificate via inverse diffusion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                narrativeWindow:
+                  type: object
+                  properties:
+                    start: { type: string, format: date-time }
+                    end: { type: string, format: date-time }
+                events:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      actorId: { type: string }
+                      contentId: { type: string }
+                      interaction: { type: string }
+                      timestamp: { type: string, format: date-time }
+                      provenance: { type: string }
+              required: [narrativeWindow, events]
+      responses:
+        '200':
+          description: Origin certificate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  originCertificate:
+                    type: object
+                    properties:
+                      originSet:
+                        type: array
+                        items: { type: string }
+                      uncertainty:
+                        type: object
+                        properties:
+                          posterior: { type: array, items: { type: number } }
+                          interval: { type: array, items: { type: number } }
+                      replayToken: { type: string }
+                      merkleRoot: { type: string }
+                      attestationQuote: { type: string, nullable: true }

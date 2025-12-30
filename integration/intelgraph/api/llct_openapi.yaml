@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: LLCT Correlation Token API
+  version: 1.0.0
+paths:
+  /llct/execute:
+    post:
+      summary: Execute OSINT modules with linkage-limited correlation token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: object
+                  properties:
+                    identifierTypes: { type: array, items: { type: string } }
+                    maxHop: { type: integer }
+                    ttl: { type: integer }
+                    egressLimit: { type: integer }
+                    jurisdiction: { type: string }
+                    replayToken: { type: string }
+                    signature: { type: string }
+                modules: { type: array, items: { type: string } }
+              required: [token, modules]
+      responses:
+        '200':
+          description: Linkage receipt and selective results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: array, items: { type: object } }
+                  linkageReceipt:
+                    type: object
+                    properties:
+                      linkedIdentifiers: { type: array, items: { type: string } }
+                      tokenHash: { type: string }
+                      egressUsed: { type: integer }
+                      attestationQuote: { type: string, nullable: true }

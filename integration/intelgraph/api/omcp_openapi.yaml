@@ -1,0 +1,35 @@
+openapi: 3.1.0
+info:
+  title: OMCP Migration Artifact API
+  version: 1.0.0
+paths:
+  /omcp/compile:
+    post:
+      summary: Compile ontology migration with compatibility proofs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                priorSchema: { type: object }
+                updatedSchema: { type: object }
+              required: [priorSchema, updatedSchema]
+      responses:
+        '200':
+          description: Migration artifact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  migrationPlan: { type: object }
+                  compatibilityShim: { type: object }
+                  compatibilityProof:
+                    type: object
+                    properties:
+                      deltaHash: { type: string }
+                      witnessChain: { type: array, items: { type: string } }
+                  replayToken: { type: string }
+                  attestationQuote: { type: string, nullable: true }

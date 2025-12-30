@@ -1,0 +1,37 @@
+openapi: 3.1.0
+info:
+  title: TCGI Macro Synthesis API
+  version: 1.0.0
+paths:
+  /tcgi/macros:
+    post:
+      summary: Generate and optimize macros from induced grammar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                objective:
+                  type: object
+                  properties:
+                    coverage: { type: number }
+                    precision: { type: number }
+                    latency: { type: number }
+                    cost: { type: number }
+                constraints: { type: object }
+              required: [objective]
+      responses:
+        '200':
+          description: Macro artifact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  macroGraph: { type: object }
+                  justification: { type: array, items: { type: string } }
+                  expectedCost: { type: number }
+                  replayToken: { type: string }
+                  attestationQuote: { type: string, nullable: true }
