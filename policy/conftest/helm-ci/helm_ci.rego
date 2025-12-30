@@ -1,7 +1,5 @@
 package helm_ci
 
-default deny := []
-
 deny contains msg if {
   not input.kind
   msg := "resource is missing a kind"

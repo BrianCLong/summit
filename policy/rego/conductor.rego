@@ -1,4 +1,4 @@
-package conductor.authz
+package rego.conductor.authz
 
 default allow := false
 

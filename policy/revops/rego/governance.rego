@@ -188,8 +188,7 @@ get_hygiene_violations(segment, tenant_id) := concat_arrays([stage_exit_violatio
 stage_exit_violations(segment) := [v |
   input.opportunity
   cfg := config.governance.stage_exit[segment][input.opportunity.stage]
-  some req
-  req := cfg[_]
+  some req in cfg
   not input.opportunity.stage_evidence[req]
   v := sprintf("stage_exit_missing_%s", [req])
 ]
@@ -236,8 +235,8 @@ hygiene_violation contains "dedupe_violation" if {
 }
 
 hygiene_violation contains "exception_without_expiry" if {
-  input.exception_registry.open[_]
-  not input.exception_registry.open[_].expires_at
+  some ex in input.exception_registry.open
+  not ex.expires_at
 }
 
 hygiene_violation contains "exception_expired" if {
@@ -319,22 +318,22 @@ naming_flag_list := [f | naming_flags[f]]
 
 naming_flags contains "deal_naming_invalid" if {
   input.opportunity
-  not re_match(config.governance.naming.deal_pattern, input.opportunity.name)
+  not regex.match(config.governance.naming.deal_pattern, input.opportunity.name)
 }
 
 naming_flags contains "campaign_naming_invalid" if {
   input.opportunity.campaign_name
-  not re_match(config.governance.naming.campaign_pattern, input.opportunity.campaign_name)
+  not regex.match(config.governance.naming.campaign_pattern, input.opportunity.campaign_name)
 }
 
 naming_flags contains "territory_naming_invalid" if {
   input.account
-  not re_match(config.governance.naming.territory_pattern, input.account.territory)
+  not regex.match(config.governance.naming.territory_pattern, input.account.territory)
 }
 
 naming_flags contains "sku_naming_invalid" if {
-  input.quote.skus[_]
-  not re_match(config.governance.naming.sku_pattern, input.quote.skus[_])
+  some sku in input.quote.skus
+  not regex.match(config.governance.naming.sku_pattern, sku)
 }
 
 routing_violation contains "manual_routing_blocked" if {
@@ -401,7 +400,7 @@ q2c_violation contains "renewal_not_created" if {
 
 q2c_violation contains "order_form_not_ready" if {
   input.quote
-  count([s | s := input.quote.skus[_]; re_match(config.governance.naming.sku_pattern, s)]) == 0
+  count([s | s := input.quote.skus[_]; regex.match(config.governance.naming.sku_pattern, s)]) == 0
 }
 
 forecast_violation contains "forecast_category_not_allowed" if {
@@ -416,8 +415,7 @@ forecast_violation contains "forecast_evidence_missing" if {
   input.opportunity
   category := input.opportunity.forecast_category
   rule := config.governance.forecast.categories[category]
-  some req
-  req := rule.evidence[_]
+  some req in rule.evidence
   not input.opportunity.stage_evidence[req]
 }
 
@@ -449,7 +447,7 @@ governance_violations contains "audit_log_missing" if {
 
 permission_violations contains "unauthorized_change" if {
   input.actor
-  input.context.change_targets[_] == target
+  some target in input.context.change_targets
   not role_can_edit(input.actor.role, target)
 }
 
@@ -507,9 +505,8 @@ stage_at_least(stage, min) if {
 }
 
 forecast_category(segment) := category if {
-  some category
   input.opportunity
-  category == input.opportunity.forecast_category
+  category := input.opportunity.forecast_category
 }
 
 compute_risk(segment, violations, sla_breaches) := score if {
@@ -623,7 +620,7 @@ recommended_actions(violations, sla_breaches) := result if {
 violation_flag_list(vs) := [violation | violation := vs[_]]
 
 handoffs_complete(required, completed) if {
-  missing := {p | p := required[_]; not completed[_] == p}
+  missing := {p | some p in required; not p in completed}
   count(missing) == 0
 }
 
@@ -651,28 +648,20 @@ pick_approvers(discount, thresholds) := approvers if {
 }
 
 approvals_superset(have, required) if {
-  missing := {a | a := required[_]; not have[_] == a}
+  missing := {a | some a in required; not a in have}
   count(missing) == 0
 }
 
+# Check if expected is a prefix of actual (non-recursive implementation)
 equal_prefix(expected, actual) if {
   not expected
 }
 
 equal_prefix(expected, actual) if {
-  expected[0] == actual[0]
-  remainder_expected := array.slice(expected, 1, count(expected))
-  remainder_actual := array.slice(actual, 1, count(actual))
-  equal_prefix_continue(remainder_expected, remainder_actual)
-}
-
-equal_prefix_continue(remainder_expected, remainder_actual) if {
-  count(remainder_expected) == 0
-}
-
-equal_prefix_continue(remainder_expected, remainder_actual) if {
-  count(remainder_expected) > 0
-  equal_prefix(remainder_expected, remainder_actual)
+  count(expected) <= count(actual)
+  # All elements at each position must match
+  mismatches := {i | some i, v in expected; actual[i] != v}
+  count(mismatches) == 0
 }
 
 mandatory_field_present("buying_role") if {

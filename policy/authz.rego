@@ -1,4 +1,4 @@
-package intelgraph.authz
+package intelgraph.authz.extended
 
 default allow := false
 

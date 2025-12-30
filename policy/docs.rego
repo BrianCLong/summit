@@ -5,7 +5,7 @@ import future.keywords.contains
 
 # Fail pages lacking required sections
 violation contains msg if {
-  input.path.endswith(".md")
+  endswith(input.path, ".md")
   not input.content_matches_see_also
   msg := sprintf("%s missing 'See also' section", [input.path])
 }

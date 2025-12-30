@@ -19,7 +19,7 @@ to_lower(s) := lower_s if {
   lower_s := lower(s)
 }
 
-set_from_array(arr) := {x | some i; arr[i] == x}
+set_from_array(arr) := {x | some i; x := arr[i]}
 
 contains_all(haystack, needles) if {
   every n in needles {
@@ -36,20 +36,21 @@ allows_action(permission, action) if {
   startswith(action, "admin:")
 }
 
-time_in_window(time, window) if {
+time_in_window(ts, window) if {
   not window
 }
 
-time_in_window(time, window) if {
+time_in_window(ts, window) if {
   not non_empty(window.start)
 }
 
-time_in_window(time, window) if {
-  parsed := time.parse_rfc3339_ns(time)
+time_in_window(ts, window) if {
+  parsed := time.parse_rfc3339_ns(ts)
+  clock := time.clock(parsed)
+  hour := clock[0]
+  minute := clock[1]
   start_parts := split(window.start, ":")
   end_parts := split(window.end, ":")
-  hour := to_number(time.format_int(parsed, "01"))
-  minute := to_number(time.format_int(parsed, "02"))
   start_minutes := to_number(start_parts[0]) * 60 + to_number(start_parts[1])
   end_minutes := to_number(end_parts[0]) * 60 + to_number(end_parts[1])
   now_minutes := hour * 60 + minute
@@ -66,5 +67,5 @@ subject_tenant := tenant if {
 }
 
 audit_hash(id) := hash if {
-  hash := sprintf("hash_%s", [crypto.sha256_hex(sprintf("%v", [id]))])
+  hash := sprintf("hash_%s", [crypto.sha256(sprintf("%v", [id]))])
 }

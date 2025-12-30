@@ -4,38 +4,38 @@ package governance_test
 import data.governance
 
 test_allow_safe if {
-    input := {
+    test_input := {
         "risk_score": 20,
         "sector": "healthcare",
         "guardrail_check": {"allowed": true}
     }
-    governance.allow with input as input
+    governance.allow with input as test_input
 }
 
 test_deny_high_risk if {
-    input := {
+    test_input := {
         "risk_score": 95,
         "mitigation": "NONE"
     }
-    not governance.allow with input as input
-    governance.any_violations with input as input
-    governance.violation["high_risk_use_case"] with input as input
+    not governance.allow with input as test_input
+    governance.any_violations with input as test_input
+    governance.violation["high_risk_use_case"] with input as test_input
 }
 
 test_deny_disallowed_sector if {
-    input := {
+    test_input := {
         "sector": "gambling"
     }
-    not governance.allow with input as input
-    governance.violation["disallowed_sector"] with input as input
+    not governance.allow with input as test_input
+    governance.violation["disallowed_sector"] with input as test_input
 }
 
 test_deny_guardrail_breach if {
-    input := {
+    test_input := {
         "guardrail_check": {"allowed": false}
     }
-    not governance.allow with input as input
-    governance.violation["guardrail_breach"] with input as input
+    not governance.allow with input as test_input
+    governance.violation["guardrail_breach"] with input as test_input
 }
 
 test_mitigation_levels if {

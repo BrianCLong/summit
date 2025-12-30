@@ -11,7 +11,7 @@ test_contract_activation_ok if {
     "tenant": {"id": "tenant-default"}
   }
 
-  decision := revops.contract_activation.decision with input as test_input
+  decision := contract_activation.decision with input as test_input
   decision.allowed
   decision.required_actions == []
 }
@@ -24,6 +24,6 @@ test_contract_missing_signature_denied if {
     "tenant": {"id": "tenant-default"}
   }
 
-  decision := revops.contract_activation.decision with input as test_input
+  decision := contract_activation.decision with input as test_input
   decision.allowed == false
 }

@@ -23,7 +23,7 @@ decision := out if {
   max_allowed := conf.max_discount[input.subject.role]
   approvals := approvals_chain(q, conf)
 
-  not invariants.deny_discount[_] with input as input
+  count(invariants.deny_discount) == 0 with input as input
 
   out := {
     "allowed": true,

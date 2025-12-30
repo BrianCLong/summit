@@ -71,9 +71,8 @@ denies contains msg if {
 }
 
 deny_after_hours contains msg if {
-  some reason
-  reason := input.reasons[_]
-  reason.type == "after-hours"
+  some r in input.reasons
+  r.type == "after-hours"
   not valid_after_hours_reason
   msg := "after-hours override requires explicit incident or release justification"
 }

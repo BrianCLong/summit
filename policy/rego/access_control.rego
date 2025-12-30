@@ -1,4 +1,4 @@
-package intelgraph.authz
+package rego.intelgraph.authz
 
 default allow := false
 

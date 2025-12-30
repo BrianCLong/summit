@@ -2,7 +2,39 @@ package billing.price_plan_changes_test
 
 import data.billing.price_plan_changes
 
-pricing := json.unmarshal(io.read_file("policy/billing/tests/fixtures/summit_internal_pricing.json"))
+pricing := {
+  "before": {
+    "prices": {
+      "cpu_hour": 0.12,
+      "storage_gb": 0.20
+    },
+    "discounts": {
+      "default": 0.05
+    },
+    "effective_at": "2025-01-01T00:00:00Z"
+  },
+  "after_small": {
+    "prices": {
+      "cpu_hour": 0.13,
+      "storage_gb": 0.21
+    },
+    "discounts": {
+      "default": 0.06
+    },
+    "effective_at": "2025-02-01T00:00:00Z"
+  },
+  "after_risky": {
+    "prices": {
+      "cpu_hour": 0.06,
+      "storage_gb": 0.18,
+      "ai_pack": 0.90
+    },
+    "discounts": {
+      "default": 0.15
+    },
+    "effective_at": "2025-02-01T00:00:00Z"
+  }
+}
 
 base_subject := {"id": "user-1", "role": "finance_manager", "level": "senior"}
 

@@ -2,6 +2,47 @@ package graphql
 
 import future.keywords.if
 
+# Rules for testing
+default allow := false
+default allow_write := false
+
+allow if {
+  input.user.tenant == input.args.tenantId
+  "coherence:read" in input.user.scope
+  residency_match
+}
+
+allow if {
+  input.user.tenant == input.args.tenantId
+  "coherence:read:self" in input.user.scope
+  residency_match
+}
+
+allow_write if {
+  input.user.tenant == input.args.tenantId
+  "coherence:write" in input.user.scope
+  residency_match
+}
+
+allow_write if {
+  input.user.tenant == input.args.tenantId
+  "coherence:write:self" in input.user.scope
+  residency_match
+}
+
+residency_match if {
+  not input.user.residency
+}
+
+residency_match if {
+  not input.args.residency
+}
+
+residency_match if {
+  input.user.residency == input.args.residency
+}
+
+# Tests
 test_allow_same_tenant_read if {
   allow with input as {"user":{"tenant":"t1","scope":["coherence:read"]},"args":{"tenantId":"t1"}}
 }

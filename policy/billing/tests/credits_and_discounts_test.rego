@@ -2,7 +2,24 @@ package billing.credits_and_discounts_test
 
 import data.billing.credits_and_discounts
 
-credits := json.unmarshal(io.read_file("policy/billing/tests/fixtures/sample_credits.json"))
+credits := [
+  {
+    "id": "cred-001",
+    "tenant_id": "tenant-123",
+    "amount": 1500,
+    "currency": "USD",
+    "reason": "service outage",
+    "type": "credit"
+  },
+  {
+    "id": "cred-002",
+    "tenant_id": "tenant-enterprise",
+    "amount": 25000,
+    "currency": "USD",
+    "reason": "strategic discount",
+    "type": "discount"
+  }
+]
 
 finance_manager := {"id": "fin-1", "role": "finance_manager"}
 

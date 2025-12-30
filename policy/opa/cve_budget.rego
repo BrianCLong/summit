@@ -28,24 +28,24 @@ violations contains msg if {
 
 violations contains msg if {
   service := input.services[_]
-  some artifact
-  artifact := service.artifacts[artifact]
+  some key
+  artifact := service.artifacts[key]
   not artifact.signed
   msg := sprintf("service %s has unsigned artifact %s", [service.name, artifact.image])
 }
 
 violations contains msg if {
   service := input.services[_]
-  some artifact
-  artifact := service.artifacts[artifact]
+  some key
+  artifact := service.artifacts[key]
   not artifact.attestations_verified
   msg := sprintf("service %s has unverified attestation for %s", [service.name, artifact.image])
 }
 
 violations contains msg if {
   service := input.services[_]
-  some artifact
-  artifact := service.artifacts[artifact]
+  some key
+  artifact := service.artifacts[key]
   not artifact.sbom_present
   msg := sprintf("service %s missing SBOM reference for %s", [service.name, artifact.image])
 }

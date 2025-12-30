@@ -6,13 +6,13 @@ import data.revops_fixtures
 # Discounts inside the role cap should be allowed with correct approvals.
 test_discount_within_cap if {
   quote := revops_fixtures.quotes[0]
-  input := {
+  test_input := {
     "quote": quote,
     "tenant": {"id": "tenant-default"},
     "subject": {"id": "user-1", "role": "sales_manager"}
   }
 
-  decision := revops.discount_approvals.decision with input as input
+  decision := discount_approvals.decision with input as test_input
   decision.allowed
   decision.max_discount_allowed == 25
   decision.required_approvals == ["sales_manager"]
@@ -29,13 +29,13 @@ test_discount_over_cap_flagged if {
     "non_standard_terms": []
   }
 
-  input := {
+  test_input := {
     "quote": quote,
     "tenant": {"id": "tenant-default"},
     "subject": {"id": "ae-1", "role": "ae"}
   }
 
-  decision := revops.discount_approvals.decision with input as input
+  decision := discount_approvals.decision with input as test_input
   decision.allowed
   decision.reason == "discount_above_role_limit"
 }

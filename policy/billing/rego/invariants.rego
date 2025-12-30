@@ -58,7 +58,7 @@ credit_blocked(req) if {
 }
 
 cost_model_blocked(req) if {
-  some period
   period := req.model_before.effective_at
-  closed_periods[_] == substr(period, 0, 7)
+  some closed_period in closed_periods
+  closed_period == substring(period, 0, 7)
 }

@@ -2,7 +2,24 @@ package billing.invoice_actions_test
 
 import data.billing.invoice_actions
 
-invoices := json.unmarshal(io.read_file("policy/billing/tests/fixtures/sample_invoices.json"))
+invoices := [
+  {
+    "id": "inv-001",
+    "tenant_id": "tenant-123",
+    "amount": 8500,
+    "status": "open",
+    "due_date": "2025-02-15",
+    "currency": "USD"
+  },
+  {
+    "id": "inv-002",
+    "tenant_id": "tenant-enterprise",
+    "amount": 125000,
+    "status": "open",
+    "due_date": "2025-02-20",
+    "currency": "USD"
+  }
+]
 
 finance_manager := {"id": "fin-1", "role": "finance_manager"}
 

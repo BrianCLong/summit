@@ -8,15 +8,13 @@ import future.keywords.if
 default allow := false
 
 role_permissions contains perm if {
-  some role
-  role := input.subject.roles[_]
+  some role in input.subject.roles
   perms := roles.roles[role].permissions
-  perm := perms[_]
+  some perm in perms
 }
 
 allow if {
-  some perm
-  perm := role_permissions[_]
+  some perm in role_permissions
   helpers.allows_action(perm, input.action)
 }
 

@@ -40,7 +40,7 @@ approvals_for("high", _) := ["finance_manager", "revops_lead", "cfo"]
 
 flags_for(risk, memo_type) := flags if {
   base := [memo_type]
-  impact := {f | risk != "low"; f := "revenue_impact"}
-  recurring := {f | memo_type == "discount"; f := "recurring_change"}
+  impact := ["revenue_impact" | risk != "low"]
+  recurring := ["recurring_change" | memo_type == "discount"]
   flags := array.concat(base, array.concat(impact, recurring))
 }

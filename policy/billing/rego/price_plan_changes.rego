@@ -45,7 +45,7 @@ compute_delta(before, after) := {
   after
 }
 
-price_changes(before, after) := [change | sku := keys(after)[_];
+price_changes(before, after) := [change | sku := object.keys(after)[_];
   before_price := value_or_default(before[sku], after[sku]);
   after_price := after[sku];
   diff := after_price - before_price;
@@ -55,9 +55,8 @@ price_changes(before, after) := [change | sku := keys(after)[_];
 
 max_price_change(before, after) := max(abs_changes) if {
   abs_changes := [abs(c.percent) | c := price_changes(before, after)[_]]
-}
-
-max_price_change(_, _) := 0 if { true }
+  count(abs_changes) > 0
+} else := 0
 
 percent_change(before, after) := pct if {
   before == 0
@@ -85,16 +84,16 @@ approvals_for("high") := ["finance_manager", "cfo"]
 # Flags inform Switchboard dashboards about risky attributes.
 delta_flags(delta) := flags if {
   base := []
-  high_change := {f | delta.max_change >= risk_thresholds["high"]; f := "high_revenue_impact"}
-  new_sku := {f | count(delta.new_skus) > 0; f := "new_sku_added"}
-  removed := {f | count(delta.removed_skus) > 0; f := "sku_removed"}
-  discount := {f | abs(delta.discount_change) > 0.1; f := "discount_shift"}
+  high_change := ["high_revenue_impact" | delta.max_change >= risk_thresholds["high"]]
+  new_sku := ["new_sku_added" | count(delta.new_skus) > 0]
+  removed := ["sku_removed" | count(delta.removed_skus) > 0]
+  discount := ["discount_shift" | abs(delta.discount_change) > 0.1]
   flags := array.concat(base, array.concat(array.concat(array.concat([], high_change), new_sku), array.concat(removed, discount)))
 }
 
-new_skus(before, after) := [sku | sku := keys(after)[_]; not before[sku]]
+new_skus(before, after) := [sku | sku := object.keys(after)[_]; not before[sku]]
 
-removed_skus(before, after) := [sku | sku := keys(before)[_]; not after[sku]]
+removed_skus(before, after) := [sku | sku := object.keys(before)[_]; not after[sku]]
 
 discount_delta(before, after) := diff if {
   before_default := value_or_default(before["default"], 0)

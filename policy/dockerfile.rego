@@ -53,9 +53,11 @@ deny contains msg if {
 
 # Deny ADD when COPY should be used
 warn contains msg if {
-	input.Stage[_].Commands[_].Cmd == "add"
-	not contains(input.Stage[_].Commands[_].Value[0], "http")
-	not contains(input.Stage[_].Commands[_].Value[0], "ftp")
+	some stage in input.Stage
+	some cmd in stage.Commands
+	cmd.Cmd == "add"
+	not contains(cmd.Value[0], "http")
+	not contains(cmd.Value[0], "ftp")
 	msg := "Use COPY instead of ADD for local files"
 }
 

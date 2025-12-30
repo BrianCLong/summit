@@ -14,28 +14,24 @@ is_sensitive if { input.bundle.sensitivity == "Sensitive" }
 is_sensitive if { input.bundle.sensitivity == "Restricted" }
 
 has_export_perm if {
-  some p
-  p := input.user.permissions[_]
+  some p in input.user.permissions
   p == "export"
 }
 
 in_allowed_role if {
-  some r
-  r := input.user.roles[_]
-  r == export_allowed_roles[_]
+  some r in input.user.roles
+  r in export_allowed_roles
 }
 
 is_pii_field contains f if {
-  f := input.bundle.fields[_]
-  some l
-  l := f.labels[_]
+  some f in input.bundle.fields
+  some l in f.labels
   startswith(l, "pii:")
 }
 
 is_explicit_mask contains f if {
-  f := input.bundle.fields[_]
-  some m
-  m := input.options.dlp_mask_fields[_]
+  some f in input.bundle.fields
+  some m in input.options.dlp_mask_fields
   m == f.name
 }
 
@@ -52,8 +48,7 @@ base_effect := "step_up" if { has_export_perm; in_allowed_role; is_sensitive; no
 base_effect := "allow" if { has_export_perm; in_allowed_role; is_sensitive; input.webauthn_verified }
 
 must_deny if {
-  some r
-  r := reason[_]
+  some r in reason
   r != "step_up_required"
 }
 
@@ -100,7 +95,7 @@ get_reasons(masks) := [] if { count(masks) == 0 }
 
 decision := sim_obj if {
   input.simulate
-  sim_obj := result with sim_obj.simulated as true
+  sim_obj := object.union(result, {"simulated": true})
 }
 
 decision := result if { not input.simulate }

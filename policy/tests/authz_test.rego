@@ -8,7 +8,7 @@ import data.policy.authz.abac
 allow_report_export if {
   decision := abac.decision with input as data.policy.fixtures.analyst_report
   decision.allow
-  not decision.deny[_]
+  count(decision.deny) == 0
 }
 
 # Tenant isolation enforcement

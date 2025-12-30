@@ -1,4 +1,4 @@
-package intelgraph.authz
+package opa.intelgraph.authz
 
 import future.keywords.if
 import future.keywords.contains

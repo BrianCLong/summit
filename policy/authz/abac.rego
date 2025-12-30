@@ -36,7 +36,7 @@ deny contains reason if {
 
 deny contains reason if {
   permission.classification
-  not permission.classification[_] == input.resource.classification
+  not input.resource.classification in permission.classification
   reason := "classification_blocked"
 }
 
@@ -82,7 +82,7 @@ obligations contains "dual_control" if {
 
 allow if {
   rbac.allow
-  not deny[_]
+  count(deny) == 0
 }
 
 decision := {

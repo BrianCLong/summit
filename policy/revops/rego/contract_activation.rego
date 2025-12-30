@@ -18,7 +18,7 @@ decision := out if {
 
   rules := config.tenant[tenant].contracts
 
-  not invariants.deny_activation[_] with input as input
+  count(invariants.deny_activation) == 0 with input as input
 
   approvals_okay(contract, rules)
   signatures_okay(contract, rules)
@@ -32,7 +32,7 @@ decision := out if {
 }
 
 approvals_okay(contract, rules) if {
-  not missing_required_approval(contract, rules.required_approvals[_])
+  count([req | some req in rules.required_approvals; missing_required_approval(contract, req)]) == 0
 }
 
 missing_required_approval(contract, req) if {
@@ -44,7 +44,7 @@ contract_has_approval(contract, req) if {
 }
 
 signatures_okay(contract, rules) if {
-  not missing_required_signature(contract, rules.required_signers[_])
+  count([req | some req in rules.required_signers; missing_required_signature(contract, req)]) == 0
 }
 
 missing_required_signature(contract, req) if {

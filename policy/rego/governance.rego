@@ -1,4 +1,4 @@
-package governance
+package rego.governance
 
 default allow := false
 default log_event := true

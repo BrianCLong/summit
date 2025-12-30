@@ -29,7 +29,7 @@ decision := out if {
 
 flags_for(req) := flags if {
   base := ["unit_economics"]
-  missing_analysis := {f | req.context.impact_analysis == ""; f := "missing_impact_analysis"}
-  retroactive := {f | req.model_before.effective_at > req.model_after.effective_at; f := "retroactive_change"}
+  missing_analysis := ["missing_impact_analysis" | req.context.impact_analysis == ""]
+  retroactive := ["retroactive_change" | req.model_before.effective_at > req.model_after.effective_at]
   flags := array.concat(base, array.concat(missing_analysis, retroactive))
 }

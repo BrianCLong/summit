@@ -141,7 +141,7 @@ security_violation if {
 security_violation if {
     # Check for sensitive data access
     input.action.type == "read_secrets"
-    not input.subject.roles[_] == "admin"
+    not "admin" in input.subject.roles
 }
 
 suspicious_url(url) if {
@@ -445,7 +445,7 @@ safety_violations := violations if {
 
 # Utility functions
 range(start, end) := numbers if {
-    numbers := [i | i := start + x; x := numbers.number[_]; x < end - start]
+    numbers := [i | some idx in numbers.range(start, end); i := idx]
 }
 
 # Helper for string operations

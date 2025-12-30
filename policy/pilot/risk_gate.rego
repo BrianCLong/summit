@@ -37,10 +37,9 @@ pending_violations if {
 
 # IAM: Wildcard actions or resources are blocked.
 iam_wildcard_violation contains v if {
-  some policy
-  policy := input.iam.policies[_]
-  policy.id := id
-  policy.effect := effect
+  some policy in input.iam.policies
+  id := policy.id
+  effect := policy.effect
   lower(effect) == "allow"
   some stmt in policy.statements
   stmt.actions[_] == "*"
@@ -52,10 +51,9 @@ iam_wildcard_violation contains v if {
 }
 
 iam_wildcard_violation contains v if {
-  some policy
-  policy := input.iam.policies[_]
-  policy.id := id
-  policy.effect := effect
+  some policy in input.iam.policies
+  id := policy.id
+  effect := policy.effect
   lower(effect) == "allow"
   some stmt in policy.statements
   stmt.resources[_] == "*"
@@ -68,10 +66,9 @@ iam_wildcard_violation contains v if {
 
 # Kubernetes: privileged or host-level access is blocked.
 privileged_workload_violation contains v if {
-  some workload
-  workload := input.kubernetes.workloads[_]
-  workload.kind := kind
-  workload.name := name
+  some workload in input.kubernetes.workloads
+  kind := workload.kind
+  name := workload.name
   workload.securityContext.privileged
   v := {
     "id": "k8s-privileged",
@@ -81,10 +78,9 @@ privileged_workload_violation contains v if {
 }
 
 privileged_workload_violation contains v if {
-  some workload
-  workload := input.kubernetes.workloads[_]
-  workload.kind := kind
-  workload.name := name
+  some workload in input.kubernetes.workloads
+  kind := workload.kind
+  name := workload.name
   workload.securityContext.hostNetwork
   v := {
     "id": "k8s-privileged",
@@ -94,10 +90,9 @@ privileged_workload_violation contains v if {
 }
 
 privileged_workload_violation contains v if {
-  some workload
-  workload := input.kubernetes.workloads[_]
-  workload.kind := kind
-  workload.name := name
+  some workload in input.kubernetes.workloads
+  kind := workload.kind
+  name := workload.name
   workload.volumes[_].hostPath
   v := {
     "id": "k8s-privileged",
@@ -108,8 +103,7 @@ privileged_workload_violation contains v if {
 
 # Public exposure without auth is blocked.
 public_exposure_violation contains v if {
-  some bucket
-  bucket := input.storage.buckets[_]
+  some bucket in input.storage.buckets
   bucket.public == true
   v := {
     "id": "public-storage",
@@ -119,8 +113,7 @@ public_exposure_violation contains v if {
 }
 
 public_exposure_violation contains v if {
-  some ingress
-  ingress := input.network.ingress[_]
+  some ingress in input.network.ingress
   ingress.public == true
   not ingress.auth_enabled
   v := {
@@ -132,22 +125,20 @@ public_exposure_violation contains v if {
 
 # Required ownership metadata must exist.
 missing_tags_violation contains v if {
-  some resource
-  resource := input.metadata[_]
+  some resource in input.metadata
   required_tags := {"env", "team", "service"}
   missing := required_tags - {k | resource.tags[k]}
   count(missing) > 0
   v := {
     "id": "missing-tags",
     "resource": resource.name,
-    "message": sprintf("Resource %q is missing tags: %v", [resource.name, array.sort(missing)])
+    "message": sprintf("Resource %q is missing tags: %v", [resource.name, sort(missing)])
   }
 }
 
 # Allowlist with owner + expiry + ticket enforcement.
 allowlisted(id) if {
-  some item
-  item := data.allowlist.exceptions[_]
+  some item in data.allowlist.exceptions
   item.id == id
   item.owner != ""
   item.ticket != ""
@@ -155,7 +146,7 @@ allowlisted(id) if {
 }
 
 expired(ts) if {
-  parsed := time.parse_rfc3339(ts)
+  parsed := time.parse_rfc3339_ns(ts)
   now := time.now_ns()
   parsed <= now
 }
