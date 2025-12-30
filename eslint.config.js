@@ -27,6 +27,8 @@ const IGNORE = [
   '_salvage_from_refs/**',
   'templates/**',
   '.ci/**',
+  '.disabled/**',
+  '.github/**',
 ];
 
 export default [
