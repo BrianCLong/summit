@@ -31,3 +31,12 @@ features:
   dark_mode_ui:
     default: true
     owners: [frontend]
+  # GA Playbooks
+  playbook_polling_place: { default: false, owners: [product] }
+  playbook_ballot_process: { default: false, owners: [product] }
+  playbook_deepfake: { default: false, owners: [product] }
+  playbook_data_fabrication: { default: false, owners: [product] }
+  playbook_harassment: { default: false, owners: [product] }
+  # Migration Gates
+  index_v2_migration_gate: { default: false, owners: [data] }
+  db_migration_2025_12_29_gate: { default: false, owners: [db] }
