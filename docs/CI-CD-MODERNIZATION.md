@@ -30,14 +30,14 @@ The modernized CI/CD pipeline delivers:
 
 ### Key Improvements
 
-| Area | Before | After |
-|------|--------|-------|
-| **Build Time** | ~15-20 min | ~8-12 min (cached) |
-| **Platforms** | Linux only | Linux, macOS, Windows |
-| **Caching** | Basic npm cache | Multi-layer: pnpm, Turbo, Docker |
-| **Security Scanning** | Ad-hoc | Integrated: Trivy, Gitleaks, SBOM |
-| **Parallel Jobs** | Sequential | 6-8 concurrent jobs |
-| **Coverage Reporting** | Manual | Automated with thresholds |
+| Area                   | Before          | After                             |
+| ---------------------- | --------------- | --------------------------------- |
+| **Build Time**         | ~15-20 min      | ~8-12 min (cached)                |
+| **Platforms**          | Linux only      | Linux, macOS, Windows             |
+| **Caching**            | Basic npm cache | Multi-layer: pnpm, Turbo, Docker  |
+| **Security Scanning**  | Ad-hoc          | Integrated: Trivy, Gitleaks, SBOM |
+| **Parallel Jobs**      | Sequential      | 6-8 concurrent jobs               |
+| **Coverage Reporting** | Manual          | Automated with thresholds         |
 
 ---
 
@@ -77,6 +77,7 @@ graph TD
 ### 1. Main CI Pipeline (`ci-modernized.yml`)
 
 **Triggers:**
+
 - Pull requests to `main` or `develop`
 - Pushes to `main` or `develop`
 - Manual dispatch with optional test skipping
@@ -84,40 +85,48 @@ graph TD
 **Phases:**
 
 #### Phase 1: Preflight
+
 - Detect Node.js and pnpm versions
 - Identify changed files (migrations, schema, Docker)
 - Configure pipeline based on changes
 
 #### Phase 2: Code Quality (Parallel)
+
 - **Lint**: ESLint, Prettier, Ruff (Python)
 - **TypeScript**: Type-check root, server, client workspaces
 - **Security**: Gitleaks, dependency audit, Trivy, SBOM generation
 
 #### Phase 3: Build (Parallel)
+
 - Build on Ubuntu, macOS, Windows
 - Node.js 18.x and 20.x matrix
 - Upload artifacts (Ubuntu only)
 
 #### Phase 4: Tests (Parallel)
+
 - **Unit tests**: Jest with coverage
 - **Integration tests**: Full stack with PostgreSQL, Redis, Neo4j
 - Coverage threshold enforcement (80%)
 
 #### Phase 5: Golden Path
+
 - Bootstrap environment with `make bootstrap`
 - Start services with Docker Compose
 - Run smoke tests (`make smoke`)
 
 #### Phase 6: Production Guardrails
+
 - Verify production config validation
 - Ensure weak secrets are rejected
 
 #### Phase 7: Merge Readiness Gate
+
 - Evaluate all required checks
 - Post summary comment on PR
 - Block merge if critical checks fail
 
 **Required Checks:**
+
 - ✅ Lint
 - ✅ TypeCheck
 - ✅ Build (Ubuntu)
@@ -126,6 +135,7 @@ graph TD
 - ✅ Production Guardrails
 
 **Optional (Non-blocking):**
+
 - ⚠️ Security Scan
 - ⚠️ Integration Tests
 - ⚠️ macOS/Windows builds
@@ -133,11 +143,13 @@ graph TD
 ### 2. Docker Build Pipeline (`docker-build-modernized.yml`)
 
 **Triggers:**
+
 - Pushes to `main` or `develop` with Dockerfile changes
 - Pull requests with Dockerfile changes
 - Manual dispatch with platform selection
 
 **Features:**
+
 - Multi-architecture builds (amd64, arm64)
 - Build matrix for api, web, gateway components
 - Security scanning with Trivy
@@ -146,12 +158,14 @@ graph TD
 - SBOM attestation
 
 **Platforms:**
+
 ```bash
 linux/amd64    # x86_64
 linux/arm64    # ARM64 (Apple Silicon, AWS Graviton)
 ```
 
 **Security Artifacts:**
+
 - SBOM in SPDX JSON format
 - SBOM in CycloneDX JSON format
 - Trivy SARIF scan results
@@ -161,12 +175,14 @@ linux/arm64    # ARM64 (Apple Silicon, AWS Graviton)
 ### 3. Performance Benchmarking (`performance-benchmark.yml`)
 
 **Triggers:**
+
 - Pull requests (compare against base branch)
 - Pushes to `main` (baseline tracking)
 - Daily schedule (2 AM UTC)
 - Manual dispatch
 
 **Benchmarks:**
+
 - Node.js performance tests
 - API load testing (autocannon)
 - Bundle size analysis
@@ -174,6 +190,7 @@ linux/arm64    # ARM64 (Apple Silicon, AWS Graviton)
 - K6 load tests (on `main` only)
 
 **Outputs:**
+
 - Performance comparison table (PR comment)
 - Bundle size report
 - K6 load test results
@@ -186,14 +203,14 @@ linux/arm64    # ARM64 (Apple Silicon, AWS Graviton)
 
 #### Step 1: Review Differences
 
-| Feature | Legacy | Modernized |
-|---------|--------|------------|
-| Platforms | Ubuntu only | Ubuntu, macOS, Windows |
-| Node versions | 20.x | 18.x, 20.x matrix |
-| Caching | pnpm only | pnpm + Turbo + Docker |
-| Security | Basic Trivy | Trivy + Gitleaks + SBOM |
-| Tests | Sequential | Parallel (unit, integration, e2e) |
-| Reporting | Basic | GitHub Step Summary + PR comments |
+| Feature       | Legacy      | Modernized                        |
+| ------------- | ----------- | --------------------------------- |
+| Platforms     | Ubuntu only | Ubuntu, macOS, Windows            |
+| Node versions | 20.x        | 18.x, 20.x matrix                 |
+| Caching       | pnpm only   | pnpm + Turbo + Docker             |
+| Security      | Basic Trivy | Trivy + Gitleaks + SBOM           |
+| Tests         | Sequential  | Parallel (unit, integration, e2e) |
+| Reporting     | Basic       | GitHub Step Summary + PR comments |
 
 #### Step 2: Update Branch Protection Rules
 
@@ -242,15 +259,15 @@ jobs:
   build:
     uses: ./.github/workflows/_reusable-setup.yml
     with:
-      node-version: '20.x'
-      pnpm-version: '9.12.0'
+      node-version: "20.x"
+      pnpm-version: "9.12.0"
       install-deps: true
 
   test:
     needs: [build]
     uses: ./.github/workflows/_reusable-test.yml
     with:
-      test-type: 'unit'
+      test-type: "unit"
       coverage-threshold: 80
       upload-coverage: true
 ```
@@ -280,6 +297,7 @@ act workflow_dispatch --input skip-tests=false
 ### 1. Caching Strategy
 
 **pnpm Store Cache:**
+
 ```yaml
 - uses: actions/cache@v4
   with:
@@ -289,6 +307,7 @@ act workflow_dispatch --input skip-tests=false
 ```
 
 **Turbo Cache:**
+
 ```yaml
 - uses: actions/cache@v4
   with:
@@ -298,6 +317,7 @@ act workflow_dispatch --input skip-tests=false
 ```
 
 **Docker Build Cache:**
+
 ```yaml
 - uses: docker/build-push-action@v6
   with:
@@ -308,21 +328,24 @@ act workflow_dispatch --input skip-tests=false
 ### 2. Fail-Fast vs. Fail-Safe
 
 **Fail-Fast (default):**
+
 ```yaml
 strategy:
-  fail-fast: true  # Stop all jobs if one fails
+  fail-fast: true # Stop all jobs if one fails
 ```
 
 **Fail-Safe (exploratory):**
+
 ```yaml
 strategy:
-  fail-fast: false  # Continue even if some jobs fail
+  fail-fast: false # Continue even if some jobs fail
 continue-on-error: true
 ```
 
 ### 3. Conditional Execution
 
 **Run only if files changed:**
+
 ```yaml
 jobs:
   docker-build:
@@ -330,6 +353,7 @@ jobs:
 ```
 
 **Run on specific branches:**
+
 ```yaml
 jobs:
   deploy:
@@ -339,6 +363,7 @@ jobs:
 ### 4. Artifact Management
 
 **Upload:**
+
 ```yaml
 - uses: actions/upload-artifact@v4
   with:
@@ -348,6 +373,7 @@ jobs:
 ```
 
 **Download:**
+
 ```yaml
 - uses: actions/download-artifact@v4
   with:
@@ -358,12 +384,14 @@ jobs:
 ### 5. Secrets Management
 
 **Required Secrets:**
+
 - `GITHUB_TOKEN` - Automatic (GitHub provides)
 - `CODECOV_TOKEN` - Optional (coverage reporting)
 - `TURBO_TOKEN` - Optional (remote caching)
 - `TURBO_TEAM` - Optional (remote caching)
 
 **Access in Workflow:**
+
 ```yaml
 env:
   MY_SECRET: ${{ secrets.MY_SECRET }}
@@ -378,10 +406,12 @@ env:
 #### Issue: Cache Miss on Every Run
 
 **Symptoms:**
+
 - Slow builds despite caching
 - "Cache not found" messages
 
 **Solution:**
+
 ```bash
 # Verify lockfile is committed
 git status pnpm-lock.yaml
@@ -390,12 +420,37 @@ git status pnpm-lock.yaml
 # Ensure all workflows use same key format
 ```
 
+#### Issue: Accidental `pnpm-lock.yaml` Churn
+
+**Symptoms:**
+
+- Lockfile changes appear without dependency intent
+- CI fails on `pnpm install --frozen-lockfile`
+
+**Solution:**
+
+```bash
+# Revert unintended lockfile changes
+git checkout -- pnpm-lock.yaml
+
+# Install without mutating the lockfile
+pnpm install --frozen-lockfile
+
+# Regenerate only when dependency updates are deliberate
+pnpm install --lockfile-only
+git diff pnpm-lock.yaml
+```
+
+**Prevention:** enforce a pre-commit or CI check that fails when the lockfile is the only modified file unless an intentional dependency change is described in the PR.
+
 #### Issue: Test Failures in CI but not Local
 
 **Symptoms:**
+
 - Tests pass locally, fail in CI
 
 **Solution:**
+
 ```bash
 # Run tests in CI mode locally
 CI=true pnpm run test
@@ -410,10 +465,12 @@ docker ps
 #### Issue: Docker Build Timeout
 
 **Symptoms:**
+
 - Docker build exceeds 60 minutes
 - Out of disk space errors
 
 **Solution:**
+
 ```yaml
 # Increase timeout
 timeout-minutes: 90
@@ -426,9 +483,11 @@ timeout-minutes: 90
 #### Issue: Merge Readiness Gate Failing
 
 **Symptoms:**
+
 - All checks pass but gate still fails
 
 **Solution:**
+
 1. Check required checks in branch protection
 2. Verify job dependencies in workflow
 3. Review step outputs and conditions
@@ -436,6 +495,7 @@ timeout-minutes: 90
 ### Debugging Workflows
 
 **Enable debug logging:**
+
 ```bash
 # Set repository secret
 ACTIONS_STEP_DEBUG = true
@@ -443,6 +503,7 @@ ACTIONS_RUNNER_DEBUG = true
 ```
 
 **View detailed logs:**
+
 ```bash
 # In GitHub Actions UI, re-run with debug logging
 # Or locally with act:
@@ -450,14 +511,14 @@ act pull_request --verbose
 ```
 
 **Check job dependencies:**
+
 ```yaml
 jobs:
-  job-a:
-    ...
+  job-a: ...
 
   job-b:
-    needs: [job-a]  # Ensure dependency is correct
-    if: always()     # Run even if job-a fails (if needed)
+    needs: [job-a] # Ensure dependency is correct
+    if: always() # Run even if job-a fails (if needed)
 ```
 
 ---
@@ -466,23 +527,23 @@ jobs:
 
 ### Before Modernization
 
-| Metric | Value |
-|--------|-------|
-| Average Build Time | 18 minutes |
-| Cache Hit Rate | ~40% |
-| Parallel Jobs | 2-3 |
+| Metric              | Value      |
+| ------------------- | ---------- |
+| Average Build Time  | 18 minutes |
+| Cache Hit Rate      | ~40%       |
+| Parallel Jobs       | 2-3        |
 | Platforms Supported | 1 (Ubuntu) |
-| Test Isolation | Poor |
+| Test Isolation      | Poor       |
 
 ### After Modernization
 
-| Metric | Value |
-|--------|-------|
-| Average Build Time | 10 minutes (cached) |
-| Cache Hit Rate | ~85% |
-| Parallel Jobs | 6-8 |
+| Metric              | Value                      |
+| ------------------- | -------------------------- |
+| Average Build Time  | 10 minutes (cached)        |
+| Cache Hit Rate      | ~85%                       |
+| Parallel Jobs       | 6-8                        |
 | Platforms Supported | 3 (Ubuntu, macOS, Windows) |
-| Test Isolation | Excellent (containers) |
+| Test Isolation      | Excellent (containers)     |
 
 ---
 
