@@ -312,6 +312,46 @@ export interface EvidenceBundle {
   generatedAt: string;
   headHash?: string;
   entries: LedgerEntry[];
+  atomIds?: string[];
+  contentHashes?: Record<string, string>;
+  metadataHashes?: Record<string, string>;
+  inclusionProofs?: Record<string, MerkleProofStep[]>;
+  snapshotCommitment?: SnapshotCommitment;
+  policyDecisionTokens?: PolicyDecisionToken[];
+  executionAttestation?: ExecutionAttestation;
+}
+
+export interface MerkleProofStep {
+  position: 'left' | 'right';
+  hash: string;
+}
+
+export interface SnapshotCommitment {
+  merkleRoot: string;
+  algorithm: string;
+  issuedAt: string;
+  bundleHash?: string;
+  headHash?: string;
+  signer?: string;
+  signature?: string;
+  publicKey?: string;
+  redacted?: boolean;
+}
+
+export interface PolicyDecisionToken {
+  token: string;
+  policyId?: string;
+  issuedAt: string;
+  signer?: string;
+  signature?: string;
+}
+
+export interface ExecutionAttestation {
+  format: string;
+  report: string;
+  verified: boolean;
+  issuedAt: string;
+  verifier?: string;
 }
 
 export type ComplianceFramework =

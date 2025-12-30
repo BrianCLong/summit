@@ -39,12 +39,15 @@ import {
 import type { ExportManifest } from './manifest.js';
 import { createExportManifest, verifyManifest } from './manifest.js';
 import { computeLedgerHash } from './quantum-safe-ledger.js';
+import { augmentEvidenceBundle } from './bundle-utils.js';
 
 export * from './mul-ledger';
 export * from './quantum-safe-ledger';
 export * from './service';
 export * from './grpc';
 export * from './audit-readiness';
+export * from './bundle-utils';
+export * from './bundle-verifier';
 
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD
@@ -121,11 +124,12 @@ export class SimpleProvenanceLedger {
     limit?: number;
   }): EvidenceBundle {
     const entries = this.list(filter);
-    return {
+    const baseBundle: EvidenceBundle = {
       generatedAt: new Date().toISOString(),
       headHash: entries.at(-1)?.hash,
       entries,
     };
+    return augmentEvidenceBundle(baseBundle, entries);
   }
 }
 
