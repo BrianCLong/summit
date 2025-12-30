@@ -1,0 +1,40 @@
+openapi: 3.0.1
+title: QSDR API
+version: 0.1.0
+paths:
+  /qsdr/run:
+    post:
+      summary: Execute recon modules with canary monitoring and kill audits.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                targets:
+                  type: array
+                  items:
+                    type: string
+                modules:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Recon results with kill audit record when applicable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                  killAuditId:
+                    type: string
+                  policyDecisionId:
+                    type: string
+                  replayToken:
+                    type: object

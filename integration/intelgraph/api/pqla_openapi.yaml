@@ -1,0 +1,36 @@
+openapi: 3.0.1
+title: PQLA API
+version: 0.1.0
+paths:
+  /pqla/run:
+    post:
+      summary: Execute policy-qualified local analytics and return compliance artifacts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                purpose:
+                  type: string
+                exportToken:
+                  type: string
+      responses:
+        "200":
+          description: Sanitized analytics output and compliance artifact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  output:
+                    type: object
+                  complianceArtifactId:
+                    type: string
+                  disclosure:
+                    type: object
+                  determinismToken:
+                    type: object

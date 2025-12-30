@@ -1,0 +1,40 @@
+openapi: 3.0.1
+title: FASC API
+version: 0.1.0
+paths:
+  /fasc/calibrate:
+    post:
+      summary: Calibrate feed weights and detect drift.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                window:
+                  type: string
+                feeds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Calibration artifact with justification witness
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  weights:
+                    type: object
+                    additionalProperties:
+                      type: number
+                  driftIndicators:
+                    type: object
+                    additionalProperties:
+                      type: number
+                  justificationWitnessId:
+                    type: string
+                  replayToken:
+                    type: object

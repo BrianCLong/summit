@@ -1,0 +1,38 @@
+openapi: 3.0.1
+title: SATT API
+version: 0.1.0
+paths:
+  /satt/execute:
+    post:
+      summary: Execute attested transform templates with license metering.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                templateId:
+                  type: string
+                inputEntity:
+                  type: string
+                policyScope:
+                  type: string
+      responses:
+        "200":
+          description: Transform artifact with receipt and witness
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  outputs:
+                    type: array
+                    items:
+                      type: object
+                  licenseReceiptId:
+                    type: string
+                  witnessId:
+                    type: string
+                  determinismToken:
+                    type: object

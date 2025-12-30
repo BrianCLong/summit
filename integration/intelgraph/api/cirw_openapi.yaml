@@ -1,0 +1,49 @@
+openapi: 3.0.1
+title: CIRW API
+version: 0.1.0
+paths:
+  /cirw/resolve:
+    post:
+      summary: Resolve identifiers into probabilistic clusters with confidence intervals.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identifiers:
+                  type: array
+                  items:
+                    type: string
+                minConfidence:
+                  type: number
+                policyScope:
+                  type: string
+      responses:
+        "200":
+          description: Candidate clusters with witnesses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clusters:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        members:
+                          type: array
+                          items:
+                            type: string
+                        confidenceInterval:
+                          type: array
+                          items:
+                            type: number
+                        witnessId:
+                          type: string
+                  determinismToken:
+                    type: object
