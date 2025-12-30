@@ -1,0 +1,39 @@
+# Production Helm Values
+
+replicaCount: 3
+
+image:
+  repository: intelgraph/server
+  pullPolicy: IfNotPresent
+  tag: "v1.0.0"
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "2000m"
+    memory: "4Gi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: api.intelgraph.io
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  # Secrets injected via ExternalSecrets

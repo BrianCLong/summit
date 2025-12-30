@@ -1,0 +1,75 @@
+# GraphQL Schema v1.0.0
+
+type Query {
+  """
+  Search for entities across the knowledge graph.
+  Enforces tenant isolation.
+  """
+  search(query: String!, limit: Int = 10): [Entity!]! @rateLimit(window: "1m", max: 100)
+
+  """
+  Get an entity by its unique ID.
+  """
+  entity(id: ID!): Entity @cacheControl(maxAge: 60)
+
+  """
+  Retrieve provenance history for an entity.
+  """
+  provenance(entityId: ID!): [ProvenanceEvent!]!
+}
+
+type Mutation {
+  """
+  Ingest a new document.
+  """
+  ingestDocument(input: IngestInput!): IngestResult!
+
+  """
+  Update an existing entity.
+  Requires 'analyst' role.
+  """
+  updateEntity(id: ID!, input: UpdateEntityInput!): Entity! @auth(role: "analyst")
+}
+
+type Entity {
+  id: ID!
+  name: String!
+  type: EntityType!
+  properties: JSON
+  score: Float
+  createdAt: DateTime!
+}
+
+enum EntityType {
+  PERSON
+  ORGANIZATION
+  LOCATION
+  EVENT
+}
+
+type ProvenanceEvent {
+  id: ID!
+  timestamp: DateTime!
+  actor: String!
+  action: String!
+  hash: String!
+}
+
+input IngestInput {
+  content: String!
+  source: String!
+  classification: String
+}
+
+input UpdateEntityInput {
+  name: String
+  properties: JSON
+}
+
+type IngestResult {
+  jobId: ID!
+  status: String!
+}
+
+scalar DateTime
+scalar JSON

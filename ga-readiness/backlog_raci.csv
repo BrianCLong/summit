@@ -1,0 +1,13 @@
+Type,Epic,Story,Task,MoSCoW,Owner,Est(Days),Deps,Risk,Status
+Docs,Enablement,Admin Guide,Write Installation Guide,Must,DevRel,2,,Low,Todo
+Docs,Enablement,User Guide,Write Analyst Manual,Must,Product,3,,Low,Todo
+Docs,Enablement,API Docs,Generate OpenAPI/GraphQL Docs,Must,Eng,1,Code,Low,Todo
+Test,Perf,SLO Verify,Run k6 Suite @ 1.2x,Must,QA,2,Env,Med,Todo
+Test,Perf,Soak Test,24h Reliability Run,Must,QA,1,Env,Med,Todo
+Sec,Compliance,Pen Test,Remediate Findings,Must,SecOps,5,Report,High,Todo
+Sec,Compliance,SBOM,Generate & Sign SBOM,Must,Build,1,,Low,Todo
+Ops,Deploy,Prod Setup,Finalize Helm Values,Must,DevOps,2,,Med,Todo
+Ops,Observability,Alerts,Tune PagerDuty thresholds,Must,SRE,1,,Low,Todo
+Ops,DR,Drill,Execute Failover Simulation,Must,SRE,3,Region,High,Todo
+Prod,Release,Go/No-Go,Final Board Review,Must,Mgmt,1,All,High,Todo
+Feature,Core,Cleanup,Remove MVP Flags,Should,Eng,2,,Low,Todo
