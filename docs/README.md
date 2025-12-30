@@ -19,6 +19,9 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[RUNBOOKS/INDEX.md](../RUNBOOKS/INDEX.md)** – Operational guides and incident playbooks.
 - **[RUNBOOKS/dev-bootstrap.md](../RUNBOOKS/dev-bootstrap.md)** – Local stack bring-up with verification steps.
 - **[RUNBOOKS/schema-migration-playbook.md](../RUNBOOKS/schema-migration-playbook.md)** – Safe database migration procedures.
+- **[ops/INCIDENT_SEVERITY.md](ops/INCIDENT_SEVERITY.md)** – SEV0–SEV3 rubric with response timing and comms expectations.
+- **[ops/INCIDENT_TEMPLATE.md](ops/INCIDENT_TEMPLATE.md)** – Copy/paste incident report shell for channels or tracker issues.
+- **[ops/DRILL_CHECKLIST.md](ops/DRILL_CHECKLIST.md)** – Tabletop drill flow to rehearse detection, comms, and recovery.
 
 ## Security & Governance
 
