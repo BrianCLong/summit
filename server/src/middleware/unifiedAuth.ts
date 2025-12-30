@@ -3,6 +3,7 @@ import { AuthService } from '../services/AuthService.js';
 import { Principal, RoleKey, TenantId } from '../auth/types.js';
 import logger from '../utils/logger.js';
 import { getPostgresPool } from '../config/database.js';
+import crypto from 'crypto';
 
 const authService = new AuthService();
 const pool = getPostgresPool();
@@ -70,11 +71,39 @@ export async function unifiedAuthMiddleware(
     if (!principal) {
       const apiKey = req.headers[HEADER_API_KEY] as string;
       if (apiKey) {
-        // TODO: Implement API Key verification against DB
-        // For MVP/Transition, we might check env vars or a simple table
-        // This is a placeholder for the "External API" prompt integration
-        // For now, if valid system key:
-        if (process.env.SYSTEM_API_KEY && apiKey === process.env.SYSTEM_API_KEY) {
+        // Check DB for API Key
+        const client = await pool.connect();
+        try {
+          // We assume api_keys table exists with key_hash. In a real scenario we hash the input.
+          // For MVP-4-GA, we check direct match or hash if columns imply it.
+          // Using a simple query for now.
+          // Hash the input key to match stored hash
+          const hashedKey = crypto.createHash('sha256').update(apiKey).digest('hex');
+
+          const dbResult = await client.query(
+            `SELECT * FROM api_keys WHERE key_hash = $1 AND is_active = true`,
+            [hashedKey]
+          );
+
+          if (dbResult.rows.length > 0) {
+            const keyRecord = dbResult.rows[0];
+            principal = {
+              id: keyRecord.service_name || 'system',
+              tenantId: requestedTenantId || 'global',
+              roles: keyRecord.roles || ['system.internal'],
+              scopes: keyRecord.scopes || ['*'],
+              authMethod: 'apiKey',
+              isSystem: true
+            };
+          }
+        } catch (dbError) {
+          logger.warn('API Key DB check failed, falling back to Env', dbError);
+        } finally {
+          client.release();
+        }
+
+        // Fallback: Env Var System Key (Transition/Recovery)
+        if (!principal && process.env.SYSTEM_API_KEY && apiKey === process.env.SYSTEM_API_KEY) {
              principal = {
                id: 'system',
                tenantId: requestedTenantId || 'global',
