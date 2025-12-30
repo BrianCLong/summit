@@ -1,0 +1,54 @@
+# Deterministic weights for the predictive risk engine
+version: 1
+bands:
+  thresholds:
+    low: 25
+    medium: 50
+    high: 75
+    critical: 90
+code:
+  weights:
+    ga_critical_path: 15
+    schema_or_migration: 14
+    security_sensitive: 14
+    high_churn_file: 8
+    large_diff: 6
+    test_coverage_drop: 12
+  patterns:
+    ga_critical_path:
+      - "^server/src/(services|policies|provenance)/"
+      - "^docs/ga/"
+    security_sensitive:
+      - "security"
+      - "authz"
+      - "authn"
+      - "secrets"
+    schema_or_migration:
+      - "migrations"
+      - "schema"
+ci:
+  weights:
+    flaky_suite: 10
+    near_failure: 8
+    long_running_job: 6
+    policy_edge_case: 5
+agent:
+  weights:
+    scope_expansion: 10
+    prior_policy_violations: 12
+    debt_ratio_negative: 10
+    prompt_reuse_anomaly: 8
+governance:
+  weights:
+    exception_load: 8
+    legacy_mode_stagnation: 6
+    invariant_erosion: 12
+    evidence_gap: 10
+recommendations:
+  high:
+    - "Require strong verification tier and targeted replay of flaky suites."
+    - "Narrow agent scope to declared zone and lock write access outside it."
+    - "Produce risk decision artifact in artifacts/risk-decisions/{pr}.json."
+  critical:
+    - "Block auto-merge; escalate to governance with signed decision record."
+    - "Run full regression and security sweeps before approval."
