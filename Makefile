@@ -13,18 +13,7 @@ SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
 VENV_BIN = $(VENV_DIR)/bin
 PYTHON ?= python3
-PACKAGE_VERSION ?= $(shell $(PYTHON) - <<'PY'
-import tomllib
-from pathlib import Path
-
-pyproject = Path("pyproject.toml")
-try:
-    with pyproject.open('rb') as f:
-	data = tomllib.load(f)
-    print(data.get("project", {}).get("version", "latest"))
-except FileNotFoundError:
-    print("latest")
-PY)
+PACKAGE_VERSION ?= $(shell $(PYTHON) -c "import tomllib;from pathlib import Path;p=Path('pyproject.toml');print(tomllib.load(p.open('rb')).get('project',{}).get('version','latest') if p.exists() else 'latest')" 2>/dev/null || echo "latest")
 IMAGE_NAME ?= intelgraph-platform
 IMAGE_TAG ?= $(PACKAGE_VERSION)
 IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
