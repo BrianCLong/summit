@@ -48,14 +48,22 @@
               }
             }
           },
-          "required": ["chain"],
+          "required": [
+            "chain"
+          ],
           "additionalProperties": false,
           "default": {
             "chain": []
           }
         }
       },
-      "required": ["id", "kind", "payload", "observedAt", "tenantId"],
+      "required": [
+        "id",
+        "kind",
+        "payload",
+        "observedAt",
+        "tenantId"
+      ],
       "additionalProperties": false
     }
   },

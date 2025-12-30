@@ -50,7 +50,9 @@
               }
             }
           },
-          "required": ["chain"],
+          "required": [
+            "chain"
+          ],
           "additionalProperties": false,
           "default": {
             "chain": []

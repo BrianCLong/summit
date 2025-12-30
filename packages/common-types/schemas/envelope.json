@@ -21,12 +21,17 @@
               "type": "string"
             }
           },
-          "required": ["name"],
+          "required": [
+            "name"
+          ],
           "additionalProperties": false
         },
         "kind": {
           "type": "string",
-          "enum": ["ENTITY", "EDGE"]
+          "enum": [
+            "ENTITY",
+            "EDGE"
+          ]
         },
         "type": {
           "type": "string"
@@ -59,7 +64,9 @@
               }
             }
           },
-          "required": ["chain"],
+          "required": [
+            "chain"
+          ],
           "additionalProperties": false
         },
         "dedupeKey": {

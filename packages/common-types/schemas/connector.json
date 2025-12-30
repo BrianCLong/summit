@@ -15,7 +15,10 @@
         },
         "kind": {
           "type": "string",
-          "enum": ["BUILTIN", "PLUGIN"]
+          "enum": [
+            "BUILTIN",
+            "PLUGIN"
+          ]
         },
         "entrypoint": {
           "type": "string"

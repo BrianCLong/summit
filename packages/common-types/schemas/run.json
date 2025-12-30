@@ -12,7 +12,13 @@
         },
         "status": {
           "type": "string",
-          "enum": ["PENDING", "RUNNING", "SUCCEEDED", "FAILED", "DLQ"]
+          "enum": [
+            "PENDING",
+            "RUNNING",
+            "SUCCEEDED",
+            "FAILED",
+            "DLQ"
+          ]
         },
         "attempt": {
           "type": "integer",
@@ -48,7 +54,11 @@
               "minimum": 0
             }
           },
-          "required": ["items", "bytes", "durationMs"],
+          "required": [
+            "items",
+            "bytes",
+            "durationMs"
+          ],
           "additionalProperties": false
         },
         "provenanceRef": {
