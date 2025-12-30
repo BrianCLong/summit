@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: AEC API
+  version: 0.1.0
+paths:
+  /aec/assessment:
+    post:
+      summary: Compile assessment evidence bundle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                telemetryWindow:
+                  type: object
+                controlPolicy:
+                  type: object
+              required: [telemetryWindow, controlPolicy]
+      responses:
+        '200':
+          description: Assessment artifact with status and replay token

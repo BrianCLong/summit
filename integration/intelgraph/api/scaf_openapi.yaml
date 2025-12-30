@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: SCAF API
+  version: 0.1.0
+paths:
+  /scaf/assurance:
+    post:
+      summary: Validate connector package and generate assurance report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packageRef:
+                  type: string
+                executionPolicy:
+                  type: object
+              required: [packageRef]
+      responses:
+        '200':
+          description: Assurance report with commitments and egress receipt

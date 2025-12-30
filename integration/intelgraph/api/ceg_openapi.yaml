@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: CEG API
+  version: 0.1.0
+paths:
+  /ceg/osint:
+    post:
+      summary: Execute OSINT module under classification scope
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target:
+                  type: string
+                scopeToken:
+                  type: string
+                modules:
+                  type: array
+                  items:
+                    type: string
+              required: [target, scopeToken]
+      responses:
+        '200':
+          description: Selective-disclosure results with egress receipt

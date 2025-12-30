@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: CIR API
+  version: 0.1.0
+paths:
+  /cir/incidents:
+    post:
+      summary: Generate incident packet after trigger
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                triggerId:
+                  type: string
+                evidenceRefs:
+                  type: array
+                  items:
+                    type: string
+              required: [triggerId]
+      responses:
+        '200':
+          description: Incident packet with checklist and replay token

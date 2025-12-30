@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: RMEP API
+  version: 0.1.0
+paths:
+  /rmep/packs:
+    post:
+      summary: Generate releasability evidence packs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                narrative:
+                  type: string
+                policy:
+                  type: object
+                provenance:
+                  type: object
+              required: [narrative, policy]
+      responses:
+        '200':
+          description: Evidence packs with manifest and replay token
