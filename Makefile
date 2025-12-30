@@ -205,6 +205,13 @@ secrets/lint:
 	@echo "Running OPA checks"
 	@conftest test --policy .ci/policies --namespace secrets --all-namespaces
 
+# --- GA Hardening ---
+
+.PHONY: ga-verify
+ga-verify: ## Run GA tier B/C verification sweep (deterministic)
+	@node --test testing/ga-verification/*.ga.test.mjs
+	@node scripts/ga/verify-ga-surface.mjs
+
 # --- Demo Environment ---
 
 demo: ## Launch one-command demo environment
