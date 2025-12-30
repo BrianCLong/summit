@@ -1,0 +1,28 @@
+name: Semver label check (warn-only)
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+jobs:
+  check-semver-label:
+    name: Validate semver label (warn-only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run semver label check
+        run: npx tsx scripts/check-semver-label.ts --warn-only --output semver-label-report.json
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semver-label-report
+          path: semver-label-report.json
