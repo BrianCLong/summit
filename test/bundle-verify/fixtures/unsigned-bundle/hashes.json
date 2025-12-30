@@ -1,0 +1,13 @@
+{
+  "algorithm": "sha256",
+  "files": [
+    {
+      "path": "index.js",
+      "sha256": "ee19ff827e279490050655c804278eed2c87f8df80a53f64c6ef5fab366b30e9"
+    },
+    {
+      "path": "README.md",
+      "sha256": "095b5950dbb54d9923b306b00d40a16d30d864bb251e6884cfa08d5e2166a294"
+    }
+  ]
+}
