@@ -5,6 +5,7 @@ import { authorize } from './policy';
 import { log } from './audit';
 import { sessionManager } from './session';
 import { breakGlassManager } from './break-glass';
+import { enrichDecision } from './decision-record';
 import type { AttributeService } from './attribute-service';
 import type {
   AuthorizationInput,
@@ -111,13 +112,17 @@ export function requireAuth(
           ),
         };
         const decision = await authorize(input);
+        const enrichedDecision = enrichDecision(decision, input);
         await log({
           subject: String(payload.sub || ''),
           action: options.action,
           resource: JSON.stringify(resource),
           tenantId: subject.tenantId,
-          allowed: decision.allowed,
-          reason: decision.reason,
+          allowed: enrichedDecision.allowed,
+          reason: enrichedDecision.reason,
+          decisionId: enrichedDecision.decisionId,
+          policyVersion: enrichedDecision.policyVersion,
+          inputsHash: enrichedDecision.inputsHash,
           breakGlass: (payload as { breakGlass?: unknown }).breakGlass as
             | undefined
             | AuthorizationInput['context']['breakGlass'],
@@ -127,26 +132,26 @@ export function requireAuth(
             action: options.action,
             resource: resource.id,
             tenantId: subject.tenantId,
-            allowed: decision.allowed,
+            allowed: enrichedDecision.allowed,
           });
         }
-        if (!decision.allowed) {
-          if (decision.obligations.length > 0) {
-            req.obligations = decision.obligations;
+        if (!enrichedDecision.allowed) {
+          if (enrichedDecision.obligations.length > 0) {
+            req.obligations = enrichedDecision.obligations;
             return res
               .status(401)
               .set('WWW-Authenticate', 'acr=loa2 step-up=webauthn')
               .json({
                 error: 'step_up_required',
-                obligations: decision.obligations,
-                reason: decision.reason,
+                obligations: enrichedDecision.obligations,
+                reason: enrichedDecision.reason,
               });
           }
           return res
             .status(403)
-            .json({ error: 'forbidden', reason: decision.reason });
+            .json({ error: 'forbidden', reason: enrichedDecision.reason });
         }
-        req.obligations = decision.obligations;
+        req.obligations = enrichedDecision.obligations;
       }
 
       req.user = payload;

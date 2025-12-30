@@ -111,6 +111,10 @@ export class AttributeService {
     const subject: SubjectAttributes = {
       id: idpRecord.id,
       tenantId: idpRecord.tenantId,
+      org: idpRecord.tenantId,
+      role: (orgRecord?.roles ?? [])[0],
+      region: idpRecord.residency,
+      auth_strength: idpRecord.loa,
       residency: idpRecord.residency,
       clearance: idpRecord.clearance,
       loa: idpRecord.loa,
@@ -146,6 +150,8 @@ export class AttributeService {
     const resource: ResourceAttributes = {
       id: tagRecord.id,
       tenantId: tagRecord.tenantId,
+      owner: tagRecord.tenantId,
+      customer_id: `${tagRecord.tenantId}-customer`,
       residency: tagRecord.residency,
       classification: tagRecord.classification,
       tags: [...(tagRecord.tags ?? [])],

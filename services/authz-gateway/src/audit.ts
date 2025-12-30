@@ -19,6 +19,9 @@ export interface AuditEntry {
   tenantId: string;
   allowed: boolean;
   reason: string;
+  decisionId?: string;
+  policyVersion?: string;
+  inputsHash?: string;
   breakGlass?: BreakGlassMetadata;
   clientId?: string;
   apiMethod?: string;
