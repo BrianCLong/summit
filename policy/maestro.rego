@@ -1,13 +1,13 @@
 package maestro.authz
 
 # Require purpose, authority, license for sensitive tasks
-allow {
+allow if {
   input.purpose != ""
   input.authority != ""
   input.license != ""
 }
 
-deny[reason] {
+deny contains reason if {
   not allow
   reason := "missing purpose/authority/license"
 }

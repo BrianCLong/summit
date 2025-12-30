@@ -1,27 +1,27 @@
 package release
 
 # Default deny
-default allow = false
+default allow := false
 
 # Allow if all gates pass
-allow {
+allow if {
     input.train == "canary"
 }
 
-allow {
+allow if {
     input.train == "integration"
     input.canary_health_duration_hours >= 24
     input.integration_tests_passed
 }
 
-allow {
+allow if {
     input.train == "stable"
     input.release_captain_approval
     input.integration_tests_passed
     not input.blocking_issues
 }
 
-allow {
+allow if {
     input.train == "ga"
     input.stable_duration_weeks >= 2
     input.executive_approval

@@ -1,9 +1,9 @@
 package summit.gates.migration
 
-default allow = false
+default allow := false
 
 # Approve migrations only when the PR is explicitly gated and compatibility tests pass.
-allow {
+allow if {
   input.change.contains_schema_change
   input.flags.migration_gate == true
   input.tests.backward_compat == true

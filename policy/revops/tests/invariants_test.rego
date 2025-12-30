@@ -3,7 +3,7 @@ package revops.invariants_test
 import data.revops.invariants
 
 # Discounts cannot exceed the global maximum.
-test_global_discount_cap {
+test_global_discount_cap if {
   input := {
     "quote": {"discount_percentage": 80}
   }
@@ -12,7 +12,7 @@ test_global_discount_cap {
 }
 
 # Contracts must be signed before activation.
-test_contract_must_be_signed {
+test_contract_must_be_signed if {
   input := {
     "contract": {"status": "draft"}
   }

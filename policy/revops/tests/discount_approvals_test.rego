@@ -4,7 +4,7 @@ import data.revops.discount_approvals
 import data.revops_fixtures
 
 # Discounts inside the role cap should be allowed with correct approvals.
-test_discount_within_cap {
+test_discount_within_cap if {
   quote := revops_fixtures.quotes[0]
   input := {
     "quote": quote,
@@ -19,7 +19,7 @@ test_discount_within_cap {
 }
 
 # Discounts above the role cap should surface a flag and still compute approvals.
-test_discount_over_cap_flagged {
+test_discount_over_cap_flagged if {
   quote := {
     "id": "quote-1",
     "segment": "enterprise",

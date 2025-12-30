@@ -19,7 +19,7 @@ high_risk_after := {
   "effective_at": "2025-02-01T00:00:00Z"
 }
 
-test_low_risk_change_allowed {
+test_low_risk_change_allowed if {
   input := {
     "subject": base_subject,
     "plan_before": pricing.before,
@@ -33,7 +33,7 @@ test_low_risk_change_allowed {
   decision.required_approvals == []
 }
 
-test_high_risk_change_requires_cfo {
+test_high_risk_change_requires_cfo if {
   input := {
     "subject": base_subject,
     "plan_before": pricing.before,
@@ -48,7 +48,7 @@ test_high_risk_change_requires_cfo {
   decision.flags[_] == "high_revenue_impact"
 }
 
-test_floor_price_violation_blocked {
+test_floor_price_violation_blocked if {
   input := {
     "subject": base_subject,
     "plan_before": pricing.before,

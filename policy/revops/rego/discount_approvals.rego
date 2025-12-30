@@ -3,7 +3,7 @@ package revops.discount_approvals
 import data.revops.config as rcfg
 import data.revops.invariants
 
-default decision = {
+default decision := {
   "allowed": false,
   "reason": "not_evaluated",
   "required_approvals": [],
@@ -11,7 +11,7 @@ default decision = {
   "flags": []
 }
 
-decision := out {
+decision := out if {
   q := input.quote
   tenant := input.tenant.id
 
@@ -32,26 +32,26 @@ decision := out {
   }
 }
 
-approvals_chain(q, conf) = approvals {
+approvals_chain(q, conf) := approvals if {
   approvals := [a | threshold := conf.approvals.thresholds[_]; q.discount_percentage <= threshold.max_discount; a := threshold.approvers[_]]
 }
 
-flags(q, conf) = out {
-  default out = []
+flags(q, conf) := out if {
+  default out := []
   q.term_months < conf.min_term_months
   out := ["short_term"]
 }
 
-flags(q, _) = out {
-  default out = []
+flags(q, _) := out if {
+  default out := []
   q.non_standard_terms
   count(q.non_standard_terms) > 0
   out := ["non_standard_term"]
 }
 
-cond_reason(over) = reason {
+cond_reason(over) := reason if {
   over
   reason := "discount_above_role_limit"
 }
 
-cond_reason(false) = "ok"
+cond_reason(false) := "ok"

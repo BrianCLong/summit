@@ -1,10 +1,10 @@
 package entitlements
 
 # input: { plan, feature }
-allow {
+allow if {
   input.feature == "batch_import"; input.plan == "enterprise"
-} else {
+} else if {
   input.feature == "advanced_export"; input.plan != "starter"
-} else {
+} else if {
   input.feature == "basic"; true
 }

@@ -16,7 +16,7 @@ model_after := {
   "effective_at": "2025-02-01T00:00:00Z"
 }
 
-test_cost_model_change_requires_dual_approval {
+test_cost_model_change_requires_dual_approval if {
   input := {
     "subject": base_subject,
     "model_before": model_before,
@@ -29,7 +29,7 @@ test_cost_model_change_requires_dual_approval {
   decision.flags[_] == "unit_economics"
 }
 
-test_cost_model_missing_analysis_flagged {
+test_cost_model_missing_analysis_flagged if {
   input := {
     "subject": base_subject,
     "model_before": model_before,

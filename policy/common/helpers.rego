@@ -6,39 +6,45 @@ classification_rank := {"public": 0, "internal": 1, "restricted": 2}
 
 default fallback_reason := "unspecified"
 
-non_empty(val) {
+non_empty(val) if {
   val != null
   val != ""
 }
 
-has_clearance(clearance, classification) {
+has_clearance(clearance, classification) if {
   classification_rank[to_lower(clearance)] >= classification_rank[to_lower(classification)]
 }
 
-to_lower(s) := lower_s {
+to_lower(s) := lower_s if {
   lower_s := lower(s)
 }
 
-set_from_array(arr) = {x | some i; arr[i] == x}
+set_from_array(arr) := {x | some i; arr[i] == x}
 
-contains_all(haystack, needles) {
+contains_all(haystack, needles) if {
   every n in needles {
     n in haystack
   }
 }
 
-allows_action(permission, action) {
+allows_action(permission, action) if {
   permission == action
-} {
+}
+
+allows_action(permission, action) if {
   permission == "admin:*"
   startswith(action, "admin:")
 }
 
-time_in_window(time, window) {
+time_in_window(time, window) if {
   not window
-} {
+}
+
+time_in_window(time, window) if {
   not non_empty(window.start)
-} {
+}
+
+time_in_window(time, window) if {
   parsed := time.parse_rfc3339_ns(time)
   start_parts := split(window.start, ":")
   end_parts := split(window.end, ":")

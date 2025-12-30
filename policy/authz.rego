@@ -1,6 +1,6 @@
 package intelgraph.authz
 
-default allow = false
+default allow := false
 
 tenant_match if { input.subject.tenant == input.resource.tenant }
 

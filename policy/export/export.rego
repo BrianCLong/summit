@@ -20,14 +20,14 @@ in_allowed_role if {
   r == export_allowed_roles[_]
 }
 
-is_pii_field[f] if {
+is_pii_field contains f if {
   f := input.bundle.fields[_]
   some l
   l := f.labels[_]
   startswith(l, "pii:")
 }
 
-is_explicit_mask[f] if {
+is_explicit_mask contains f if {
   f := input.bundle.fields[_]
   some m
   m := input.options.dlp_mask_fields[_]
@@ -38,9 +38,9 @@ redact_fields := { f.name | f := input.bundle.fields[_]; is_pii_field[f] }
 explicit_masks := { f.name | f := input.bundle.fields[_]; is_explicit_mask[f] }
 all_masks := redact_fields | explicit_masks
 
-reason["not_authorized"] if { not has_export_perm }
-reason["role_not_allowed"] if { not in_allowed_role }
-reason["step_up_required"] if { is_sensitive; not input.webauthn_verified }
+reason contains "not_authorized" if { not has_export_perm }
+reason contains "role_not_allowed" if { not in_allowed_role }
+reason contains "step_up_required" if { is_sensitive; not input.webauthn_verified }
 
 base_effect := "allow" if { has_export_perm; in_allowed_role; not is_sensitive }
 base_effect := "step_up" if { has_export_perm; in_allowed_role; is_sensitive; not input.webauthn_verified }
@@ -65,7 +65,7 @@ result := {
   "redact_fields": [],
   "reasons": ["step_up_required"],
   "simulated": false,
-  "note": "Sensitive export requires WebAuthn step‑up"
+  "note": "Sensitive export requires WebAuthn step-up"
 } if { not must_deny; base_effect == "step_up" }
 
 result := allow_obj if {

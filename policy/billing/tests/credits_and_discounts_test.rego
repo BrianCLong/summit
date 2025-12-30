@@ -9,7 +9,7 @@ finance_manager := {"id": "fin-1", "role": "finance_manager"}
 low_credit := credits[0]
 high_discount := credits[1]
 
-test_low_credit_requires_finance_manager_only {
+test_low_credit_requires_finance_manager_only if {
   input := {
     "subject": finance_manager,
     "credit_memo": low_credit,
@@ -21,7 +21,7 @@ test_low_credit_requires_finance_manager_only {
   decision.required_approvals == ["finance_manager"]
 }
 
-test_high_discount_requires_cfo {
+test_high_discount_requires_cfo if {
   input := {
     "subject": finance_manager,
     "credit_memo": high_discount,

@@ -7,25 +7,25 @@ import future.keywords.if
 
 default allow := false
 
-role_permissions[perm] {
+role_permissions contains perm if {
   some role
   role := input.subject.roles[_]
   perms := roles.roles[role].permissions
   perm := perms[_]
 }
 
-allow {
+allow if {
   some perm
   perm := role_permissions[_]
   helpers.allows_action(perm, input.action)
 }
 
-deny[reason] {
+deny contains reason if {
   not input.subject.roles
   reason := "missing_roles"
 }
 
-deny[reason] {
+deny contains reason if {
   not allow
   reason := "role_missing_permission"
 }

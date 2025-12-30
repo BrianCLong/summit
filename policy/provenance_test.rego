@@ -2,7 +2,7 @@ package summit.provenance
 
 import data.summit.provenance
 
-test_valid_deploy_prov {
+test_valid_deploy_prov if {
   provenance.valid with input as {
     "id": "prov_1",
     "timestamp": "2025-12-03T12:00:00Z",
@@ -13,7 +13,7 @@ test_valid_deploy_prov {
   }
 }
 
-test_invalid_orphan_deploy_prov {
+test_invalid_orphan_deploy_prov if {
   not provenance.valid with input as {
     "id": "prov_2",
     "timestamp": "2025-12-03T12:00:00Z",

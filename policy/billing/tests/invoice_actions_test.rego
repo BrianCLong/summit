@@ -9,7 +9,7 @@ finance_manager := {"id": "fin-1", "role": "finance_manager"}
 low_invoice := invoices[0]
 high_invoice := invoices[1]
 
-test_mark_sent_low_value_allows_no_approvals {
+test_mark_sent_low_value_allows_no_approvals if {
   input := {
     "subject": finance_manager,
     "invoice": low_invoice,
@@ -22,7 +22,7 @@ test_mark_sent_low_value_allows_no_approvals {
   decision.reason == "mark_sent_low"
 }
 
-test_cancel_high_value_requires_cfo {
+test_cancel_high_value_requires_cfo if {
   input := {
     "subject": finance_manager,
     "invoice": high_invoice,
@@ -36,7 +36,7 @@ test_cancel_high_value_requires_cfo {
   decision.flags[_] == "high_value"
 }
 
-test_manual_mark_paid_without_evidence_blocked {
+test_manual_mark_paid_without_evidence_blocked if {
   input := {
     "subject": finance_manager,
     "invoice": low_invoice,

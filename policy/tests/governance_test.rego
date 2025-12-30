@@ -3,7 +3,7 @@ package governance_test
 
 import data.governance
 
-test_allow_safe {
+test_allow_safe if {
     input := {
         "risk_score": 20,
         "sector": "healthcare",
@@ -12,7 +12,7 @@ test_allow_safe {
     governance.allow with input as input
 }
 
-test_deny_high_risk {
+test_deny_high_risk if {
     input := {
         "risk_score": 95,
         "mitigation": "NONE"
@@ -22,7 +22,7 @@ test_deny_high_risk {
     governance.violation["high_risk_use_case"] with input as input
 }
 
-test_deny_disallowed_sector {
+test_deny_disallowed_sector if {
     input := {
         "sector": "gambling"
     }
@@ -30,7 +30,7 @@ test_deny_disallowed_sector {
     governance.violation["disallowed_sector"] with input as input
 }
 
-test_deny_guardrail_breach {
+test_deny_guardrail_breach if {
     input := {
         "guardrail_check": {"allowed": false}
     }
@@ -38,7 +38,7 @@ test_deny_guardrail_breach {
     governance.violation["guardrail_breach"] with input as input
 }
 
-test_mitigation_levels {
+test_mitigation_levels if {
     governance.mitigation == "DENY" with input as {"risk_score": 95}
     governance.mitigation == "REVIEW" with input as {"risk_score": 75}
     governance.mitigation == "RESTRICT" with input as {"risk_score": 55}

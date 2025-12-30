@@ -4,7 +4,7 @@ import data.revops.lead_routing
 import data.revops_fixtures
 
 # Ensure enterprise lead routes with expected segment and assignee.
-test_enterprise_lead_routed {
+test_enterprise_lead_routed if {
   lead := revops_fixtures.leads[0]
   input := {
     "lead": lead,
@@ -20,7 +20,7 @@ test_enterprise_lead_routed {
 }
 
 # Blocklisted domains are rejected.
-test_blocklisted_domain_denied {
+test_blocklisted_domain_denied if {
   lead := revops_fixtures.leads[1]
   input := {
     "lead": lead,

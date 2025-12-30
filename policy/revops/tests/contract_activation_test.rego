@@ -4,7 +4,7 @@ import data.revops.contract_activation
 import data.revops_fixtures
 
 # Contracts with required signatures and approvals pass activation.
-test_contract_activation_ok {
+test_contract_activation_ok if {
   contract := revops_fixtures.contracts[0]
   input := {
     "contract": contract,
@@ -17,7 +17,7 @@ test_contract_activation_ok {
 }
 
 # Contracts missing signature are blocked by invariants.
-test_contract_missing_signature_denied {
+test_contract_missing_signature_denied if {
   contract := revops_fixtures.contracts[1]
   input := {
     "contract": contract,
