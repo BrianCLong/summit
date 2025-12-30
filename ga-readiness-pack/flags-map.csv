@@ -1,0 +1,7 @@
+Flag,Default (Dev),Default (Stage),Default (Prod),Owner,Kill-Switch Tested
+ENABLE_NEO4J_V5_DRIVER,true,true,true,Data Team,YES
+USE_NEW_PROVENANCE_LEDGER,true,true,false,Security Team,YES
+ENABLE_AI_COPILOT,true,true,true,AI Team,YES
+WRITE_QUORUM,false,false,false,Infra Team,YES
+ENABLE_STREAMING_RESPONSES,true,true,true,API Team,YES
+BETA_SEARCH_INDEX,true,true,false,Search Team,YES
