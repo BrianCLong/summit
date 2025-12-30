@@ -9,8 +9,9 @@
  * It sets up global test utilities and configuration.
  */
 
-// @ts-nocheck
-import { jest } from '@jest/globals';
+// Use require for CommonJS compatibility with ts-jest
+const jestGlobals = require('@jest/globals');
+const { jest } = jestGlobals;
 
 // Extend Jest timeout for integration tests
 jest.setTimeout(30000);
@@ -81,5 +82,3 @@ console.warn = (...args: unknown[]) => {
   }
   originalWarn.apply(console, args);
 };
-
-export {};
