@@ -1,44 +1,39 @@
-# SummitThreat Roadmap
+# Summit (IntelGraph) Roadmap
 
-This document outlines the future development plans for the SummitThreat platform.
+This roadmap reflects the current Summit (IntelGraph) platform reality: **v2.0.0 shipped in December 2025** and we now operate on a **2-week Golden Path release train** (see [README Release Cadence](../README.md#-release-cadence)). The immediate focus is **stability, reliability, supply-chain security, and user-visible performance**.
 
-## Q1 2026: MVP+
+## Current State — GA Baseline (v2.0.0)
 
-*   **Zero-Cost Universal Feed Fusion:**
-    *   Integrate with at least 10 live open-source feeds.
-    *   Implement a PostgreSQL database for storing IOCs.
-    *   Add basic data deduplication and normalization.
-*   **Hyper-Predictive GenAI Engine:**
-    *   Integrate with a local LLM (e.g., Llama).
-    *   Implement a basic RAG pipeline for threat forecasting.
-*   **Deployment:**
-    *   Provide Docker and Docker Compose files for easy deployment.
+- Enterprise intelligence platform with graph analytics, real-time collaboration, and AI-driven insights.
+- Hardened stack: rate limiting, GraphQL complexity limits, IDOR fixes, load balancing, multi-tier caching, and telemetry.
+- Data tier: Neo4j for relationships, PostgreSQL/Timescale for structured and time-series data, Redis for caching/pub-sub.
+- Orchestration: Maestro (BullMQ) for background jobs and AI pipelines.
 
-## Q2 2026: Alpha Release
+## Active Sprint (Dec 29, 2025 → Jan 9, 2026)
 
-*   **Autonomous Attack Surface Emulator:**
-    *   Implement a scanner for AWS S3 buckets.
-    *   Implement a scanner for public-facing web servers.
-*   **Multilingual Deep Web Hunter:**
-    *   Implement a passive scraper for a selection of public forums.
-    *   Integrate with a translation API.
-*   **Frontend:**
-    *   Add interactive dashboards with risk heatmaps and timelines.
+- **Operational readiness:** Ship `/healthz`, `/readyz`, and `/status` endpoints with probes documented.
+- **Developer velocity:** Standardize `make bootstrap` / `make test` and CI workflow with caching and artifacts.
+- **Supply-chain integrity:** Generate and sign SBOMs (Syft + cosign) with provenance verification in CI.
+- **Graph performance:** Introduce Canvas + Web Worker renderer to eliminate hairball freezes on large graphs.
+- **Backlog hygiene:** Convert “Review X.md” issues into actionable, labeled engineering tickets.
 
-## Q3 2026: Beta Release
+## Near-Term Themes (Q1 2026)
 
-*   **Collaborative Analyst Swarm:**
-    *   Implement a basic multi-agent system with pre-defined tasks.
-    *   Implement a simple feedback mechanism for human-in-the-loop.
-*   **Integrations:**
-    *   Add support for exporting data to STIX/JSON/MISP formats.
-    *   Provide a basic API for integrating with SIEMs/SOARs.
+- **Golden Path resiliency:** Keep `make smoke` green; expand health/readiness coverage and automated rollback playbooks.
+- **Observability & SRE:** Standard dashboards/alerts for API latency, worker throughput, queue health, and database readiness.
+- **CI/CD standardization:** Reproducible builds with artifact retention, coverage gates, and consistent jest/vitest setup across packages.
+- **Supply-chain security:** Fail-closed provenance checks, signed releases, and stricter branch protections/code scanning.
+- **Frontend performance & UX:** Configurable graph renderer thresholds, non-blocking interactions, and accessibility audits.
 
-## Q4 2026: v1.0 Release
+## Medium-Term (H1 2026)
 
-*   **Full Feature Implementation:**
-    *   Complete the implementation of all five core modules.
-*   **Plugin Ecosystem:**
-    *   Develop a plugin architecture for extending the platform's capabilities.
-*   **Enterprise Features:**
-    *   Add support for multi-tenancy and role-based access control.
+- **Scalability & cost controls:** Auto-scaling policies for workers and services, cache hit-rate optimization, and cold-start budgets.
+- **Data governance:** Expanded policy-as-code for access control, immutable audit logging, and retention/PII guardrails.
+- **Collaboration & workflow:** Improved real-time co-analysis, annotation workflows, and shared playbooks.
+- **AI/ML enhancements:** Higher-accuracy entity/event extraction, safer RAG pipelines, and evaluation harnesses tied to CI.
+
+## Ongoing Commitments
+
+- Documentation stays in lockstep with shipped features and the Release Cadence in the README.
+- No merge without Golden Path CI passing; regressions trigger immediate stabilization work.
+- Security findings, compliance exceptions, and SLO breaches must be tracked with remediation owners and timelines.
