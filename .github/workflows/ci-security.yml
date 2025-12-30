@@ -512,7 +512,7 @@ jobs:
                 json.dump(summary, fh, indent=2)
           PY
       - name: Publish job summary
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
