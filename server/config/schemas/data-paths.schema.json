@@ -27,7 +27,7 @@
           },
           "tags": {
             "type": "array",
-            "minItems": 1,
+            "minItems": 2,
             "items": {
               "type": "string",
               "minLength": 1
@@ -45,7 +45,39 @@
           }
         },
         "required": ["id", "system", "path", "tags"],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {"system": {"const": "maestro"}}
+            },
+            "then": {
+              "properties": {
+                "tags": {"contains": {"const": "maestro"}}
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"system": {"const": "intelgraph"}}
+            },
+            "then": {
+              "properties": {
+                "tags": {"contains": {"const": "intelgraph"}}
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"system": {"const": "companyos"}}
+            },
+            "then": {
+              "properties": {
+                "tags": {"contains": {"const": "companyos"}}
+              }
+            }
+          }
+        ]
       }
     }
   },

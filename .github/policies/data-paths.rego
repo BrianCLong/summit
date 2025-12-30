@@ -15,8 +15,8 @@ violations[msg] {
 
 violations[msg] {
   dp := input.dataPaths[_]
-  count(dp.tags) == 0
-  msg := sprintf("%s must declare at least one tag", [dp.id])
+  count(dp.tags) < 2
+  msg := sprintf("%s must declare at least two tags", [dp.id])
 }
 
 violations[msg] {
