@@ -412,9 +412,8 @@ export function createComplianceAssessmentLoader(
  */
 export function createAssessmentsByControlLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    // @ts-ignore
+): DataLoader<string, ComplianceAssessmentWithVerdict[]> {
+  return new DataLoader<string, ComplianceAssessmentWithVerdict[]>(
     (controlIds) => batchLoadAssessmentsByControl(controlIds, context),
     {
       cache: true,
@@ -429,9 +428,8 @@ export function createAssessmentsByControlLoader(
  */
 export function createAssessmentsByFrameworkLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    // @ts-ignore
+): DataLoader<string, ComplianceAssessmentWithVerdict[]> {
+  return new DataLoader<string, ComplianceAssessmentWithVerdict[]>(
     (frameworks) => batchLoadAssessmentsByFramework(frameworks, context),
     {
       cache: true,

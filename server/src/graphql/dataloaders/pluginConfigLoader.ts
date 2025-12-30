@@ -405,9 +405,8 @@ export function createPluginConfigLoader(
  */
 export function createAllPluginsForTenantLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    // @ts-ignore
+): DataLoader<string, PluginConfigWithVerdict[]> {
+  return new DataLoader<string, PluginConfigWithVerdict[]>(
     (tenantIds) => batchLoadAllPluginConfigsForTenant(tenantIds, context),
     {
       cache: true,
@@ -422,9 +421,8 @@ export function createAllPluginsForTenantLoader(
  */
 export function createEnabledPluginsLoader(
   context: DataLoaderContext
-) {
-  return new DataLoader(
-    // @ts-ignore
+): DataLoader<string, PluginConfigWithVerdict[]> {
+  return new DataLoader<string, PluginConfigWithVerdict[]>(
     (tenantIds) => batchLoadEnabledPlugins(tenantIds, context),
     {
       cache: true,
