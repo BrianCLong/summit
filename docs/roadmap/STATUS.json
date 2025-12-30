@@ -1,5 +1,5 @@
 {
-  "last_updated": "2025-12-29T12:30:00Z",
+  "last_updated": "2025-12-30T02:40:00Z",
   "initiatives": [
     {
       "id": "A",
@@ -63,6 +63,24 @@
           "id": "C2",
           "name": "Immutable Audit Log",
           "status": "rc-ready",
+          "owner": "Jules"
+        }
+      ]
+    },
+    {
+      "id": "D",
+      "name": "Competitive Wedge Delivery",
+      "epics": [
+        {
+          "id": "D1",
+          "name": "Action/Feature/Witness Foundations (ADDT, PAFF, WTG)",
+          "status": "planned",
+          "owner": "Jules"
+        },
+        {
+          "id": "D2",
+          "name": "Retrieval & Routing Differentiators (LC-GKL, GFJP, EMCP, MK-RCT, GCR, CGG, GSQS)",
+          "status": "planned",
           "owner": "Jules"
         }
       ]
