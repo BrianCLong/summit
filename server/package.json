@@ -21,6 +21,7 @@
     "case-overview-cache": "ts-node src/scripts/case-overview-cache.ts",
     "migrate": "ts-node scripts/migrate.ts up",
     "migrate:persistence": "node scripts/migrate-persistence.js",
+    "verify:ga": "npx tsx tests/verification/verify_ga_features.ts",
     "verify:policies": "tsx scripts/verify_policy_lifecycle.ts && tsx scripts/verify_policy_simulation.ts",
     "worker:outbox": "node scripts/outbox-worker.js",
     "test:smoke": "echo 'Server smoke tests are consolidated in root smoke-test.js'",
