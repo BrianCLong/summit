@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: JPC Workflow Minimization API
+  version: 0.1.0
+paths:
+  /jpc/compile:
+    post:
+      summary: Compile a workflow spec into minimal source queries and join preservation certificate.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workflowSpec: { type: object }
+      responses:
+        '200':
+          description: Compiled query set and certificate.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  queries: { type: array, items: { type: object } }
+                  certificate: { type: object }
+                  replayToken: { type: string }

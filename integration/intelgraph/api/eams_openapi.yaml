@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: EAMS Sandbox Execution API
+  version: 0.1.0
+paths:
+  /eams/modules/{moduleId}/run:
+    post:
+      summary: Execute a sandboxed OSINT module with egress accounting.
+      parameters:
+        - in: path
+          name: moduleId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target: { type: string }
+                purpose: { type: string }
+      responses:
+        '200':
+          description: Module results, egress receipt, and compliance decision.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: object }
+                  receipt: { type: object }
+                  decision: { type: string }
+                  replayToken: { type: string }

@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: CEVH Hazard Forecast API
+  version: 0.1.0
+paths:
+  /cevh/forecast/{assetId}:
+    get:
+      summary: Retrieve time-varying hazard forecast and decomposition witness for an asset.
+      parameters:
+        - in: path
+          name: assetId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Hazard forecast artifact.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hazard:
+                    type: number
+                  timeToEvent:
+                    type: number
+                  decomposition:
+                    type: array
+                    items: { type: string }
+                  replayToken:
+                    type: string

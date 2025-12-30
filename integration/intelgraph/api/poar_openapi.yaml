@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info:
+  title: POAR Proof-Carrying Actions API
+  version: 0.1.0
+paths:
+  /poar/actions:
+    post:
+      summary: Submit an action specification for compilation, verification, and execution.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actionSpec: { type: object }
+                purpose: { type: string }
+      responses:
+        '200':
+          description: Transformed output with proof object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  output: { type: object }
+                  proofObject: { type: object }
+                  replayToken: { type: string }

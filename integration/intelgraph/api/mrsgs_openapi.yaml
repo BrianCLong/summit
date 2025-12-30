@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: MRSGS Campaign Detection API
+  version: 0.1.0
+paths:
+  /mrsgs/scan:
+    post:
+      summary: Submit interaction window for spectral sketching and anomaly scoring.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                windowId:
+                  type: string
+                interactions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      actorId: { type: string }
+                      contentId: { type: string }
+                      weight: { type: number }
+                      timestamp: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Campaign artifact and anomaly score.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  anomalyScore: { type: number }
+                  replayToken: { type: string }
+                  localizedSubgraph: { type: object }
+                  commitments: { type: object }
