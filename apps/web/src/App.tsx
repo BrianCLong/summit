@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
 
@@ -35,6 +35,9 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+
+// Workbench
+import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -69,6 +72,11 @@ function App() {
                       path="/access-denied"
                       element={<AccessDeniedPage />}
                     />
+
+                    {/* Workbench Route - intentionally outside main layout for focus mode, or inside if desired.
+                        The prompts asked for a "shell", usually implying it might stand alone or take over.
+                        I'll put it at /workbench. */}
+                    <Route path="/workbench" element={<WorkbenchShell />} />
 
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
