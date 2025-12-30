@@ -46,6 +46,8 @@ function initializeServices(): GraphRAGService {
 }
 
 
+import { Context } from '../context.js';
+
 interface GraphRAGQueryInput {
   investigationId: string;
   question: string;
@@ -55,13 +57,6 @@ interface GraphRAGQueryInput {
   maxTokens?: number;
   useCase?: string;
   rankingStrategy?: string;
-}
-
-interface Context {
-  user?: {
-    id: string;
-    roles: string[];
-  };
 }
 
 export const graphragResolvers = {
@@ -169,7 +164,7 @@ export const graphragResolvers = {
           topK,
           threshold: 0.7,
           includeText: true,
-          tenantId: context.user?.tenant_id || context.user?.tenantId,
+          tenantId: context.user?.tenantId,
         });
 
         // TODO: Fetch full entity objects from Neo4j using the entity IDs
