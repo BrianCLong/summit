@@ -5,7 +5,16 @@ import { createHmac } from 'crypto';
 
 // Simple BFT parameters
 const QUORUM_PERCENTAGE = 0.67; // 2/3 majority
-const SHARED_SECRET = process.env.SWARM_SECRET || 'dev-secret-key';
+
+// SECURITY: SWARM_SECRET must be set in production environments
+const SHARED_SECRET = process.env.SWARM_SECRET;
+
+if (!SHARED_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('SWARM_SECRET environment variable must be set in production');
+  }
+  logger.warn('SWARM_SECRET not set - using insecure default for development only');
+}
 
 export class ConsensusEngine {
   private gossip: GossipProtocol;
@@ -24,7 +33,8 @@ export class ConsensusEngine {
 
   // Sign data
   private sign(data: string): string {
-    return createHmac('sha256', SHARED_SECRET).update(data).digest('hex');
+    const secret = SHARED_SECRET || 'dev-secret-key-insecure';
+    return createHmac('sha256', secret).update(data).digest('hex');
   }
 
   // Verify signature
