@@ -36,6 +36,20 @@ import { QueryPreviewService } from '../QueryPreviewService.js';
 import { GlassBoxRunService } from '../GlassBoxRunService.js';
 import { NlToCypherService } from '../../ai/nl-to-cypher/nl-to-cypher.service.js';
 
+// Mock promptRegistry to verify audit linking
+jest.mock('../../prompts/registry.js', () => ({
+  promptRegistry: {
+    getPrompt: jest.fn().mockImplementation((id: string) => {
+      if (id === 'core.jules-copilot@v4') {
+        return {
+          meta: { id, owner: 'jules' }
+        };
+      }
+      return null;
+    }),
+  },
+}));
+
 // Test constants
 const TEST_TENANT_ID = 'test-tenant';
 const TEST_USER_ID = 'test-user';
@@ -267,7 +281,7 @@ describe('GraphRAGQueryService', () => {
   });
 
   describe('Glass-Box Run Capture', () => {
-    it('should create glass-box run for every query', async () => {
+    it('should create glass-box run for every query with linked prompt audit metadata', async () => {
       const response = await graphRAGQueryService.query({
         investigationId: TEST_INVESTIGATION_ID,
         tenantId: TEST_TENANT_ID,
@@ -283,6 +297,52 @@ describe('GraphRAGQueryService', () => {
       expect(run!.investigationId).toBe(TEST_INVESTIGATION_ID);
       expect(run!.prompt).toBe('Test query');
       expect(run!.type).toBe('graphrag_query');
+
+      // Verify audit metadata
+      expect(run!.parameters).toBeDefined();
+      expect((run!.parameters as any).systemPromptId).toBe('core.jules-copilot@v4');
+      expect((run!.parameters as any).systemPromptOwner).toBe('jules');
+    });
+
+    it('should block publication if claims lack provenance (strict prompt contract)', async () => {
+      // Mock GraphRAGService to return an answer without citations
+      const mockGraphRAGServiceNoCitations = new GraphRAGService(
+        neo4jDriver,
+        createMockLLMService(),
+        createMockEmbeddingService(),
+        redis
+      );
+      // Override answer to return no citations but a long answer
+      mockGraphRAGServiceNoCitations.answer = jest.fn().mockResolvedValue({
+        answer: 'This is a very long generated answer that claims many things but provides absolutely no citations to back them up, which is a violation of the strict prompt contract.',
+        confidence: 0.8,
+        citations: { entityIds: [] }, // No citations
+        why_paths: []
+      } as any);
+
+      // Create a service instance with this mock
+      const strictService = new GraphRAGQueryService(
+        mockGraphRAGServiceNoCitations as any,
+        queryPreviewService,
+        glassBoxService,
+        pool,
+        neo4jDriver
+      );
+
+      // Execute query
+      try {
+        await strictService.query({
+          investigationId: TEST_INVESTIGATION_ID,
+          tenantId: TEST_TENANT_ID,
+          userId: TEST_USER_ID,
+          question: 'Generate a claim without evidence',
+          autoExecute: true,
+        });
+        fail('Should have thrown an error due to missing citations');
+      } catch (error: any) {
+        expect(error.message).toContain('Publication blocked');
+        expect(error.message).toContain('lacks required citations');
+      }
     });
 
     it('should capture execution steps', async () => {
