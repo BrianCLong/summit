@@ -14,6 +14,7 @@ if ! pnpm install --frozen-lockfile; then
 fi
 
 echo "== checks =="
+node scripts/ci/check_debt_regression.cjs
 pnpm -w run lint
 pnpm -w run typecheck || true
 pnpm -w run build

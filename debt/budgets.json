@@ -1,0 +1,31 @@
+{
+  "budgets": [
+    {
+      "scope": "global",
+      "period": "sprint",
+      "max_new_debt": 0,
+      "min_reduction": 10,
+      "unit": "count"
+    },
+    {
+      "scope": "agent",
+      "period": "transaction",
+      "max_new_debt": 0,
+      "min_reduction": 0,
+      "rule": "Agents must not introduce new debt."
+    },
+    {
+      "scope": "pr",
+      "period": "pull_request",
+      "max_new_debt": 0,
+      "min_reduction": 0,
+      "rule": "PRs cannot increase debt count."
+    }
+  ],
+  "severity_weights": {
+    "low": 1,
+    "medium": 3,
+    "high": 10,
+    "critical": 50
+  }
+}
