@@ -1,0 +1,25 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *' # Nightly at 2 AM
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Integration Tests
+        env:
+          INTEGRATION_TESTS: 1
+        run: npx jest -c jest.integration.config.cjs
