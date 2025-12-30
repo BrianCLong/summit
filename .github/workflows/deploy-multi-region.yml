@@ -7,6 +7,10 @@ on:
         description: "Comma-separated list of regions to deploy to (e.g., us-east-1,eu-west-1). Leave blank for all."
         required: false
         default: ""
+      release_tag:
+        description: "Release tag to deploy (must have signed provenance asset)."
+        required: true
+        default: "latest"
 
 jobs:
   deploy:
@@ -25,6 +29,62 @@ jobs:
 
       - name: Set up yq
         uses: mikefarah/yq@v4.30.8
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.2.4
+
+      - name: Download signed provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p provenance
+          gh release download "${{ inputs.release_tag }}" --pattern "provenance.json" --dir provenance --clobber
+          gh release download "${{ inputs.release_tag }}" --pattern "provenance.json.sig" --dir provenance --clobber
+          gh release download "${{ inputs.release_tag }}" --pattern "provenance.json.pem" --dir provenance --clobber
+
+      - name: Verify provenance signature
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          cosign verify-blob --yes \
+            --cert provenance/provenance.json.pem \
+            --signature provenance/provenance.json.sig \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/release-ga.yml@.*" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            provenance/provenance.json
+
+      - name: Extract signed image URIs
+        id: provenance
+        run: |
+          SERVER_IMAGE=$(jq -r '.images[] | select(.name=="server") | .uri' provenance/provenance.json)
+          CLIENT_IMAGE=$(jq -r '.images[] | select(.name=="client") | .uri' provenance/provenance.json)
+
+          if [ -z "$SERVER_IMAGE" ] || [ -z "$CLIENT_IMAGE" ]; then
+            echo "Missing image references in provenance.json" >&2
+            exit 1
+          fi
+
+          echo "server_image=$SERVER_IMAGE" >> "$GITHUB_OUTPUT"
+          echo "client_image=$CLIENT_IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Verify server image signature
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          cosign verify "${{ steps.provenance.outputs.server_image }}" \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/_reusable-slsa-build.yml@.*" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
+      - name: Verify client image signature
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          cosign verify "${{ steps.provenance.outputs.client_image }}" \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/_reusable-slsa-build.yml@.*" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
 
       - name: Resolve target regions
         run: |

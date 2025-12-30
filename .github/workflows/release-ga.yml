@@ -28,16 +28,44 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Server Tests
+        id: server_tests
         run: pnpm test:server
         continue-on-error: false
 
       - name: Run Policy Checks
+        id: policy_checks
         run: ./scripts/policy-test.sh
         continue-on-error: false
 
       - name: Verify Documentation Completeness
+        id: docs_traceability
         run: ./scripts/check_traceability.cjs
         continue-on-error: false
+
+      - name: Publish test evidence
+        if: always()
+        run: |
+          mkdir -p evidence/tests
+          cat <<'EOF' > evidence/tests/summary.json
+          {
+            "commit": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}",
+            "tests": {
+              "server": "${{ steps.server_tests.outcome }}",
+              "policy": "${{ steps.policy_checks.outcome }}",
+              "docs_traceability": "${{ steps.docs_traceability.outcome }}"
+            },
+            "timestamp": "$(date -u +%FT%TZ)"
+          }
+          EOF
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence-${{ github.run_id }}
+          path: evidence/tests
+          retention-days: 30
 
   build-server:
     name: Build Server
@@ -69,7 +97,7 @@ jobs:
 
   release:
     name: Create Release
-    needs: [build-server, build-client]
+    needs: [build-server, build-client, test-and-verify]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -77,6 +105,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.2.4
 
       - name: Download Server Artifacts
         uses: actions/download-artifact@v4
@@ -90,10 +123,59 @@ jobs:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
+      - name: Download Test Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: test-evidence-${{ github.run_id }}
+          path: evidence/tests
+
+      - name: Create provenance manifest
+        run: |
+          mkdir -p release-assets
+          cat <<'EOF' > release-assets/provenance.json
+          {
+            "release_tag": "${{ github.ref_name }}",
+            "commit": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}",
+            "images": [
+              {
+                "name": "server",
+                "uri": "${{ needs.build-server.outputs.image_uri }}",
+                "digest": "${{ needs.build-server.outputs.image_digest }}",
+                "sbom_digest": "${{ needs.build-server.outputs.sbom_digest }}",
+                "trivy_report": "${{ needs.build-server.outputs.trivy_report }}"
+              },
+              {
+                "name": "client",
+                "uri": "${{ needs.build-client.outputs.image_uri }}",
+                "digest": "${{ needs.build-client.outputs.image_digest }}",
+                "sbom_digest": "${{ needs.build-client.outputs.sbom_digest }}",
+                "trivy_report": "${{ needs.build-client.outputs.trivy_report }}"
+              }
+            ],
+            "tests": {
+              "artifact": "test-evidence-${{ github.run_id }}",
+              "status": "${{ needs.test-and-verify.result }}"
+            },
+            "evidence_bundle": "evidence.tar.gz",
+            "generated_at": "$(date -u +%FT%TZ)"
+          }
+          EOF
+
       - name: Create Evidence Bundle
         run: |
           mkdir -p release-assets
+          cp release-assets/provenance.json evidence/provenance.json
           tar -czf release-assets/evidence.tar.gz evidence/
+
+      - name: Sign release assets with Cosign
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+
+          cosign sign-blob --yes --output-signature release-assets/evidence.tar.gz.sig --output-certificate release-assets/evidence.tar.gz.pem release-assets/evidence.tar.gz
+          cosign sign-blob --yes --output-signature release-assets/provenance.json.sig --output-certificate release-assets/provenance.json.pem release-assets/provenance.json
 
       - name: Generate Release Notes
         id: notes
@@ -103,7 +185,13 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/evidence.tar.gz
+          files: |
+            release-assets/evidence.tar.gz
+            release-assets/evidence.tar.gz.sig
+            release-assets/evidence.tar.gz.pem
+            release-assets/provenance.json
+            release-assets/provenance.json.sig
+            release-assets/provenance.json.pem
           body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: false

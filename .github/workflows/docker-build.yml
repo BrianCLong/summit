@@ -2,11 +2,11 @@ name: Docker Build & Security Scan
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 0 * * 0'  # Weekly security scan
+    - cron: "0 0 * * 0" # Weekly security scan
   workflow_dispatch:
 
 env:
@@ -20,32 +20,32 @@ jobs:
       contents: read
       packages: write
       security-events: write
-    
+
     strategy:
       matrix:
         platform: [linux/amd64, linux/arm64]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           driver-opts: |
             image=moby/buildkit:latest
             network=host
-      
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -57,8 +57,9 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix={{branch}}-
-      
+
       - name: Build and push
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -71,16 +72,38 @@ jobs:
           build-args: |
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
-      
+
+      - name: Generate SBOM with Syft
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
+          syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }} -o cyclonedx-json=sbom-${{ matrix.platform }}.cdx.json
+          syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }} -o spdx-json=sbom-${{ matrix.platform }}.spdx.json
+
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-      
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          format: "sarif"
+          output: "trivy-results-${{ matrix.platform }}.sarif"
+          severity: "CRITICAL,HIGH"
+          ignore-unfixed: false
+          vuln-type: "os,library"
+          exit-code: "1"
+
       - name: Upload Trivy results to Security tab
+        if: ${{ always() && github.event_name != 'pull_request' }}
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results-${{ matrix.platform }}.sarif"
+
+      - name: Upload supply-chain artifacts
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-security-${{ matrix.platform }}-${{ github.run_id }}
+          path: |
+            sbom-${{ matrix.platform }}.cdx.json
+            sbom-${{ matrix.platform }}.spdx.json
+            trivy-results-${{ matrix.platform }}.sarif
