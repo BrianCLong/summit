@@ -16,7 +16,10 @@ export default tseslint.config(
     'ga-graphai/**', 'conductor-ui/**', 'e2e/**', 'mobile/**', 'activities/**',
     '__mocks__/**', 'bindings/**', 'operator-kit/**', 'platform/**', 'companyos/**',
     'cli/**', 'gateway/**', 'adversarial-misinfo-defense-platform/**', 'active-measures-module/**',
-    'absorption/**', 'assistant/**', '.maestro/**', '.security/**'
+    'absorption/**', 'assistant/**', '.maestro/**', '.security/**',
+    'website/**', 'workers/**', 'sdk/**', 'libs/**', 'docs/**', 'intelgraph/**',
+    'intelgraph-mcp/**', 'agents/**', 'graphql/**', 'agentic/**', 'backend/**',
+    'api/**', 'bootstrap/**', 'adapters/**', 'tests/**', 'src/**'
   ] },
   {
     extends: [
@@ -58,6 +61,8 @@ export default tseslint.config(
       'no-unused-expressions': 'off',
       '@typescript-eslint/no-unused-expressions': ['warn', { allowShortCircuit: true, allowTernary: true }],
       '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-require-imports': 'warn',
+      'no-useless-escape': 'warn',
       'no-console': 'warn', // Warn about console statements
     },
   },

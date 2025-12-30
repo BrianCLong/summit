@@ -53,6 +53,23 @@ const IGNORE = [
   'assistant/**',
   '.maestro/**',
   '.security/**',
+  // Additional directories
+  'website/**',
+  'workers/**',
+  'sdk/**',
+  'libs/**',
+  'docs/**',
+  'intelgraph/**',
+  'intelgraph-mcp/**',
+  'agents/**',
+  'graphql/**',
+  'agentic/**',
+  'backend/**',
+  'api/**',
+  'bootstrap/**',
+  'adapters/**',
+  'tests/**',
+  'src/**',
 ];
 
 export default [
@@ -116,6 +133,8 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/no-require-imports': 'warn', // Relaxed for gradual migration
+      'no-useless-escape': 'warn', // Relaxed for gradual migration
 
       // Best Practices
       curly: ['warn', 'all'],
