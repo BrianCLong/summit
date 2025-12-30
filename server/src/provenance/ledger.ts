@@ -201,6 +201,9 @@ export class ProvenanceLedgerV2 extends EventEmitter {
           actor_type: entry.actorType,
         });
 
+        // Use standard crypto if node:crypto fails or lazy load
+        const { createHash } = await import('crypto');
+
         const startTime = Date.now();
 
         try {
@@ -1035,6 +1038,15 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       console.error('Daily root signing failed:', error);
       this.emit('dailySigningFailed', { error, timestamp: new Date() });
     }
+  }
+
+  async getEntryById(id: string): Promise<ProvenanceEntry | null> {
+    const result = await pool.query(
+      `SELECT * FROM provenance_ledger_v2 WHERE id = $1`,
+      [id]
+    );
+    if (result.rows.length === 0) return null;
+    return this.mapRowToEntry(result.rows[0]);
   }
 
   async getEntries(
