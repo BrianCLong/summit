@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Runtime Enforcement Telemetry",
+  "description": "Evidence payload for runtime policy decisions.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "timestamp",
+    "policy_id",
+    "policy_domain",
+    "decision",
+    "reason_codes",
+    "environment",
+    "correlation_id"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique identifier for this enforcement event (UUID)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the decision was made."
+    },
+    "policy_id": {
+      "type": "string",
+      "description": "Policy identifier from runtime/policies/catalog.yaml."
+    },
+    "policy_domain": {
+      "type": "string",
+      "description": "Domain grouping for the evaluated policy."
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["allow", "deny", "degrade", "throttle", "kill"],
+      "description": "Outcome of policy evaluation."
+    },
+    "response_profile": {
+      "type": "string",
+      "description": "Response profile applied from runtime/response-matrix.yaml."
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Machine-readable reasons for the decision."
+    },
+    "context": {
+      "type": "object",
+      "description": "Redacted context used for evaluation.",
+      "properties": {
+        "tenant": { "type": "string" },
+        "subject": { "type": "string" },
+        "environment": { "type": "string" },
+        "risk_score": { "type": "number" },
+        "feature_flag": { "type": "string" },
+        "classification": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "demo", "staging", "prod"],
+      "description": "Runtime environment where the decision occurred."
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Correlation ID tying request, policy decision, and provenance events."
+    },
+    "latency_ms": {
+      "type": "number",
+      "description": "Evaluation latency in milliseconds."
+    },
+    "provenance_ref": {
+      "type": "string",
+      "description": "Identifier of persisted provenance record for this decision."
+    }
+  },
+  "additionalProperties": false
+}
