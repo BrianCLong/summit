@@ -16,7 +16,7 @@ jobs:
       NODE_OPTIONS: '--max-old-space-size=3072'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
