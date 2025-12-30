@@ -1,7 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 import { createLogger } from '../utils/logger.js';
 
 const logger = createLogger('AuthMiddleware');
+
+// JWT configuration
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_AUDIENCE = process.env.JWT_AUDIENCE || 'intelgraph-api';
+const JWT_ISSUER = process.env.JWT_ISSUER || 'https://auth.intelgraph.ai';
+
+// Validate JWT configuration at startup
+if (!JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is required for authentication');
+}
+
+if (JWT_SECRET.length < 32) {
+  throw new Error('FATAL: JWT_SECRET must be at least 32 characters');
+}
 
 export interface AuthenticatedUser {
   id: string;
@@ -31,19 +46,10 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     Math.random().toString(36).substring(2, 15) +
     Math.random().toString(36).substring(2, 15);
 
-  // For development, use a default user if no auth header
-  if (!authHeader && process.env.NODE_ENV !== 'production') {
-    req.user = {
-      id: 'dev-user-001',
-      email: 'dev@example.com',
-      tenantId: 'dev-tenant-001',
-      role: 'admin',
-      permissions: ['*'],
-    };
-    return next();
-  }
-
+  // SECURITY: No development bypasses allowed
+  // All requests must provide valid JWT tokens
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    logger.warn('Missing authorization header', { requestId: req.requestId });
     res.status(401).json({ error: 'Missing or invalid authorization header' });
     return;
   }
@@ -51,17 +57,33 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   const token = authHeader.substring(7);
 
   try {
-    // In production, this would validate the JWT and extract user info
-    // For now, decode a mock token format: base64(JSON)
-    const decoded = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
+    // SECURITY: Verify JWT signature and claims
+    const decoded = jwt.verify(token, JWT_SECRET!, {
+      audience: JWT_AUDIENCE,
+      issuer: JWT_ISSUER,
+      algorithms: ['HS256', 'RS256'],
+      clockTolerance: 30, // 30 seconds clock skew tolerance
+    }) as any;
 
+    // Extract user information from verified token
     req.user = {
-      id: decoded.sub || decoded.id,
+      id: decoded.sub || decoded.user_id || decoded.id,
       email: decoded.email,
       tenantId: decoded.tenant_id || decoded.tenantId,
       role: decoded.role || 'viewer',
-      permissions: decoded.permissions || [],
+      permissions: Array.isArray(decoded.permissions) ? decoded.permissions : [],
     };
+
+    // SECURITY: Validate required claims
+    if (!req.user.id || !req.user.tenantId) {
+      logger.error('JWT missing required claims', {
+        hasSub: !!decoded.sub,
+        hasTenantId: !!decoded.tenant_id,
+        requestId: req.requestId,
+      });
+      res.status(401).json({ error: 'Invalid token: missing required claims' });
+      return;
+    }
 
     logger.debug('User authenticated', {
       userId: req.user.id,
@@ -71,11 +93,18 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 
     next();
   } catch (error) {
-    logger.warn('Authentication failed', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.warn('JWT verification failed', {
+      error: errorMessage,
       requestId: req.requestId,
     });
-    res.status(401).json({ error: 'Invalid token' });
+
+    // Return specific error for debugging in development only
+    const errorResponse = process.env.NODE_ENV === 'development'
+      ? { error: 'Invalid token', details: errorMessage }
+      : { error: 'Invalid token' };
+
+    res.status(401).json(errorResponse);
   }
 }
 
