@@ -115,6 +115,7 @@ Our CI pipeline ("Fast Lane") enforces high standards:
 - **[Onboarding](docs/ONBOARDING.md)**: Detailed setup guide.
 - **[API Reference](docs/api/README.md)**: GraphQL and REST API details.
 - **[Security](SECURITY.md)**: Security policy and reporting.
+- **[Summit MVP Generation Prompt](docs/prompts/summit-mvp-agent-prompt.md)**: Ready-to-run prompt for producing a governance-ready multi-agent MVP drop-in codebase.
 
 ---
 
