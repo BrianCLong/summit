@@ -13,6 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - (Changes to existing functionality)
 
+## [4.0.0] - MVP-4 GA - 2025-12-30
+
+### Added
+- **Reliability Hardening**:
+  - Added exponential backoff retry logic (3 attempts) to Maestro LLM execution with cancellation support.
+  - Added 60s timeout to Maestro LLM calls to prevent hanging jobs.
+- **Tests**:
+  - Added reliability unit tests for Maestro task execution.
+
+### Changed
+- **Observability**:
+  - Validated and verified existing `/health` endpoints (`/health/detailed`, `/health/ready`) and structured logging configuration.
+  - Verified correlation ID propagation across HTTP requests.
+- **Reliability**:
+  - Verified existing graceful shutdown logic for Neo4j, Postgres, Redis, and WebSocket server.
+- **Security**:
+  - Verified `helmet` usage and CSP configuration.
+  - Audited dependencies and secret management patterns.
+- Standardized error handling to provide consistent JSON responses and production safety (masking internal errors).
+- Configuration now strictly validated with Zod on startup.
+
+### Known Limitations
+- Background jobs are currently in-memory/simulated in some modules; production deployment requires persistent queue backend (Redis/BullMQ verified).
+
 ### Deprecated
 - (Features marked for future removal)
 
