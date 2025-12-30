@@ -1,0 +1,32 @@
+# Export Manifest Template
+
+**Usage:** For Customer Data Export (GDPR/Portability).
+
+```yaml
+manifest_version: 1.0
+export_id: {{ uuid }}
+tenant_id: {{ tenant_id }}
+timestamp: {{ timestamp }}
+checksum_algorithm: sha256
+
+files:
+  - path: data/graph_nodes.csv
+    type: node_list
+    count: {{ node_count }}
+    checksum: {{ sha256_nodes }}
+
+  - path: data/graph_edges.csv
+    type: edge_list
+    count: {{ edge_count }}
+    checksum: {{ sha256_edges }}
+
+  - path: audit/provenance_log.jsonl
+    type: audit_log
+    count: {{ log_count }}
+    checksum: {{ sha256_logs }}
+
+signature:
+  signer: "IntelGraph Export Service"
+  key_id: "key-v1"
+  value: {{ signature_value }}
+```

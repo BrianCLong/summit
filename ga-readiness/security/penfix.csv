@@ -1,0 +1,5 @@
+ID,Finding,Severity,Status,Remediation,Owner
+PEN-01,Reflected XSS in Search,High,Fixed,Sanitized input using Zod,Dev
+PEN-02,Missing HSTS Header,Medium,Fixed,Added Helmet middleware,DevOps
+PEN-03,Weak Password Policy,Medium,Fixed,Enforced NIST guidelines,Auth
+PEN-04,Information Leak in Error,Low,Accepted,Stack traces disabled in prod,Dev

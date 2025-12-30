@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "queries": {
+    "SearchEntities": "sha256:a1b2c3d4e5f6...",
+    "GetEntityDetails": "sha256:f6e5d4c3b2a1...",
+    "IngestDocument": "sha256:1a2b3c4d5e6f..."
+  }
+}

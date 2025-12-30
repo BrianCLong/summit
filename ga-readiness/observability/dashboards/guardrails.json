@@ -1,0 +1,29 @@
+{
+  "title": "GA Guardrails Dashboard",
+  "panels": [
+    {
+      "title": "API P95 Latency",
+      "type": "graph",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))" }
+      ],
+      "thresholds": [{ "value": 0.35, "color": "red" }]
+    },
+    {
+      "title": "Error Rate",
+      "type": "gauge",
+      "targets": [
+        { "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))" }
+      ],
+      "thresholds": [{ "value": 0.01, "color": "red" }]
+    },
+    {
+      "title": "LLM Cost (Est)",
+      "type": "stat",
+      "targets": [
+        { "expr": "sum(increase(llm_token_usage_total[1h])) * 0.00003" }
+      ],
+      "thresholds": [{ "value": 5000, "color": "red" }]
+    }
+  ]
+}
