@@ -12,7 +12,7 @@ module.exports = {
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts'],
+  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'test'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',

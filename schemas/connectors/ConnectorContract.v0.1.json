@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.com/schemas/connectors/ConnectorContract.v0.1.json",
+  "title": "Connector Contract v0.1",
+  "type": "object",
+  "required": [
+    "identity",
+    "capabilities",
+    "idempotency",
+    "errors",
+    "evidence",
+    "redaction"
+  ],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "required": ["name", "version", "kind", "owner"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "kind": { "type": "string", "enum": ["source", "destination", "bi-directional"] },
+        "owner": { "type": "string" }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["read_scopes", "write_scopes", "rate_limits", "supported_entities"],
+      "properties": {
+        "read_scopes": { "type": "array", "items": { "type": "string" } },
+        "write_scopes": { "type": "array", "items": { "type": "string" } },
+        "rate_limits": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z0-9_-]+$": {
+              "type": "object",
+              "required": ["requests", "period_ms"],
+              "properties": {
+                "requests": { "type": "integer" },
+                "period_ms": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "supported_entities": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "idempotency": {
+      "type": "object",
+      "required": ["required_keys", "semantics"],
+      "properties": {
+        "required_keys": { "type": "array", "items": { "type": "string" } },
+        "semantics": { "type": "string", "enum": ["at-least-once", "exactly-once"] }
+      }
+    },
+    "errors": {
+      "type": "object",
+      "required": ["standard_codes_mapping"],
+      "properties": {
+        "standard_codes_mapping": {
+          "type": "object",
+          "patternProperties": {
+            "^[0-9]+$": { "type": "string" }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["required_artifacts"],
+      "properties": {
+        "required_artifacts": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "required": ["declared_sensitive_fields"],
+      "properties": {
+        "declared_sensitive_fields": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
