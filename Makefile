@@ -20,7 +20,7 @@ from pathlib import Path
 pyproject = Path("pyproject.toml")
 try:
     with pyproject.open('rb') as f:
-	data = tomllib.load(f)
+        data = tomllib.load(f)
     print(data.get("project", {}).get("version", "latest"))
 except FileNotFoundError:
     print("latest")
