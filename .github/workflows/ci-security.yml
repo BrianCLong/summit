@@ -52,7 +52,7 @@ jobs:
     needs: context
     steps:
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
         with:
           fetch-depth: 0
       - name: Prepare report directory
@@ -86,7 +86,7 @@ jobs:
       matrix:
         language: [javascript, python]
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
@@ -107,7 +107,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Semgrep CI ruleset
@@ -136,7 +136,7 @@ jobs:
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Ensure SNYK_TOKEN is configured
@@ -175,7 +175,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
       - name: Prepare report directory
@@ -209,7 +209,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Build server image for scanning
@@ -256,7 +256,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
@@ -280,7 +280,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Checkov
         run: pip install --no-cache-dir checkov==3.2.23
       - name: Run Checkov across Terraform and Helm assets
@@ -309,7 +309,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
@@ -342,7 +342,7 @@ jobs:
       - context
       - opa-policy
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
@@ -378,7 +378,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: context
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Execute baseline checks
         run: |
           chmod +x scripts/security/baseline-check.sh
@@ -397,7 +397,7 @@ jobs:
     if: ${{ needs.context.outputs.run_dast == 'true' }}
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
