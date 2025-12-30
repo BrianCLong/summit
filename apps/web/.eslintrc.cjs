@@ -9,7 +9,7 @@ module.exports = {
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs', 'public/js/**/*', 'vite.config.js'],
   parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh', '@typescript-eslint'],
+  plugins: ['react-refresh', '@typescript-eslint', 'jsx-a11y'],
   rules: {
     'react-refresh/only-export-components': 'off',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
@@ -22,4 +22,13 @@ module.exports = {
     'prefer-const': 'error',
     'no-var': 'error',
   },
+  overrides: [
+    {
+      files: ['src/components/Layout.tsx', 'src/pages/SignInPage.tsx'],
+      extends: ['plugin:jsx-a11y/recommended'],
+      rules: {
+        'jsx-a11y/no-autofocus': 'off',
+      },
+    },
+  ],
 }
