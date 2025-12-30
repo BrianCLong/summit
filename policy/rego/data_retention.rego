@@ -1,6 +1,6 @@
 package data.retention
 # Example policy: PII data must have a retention period
-deny[msg] {
+deny contains msg if {
   input.data.pii == true
   not input.data.retention_days
   msg := "PII data must have a retention period"

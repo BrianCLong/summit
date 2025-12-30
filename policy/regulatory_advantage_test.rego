@@ -1,6 +1,6 @@
 package summit.regulatory
 
-test_deny_missing_jurisdiction {
+test_deny_missing_jurisdiction if {
     input := {
         "kind": "DeploymentConfig",
         "config": {
@@ -11,7 +11,7 @@ test_deny_missing_jurisdiction {
     msg == "Regulatory Violation: Missing 'jurisdiction' toggle in deployment configuration. See strategy/REGULATORY_ADVANTAGE.md#5"
 }
 
-test_allow_with_jurisdiction {
+test_allow_with_jurisdiction if {
     input := {
         "kind": "DeploymentConfig",
         "config": {
@@ -22,7 +22,7 @@ test_allow_with_jurisdiction {
     count(deny) == 0 with input as input
 }
 
-test_deny_sensitive_op_without_audit {
+test_deny_sensitive_op_without_audit if {
     input := {
         "operation": {
             "sensitivity": "high"
@@ -35,7 +35,7 @@ test_deny_sensitive_op_without_audit {
     msg == "Regulatory Violation: Audit logging must be enabled for high-sensitivity operations. See strategy/REGULATORY_ADVANTAGE.md#5"
 }
 
-test_deny_private_meeting_no_legal {
+test_deny_private_meeting_no_legal if {
     input := {
         "interaction": {
             "type": "regulator_meeting",
