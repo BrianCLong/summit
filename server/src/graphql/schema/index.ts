@@ -28,6 +28,10 @@ const ewTypeDefs = fs.readFileSync(ewSchemaPath, 'utf8');
 const collabSchemaPath = path.join(__dirname, './collaboration.graphql');
 const collabTypeDefs = fs.readFileSync(collabSchemaPath, 'utf8');
 
+// Load Cognitive Security schema
+const cogSecSchemaPath = path.join(__dirname, './cognitive-security.graphql');
+const cogSecTypeDefs = fs.readFileSync(cogSecSchemaPath, 'utf8');
+
 const base = gql`
   scalar JSON
   scalar DateTime
@@ -63,6 +67,7 @@ export const typeDefs = [
   erTypeDefs,
   ewTypeDefs,
   collabTypeDefs,
+  cogSecTypeDefs,
 ];
 
 export default typeDefs;
