@@ -164,11 +164,12 @@ Every external artifact must declare at top:
 
 CI will:
 
-- Fail on prohibited phrases
+- Fail on prohibited phrases (see `ci/claim-lint-ruleset.yaml`)
 - Fail on unregistered claims (if enforcement enabled)
 - Warn on strong/moderate claims without evidence pointers
 - Warn on comparative claims without a basis
 - Produce a risk report on security/compliance language
+- Run `scripts/ci/validate_claims_registry.py` in `.github/workflows/claim-validation.yml` to block scope/channel violations
 
 ## 8. Exceptions Process
 

@@ -1,0 +1,43 @@
+version: "0.1"
+forbidden_phrases:
+  - fully autonomous
+  - zero risk
+  - guaranteed compliance
+  - eliminates all breaches
+  - perfect accuracy
+  - compliant by default
+  - certified without scope
+  - unbounded autonomy
+  - self-approving agents
+  - unchecked production rollout
+  - bypasses human oversight
+intensity_rules:
+  block_universal_strong: true
+  public_channel_requires_evidence: true
+  comparative_claims_require_basis: true
+scope_rules:
+  universal:
+    allowed_channels:
+      - internal
+  general:
+    disallowed_channels:
+      - public
+    rationale: "Generalized claims must be scoped or evidenced before public distribution."
+evidence_requirements:
+  soft: 0
+  moderate: 1
+  strong: 1
+channel_requirements:
+  public:
+    min_confidence: "review-ready"
+  partner:
+    min_confidence: "review-ready"
+  internal:
+    min_confidence: "draft"
+comparative_requirements:
+  enforce_basis: true
+  basis_fields:
+    - comparators
+    - evidence
+notes:
+  - "This ruleset is intentionally conservative for marketing/security claims."

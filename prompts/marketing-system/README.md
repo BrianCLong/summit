@@ -32,7 +32,7 @@ This package contains the governed prompt stack for generating, refining, and va
 
 ## Enforcement Hooks
 
-- CI can validate claims against `governance/claims.schema.json`.
-- Forbidden phrases and channel rules should be enforced by narrative linting workflows.
+- CI validates claims with `scripts/ci/validate_claims_registry.py` (see `.github/workflows/claim-validation.yml`).
+- Forbidden phrases, channel scope, and comparative bases are governed by `ci/claim-lint-ruleset.yaml`.
 
 Use these prompts as the canonical entry point for any external narrative work so marketing assets maintain the same rigor as GA engineering deliverables.

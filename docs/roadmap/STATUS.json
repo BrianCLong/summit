@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-31T22:38:09Z",
-  "revision_note": "Added governed marketing claim system (policy, registry, prompts) to keep narrative assets GA-ready",
+  "last_updated": "2025-12-31T22:42:25Z",
+  "revision_note": "Added claim lint ruleset and CI workflow to enforce governed marketing claims",
   "initiatives": [
     {
       "id": "A",
