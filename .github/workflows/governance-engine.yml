@@ -2,9 +2,9 @@ name: Governance Engine
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   enforce-policy:
@@ -20,13 +20,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install dependencies (scripts only)
-        # We only need standard node, but if we used external libs we would install here.
-        # Since we use standard libs, we might just skip or do minimal.
-        # But to be safe if we add deps later:
-        run: npm install --no-save
+        run: pnpm install --frozen-lockfile
 
       - name: Evaluate Governance Policies
         env:

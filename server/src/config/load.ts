@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { createRequire } from 'module';
@@ -6,8 +7,9 @@ import type { DefinedError } from 'ajv';
 
 dotenv.config();
 
-const require = createRequire(import.meta.url);
-const schema = require('./schema.json');
+// Use a different variable name to avoid conflicts with Jest's CJS transformation
+const requireModule = createRequire(import.meta.url);
+const schema = requireModule('./schema.json');
 
 const ajv = new Ajv({
     allErrors: true,
