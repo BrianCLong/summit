@@ -25,6 +25,7 @@ import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.
 import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
+import { sunsetMiddleware } from './evolution/sunset/middleware.js';
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import { securityHeaders } from './middleware/securityHeaders.js';
@@ -221,6 +222,7 @@ export const createApp = async () => {
   app.use(sanitizeInput);
   app.use(piiGuardMiddleware);
   app.use(safetyModeMiddleware);
+  app.use(sunsetMiddleware);
 
   // Circuit Breaker Middleware - Fail fast if system is unstable
   app.use(circuitBreakerMiddleware);
