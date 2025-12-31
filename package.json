@@ -195,6 +195,7 @@
     "neo4j-driver": "^5.28.1",
     "pg": "^8.16.3",
     "redis": "^5.8.1",
+    "supertest": "^7.1.4",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
