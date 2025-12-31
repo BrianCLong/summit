@@ -1,16 +1,14 @@
 name: Copilot Golden Path
 
+# Disabled: reusable workflow references need refactoring
+# TODO: Move _golden-path-pipeline.yml to top-level workflows directory
 on:
-  push:
-    branches: [main]
-    paths:
-      - "services/copilot/**"
-      - ".github/workflows/copilot-golden-path.yml"
-  pull_request:
-    branches: [main]
-    paths:
-      - "services/copilot/**"
-      - ".github/workflows/copilot-golden-path.yml"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual run"
+        required: false
+        type: string
 
 jobs:
   pipeline:

@@ -1,11 +1,14 @@
 name: Golden Path Supply Chain
 
+# Disabled: reusable workflow in subdirectory not supported
+# TODO: Move reusable/supply-chain-policy.yml to top-level workflows
 on:
-  push:
-    branches: ["main", "develop", "release/**"]
-  pull_request:
-    branches: ["main", "develop", "release/**"]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual run"
+        required: false
+        type: string
 
 permissions:
   contents: read
