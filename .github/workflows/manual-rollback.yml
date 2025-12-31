@@ -1,0 +1,33 @@
+name: Manual Release Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The GA version to roll back to (e.g., v2026.01.14-ga)'
+        required: true
+      reason:
+        description: 'The reason for the rollback'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up script permissions
+        run: chmod +x scripts/rollback-release.sh
+
+      - name: Run Rollback Script
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          ./scripts/rollback-release.sh \
+            --version "${{ github.event.inputs.version }}" \
+            --reason "${{ github.event.inputs.reason }}" \
+            --notify

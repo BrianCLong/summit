@@ -1,0 +1,22 @@
+name: Scheduled Drift Detection
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Run daily at 8 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up script permissions
+        run: chmod +x scripts/detect-drift.sh
+
+      - name: Run Drift Detection
+        run: ./scripts/detect-drift.sh

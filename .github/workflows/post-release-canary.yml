@@ -1,28 +1,27 @@
-name: Post-Release Canary
+name: Post-Release Canary Deployment
 
 on:
-  schedule:
-    - cron: "0 * * * *" # Run hourly
-  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
 
 jobs:
-  canary:
+  canary-deployment:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Set up script permissions
+        run: chmod +x scripts/canary/deploy-canary.sh
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-          cache: pnpm
-
-      - name: Install dependencies (script only)
-        # Using pnpm add -w to respect workspace root
-        run: pnpm add -w js-yaml
-
-      - name: Run Canary Check
-        run: node scripts/canary-check.cjs
+      - name: Run Canary Deployment
+        env:
+          # This assumes the deploy-canary.sh script can get the version
+          # from the release tag. If not, we can pass it as an argument.
+          # For example: IMAGE_TAG: ${{ github.event.release.tag_name }}
+          PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: ./scripts/canary/deploy-canary.sh
