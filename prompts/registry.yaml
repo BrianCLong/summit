@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: autonomy-tiered-contracts-v1
+    version: v1
+    path: prompts/autonomy/tiered-autonomy-contracts.md
+    sha256: aaa5b1276a16057a650dd9d8866bb2be6445c466fa0e63c256a44603689d6d8a
+    description: Tiered autonomy contracts, policy gates, and promotion/demotion rules for bounded optimization loops.
+    scope:
+      paths:
+        - docs/autonomy/
+        - docs/roadmap/STATUS.json
+        - prompts/autonomy/
+        - prompts/registry.yaml
+      domains:
+        - autonomy
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
