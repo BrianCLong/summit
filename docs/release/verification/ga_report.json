@@ -1,0 +1,70 @@
+{
+  "timestamp": "2025-12-31T23:09:09.421Z",
+  "checks": [
+    {
+      "name": "File Exist: server/src/middleware/auth.ts",
+      "passed": true,
+      "message": "Found Auth Middleware",
+      "type": "static"
+    },
+    {
+      "name": "Content Check: server/src/middleware/auth.ts",
+      "passed": true,
+      "message": "Found ensureAuthenticated export",
+      "type": "static"
+    },
+    {
+      "name": "File Exist: server/src/middleware/rateLimit.ts",
+      "passed": true,
+      "message": "Found Rate Limit Middleware",
+      "type": "static"
+    },
+    {
+      "name": "File Exist: server/src/provenance/ledger.ts",
+      "passed": true,
+      "message": "Found Provenance Ledger",
+      "type": "static"
+    },
+    {
+      "name": "File Exist: server/src/pii/sensitivity.ts",
+      "passed": true,
+      "message": "Found Sensitivity Config",
+      "type": "static"
+    },
+    {
+      "name": "Content Check: server/src/pii/sensitivity.ts",
+      "passed": true,
+      "message": "Found Sensitivity definitions",
+      "type": "static"
+    },
+    {
+      "name": "File Exist: policy/",
+      "passed": true,
+      "message": "Found OPA Policy Directory",
+      "type": "static"
+    },
+    {
+      "name": "Module Import: server/src/pii/sensitivity.ts",
+      "passed": true,
+      "message": "Loaded successfully",
+      "type": "runtime"
+    },
+    {
+      "name": "Module Import: server/src/middleware/auth.ts",
+      "passed": false,
+      "message": "Failed to load: Cannot find module '/app/node_modules/.pnpm/argon2@0.31.2/node_modules/argon2/lib/binding/napi-v3/argon2.node'\nRequire stack:\n- /app/node_modules/.pnpm/argon2@0.31.2/node_modules/argon2/argon2.js",
+      "type": "runtime"
+    },
+    {
+      "name": "Module Import: server/src/provenance/ledger.ts",
+      "passed": false,
+      "message": "Failed to load: A metric with the name db_query_duration_seconds has already been registered.",
+      "type": "runtime"
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "passed": 8,
+    "failed": 2
+  }
+}

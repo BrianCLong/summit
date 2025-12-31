@@ -1,0 +1,30 @@
+name: GA Verification
+
+on:
+  push:
+    branches: [ main, release/* ]
+  pull_request:
+    branches: [ main, release/* ]
+
+jobs:
+  ga-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile || npm install
+
+      - name: Run Tier A & B Verification
+        run: npx tsx server/tests/verification/verify_ga.ts
+
+      - name: Run Node-Native Tests
+        run: npx tsx --test test/node/ga_critical.test.ts
+
+      - name: Run Security Assertions
+        run: npx tsx server/tests/verification/verify_security_claims.ts
