@@ -18,6 +18,7 @@ module.exports = {
     '<rootDir>/archive/',
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
+    '<rootDir>/packages/cli/',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -78,7 +79,7 @@ module.exports = {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(uuid|.*\\.mjs$))',
+    'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|.*\\.mjs$))',
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',

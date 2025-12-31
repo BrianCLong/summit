@@ -226,6 +226,8 @@ export default {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     // Handle .js extensions in imports
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    // Mock ESM-only modules
+    '^node-fetch$': '<rootDir>/../__mocks__/node-fetch.js',
     // Mock native/unavailable modules
     '^pkcs11js$': '<rootDir>/tests/__mocks__/pkcs11js.js',
     '^@packages/cache$': '<rootDir>/tests/__mocks__/packages-cache.js',
@@ -288,7 +290,7 @@ export default {
 
   transformIgnorePatterns: [
     // Transform ESM packages in node_modules
-    '/node_modules/(?!(node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|@exodus|html-encoding-sniffer|jsdom|apollo-server-env|apollo-server-core|apollo-server-express)/)',
+    '/node_modules/(?!(node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|@exodus|html-encoding-sniffer|jsdom|apollo-server-env|apollo-server-core|apollo-server-express|@opentelemetry)/)',
   ],
 
   // Increase workers for faster parallel testing

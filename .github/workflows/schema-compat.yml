@@ -50,7 +50,7 @@ jobs:
           fi
 
       - name: Upload schema compatibility reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: schema-compatibility-reports
           path: schema-compat-artifacts/*.md
