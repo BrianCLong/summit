@@ -23,6 +23,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
+import { admissionControl } from './runtime/backpressure/AdmissionControl.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import { residencyEnforcement } from './middleware/residency.js';
@@ -42,6 +43,7 @@ import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
 import { metricsRoute } from './http/metricsRoute.js';
+import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
@@ -280,6 +282,7 @@ export const createApp = async () => {
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
+  app.use(['/api', '/graphql'], admissionControl);
 
   // Enforce Data Residency
   app.use(['/api', '/graphql'], residencyEnforcement);
@@ -355,6 +358,7 @@ export const createApp = async () => {
   // app.use('/api/policy', policyRouter);
   app.use('/api/receipts', receiptsRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
+  app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);

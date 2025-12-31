@@ -2,12 +2,12 @@
 // server/src/lib/resources/budget-tracker.ts
 
 import { EventEmitter } from 'events';
-import { CostDomain, BudgetConfig, BudgetStatus } from './types.js';
+import { CostDomain, BudgetConfig, BudgetStatus, CostAttribution } from './types.js';
 
 /**
  * @file Tracks costs and budgets for tenants with strict enforcement.
  * @author Jules
- * @version 2.1.0
+ * @version 2.2.0
  *
  * @warning This implementation uses a non-persistent in-memory store.
  * All budget and cost data will be lost on application restart.
@@ -19,6 +19,7 @@ interface CostRecord {
   amount: number;
   timestamp: Date;
   details?: Record<string, any>;
+  attribution?: CostAttribution;
 }
 
 // In-memory stores
@@ -80,13 +81,7 @@ export class BudgetTracker extends EventEmitter {
   public checkBudget(tenantId: string, domain: CostDomain, estimatedCost: number = 0): boolean {
     const budget = budgetStore[tenantId]?.[domain];
     if (!budget) {
-      // Default behavior: if no budget defined, allow (or block depending on policy).
-      // Prompt says "No spend path lacks an owner/budget".
-      // We'll allow it but log a warning if strict mode is off, but sprint says "Hard Stops".
-      // For now, if no budget is set, we assume infinite (or undefined) but we should probably set defaults.
-      // Let's assume infinite if not set for backward compatibility during migration,
-      // but in production this should be strict.
-      return true;
+      return true; // No budget = unlimited (soft enforcement)
     }
 
     if (budget.currentSpending + estimatedCost > budget.limit) {
@@ -98,7 +93,10 @@ export class BudgetTracker extends EventEmitter {
         attemptedCost: estimatedCost,
         timestamp: new Date(),
       });
-      return false; // HARD STOP
+
+      if (budget.hardStop) {
+          return false; // HARD STOP
+      }
     }
     return true;
   }
@@ -106,7 +104,7 @@ export class BudgetTracker extends EventEmitter {
   /**
    * Tracks a realized cost.
    */
-  public trackCost(tenantId: string, domain: CostDomain, amount: number, details?: Record<string, any>): void {
+  public trackCost(tenantId: string, domain: CostDomain, amount: number, details?: Record<string, any>, attribution?: CostAttribution): void {
     if (!costStore[tenantId]) {
       costStore[tenantId] = [];
     }
@@ -117,6 +115,7 @@ export class BudgetTracker extends EventEmitter {
       amount,
       timestamp: new Date(),
       details,
+      attribution
     };
 
     costStore[tenantId].push(costRecord);
@@ -196,6 +195,13 @@ export class BudgetTracker extends EventEmitter {
 
   public getDomainBudget(tenantId: string, domain: CostDomain): BudgetStatus | undefined {
       return budgetStore[tenantId]?.[domain];
+  }
+
+  /**
+   * Get detailed costs with attribution
+   */
+  public getAttributedCosts(tenantId: string): CostRecord[] {
+      return costStore[tenantId] || [];
   }
 
   /**
