@@ -1,7 +1,7 @@
 # Sprint Planning Index
 
-**Last Updated:** 2025-10-27 (Sprint N+55 Update)
-**Total Sprints Documented:** 101+
+**Last Updated:** 2026-01-01 (Ecosystem Integrations & Tenant Trust prompt added)
+**Total Sprints Documented:** 102+
 **Status:** Active Planning ✅ (historical sprints sealed)
 
 ---
@@ -37,6 +37,7 @@
 - **Focus:** Value Density & Pruning.
 - **Key Artifacts:** `PORTFOLIO_SCORECARD.md`, `PORTFOLIO_DECISIONS.md`, `docs/GOVERNANCE.md` (Updated).
 - **Incoming Prompt:** **IntelGraph Disinformation GA “Proof-First” Sprint (10 business days)** — see `sprint/edops-ga-sprint-prompt.md` for the full execution brief, acceptance criteria, KPIs, and quick decision questions.
+- **New Prompt:** **Ecosystem Integrations, Tenant Trust, and Scenario Playbooks** — see `sprint/sprint-ecosystem-integrations-tenant-trust.md` for objectives spanning multi-tenant isolation, integration guardrails, executable playbooks, and marketplace-ready onboarding.
 
 ### Upcoming Sprint (26)
 

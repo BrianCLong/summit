@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-01-01T00:30:00Z",
+  "revision_note": "Recorded Ecosystem Integrations, Tenant Trust, and Scenario Playbooks sprint prompt with new multi-tenant and integration readiness epics",
   "initiatives": [
     {
       "id": "A",
@@ -134,14 +134,52 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Ecosystem Integrations & Tenant Trust",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Multi-Tenant Isolation",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Sprint prompt at sprint/sprint-ecosystem-integrations-tenant-trust.md outlines TenantSafePostgres coverage, quotas, and audit slicing",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F2",
+          "name": "Integration Guardrails",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Sprint prompt defines integration inventory, profiles, sandbox defaults, and evidence posture extensions",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F3",
+          "name": "Scenario Playbooks & DR",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Prompt requires executable DR/incident playbooks, rehearsal scheduler, and evidence artifacts per release",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F4",
+          "name": "Marketplace Onboarding",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Prompt calls for deployment blueprints, guided onboarding, and integration templates for marketplace readiness",
+          "target_completion": "Sprint N+1"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 5,
-    "total": 11,
+    "not_started": 9,
+    "total": 15,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }
