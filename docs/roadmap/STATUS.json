@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2025-12-31T00:35:00Z",
+  "revision_note": "Documented Governed Analyst Copilot pilot blueprint and governance slices",
   "initiatives": [
     {
       "id": "A",
@@ -90,6 +90,19 @@
             "No centralized log aggregation"
           ],
           "target_completion": "Sprint N+1 (CRITICAL for GA)"
+        },
+        {
+          "id": "C3",
+          "name": "Governed Analyst Copilot Pilot",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Pilot blueprint defined in docs/governance/governed-analyst-copilot.md including model cards, provenance, and policy gate slices",
+          "blockers": [
+            "Model card registry and UI surfacing not yet implemented",
+            "Provenance event pipeline needs append-only storage",
+            "Policy gating for roles/data types pending wiring"
+          ],
+          "target_completion": "Sprint N+2"
         }
       ]
     },
@@ -140,8 +153,9 @@
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 5,
-    "total": 11,
+    "not_started": 6,
+    "in_progress": 1,
+    "total": 13,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }
