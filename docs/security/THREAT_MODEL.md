@@ -1,99 +1,88 @@
-# Repo-Wide Threat Model
+# System Threat Model
 
-**Version:** 0.1
-**Target:** Summit + Maestro + CompanyOS
-**Date:** October 2025
-**Scope:** Server, Client, Orchestration, AI Services
-**Owner:** Security Engineering (U-Series)
+## 1. Executive Summary
 
-## 1. Assets
-What are we protecting?
+This document defines the formal Threat Model for the IntelGraph platform. It follows the **STRIDE** methodology to categorize threats and maps them to architectural components. The goal is to move from "implicit security" to "explicit, verifiable security controls."
 
-*   **Customer Data**: PII (Names, Emails), Proprietary Knowledge Graphs, Ingested Documents, Behavioral Telemetry.
-*   **Intellectual Property**: System Prompts (PsyOps, Oracle), Proprietary Algorithms, internal "Black Project" code.
-*   **Compute Resources**: LLM Token Budgets, Cloud Infrastructure (AWS/K8s), Database IOPS.
-*   **Audit Trails**: Provenance Ledger, Security Logs, Compliance Artifacts (SOC2 evidence).
-*   **System Integrity**: The correctness of the Knowledge Lattice and decision-making logic.
+**Scope:**
+*   **Trust Boundaries:** API Gateway, Database Access, Agent Execution Environment.
+*   **Assets:** Customer Data (Graph), PII, Audit Logs, AI Models.
+*   **Actors:** External Users, Internal Admins, Autonomous Agents, Third-Party Webhooks.
 
-## 2. Actors
-Who interacts with the system?
+---
 
-*   **External Analysts (Users)**: Authenticated users accessing the web UI to run queries and simulations.
-*   **Internal Operators (Admins)**: DevOps/SREs with privileged access to infrastructure and prod DBs.
-*   **Automated Agents**: "Codex" agents, background workers, and schedulers (Maestro) operating with service accounts.
-*   **Third-Party Services**: External APIs (OpenAI, Anthropic), Managed Databases (Neo4j Aura, RDS).
-*   **Malicious Actors**: External attackers, compromised insiders, or compromised dependencies.
+## 2. Architecture & Data Flow
 
-## 3. Trust Boundaries
-Where does trust end?
+### 2.1 High-Level Data Flow
+1.  **Ingestion:** Data enters via REST API (`/api/ingest`) or Stream (`/api/stream`). Authenticated via JWT.
+2.  **Processing:** Validated by `IngestionPipeline`, passed to `Maestro` for agentic reasoning or directly to Storage.
+3.  **Storage:**
+    *   **Graph:** Neo4j (Tenant-isolated).
+    *   **Relational:** PostgreSQL (RLS/Schema-isolated).
+    *   **Vector:** Vector Store (Namespace-isolated).
+4.  **Consumption:** Users query via GraphQL (`/graphql`) or REST.
+5.  **Audit:** All mutations are signed and logged to `ProvenanceLedger`.
 
-*   **Browser / Server (The API Boundary)**: All input from the client (web, mobile, CLI) is untrusted. Must be validated by Zod schemas and sanitizers.
-*   **Server / LLM Provider (The Egress Boundary)**: We trust the provider (e.g., OpenAI) not to leak data deliberately, but we **do not trust** the model output to be safe (Prompt Injection response). All LLM output is treated as potentially tainted.
-*   **Server / Database**: Trusted internal network (VPC), but access requires authentication (mTLS/Credentials).
-*   **Service / Service**: Currently effectively flat internal trust (within K8s namespace). Planned move to Zero Trust (mTLS + OPA per hop).
-*   **Connectors / External Web**: Untrusted. OSINT connectors fetching URLs must be sandboxed to prevent SSRF and malware ingress.
+### 2.2 Trust Boundaries
+*   **Public Internet vs. API Gateway**: The `server` application is the primary gatekeeper.
+*   **Application vs. Data Store**: The application holds database credentials; end-users never access DB directly.
+*   **Application vs. AI Models**: Calls to LLMs are mediated by `CostMeter` and `PIIGuard`.
+*   **Tenant vs. Tenant**: Strictly enforced logic separation; shared infrastructure.
 
-## 4. Attack Surfaces
+---
 
-### 4.1 LLM Attack Surfaces
-*   **Prompt Injection**: User inputs (search queries, tickets) injected into prompts.
-    *   *Mitigation*: Input sanitization, delimiters, system/user role separation.
-*   **Model Inversion**: Repeated queries to Oracle/PsyOps services to extract training data.
-    *   *Mitigation*: Rate limiting (Token/Request based), anomaly detection.
-*   **Token Exhaustion (DoS)**: Massive inputs sent to token-counting services.
-    *   *Mitigation*: `BudgetAdmissionController`, strict quotas.
+## 3. Threat Analysis (STRIDE)
 
-### 4.2 API Injection Vectors
-*   **Cypher/Graph Injection**: Malicious inputs in GraphRAG endpoints.
-    *   *Mitigation*: Neo4j parameters (`$param`), `MutationValidators`.
-*   **SSRF**: Webhook endpoints or "Fetch URL" features.
-    *   *Mitigation*: `URLSchema` validation (no localhost/private IPs), egress filtering.
+### 3.1 Spoofing (Identity)
 
-### 4.3 Orchestration Abuse
-*   **Queue Flooding**: Submitting thousands of "light" runs to Maestro.
-    *   *Mitigation*: Tenant-based quotas, queue depth monitoring.
-*   **Race Conditions**: Simultaneous requests checking budget limits.
-    *   *Mitigation*: Atomic check-and-increment (Lua/Redis).
-
-### 4.4 Impersonation & Auth
-*   **Token Theft**: XSS stealing `localStorage` tokens.
-    *   *Mitigation*: Short-lived access tokens, `HttpOnly` refresh cookies (planned).
-*   **Tenant Confusion**: Manipulating `X-Tenant-ID`.
-    *   *Mitigation*: Deriving `tenantId` strictly from signed JWT `req.user.tenantId`.
-
-### 4.5 Data Exfiltration
-*   **Logging Leakage**: Logging full request bodies/headers (Secrets/PII).
-    *   *Mitigation*: `pino-http` redaction, PII scrubbing.
-*   **Verbose Errors**: Stack traces in GraphQL errors.
-    *   *Mitigation*: `formatError` masking in production.
-
-### 4.6 Supply Chain
-*   **Malicious Dependencies**: Compromised npm/pypi packages.
-    *   *Mitigation*: `pnpm-lock.yaml`, dependency auditing (Wave U).
-
-## 5. Top Threats & Mitigations
-| Threat ID | Description | Likelihood | Impact | Mitigation Status |
+| Threat ID | Description | Component | Mitigation | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **T-01** | **Prompt Injection** leading to data leak | High | High | Partial (Sanitization) |
-| **T-02** | **Tenant Cross-Talk** via Graph Query | Low | Critical | Strong (Tenant Isolation Clauses) |
-| **T-03** | **Budget Exhaustion** via DoS | Medium | Medium | Strong (Quota Manager) |
-| **T-04** | **Secret Leakage** in Logs | Medium | High | Partial (Redaction Policy needed) |
-| **T-05** | **Malicious Dependency** | Low | Critical | Weak (Manual audit only) |
+| **S-01** | Attacker mimics a legitimate user using a forged JWT. | `AuthService` | **Control:** JWTs signed with RSA-256 (RS256) from OIDC provider. **Verification:** Signature verification in `productionAuthMiddleware`. | ✅ Protected |
+| **S-02** | Developer bypassing auth in Production. | `AuthMiddleware` | **Control:** `NODE_ENV=production` forces strict auth; dev-mode mock user disabled. | ✅ Protected |
+| **S-03** | Webhook spoofing (e.g., fake Stripe event). | `Webhooks` | **Control:** Signature verification (HMAC) on webhook payloads. | ✅ Protected |
 
-## 6. Known Gaps
-Current security gaps identified for remediation in Wave U.
+### 3.2 Tampering (Integrity)
 
-1.  **Dependency Auditing**: Currently manual. No automated alerts for new vulnerabilities.
-2.  **Secret Scanning**: No pre-commit or CI check for secrets. Reliance on developer discipline.
-3.  **SAST Baseline**: Minimal linting for security patterns (e.g., `no-eval`, unsafe regex).
-4.  **Incident Runbook**: No formalized process for security incidents or vulnerability disclosure.
-5.  **Log Redaction**: Inconsistent application of redaction rules across services.
+| Threat ID | Description | Component | Mitigation | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **T-01** | Modification of Audit Logs. | `ProvenanceLedger` | **Control:** Logs are written to WORM-compliant tables (append-only) with cryptographic chaining. | ✅ Protected |
+| **T-02** | Supply Chain Injection (malicious npm package). | `Build System` | **Control:** Locked `pnpm-lock.yaml`, SBOM generation, CI dependency scanning. | ✅ Protected |
+| **T-03** | Request Body Modification in transit. | `API Gateway` | **Control:** TLS 1.2+ required. `auditFirstMiddleware` captures raw request signature. | ✅ Protected |
 
-## 7. Next Hardening Steps (Wave U)
-Roadmap for immediate security improvements.
+### 3.3 Repudiation (Logging)
 
-1.  **Automate Dependency Audit**: Implement warn-only check in CI (U3).
-2.  **Implement Secret Scanning**: Add `secret-scan` script and CI job (U4).
-3.  **Establish Security Gates**: Create a "sec-verify" aggregator (U5).
-4.  **Harden SAST**: Add security-focused ESLint rules (U6).
-5.  **Formalize Documentation**: Publish Incident Runbook, Vuln Disclosure, and Log Redaction Policy (U7, U8).
+| Threat ID | Description | Component | Mitigation | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **R-01** | Admin denies performing a sensitive action. | `AuditSystem` | **Control:** `auditLogger` records `sub`, `tenant_id`, `ip`, and `action` for every write operation. | ✅ Protected |
+| **R-02** | AI Agent denies executing a dangerous tool. | `Maestro` | **Control:** All agent tool executions are recorded in the `Activity` stream with input/output snapshots. | ✅ Protected |
+
+### 3.4 Information Disclosure (Privacy)
+
+| Threat ID | Description | Component | Mitigation | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **I-01** | PII leakage to LLM providers. | `LLM Gateway` | **Control:** `piiGuardMiddleware` scans and redacts sensitive entities (Names, SSN, Credit Cards) before upstream transmission. | ✅ Protected |
+| **I-02** | Cross-Tenant Data Leak (Tenant A sees Tenant B). | `API/Graph` | **Control:** `tenantContextMiddleware` enforces header consistency. `TenantIsolationGuard` validates access. Database queries inject `tenant_id` clauses. | ✅ Protected |
+| **I-03** | Stack trace exposure in API errors. | `ErrorHandler` | **Control:** `centralizedErrorHandler` suppresses stack traces in production (returns generic 500). | ✅ Protected |
+
+### 3.5 Denial of Service (Availability)
+
+| Threat ID | Description | Component | Mitigation | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **D-01** | API Flooding. | `RateLimiter` | **Control:** `advancedRateLimiter` enforces per-IP and per-Tenant quotas. | ✅ Protected |
+| **D-02** | Complex GraphQL Query ("DoS by Complexity"). | `GraphQL` | **Control:** `depthLimit` (max depth 6), `rateLimitAndCachePlugin` (complexity scoring), `circuitBreakerMiddleware`. | ✅ Protected |
+| **D-03** | LLM Cost Exhaustion (Wallet Drain). | `Maestro` | **Control:** `TenantIsolationGuard` enforces `llmSoftCeiling` and hard caps per tenant. | ✅ Protected |
+
+### 3.6 Elevation of Privilege (Authorization)
+
+| Threat ID | Description | Component | Mitigation | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **E-01** | Standard user accessing Admin API. | `RBAC` | **Control:** `ensureRole('admin')` middleware on `/api/admin/*` and `/api/compliance/*`. | ✅ Protected |
+| **E-02** | Tenant User escaping to another Tenant. | `Tenancy` | **Control:** `tenantContextMiddleware` validates that the token claim `tenant_id` matches the route parameter. | ✅ Protected |
+
+---
+
+## 4. Residual Risks
+
+1.  **Insider Threat:** A compromised DB admin has full access. *Mitigation: Database access logging (partial).*
+2.  **Zero-Day Dependency:** `pnpm audit` runs in CI, but zero-days exist. *Mitigation: WAF, Runtime protection.*
+3.  **Model Hallucination:** Agents may generate incorrect but plausible security assertions. *Mitigation: Human-in-the-loop for high-stakes decisions.*
