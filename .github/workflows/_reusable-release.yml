@@ -63,7 +63,7 @@ jobs:
             release-bundle/compliance-bundle-v${{ inputs.version }}.tgz \
             -C release-bundle/compliance .
       - name: Upload release artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-bundle
           path: release-bundle/
