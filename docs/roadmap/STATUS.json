@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2025-12-31T22:18:34Z",
+  "revision_note": "Recorded MVP GA launch sprint prompt covering GA lock, evidence pack v1, onboarding, and telemetry feedback loop",
   "initiatives": [
     {
       "id": "A",
