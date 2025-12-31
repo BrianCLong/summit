@@ -1,6 +1,13 @@
 /**
  * Post-Quantum Cryptography Implementation
  *
+ * ⚠️ SECURITY WARNING: This module contains simplified/placeholder implementations
+ * for demonstration and testing purposes only. DO NOT use in production.
+ *
+ * ✅ SCAFFOLD GATED: This implementation is intentionally disabled in production.
+ * For production post-quantum cryptography, use the server QuantumResistantCryptoService
+ * which integrates with the @intelgraph/post-quantum-crypto package.
+ *
  * Implements quantum-resistant cryptographic algorithms and protocols
  * for securing active measures operations against quantum computing threats.
  *
@@ -9,6 +16,30 @@
 
 import * as crypto from 'crypto';
 import * as forge from 'node-forge';
+
+/**
+ * Feature gate for post-quantum crypto module
+ * Set to 'true' ONLY in development/testing environments
+ */
+const PQC_MODULE_ENABLED = process.env.ENABLE_PQC_DEMO_MODULE === 'true';
+
+/**
+ * Security warning for development use
+ */
+if (PQC_MODULE_ENABLED) {
+  console.warn(
+    '\n' +
+    '╔════════════════════════════════════════════════════════════════╗\n' +
+    '║  ⚠️  POST-QUANTUM CRYPTO DEMO MODULE ENABLED                  ║\n' +
+    '║                                                                ║\n' +
+    '║  This module uses simplified/placeholder implementations       ║\n' +
+    '║  and is NOT secure for production use.                        ║\n' +
+    '║                                                                ║\n' +
+    '║  For production, use server/QuantumResistantCryptoService     ║\n' +
+    '║  with @intelgraph/post-quantum-crypto                         ║\n' +
+    '╚════════════════════════════════════════════════════════════════╝\n'
+  );
+}
 
 export interface PQCConfig {
   algorithm: PQCAlgorithm;
@@ -82,20 +113,53 @@ export enum PQCSecurityLevel {
 
 /**
  * Post-Quantum Cryptography Engine
+ *
+ * ⚠️ SECURITY WARNING: Contains simplified implementations
+ * This class is GATED and will throw errors in production unless explicitly enabled
  */
 export class PostQuantumCryptoEngine {
   private keyStore: Map<string, PQCKeyPair> = new Map();
   private config: PQCConfig;
 
   constructor(config: PQCConfig) {
+    // ✅ SECURITY GATE: Prevent instantiation in production
+    if (!PQC_MODULE_ENABLED) {
+      throw new Error(
+        'PostQuantumCryptoEngine is disabled in production. ' +
+        'This module contains simplified/placeholder implementations and is NOT secure. ' +
+        'For production use, import { quantumCryptoService } from "../server/src/services/QuantumResistantCryptoService" ' +
+        'which uses the @intelgraph/post-quantum-crypto package with real NIST PQC algorithms. ' +
+        'To enable this demo module in development only, set ENABLE_PQC_DEMO_MODULE=true'
+      );
+    }
+
+    console.warn('[PQC-DEMO] Initializing DEMO post-quantum crypto engine (NOT FOR PRODUCTION)');
     this.config = config;
   }
 
   /**
+   * Security check before any cryptographic operation
+   */
+  private checkEnabled(): void {
+    if (!PQC_MODULE_ENABLED) {
+      throw new Error(
+        'PostQuantumCryptoEngine is disabled. This is a demo/testing module only. ' +
+        'Use server/QuantumResistantCryptoService for production.'
+      );
+    }
+  }
+
+  /**
    * Generate a post-quantum key pair
+   *
+   * ⚠️ DEMO IMPLEMENTATION: Uses simplified algorithms, not production-ready
    */
   async generateKeyPair(algorithm?: PQCAlgorithm): Promise<PQCKeyPair> {
+    this.checkEnabled();
+
     const alg = algorithm || this.config.algorithm;
+
+    console.warn(`[PQC-DEMO] Generating ${alg} key pair with SIMPLIFIED implementation`);
 
     switch (alg) {
       case PQCAlgorithm.CRYSTALS_KYBER:
@@ -272,12 +336,17 @@ export class PostQuantumCryptoEngine {
 
   /**
    * Encrypt data using post-quantum algorithms
+   *
+   * ⚠️ DEMO IMPLEMENTATION: Uses simplified encryption, NOT quantum-resistant in practice
    */
   async encrypt(
     data: Buffer,
     publicKey: PQCPublicKey,
     hybrid: boolean = false,
   ): Promise<PQCEncryptedData> {
+    this.checkEnabled();
+    console.warn(`[PQC-DEMO] Encrypting with SIMPLIFIED ${publicKey.algorithm}`);
+
     if (hybrid) {
       return this.hybridEncrypt(data, publicKey);
     }
@@ -294,11 +363,16 @@ export class PostQuantumCryptoEngine {
 
   /**
    * Decrypt data using post-quantum algorithms
+   *
+   * ⚠️ DEMO IMPLEMENTATION: Uses simplified decryption, NOT quantum-resistant in practice
    */
   async decrypt(
     encryptedData: PQCEncryptedData,
     privateKey: PQCPrivateKey,
   ): Promise<Buffer> {
+    this.checkEnabled();
+    console.warn(`[PQC-DEMO] Decrypting with SIMPLIFIED ${encryptedData.algorithm}`);
+
     switch (encryptedData.algorithm) {
       case PQCAlgorithm.CRYSTALS_KYBER:
         return this.kyberDecrypt(encryptedData, privateKey);
@@ -313,8 +387,13 @@ export class PostQuantumCryptoEngine {
 
   /**
    * Sign data using post-quantum digital signatures
+   *
+   * ⚠️ DEMO IMPLEMENTATION: Uses HMAC/SHA256, NOT real post-quantum signatures
    */
   async sign(data: Buffer, privateKey: PQCPrivateKey): Promise<PQCSignature> {
+    this.checkEnabled();
+    console.warn(`[PQC-DEMO] Signing with SIMPLIFIED ${privateKey.algorithm} (HMAC, not real PQC)`);
+
     const nonce = crypto.randomBytes(32);
     const message = Buffer.concat([data, nonce]);
 
@@ -332,12 +411,17 @@ export class PostQuantumCryptoEngine {
 
   /**
    * Verify post-quantum digital signature
+   *
+   * ⚠️ DEMO IMPLEMENTATION: Uses HMAC/SHA256, NOT real post-quantum verification
    */
   async verify(
     data: Buffer,
     signature: PQCSignature,
     publicKey: PQCPublicKey,
   ): Promise<boolean> {
+    this.checkEnabled();
+    console.warn(`[PQC-DEMO] Verifying with SIMPLIFIED ${signature.algorithm} (HMAC, not real PQC)`);
+
     const message = Buffer.concat([data, signature.nonce]);
 
     switch (signature.algorithm) {
