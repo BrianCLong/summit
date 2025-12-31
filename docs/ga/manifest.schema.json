@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GA Release Manifest",
+  "description": "A manifest of all artifacts included in a General Availability release.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "description": "The release version, derived from the Git tag.",
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "git_ref": {
+      "description": "The Git commit hash the release was built from.",
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "build_timestamp": {
+      "description": "The UTC timestamp of the build.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifacts": {
+      "description": "A list of release artifacts.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The canonical name of the artifact component (e.g., 'server', 'client').",
+            "type": "string"
+          },
+          "file": {
+            "description": "The relative path to the artifact from the release directory root.",
+            "type": "string"
+          },
+          "hash": {
+            "description": "The SHA-256 hash of the artifact.",
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "sbom_ref": {
+            "description": "The relative path to the artifact's SBOM.",
+            "type": "string"
+          },
+          "provenance_ref": {
+            "description": "The relative path to the artifact's provenance document.",
+            "type": "string"
+          }
+        },
+        "required": ["name", "file", "hash", "sbom_ref", "provenance_ref"]
+      }
+    }
+  },
+  "required": ["version", "git_ref", "build_timestamp", "artifacts"]
+}
