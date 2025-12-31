@@ -277,6 +277,12 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
+!artifacts/
+!artifacts/learning/
+!artifacts/learning/status/
+!artifacts/learning/status/**
+!artifacts/learning/history/
+!artifacts/learning/history/**
 /dist
 .env
 sbom.json

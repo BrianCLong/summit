@@ -1,0 +1,26 @@
+name: verify-learning-change
+
+on:
+  pull_request:
+    paths:
+      - "docs/governance/**"
+      - "scripts/learning/**"
+      - "scripts/ci/verify-learning-change.sh"
+      - ".github/workflows/verify-learning-change.yml"
+  push:
+    branches: [main]
+    paths:
+      - "docs/governance/**"
+      - "scripts/learning/**"
+      - "scripts/ci/verify-learning-change.sh"
+      - ".github/workflows/verify-learning-change.yml"
+  workflow_dispatch: {}
+
+jobs:
+  verify-learning-change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify governance assets
+        run: ./scripts/ci/verify-learning-change.sh
