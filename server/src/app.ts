@@ -49,8 +49,6 @@ import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
@@ -137,9 +135,6 @@ import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 
 export const createApp = async () => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
