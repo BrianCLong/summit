@@ -1,6 +1,8 @@
 /**
  * Enhanced Tenant Validation Middleware
  * Provides comprehensive tenant isolation at API, DB, and cache layers
+ *
+ * ✅ SCAFFOLD ELIMINATED: Fixed regex injection vulnerability in Neo4j query handling
  */
 
 import { GraphQLError } from 'graphql';
@@ -20,6 +22,23 @@ export interface TenantValidationOptions {
   allowSystemAccess?: boolean;
   validateOwnership?: boolean;
   cacheScope?: 'tenant' | 'global' | 'user';
+}
+
+/**
+ * Configuration for Neo4j tenant enforcement
+ */
+export interface Neo4jTenantEnforcement {
+  /**
+   * If true, throw error if query doesn't include tenant filtering
+   * If false, log warning only
+   */
+  strict: boolean;
+
+  /**
+   * Node labels that require tenant isolation (e.g., ['Investigation', 'Entity'])
+   * If empty, all nodes are checked
+   */
+  requiredLabels?: string[];
 }
 
 /**
@@ -159,52 +178,166 @@ export class TenantValidator {
   }
 
   /**
-   * Validate and enhance Neo4j query with tenant constraints
+   * Prepare Neo4j query with tenant context parameter
+   *
+   * ✅ SECURITY FIX: Removed dangerous regex-based query rewriting
+   *
+   * PREVIOUS VULNERABILITY:
+   * - Used regex to inject tenant filtering into Cypher queries
+   * - Could be bypassed with formatting tricks
+   * - String manipulation instead of parameterization
+   * - Hardcoded node variable names (assumed 'n')
+   * - Skipped filtering if 'tenantId' string found anywhere
+   *
+   * NEW SECURE APPROACH:
+   * - Adds tenantId to parameters (safe parameterization)
+   * - Validates that query includes tenant filtering
+   * - Throws error if tenant isolation not explicitly implemented
+   * - Forces developers to write tenant-aware queries
+   *
+   * @param cypherQuery - Cypher query that MUST include tenant filtering
+   * @param parameters - Query parameters
+   * @param tenantContext - Tenant context to enforce
+   * @param enforcement - Enforcement configuration
+   * @returns Enhanced query parameters with tenantId
+   * @throws Error if query lacks tenant filtering and strict mode enabled
    */
-  static addTenantToNeo4jQuery(
+  static prepareTenantScopedNeo4jQuery(
     cypherQuery: string,
     parameters: Record<string, any>,
     tenantContext: TenantContext,
+    enforcement: Neo4jTenantEnforcement = { strict: true },
   ): { query: string; parameters: Record<string, any> } {
-    // Add tenant parameter
+    // Add tenant parameter to query parameters
     const enhancedParams = {
       ...parameters,
       tenantId: tenantContext.tenantId,
     };
 
-    // Inject tenant filtering into WHERE clauses
-    let enhancedQuery = cypherQuery;
+    // Validate that query includes tenant filtering
+    const hasTenantFilter = this.validateNeo4jTenantIsolation(
+      cypherQuery,
+      enforcement,
+    );
 
-    // Pattern to add tenant filtering to node matches
-    if (!cypherQuery.includes('tenantId')) {
-      // Add tenant constraint to MATCH patterns
-      enhancedQuery = enhancedQuery.replace(
-        /MATCH\s*\((\w+):(\w+)\)/g,
-        'MATCH ($1:$2 {tenantId: $tenantId})',
-      );
+    if (!hasTenantFilter) {
+      const errorMessage =
+        `SECURITY: Neo4j query lacks tenant isolation for tenant ${tenantContext.tenantId}. ` +
+        `All queries MUST filter by tenantId parameter. ` +
+        `Example: MATCH (n:Node {tenantId: $tenantId}) or WHERE n.tenantId = $tenantId`;
 
-      // Add tenant constraint to WHERE clauses
-      if (enhancedQuery.includes('WHERE')) {
-        enhancedQuery = enhancedQuery.replace(
-          /WHERE\s+/g,
-          'WHERE n.tenantId = $tenantId AND ',
-        );
-      } else if (enhancedQuery.includes('RETURN')) {
-        enhancedQuery = enhancedQuery.replace(
-          /RETURN/g,
-          'WHERE n.tenantId = $tenantId RETURN',
-        );
+      if (enforcement.strict) {
+        logger.error(errorMessage);
+        throw new Error(errorMessage);
+      } else {
+        logger.warn(errorMessage);
       }
     }
 
     logger.debug(
-      `Enhanced Neo4j query with tenant constraints for tenant ${tenantContext.tenantId}`,
+      `Prepared Neo4j query with tenant parameter for tenant ${tenantContext.tenantId}`,
     );
 
     return {
-      query: enhancedQuery,
+      query: cypherQuery,
       parameters: enhancedParams,
     };
+  }
+
+  /**
+   * Validate that a Neo4j query includes proper tenant isolation
+   *
+   * Checks for common patterns that indicate tenant filtering:
+   * - {tenantId: $tenantId} in node patterns
+   * - WHERE clauses with tenantId checks
+   * - SET tenantId = $tenantId for CREATE/MERGE
+   *
+   * @param query - Cypher query to validate
+   * @param enforcement - Enforcement configuration
+   * @returns true if query appears to include tenant filtering
+   */
+  private static validateNeo4jTenantIsolation(
+    query: string,
+    enforcement: Neo4jTenantEnforcement,
+  ): boolean {
+    const normalizedQuery = query.toLowerCase();
+
+    // Check for tenant filtering patterns
+    const hasTenantInNodePattern =
+      /\{[^}]*tenantid\s*:\s*\$tenantid[^}]*\}/i.test(query);
+    const hasTenantInWhere =
+      /where\s+[^;]*\.tenantid\s*=\s*\$tenantid/i.test(query);
+    const hasTenantInSet = /set\s+[^;]*\.tenantid\s*=\s*\$tenantid/i.test(
+      query,
+    );
+
+    // Query has tenant filtering if any pattern matches
+    const hasFiltering =
+      hasTenantInNodePattern || hasTenantInWhere || hasTenantInSet;
+
+    // If requiredLabels specified, validate they're present in query
+    if (enforcement.requiredLabels && enforcement.requiredLabels.length > 0) {
+      for (const label of enforcement.requiredLabels) {
+        const labelPattern = new RegExp(`:${label}\\b`, 'i');
+        if (labelPattern.test(query)) {
+          // This label is in the query - ensure it has tenant filtering nearby
+          const labelIndex = normalizedQuery.indexOf(`:${label.toLowerCase()}`);
+          const querySegment = normalizedQuery.slice(
+            Math.max(0, labelIndex - 100),
+            labelIndex + 200,
+          );
+
+          if (!querySegment.includes('tenantid')) {
+            logger.warn(
+              `Query includes label ${label} but lacks nearby tenant filtering`,
+            );
+            return false;
+          }
+        }
+      }
+    }
+
+    return hasFiltering;
+  }
+
+  /**
+   * Helper to build tenant-scoped MATCH clause
+   *
+   * @param nodeVar - Node variable name (e.g., 'n', 'user', 'inv')
+   * @param nodeLabel - Node label (e.g., 'Investigation', 'Entity')
+   * @param additionalProps - Additional properties to match
+   * @returns Cypher MATCH clause with tenant filtering
+   *
+   * @example
+   * buildTenantMatch('inv', 'Investigation', { status: 'active' })
+   * // Returns: "MATCH (inv:Investigation {tenantId: $tenantId, status: $status})"
+   */
+  static buildTenantMatch(
+    nodeVar: string,
+    nodeLabel: string,
+    additionalProps: Record<string, string> = {},
+  ): string {
+    const props = Object.keys(additionalProps)
+      .map((key) => `${key}: $${additionalProps[key]}`)
+      .join(', ');
+
+    const propsClause = props ? `, ${props}` : '';
+
+    return `MATCH (${nodeVar}:${nodeLabel} {tenantId: $tenantId${propsClause}})`;
+  }
+
+  /**
+   * Helper to build tenant-scoped WHERE clause
+   *
+   * @param nodeVar - Node variable name
+   * @returns Cypher WHERE clause for tenant filtering
+   *
+   * @example
+   * buildTenantWhere('n')
+   * // Returns: "n.tenantId = $tenantId"
+   */
+  static buildTenantWhere(nodeVar: string): string {
+    return `${nodeVar}.tenantId = $tenantId`;
   }
 
   /**
@@ -276,15 +409,19 @@ export class TenantValidator {
               TenantValidator.getTenantCacheKey(baseKey, tenantContext, scope),
             getTenantQueryConstraints: () =>
               TenantValidator.getTenantQueryConstraints(tenantContext),
-            addTenantToNeo4jQuery: (
+            prepareTenantNeo4jQuery: (
               query: string,
               params: Record<string, any>,
+              enforcement?: Neo4jTenantEnforcement,
             ) =>
-              TenantValidator.addTenantToNeo4jQuery(
+              TenantValidator.prepareTenantScopedNeo4jQuery(
                 query,
                 params,
                 tenantContext,
+                enforcement,
               ),
+            buildTenantMatch: TenantValidator.buildTenantMatch,
+            buildTenantWhere: TenantValidator.buildTenantWhere,
           };
 
           // Call original resolver with enhanced context
@@ -303,6 +440,8 @@ export class TenantValidator {
 export const {
   validateTenantAccess,
   getTenantCacheKey,
-  addTenantToNeo4jQuery,
+  prepareTenantScopedNeo4jQuery,
+  buildTenantMatch,
+  buildTenantWhere,
 } = TenantValidator;
 export const tenantMiddleware = TenantValidator.createTenantMiddleware;
