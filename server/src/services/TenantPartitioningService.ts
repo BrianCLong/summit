@@ -1045,17 +1045,67 @@ export class TenantPartitioningService extends EventEmitter {
   }
 
   private async executeStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would execute the actual command
-    // For now, simulate execution time
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.min(step.estimatedDuration * 10, 5000)),
-    );
+    logger.info(`Executing migration step: ${step.name}`, { command: step.command });
+    const startTime = Date.now();
+
+    try {
+      // Parse the command to identify action
+      const parts = step.command.split(' ');
+      const action = parts[0];
+
+      switch (action) {
+        case 'pg_dump':
+          // Example: pg_dump --tenant tenantId
+          // In a real K8s environment, this might trigger a Job or call a Sidecar
+          // Here we simulate the successful execution of the dump
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          break;
+
+        case 'allocate_partition':
+          // Example: allocate_partition --tenant tenantId --type type
+          // Logic to create new DB user, schema, or spin up RDS instance
+          // Here we assume schema-based isolation for 'shared_*' and 'dedicated_compute'
+          // We can execute SQL to create the schema
+          const tenantId = parts.find((p, i) => parts[i-1] === '--tenant');
+          if (tenantId) {
+             await this.db.query(`CREATE SCHEMA IF NOT EXISTS "${tenantId}"`);
+             logger.info(`Created schema for tenant ${tenantId}`);
+          }
+          break;
+
+        case 'migrate_data':
+          // Logic to restore data to new location
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          break;
+
+        case 'update_routing':
+           // Logic to update routing table/cache
+           await new Promise(resolve => setTimeout(resolve, 500));
+           break;
+
+        default:
+           // Fallback for simulation
+           await new Promise((resolve) =>
+             setTimeout(resolve, Math.min(step.estimatedDuration * 10, 1000)),
+           );
+      }
+    } catch (error) {
+       logger.error(`Failed to execute step ${step.name}`, error);
+       throw error;
+    }
   }
 
   private async validateStep(step: MigrationStep): Promise<void> {
-    // In a real implementation, this would run the validation command
-    // For now, simulate validation
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    logger.info(`Validating migration step: ${step.name}`);
+
+    // Simulate validation checks
+    // In production, this would query DB, check file existence, verify connectivity
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Basic probability of failure for simulation purposes (can be removed for prod)
+    if (Math.random() < 0.01) {
+       throw new Error(`Validation failed for ${step.name}: Random failure simulation`);
+    }
   }
 
   private async rollbackMigration(

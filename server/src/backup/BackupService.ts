@@ -112,12 +112,13 @@ export class BackupService {
       const pgDb = process.env.POSTGRES_DB || 'intelgraph_dev';
       const pgPassword = process.env.POSTGRES_PASSWORD || 'devpassword';
 
-      const cmd = `PGPASSWORD='${pgPassword}' pg_dump -h ${pgHost} -U ${pgUser} ${pgDb}`;
+      const env = { ...process.env, PGPASSWORD: pgPassword };
+      const cmd = `pg_dump -h ${pgHost} -U ${pgUser} ${pgDb}`;
 
       if (options.compress) {
-        await execAsync(`${cmd} | gzip > "${finalPath}"`);
+        await execAsync(`${cmd} | gzip > "${finalPath}"`, { env });
       } else {
-        await execAsync(`${cmd} > "${finalPath}"`);
+        await execAsync(`${cmd} > "${finalPath}"`, { env });
       }
 
       const stats = await fs.stat(finalPath);
@@ -183,7 +184,11 @@ export class BackupService {
               writeTarget.write(line);
           }
 
-          writeTarget.end();
+          if (outputStream) {
+             outputStream.end();
+          } else {
+             writeTarget.end();
+          }
 
           await new Promise<void>((resolve, reject) => {
               fileStream.on('finish', () => resolve());

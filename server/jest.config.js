@@ -83,7 +83,7 @@ export default {
     '/tests/plugins/',
     '/tests/db/',
     '/src/tests/narrative/',
-    '/src/services/__tests__/',
+
     '/src/middleware/__tests__/',
     '/src/maestro/mcp/__tests__/',
     '/src/queue/__tests__/',
@@ -158,7 +158,7 @@ export default {
     '/src/tests/audit/',
     '/src/tests/services/',
     '/src/tests/time-series-intelligence',
-    '/src/cache/__tests__/',
+
     '/src/ingestion/migration/__tests__/',
     '/src/trust-center/__tests__/',
     '/src/metering/__tests__/',
