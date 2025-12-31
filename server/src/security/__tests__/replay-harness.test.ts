@@ -3,6 +3,40 @@ import request from 'supertest';
 import path from 'path';
 import fs from 'fs';
 
+// Mock database BEFORE any module imports it
+const mockPool = {
+  query: jest.fn().mockResolvedValue({ rows: [] }),
+  connect: jest.fn().mockResolvedValue({
+    query: jest.fn().mockResolvedValue({ rows: [] }),
+    release: jest.fn(),
+  }),
+  end: jest.fn(),
+};
+
+jest.mock('../../config/database.js', () => ({
+  initializePostgres: jest.fn(),
+  getPostgresPool: () => mockPool,
+  closePostgresPool: jest.fn(),
+}));
+
+// Mock audit system to prevent it from trying to initialize
+jest.mock('../../audit/advanced-audit-system.js', () => ({
+  AdvancedAuditSystem: {
+    getInstance: jest.fn().mockReturnValue({
+      logEvent: jest.fn(),
+      logSecurityEvent: jest.fn(),
+      flush: jest.fn(),
+    }),
+  },
+}));
+
+// Mock provenance ledger
+jest.mock('../../provenance/ledger.js', () => ({
+  ProvenanceLedger: jest.fn().mockImplementation(() => ({
+    recordEvent: jest.fn(),
+  })),
+}));
+
 // Mock config BEFORE importing app
 jest.mock('../../config.js', () => ({
   cfg: {

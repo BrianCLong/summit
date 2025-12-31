@@ -13,28 +13,29 @@ import { jest } from '@jest/globals';
 import { createJWTSecurityManager, JWTSecurityManager } from '../jwt-security';
 import { createClient } from 'redis';
 
-// Mock Redis
+// Create a shared mock Redis instance
+const mockRedis: any = {
+  connect: jest.fn(),
+  quit: jest.fn(),
+  get: jest.fn(),
+  set: jest.fn(),
+  setex: jest.fn(),
+  exists: jest.fn(),
+  keys: jest.fn(),
+  del: jest.fn(),
+  ping: jest.fn(),
+};
+
+// Mock Redis to always return the same instance
 jest.mock('redis', () => ({
-  createClient: jest.fn(() => ({
-    connect: jest.fn(),
-    quit: jest.fn(),
-    get: jest.fn(),
-    set: jest.fn(),
-    setex: jest.fn(),
-    exists: jest.fn(),
-    keys: jest.fn(),
-    del: jest.fn(),
-    ping: jest.fn(),
-  })),
+  createClient: jest.fn(() => mockRedis),
 }));
 
 describe('JWTSecurityManager', () => {
   let jwtManager: JWTSecurityManager;
-  let mockRedis: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRedis = (createClient as jest.Mock)();
     mockRedis.connect.mockResolvedValue(undefined);
     mockRedis.ping.mockResolvedValue('PONG');
     mockRedis.get.mockResolvedValue(null);
