@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2025-12-31T00:10:00Z",
+  "revision_note": "Added autonomous operations, debt governance, and continuous GA assurance track",
   "initiatives": [
     {
       "id": "A",
@@ -134,14 +134,62 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Autonomous Operations & GA Assurance",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Autonomy & Governance Tightening",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Governance principles not yet mapped one-to-one to OPA policies or CI gates",
+          "blockers": [
+            "Requires policy mapping table",
+            "Needs drift detection feed into incident pipeline"
+          ],
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F2",
+          "name": "Technical Debt Ledger & Budgeting",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Debt ledger model and CI metadata validation not present",
+          "blockers": ["Implement debt ledger schema", "Add CI guard for debt metadata"],
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F3",
+          "name": "Autonomous Guardrails for Agents & Copilot",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Tiered autonomy enforcement and safe suggestion flows not wired into policy engine",
+          "blockers": ["Design autonomy levels", "Add policy-driven safe suggestions"],
+          "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "F4",
+          "name": "Continuous GA Self-Check",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Nightly GA self-check job and status report artifacts not implemented",
+          "blockers": ["Create GA self-check workflow", "Surface GA status in admin UI"],
+          "target_completion": "Sprint N+1 (critical)"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 5,
-    "total": 11,
-    "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
+    "not_started": 9,
+    "total": 15,
+    "ga_blockers": [
+      "C2: Immutable Audit Log must be completed for GA compliance",
+      "F4: Continuous GA Self-Check must run and surface artifacts before GA sign-off"
+    ]
   }
 }
