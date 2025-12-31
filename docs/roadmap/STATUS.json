@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2025-12-31T00:45:00Z",
+  "revision_note": "Added Summit Agent Stack blueprint covering OSINT, threat intel triage, and investigative assistants on IntelGraph",
   "initiatives": [
     {
       "id": "A",
@@ -12,7 +12,10 @@
           "status": "incomplete",
           "owner": "Jules",
           "evidence": "No dedicated vector store service found in /server/src/services/",
-          "blockers": ["Need to implement vector store service", "No storage backend configured"],
+          "blockers": [
+            "Need to implement vector store service",
+            "No storage backend configured"
+          ],
           "target_completion": "Sprint N+1"
         },
         {
@@ -21,7 +24,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "GraphRAGService.ts exists; ingestion incomplete",
-          "blockers": ["Missing source connectors", "Incomplete processing pipeline"],
+          "blockers": [
+            "Missing source connectors",
+            "Incomplete processing pipeline"
+          ],
           "target_completion": "Sprint N+1"
         },
         {
@@ -43,7 +49,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "blockers": [
+            "Need connector registry",
+            "Missing connector lifecycle management"
+          ],
           "target_completion": "Sprint N+2"
         },
         {
@@ -52,7 +61,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         },
         {
@@ -61,7 +72,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -134,6 +147,36 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Summit Agent Stack",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "OSINT & Influence Analyst",
+          "status": "planned",
+          "owner": "Jules",
+          "evidence": "Blueprint defined in ga-graphai/docs/summit-agent-stack.md covering planning, de-duplication, and outputs",
+          "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "F2",
+          "name": "Threat Intel / Incident Triage",
+          "status": "planned",
+          "owner": "Jules",
+          "evidence": "Agentic flow and tooling needs documented in ga-graphai/docs/summit-agent-stack.md",
+          "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "F3",
+          "name": "Investigative Research Assistant",
+          "status": "planned",
+          "owner": "Jules",
+          "evidence": "Research assistant orchestration and evaluation defined in ga-graphai/docs/summit-agent-stack.md",
+          "target_completion": "Sprint N+3"
+        }
+      ]
     }
   ],
   "summary": {
@@ -141,7 +184,10 @@
     "partial": 2,
     "incomplete": 2,
     "not_started": 5,
-    "total": 11,
-    "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
+    "planned": 3,
+    "total": 14,
+    "ga_blockers": [
+      "C2: Immutable Audit Log must be completed for GA compliance"
+    ]
   }
 }
