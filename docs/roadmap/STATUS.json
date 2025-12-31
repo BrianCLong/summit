@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2025-12-31T00:35:00Z",
+  "revision_note": "Added frontier multimodal IntelGraph Assist pilot with flash + thinking lanes and narrative/guardrail scope",
   "initiatives": [
     {
       "id": "A",
@@ -134,14 +134,44 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Frontier Multimodal IntelGraph Assist",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Flash triage lane for multimodal intake",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Plan defined in docs/roadmaps/multimodal-intelgraph-assist.md covering adapters and triage prompts",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F2",
+          "name": "Thinking lane for hypothesis and corroboration",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Covers hypothesis lattice and corroboration loop in docs/roadmaps/multimodal-intelgraph-assist.md",
+          "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "F3",
+          "name": "Narrative, observability, and guardrails",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Narrative templates, SME scoring, SLOs, and guardrails captured in docs/roadmaps/multimodal-intelgraph-assist.md",
+          "target_completion": "Sprint N+2"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 5,
-    "total": 11,
+    "not_started": 8,
+    "total": 14,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }
