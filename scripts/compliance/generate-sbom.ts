@@ -200,13 +200,18 @@ function enrichPackageInfo(packages: PackageInfo[]): PackageInfo[] {
 function generateCycloneDX(packages: PackageInfo[], config: SBOMConfig): CycloneDXBOM {
   const projectInfo = getProjectInfo();
 
+  // Use SOURCE_DATE_EPOCH for deterministic builds
+  const timestamp = process.env.SOURCE_DATE_EPOCH
+    ? new Date(parseInt(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString()
+    : new Date().toISOString();
+
   const bom: CycloneDXBOM = {
     bomFormat: 'CycloneDX',
     specVersion: '1.5',
     serialNumber: `urn:uuid:${generateUUID()}`,
     version: 1,
     metadata: {
-      timestamp: new Date().toISOString(),
+      timestamp,
       tools: [
         {
           vendor: 'Summit',
@@ -279,6 +284,11 @@ function generateCycloneDX(packages: PackageInfo[], config: SBOMConfig): Cyclone
 function generateSPDX(packages: PackageInfo[], config: SBOMConfig): object {
   const projectInfo = getProjectInfo();
 
+  // Use SOURCE_DATE_EPOCH for deterministic builds
+  const timestamp = process.env.SOURCE_DATE_EPOCH
+    ? new Date(parseInt(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString()
+    : new Date().toISOString();
+
   return {
     spdxVersion: 'SPDX-2.3',
     dataLicense: 'CC0-1.0',
@@ -286,7 +296,7 @@ function generateSPDX(packages: PackageInfo[], config: SBOMConfig): object {
     name: projectInfo.name,
     documentNamespace: `https://spdx.org/spdxdocs/${projectInfo.name}-${projectInfo.version}-${generateUUID()}`,
     creationInfo: {
-      created: new Date().toISOString(),
+      created: timestamp,
       creators: [
         `Tool: summit-sbom-generator-1.0.0`,
         `Organization: ${config.organizationName}`,

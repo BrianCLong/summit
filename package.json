@@ -75,8 +75,9 @@
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
     "compliance:check": "npx tsx scripts/compliance/check_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
-    "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
-    "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "generate:sbom": "npx tsx scripts/compliance/generate-sbom.ts",
+    "generate:provenance": "npx tsx scripts/compliance/generate-provenance.ts",
+    "verify:provenance": "npx tsx scripts/compliance/verify-provenance-and-sbom.ts",
     "prepare": "husky"
   },
   "keywords": [
