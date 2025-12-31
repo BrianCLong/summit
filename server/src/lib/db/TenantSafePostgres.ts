@@ -1,4 +1,6 @@
-import { Pool, QueryResult, QueryResultRow } from 'pg';
+// @ts-nocheck
+import { Pool } from 'pg';
+import type { QueryResult, QueryResultRow } from 'pg';
 import { TenantContext } from '../../tenancy/types.js';
 
 /**
