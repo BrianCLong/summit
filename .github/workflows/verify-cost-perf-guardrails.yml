@@ -1,0 +1,25 @@
+name: verify-cost-perf-guardrails
+
+on:
+  pull_request:
+    branches: ["*"]
+  workflow_dispatch: {}
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node (for repo tooling)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Run guardrails
+        env:
+          GUARDRAILS_DISABLED: ${{ vars.GUARDRAILS_DISABLED || 'false' }}
+        run: |
+          chmod +x scripts/verify_cost_perf_guardrails.sh
+          ./scripts/verify_cost_perf_guardrails.sh artifacts/cost_perf/latest.json
