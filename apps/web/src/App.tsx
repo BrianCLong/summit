@@ -197,16 +197,19 @@ function App() {
                       <Route path="help" element={<HelpPage />} />
                       <Route path="changelog" element={<ChangelogPage />} />
 
-                      {demoModeEnabled && (
-                        <Route
-                          path="demo"
-                          element={
+                      {/* Explicitly Gated Demo Routes */}
+                      <Route
+                        path="demo"
+                        element={
+                          demoModeEnabled ? (
                             <DemoModeGate>
                               <DemoControlPage />
                             </DemoModeGate>
-                          }
-                        />
-                      )}
+                          ) : (
+                            <Navigate to="/" replace />
+                          )
+                        }
+                      />
                       {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
 
                       {/* Catch all */}
