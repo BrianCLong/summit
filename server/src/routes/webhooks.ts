@@ -60,6 +60,51 @@ const verifyGitHubSignature = (req: any, res: any, next: any) => {
   next();
 };
 
+// Jira Secret Verification Middleware
+const verifyJiraSecret = (req: any, res: any, next: any) => {
+  const secret = process.env.JIRA_WEBHOOK_SECRET;
+
+  // Skip verification if secret is not configured
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn('JIRA_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+    }
+    return next();
+  }
+
+  // Check for secret in header or query param (common Jira patterns)
+  const incomingSecret = req.headers['x-webhook-secret'] || req.query.secret;
+
+  if (!incomingSecret || incomingSecret !== secret) {
+    logger.warn('Jira webhook rejected: Invalid secret');
+    return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
+  }
+
+  next();
+};
+
+// Lifecycle Secret Verification Middleware
+const verifyLifecycleSecret = (req: any, res: any, next: any) => {
+  const secret = process.env.LIFECYCLE_WEBHOOK_SECRET;
+
+  // Skip verification if secret is not configured
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      logger.warn('LIFECYCLE_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+    }
+    return next();
+  }
+
+  const incomingSecret = req.headers['x-lifecycle-secret'] || req.headers['x-webhook-secret'];
+
+  if (!incomingSecret || incomingSecret !== secret) {
+    logger.warn('Lifecycle webhook rejected: Invalid secret');
+    return res.status(401).json({ error: 'Unauthorized: Invalid webhook secret' });
+  }
+
+  next();
+};
+
 // Helper for validation (for new routes)
 const validate = (schema: any) => (req: any, res: any, next: any) => {
   try {
@@ -487,6 +532,7 @@ router.post(
  */
 router.post(
   '/jira',
+  verifyJiraSecret,
   body('webhookEvent').isString(),
   body('issue').optional().isObject(),
   async (req, res) => {
@@ -582,6 +628,7 @@ router.post(
  */
 router.post(
   '/lifecycle',
+  verifyLifecycleSecret,
   body('event_type').isIn([
     'run_created',
     'run_completed',
