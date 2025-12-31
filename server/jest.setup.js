@@ -1,3 +1,4 @@
+/* eslint-env jest */
 // Global test setup
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-secret-at-least-32-chars-long-for-safety';
@@ -33,7 +34,7 @@ jest.mock('@opentelemetry/resource-detector-gcp', () => ({
 
 // Mock console.error to avoid noise but allow it to be spied on without throwing
 // unless we want to enforce no console.error
-const originalConsoleError = console.error;
-console.error = (...args) => {
-  // originalConsoleError(...args); // Uncomment to see errors
+const _originalConsoleError = console.error;
+console.error = (..._args) => {
+  // _originalConsoleError(..._args); // Uncomment to see errors
 };
