@@ -755,7 +755,7 @@ const CogSecCampaign = {
   },
 };
 
-const CogSecIncident = {
+const CogSecIncidentResolvers = {
   campaigns: async (incident: CogSecIncident) => {
     return [];
   },
@@ -770,7 +770,7 @@ const CogSecIncident = {
   },
 };
 
-const VerificationAppeal = {
+const VerificationAppealResolvers = {
   claim: async (appeal: VerificationAppeal) => {
     const { claims } = getServices();
     return claims.getClaim(appeal.claimId);
@@ -793,8 +793,8 @@ export const cognitiveSecurityResolvers = {
   Subscription,
   CogSecClaim,
   CogSecCampaign,
-  CogSecIncident,
-  VerificationAppeal,
+  CogSecIncident: CogSecIncidentResolvers,
+  VerificationAppeal: VerificationAppealResolvers,
 };
 
 export default cognitiveSecurityResolvers;
