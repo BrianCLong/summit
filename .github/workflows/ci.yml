@@ -114,11 +114,9 @@ jobs:
       - run: npm test -- --testPathPattern="governance" --bail
 
   provenance:
-    name: Provenance
-    needs: test
+    name: Provenance & SBOM (GA Blocking)
+    needs: [test, reproducible-build]
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -127,7 +125,28 @@ jobs:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: npm test -- --testPathPattern="provenance" --bail
+      - name: Build artifacts
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --pretty=format:%ct)
+          pnpm build
+      - name: Generate SBOM
+        run: pnpm generate:sbom
+      - name: Generate Provenance
+        run: pnpm generate:provenance
+      - name: Verify Provenance and SBOM
+        run: pnpm verify:provenance
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sbom
+          path: sbom/
+      - name: Upload Provenance artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: provenance
+          path: dist/provenance/
 
   schema-diff:
     name: Schema Diff
