@@ -20,6 +20,7 @@ import { featureFlagContextMiddleware } from './middleware/feature-flag-context.
 import { sanitizeInput } from './middleware/sanitization.js';
 import { piiGuardMiddleware } from './middleware/pii-guard.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { publicRateLimit, authenticatedRateLimit } from './middleware/rateLimiter.js';
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
@@ -190,6 +191,10 @@ export const createApp = async () => {
     }),
   );
 
+  // Rate limiting - applied early to prevent abuse
+  // Public rate limit applies to all routes as baseline protection
+  app.use(publicRateLimit);
+
   // Enhanced Pino HTTP logger with correlation and trace context
   app.use(
     pinoHttp({
@@ -280,6 +285,9 @@ export const createApp = async () => {
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
+
+  // Authenticated rate limiting for API and GraphQL routes
+  app.use(['/api', '/graphql'], authenticatedRateLimit);
 
   // Enforce Data Residency
   app.use(['/api', '/graphql'], residencyEnforcement);
