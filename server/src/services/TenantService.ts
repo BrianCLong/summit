@@ -217,6 +217,12 @@ export class TenantService {
     return this.mapRowToTenant(result.rows[0]);
   }
 
+  async listTenants(limit = 100, offset = 0): Promise<Tenant[]> {
+    const pool = getPostgresPool();
+    const result = await pool.query('SELECT * FROM tenants ORDER BY created_at DESC LIMIT $1 OFFSET $2', [limit, offset]);
+    return result.rows.map(this.mapRowToTenant);
+  }
+
   async updateSettings(
     tenantId: string,
     settings: Record<string, any>,
