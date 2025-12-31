@@ -1,0 +1,12 @@
+{
+  "id": "cf0ea895-53c1-4be6-92f4-6bf20c2a4964",
+  "version": "1.27.0",
+  "definition": {
+    "entities": [],
+    "edges": []
+  },
+  "changelog": "Test change",
+  "status": "DRAFT",
+  "createdAt": "2025-12-31T10:10:38.392Z",
+  "createdBy": "tester"
+}

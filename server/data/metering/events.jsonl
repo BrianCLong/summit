@@ -14,3 +14,5 @@
 {"data":{"kind":"ingest.units","source":"test","tenantId":"t1","units":10},"hash":"b294363199e9fc260772135edc20ecc7c7485218412631f6d217ec2416111dba","prevHash":"f209db4675086550438a30b64d6d7de8997e9d2e5466ca73c6d4ef17d990cc9c"}
 {"data":{"kind":"ingest.units","source":"test","tenantId":"t1","units":10},"hash":"f209db4675086550438a30b64d6d7de8997e9d2e5466ca73c6d4ef17d990cc9c","prevHash":""}
 {"data":{"kind":"ingest.units","source":"test","tenantId":"t1","units":10},"hash":"b294363199e9fc260772135edc20ecc7c7485218412631f6d217ec2416111dba","prevHash":"f209db4675086550438a30b64d6d7de8997e9d2e5466ca73c6d4ef17d990cc9c"}
+{"data":{"kind":"ingest.units","source":"test","tenantId":"t1","units":10},"hash":"f209db4675086550438a30b64d6d7de8997e9d2e5466ca73c6d4ef17d990cc9c","prevHash":""}
+{"data":{"kind":"ingest.units","source":"test","tenantId":"t1","units":10},"hash":"b294363199e9fc260772135edc20ecc7c7485218412631f6d217ec2416111dba","prevHash":"f209db4675086550438a30b64d6d7de8997e9d2e5466ca73c6d4ef17d990cc9c"}
