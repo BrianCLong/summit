@@ -5,7 +5,23 @@ on:
     branches: [main]
 
 jobs:
+  verify-compliance-integrity:
+    name: Verify Compliance Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for git diff
+
+      - name: Run compliance integrity check
+        run: |
+          bash ./scripts/verify-compliance-integrity.sh \
+            "${{ toJSON(github.event.pull_request.labels.*.name) }}" \
+            "${{ github.base_ref }}"
+
   security-scan:
+    needs: verify-compliance-integrity
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
     with:
