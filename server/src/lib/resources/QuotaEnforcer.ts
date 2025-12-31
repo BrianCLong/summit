@@ -33,7 +33,8 @@ export class QuotaEnforcer {
 
   private getLimits(tenantId: string): PlanLimits {
     const plan = quotaConfigService.getTenantPlan(tenantId);
-    const baseLimits = DEFAULT_PLANS[plan];
+    // Safe fallback if plan doesn't exist in DEFAULT_PLANS
+    const baseLimits = DEFAULT_PLANS[plan] || DEFAULT_PLANS['FREE'];
     const overrides = quotaConfigService.getTenantOverrides(tenantId);
 
     return {
@@ -54,6 +55,7 @@ export class QuotaEnforcer {
         tenant_id: tenantId,
         feature,
       });
+      logger.warn({ tenantId, feature }, 'Feature access denied');
     }
 
     return allowed;
@@ -75,6 +77,7 @@ export class QuotaEnforcer {
         tenant_id: tenantId,
         reason: 'api_rpm',
       });
+      logger.warn({ tenantId, limit: limits.api_rpm }, 'API quota exceeded');
     }
 
     return {
@@ -108,6 +111,7 @@ export class QuotaEnforcer {
         tenant_id: tenantId,
         reason: 'ingest_eps',
       });
+      logger.warn({ tenantId, limit: limits.ingest_eps }, 'Ingest quota exceeded');
     }
 
     return {
@@ -143,6 +147,7 @@ export class QuotaEnforcer {
         tenant_id: tenantId,
         reason: 'egress_day',
       });
+      logger.warn({ tenantId, limit: limitBytes }, 'Egress quota exceeded');
     }
 
     return {

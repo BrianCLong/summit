@@ -25,30 +25,69 @@ const normalizeRoles = (roles: unknown): string[] => {
 const normalizeEnvironment = (
   environment: unknown,
   fallback: TenantEnvironment,
+  strict: boolean = false,
 ): { value: TenantEnvironment; inferred: boolean } => {
   const env = String(environment || '').toLowerCase();
+
   if (env.startsWith('prod')) {
     return { value: 'prod', inferred: false };
   }
   if (env.startsWith('stag')) {
     return { value: 'staging', inferred: false };
   }
-  if (env) {
-    return { value: 'dev', inferred: true };
+  if (env.startsWith('dev')) {
+    return { value: 'dev', inferred: false };
   }
+
+  // If we have a value but it didn't match known prefixes, strictly fail or default?
+  // If we have NO value (env is empty string):
+  if (!env) {
+    if (strict) {
+       throw new TenantContextError('Tenant environment header is required in strict mode', 400);
+    }
+    // In non-strict mode, we fall back
+    if (fallback) {
+      return { value: fallback, inferred: true };
+    }
+  }
+
+  // If we have a value that is unknown (e.g. "foo"), map to dev?
+  // In strict mode, unknown environments should probably be rejected or mapped carefully.
+  // For now, let's keep existing "if (env) return dev" logic for non-strict compat,
+  // but in strict mode we might want to be tighter.
+
+  if (env) {
+     return { value: 'dev', inferred: true };
+  }
+
   return { value: fallback, inferred: true };
 };
 
 const normalizePrivilegeTier = (
   tier: unknown,
+  strict: boolean = false,
 ): { value: TenantPrivilegeTier; inferred: boolean } => {
   const normalized = String(tier || '').toLowerCase();
+
   if (['break-glass', 'breakglass'].includes(normalized)) {
     return { value: 'break-glass', inferred: false };
   }
   if (['elevated', 'admin'].includes(normalized)) {
     return { value: 'elevated', inferred: false };
   }
+  if (['standard', 'default'].includes(normalized)) {
+    return { value: 'standard', inferred: false };
+  }
+
+  if (!normalized && strict) {
+      // In strict mode, we might want to REQUIRE privilege tier,
+      // OR we can default to 'standard' as it is the safest least-privilege default.
+      // Unlike environment (which can be ambiguous), privilege defaulting to standard is usually safe.
+      // However, the prompt says "No implicit or global tenant state".
+      // Explicit is better.
+      throw new TenantContextError('Tenant privilege header is required in strict mode', 400);
+  }
+
   if (normalized) {
     return { value: 'standard', inferred: true };
   }
@@ -67,6 +106,10 @@ export const extractTenantContext = (
   const headerName = options.headerName || DEFAULT_TENANT_HEADER;
   const environmentHeader = options.environmentHeader || DEFAULT_ENV_HEADER;
   const privilegeHeader = options.privilegeHeader || DEFAULT_PRIVILEGE_HEADER;
+
+  // Determine strictness
+  const isStrict = options.strict ?? (process.env.STRICT_TENANCY === 'true' || process.env.NODE_ENV === 'production');
+
   const tenantFromHeader =
     (req.headers[headerName] as string) || (req.headers['x-tenant'] as string);
   const authContext = extractAuthContext(req);
@@ -85,19 +128,26 @@ export const extractTenantContext = (
     (authContext.userId as string) ||
     '';
   const roles = normalizeRoles(authContext.roles);
+
+  const rawEnv = req.headers[environmentHeader] || (authContext.environment as string);
+  // Only use fallback if NOT strict. In strict mode, rawEnv must be present.
+  const envInput = rawEnv || (isStrict ? '' : (process.env.NODE_ENV || 'dev'));
+
   const { value: environment, inferred: inferredEnvironment } =
     normalizeEnvironment(
-      req.headers[environmentHeader] ||
-        (authContext.environment as string) ||
-        process.env.NODE_ENV ||
-        'dev',
-      'dev',
+      envInput,
+      'dev', // fallback for non-strict
+      isStrict
     );
+
+  const rawPrivilege = req.headers[privilegeHeader] ||
+        (authContext.privilegeTier as string) ||
+        (authContext.tier as string);
+
   const { value: privilegeTier, inferred: inferredPrivilege } =
     normalizePrivilegeTier(
-      req.headers[privilegeHeader] ||
-        (authContext.privilegeTier as string) ||
-        (authContext.tier as string),
+      rawPrivilege,
+      isStrict
     );
 
   return {

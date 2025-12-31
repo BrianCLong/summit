@@ -101,6 +101,7 @@ import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
 import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
+import { adminRouter } from './routes/admin/index.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
