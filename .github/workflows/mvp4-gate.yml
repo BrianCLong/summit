@@ -56,10 +56,11 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Dependency Check
+      - name: Dependency Check (Critical CVEs - GA Gate)
         run: |
           echo "Scanning for Critical CVEs..."
-          # pnpm audit --audit-level critical # Uncomment when baseline clean
+          pnpm audit --audit-level critical # Enabled for GA - blocks on critical vulnerabilities
+        continue-on-error: false # Hard gate: block on critical vulnerabilities
 
   # 3. Policy Compliance
   policy-check:
