@@ -106,6 +106,13 @@ class IntelligenceFusionPipeline:
                     entity.attributes.update(updates)
                     delta = float(updates.get("confidence_delta", 0))
                     entity.confidence = _clamp(entity.confidence + delta, 0.05, 1.0)
+            if not entity.attributes.get("aliases"):
+                alias_seed = (
+                    entity.attributes.get("handle")
+                    or entity.attributes.get("email")
+                    or entity.id
+                )
+                entity.attributes["aliases"] = [alias_seed]
             enriched.append(entity)
         return enriched
 

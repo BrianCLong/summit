@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2025-12-31T00:22:44Z",
+  "revision_note": "Captured self-tuning narrative watcher pilot for persistent IntelGraph memory",
   "initiatives": [
     {
       "id": "A",
@@ -134,14 +134,28 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Self-Tuning Narrative Watcher",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Persistent Narrative Watcher Pilot",
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "Memory-backed reflection loop implemented in ga-graphai/packages/autonomous-investigator/narrative_watcher.py with pytest coverage",
+          "target_completion": "Sprint N+1"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
-    "partial": 2,
+    "partial": 3,
     "incomplete": 2,
     "not_started": 5,
-    "total": 11,
+    "total": 12,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

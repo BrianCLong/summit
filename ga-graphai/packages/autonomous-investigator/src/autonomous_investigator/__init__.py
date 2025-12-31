@@ -3,12 +3,26 @@
 from importlib import import_module
 from typing import Any
 
+from .case_report import (
+    build_cypher_preview,
+    build_graphrag_summary,
+    build_hypotheses,
+    build_results_table,
+    load_case_manifest,
+)
 from .fusion_pipeline import (
     CorrelationResult,
     FusionEntity,
     FusionOutcome,
     FusionPattern,
     IntelligenceFusionPipeline,
+)
+from .narrative_watcher import (
+    MemoryEntry,
+    MemoryStore,
+    NarrativeWatcher,
+    PerformanceSnapshot,
+    ReflectionReport,
 )
 
 __all__ = [
@@ -18,6 +32,16 @@ __all__ = [
     "FusionOutcome",
     "FusionPattern",
     "IntelligenceFusionPipeline",
+    "build_cypher_preview",
+    "build_graphrag_summary",
+    "build_hypotheses",
+    "build_results_table",
+    "load_case_manifest",
+    "MemoryEntry",
+    "MemoryStore",
+    "NarrativeWatcher",
+    "PerformanceSnapshot",
+    "ReflectionReport",
 ]
 
 
