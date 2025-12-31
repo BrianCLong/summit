@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/summit/governance/claims.schema.json",
+  "title": "Summit Claims Registry Schema",
+  "type": "object",
+  "required": ["version", "claims"],
+  "properties": {
+    "version": { "type": "string" },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "text",
+          "strength",
+          "scope",
+          "category",
+          "channels",
+          "owners",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z]+-[A-Z0-9]+-[0-9]{3,}$",
+            "description": "Stable claim ID, e.g. SUMMIT-CLAIM-001"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "approved", "deprecated", "blocked"]
+          },
+          "text": { "type": "string", "minLength": 10 },
+          "category": {
+            "type": "string",
+            "enum": [
+              "feature",
+              "architecture",
+              "security",
+              "compliance",
+              "performance",
+              "outcome",
+              "comparative",
+              "pricing",
+              "roadmap"
+            ]
+          },
+          "strength": {
+            "type": "string",
+            "enum": ["soft", "moderate", "strong"]
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["bounded", "general", "universal"]
+          },
+          "channels": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["internal", "partner", "public"] },
+            "minItems": 1
+          },
+          "owners": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 2 },
+            "minItems": 1
+          },
+          "reviewers": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["type", "ref"],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["code", "test", "doc", "gate", "benchmark", "audit", "link"]
+                },
+                "ref": { "type": "string", "minLength": 3 },
+                "notes": { "type": "string" }
+              }
+            }
+          },
+          "assumptions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "comparators": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date",
+            "description": "Optional expiration for time-sensitive claims"
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
