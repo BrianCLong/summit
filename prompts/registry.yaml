@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: marketing-pitch-system
+    version: v1
+    path: prompts/marketing-pitch-system.md
+    sha256: bac4a2aa25461a37ff1b6a112989444ed6ac60e671be8142ae480d361816f4f3
+    description: Two-layer prompt system for authoritative Summit marketing corpus generation and artifact refinement.
+    scope:
+      paths:
+        - prompts/
+        - docs/marketing/
+        - docs/communications/
+      domains:
+        - marketing
+        - positioning
+        - sales-enablement
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
