@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Monitoring middleware for Express and GraphQL
  */

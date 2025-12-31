@@ -182,14 +182,21 @@ export class PolicyProfileService {
 
       // Record specifically as TENANT_POLICY_APPLIED
       await provenanceLedger.appendEntry({
-        action: 'TENANT_POLICY_APPLIED',
-        actor: { id: actorId, role: 'admin' }, // Role might need to be dynamic
+        tenantId,
+        timestamp: new Date(),
+        actionType: 'TENANT_POLICY_APPLIED',
+        resourceType: 'PolicyProfile',
+        resourceId: profileId,
+        actorId,
+        actorType: 'user',
+        payload: {
+          mutationType: 'UPDATE',
+          entityId: profileId,
+          entityType: 'PolicyProfile',
+        },
         metadata: {
-          tenantId,
-          profileId,
           bundleHash: createHash('sha256').update(JSON.stringify(newBundle)).digest('hex'),
         },
-        artifacts: [],
       });
 
       await client.query('COMMIT');

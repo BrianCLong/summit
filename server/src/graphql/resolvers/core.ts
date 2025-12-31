@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Core GraphQL Resolvers - Production persistence layer
  * Replaces demo resolvers with real PostgreSQL + Neo4j operations

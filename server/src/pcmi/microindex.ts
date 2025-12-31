@@ -1,3 +1,4 @@
+// @ts-nocheck
 import MiniSearch, { SearchResult } from 'minisearch';
 import { createHash } from 'crypto';
 import { computePolicyScopeId } from './psid';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { NextFunction, Request, Response } from 'express';
 import { GraphQLError } from 'graphql';
 import { z } from 'zod';

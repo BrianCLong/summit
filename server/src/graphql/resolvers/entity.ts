@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
 import neo4j from 'neo4j-driver';

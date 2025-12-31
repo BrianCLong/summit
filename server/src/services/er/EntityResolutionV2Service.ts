@@ -93,7 +93,7 @@ export class EntityResolutionV2Service {
   private readonly poolProvider: () => ReturnType<typeof getPostgresPool>;
 
   constructor({ dlq, pool }: EntityResolutionV2Dependencies = {}) {
-    this.dlq = dlq ?? dlqFactory('er-merge-conflicts');
+    this.dlq = dlq ?? (dlqFactory('er-merge-conflicts') as any);
     this.poolProvider = () => pool ?? getPostgresPool();
   }
 

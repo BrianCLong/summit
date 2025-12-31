@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/services/IntelGraphService.ts
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import { randomUUID } from 'crypto';

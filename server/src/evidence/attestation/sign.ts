@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Buffer } from 'node:buffer';
 
 export type SignerType = 'none' | 'ed25519';

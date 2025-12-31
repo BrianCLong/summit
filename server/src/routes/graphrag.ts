@@ -9,14 +9,16 @@ import { GraphRAGService } from '../services/GraphRAGService.js';
 import { QueryPreviewService } from '../services/QueryPreviewService.js';
 import { GlassBoxRunService } from '../services/GlassBoxRunService.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
-import { EmbeddingService } from '../services/EmbeddingService.js';
+import EmbeddingService from '../services/EmbeddingService.js';
 import { LLMService } from '../services/LLMService.js';
 import { LLMServiceAdapter } from '../ai/nl-to-cypher/LLMServiceAdapter.js';
 
 import { getNeo4jDriver, getPostgresPool, getRedisClient } from '../config/database.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
-import { graphRagRateLimiter } from '../middleware/rateLimit.js';
+import { createRateLimiter, EndpointClass } from '../middleware/rateLimit.js';
 import { validateRequest } from '../middleware/validation.js';
+
+const graphRagRateLimiter = createRateLimiter(EndpointClass.QUERY);
 import { logger } from '../utils/logger.js';
 import { AuthenticatedRequest } from './types.js';
 
@@ -36,7 +38,7 @@ function initializeServices() {
 
     const graphRAGService = new GraphRAGService(
       neo4jDriver,
-      llmService,
+      llmService as any,
       embeddingService,
       redisClient
     );

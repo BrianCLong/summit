@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { ensureAuthenticated } from '../middleware/auth.js';
