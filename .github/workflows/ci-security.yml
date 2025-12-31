@@ -147,7 +147,7 @@ jobs:
             exit 1
           fi
       - name: Run Snyk test across all manifests
-        uses: snyk/actions/node@b98d498629f1c368650224d6d212bf7dfa89e4bf # 0.4.0
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
         with:
           command: test
           args: >-
