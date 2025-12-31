@@ -9,6 +9,9 @@ import { Queue, Worker, QueueEvents } from 'bullmq';
 import { logger } from '../utils/logger';
 import { coordinationService } from './coordination/service';
 import * as crypto from 'node:crypto';
+import { policyEngine, AgentContext } from './governance/policy';
+import { provenanceRecorder } from './governance/provenance';
+import { MaestroAgent } from './model';
 
 // Interface for dependencies
 interface MaestroDependencies {
@@ -25,6 +28,9 @@ export class MaestroEngine {
 
   constructor(private deps: MaestroDependencies) {
     this.db = deps.db;
+
+    // Initialize Provenance Persistence
+    provenanceRecorder.init(deps.db);
 
     // Initialize BullMQ
     this.queue = new Queue('maestro_v2', { connection: deps.redisConnection });
@@ -114,6 +120,13 @@ export class MaestroEngine {
       metadata: {}
     };
 
+    // 3.5 Initialize Provenance if Agent Run
+    if (run.metadata?.agentId || template.kind === 'agent') {
+       // Best effort initialization
+       const agentId = (run.metadata?.agentId as string) || templateId; // Fallback
+       await provenanceRecorder.startTrace(runId, agentId, tenantId, templateId);
+    }
+
     // 4. Compile Tasks
     const tasks = MaestroDSL.compileToTasks(template.spec, runId, tenantId, input);
 
@@ -190,6 +203,10 @@ export class MaestroEngine {
       backoffStrategy: taskRow.backoff_strategy
     };
 
+    // Fetch Run for Context
+    const runRes = await this.db.query(`SELECT * FROM maestro_runs WHERE id = $1`, [runId]);
+    const runRow = runRes.rows[0];
+
     // 2. Mark Running
     await this.db.query(
       `UPDATE maestro_tasks SET status = 'running', started_at = NOW(), attempt = attempt + 1 WHERE id = $1`,
@@ -197,16 +214,57 @@ export class MaestroEngine {
     );
 
     try {
-      // 2.5 Check Coordination Constraints (Budget, Kill-Switch)
+      // 2.5 Governance: Policy Check & Hard Caps
+      const agentId = (task.metadata?.agentId as string) || (runRow.metadata?.agentId as string);
+
+      if (agentId) {
+        const agent = await this.getAgent(agentId, tenantId);
+        if (agent) {
+          const usage = await this.getRunUsage(runId);
+          const context: AgentContext = {
+            tenantId,
+            agentId,
+            capabilities: agent.capabilities || [],
+            currentUsage: {
+              actions: usage.actions,
+              tokens: usage.tokens,
+              externalCalls: usage.externalCalls,
+              cost: usage.cost,
+              startTime: new Date(runRow.started_at).getTime()
+            }
+          };
+
+          // Map task kind to action for policy check
+          let action = task.kind;
+          if (task.kind === 'http_request') {
+             const method = (task.payload as any)?.method?.toLowerCase() || 'get';
+             action = `http.${method}`;
+          } else if (task.kind === 'script') {
+             action = 'script.exec';
+          }
+
+          const decision = await policyEngine.evaluateAction(context, {
+            action,
+            params: task.payload,
+            resource: (task.payload as any)?.url // Extract URL for HTTP requests
+          });
+
+          if (!decision.allowed) {
+            throw new Error(`Policy Violation: ${decision.reason} (${decision.violation})`);
+          }
+        }
+      }
+
+      // 2.6 Check Coordination Constraints (Budget, Kill-Switch)
       if (task.metadata?.coordinationId) {
         const coordId = task.metadata.coordinationId as string;
         // Assume task has a 'role' in metadata, or default to WORKER
         const role = (task.metadata.role as any) || 'WORKER';
         // We use the run's creator or a specific agentId if present
-        const agentId = (task.metadata.agentId as string) || 'unknown_agent';
+        const agentIdRef = (task.metadata.agentId as string) || 'unknown_agent';
 
         // Check if allowed to proceed
-        const allowed = coordinationService.validateAction(coordId, agentId, role);
+        const allowed = coordinationService.validateAction(coordId, agentIdRef, role);
         if (!allowed) {
           throw new Error(`Coordination constraints prevented execution for ${coordId}`);
         }
@@ -221,12 +279,57 @@ export class MaestroEngine {
         throw new Error(`No handler registered for task kind: ${task.kind}`);
       }
 
+      const startTime = Date.now();
       const result = await handler(task);
+      const duration = Date.now() - startTime;
 
       // 3.5 Consumne Token Budget if available
-      if (task.metadata?.coordinationId && result && typeof result === 'object' && result.usage?.totalTokens) {
+      let tokensUsed = 0;
+      if (result && typeof result === 'object' && result.usage?.totalTokens) {
+        tokensUsed = result.usage.totalTokens;
+      }
+
+      if (task.metadata?.coordinationId && tokensUsed > 0) {
         const coordId = task.metadata.coordinationId as string;
-        coordinationService.consumeBudget(coordId, { totalTokens: result.usage.totalTokens });
+        coordinationService.consumeBudget(coordId, { totalTokens: tokensUsed });
+      }
+
+      // 3.5.5 Update Usage Metrics
+      const externalCall = (task.kind === 'http_request' || task.kind === 'graph_job') ? 1 : 0;
+      await this.db.query(`
+        UPDATE maestro_runs
+        SET usage_metrics = jsonb_set(
+            jsonb_set(
+                jsonb_set(
+                    COALESCE(usage_metrics, '{}'::jsonb),
+                    '{total_actions}',
+                    (COALESCE(usage_metrics->>'total_actions','0')::int + 1)::text::jsonb
+                ),
+                '{total_tokens}',
+                (COALESCE(usage_metrics->>'total_tokens','0')::int + $1)::text::jsonb
+            ),
+            '{total_external_calls}',
+            (COALESCE(usage_metrics->>'total_external_calls','0')::int + $2)::text::jsonb
+        )
+        WHERE id = $3
+      `, [tokensUsed, externalCall, runId]);
+
+
+      // 3.6 Record Provenance
+      if (agentId) {
+        // Await logic to ensure order/durability
+        await provenanceRecorder.recordStep(runId, {
+            stepId: Date.now(), // Provisional ID
+            timestamp: new Date().toISOString(),
+            action: task.kind,
+            input: task.payload,
+            policyDecision: { allowed: true, reason: 'Policy check passed' },
+            output: result,
+            usage: {
+                tokens: tokensUsed,
+                durationMs: duration
+            }
+        });
       }
 
       // 4. Mark Succeeded
@@ -321,8 +424,41 @@ export class MaestroEngine {
         [runId, finalStatus]
       );
 
+      // Finalize Provenance Trace
+      await provenanceRecorder.finalizeTrace(runId, finalStatus as any);
+
       logger.info(`Run ${runId} completed with status ${finalStatus}`);
     }
+  }
+
+  private async getAgent(agentId: string, tenantId: string): Promise<MaestroAgent | null> {
+      const res = await this.db.query(
+          `SELECT * FROM maestro_agents WHERE id = $1 AND tenant_id = $2`,
+          [agentId, tenantId]
+      );
+      if (res.rows.length === 0) return null;
+      return res.rows[0];
+  }
+
+  private async getRunUsage(runId: string): Promise<{ actions: number; tokens: number; externalCalls: number; cost: number }> {
+      // Use cached metrics if available (preferred)
+      const res = await this.db.query(
+          `SELECT usage_metrics FROM maestro_runs WHERE id = $1`,
+          [runId]
+      );
+
+      const metrics = res.rows[0]?.usage_metrics;
+      if (metrics) {
+          return {
+              actions: parseInt(metrics.total_actions || '0'),
+              tokens: parseInt(metrics.total_tokens || '0'),
+              externalCalls: parseInt(metrics.total_external_calls || '0'),
+              cost: parseFloat(metrics.total_cost_usd || '0.0')
+          };
+      }
+
+      // Fallback (e.g. legacy runs or race condition where metrics are null)
+      return { actions: 0, tokens: 0, externalCalls: 0, cost: 0 };
   }
 
   private setupEventListeners() {
