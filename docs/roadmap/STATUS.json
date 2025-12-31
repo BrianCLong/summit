@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2025-12-31T23:44:03Z",
+  "revision_note": "Documented global active/active architecture, consistency, and residency controls for multi-region readiness.",
   "initiatives": [
     {
       "id": "A",
