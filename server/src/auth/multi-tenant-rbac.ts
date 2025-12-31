@@ -528,40 +528,115 @@ export class MultiTenantRBACManager {
 
   /**
    * Evaluate OPA policy
+   *
+   * ✅ SCAFFOLD ELIMINATED: Added proper OPA handling with fallback, logging, and error handling
+   *
+   * Decision flow:
+   * 1. If OPA client configured: Query OPA for additional policy checks
+   * 2. If OPA not configured and REQUIRE_OPA=true: Deny access
+   * 3. If OPA not configured and REQUIRE_OPA=false: Allow (RBAC already checked)
+   * 4. If OPA query fails: Fall back based on OPA_FAILURE_MODE
+   *
+   * @param user - User requesting access
+   * @param resource - Resource being accessed
+   * @param action - Action being performed
+   * @returns OPA policy decision
    */
   private async evaluateOPAPolicy(
     user: MultiTenantUser,
     resource: ResourceContext,
     action: string
   ): Promise<{ allowed: boolean; reason?: string; obligations?: AccessObligation[] }> {
+    const requireOPA = process.env.REQUIRE_OPA === 'true';
+    const opaFailureMode = process.env.OPA_FAILURE_MODE || 'allow'; // 'allow' | 'deny'
+
+    // Check if OPA client is configured
     if (!this.opaClient) {
+      if (requireOPA) {
+        // Strict mode: OPA required but not configured
+        logger.error('OPA policy evaluation required but OPA client not configured', {
+          userId: user.id,
+          resource: `${resource.type}:${resource.id}`,
+          action,
+        });
+        return {
+          allowed: false,
+          reason: 'OPA policy engine required but not configured',
+        };
+      }
+
+      // OPA not required - allow access (RBAC already validated)
+      logger.debug('OPA policy evaluation skipped (OPA client not configured)', {
+        userId: user.id,
+        resource: `${resource.type}:${resource.id}`,
+        action,
+      });
       return { allowed: true };
     }
 
-    const input = {
-      user: {
-        id: user.id,
-        tenant_id: user.tenantId,
-        roles: user.roles.map(r => r.role),
-        clearance: user.clearanceLevel,
-        attributes: user.attributes,
-        mfa_verified: user.mfaVerified,
-      },
-      resource: {
-        type: resource.type,
-        id: resource.id,
-        tenant_id: resource.tenantId,
-        classification: resource.classification,
-        tags: resource.tags,
-      },
-      action,
-      context: {
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV,
-      },
-    };
+    // Query OPA
+    try {
+      const input = {
+        user: {
+          id: user.id,
+          tenant_id: user.tenantId,
+          tenant_ids: user.tenantIds,
+          roles: user.roles.map(r => r.role),
+          clearance: user.clearanceLevel,
+          attributes: user.attributes,
+          mfa_verified: user.mfaVerified,
+        },
+        resource: {
+          type: resource.type,
+          id: resource.id,
+          tenant_id: resource.tenantId,
+          classification: resource.classification,
+          tags: resource.tags,
+          owner: resource.owner,
+        },
+        action,
+        context: {
+          timestamp: new Date().toISOString(),
+          environment: process.env.NODE_ENV,
+        },
+      };
 
-    return this.opaClient.evaluate(input);
+      const result = await this.opaClient.evaluate(input);
+
+      logger.debug('OPA policy evaluation completed', {
+        userId: user.id,
+        resource: `${resource.type}:${resource.id}`,
+        action,
+        allowed: result.allowed,
+        reason: result.reason,
+      });
+
+      return result;
+    } catch (error) {
+      // OPA query failed
+      logger.error('OPA policy evaluation failed', {
+        error: error instanceof Error ? error.message : String(error),
+        userId: user.id,
+        resource: `${resource.type}:${resource.id}`,
+        action,
+        failureMode: opaFailureMode,
+      });
+
+      // Handle based on failure mode
+      if (opaFailureMode === 'deny') {
+        return {
+          allowed: false,
+          reason: 'OPA policy evaluation failed (fail-closed mode)',
+        };
+      }
+
+      // Default: fail-open (allow access since RBAC already validated)
+      logger.warn('OPA evaluation failed but allowing access (fail-open mode)', {
+        userId: user.id,
+        resource: `${resource.type}:${resource.id}`,
+      });
+      return { allowed: true };
+    }
   }
 
   /**
