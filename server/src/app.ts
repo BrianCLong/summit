@@ -134,6 +134,7 @@ import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
+import graphragRouter from './routes/graphrag.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -444,6 +445,7 @@ export const createApp = async () => {
   app.use('/api/vector-store', vectorStoreRouter);
 
   app.use('/api/intel-graph', intelGraphRouter);
+  app.use('/api/graphrag', graphragRouter);
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
