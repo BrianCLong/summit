@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Enhanced Prometheus Metrics with Query Latency Heatmaps
  * Provides comprehensive monitoring including P50, P95, P99 latencies
@@ -10,8 +9,8 @@ import {
   Histogram,
   Summary,
 } from 'prom-client';
-import logger from '../utils/logger.js';
-import { registry } from '../monitoring/metrics.js';
+import { logger } from '../config/logger.js';
+import { register as registry } from '../monitoring/metrics.js';
 
 export { registry };
 
