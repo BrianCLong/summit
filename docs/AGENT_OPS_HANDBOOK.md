@@ -70,6 +70,14 @@ Velocity metrics are tracked in `.agentic-tasks.yaml` (or a central store). Key 
 - **Time to Merge:** Duration from PR open to merge.
 - **Revision Count:** Number of iterations required.
 
+### Human steering controls
+
+- **Backlog of record:** `TASK_BACKLOG.md` (set `mode: exploration|exploitation`, adjust priorities, mark human-only work).
+- **Activity ledger:** `AGENT_ACTIVITY.md` (log task IDs, branches, PR links, agent, status for each pickup or change).
+- **Guardrail enforcement:** `.github/workflows/agent-guardrails.yml` blocks PRs that touch restricted paths unless the `restricted-area-override` label or `"restricted_override": true` metadata token is present.
+- **Policy contract:** `AGENT_CONTRACT.md` (human-readable) and `agent-contract.json` (machine-readable) define allowed zones, restricted areas, and escalation paths.
+- **Override steps:** Apply the override label or metadata token, note rationale in the PR description, and keep the ledger/backlog synchronized.
+
 ## Safety & Governance
 
 - **Rate Limits:** Only N active tasks per lane are recommended.
