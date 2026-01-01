@@ -3,6 +3,33 @@
  * Stores STIX objects and relationships for graph-based analysis
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'devpassword', 'neo4j'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import neo4j, { Driver, Session, ManagedTransaction, Integer, Node, Relationship as Neo4jRelationship, Path, PathSegment } from 'neo4j-driver';
 import pino from 'pino';
 
@@ -77,7 +104,7 @@ export class Neo4jGraphStore {
   constructor(config: Neo4jGraphStoreConfig = {}) {
     const uri = config.uri || process.env.NEO4J_URI || 'bolt://localhost:7687';
     const username = config.username || process.env.NEO4J_USER || 'neo4j';
-    const password = config.password || process.env.NEO4J_PASSWORD || 'devpassword';
+    const password = config.password || requireSecret('NEO4J_PASSWORD', process.env.NEO4J_PASSWORD, 16);
     this.database = config.database || process.env.NEO4J_DATABASE || 'neo4j';
 
     this.driver = neo4j.driver(uri, neo4j.auth.basic(username, password), {

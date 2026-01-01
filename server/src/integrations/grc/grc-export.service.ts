@@ -1,3 +1,30 @@
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 32): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'default-key'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { pg } from '../../db/pg.js';
@@ -444,7 +471,7 @@ export class GRCExportService {
 
     // Package seal (HMAC signature)
     const seal = crypto
-      .createHmac('sha256', process.env.EVIDENCE_SIGNATURE_KEY || 'default-key')
+      .createHmac('sha256', requireSecret('EVIDENCE_SIGNATURE_KEY', process.env.EVIDENCE_SIGNATURE_KEY, 32))
       .update(`${packageId}:${tenantId}`)
       .digest('hex');
 
