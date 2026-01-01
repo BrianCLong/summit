@@ -5,6 +5,7 @@ import { logger } from '../utils/logger.js';
 import { getVariant, isEnabled } from '../lib/featureFlags.js';
 import { telemetryService } from '../analytics/telemetry/TelemetryService.js';
 import { auditTrailService } from '../services/audit/AuditTrailService.js';
+import { runCanary } from '../monitoring/canary.js';
 
 const router = Router();
 
@@ -27,6 +28,14 @@ interface ServiceHealthError {
 
 const buildDisabledResponse = (res: Response) =>
   res.status(404).json({ status: 'disabled', reason: 'HEALTH_ENDPOINTS_ENABLED is false' });
+
+router.get('/health/canary', async (req, res) => {
+  const result = await runCanary();
+  if (result.status === 'error') {
+    return res.status(503).json(result);
+  }
+  return res.json(result);
+});
 
 router.get('/healthz', (_req: Request, res: Response) => {
   if (!healthEndpointsEnabled()) {

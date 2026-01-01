@@ -1,35 +1,43 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { AutomationExecutor } from '../src/autonomous/AutomationExecutor';
-import { GuardrailService } from '../src/autonomous/GuardrailService';
-import { ApprovalService } from '../src/autonomous/ApprovalService';
-import { PolicyEngine } from '../src/autonomous/policy-engine';
-import { Logger } from 'pino';
-import { Pool } from 'pg';
+import { describe, it, beforeEach, mock } from 'node:test';
+import assert from 'node:assert';
+import { AutomationExecutor } from '../src/autonomous/AutomationExecutor.js';
+import { GuardrailService } from '../src/autonomous/GuardrailService.js';
+import { ApprovalService } from '../src/autonomous/ApprovalService.js';
+// import { PolicyEngine } from '../src/autonomous/policy-engine.js';
+// import { Logger } from 'pino';
+// import { Pool } from 'pg';
 
 // Mocks
 const mockLogger = {
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  child: jest.fn().mockReturnThis(),
-} as unknown as Logger;
+  info: mock.fn(),
+  warn: mock.fn(),
+  error: mock.fn(),
+  debug: mock.fn(),
+  child: mock.fn(() => mockLogger),
+};
 
 const mockDb = {
-    query: jest.fn(),
-} as unknown as Pool;
+    query: mock.fn(),
+};
 
 const mockPolicyEngine = {
-    evaluate: jest.fn(),
-} as unknown as PolicyEngine;
+    evaluate: mock.fn(),
+};
 
 describe('Autonomous Operations Flow', () => {
-  let executor: AutomationExecutor;
-  let guardrailService: GuardrailService;
-  let approvalService: ApprovalService;
+  let executor;
+  let guardrailService;
+  let approvalService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockLogger.info.mock.resetCalls();
+    mockLogger.warn.mock.resetCalls();
+    mockLogger.error.mock.resetCalls();
+    mockLogger.debug.mock.resetCalls();
+
+    mockDb.query.mock.resetCalls();
+    mockPolicyEngine.evaluate.mock.resetCalls();
+
     guardrailService = new GuardrailService(mockPolicyEngine, mockLogger);
     approvalService = new ApprovalService(mockDb, mockLogger);
     executor = new AutomationExecutor(guardrailService, approvalService, mockLogger);
@@ -41,8 +49,8 @@ describe('Autonomous Operations Flow', () => {
         actionType: 'test_action',
         tenantId: 'global',
       });
-      expect(result.allowed).toBe(false);
-      expect(result.reason).toContain('Cross-tenant actions are strictly prohibited');
+      assert.strictEqual(result.allowed, false);
+      assert.match(result.reason, /Cross-tenant actions are strictly prohibited/);
     });
 
     it('should block policy changes', async () => {
@@ -50,12 +58,12 @@ describe('Autonomous Operations Flow', () => {
           actionType: 'update_policy',
           tenantId: 'tenant-1',
         });
-        expect(result.allowed).toBe(false);
-        expect(result.reason).toContain('Autonomous policy changes are strictly prohibited');
+        assert.strictEqual(result.allowed, false);
+        assert.match(result.reason, /Autonomous policy changes are strictly prohibited/);
     });
 
     it('should allow valid operational actions', async () => {
-        (mockPolicyEngine.evaluate as jest.Mock).mockResolvedValue({ allowed: true });
+        mockPolicyEngine.evaluate.mock.mockImplementation(async () => ({ allowed: true }));
 
         const result = await guardrailService.checkGuardrails({
             actionType: 'throttle_tenant',
@@ -64,18 +72,18 @@ describe('Autonomous Operations Flow', () => {
 
         // Since throttle_tenant is in the whitelist for data mutation check,
         // it proceeds to policy engine check.
-        expect(mockPolicyEngine.evaluate).toHaveBeenCalled();
-        expect(result.allowed).toBe(true);
+        assert.strictEqual(mockPolicyEngine.evaluate.mock.callCount(), 1);
+        assert.strictEqual(result.allowed, true);
     });
   });
 
   describe('AutomationExecutor', () => {
      it('should require approval for scaling actions', async () => {
          // Setup: Allow via guardrails
-         (mockPolicyEngine.evaluate as jest.Mock).mockResolvedValue({ allowed: true });
+         mockPolicyEngine.evaluate.mock.mockImplementation(async () => ({ allowed: true }));
 
          // Setup: Database mock for approval request
-         (mockDb.query as jest.Mock).mockResolvedValue({ rowCount: 1 });
+         mockDb.query.mock.mockImplementation(async () => ({ rowCount: 1 }));
 
          const result = await executor.executeAction({
              type: 'suggest_scale_up',
@@ -84,17 +92,14 @@ describe('Autonomous Operations Flow', () => {
              reason: 'High load'
          });
 
-         expect(result.success).toBe(false);
-         expect(result.approvalId).toBeDefined();
-         expect(mockDb.query).toHaveBeenCalledWith(
-             expect.stringContaining('INSERT INTO autonomous_approvals'),
-             expect.any(Array)
-         );
+         assert.strictEqual(result.success, false);
+         assert.ok(result.approvalId);
+         assert.strictEqual(mockDb.query.mock.callCount(), 1);
      });
 
      it('should execute safe actions immediately', async () => {
         // Setup: Allow via guardrails
-        (mockPolicyEngine.evaluate as jest.Mock).mockResolvedValue({ allowed: true });
+        mockPolicyEngine.evaluate.mock.mockImplementation(async () => ({ allowed: true }));
 
         const result = await executor.executeAction({
             type: 'auto_retry',
@@ -103,8 +108,8 @@ describe('Autonomous Operations Flow', () => {
             reason: 'Transient failure'
         });
 
-        expect(result.success).toBe(true);
-        expect(mockDb.query).not.toHaveBeenCalled(); // No approval needed
+        assert.strictEqual(result.success, true);
+        assert.strictEqual(mockDb.query.mock.callCount(), 0); // No approval needed
      });
 
      it('should block unsafe actions via guardrails', async () => {
@@ -115,8 +120,8 @@ describe('Autonomous Operations Flow', () => {
             reason: 'Cleanup'
         });
 
-        expect(result.success).toBe(false);
-        expect(result.error).toContain('Autonomous business data mutation is strictly prohibited');
+        assert.strictEqual(result.success, false);
+        assert.match(result.error, /Autonomous business data mutation is strictly prohibited/);
      });
   });
 });

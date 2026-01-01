@@ -53,6 +53,10 @@ const ENV_VAR_HELP: Record<string, string> = {
 };
 
 export const cfg = (() => {
+  // Allow skipping validation if explicitly requested (e.g. for schema import during tests)
+  if (process.env.SKIP_ENV_VALIDATION === '1') {
+      return process.env as any;
+  }
   const parsed = Env.safeParse(process.env);
   if (!parsed.success) {
     console.error('\n❌ Environment Validation Failed\n');

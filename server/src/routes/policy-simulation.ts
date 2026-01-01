@@ -1,12 +1,14 @@
 import express from 'express';
 import { defaultPolicySimulationService } from '../governance/policy-simulation-service.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
+import { enforcePolicy } from '../middleware/policy-enforcement.js';
 
 const router = express.Router();
 
 router.use(ensureAuthenticated);
 
-router.post('/simulate', async (req, res) => {
+// Enforce policy: Only authorized roles can run simulations
+router.post('/simulate', enforcePolicy('simulate_policy', 'governance_simulation'), async (req, res) => {
   if (process.env.POLICY_SIMULATION !== '1') {
     return res.status(403).json({
       error: 'Policy simulation feature is disabled. Set POLICY_SIMULATION=1 to enable.',
