@@ -1,0 +1,172 @@
+openapi: 3.0.0
+info:
+  title: Summit Ontology Engine API
+  version: 1.0.0
+  description: API for managing ontologies and executing reasoning jobs.
+servers:
+  - url: /api/v1/ontology
+paths:
+  /ontologies:
+    get:
+      summary: List all ontologies
+      operationId: listOntologies
+      parameters:
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+        - in: query
+          name: page_token
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of ontologies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OntologyMetadata'
+    post:
+      summary: Upload a new ontology
+      operationId: createOntology
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                metadata:
+                  $ref: '#/components/schemas/OntologyMetadata'
+      responses:
+        '201':
+          description: Ontology created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+
+  /ontologies/{id}:
+    get:
+      summary: Get ontology details
+      operationId: getOntology
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ontology details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OntologyMetadata'
+    put:
+      summary: Update ontology
+      operationId: updateOntology
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OntologyMetadata'
+      responses:
+        '200':
+          description: Ontology updated
+    delete:
+      summary: Delete ontology
+      operationId: deleteOntology
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Ontology deleted
+
+  /ontologies/query:
+    post:
+      summary: Execute a SPARQL or Cypher query against the ontology graph
+      operationId: queryOntology
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                language:
+                  type: string
+                  enum: [SPARQL, CYPHER]
+      responses:
+        '200':
+          description: Query results
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /reasoning/jobs:
+    post:
+      summary: Submit a reasoning job
+      operationId: submitReasoningJob
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ontologyId:
+                  type: string
+                mode:
+                  type: string
+                  enum: [RULE_BASED, DESCRIPTION_LOGIC]
+                inputData:
+                  type: object
+      responses:
+        '202':
+          description: Job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+
+components:
+  schemas:
+    OntologyMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        namespace:
+          type: string
+        description:
+          type: string

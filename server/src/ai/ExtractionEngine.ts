@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 import pino from 'pino';
 import path from 'path';
-import { createReadStream } from 'fs';
+import { createReadStream, promises as fsPromises } from 'fs';
 import { spawn } from 'child_process';
 import { OCREngine } from './engines/OCREngine.js';
 import { ObjectDetectionEngine } from './engines/ObjectDetectionEngine.js';
@@ -60,12 +60,50 @@ export class ExtractionEngine {
   }
 
   /**
+   * Validate that the media path is within allowed directories
+   */
+  private async validateMediaPath(mediaPath: string): Promise<void> {
+    const resolvedPath = path.resolve(mediaPath);
+
+    // Use configured allowed paths or fallback to tempPath
+    // Create a new array to avoid mutating the configuration
+    const allowedPaths = this.config.allowedPaths
+      ? [...this.config.allowedPaths]
+      : [this.config.tempPath];
+
+    const isAllowed = allowedPaths.some(allowed => {
+      const resolvedAllowed = path.resolve(allowed);
+
+      // Ensure we are checking directory boundaries to prevent partial path matching
+      // e.g. /tmp/upload-secret should not match /tmp/upload
+      if (resolvedPath === resolvedAllowed) return true;
+
+      return resolvedPath.startsWith(resolvedAllowed + path.sep);
+    });
+
+    if (!isAllowed) {
+      // Check if file exists to give better error message, but still deny
+      try {
+        await fsPromises.access(resolvedPath);
+        logger.warn(`Access denied to file outside allowed paths: ${resolvedPath}`);
+      } catch (e) {
+        // File doesn't exist or no access, which is also fine to reject
+      }
+      throw new Error(`Access denied: Media path is not in an allowed directory.`);
+    }
+  }
+
+  /**
    * Process extraction request using multiple AI models
    */
   async processExtraction(
     request: ExtractionRequest,
   ): Promise<ExtractionResult[]> {
     const { jobId, mediaPath, mediaType, extractionMethods, options } = request;
+
+    // Validate mediaPath before processing to prevent Path Traversal / Arbitrary File Read
+    await this.validateMediaPath(mediaPath);
+
     const startTime = Date.now();
 
     logger.info(

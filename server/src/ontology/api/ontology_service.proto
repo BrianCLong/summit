@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package ontology.v1;
+
+service OntologyService {
+  rpc ListOntologies (ListOntologiesRequest) returns (ListOntologiesResponse);
+  rpc CreateOntology (CreateOntologyRequest) returns (CreateOntologyResponse);
+  rpc GetOntology (GetOntologyRequest) returns (OntologyMetadata);
+  rpc UpdateOntology (UpdateOntologyRequest) returns (OntologyMetadata);
+  rpc DeleteOntology (DeleteOntologyRequest) returns (DeleteOntologyResponse);
+
+  rpc QueryOntology (QueryOntologyRequest) returns (QueryOntologyResponse);
+
+  rpc SubmitReasoningJob (SubmitReasoningJobRequest) returns (SubmitReasoningJobResponse);
+  rpc GetReasoningJobStatus (GetReasoningJobStatusRequest) returns (GetReasoningJobStatusResponse);
+}
+
+message ListOntologiesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message OntologyMetadata {
+  string id = 1;
+  string name = 2;
+  string version = 3;
+  string namespace = 4;
+  string description = 5;
+}
+
+message ListOntologiesResponse {
+  repeated OntologyMetadata ontologies = 1;
+  string next_page_token = 2;
+}
+
+message CreateOntologyRequest {
+  OntologyMetadata metadata = 1;
+  bytes content = 2; // The ontology file content
+}
+
+message CreateOntologyResponse {
+  string id = 1;
+}
+
+message GetOntologyRequest {
+  string id = 1;
+}
+
+message UpdateOntologyRequest {
+  string id = 1;
+  OntologyMetadata metadata = 2;
+}
+
+message DeleteOntologyRequest {
+  string id = 1;
+}
+
+message DeleteOntologyResponse {}
+
+enum QueryLanguage {
+  SPARQL = 0;
+  CYPHER = 1;
+}
+
+message QueryOntologyRequest {
+  string query = 1;
+  QueryLanguage language = 2;
+}
+
+message QueryOntologyResponse {
+  string result_json = 1;
+}
+
+enum ReasoningMode {
+  RULE_BASED = 0;
+  DESCRIPTION_LOGIC = 1;
+}
+
+message SubmitReasoningJobRequest {
+  string ontology_id = 1;
+  ReasoningMode mode = 2;
+  string input_data_json = 3;
+}
+
+message SubmitReasoningJobResponse {
+  string job_id = 1;
+}
+
+message GetReasoningJobStatusRequest {
+  string job_id = 1;
+}
+
+message GetReasoningJobStatusResponse {
+  string job_id = 1;
+  string status = 2; // PENDING, RUNNING, COMPLETED, FAILED
+  string result_json = 3;
+}

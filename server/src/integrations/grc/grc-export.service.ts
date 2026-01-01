@@ -199,7 +199,7 @@ export class GRCExportService {
 
     query += ` ORDER BY cm.framework, cm.framework_control_id`;
 
-    const result = await pg.query(query, params);
+    const result = await pg.readMany(query, params);
 
     // Map to GRCControlMappingExport format
     const controlMappings = await Promise.all(
@@ -232,7 +232,7 @@ export class GRCExportService {
     const packageId = uuidv4();
 
     // Collect audit events
-    const auditEventsResult = await pg.query(
+    const auditEventsResult = await pg.readMany(
       `SELECT COUNT(*) as count
        FROM audit.events
        WHERE tenant_id = $1
@@ -243,7 +243,7 @@ export class GRCExportService {
     );
 
     // Collect control mappings
-    const controlMappingsResult = await pg.query(
+    const controlMappingsResult = await pg.readMany(
       `SELECT COUNT(*) as count
        FROM compliance_control_mappings
        WHERE tenant_id = $1`,
@@ -251,7 +251,7 @@ export class GRCExportService {
     );
 
     // Collect evidence artifacts
-    const evidenceResult = await pg.query(
+    const evidenceResult = await pg.readMany(
       `SELECT
          ea.id,
          ea.type,
@@ -355,7 +355,7 @@ export class GRCExportService {
 
     query += ` ORDER BY vr.verified_at DESC`;
 
-    const result = await pg.query(query, params);
+    const result = await pg.readMany(query, params);
     return result.rows;
   }
 
@@ -367,7 +367,7 @@ export class GRCExportService {
     tenantId: string
   ): Promise<GRCControlMappingExport> {
     // Fetch evidence for this control
-    const evidenceResult = await pg.query(
+    const evidenceResult = await pg.readMany(
       `SELECT
          id,
          type,

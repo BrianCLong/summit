@@ -1,48 +1,209 @@
-# IntelGraph Runbook Strategy
+# Operational Runbooks
 
-This document outlines the strategy for implementing and managing operational runbooks within the IntelGraph ecosystem. Runbooks are critical for standardizing operational procedures, ensuring reproducibility, and providing clear guidance for various scenarios, from routine tasks to incident response.
+Automated index of available runbooks.
 
-## 1. Runbook Definition and Structure
-
-Each runbook (R1-R10, etc.) will be implemented as a Directed Acyclic Graph (DAG), representing a sequence of automated or semi-automated steps. Each step within a runbook will have clearly defined attributes:
-
-- **Purpose:** A concise description of the step's objective.
-- **Inputs:** Required data or parameters for the step.
-- **Outputs:** Expected results or data produced by the step.
-- **Legal Basis:** (Where applicable) The legal or policy justification for performing the step, especially for sensitive operations.
-- **KPIs (Key Performance Indicators):** Metrics to measure the success or efficiency of the step.
-- **XAI Notes (Explainable AI):** For steps involving AI/ML models, notes on the model's behavior, decision rationale, and potential biases.
-
-## 2. Replayable Logs
-
-All runbook executions will generate comprehensive, replayable logs. These logs will capture:
-
-- The exact sequence of steps executed.
-- All inputs and outputs for each step.
-- Timestamps and execution durations.
-- Any errors or warnings encountered.
-- Contextual information (e.g., user who initiated, associated case ID).
-
-This ensures that any runbook execution can be fully audited, debugged, and replayed for analysis or training purposes.
-
-## 3. Demo Runbooks
-
-To showcase the capabilities of the IntelGraph platform and its operationalization, the following demonstration runbooks will be shipped:
-
-### a. Crisis Ops Runbook
-
-- **Purpose:** A simulated incident response runbook for critical operational failures or security breaches.
-- **Scope:** Covers steps from initial alert reception, automated diagnostics, stakeholder notification, to recovery and post-mortem analysis.
-- **Features:** Demonstrates integration with monitoring systems, communication channels, and automated remediation actions.
-
-### b. Dark-Web Lead Vetting Runbook
-
-- **Purpose:** A simulated runbook for vetting potential leads or intelligence gathered from dark web sources.
-- **Scope:** Covers steps from data ingestion, entity extraction, risk assessment, cross-referencing with internal databases, to reporting and action recommendations.
-- **Features:** Highlights the use of AI Copilot for analysis, provenance tracking for source verification, and compliance checks for legal/ethical considerations.
-
-## 4. Implementation Details
-
-- Runbooks will be defined using a declarative format (e.g., YAML or a custom DSL) that can be interpreted by a runbook orchestration engine.
-- Integration with existing IntelGraph modules (e.g., Connectors, Graph Core, AI Copilot, Governance) will be seamless, allowing runbook steps to invoke functions from these modules.
-- The runbook orchestration engine will support conditional logic, parallel execution, and error handling to ensure robust and flexible workflows.
+- [502-storm-response.md](502-storm-response.md)
+- [AGENTIC_OPS.md](AGENTIC_OPS.md)
+- [ALERT_RUNBOOKS.md](ALERT_RUNBOOKS.md)
+- [BACKUP_RESTORE_RUNBOOK.md](BACKUP_RESTORE_RUNBOOK.md)
+- [BREAK_GLASS_ACCESS.md](BREAK_GLASS_ACCESS.md)
+- [CHAOS_DRILL_BROKER_LOSS.md](CHAOS_DRILL_BROKER_LOSS.md)
+- [CI_RELEASE_GATE_RUNBOOK.md](CI_RELEASE_GATE_RUNBOOK.md)
+- [DATABASE_RECOVERY.md](DATABASE_RECOVERY.md)
+- [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md)
+- [DR.md](DR.md)
+- [DR_DRILL_LIMITATIONS.md](DR_DRILL_LIMITATIONS.md)
+- [DR_DRILL_PROCEDURE.md](DR_DRILL_PROCEDURE.md)
+- [DR_FAILOVER.md](DR_FAILOVER.md)
+- [DR_RUNBOOK.md](DR_RUNBOOK.md)
+- [GAME_DAY_SCENARIO.md](GAME_DAY_SCENARIO.md)
+- [GA_RUNBOOK.md](GA_RUNBOOK.md)
+- [HAZARD_DRIFT.md](HAZARD_DRIFT.md)
+- [HIGH_ERROR_LATENCY.md](HIGH_ERROR_LATENCY.md)
+- [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md)
+- [INCIDENT_RESPONSE_PLAYBOOK.md](INCIDENT_RESPONSE_PLAYBOOK.md)
+- [INDEX.md](INDEX.md)
+- [INDEX_STALENESS.md](INDEX_STALENESS.md)
+- [KEY_MANAGEMENT.md](KEY_MANAGEMENT.md)
+- [LAMBDA_DEPLOYMENT_RUNBOOK.md](LAMBDA_DEPLOYMENT_RUNBOOK.md)
+- [LAUNCH_RUNBOOKS.md](LAUNCH_RUNBOOKS.md)
+- [NEO4J_CAUSAL_CLUSTER.md](NEO4J_CAUSAL_CLUSTER.md)
+- [R1_rapid_attribution.md](R1_rapid_attribution.md)
+- [R3_disinfo_network_mapping.md](R3_disinfo_network_mapping.md)
+- [R6_supply_chain_compromise_trace.md](R6_supply_chain_compromise_trace.md)
+- [RACI-MATRIX.md](RACI-MATRIX.md)
+- [RAPID_EVIDENCE_REGISTRATION.md](RAPID_EVIDENCE_REGISTRATION.md)
+- [RELEASE_GA.md](RELEASE_GA.md)
+- [RESILIENCE.md](RESILIENCE.md)
+- [ROLLBACK.md](ROLLBACK.md)
+- [SELECTIVE_DISCLOSURE_PACKAGER.md](SELECTIVE_DISCLOSURE_PACKAGER.md)
+- [SIGNER_FAILURES.md](SIGNER_FAILURES.md)
+- [SOC2_EVIDENCE_GENERATION.md](SOC2_EVIDENCE_GENERATION.md)
+- [STREAMING_RUNBOOK.md](STREAMING_RUNBOOK.md)
+- [SYNTHETICS_DASHBOARDS_RUNBOOK.md](SYNTHETICS_DASHBOARDS_RUNBOOK.md)
+- [TABLETOP_SCENARIOS.md](TABLETOP_SCENARIOS.md)
+- [TTD-TTR-IMPROVEMENTS.md](TTD-TTR-IMPROVEMENTS.md)
+- [_template.md](_template.md)
+- [acceptance-criteria.md](acceptance-criteria.md)
+- [actor-pivoting.yaml](actor-pivoting.yaml)
+- [agent-launch.md](agent-launch.md)
+- [agent-runaway.md](agent-runaway.md)
+- [ai-copilot-service.md](ai-copilot-service.md)
+- [aml-structuring.yaml](aml-structuring.yaml)
+- [aml-suspicious-activity.yaml](aml-suspicious-activity.yaml)
+- [api-rate-limit-exceeded.md](api-rate-limit-exceeded.md)
+- [approvals-service.md](approvals-service.md)
+- [audit-and-rfa.md](audit-and-rfa.md)
+- [auth-outage-recovery.md](auth-outage-recovery.md)
+- [auth-outage.md](auth-outage.md)
+- [authz.md](authz.md)
+- [autonomous-orchestrator-operations.md](autonomous-orchestrator-operations.md)
+- [backfill-entity-resolver.yaml](backfill-entity-resolver.yaml)
+- [backup_dr_runbook_pr16.md](backup_dr_runbook_pr16.md)
+- [backup_runbook.md](backup_runbook.md)
+- [break-glass-procedures.md](break-glass-procedures.md)
+- [break-glass-runbook.md](break-glass-runbook.md)
+- [canary-rollout-complete.md](canary-rollout-complete.md)
+- [canary-slo-gates.md](canary-slo-gates.md)
+- [chaos-drill-runbooks.md](chaos-drill-runbooks.md)
+- [chaos-drill.yaml](chaos-drill.yaml)
+- [ci_token_leak_tabletop.md](ci_token_leak_tabletop.md)
+- [communication-templates.md](communication-templates.md)
+- [completeness-drop.md](completeness-drop.md)
+- [connector-rate-limit-storm.md](connector-rate-limit-storm.md)
+- [container-hardening.md](container-hardening.md)
+- [cost-alerts-budget-violations.md](cost-alerts-budget-violations.md)
+- [cross-region-failover.yaml](cross-region-failover.yaml)
+- [cti-rapid-attribution.yaml](cti-rapid-attribution.yaml)
+- [data-plane.md](data-plane.md)
+- [data-spine-audit-ingestion.md](data-spine-audit-ingestion.md)
+- [database-backup-restore.md](database-backup-restore.md)
+- [database-failure-recovery.md](database-failure-recovery.md)
+- [day1-topology-rollback.md](day1-topology-rollback.md)
+- [demo-seed.yaml](demo-seed.yaml)
+- [deploy-procedure.md](deploy-procedure.md)
+- [deploy-promote.yaml](deploy-promote.yaml)
+- [deploy.md](deploy.md)
+- [dev-bootstrap.md](dev-bootstrap.md)
+- [dev-bootstrap.yaml](dev-bootstrap.yaml)
+- [disaster-recovery-procedures.yaml](disaster-recovery-procedures.yaml)
+- [disclosure-packager.yaml](disclosure-packager.yaml)
+- [disinfo-campaign.yaml](disinfo-campaign.yaml)
+- [dlq-growth.md](dlq-growth.md)
+- [docling-deploy.md](docling-deploy.md)
+- [docling-oncall.md](docling-oncall.md)
+- [docling-rollback.md](docling-rollback.md)
+- [dr-cutback.md](dr-cutback.md)
+- [dr-drill-scenarios.yaml](dr-drill-scenarios.yaml)
+- [dr-failover.md](dr-failover.md)
+- [etl-assistant-demo.yaml](etl-assistant-demo.yaml)
+- [export-failure.md](export-failure.md)
+- [failover.md](failover.md)
+- [feature-flags.md](feature-flags.md)
+- [fraud-ring-detection.yaml](fraud-ring-detection.yaml)
+- [freshness-lag.md](freshness-lag.md)
+- [ga-cut-checklist.md](ga-cut-checklist.md)
+- [game-day.md](game-day.md)
+- [gateway-latency.md](gateway-latency.md)
+- [go-no-go-checklist.md](go-no-go-checklist.md)
+- [golden-path-failure.md](golden-path-failure.md)
+- [golden-path-observability.md](golden-path-observability.md)
+- [golden-paths.md](golden-paths.md)
+- [gpu-deployment.md](gpu-deployment.md)
+- [graphql-high-error-rate.md](graphql-high-error-rate.md)
+- [graphql-high-latency.md](graphql-high-latency.md)
+- [hot-partition-mitigation.md](hot-partition-mitigation.md)
+- [human-rights-vetting.yaml](human-rights-vetting.yaml)
+- [incident-auto-reweighter.md](incident-auto-reweighter.md)
+- [incident-management.md](incident-management.md)
+- [incident-response-playbook.md](incident-response-playbook.md)
+- [incident-response.md](incident-response.md)
+- [index.md](index.md)
+- [ingest-enrich-handoff.yaml](ingest-enrich-handoff.yaml)
+- [ingest.md](ingest.md)
+- [ingestion-stuck.md](ingestion-stuck.md)
+- [insider-risk-assessment.yaml](insider-risk-assessment.yaml)
+- [intelgraph-query-issues.md](intelgraph-query-issues.md)
+- [ip-theft-investigation.yaml](ip-theft-investigation.yaml)
+- [link-analysis-demo.yaml](link-analysis-demo.yaml)
+- [local.md](local.md)
+- [maestro-mcp-ops.md](maestro-mcp-ops.md)
+- [maestro-rollback.md](maestro-rollback.md)
+- [migrations-expand-contract.md](migrations-expand-contract.md)
+- [migrations-rollback.md](migrations-rollback.md)
+- [ml-alerting-guide.md](ml-alerting-guide.md)
+- [ml-pipeline-troubleshooting.md](ml-pipeline-troubleshooting.md)
+- [mvp3_go_live.md](mvp3_go_live.md)
+- [observability.md](observability.md)
+- [on-call-triage.md](on-call-triage.md)
+- [orchestration-troubleshooting.md](orchestration-troubleshooting.md)
+- [performance-troubleshooting.md](performance-troubleshooting.md)
+- [performance.md](performance.md)
+- [phishing-cluster.yaml](phishing-cluster.yaml)
+- [pipeline-availability.md](pipeline-availability.md)
+- [pod-crashloop-recovery.md](pod-crashloop-recovery.md)
+- [policy-bundles-signer.md](policy-bundles-signer.md)
+- [postmortem_template.md](postmortem_template.md)
+- [premium-routing-troubleshooting.md](premium-routing-troubleshooting.md)
+- [preview-env.md](preview-env.md)
+- [price-aware-orchestration.md](price-aware-orchestration.md)
+- [probe-failing.md](probe-failing.md)
+- [prod-readiness-runbook.md](prod-readiness-runbook.md)
+- [query-latency-spike.md](query-latency-spike.md)
+- [ransomware-triage.yaml](ransomware-triage.yaml)
+- [rapid-attribution.yaml](rapid-attribution.yaml)
+- [realtime.md](realtime.md)
+- [release-captain-quick-reference.md](release-captain-quick-reference.md)
+- [release-captain-verification.md](release-captain-verification.md)
+- [release-captain.md](release-captain.md)
+- [reports.md](reports.md)
+- [restore_runbook.md](restore_runbook.md)
+- [rollback-plan.md](rollback-plan.md)
+- [rollback-procedure.md](rollback-procedure.md)
+- [rollback.yaml](rollback.yaml)
+- [runbook-billing-cycle.md](runbook-billing-cycle.md)
+- [runbook-llm-routing-incident.md](runbook-llm-routing-incident.md)
+- [runbook-slo-breach.md](runbook-slo-breach.md)
+- [runbooks_r1_r10_outline.md](runbooks_r1_r10_outline.md)
+- [schema-migration-playbook.md](schema-migration-playbook.md)
+- [search.md](search.md)
+- [secret-rotation.md](secret-rotation.md)
+- [secrets-operations.md](secrets-operations.md)
+- [security-incident-response.md](security-incident-response.md)
+- [service-degradation.md](service-degradation.md)
+- [service-mesh-operations.md](service-mesh-operations.md)
+- [signer-service.md](signer-service.md)
+- [slo-api-latency.md](slo-api-latency.md)
+- [sso-oidc.md](sso-oidc.md)
+- [supply-chain-exposure.yaml](supply-chain-exposure.yaml)
+- [supply-chain.md](supply-chain.md)
+- [support-l1.md](support-l1.md)
+- [support-l2.md](support-l2.md)
+- [support-l3.md](support-l3.md)
+- [template.md](template.md)
+- [tenant-cost-guard.md](tenant-cost-guard.md)
+- [tenant-restore.yaml](tenant-restore.yaml)
+- [v0.3.3-post-deployment-operations.md](v0.3.3-post-deployment-operations.md)
+- [v0.3.4-go-live.md](v0.3.4-go-live.md)
+- [v0.4.1-go-live.md](v0.4.1-go-live.md)
+- [v1.0-ga-verification.md](v1.0-ga-verification.md)
+- [v24-coherence.md](v24-coherence.md)
+- [vacuum-playbook.md](vacuum-playbook.md)
+- [adapters/dlq-replay.md](adapters/dlq-replay.md)
+- [adapters/isolation-incidents.md](adapters/isolation-incidents.md)
+- [adapters/signature-verification-failures.md](adapters/signature-verification-failures.md)
+- [canary/raise_conductor_canary.md](canary/raise_conductor_canary.md)
+- [compliance/break_glass_flow.md](compliance/break_glass_flow.md)
+- [compliance/dsar_export_validation.md](compliance/dsar_export_validation.md)
+- [compliance/rtbf_two_phase_confirm.md](compliance/rtbf_two_phase_confirm.md)
+- [dr/pitr_restore_rds.md](dr/pitr_restore_rds.md)
+- [dr/region_evacuation.md](dr/region_evacuation.md)
+- [dr/table_level_restore_postgres.md](dr/table_level_restore_postgres.md)
+- [observability/error-rate-spike.md](observability/error-rate-spike.md)
+- [observability/high-latency.md](observability/high-latency.md)
+- [release/canary-rollout.md](release/canary-rollout.md)
+- [search/latency-spike.md](search/latency-spike.md)
+- [stage/dual_flip.md](stage/dual_flip.md)
+- [templates/incident-ticket.md](templates/incident-ticket.md)
+- [templates/postmortem-comprehensive.md](templates/postmortem-comprehensive.md)
+- [templates/stakeholder-update.md](templates/stakeholder-update.md)

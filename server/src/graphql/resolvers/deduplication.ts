@@ -5,7 +5,7 @@
  */
 
 import { similarityService } from '../../services/SimilarityService.js';
-import type { GraphQLContext } from '../context.js';
+import type { Context as GraphQLContext } from '../context.js';
 import { logger } from '../../utils/logger.js';
 
 const dedupLogger = logger.child({ module: 'deduplication-resolvers' });
@@ -46,7 +46,7 @@ export const deduplicationResolvers = {
           threshold: args.threshold,
           topK: 10, // Configurable if needed
           includeReasons: true,
-          tenantId: context.tenantId,
+          tenantId: context.tenant,
         });
 
         dedupLogger.debug('Deduplication candidates retrieved', {

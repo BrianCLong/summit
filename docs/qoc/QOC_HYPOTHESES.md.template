@@ -1,0 +1,82 @@
+# QOC <YYYY_QN> - Hypotheses
+
+**Do not edit this template directly. Create a copy named `QOC_<YYYY_QN>_HYPOTHESES.md`.**
+
+---
+
+## Overview
+
+*   **Quarter:** `<YYYY_QN>` (e.g., 2025_Q4)
+*   **Cycle Lead:** `<Name>`
+*   **Status:** `Draft` | `In Review` | `Approved`
+
+---
+
+## Signal Intake Summary
+
+*Briefly summarize the key signals from Week 1 analysis that led to these hypotheses.*
+
+*   **Cost Trends:** (e.g., "S3 storage costs increased 15% month-over-month, driven by unoptimized data retention policies.")
+*   **SLA/SLO Trends:** (e.g., "p95 latency for the `/api/v1/search` endpoint has degraded by 50ms, approaching SLO threshold.")
+*   **Autonomy Health:** (e.g., "Autonomous agent `Auto-Remediate-X` was demoted twice due to false positives.")
+*   **Certification Drift:** (e.g., "Control `AC-2` evidence is becoming stale, requiring manual intervention.")
+
+---
+
+## Hypothesis 1: <Concise Title>
+
+*   **Problem Statement:** A clear, data-driven statement of the problem.
+    > *Example: The `data-processing` service is over-provisioned, resulting in an estimated 40% CPU idle time and unnecessary cost.*
+
+*   **Proposed Change (Surgical):** A specific, bounded technical change.
+    > *Example: Reduce the CPU allocation for the `data-processing` service from 4 vCPU to 2 vCPU in the production environment.*
+
+*   **Allowed Outcome Category:** `Cost Reduction` | `Reliability Improvement` | `Latency Reduction` | `Autonomy Safety Improvement` | `Operator Efficiency Improvement` | `Evidence Quality Improvement`
+
+*   **Metric & Measurement:** The specific metric that will prove the hypothesis, and how it will be measured.
+    *   **Metric:** `Δ Cost (absolute + %)`
+    *   **Measurement:** "We will measure the change in daily compute cost for the `data-processing` service via the billing dashboard. We expect a 45-50% reduction, saving approximately $1,500/month."
+
+*   **Rollback Plan:** A simple, immediate action to revert the change.
+    > *Example: "Revert the container definition to its previous state (4 vCPU) via the CI/CD pipeline."*
+
+*   **Guardrail:** The mechanism that prevents negative impact.
+    > *Example: "A CPU utilization alert is set to trigger if usage exceeds 80% for 5 minutes, automatically initiating the rollback procedure."*
+
+*   **Verification Delta:** The specific tests or queries that will confirm success.
+    > *Example: "Run the existing performance test suite to confirm no change in p95 latency. Monitor the Grafana dashboard for CPU utilization to confirm it remains below the 80% threshold under peak load."*
+
+---
+
+## Hypothesis 2: <Optional, max 3>
+
+*   **Problem Statement:**
+*   **Proposed Change (Surgical):**
+*   **Allowed Outcome Category:**
+*   **Metric & Measurement:**
+*   **Rollback Plan:**
+*   **Guardrail:**
+*   **Verification Delta:**
+
+---
+
+## Hypothesis 3: <Optional, max 3>
+
+*   **Problem Statement:**
+*   **Proposed Change (Surgical):**
+*   **Allowed Outcome Category:**
+*   **Metric & Measurement:**
+*   **Rollback Plan:**
+*   **Guardrail:**
+*   **Verification Delta:**
+
+---
+
+## Rejected Hypotheses
+
+*A brief log of any hypotheses that were considered but rejected during Week 1, and the reason for rejection. This prevents re-litigating ideas.*
+
+*   **Hypothesis:** *Example: Refactor the entire authentication service.*
+    *   **Reason for Rejection:** *Violates the "No Architectural Refactors" rule.*
+*   **Hypothesis:** *...*
+    *   **Reason for Rejection:** *...*

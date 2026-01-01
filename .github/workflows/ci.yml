@@ -138,6 +138,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: npm run check:governance
       - run: npm test -- --testPathPattern="governance" --bail
+      - name: Execute Governance Audit (Control the Arena)
+        run: npx tsx scripts/governance/audit_ci.ts
 
   provenance:
     name: Provenance
@@ -226,6 +228,14 @@ jobs:
     uses: ./.github/workflows/ci-security.yml
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
+
+  ga-risk-gate:
+    name: GA Risk Gate
+    needs: [lint] # Run early to fail fast
+    uses: ./.github/workflows/ga-risk-gate.yml
+    with:
+      ref: ${{ github.sha }}
+    secrets: inherit
 
   build-server-image:
     name: Build Server Image (Governance)

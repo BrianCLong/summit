@@ -12,6 +12,8 @@ This index tracks key architectural decisions for Summit.
 | [ADR-006](./ADR-006_lbac_security_proxy.md)                     | LBAC via API-Level Security Proxy for Neo4j     | Proposed | 2025-12-05 |
 | [ADR-007](./ADR-007_ingest_airgap_gateway.md)                   | Ingest Staging and Air-Gap Gateway              | Proposed | 2025-12-05 |
 | [ADR-008](./ADR-008_simulation_overlay_and_synthetic_policy.md) | Simulation Overlay and Synthetic Data Policy    | Proposed | 2025-12-05 |
+| [ADR-009](./ADR-009_context_provenance_graph.md)                | Context Provenance Graph (CPG) for MCP          | Proposed | 2026-01-01 |
+| [ADR-010](./ADR-010_invariant_carrying_context_capsules.md)     | Invariant-Carrying Context Capsules (IC³)       | Proposed | 2026-01-01 |
 
 <!-- Add new ADRs above this line -->
 

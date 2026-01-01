@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Attribution Evidence Schema",
+  "description": "This schema defines the structure of an evidence document used in the Attribution Ledger.",
+  "type": "object",
+  "properties": {
+    "evidenceId": {
+      "description": "A unique identifier for the piece of evidence.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "timestamp": {
+      "description": "The time at which the evidence was recorded.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "description": "The source of the evidence.",
+      "type": "string"
+    },
+    "content": {
+      "description": "The content of the evidence.",
+      "type": "object"
+    },
+    "attributionHypothesis": {
+      "description": "The attribution hypothesis that this evidence supports.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "evidenceId",
+    "timestamp",
+    "source",
+    "content",
+    "attributionHypothesis"
+  ]
+}

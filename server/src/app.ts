@@ -24,6 +24,7 @@ import { publicRateLimit, authenticatedRateLimit } from './middleware/rateLimite
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
+import { admissionControl } from './runtime/backpressure/AdmissionControl.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import { residencyEnforcement } from './middleware/residency.js';
@@ -43,6 +44,7 @@ import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
 import { metricsRoute } from './http/metricsRoute.js';
+import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
@@ -95,6 +97,7 @@ import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import correctnessProgramRouter from './routes/correctness-program.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
+import ontologyRouter from './routes/ontology.js';
 import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
@@ -272,19 +275,29 @@ export const createApp = async () => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
-        if (!token) {
-          console.warn('Development: No token provided, allowing request');
+        if (token) {
+          return next();
+        }
+
+        // SEC-2025-001: Fail Closed by default.
+        // Only allow bypass if explicitly enabled via env var.
+        if (process.env.ENABLE_INSECURE_DEV_AUTH === 'true') {
+          console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
           (req as any).user = {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
           };
+          return next();
         }
-        next();
+
+        // Default: Reject unauthenticated requests even in dev/test if bypass not enabled
+        res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
       };
 
   // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], tenantContextMiddleware());
+  app.use(['/api', '/graphql'], admissionControl);
 
   // Authenticated rate limiting for API and GraphQL routes
   app.use(['/api', '/graphql'], authenticatedRateLimit);
@@ -363,6 +376,7 @@ export const createApp = async () => {
   // app.use('/api/policy', policyRouter);
   app.use('/api/receipts', receiptsRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
+  app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
@@ -405,6 +419,7 @@ export const createApp = async () => {
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  app.use('/api/ontology', ontologyRouter);
   app.use('/search', searchIndexRouter); // Register Search Index API
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);

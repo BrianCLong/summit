@@ -175,7 +175,7 @@ export interface PredictionResponse {
 export interface ExecutionContext {
   predictionId: string;
   startTime: number;
-  limits: Required<PredictionOptions>;
+  limits: ExecutionLimits;
   resourceUsage: ResourceUsage;
   abortController: AbortController;
 }

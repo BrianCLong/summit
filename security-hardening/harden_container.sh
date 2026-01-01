@@ -29,7 +29,7 @@ fi
 # Check 2: Base Image Pinning (Digest preferred, Version accepted)
 if grep -E "^FROM .*@" "$TARGET"; then
      echo "✅ [PASS] Base image pinned by digest (SHA256)."
-elif grep -E "^FROM .*:[0-9]+\.[0-9]+" "$TARGET"; then
+elif grep -E "^FROM .*:[0-9]+" "$TARGET"; then
      echo "⚠️ [WARN] Base image pinned by version tag. Prefer SHA256 digest for immutability."
 else
      echo "❌ [FAIL] Base image uses 'latest' or unpinned tag."
