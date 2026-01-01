@@ -1,0 +1,43 @@
+{
+  "tiers": [
+    {
+      "id": "compatible",
+      "label": "Compatible",
+      "requirements": {
+        "tests": ["pattern-conformance", "scope-creep-negative"],
+        "security_posture": "CIS baseline attestation + SBOM provided",
+        "residency_validation": "evidence of region pinning and no cross-tenant data movement"
+      },
+      "revocation": "Automatic on failed drift check or missing evidence refresh in 90 days"
+    },
+    {
+      "id": "verified",
+      "label": "Verified",
+      "requirements": {
+        "tests": [
+          "pattern-conformance",
+          "kill-switch-integration",
+          "policy-engine-decision-export"
+        ],
+        "security_posture": "Independent pen-test summary + SOC mapping supplied",
+        "residency_validation": "OPA policies enforce residency tags; audit trail exported"
+      },
+      "revocation": "Triggered by control failure, expired evidence, or pattern drift"
+    },
+    {
+      "id": "trusted",
+      "label": "Trusted",
+      "requirements": {
+        "tests": [
+          "pattern-conformance",
+          "kill-switch-integration",
+          "isolation-chaos",
+          "scope-creep-negative"
+        ],
+        "security_posture": "Continuous monitoring feed + SBOM delta reports",
+        "residency_validation": "Continuous residency attestation with prov-ledger anchors"
+      },
+      "revocation": "Immediate on failed chaos test, misuse, or human DRI withdrawal"
+    }
+  ]
+}

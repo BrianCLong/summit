@@ -17,7 +17,7 @@ ARG GRAPHQL_SCHEMA_URL
 ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
 RUN npm run build
 
-FROM cgr.dev/chainguard/node:20 AS runtime
+FROM node:20-alpine AS runtime
 WORKDIR /app
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
