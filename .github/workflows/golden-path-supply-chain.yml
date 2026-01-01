@@ -27,10 +27,9 @@ jobs:
   # DISABLED: This workflow has issues with reusable workflow references
   # TODO: Fix and re-enable when the reusable workflow infrastructure is ready
   placeholder:
-    if: false
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Placeholder"
+      - run: echo "Workflow disabled - placeholder job for CI status"
 
   build-reference:
     if: false # Temporarily disabled
