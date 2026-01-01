@@ -1,16 +1,35 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'sdk/*'
-  - 'sdk/*'
+  # Frontend workspace
+  - 'client'
+  - 'apps/web'
+  - 'apps/webapp'
+  - 'apps/ui'
+  - 'apps/tri-pane'
+  - 'apps/mobile-interface'
+  - 'apps/switchboard-web'
+
+  # Backend workspace
+  - 'server'
+  - 'apps/api'
+  - 'apps/gateway'
+  - 'apps/search-engine'
+  - 'apps/graph-analytics'
+  - 'apps/analytics-engine'
+  - 'apps/workflow-engine'
+  - 'apps/intelgraph-api'
   - 'services/*'
   - 'companyos/services/*'
+
+  # Core services and shared libraries
+  - 'packages/*'
+  - 'sdk/*'
   - 'libs/*/node'
-  - 'client'
-  - 'server'
   - 'tools/*'
   - 'devtools/*'
   - 'prov-ledger-service'
+
+  # Fallback catch-all for remaining apps while we migrate
+  - 'apps/*'
 exclude:
   - 'archive/**'
   - 'apps/desktop-electron'

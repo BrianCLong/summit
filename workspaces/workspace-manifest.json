@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "workspaces": {
+    "frontend": {
+      "description": "User-facing applications and UI surfaces used by analysts and operators.",
+      "packages": [
+        "client",
+        "apps/web",
+        "apps/webapp",
+        "apps/ui",
+        "apps/tri-pane",
+        "apps/mobile-interface",
+        "apps/switchboard-web"
+      ]
+    },
+    "backend": {
+      "description": "APIs, ingestion surfaces, and service entrypoints that power the platform.",
+      "packages": [
+        "server",
+        "apps/api",
+        "apps/gateway",
+        "apps/search-engine",
+        "apps/graph-analytics",
+        "apps/analytics-engine",
+        "apps/workflow-engine",
+        "services/*",
+        "apps/intelgraph-api"
+      ]
+    },
+    "core-services": {
+      "description": "Shared SDKs, libraries, observability, and infrastructure automation layers.",
+      "packages": [
+        "packages/*",
+        "sdk/*",
+        "libs/*/node",
+        "tools/*",
+        "devtools/*",
+        "companyos/services/*",
+        "prov-ledger-service"
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-01T17:20:00Z",
+  "revision_note": "Introduced Turborepo workspace segmentation to isolate frontend, backend, and core-services pipelines",
   "initiatives": [
     {
       "id": "A",
