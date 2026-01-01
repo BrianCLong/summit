@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /**
  * Integration Tests for Simulation Harness
  * These tests validate the end-to-end workflow
@@ -9,6 +10,7 @@ import {
   MetricsCollector,
   ComparisonReporter,
   ConfigLoader,
+  HarnessConfig,
   ScenarioParameters,
   Workflow,
   WorkflowStep,
@@ -168,8 +170,9 @@ describe('Simulation Harness Integration', () => {
     });
 
     it('should merge custom configuration with defaults', () => {
-      const customConfig = {
+      const customConfig: Partial<HarnessConfig> = {
         scenarios: {
+          ...ConfigLoader.getDefaults().scenarios,
           defaultSize: 'large' as const,
         },
       };

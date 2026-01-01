@@ -23,5 +23,11 @@ export { ConfigLoader } from './utils/ConfigLoader.js';
 // Types
 export * from './types/index.js';
 
+// Redteam harness
+export { RedteamHarness } from './agent-redteam/RedteamHarness.js';
+export { AgentTaskRegistry } from './agent-redteam/AgentTaskRegistry.js';
+export { PromptRegistry } from './agent-redteam/PromptRegistry.js';
+export * from './agent-redteam/types.js';
+
 // Version
 export const VERSION = '1.0.0';
