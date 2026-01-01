@@ -1,0 +1,10 @@
+{
+  "entities": {
+    "test.plugin": {
+      "type": "plugin",
+      "level": "verified",
+      "status": "active",
+      "validUntil": "2099-12-31"
+    }
+  }
+}
