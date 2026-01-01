@@ -46,6 +46,7 @@ export enum CostDomain {
   WRITE_ACTIONS = 'write_actions',
   MARKETPLACE = 'marketplace',
   CI_ASSURANCE = 'ci_assurance',
+  API_REQUEST = 'api_request',
 }
 
 export interface CostAttribution {

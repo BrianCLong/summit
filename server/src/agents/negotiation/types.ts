@@ -132,15 +132,41 @@ export interface ApprovalMessage {
   negotiationId: string;
   role: 'human' | 'policy_engine';
   type: 'approval';
+  turn?: number;
   timestamp: string;
 
   decision: 'approved' | 'rejected' | 'conditional';
   conditions?: string[];
   remarks?: string;
   approverIdentity: string;
+
+  metadata?: {
+    agentId: string;
+    tenantId?: string;
+  };
 }
 
-export type NegotiationMessage = ProposalMessage | ChallengeMessage | ResolutionMessage | ApprovalMessage;
+export interface AcceptanceMessage {
+  messageId: string;
+  negotiationId: string;
+  role: NegotiationRole;
+  type: 'acceptance';
+  turn: number;
+  timestamp: string;
+  inReplyTo: string;
+
+  acceptance: {
+    acceptedTerms: Record<string, unknown>;
+    remarks?: string;
+  };
+
+  metadata?: {
+    agentId: string;
+    tenantId?: string;
+  };
+}
+
+export type NegotiationMessage = ProposalMessage | ChallengeMessage | ResolutionMessage | ApprovalMessage | AcceptanceMessage;
 
 // ============================================================================
 // Negotiation Types
