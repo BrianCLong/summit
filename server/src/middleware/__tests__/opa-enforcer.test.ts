@@ -16,6 +16,8 @@ import { jest } from '@jest/globals';
 import type { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { OPAEnforcer, createOPAMiddleware } from '../opa-enforcer';
+import { getBudgetLedgerManager } from '../../db/budgetLedger';
+import type { BudgetLedgerManager } from '../../db/budgetLedger';
 
 // Mock axios
 jest.mock('axios');
@@ -39,8 +41,30 @@ describe('OPAEnforcer', () => {
     jest.clearAllMocks();
 
     // Get mocked budget ledger
-    const budgetLedgerMock = jest.requireMock('../../db/budgetLedger') as { getBudgetLedgerManager: () => any };
-    mockBudgetLedger = budgetLedgerMock.getBudgetLedgerManager();
+    const mockedGetBudgetLedgerManager =
+      getBudgetLedgerManager as jest.MockedFunction<
+        typeof getBudgetLedgerManager
+      >;
+
+    mockBudgetLedger = {
+      getTenantBudget: jest.fn(async () => null),
+      getSpendingSummary: jest.fn(async () => ({
+        tenantId: 'tenant-123',
+        totalOperations: 0,
+        estimatedUsd: 0,
+        totalUsd: 0,
+      })),
+      getSpendingEntries: jest.fn(async () => []),
+      checkTenantBudget: jest.fn(async () => ({
+        canAfford: true,
+        budgetLimit: 0,
+        currentSpend: 0,
+        utilizationPct: 0,
+        reason: '',
+      })),
+    } as unknown as BudgetLedgerManager;
+
+    mockedGetBudgetLedgerManager.mockReturnValue(mockBudgetLedger);
 
     // Reset environment variables
     delete process.env.OPA_ENFORCEMENT;
@@ -441,6 +465,50 @@ describe('OPAEnforcer', () => {
 
       expect(mockedAxios.post).toHaveBeenCalledTimes(2);
     });
+
+    it('should track cache hits, misses, and hit rate', async () => {
+      const cacheStatsEnforcer = new OPAEnforcer({
+        enabled: true,
+        cacheDecisions: true,
+        cacheTtlMs: 60000,
+      });
+
+      const mockOPAResponse = {
+        data: {
+          result: {
+            allow: true,
+            tenant_id: mockInput.tenant_id,
+            estimated_usd: mockInput.est_usd,
+            monthly_room: 100.0,
+            daily_room: 3.33,
+            requires_four_eyes: false,
+            valid_approvers: 0,
+            risk_level: 'low',
+            violation_reasons: [],
+            policy_version: '1.0',
+            evaluated_at: Date.now(),
+          },
+        },
+      };
+
+      mockBudgetLedger.getTenantBudget.mockResolvedValue({
+        monthlyUsdLimit: 100.0,
+        dailyUsdLimit: 10.0,
+      });
+      mockBudgetLedger.getSpendingSummary.mockResolvedValue({});
+      mockBudgetLedger.getSpendingEntries.mockResolvedValue([]);
+
+      mockedAxios.post.mockResolvedValue(mockOPAResponse);
+
+      await cacheStatsEnforcer.evaluatePolicy(mockInput); // miss
+      await cacheStatsEnforcer.evaluatePolicy(mockInput); // hit
+
+      const stats = cacheStatsEnforcer.getStats();
+
+      expect(stats.cacheHits).toBe(1);
+      expect(stats.cacheMisses).toBe(1);
+      expect(stats.cacheHitRate).toBeCloseTo(0.5);
+    });
   });
 
   describe('createMiddleware', () => {
@@ -490,7 +558,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should allow request when OPA approves', async () => {
-      (mockReq.get as jest.Mock).mockImplementation((header: string) => {
+      (mockReq.get as jest.Mock).mockImplementation((header: unknown) => {
         const headers: Record<string, string> = {
           'x-tenant-id': 'tenant-123',
           'x-user-id': 'user-456',
@@ -498,7 +566,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
-        return headers[header];
+        return headers[header as string];
       });
 
       const mockOPAResponse = {
@@ -538,7 +606,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should deny request with 403 when OPA denies', async () => {
-      (mockReq.get as jest.Mock).mockImplementation((header: string) => {
+      (mockReq.get as jest.Mock).mockImplementation((header: unknown) => {
         const headers: Record<string, string> = {
           'x-tenant-id': 'tenant-123',
           'x-user-id': 'user-456',
@@ -546,7 +614,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '100000',
           'x-request-id': 'req-789',
         };
-        return headers[header];
+        return headers[header as string];
       });
 
       const mockOPAResponse = {
@@ -611,7 +679,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should extract mutation field name from query', async () => {
-      (mockReq.get as jest.Mock).mockImplementation((header: string) => {
+      (mockReq.get as jest.Mock).mockImplementation((header: unknown) => {
         const headers: Record<string, string> = {
           'x-tenant-id': 'tenant-123',
           'x-user-id': 'user-456',
@@ -619,7 +687,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
-        return headers[header];
+        return headers[header as string];
       });
 
       mockReq.body = {

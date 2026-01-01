@@ -65,6 +65,8 @@ export class OPAEnforcer {
     string,
     { decision: OPADecision; expiresAt: number }
   >();
+  private cacheHits = 0;
+  private cacheMisses = 0;
 
   constructor(options: OPAEnforcerOptions = {}) {
     this.options = {
@@ -92,12 +94,11 @@ export class OPAEnforcer {
     if (this.options.cacheDecisions) {
       const cached = this.decisionCache.get(cacheKey);
       if (cached && Date.now() < cached.expiresAt) {
-        logger.debug('OPA decision cache hit', {
-          tenantId: input.tenant_id,
-          requestId: input.request_id,
-        });
+        this.recordCacheHit(input);
         return cached.decision;
       }
+
+      this.recordCacheMiss(input, cached ? 'expired' : 'miss');
     }
 
     try {
@@ -384,7 +385,7 @@ export class OPAEnforcer {
    * Extract mutation field name from GraphQL query
    */
   private extractMutationField(query: string): string | undefined {
-    const mutationMatch = query.match(/mutation\s+\w*\s*{[^{]*(\w+)\s*\(/);
+    const mutationMatch = query.match(/mutation\s+\w*\s*{\s*(\w+)\s*\(/);
     return mutationMatch?.[1];
   }
 
@@ -422,18 +423,52 @@ export class OPAEnforcer {
     ); // Every 5 minutes
   }
 
+  private calculateCacheHitRate(): number {
+    const total = this.cacheHits + this.cacheMisses;
+    if (total === 0) return 0;
+
+    return this.cacheHits / total;
+  }
+
+  private recordCacheHit(input: OPAInput): void {
+    this.cacheHits += 1;
+    logger.debug('OPA decision cache hit', {
+      tenantId: input.tenant_id,
+      requestId: input.request_id,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: this.calculateCacheHitRate(),
+    });
+  }
+
+  private recordCacheMiss(input: OPAInput, reason: string): void {
+    this.cacheMisses += 1;
+    logger.debug('OPA decision cache miss', {
+      tenantId: input.tenant_id,
+      requestId: input.request_id,
+      reason,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: this.calculateCacheHitRate(),
+    });
+  }
+
   /**
    * Get enforcement statistics
    */
   getStats(): {
     enabled: boolean;
     cacheSize: number;
+    cacheHits: number;
+    cacheMisses: number;
     cacheHitRate: number;
   } {
     return {
       enabled: this.options.enabled,
       cacheSize: this.decisionCache.size,
-      cacheHitRate: 0, // TODO: Track cache hits/misses
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: this.calculateCacheHitRate(),
     };
   }
 }
