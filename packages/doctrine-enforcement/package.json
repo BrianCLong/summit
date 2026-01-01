@@ -1,0 +1,12 @@
+{
+  "name": "@summit/doctrine-enforcement",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/doctrine-enforcement/src/__tests__/decision-enforcement.test.ts"
+  }
+}
