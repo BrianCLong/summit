@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T04:11:56Z",
-  "revision_note": "Added Sprint N+3 Freeze/Certify/Release planning pack; refreshed SummitThreat roadmap narrative for 2026",
+  "last_updated": "2026-01-01T06:32:55Z",
+  "revision_note": "Added counter-intel OSINT playbook plus passive recon automation for metadata, secrets, and supply-chain coverage",
   "initiatives": [
     {
       "id": "A",
