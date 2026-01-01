@@ -112,6 +112,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: npm run check:governance
       - run: npm test -- --testPathPattern="governance" --bail
+      - name: Execute Governance Audit (Control the Arena)
+        run: npx tsx scripts/governance/audit_ci.ts
 
   provenance:
     name: Provenance
