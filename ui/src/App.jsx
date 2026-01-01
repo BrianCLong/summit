@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { SymphonyProvider, useSymphony } from './context/SymphonyContext';
+import api from './api.js';
 import Dashboard from './components/Dashboard.jsx';
 import RoutingStudio from './components/RoutingStudio.jsx';
 import RAGConsole from './components/RAGConsole.jsx';
@@ -10,7 +12,9 @@ import CIChaos from './components/CIChaos.jsx';
 import DocsRunbooks from './components/DocsRunbooks.jsx';
 import './App.css';
 
-const App = () => {
+// Main App component that uses the Symphony context
+const AppContent = () => {
+  const { systemStatus, lastUpdate, setSystemStatus } = useSymphony();
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const tabs = [
@@ -25,9 +29,25 @@ const App = () => {
     { id: 'docs', name: 'Docs & Runbooks', icon: '📚' },
   ];
 
+  // Auto-refresh system status
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const health = await api.getHealth();
+        setSystemStatus(health);
+      } catch (error) {
+        console.error('Health check failed:', error);
+      }
+    };
+
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, [setSystemStatus]);
+
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard systemStatus={systemStatus} />;
       case 'routing': return <RoutingStudio />;
       case 'rag': return <RAGConsole />;
       case 'neo4j': return <Neo4jGuard />;
@@ -36,8 +56,27 @@ const App = () => {
       case 'observability': return <Observability />;
       case 'ci-chaos': return <CIChaos />;
       case 'docs': return <DocsRunbooks />;
-      default: return <Dashboard />;
+      default: return <Dashboard systemStatus={systemStatus} />;
     }
+  };
+
+  // Status indicators based on system status
+  const getServicesStatus = () => {
+    if (!systemStatus) return [
+      { name: 'Models', count: 7, status: 'up' },
+      { name: 'Ollama', status: 'up' },
+      { name: 'LiteLLM', status: 'up' },
+      { name: 'Neo4j', status: 'up' },
+      { name: 'Federation', status: 'ready' },
+    ];
+
+    return [
+      { name: 'Models', count: systemStatus.models || 7, status: 'up' },
+      { name: 'Ollama', status: systemStatus.ollama ? 'up' : 'down' },
+      { name: 'LiteLLM', status: systemStatus.litellm ? 'up' : 'down' },
+      { name: 'Neo4j', status: systemStatus.neo4j ? 'up' : 'down' },
+      { name: 'Federation', status: 'ready' },
+    ];
   };
 
   return (
@@ -56,21 +95,35 @@ const App = () => {
                   ▸ {tabs.find((t) => t.id === activeTab)?.name}
                 </span>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <span className="px-2 py-1 bg-green-100 text-green-800 rounded">
-                  HEALTH: GREEN
-                </span>
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                  ENV: dev
-                </span>
-                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
-                  LOA: 1
-                </span>
+
+              {/* Status indicators */}
+              <div className="flex items-center space-x-3 text-sm" aria-label="System status indicators">
+                {getServicesStatus().map((service, index) => (
+                  <div key={index} className="flex items-center space-x-1">
+                    <div
+                      className={`status-indicator rounded-full ${
+                        service.status === 'up' || service.status === 'ready'
+                          ? 'bg-green-500'
+                          : 'bg-red-500'
+                      }`}
+                      aria-label={`${service.name} status: ${service.status}`}
+                      role="status"
+                    ></div>
+                    <span className="text-gray-600">
+                      {service.name}
+                      {service.count ? `: ${service.count}` : ''}:{' '}
+                      {service.status.toUpperCase()}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
+
             <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <span>ENV: dev</span>
+              <span>LOA: 1</span>
               <span>Kill: OFF</span>
-              <span>{new Date().toLocaleTimeString()}</span>
+              <span>{lastUpdate.toLocaleTimeString()}</span>
             </div>
           </div>
 
@@ -103,6 +156,15 @@ const App = () => {
         {renderTabContent()}
       </main>
     </div>
+  );
+};
+
+// Wrap the main App with the SymphonyProvider
+const App = () => {
+  return (
+    <SymphonyProvider>
+      <AppContent />
+    </SymphonyProvider>
   );
 };
 

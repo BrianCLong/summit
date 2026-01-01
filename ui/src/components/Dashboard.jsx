@@ -14,7 +14,15 @@ const Card = ({ title, children, actions, className = '' }) => (
   </div>
 );
 
-const Dashboard = () => {
+const Dashboard = ({ systemStatus }) => {
+  // Use system status to determine health state
+  const isHealthy = systemStatus &&
+    systemStatus.ollama &&
+    systemStatus.litellm &&
+    systemStatus.neo4j;
+
+  const healthTitle = isHealthy ? "Health: GREEN" : "Health: WARNING";
+
   const recentRoutes = [
     {
       task: 'nl2cy',
@@ -42,7 +50,7 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Health & Performance Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card title="Health: GREEN" className="lg:col-span-2">
+        <Card title={healthTitle} className="lg:col-span-2">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-4">
             <div>
               <div className="text-2xl font-bold text-green-600">
