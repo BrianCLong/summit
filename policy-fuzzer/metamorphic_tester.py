@@ -237,7 +237,30 @@ class MetamorphicTester:
             }
         )
 
+        # Relation 22: Query Simplification
+        relations.append(
+            {
+                "name": "query_simplification",
+                "transform": lambda p, q: self._simplify_query(p, q),
+                "check": lambda original_compliant, transformed_compliant: (
+                    transformed_compliant if original_compliant else True
+                ),
+            }
+        )
+
         return relations
+
+    def _simplify_query(self, policy, query):
+        """
+        Simplifies a query by making it more restrictive.
+        NOTE: This is a placeholder for a more sophisticated implementation.
+        The current logic is a simple transformation for testing purposes.
+        """
+        transformed_query = deepcopy(query)
+        # Example simplification: if location is EU, make it US (assuming US is more restrictive)
+        if "location" in transformed_query and transformed_query["location"] == "EU":
+            transformed_query["location"] = "US"
+        return transformed_query
 
     def _shift_time_within_window(self, policy, query):
         transformed_query = deepcopy(query)
