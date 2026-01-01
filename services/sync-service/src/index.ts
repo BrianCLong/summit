@@ -6,6 +6,33 @@
  * with cryptographic verification and conflict resolution.
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['postgres:postgres', 'password', 'secret', 'changeme', 'default'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} contains insecure credentials`);
+    console.error(`Use a strong connection string with unique credentials`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
@@ -39,9 +66,7 @@ const PUBLIC_KEY_PATH = process.env.PUBLIC_KEY_PATH || '/opt/intelgraph/keys/pub
 
 // Database connection
 const pool = new Pool({
-  connectionString:
-    process.env.DATABASE_URL ||
-    'postgres://postgres:postgres@localhost:5432/intelgraph',
+  connectionString: requireSecret('DATABASE_URL', process.env.DATABASE_URL, 30),
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

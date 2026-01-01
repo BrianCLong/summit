@@ -3,6 +3,33 @@
  * Sprint 27H: Single Sign-On and automated user provisioning
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 32): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'default-secret', 'default-refresh-secret'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
@@ -546,7 +573,7 @@ export class SSOManager extends EventEmitter {
         groups: user.groups,
         type: 'access',
       },
-      process.env.JWT_SECRET || 'default-secret',
+      requireSecret('JWT_SECRET', process.env.JWT_SECRET, 32),
       {
         expiresIn: '1h',
         issuer: 'intelgraph',
@@ -561,7 +588,7 @@ export class SSOManager extends EventEmitter {
         sub: user.id,
         type: 'refresh',
       },
-      process.env.JWT_REFRESH_SECRET || 'default-refresh-secret',
+      requireSecret('JWT_REFRESH_SECRET', process.env.JWT_REFRESH_SECRET, 32),
       {
         expiresIn: '30d',
         issuer: 'intelgraph',
