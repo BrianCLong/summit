@@ -14,6 +14,7 @@ import sprint28Resolvers from './sprint28.js';
 import ewResolvers from './electronic-warfare.js';
 import { collaborationResolvers } from './collaboration';
 import { cognitiveSecurityResolvers } from './cognitive-security.js';
+import { deduplicationResolvers } from './deduplication.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040.js';
@@ -39,6 +40,7 @@ const resolvers = {
     ...(ewResolvers.Query || {}),
     ...(collaborationResolvers.Query || {}),
     ...(cognitiveSecurityResolvers.Query || {}),
+    ...(deduplicationResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)

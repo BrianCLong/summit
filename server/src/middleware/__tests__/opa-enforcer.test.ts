@@ -22,32 +22,55 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock budget ledger
-jest.mock('../../db/budgetLedger', () => ({
-  getBudgetLedgerManager: jest.fn(() => ({
+jest.mock('../../db/budgetLedger', () => {
+  const ledger = {
     getTenantBudget: jest.fn(),
     getSpendingSummary: jest.fn(),
     getSpendingEntries: jest.fn(),
     checkTenantBudget: jest.fn(),
-  })),
-}));
+  };
+
+  return {
+    getBudgetLedgerManager: jest.fn(() => ledger),
+    __mockLedger: ledger,
+  };
+});
+
+const budgetLedgerModule = jest.requireMock('../../db/budgetLedger') as {
+  __mockLedger: {
+    getTenantBudget: jest.MockedFunction<(...args: any[]) => any>;
+    getSpendingSummary: jest.MockedFunction<(...args: any[]) => any>;
+    getSpendingEntries: jest.MockedFunction<(...args: any[]) => any>;
+    checkTenantBudget: jest.MockedFunction<(...args: any[]) => any>;
+  };
+  getBudgetLedgerManager: () => any;
+};
+
+const mockBudgetLedger = budgetLedgerModule.__mockLedger;
+
+const buildEnforcer = (
+  options?: ConstructorParameters<typeof OPAEnforcer>[0],
+): OPAEnforcer => {
+  const enforcer = new OPAEnforcer(options);
+  (enforcer as any).budgetLedger = mockBudgetLedger;
+  return enforcer;
+};
 
 describe('OPAEnforcer', () => {
   let opaEnforcer: OPAEnforcer;
-  let mockBudgetLedger: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Get mocked budget ledger
-    const budgetLedgerMock = jest.requireMock('../../db/budgetLedger') as { getBudgetLedgerManager: () => any };
-    mockBudgetLedger = budgetLedgerMock.getBudgetLedgerManager();
+    if (mockBudgetLedger) {
+      Object.values(mockBudgetLedger).forEach((fn) => fn.mockReset());
+    }
 
     // Reset environment variables
     delete process.env.OPA_ENFORCEMENT;
     delete process.env.FOUR_EYES_THRESHOLD_USD;
     delete process.env.FOUR_EYES_THRESHOLD_TOKENS;
 
-    opaEnforcer = new OPAEnforcer({
+    opaEnforcer = buildEnforcer({
       enabled: true,
       opaUrl: 'http://localhost:8181',
       cacheDecisions: false, // Disable cache for most tests
@@ -306,7 +329,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should use fallback decision when OPA is disabled', async () => {
-      const disabledEnforcer = new OPAEnforcer({
+      const disabledEnforcer = buildEnforcer({
         enabled: false,
       });
 
@@ -360,7 +383,7 @@ describe('OPAEnforcer', () => {
     };
 
     it('should cache decisions when enabled', async () => {
-      const cachedEnforcer = new OPAEnforcer({
+      const cachedEnforcer = buildEnforcer({
         enabled: true,
         cacheDecisions: true,
         cacheTtlMs: 60000,
@@ -403,7 +426,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should not cache when disabled', async () => {
-      const noCacheEnforcer = new OPAEnforcer({
+      const noCacheEnforcer = buildEnforcer({
         enabled: true,
         cacheDecisions: false,
       });
@@ -440,6 +463,48 @@ describe('OPAEnforcer', () => {
       await noCacheEnforcer.evaluatePolicy(mockInput);
 
       expect(mockedAxios.post).toHaveBeenCalledTimes(2);
+    });
+
+    it('should report cache hit rate statistics', async () => {
+      const statsEnforcer = buildEnforcer({
+        enabled: true,
+        cacheDecisions: true,
+        cacheTtlMs: 60000,
+      });
+
+      const mockOPAResponse = {
+        data: {
+          result: {
+            allow: true,
+            tenant_id: mockInput.tenant_id,
+            estimated_usd: mockInput.est_usd,
+            monthly_room: 100.0,
+            daily_room: 3.33,
+            requires_four_eyes: false,
+            valid_approvers: 0,
+            risk_level: 'low',
+            violation_reasons: [],
+            policy_version: '1.0',
+            evaluated_at: Date.now(),
+          },
+        },
+      };
+
+      mockBudgetLedger.getTenantBudget.mockResolvedValue({
+        monthlyUsdLimit: 100.0,
+        dailyUsdLimit: 10.0,
+      });
+      mockBudgetLedger.getSpendingSummary.mockResolvedValue({});
+      mockBudgetLedger.getSpendingEntries.mockResolvedValue([]);
+
+      mockedAxios.post.mockResolvedValue(mockOPAResponse);
+
+      await statsEnforcer.evaluatePolicy(mockInput); // miss
+      await statsEnforcer.evaluatePolicy(mockInput); // hit
+
+      const stats = statsEnforcer.getStats();
+      expect(stats.cacheSize).toBe(1);
+      expect(stats.cacheHitRate).toBeCloseTo(0.5);
     });
   });
 
@@ -490,7 +555,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should allow request when OPA approves', async () => {
-      (mockReq.get as jest.Mock).mockImplementation((header: string) => {
+      (mockReq.get as jest.Mock).mockImplementation((header: unknown) => {
         const headers: Record<string, string> = {
           'x-tenant-id': 'tenant-123',
           'x-user-id': 'user-456',
@@ -498,7 +563,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
-        return headers[header];
+        return headers[typeof header === 'string' ? header : ''];
       });
 
       const mockOPAResponse = {
@@ -538,7 +603,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should deny request with 403 when OPA denies', async () => {
-      (mockReq.get as jest.Mock).mockImplementation((header: string) => {
+      (mockReq.get as jest.Mock).mockImplementation((header: unknown) => {
         const headers: Record<string, string> = {
           'x-tenant-id': 'tenant-123',
           'x-user-id': 'user-456',
@@ -546,7 +611,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '100000',
           'x-request-id': 'req-789',
         };
-        return headers[header];
+        return headers[typeof header === 'string' ? header : ''];
       });
 
       const mockOPAResponse = {
@@ -611,7 +676,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should extract mutation field name from query', async () => {
-      (mockReq.get as jest.Mock).mockImplementation((header: string) => {
+      (mockReq.get as jest.Mock).mockImplementation((header: unknown) => {
         const headers: Record<string, string> = {
           'x-tenant-id': 'tenant-123',
           'x-user-id': 'user-456',
@@ -619,7 +684,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
-        return headers[header];
+        return headers[typeof header === 'string' ? header : ''];
       });
 
       mockReq.body = {
@@ -673,7 +738,7 @@ describe('OPAEnforcer', () => {
 
   describe('fallback decision', () => {
     it('should allow low-cost operations when budget is available', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -699,7 +764,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should deny when budget is exceeded', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -725,7 +790,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should require four-eyes approval for high-cost operations', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -752,7 +817,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should require four-eyes approval for destructive operations', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -779,7 +844,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should allow high-cost operation with sufficient approvers', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',

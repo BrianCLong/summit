@@ -4,42 +4,42 @@ on:
   workflow_call:
     inputs:
       test-type:
-        description: 'Type of tests to run (unit, integration, e2e, perf, lint)'
+        description: "Type of tests to run (unit, integration, e2e, perf, lint)"
         required: true
         type: string
       node-version:
-        description: 'Node.js version to use'
+        description: "Node.js version to use"
         required: false
         type: string
-        default: '20'
+        default: "20"
       pnpm-version:
-        description: 'pnpm version to use'
+        description: "pnpm version to use"
         required: false
         type: string
-        default: '9'
+        default: "9"
       test-command:
-        description: 'Custom test command to run'
+        description: "Custom test command to run"
         required: false
         type: string
       timeout-minutes:
-        description: 'Job timeout in minutes'
+        description: "Job timeout in minutes"
         required: false
         type: number
         default: 30
       upload-coverage:
-        description: 'Whether to upload coverage reports'
+        description: "Whether to upload coverage reports"
         required: false
         type: boolean
         default: false
       working-directory:
-        description: 'Working directory for tests'
+        description: "Working directory for tests"
         required: false
         type: string
-        default: '.'
+        default: "."
 
 env:
   CI: true
-  NODE_OPTIONS: '--max-old-space-size=4096'
+  NODE_OPTIONS: "--max-old-space-size=4096"
 
 jobs:
   test:
@@ -48,7 +48,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup toolchain
         uses: ./.github/actions/setup-toolchain
@@ -92,7 +92,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ inputs.test-type }}
           path: |

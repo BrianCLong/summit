@@ -500,6 +500,270 @@ export class SimilarityService {
     }
     return results;
   }
+
+  /**
+   * Calculate topology similarity using Jaccard index
+   * Measures overlap between entity neighbor sets
+   */
+  private calculateTopologySimilarity(
+    neighbors1: string[],
+    neighbors2: string[],
+  ): number {
+    if (!neighbors1?.length && !neighbors2?.length) {
+      return 0;
+    }
+
+    const set1 = new Set(neighbors1 || []);
+    const set2 = new Set(neighbors2 || []);
+
+    const intersection = new Set([...set1].filter((x) => set2.has(x)));
+    const union = new Set([...set1, ...set2]);
+
+    if (union.size === 0) {
+      return 0;
+    }
+
+    return intersection.size / union.size;
+  }
+
+  /**
+   * Calculate provenance similarity
+   * Returns 1 if sources match, 0 otherwise
+   */
+  private calculateProvenanceSimilarity(
+    source1?: string,
+    source2?: string,
+  ): number {
+    if (!source1 || !source2) {
+      return 0;
+    }
+    return source1 === source2 ? 1 : 0;
+  }
+
+  /**
+   * Find potential duplicate entities using semantic similarity + topology + provenance
+   * Modern pgvector-based implementation replacing O(n²) legacy algorithm
+   *
+   * @param params Configuration for duplicate detection
+   * @returns Array of duplicate candidate pairs with similarity scores and reasons
+   */
+  async findDuplicateCandidates(params: {
+    investigationId: string;
+    threshold?: number;
+    topK?: number;
+    includeReasons?: boolean;
+    tenantId?: string;
+  }): Promise<DuplicateCandidate[]> {
+    const startTime = Date.now();
+    const threshold = params.threshold ?? this.config.defaultThreshold;
+    const topK = params.topK ?? 5; // Top K similar entities per entity
+    const includeReasons = params.includeReasons ?? true;
+
+    return otelService.wrapNeo4jOperation(
+      'find-duplicate-candidates',
+      async () => {
+        try {
+          serviceLogger.info('Finding duplicate candidates', {
+            investigationId: params.investigationId,
+            threshold,
+            topK,
+          });
+
+          // Step 1: Fetch all entities with embeddings for this investigation
+          const client = await this.getPool().connect();
+
+          let entities: EntityEmbeddingRecord[];
+          try {
+            const result = await client.query(
+              `
+              SELECT
+                entity_id,
+                embedding,
+                text,
+                metadata
+              FROM entity_embeddings
+              WHERE investigation_id = $1
+              ORDER BY entity_id
+            `,
+              [params.investigationId],
+            );
+
+            entities = result.rows.map((row) => ({
+              entityId: row.entity_id,
+              embedding: this.parseVectorString(row.embedding),
+              text: row.text,
+              neighborIds: row.metadata?.neighbor_ids || [],
+              sourceSystem: row.metadata?.source_system,
+            }));
+          } finally {
+            client.release();
+          }
+
+          serviceLogger.debug('Loaded entities for deduplication', {
+            entityCount: entities.length,
+          });
+
+          if (entities.length === 0) {
+            return [];
+          }
+
+          // Step 2: For each entity, find similar entities using vector search
+          // This is O(n) with pgvector vs O(n²) with naive comparison
+          const candidatePairs: Map<string, DuplicateCandidate> = new Map();
+
+          for (const entity of entities) {
+            const similarEntities = await this.performVectorSearch(
+              entity.embedding,
+              params.investigationId,
+              topK,
+              0.0, // Don't filter by threshold yet, we'll apply hybrid scoring
+              false, // Don't include text in results
+              entity.entityId, // Exclude self
+              params.tenantId,
+            );
+
+            // Step 3: Calculate hybrid scores for each similar entity
+            for (const similar of similarEntities) {
+              const targetEntity = entities.find(
+                (e) => e.entityId === similar.entityId,
+              );
+
+              if (!targetEntity) {
+                continue;
+              }
+
+              // Semantic similarity from pgvector (already computed)
+              const semanticSimilarity = similar.similarity;
+
+              // Topology similarity (Jaccard index of neighbor sets)
+              const topologySimilarity = this.calculateTopologySimilarity(
+                entity.neighborIds,
+                targetEntity.neighborIds,
+              );
+
+              // Provenance similarity (same source system)
+              const provenanceSimilarity = this.calculateProvenanceSimilarity(
+                entity.sourceSystem,
+                targetEntity.sourceSystem,
+              );
+
+              // Weighted hybrid score matching legacy weights:
+              // Semantic: 60%, Topology: 30%, Provenance: 10%
+              const overallSimilarity =
+                semanticSimilarity * 0.6 +
+                topologySimilarity * 0.3 +
+                provenanceSimilarity * 0.1;
+
+              // Only include if meets threshold
+              if (overallSimilarity >= threshold) {
+                // Create deterministic pair key (sorted entity IDs)
+                const pairKey =
+                  entity.entityId < similar.entityId
+                    ? `${entity.entityId}::${similar.entityId}`
+                    : `${similar.entityId}::${entity.entityId}`;
+
+                // Avoid duplicate pairs
+                if (!candidatePairs.has(pairKey)) {
+                  const reasons: string[] = [];
+
+                  if (includeReasons) {
+                    if (semanticSimilarity > 0.8) {
+                      reasons.push('High semantic similarity');
+                    }
+                    if (topologySimilarity > 0.5) {
+                      reasons.push('Significant neighbor overlap');
+                    }
+                    if (provenanceSimilarity > 0) {
+                      reasons.push('Same source');
+                    }
+                    if (reasons.length === 0) {
+                      reasons.push('Overall similarity threshold met');
+                    }
+                  }
+
+                  candidatePairs.set(pairKey, {
+                    entityA: {
+                      id: entity.entityId,
+                      label: entity.text || entity.entityId,
+                    },
+                    entityB: {
+                      id: similar.entityId,
+                      label: targetEntity.text || similar.entityId,
+                    },
+                    similarity: overallSimilarity,
+                    scores: {
+                      semantic: semanticSimilarity,
+                      topology: topologySimilarity,
+                      provenance: provenanceSimilarity,
+                    },
+                    reasons: includeReasons ? reasons : undefined,
+                  });
+                }
+              }
+            }
+          }
+
+          const candidates = Array.from(candidatePairs.values());
+
+          // Sort by similarity descending
+          candidates.sort((a, b) => b.similarity - a.similarity);
+
+          const executionTime = Date.now() - startTime;
+
+          serviceLogger.info('Duplicate candidates found', {
+            investigationId: params.investigationId,
+            candidateCount: candidates.length,
+            entityCount: entities.length,
+            executionTime,
+            threshold,
+          });
+
+          otelService.addSpanAttributes({
+            'dedup.investigation_id': params.investigationId,
+            'dedup.candidate_count': candidates.length,
+            'dedup.entity_count': entities.length,
+            'dedup.execution_time': executionTime,
+            'dedup.threshold': threshold,
+          });
+
+          return candidates;
+        } catch (error) {
+          serviceLogger.error('Failed to find duplicate candidates', {
+            investigationId: params.investigationId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+          throw error;
+        }
+      },
+    );
+  }
+}
+
+// Types for duplicate detection
+interface EntityEmbeddingRecord {
+  entityId: string;
+  embedding: number[];
+  text?: string;
+  neighborIds: string[];
+  sourceSystem?: string;
+}
+
+export interface DuplicateCandidate {
+  entityA: {
+    id: string;
+    label: string;
+  };
+  entityB: {
+    id: string;
+    label: string;
+  };
+  similarity: number;
+  scores: {
+    semantic: number;
+    topology: number;
+    provenance: number;
+  };
+  reasons?: string[];
 }
 
 export const similarityService = new SimilarityService();
