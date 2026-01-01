@@ -3,6 +3,56 @@ import request from 'supertest';
 import path from 'path';
 import fs from 'fs';
 
+// Mock database BEFORE any module imports it
+const mockPool = {
+  query: jest.fn().mockResolvedValue({ rows: [] }),
+  connect: jest.fn().mockResolvedValue({
+    query: jest.fn().mockResolvedValue({ rows: [] }),
+    release: jest.fn(),
+  }),
+  end: jest.fn(),
+};
+
+jest.mock('../../config/database.js', () => ({
+  initializePostgres: jest.fn(),
+  getPostgresPool: () => mockPool,
+  closePostgresPool: jest.fn(),
+}));
+
+// Mock audit system to prevent it from trying to initialize
+jest.mock('../../audit/advanced-audit-system.js', () => ({
+  AdvancedAuditSystem: {
+    getInstance: jest.fn().mockReturnValue({
+      logEvent: jest.fn(),
+      logSecurityEvent: jest.fn(),
+      flush: jest.fn(),
+    }),
+  },
+}));
+
+// Mock provenance ledger
+jest.mock('../../provenance/ledger.js', () => ({
+  ProvenanceLedger: jest.fn().mockImplementation(() => ({
+    recordEvent: jest.fn(),
+  })),
+}));
+
+// Mock monitoring routes to prevent health.js import issues
+jest.mock('../../routes/monitoring.js', () => ({
+  monitoringRouter: {
+    get: jest.fn(),
+    use: jest.fn(),
+  },
+}));
+
+// Mock monitoring/health.js to prevent ESM import issues
+jest.mock('../../monitoring/health.js', () => ({
+  performHealthCheck: jest.fn().mockResolvedValue({ status: 'healthy' }),
+  getCachedHealthStatus: jest.fn().mockReturnValue({ status: 'healthy' }),
+  livenessProbe: jest.fn().mockResolvedValue({ status: 'ok' }),
+  readinessProbe: jest.fn().mockResolvedValue({ status: 'ready' }),
+}));
+
 // Mock config BEFORE importing app
 jest.mock('../../config.js', () => ({
   cfg: {
