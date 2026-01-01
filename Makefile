@@ -309,6 +309,20 @@ conductor-logs: ## Tail Conductor logs
 	@echo "--- client ---"
 	@tail -n 20 .run/client.log 2>/dev/null || echo "No client logs."
 
+# UX Governance
+.PHONY: ux-governance-check ux-governance-audit ux-governance-report
+ux-governance-check: ## Run UX governance validation on current codebase
+	@echo "Running UX governance validation..."
+	@node scripts/ux-ci-enforcer.cjs
+
+ux-governance-audit: ## Perform complete UX governance audit
+	@echo "Running complete UX governance audit..."
+	@node scripts/ux-governance-orchestrator.cjs
+
+ux-governance-report: ## Generate UX governance report
+	@echo "Generating UX governance report..."
+	@cat ux-governance-decision-package.json
+
 # Pipeline Orchestration
 pipelines-list: ## List registered pipelines
 	@python3 pipelines/cli.py list --format table

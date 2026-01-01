@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "corePrinciples": [
+    {
+      "id": "PRIN-001",
+      "name": "Human Primacy",
+      "description": "All consequential decisions require human authorization and remain traceable to human intent",
+      "enforcementLevel": "mandatory"
+    },
+    {
+      "id": "PRIN-002",
+      "name": "Security-First",
+      "description": "Security and compliance requirements override convenience and performance",
+      "enforcementLevel": "mandatory"
+    },
+    {
+      "id": "PRIN-003",
+      "name": "Stress-Resilient Design",
+      "description": "Interfaces must remain functional and clear under high cognitive load",
+      "enforcementLevel": "mandatory"
+    },
+    {
+      "id": "PRIN-004",
+      "name": "Transparency by Design",
+      "description": "All system decisions and data provenance must be fully explainable",
+      "enforcementLevel": "mandatory"
+    },
+    {
+      "id": "PRIN-005",
+      "name": "Accessibility Always",
+      "description": "WCAG 2.1 AA compliance required for all features",
+      "enforcementLevel": "mandatory"
+    }
+  ],
+  "interactionPatterns": [
+    {
+      "id": "PATT-001",
+      "name": "Critical Action Pattern",
+      "description": "Multi-step confirmation for high-risk operations",
+      "implementationGuidelines": [
+        "Visual separation from routine operations",
+        "Multi-step confirmation process (at least 2 steps with 1-second delay)",
+        "Clear indication of potential consequences",
+        "Immutable logging of the operation"
+      ],
+      "validationCriteria": [
+        "Requires more than 1 interaction step",
+        "Includes delay between steps",
+        "Shows consequences before confirmation",
+        "Logs to audit trail"
+      ]
+    },
+    {
+      "id": "PATT-002",
+      "name": "Progressive Disclosure",
+      "description": "Advanced features hidden behind role-based access",
+      "implementationGuidelines": [
+        "Hidden behind role-based access controls",
+        "Revealed based on user expertise and authorization level",
+        "Accompanied by contextual help and guidance"
+      ],
+      "validationCriteria": [
+        "Requires appropriate role to access",
+        "Shows contextual help",
+        "Follows security authorization model"
+      ]
+    },
+    {
+      "id": "PATT-003",
+      "name": "Context-Aware UI",
+      "description": "Interface adapts based on user context",
+      "implementationGuidelines": [
+        "Adapts based on user's security clearance and role",
+        "Changes based on operational context (normal vs emergency)",
+        "Responds to system stress levels and performance metrics"
+      ],
+      "validationCriteria": [
+        "Changes based on user role/clearance",
+        "Different mode for emergency contexts",
+        "Performance-aware optimizations"
+      ]
+    },
+    {
+      "id": "PATT-004",
+      "name": "Consistent Visual Language",
+      "description": "Single design system across all components",
+      "implementationGuidelines": [
+        "Use the same design system (standardize on Radix/Tailwind)",
+        "Follow consistent color, typography, and spacing patterns",
+        "Maintain accessibility compliance across all states"
+      ],
+      "validationCriteria": [
+        "Uses single design system components",
+        "Consistent color/typography patterns",
+        "Meets accessibility requirements"
+      ]
+    }
+  ],
+  "accessibilityRequirements": {
+    "wcagLevel": "AA",
+    "standards": ["WCAG 2.1 AA", "Section 508", "ARIA 1.2"],
+    "validationTools": ["axe-core", "eslint-plugin-jsx-a11y", "react-axe"]
+  },
+  "criticalOperations": [
+    {
+      "operationType": "data_destruction",
+      "requiredConfirmations": 2,
+      "minimumDelay": 1,
+      "loggingRequired": true
+    },
+    {
+      "operationType": "security_level_change",
+      "requiredConfirmations": 2,
+      "minimumDelay": 1,
+      "loggingRequired": true
+    },
+    {
+      "operationType": "system_configuration",
+      "requiredConfirmations": 2,
+      "minimumDelay": 1,
+      "loggingRequired": true
+    },
+    {
+      "operationType": "emergency_procedures",
+      "requiredConfirmations": 1,
+      "minimumDelay": 0,
+      "loggingRequired": true
+    }
+  ],
+  "priorityIssues": {
+    "P0": [
+      "Critical Actions Lack Sufficient Confirmation",
+      "Accessibility Compliance Gaps",
+      "Cognitive Load Under Stress"
+    ],
+    "P1": ["Mixed Design Systems", "Information Overload", "Trust Boundary Visualization"],
+    "P2": ["Performance Scaling Challenges", "Confirmation Bias Reinforcement"],
+    "P3": ["Loading State Inconsistencies", "Alert Homogeneity"]
+  }
+}

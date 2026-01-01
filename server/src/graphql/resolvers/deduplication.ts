@@ -46,7 +46,7 @@ export const deduplicationResolvers = {
           threshold: args.threshold,
           topK: 10, // Configurable if needed
           includeReasons: true,
-          tenantId: context.tenantId,
+          tenantId: context.tenant,
         });
 
         dedupLogger.debug('Deduplication candidates retrieved', {

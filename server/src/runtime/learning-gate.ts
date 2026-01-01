@@ -22,7 +22,16 @@ export const OutcomeEvaluationSchema = z.object({
   confidenceDelta: z.number().optional(),
 });
 
-export type OutcomeEvaluation = z.infer<typeof OutcomeEvaluationSchema>;
+export interface OutcomeEvaluation {
+  decisionId: string;
+  timestamp: string;
+  expectedOutcome?: Record<string, any>;
+  actualOutcome: Record<string, any>;
+  deltaExplanation?: string;
+  eligibilityForLearning: boolean;
+  verificationSource: string;
+  confidenceDelta?: number;
+}
 
 export class LearningGate {
   private static instance: LearningGate;
