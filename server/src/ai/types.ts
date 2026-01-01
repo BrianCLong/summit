@@ -6,6 +6,7 @@ export interface ExtractionEngineConfig {
   tempPath: string;
   maxConcurrentJobs: number;
   enableGPU: boolean;
+  allowedPaths?: string[]; // Whitelist of allowed directories for file access
 }
 
 export interface ExtractionRequest {
