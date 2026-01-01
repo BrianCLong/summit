@@ -106,7 +106,10 @@ Summit ships with explicit, evidence-backed limits covering scale, performance, 
 We welcome contributions from humans and AI agents alike!
 
 - **Atomic PRs**: One feature per PR.
-- **Golden Path**: Ensure `make smoke` passes before submitting.
+- **Bootstrap First**: Run `pnpm bootstrap` to ensure dependencies are installed.
+- **Verify Before Commit**: Run `pnpm verify` to check GA features and structure.
+- **Golden Path**: Ensure `pnpm lint && pnpm verify && pnpm build` passes before submitting.
+- **Testing Conventions**: Use Jest for unit tests, node-native for verification. See [TESTING.md](TESTING.md).
 - **Bots/Co-authors**: Please sign your commits and follow our [Agent Guidelines](AGENTS.md).
 
 👉 **[Read the Contributing Guide](CONTRIBUTING.md)**
@@ -117,9 +120,13 @@ We welcome contributions from humans and AI agents alike!
 
 Our CI pipeline ("Fast Lane") enforces high standards:
 
-1.  **Lint & Unit**: Fast static analysis and unit tests.
-2.  **Golden Path**: Full-stack integration test (`make smoke`) in a clean environment.
-3.  **Security**: SAST, Dependency Scanning, Secret Detection.
+1.  **Lint**: Fast static analysis (ESLint + Ruff).
+2.  **Verify**: Deterministic verification suite for GA features (Auth, Rate Limits, Policies, etc.). **BLOCKS CI on failure.**
+3.  **Test**: Jest unit and integration tests.
+4.  **Golden Path**: Full-stack integration test (`make smoke`) in a clean environment.
+5.  **Security**: SAST, Dependency Scanning, Secret Detection.
+
+**New in this release:** We've established a deterministic verification suite using node-native tests (tsx + node:assert) to avoid Jest ESM/CJS brittleness. See [TESTING.md](TESTING.md) for details.
 
 ---
 
