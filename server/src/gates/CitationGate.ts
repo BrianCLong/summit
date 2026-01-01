@@ -1,6 +1,8 @@
 import { getFeatureFlagService } from '../services/FeatureFlagService';
 import { FlagUser } from '../services/FeatureFlagService';
 
+const isProductionBuild = () => process.env.NODE_ENV === 'production';
+
 export interface Citation {
   locator: string; // e.g., "doc-123", "https://..."
   snippet?: string;
@@ -46,11 +48,8 @@ export class CitationGate {
         }
     };
 
-    const isEnabled = await featureFlagService.isEnabled('CITATION_GATE', userContext);
-
-    if (!isEnabled) {
-      return payload;
-    }
+    const flagEnabled = await featureFlagService.isEnabled('CITATION_GATE', userContext);
+    const enforceGate = isProductionBuild() || flagEnabled;
 
     const gaps: Statement[] = [];
     const newPayload = { ...payload };
@@ -99,7 +98,7 @@ export class CitationGate {
 
     // If gaps found
     if (gaps.length > 0) {
-        if (options.strict) {
+        if (options.strict || enforceGate) {
              throw new Error(`Export blocked: ${gaps.length} uncited statements found.`);
         }
 

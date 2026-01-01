@@ -1049,6 +1049,26 @@ export class MigrationGatesSystem extends EventEmitter {
       this.monitoringInterval = null;
     }
   }
+
+  getGateRegistrySnapshot(): Array<{
+    id: string;
+    name: string;
+    type: GateType;
+    enabled: boolean;
+  }> {
+    return Array.from(this.gates.values()).map((gate) => ({
+      id: gate.id,
+      name: gate.name,
+      type: gate.type,
+      enabled: gate.enabled,
+    }));
+  }
+
+  getEnabledGateCount(type?: GateType): number {
+    const gates = Array.from(this.gates.values());
+    return gates.filter((gate) => gate.enabled && (!type || gate.type === type))
+      .length;
+  }
 }
 
 export const migrationGates = new MigrationGatesSystem();

@@ -11,6 +11,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
 import { otelService } from './lib/observability/otel.js';
+import { assertGateActivation } from './runtime/gateHealth.js';
 
 // Initialize OpenTelemetry as early as possible
 otelService.initialize();
@@ -52,6 +53,7 @@ const startServer = async () => {
       logger.warn('Kafka not available - running in minimal mode');
     }
   }
+  await assertGateActivation();
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 

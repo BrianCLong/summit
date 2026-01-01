@@ -17,20 +17,21 @@ jest.mock('../../src/services/FeatureFlagService', () => {
 describe('CitationGate', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        process.env.NODE_ENV = '';
     });
 
-    it('should pass through payload when flag is disabled', async () => {
+    it('should still surface gaps when flag is disabled', async () => {
         mockIsEnabled.mockResolvedValue(false);
         const payload: ExportPayload = {
             findings: ['uncited finding']
         };
 
         const result = await CitationGate.validateCitations(payload, { tenantId: 'test' });
-        expect(result).toEqual(payload);
-        expect(result.findings).toHaveLength(1);
+        expect(result.findings).toHaveLength(0);
+        expect(result.gaps).toHaveLength(1);
     });
 
-    it('should move uncited findings to gaps when flag is enabled', async () => {
+    it('should block uncited findings when flag is enabled', async () => {
         mockIsEnabled.mockResolvedValue(true);
         const payload: ExportPayload = {
             findings: [
@@ -39,17 +40,11 @@ describe('CitationGate', () => {
             ]
         };
 
-        const result = await CitationGate.validateCitations(payload, { tenantId: 'test' });
-
-        expect(result.findings).toHaveLength(1);
-        expect(result.findings![0]).toEqual(payload.findings![1]);
-
-        expect(result.gaps).toBeDefined();
-        expect(result.gaps).toHaveLength(1);
-        expect(result.gaps![0]).toEqual({ text: 'uncited finding', citations: [] });
+        await expect(CitationGate.validateCitations(payload, { tenantId: 'test' }))
+            .rejects.toThrow(/Export blocked/);
     });
 
-    it('should validate sections in ReportingService format', async () => {
+    it('should block uncited reporting sections when gate is enabled', async () => {
         mockIsEnabled.mockResolvedValue(true);
         const payload: ExportPayload = {
             sections: [
@@ -66,17 +61,8 @@ describe('CitationGate', () => {
             ]
         };
 
-        const result = await CitationGate.validateCitations(payload, { tenantId: 'test' });
-
-        const summary = result.sections![0];
-        expect(summary.data.keyInsights).toHaveLength(1);
-        expect(summary.data.keyInsights[0].description).toBe('cited insight');
-
-        // Check gaps appendix
-        const gapsAppendix = result.sections!.find(s => s.name === 'gaps_appendix');
-        expect(gapsAppendix).toBeDefined();
-        expect(gapsAppendix!.data.gaps).toHaveLength(1);
-        expect(gapsAppendix!.data.gaps[0].text).toBe('uncited insight');
+        await expect(CitationGate.validateCitations(payload, { tenantId: 'test' }))
+            .rejects.toThrow(/Export blocked/);
     });
 
     it('should throw error in strict mode if gaps are found', async () => {
@@ -86,6 +72,17 @@ describe('CitationGate', () => {
         };
 
         await expect(CitationGate.validateCitations(payload, { tenantId: 'test', strict: true }))
+            .rejects.toThrow(/Export blocked/);
+    });
+
+    it('enforces gating in production builds even without strict flag', async () => {
+        process.env.NODE_ENV = 'production';
+        mockIsEnabled.mockResolvedValue(false);
+        const payload: ExportPayload = {
+            findings: ['uncited finding']
+        };
+
+        await expect(CitationGate.validateCitations(payload, { tenantId: 'test' }))
             .rejects.toThrow(/Export blocked/);
     });
 });

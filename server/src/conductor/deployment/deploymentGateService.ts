@@ -124,11 +124,51 @@ export class DeploymentGateService {
     options: DeploymentGateServiceOptions = {},
   ) {
     this.logger = adapters.logger ?? defaultLogger;
+    this.validateAdapters(adapters);
     this.requiredApprovals = Math.max(
       options.requiredMaintainerApprovals ?? 2,
       1,
     );
     this.productionEnvironment = options.productionEnvironment ?? 'production';
+  }
+
+  private validateAdapters(adapters: DeploymentGateAdapters): void {
+    const required = {
+      migrations: ['getPendingMigrations'],
+      readiness: ['getUnhealthyServices'],
+      configuration: ['diffEnvironments'],
+      smokeTests: ['run'],
+      api: ['getBreakingChanges'],
+      release: ['hasRollbackPlan'],
+      approvals: ['getMaintainerApprovals'],
+      slack: ['notify'],
+    } as const;
+
+    for (const [adapterKey, requiredFns] of Object.entries(required)) {
+      // @ts-expect-error - dynamic lookup
+      const adapter = adapters[adapterKey];
+      if (!adapter) {
+        throw new Error(`Deployment gate adapter missing: ${adapterKey}`);
+      }
+
+      for (const fnName of requiredFns as readonly string[]) {
+        if (typeof adapter[fnName] !== 'function') {
+          throw new Error(
+            `Deployment gate adapter ${adapterKey} missing required function ${fnName}`,
+          );
+        }
+      }
+    }
+  }
+
+  describeConfiguration(): {
+    requiredApprovals: number;
+    productionEnvironment: string;
+  } {
+    return {
+      requiredApprovals: this.requiredApprovals,
+      productionEnvironment: this.productionEnvironment,
+    };
   }
 
   async validate(
