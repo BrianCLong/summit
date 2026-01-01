@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T07:00:00Z",
-  "revision_note": "Billing advisory locks; OPA cache metrics; severity ledger; partner model; Sprint N+3 planning",
+  "last_updated": "2026-01-01T08:00:00Z",
+  "revision_note": "Postgres usage metering persistence; Billing advisory locks; OPA cache metrics; severity ledger; partner model; Sprint N+3 planning",
   "initiatives": [
     {
       "id": "A",
