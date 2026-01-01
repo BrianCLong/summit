@@ -49,6 +49,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:${{ matrix.test-suite }}
+      - name: Run API authz e2e tests
+        if: matrix.test-suite == 'integration'
+        run: pnpm --filter @intelgraph/api test
 
   golden-path:
     name: Golden Path
