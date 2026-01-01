@@ -5,8 +5,16 @@ on:
     branches: [main]
 
 jobs:
+  ga-risk-gate:
+    name: GA Risk Gate
+    uses: ./.github/workflows/ga-risk-gate.yml
+    with:
+      ref: ${{ github.sha }}
+    secrets: inherit
+
   security-scan:
     name: Vulnerability and Security Scan
+    needs: [ga-risk-gate]
     uses: ./.github/workflows/ci-security.yml
     with:
       run_dast: false # DAST is too slow for a PR check

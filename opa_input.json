@@ -1,0 +1,24 @@
+{
+  "secrets_scan": {
+    "count": 0
+  },
+  "sbom": {
+    "vulns": {
+      "critical_vulns": 0
+    }
+  },
+  "authz_check": {
+    "violations": 0
+  },
+  "export_check": {
+    "violations": 0
+  },
+  "dlp_check": {
+    "violations": 0
+  },
+  "trust_policy": {
+    "ga_gate": {
+      "freeze_mode": "blocking"
+    }
+  }
+}
