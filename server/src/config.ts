@@ -58,7 +58,7 @@ export const cfg = (() => {
     console.error('\n❌ Environment Validation Failed\n');
     console.error('Missing or invalid environment variables:\n');
 
-    parsed.error.issues.forEach((issue) => {
+    parsed.error.issues.forEach((issue: { path: (string | number)[]; message: string }) => {
       const varName = issue.path.join('.');
       const help = ENV_VAR_HELP[varName] || 'See .env.example for expected format';
       console.error(`  • ${varName}`);
@@ -106,11 +106,11 @@ export const cfg = (() => {
     };
     guardSecret('JWT_SECRET');
     guardSecret('JWT_REFRESH_SECRET');
-    const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.trim());
+    const corsOrigins = env.CORS_ORIGIN.split(',').map((origin: string) => origin.trim());
     if (
       corsOrigins.length === 0 ||
       corsOrigins.some(
-        (origin) =>
+        (origin: string) =>
           origin === '*' ||
           origin.startsWith('http://') ||
           origin.includes('localhost'),
