@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { metrics } from '../observability/metrics.js';
 import { runsRepo } from './runs/runs-repo.js';
-import { SubagentCoordinator, agentGovernance } from './subagent-coordinator.js';
+import { SubagentCoordinator } from './subagent-coordinator.js';
 import { killSwitchService } from '../services/KillSwitchService.js';
 import { telemetryService } from '../services/TelemetryService.js';
 import { driftDetectionService } from '../services/DriftDetectionService.js';

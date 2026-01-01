@@ -39,6 +39,17 @@ export type PluginCapability =
   | 'admin:full';
 
 // ============================================================================
+// Plugin Autonomy
+// ============================================================================
+
+export enum AutonomyTier {
+  TIER_0_ADVISORY = 0,
+  TIER_1_SEMI_AUTONOMOUS = 1,
+  TIER_2_AUTONOMOUS = 2,
+  TIER_3_STRATEGIC = 3
+}
+
+// ============================================================================
 // Plugin Manifest
 // ============================================================================
 
@@ -75,6 +86,20 @@ export interface PluginManifest {
   license?: string;
   /** Tags for search */
   tags?: string[];
+
+  /** Trust Tier (Internal, Verified, Audited) */
+  trustTier?: string; // Should import TrustTier enum but avoiding circular dependency or extra imports for now
+
+  // Autonomy Contract
+  autonomyTier?: AutonomyTier;
+  intents?: string[];
+  protectedMetrics?: string[];
+  hardCaps?: {
+    budget?: number; // Financial budget ($)
+    cpu?: number;    // CPU share
+    memory?: number; // Memory (MB)
+    apiCalls?: number; // Rate limit
+  };
 }
 
 export interface PluginDependency {
@@ -226,6 +251,9 @@ export interface PluginRegistration {
   errorCount: number;
   lastError?: string;
   version: string;
+
+  // Autonomy
+  assignedTier?: AutonomyTier;
 }
 
 export interface TenantPluginConfig {

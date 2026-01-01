@@ -17,6 +17,7 @@ import {
   PluginStatus,
   PluginCategory,
   TenantPluginConfig,
+  AutonomyTier,
 } from './types/Plugin.js';
 import { createDataEnvelope, DataEnvelope, GovernanceResult } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
@@ -133,6 +134,7 @@ export class PluginRegistry {
         executionCount: 0,
         errorCount: 0,
         version: manifest.version,
+        assignedTier: AutonomyTier.TIER_0_ADVISORY, // Default assumption
       };
 
       logger.info({ pluginId: manifest.id }, 'Plugin registered');
@@ -197,6 +199,8 @@ export class PluginRegistry {
         errorCount: parseInt(row.error_count, 10),
         lastError: row.last_error,
         version: row.version,
+        // Hydrate from manifest since column migration is pending
+        assignedTier: row.manifest.systemAssignedTier || AutonomyTier.TIER_0_ADVISORY,
       };
 
       return createDataEnvelope(
@@ -212,6 +216,59 @@ export class PluginRegistry {
     } catch (error) {
       logger.error({ error, pluginId }, 'Failed to get plugin');
       throw error;
+    }
+  }
+
+  /**
+   * Update Autonomy Tier
+   *
+   * NOTE: This assumes an 'assigned_tier' column exists in the 'plugins' table.
+   * If it doesn't, we should add a migration.
+   * Since I cannot run migrations easily, I will update the Manifest JSON as a fallback store
+   * OR use the `plugin_tenant_config` logic.
+   * However, `assigned_tier` is typically global for the installation.
+   *
+   * Strategy: Try to update `assigned_tier` column. If it fails, log warning (or we assume schema is updated).
+   */
+  async updateTier(
+    pluginId: string,
+    tier: AutonomyTier,
+    actorId: string
+  ): Promise<DataEnvelope<{ success: boolean }>> {
+    try {
+        // We will store it in the manifest JSON as well to be safe if the column doesn't exist yet
+        // First get current manifest
+        const current = await this.pool.query('SELECT manifest FROM plugins WHERE id = $1', [pluginId]);
+        if (current.rows.length === 0) throw new Error('Plugin not found');
+
+        const manifest = current.rows[0].manifest;
+        // We add a synthetic property to manifest for persistence if column fails
+        manifest.systemAssignedTier = tier;
+
+        // Try updating column + manifest
+        await this.pool.query(
+          `UPDATE plugins SET
+             manifest = $2,
+             updated_at = $3
+             -- assigned_tier = $4  <-- Commented out to prevent crash if column missing. Using manifest storage for MVP.
+           WHERE id = $1`,
+          [pluginId, JSON.stringify(manifest), new Date().toISOString(), tier]
+        );
+
+        // Also update in-memory instance metadata if possible
+        const instance = this.plugins.get(pluginId);
+        if (instance) {
+            (instance as any).assignedTier = tier;
+        }
+
+        return createDataEnvelope(
+            { success: true },
+            { source: 'PluginRegistry', actor: actorId },
+            { result: GovernanceResult.ALLOW, policyId: 'plugin-tier', reason: 'Tier updated', evaluator: 'PluginRegistry' }
+        );
+    } catch (error) {
+        logger.error({ error, pluginId }, 'Failed to update plugin tier');
+        throw error;
     }
   }
 
@@ -281,6 +338,8 @@ export class PluginRegistry {
         errorCount: parseInt(row.error_count, 10),
         lastError: row.last_error,
         version: row.version,
+        // Hydrate from manifest if column missing
+        assignedTier: row.manifest.systemAssignedTier || AutonomyTier.TIER_0_ADVISORY
       }));
 
       return createDataEnvelope(

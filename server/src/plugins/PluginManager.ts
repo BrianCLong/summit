@@ -20,12 +20,14 @@ import {
   PluginAuditEntry,
   PluginCapability,
   PluginStatus,
+  AutonomyTier,
 } from './types/Plugin.js';
 import { PluginRegistry } from './PluginRegistry.js';
 import { PluginSandbox } from './PluginSandbox.js';
 import { createDataEnvelope, DataEnvelope, GovernanceResult } from '../types/data-envelope.js';
 import { Principal } from '../types/identity.js';
 import logger from '../utils/logger.js';
+import { pluginCoordinationAdapter } from './CoordinationAdapter.js';
 
 // ============================================================================
 // Types
@@ -35,6 +37,7 @@ export interface ExecuteOptions {
   timeout?: number;
   simulation?: boolean;
   skipGovernance?: boolean;
+  coordinationId?: string; // Integration with Coordination Service
 }
 
 export interface PluginEventPayload {
@@ -83,6 +86,20 @@ export class PluginManager {
         );
       }
 
+      // ----------------------------------------------------------------------
+      // Autonomy Contract Validation
+      // ----------------------------------------------------------------------
+
+      // Force declared autonomy tier to 0 (Advisory) initially, regardless of manifest.
+      // Must be explicitly promoted later.
+      // We store the *requested* tier in the manifest, but the *assigned* tier is separate.
+      // For now, we assume the registry stores the assigned tier, defaulting to 0.
+
+      if (manifest.autonomyTier && manifest.autonomyTier > AutonomyTier.TIER_0_ADVISORY) {
+        logger.warn({ pluginId: manifest.id, requestedTier: manifest.autonomyTier },
+          'Plugin requested high autonomy tier. Installing at Tier 0 (Advisory).');
+      }
+
       // Register the plugin
       const result = await this.registry.register(manifest, plugin, principal.id);
       if (!result.data.success) {
@@ -105,6 +122,11 @@ export class PluginManager {
         for (const hook of manifest.hooks) {
           this.subscribeToEvent(manifest.id, hook.event);
         }
+      }
+
+      // Register Intents with Coordination Service
+      if (manifest.intents && manifest.intents.length > 0) {
+        await pluginCoordinationAdapter.registerPluginIntents(manifest.id, manifest.intents);
       }
 
       // Audit log
@@ -132,6 +154,49 @@ export class PluginManager {
     } catch (error) {
       logger.error({ error, pluginId: manifest.id }, 'Failed to install plugin');
       throw error;
+    }
+  }
+
+  /**
+   * Promote or Demote a plugin's Autonomy Tier
+   */
+  async setAutonomyTier(
+    pluginId: string,
+    tier: AutonomyTier,
+    principal: Principal
+  ): Promise<DataEnvelope<{ success: boolean; oldTier?: AutonomyTier; newTier: AutonomyTier }>> {
+    try {
+      if (!this.hasCapability(principal, 'admin:full')) {
+         throw new Error('Insufficient permissions to change autonomy tier');
+      }
+
+      // In a real implementation, we would update the 'assigned_tier' column in the DB.
+      // Since we are mocking the DB part or it's not fully visible, we assume registry handles it
+      // or we just log it for now.
+
+      // Logic: Update registry
+      await this.registry.updateTier(pluginId, tier, principal.id);
+
+      logger.info({ pluginId, tier, actor: principal.id }, 'Plugin autonomy tier updated');
+
+      await this.logAudit({
+        pluginId,
+        tenantId: principal.tenantId,
+        action: 'set_autonomy_tier',
+        actorId: principal.id,
+        success: true,
+        governanceVerdict: GovernanceResult.ALLOW,
+        input: { tier }
+      });
+
+      return createDataEnvelope(
+        { success: true, newTier: tier },
+        { source: 'PluginManager', actor: principal.id },
+        { result: GovernanceResult.ALLOW, policyId: 'plugin-tier', reason: 'Tier updated', evaluator: 'PluginManager' }
+      );
+    } catch (error: any) {
+        logger.error({ error, pluginId }, 'Failed to set autonomy tier');
+        throw error;
     }
   }
 
@@ -314,6 +379,61 @@ export class PluginManager {
             evaluator: 'PluginManager',
           }
         );
+      }
+
+      // ----------------------------------------------------------------------
+      // Autonomy Tier Enforcement
+      // ----------------------------------------------------------------------
+
+      // Determine the plugin's current assigned tier
+      // We check if the registry has the metadata available directly or if we need to fetch it.
+      // Since getPluginInstance returns the plugin object, we expect the registry to have attached 'assignedTier' to it
+      // when loading or updating.
+      // However, registry.getPluginInstance only returns the code object.
+      // We need to fetch the tier metadata. Ideally, PluginContext should contain it, or we fetch it here.
+      // For performance, PluginManager should cache this or PluginRegistry.getPluginInstance should return a wrapper.
+      // Let's fetch it from registry now.
+
+      let assignedTier = AutonomyTier.TIER_0_ADVISORY;
+      // In production, this would be cached.
+      const pluginMeta = await this.registry.getPlugin(pluginId, principal.id);
+      if (pluginMeta.data && pluginMeta.data.assignedTier !== undefined) {
+         assignedTier = pluginMeta.data.assignedTier;
+      }
+
+      // Tier 0 Check: Can only do read-only or log actions.
+      // This is a simplified check. Real implementation would check action metadata.
+      if (assignedTier === AutonomyTier.TIER_0_ADVISORY) {
+          // Assuming 'action' names follow a convention or we have a registry of safe actions.
+          // For this sprint, we enforce that unknown actions are blocked at Tier 0.
+          const safeActions = ['healthCheck', 'getMetrics', 'describe'];
+          if (!safeActions.includes(action)) {
+             // Block unless specific permission override
+             // Returning DENY
+             return createDataEnvelope(
+                { success: false, error: 'Action not permitted at Tier 0 (Advisory)' },
+                { source: 'PluginManager', actor: principal.id },
+                { result: GovernanceResult.DENY, policyId: 'tier-enforcement', reason: 'Tier 0 restriction', evaluator: 'PluginManager' }
+             );
+          }
+      }
+
+      // Tier 2+ Coordination Check
+      if (assignedTier >= AutonomyTier.TIER_2_AUTONOMOUS) {
+        const coordinationCheck = await pluginCoordinationAdapter.requestPermission(
+            pluginId,
+            action,
+            { principal, params },
+            options.coordinationId
+        );
+
+        if (!coordinationCheck.allowed) {
+            return createDataEnvelope(
+                { success: false, error: coordinationCheck.reason || 'Coordination denied' },
+                { source: 'PluginManager', actor: principal.id },
+                { result: GovernanceResult.DENY, policyId: 'coordination', reason: coordinationCheck.reason, evaluator: 'PluginManager' }
+             );
+        }
       }
 
       // Create execution context
