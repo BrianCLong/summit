@@ -28,3 +28,25 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sh-mcp-provisional
+    version: v1
+    path: prompts/ip/sh-mcp-provisional.md
+    sha256: 9d0c33d65264992b3908017796b0a46afaaf1c5beaed6c4333aca9dbd86b7b14
+    description: Drafting protocol for self-healing Model Context Protocol provisional filings and roadmap metadata updates.
+    scope:
+      paths:
+        - docs/patents/provisionals/
+        - docs/roadmap/
+      domains:
+        - ip
+        - roadmap
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
