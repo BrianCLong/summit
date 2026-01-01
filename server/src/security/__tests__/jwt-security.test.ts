@@ -10,73 +10,59 @@
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type {
+  JWTSecurityManager as JWTSecurityManagerClass,
+  createJWTSecurityManager as createJWTSecurityManagerFn,
+} from '../jwt-security.js';
 
-// Store mock functions in a closure that persists across hoisting
-const mockRedis: Record<string, jest.Mock> = {};
+const unstableMockModule = (jest as any).unstable_mockModule as any;
 
-// Mock Redis module - all mock functions are created inside the factory
-jest.mock('redis', () => {
-  // Create mock functions here so they exist when factory is called
-  const connect = jest.fn().mockResolvedValue(undefined);
-  const quit = jest.fn().mockResolvedValue(undefined);
-  const get = jest.fn().mockResolvedValue(null);
-  const set = jest.fn().mockResolvedValue('OK');
-  const setex = jest.fn().mockResolvedValue('OK');
-  const exists = jest.fn().mockResolvedValue(0);
-  const keys = jest.fn().mockResolvedValue([]);
-  const del = jest.fn().mockResolvedValue(1);
-  const ping = jest.fn().mockResolvedValue('PONG');
+const mockRedisClient = {
+  connect: jest.fn().mockResolvedValue(undefined),
+  quit: jest.fn().mockResolvedValue(undefined),
+  get: jest.fn().mockResolvedValue(null),
+  set: jest.fn().mockResolvedValue('OK'),
+  setex: jest.fn().mockResolvedValue('OK'),
+  exists: jest.fn().mockResolvedValue(0),
+  keys: jest.fn().mockResolvedValue([]),
+  del: jest.fn().mockResolvedValue(1),
+  ping: jest.fn().mockResolvedValue('PONG'),
+};
 
-  // Store references for test access
-  mockRedis.connect = connect;
-  mockRedis.quit = quit;
-  mockRedis.get = get;
-  mockRedis.set = set;
-  mockRedis.setex = setex;
-  mockRedis.exists = exists;
-  mockRedis.keys = keys;
-  mockRedis.del = del;
-  mockRedis.ping = ping;
+const createClient = jest.fn(() => mockRedisClient);
 
-  return {
-    createClient: jest.fn(() => ({
-      connect,
-      quit,
-      get,
-      set,
-      setex,
-      exists,
-      keys,
-      del,
-      ping,
-    })),
-  };
-});
+unstableMockModule('redis', () => ({
+  createClient,
+}));
 
-import { createJWTSecurityManager, JWTSecurityManager } from '../jwt-security.js';
+let createJWTSecurityManager: typeof createJWTSecurityManagerFn;
+let JWTSecurityManager: typeof JWTSecurityManagerClass;
+let jwtManager: InstanceType<typeof JWTSecurityManagerClass>;
 
-// TODO: Fix ESM mocking for 'redis' package - jest.mock hoisting doesn't work correctly with ESM
-// The tests below are skipped until the mock infrastructure is updated for ESM compatibility
-describe.skip('JWTSecurityManager', () => {
-  let jwtManager: JWTSecurityManager;
+describe('JWTSecurityManager', () => {
+  beforeAll(async () => {
+    ({ createJWTSecurityManager, JWTSecurityManager } =
+      await import('../jwt-security.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
     // Reset mock implementations to defaults
-    mockRedis.connect.mockResolvedValue(undefined);
-    mockRedis.quit.mockResolvedValue(undefined);
-    mockRedis.ping.mockResolvedValue('PONG');
-    mockRedis.get.mockResolvedValue(null);
-    mockRedis.set.mockResolvedValue('OK');
-    mockRedis.setex.mockResolvedValue('OK');
-    mockRedis.exists.mockResolvedValue(0);
-    mockRedis.keys.mockResolvedValue([]);
-    mockRedis.del.mockResolvedValue(1);
+    mockRedisClient.connect.mockResolvedValue(undefined);
+    mockRedisClient.quit.mockResolvedValue(undefined);
+    mockRedisClient.ping.mockResolvedValue('PONG');
+    mockRedisClient.get.mockResolvedValue(null);
+    mockRedisClient.set.mockResolvedValue('OK');
+    mockRedisClient.setex.mockResolvedValue('OK');
+    mockRedisClient.exists.mockResolvedValue(0);
+    mockRedisClient.keys.mockResolvedValue([]);
+    mockRedisClient.del.mockResolvedValue(1);
   });
 
   afterEach(async () => {
     // Reset quit mock to resolve before shutdown to prevent errors
-    mockRedis.quit.mockResolvedValue(undefined);
+    mockRedisClient.quit.mockResolvedValue(undefined);
     if (jwtManager) {
       await jwtManager.shutdown().catch(() => {});
     }
@@ -91,12 +77,12 @@ describe.skip('JWTSecurityManager', () => {
 
       await jwtManager.initialize();
 
-      expect(mockRedis.connect).toHaveBeenCalledTimes(1);
-      expect(mockRedis.get).toHaveBeenCalledWith('jwt:current_key');
+      expect(mockRedisClient.connect).toHaveBeenCalledTimes(1);
+      expect(mockRedisClient.get).toHaveBeenCalledWith('jwt:current_key');
     });
 
     it('should generate new key if none exists in Redis', async () => {
-      mockRedis.get.mockResolvedValue(null);
+      mockRedisClient.get.mockResolvedValue(null);
 
       jwtManager = createJWTSecurityManager({
         redisUrl: 'redis://localhost:6379',
@@ -104,7 +90,7 @@ describe.skip('JWTSecurityManager', () => {
 
       await jwtManager.initialize();
 
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedisClient.set).toHaveBeenCalledWith(
         'jwt:current_key',
         expect.any(String),
       );
@@ -120,7 +106,7 @@ describe.skip('JWTSecurityManager', () => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       };
 
-      mockRedis.get.mockResolvedValue(JSON.stringify(existingKey));
+      mockRedisClient.get.mockResolvedValue(JSON.stringify(existingKey));
 
       jwtManager = createJWTSecurityManager({
         redisUrl: 'redis://localhost:6379',
@@ -128,8 +114,8 @@ describe.skip('JWTSecurityManager', () => {
 
       await jwtManager.initialize();
 
-      expect(mockRedis.get).toHaveBeenCalledWith('jwt:current_key');
-      expect(mockRedis.set).not.toHaveBeenCalled(); // Should not generate new key
+      expect(mockRedisClient.get).toHaveBeenCalledWith('jwt:current_key');
+      expect(mockRedisClient.set).not.toHaveBeenCalled(); // Should not generate new key
     });
 
     it('should rotate expired key on initialization', async () => {
@@ -142,7 +128,7 @@ describe.skip('JWTSecurityManager', () => {
         expiresAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // Expired yesterday
       };
 
-      mockRedis.get.mockResolvedValue(JSON.stringify(expiredKey));
+      mockRedisClient.get.mockResolvedValue(JSON.stringify(expiredKey));
 
       jwtManager = createJWTSecurityManager({
         redisUrl: 'redis://localhost:6379',
@@ -152,7 +138,7 @@ describe.skip('JWTSecurityManager', () => {
 
       // When expired key is found, should generate a new key
       // Either via set (new key) or the manager handles it internally
-      expect(mockRedis.set).toHaveBeenCalledWith(
+      expect(mockRedisClient.set).toHaveBeenCalledWith(
         'jwt:current_key',
         expect.any(String),
       );
@@ -240,7 +226,7 @@ describe.skip('JWTSecurityManager', () => {
     });
 
     it('should verify a valid token', async () => {
-      mockRedis.exists.mockResolvedValue(0); // JTI doesn't exist (not replayed)
+      mockRedisClient.exists.mockResolvedValue(0); // JTI doesn't exist (not replayed)
 
       const payload = await jwtManager.verifyToken(token);
 
@@ -279,13 +265,13 @@ describe.skip('JWTSecurityManager', () => {
     });
 
     it('should detect replay attacks using JTI', async () => {
-      mockRedis.exists.mockResolvedValue(0); // First verification succeeds
+      mockRedisClient.exists.mockResolvedValue(0); // First verification succeeds
 
       // First verification
       await jwtManager.verifyToken(token);
 
       // Simulate JTI already exists (replay)
-      mockRedis.exists.mockResolvedValue(1);
+      mockRedisClient.exists.mockResolvedValue(1);
 
       // Second verification should fail
       await expect(jwtManager.verifyToken(token)).rejects.toThrow(
@@ -294,11 +280,11 @@ describe.skip('JWTSecurityManager', () => {
     });
 
     it('should record JTI with TTL for replay protection', async () => {
-      mockRedis.exists.mockResolvedValue(0);
+      mockRedisClient.exists.mockResolvedValue(0);
 
       await jwtManager.verifyToken(token);
 
-      expect(mockRedis.setex).toHaveBeenCalledWith(
+      expect(mockRedisClient.setex).toHaveBeenCalledWith(
         expect.stringMatching(/^jwt:jti:/),
         expect.any(Number), // TTL in seconds
         '1',
@@ -363,7 +349,7 @@ describe.skip('JWTSecurityManager', () => {
     });
 
     it('should be able to verify tokens signed with old keys', async () => {
-      mockRedis.exists.mockResolvedValue(0);
+      mockRedisClient.exists.mockResolvedValue(0);
 
       const token1 = await jwtManager.signToken({ sub: 'user-1' });
 
@@ -376,7 +362,7 @@ describe.skip('JWTSecurityManager', () => {
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       };
-      mockRedis.get.mockResolvedValue(JSON.stringify(oldKeyData));
+      mockRedisClient.get.mockResolvedValue(JSON.stringify(oldKeyData));
 
       // Should still verify token signed with current key
       const payload = await jwtManager.verifyToken(token1);
@@ -385,8 +371,8 @@ describe.skip('JWTSecurityManager', () => {
 
     it('should cleanup expired keys', async () => {
       const expiredKeyId = 'expired-key-123';
-      mockRedis.keys.mockResolvedValue([`jwt:key:${expiredKeyId}`]);
-      mockRedis.get.mockResolvedValue(
+      mockRedisClient.keys.mockResolvedValue([`jwt:key:${expiredKeyId}`]);
+      mockRedisClient.get.mockResolvedValue(
         JSON.stringify({
           kid: expiredKeyId,
           expiresAt: new Date(Date.now() - 1000).toISOString(), // Expired
@@ -400,7 +386,7 @@ describe.skip('JWTSecurityManager', () => {
       await new Promise((resolve) => setTimeout(resolve, 200));
 
       // Should have deleted expired key
-      expect(mockRedis.del).toHaveBeenCalledWith(`jwt:key:${expiredKeyId}`);
+      expect(mockRedisClient.del).toHaveBeenCalledWith(`jwt:key:${expiredKeyId}`);
     });
   });
 
@@ -431,7 +417,7 @@ describe.skip('JWTSecurityManager', () => {
       const keys = await jwtManager.getPublicKeys();
 
       // All keys should be valid
-      keys.forEach((key) => {
+      keys.forEach((key: { kid: string }) => {
         expect(key.kid).toBeDefined();
       });
     });
@@ -446,7 +432,7 @@ describe.skip('JWTSecurityManager', () => {
     });
 
     it('should return healthy status when everything is ok', async () => {
-      mockRedis.ping.mockResolvedValue('PONG');
+      mockRedisClient.ping.mockResolvedValue('PONG');
 
       const health = await jwtManager.healthCheck();
 
@@ -457,7 +443,7 @@ describe.skip('JWTSecurityManager', () => {
     });
 
     it('should return unhealthy status when Redis is down', async () => {
-      mockRedis.ping.mockRejectedValue(new Error('Connection refused'));
+      mockRedisClient.ping.mockRejectedValue(new Error('Connection refused'));
 
       const health = await jwtManager.healthCheck();
 
@@ -476,7 +462,7 @@ describe.skip('JWTSecurityManager', () => {
 
       await jwtManager.shutdown();
 
-      expect(mockRedis.quit).toHaveBeenCalledTimes(1);
+      expect(mockRedisClient.quit).toHaveBeenCalledTimes(1);
     });
 
     it('should handle shutdown errors gracefully', async () => {
@@ -487,7 +473,7 @@ describe.skip('JWTSecurityManager', () => {
       await testManager.initialize();
 
       // Set quit to reject AFTER initialization
-      mockRedis.quit.mockRejectedValueOnce(new Error('Redis error'));
+      mockRedisClient.quit.mockRejectedValueOnce(new Error('Redis error'));
 
       // The implementation may throw or handle gracefully -
       // either is acceptable as long as it doesn't crash the process
@@ -498,7 +484,7 @@ describe.skip('JWTSecurityManager', () => {
       }
 
       // Verify quit was called
-      expect(mockRedis.quit).toHaveBeenCalled();
+      expect(mockRedisClient.quit).toHaveBeenCalled();
     });
   });
 
@@ -541,14 +527,14 @@ describe.skip('JWTSecurityManager', () => {
       const tokens = await Promise.all(promises);
 
       expect(tokens).toHaveLength(10);
-      tokens.forEach((token, i) => {
+      tokens.forEach((token: string, i: number) => {
         expect(token).toBeDefined();
         expect(typeof token).toBe('string');
       });
     });
 
     it('should handle concurrent token verification', async () => {
-      mockRedis.exists.mockResolvedValue(0);
+      mockRedisClient.exists.mockResolvedValue(0);
 
       const tokens = await Promise.all(
         Array.from({ length: 5 }, (_, i) =>
