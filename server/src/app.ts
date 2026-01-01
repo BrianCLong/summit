@@ -273,15 +273,24 @@ export const createApp = async () => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
-        if (!token) {
-          console.warn('Development: No token provided, allowing request');
+        if (token) {
+          return next();
+        }
+
+        // SEC-2025-001: Fail Closed by default.
+        // Only allow bypass if explicitly enabled via env var.
+        if (process.env.ENABLE_INSECURE_DEV_AUTH === 'true') {
+          console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
           (req as any).user = {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
           };
+          return next();
         }
-        next();
+
+        // Default: Reject unauthenticated requests even in dev/test if bypass not enabled
+        res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
       };
 
   // Resolve and enforce tenant context for API and GraphQL surfaces

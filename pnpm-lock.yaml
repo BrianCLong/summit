@@ -81,6 +81,9 @@ importers:
       redis:
         specifier: ^5.8.1
         version: 5.10.0
+      supertest:
+        specifier: ^7.1.4
+        version: 7.1.4
       ws:
         specifier: '>=8.17.1'
         version: 8.18.3
@@ -161,7 +164,7 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1
       express:
-        specifier: '>=4.21.0'
+        specifier: ^5.2.1
         version: 5.2.1
       globals:
         specifier: ^15.15.0
