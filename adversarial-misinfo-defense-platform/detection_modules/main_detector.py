@@ -8,7 +8,7 @@ for detecting adversarial misinformation across multiple modalities.
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -49,6 +49,134 @@ class AdversarialMisinfoDetector:
             "meme": [],
             "deepfake": [],
         }
+
+    def detect(self, content: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Unified detection method that analyzes content across all modalities
+
+        Args:
+            content: Dictionary containing content to analyze
+
+        Returns:
+            Dictionary with detection results
+        """
+        results = {
+            "overall_risk": 0.0,
+            "confidence": 0.0,
+            "modality_results": {},
+            "final_verdict": "unknown",
+            "explanation": "",
+            "timestamp": np.datetime64("now"),
+        }
+
+        individual_scores = []
+        modality_results = {}
+
+        # Analyze text if present
+        if "text" in content and content["text"]:
+            text_result = self.text_detector.detect_misinfo(content["text"])
+            modality_results["text"] = text_result
+            if "score" in text_result:
+                individual_scores.append(text_result["score"])
+
+        # Analyze image if present
+        if "image_path" in content and content["image_path"]:
+            image_result = self.image_detector.detect_manipulation(
+                content["image_path"]
+            )
+            modality_results["image"] = image_result
+            if "score" in image_result:
+                individual_scores.append(image_result["score"])
+
+        # Analyze audio if present
+        if "audio_path" in content and content["audio_path"]:
+            audio_result = self.audio_detector.detect_deepfake(
+                content["audio_path"]
+            )
+            modality_results["audio"] = audio_result
+            if "score" in audio_result:
+                individual_scores.append(audio_result["score"])
+
+        # Analyze video if present
+        if "video_path" in content and content["video_path"]:
+            video_result = self.video_detector.detect_deepfake(
+                content["video_path"]
+            )
+            modality_results["video"] = video_result
+            if "score" in video_result:
+                individual_scores.append(video_result["score"])
+
+        # Analyze meme if present
+        if "meme_path" in content and content["meme_path"]:
+            meme_result = self.meme_detector.detect_manipulation(
+                content["meme_path"]
+            )
+            modality_results["meme"] = meme_result
+            if "score" in meme_result:
+                individual_scores.append(meme_result["score"])
+
+        # Analyze deepfake if present (separate from video detection)
+        if "deepfake_path" in content and content["deepfake_path"]:
+            deepfake_result = self.deepfake_detector.detect_deepfake(
+                content["deepfake_path"]
+            )
+            modality_results["deepfake"] = deepfake_result
+            if "score" in deepfake_result:
+                individual_scores.append(deepfake_result["score"])
+
+        results["modality_results"] = modality_results
+
+        # Calculate overall risk based on individual scores
+        if individual_scores:
+            avg_score = sum(individual_scores) / len(individual_scores)
+            results["overall_risk"] = avg_score
+
+            # Determine final verdict
+            if avg_score > 0.7:
+                results["final_verdict"] = "malicious"
+                results["explanation"] = "High risk detected across modalities"
+            elif avg_score > 0.4:
+                results["final_verdict"] = "suspicious"
+                results["explanation"] = "Moderate risk detected, requires review"
+            else:
+                results["final_verdict"] = "benign"
+                results["explanation"] = "Content appears legitimate"
+
+            # Calculate confidence
+            confidence_values = [
+                res.get("confidence", 0.0)
+                for res in modality_results.values()
+            ]
+            if confidence_values:
+                results["confidence"] = sum(confidence_values) / len(
+                    confidence_values
+                )
+
+        return results
+
+    def add_pattern(self, modality: str, pattern: Any):
+        """
+        Add a new pattern to the pattern list for a specific modality
+
+        Args:
+            modality: The modality to add the pattern for
+            pattern: The pattern to add
+        """
+        if modality in self.pattern_lists:
+            self.pattern_lists[modality].append(pattern)
+            self.logger.info(f"Added new pattern for {modality} modality")
+
+    def get_patterns(self, modality: str) -> list:
+        """
+        Get all patterns for a specific modality
+
+        Args:
+            modality: The modality to get patterns for
+
+        Returns:
+            List of patterns for the specified modality
+        """
+        return self.pattern_lists.get(modality, [])
 
     def detect_text_misinfo(self, texts: list[str]) -> list[dict[str, Any]]:
         """

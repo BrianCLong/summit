@@ -1,70 +1,42 @@
 # Adversarial Misinformation Defense Platform - User Guide
 
 ## Table of Contents
-1. [Introduction](#introduction)
-2. [Installation](#installation)
-3. [Quick Start](#quick-start)
-4. [Core Components](#core-components)
-5. [Advanced Usage](#advanced-usage)
-6. [API Reference](#api-reference)
-7. [Troubleshooting](#troubleshooting)
-8. [Contributing](#contributing)
 
-## Introduction
+1. [Overview](#overview)
+2. [Quick Start](#quick-start)
+3. [Platform Components](#platform-components)
+4. [Advanced Features](#advanced-features)
+5. [Performance Optimization](#performance-optimization)
+6. [Security Features](#security-features)
+7. [Testing and Validation](#testing-and-validation)
+8. [Command Line Interface](#command-line-interface)
+9. [API Reference](#api-reference)
+10. [Troubleshooting](#troubleshooting)
 
-The Adversarial Misinformation Defense Platform is a comprehensive system designed to detect and defend against sophisticated adversarial misinformation campaigns across multiple modalities including text, images, audio, video, memes, and deepfakes.
+## Overview
+
+The Adversarial Misinformation Defense Platform is a comprehensive system for detecting and defending against adversarial misinformation across multiple modalities including text, images, audio, video, memes, and deepfakes. The platform implements state-of-the-art detection techniques combined with adaptive learning, ensemble methods, and security hardening.
 
 ### Key Features
 
-- **Multi-Modal Detection**: Advanced detection across text, image, audio, video, memes, and deepfakes
-- **Autonomous Evolution**: Self-evolving detection tactics that adapt to new adversarial techniques
-- **Adversarial Training**: GAN-based adversarial sample generation with LLM-assisted library extension
-- **Red/Blue Team Operations**: Scenario builder UI for adversarial exercises
-- **Validation Suite**: Comprehensive benchmarking against state-of-the-art attacks
-
-## Installation
-
-### Prerequisites
-
-- Python 3.8 or higher
-- pip package manager
-- Virtual environment (recommended)
-
-### Installation Steps
-
-1. **Clone the Repository**:
-   ```bash
-   git clone <repository-url>
-   cd adversarial-misinfo-defense-platform
-   ```
-
-2. **Create Virtual Environment** (optional but recommended):
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Install the Package**:
-   ```bash
-   pip install -e .
-   ```
-
-### GPU Support (Optional)
-
-For enhanced performance with deepfake and image detection:
-
-```bash
-pip install -e .[gpu]
-```
+- Multi-modal detection across text, image, audio, video, memes, and deepfakes
+- Ensemble detection for improved accuracy
+- Adaptive learning based on feedback
+- Real-time content analysis
+- Performance optimization with GPU acceleration and caching
+- Comprehensive security hardening
+- Advanced testing and validation capabilities
 
 ## Quick Start
 
-### Basic Detection
+### Installation
+
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Install the platform: `pip install -e .`
+4. Run setup: `python setup_platform.py`
+
+### Basic Usage
 
 ```python
 from adversarial_misinfo_defense import create_platform
@@ -73,575 +45,562 @@ from adversarial_misinfo_defense import create_platform
 platform = create_platform()
 detector = platform['detector']
 
-# Analyze text samples
-text_samples = [
-    "This shocking revelation will change everything!",
-    "Research shows balanced approaches are beneficial."
-]
-
-results = detector.detect_text_misinfo(text_samples)
-for i, result in enumerate(results):
-    print(f"Sample {i+1}: Misinfo Score = {result['misinfo_score']:.3f}")
+# Analyze text
+text_results = detector.detect_text_misinfo(["This is a test sentence."])
+print(text_results)
 ```
 
-### Running Validation
+### Command Line Usage
 
-```python
-from adversarial_misinfo_defense import ValidationBenchmark
-
-# Create validation benchmark
-validator = ValidationBenchmark()
+```bash
+# Analyze text
+python main.py detect --text "This is suspicious content"
 
 # Run comprehensive validation
-results = validator.run_comprehensive_validation()
+python main.py validate
 
-# Generate report
-report = validator.generate_validation_report(results)
-print(report)
+# Run security audit
+python main.py security-audit
+
+# Run performance optimization
+python main.py optimize
 ```
 
-### Managing Red/Blue Team Exercises
+## Platform Components
+
+### Detection Modules
+
+The platform includes specialized detectors for each modality:
+
+- **Text Detector**: Uses NLP techniques, transformers, and pattern matching
+- **Image Detector**: Computer vision techniques for manipulation detection
+- **Audio Detector**: Acoustic analysis for deepfake detection
+- **Video Detector**: Temporal analysis for video deepfake detection
+- **Meme Detector**: Template and caption analysis
+- **Deepfake Detector**: Comprehensive deepfake identification
+
+### Core Services
+
+- **Adversarial Training Engine**: GAN-based adversarial sample generation
+- **Tactic Evolver**: Autonomous evolution of detection techniques
+- **Red/Blue Team Manager**: Exercise management and scenario building
+- **Validation Benchmark**: Comprehensive testing against state-of-the-art attacks
+
+## Advanced Features
+
+### Ensemble Detection
+
+The platform implements ensemble detection that combines multiple detection models to improve accuracy:
 
 ```python
-from adversarial_misinfo_defense import RedBlueTeamExerciseManager
+from adversarial_misinfo_defense import EnsembleDetector
 
-# Create exercise manager
-exercise_manager = RedBlueTeamExerciseManager()
-
-# List available scenarios
-scenarios = exercise_manager.get_all_scenarios()
-for scenario in scenarios:
-    print(f"- {scenario.name} ({scenario.difficulty.value})")
-
-# Create a new scenario
-new_scenario = exercise_manager.create_scenario(
-    name="Social Media Influence Campaign",
-    description="Test defenses against coordinated social media influence operations",
-    exercise_type="social_engineering",
-    difficulty="intermediate",
-    objectives=[
-        "Detect coordinated account behavior",
-        "Identify inauthentic engagement patterns",
-        "Trace information flow manipulation"
-    ],
-    created_by="User"
+detector = EnsembleDetector()
+results = detector.detect_misinfo_ensemble(
+    text="Content to analyze",
+    image_path="/path/to/image.jpg"
 )
-
-# Start an exercise session
-session = exercise_manager.start_exercise_session(
-    scenario_id=new_scenario.scenario_id,
-    participating_teams=[
-        {"role": "red_team_attacker", "members": ["alice", "bob"]},
-        {"role": "blue_team_defender", "members": ["charlie", "diana"]}
-    ]
-)
 ```
 
-## Core Components
+The ensemble uses weighted scoring across modalities to produce a final risk assessment:
 
-### 1. Detection Modules
+- Each modality's detector contributes a score
+- Scores are weighted based on historical performance
+- Final verdict is determined by ensemble consensus
 
-The platform includes specialized detection modules for each modality:
+### Adaptive Learning
 
-#### Text Detection
-Detects adversarial text patterns including clickbait, emotional manipulation, and false authority claims.
-
-```python
-# Text detection
-text_detector = platform['detector'].text_detector
-results = text_detector.detect_misinfo(["Sample text for analysis"])
-```
-
-#### Image Detection
-Identifies manipulated images and visual misinformation using computer vision techniques.
+The platform adapts to new adversarial techniques through feedback:
 
 ```python
-# Image detection
-image_detector = platform['detector'].image_detector
-results = image_detector.detect_misinfo(["/path/to/image.jpg"])
-```
+from adversarial_misinfo_defense import AdaptiveDetector
 
-#### Audio Detection
-Detects deepfake audio and acoustic anomalies using signal processing.
-
-```python
-# Audio detection
-audio_detector = platform['detector'].audio_detector
-results = audio_detector.detect_misinfo(["/path/to/audio.wav"])
-```
-
-#### Video Detection
-Analyzes video content for temporal inconsistencies and deepfake artifacts.
-
-```python
-# Video detection
-video_detector = platform['detector'].video_detector
-results = video_detector.detect_misinfo(["/path/to/video.mp4"])
-```
-
-#### Meme Detection
-Recognizes manipulated meme templates and deceptive captions.
-
-```python
-# Meme detection
-meme_detector = platform['detector'].meme_detector
-results = meme_detector.detect_misinfo(["/path/to/meme.jpg"])
-```
-
-#### Deepfake Detection
-Comprehensive deepfake detection across all modalities.
-
-```python
-# Deepfake detection
-deepfake_detector = platform['detector'].deepfake_detector
-results = deepfake_detector.detect_misinfo(["/path/to/content.mp4"], ["video"])
-```
-
-### 2. Autonomous Tactic Evolution
-
-The platform automatically evolves detection tactics based on observed adversarial patterns.
-
-```python
-from adversarial_misinfo_defense import AutonomousTacticEvolver
-
-# Create tactic evolver
-evolver = AutonomousTacticEvolver()
-
-# Register a threat actor
-actor_profile = ThreatActorProfile(
-    actor_id="actor_001",
-    name="Example Threat Group",
-    tactics=["social_engineering", "meme_manipulation"],
-    sophistication_level=0.7,
-    adaptation_rate=0.5,
-    success_history=[0.6, 0.7, 0.65],
-    last_seen=datetime.now(),
-    associated_accounts=["account1", "account2"],
-    geographic_focus=["US", "EU"],
-    target_demographics=["young_adults"]
-)
-
-evolver.register_threat_actor(actor_profile)
-
-# Evolve tactics based on detection performance
-detection_performance = {
-    "tactic_001": 0.85,  # High detection rate means tactic needs to evolve
-    "tactic_002": 0.45   # Lower detection rate means tactic is working well
+adaptive_detector = AdaptiveDetector(base_detector)
+feedback = {
+    "type": "false_negative",  # or "false_positive"
+    "modalities": ["text", "image"],
+    "accuracy": 0.8
 }
-
-evolved_tactics = evolver.evolve_tactics_based_on_detection_rates(detection_performance)
+result = adaptive_detector.update_from_feedback(content, feedback)
 ```
 
-### 3. Adversarial Training
+The adaptive system adjusts detection parameters based on:
 
-The platform uses GANs and LLMs to generate adversarial samples and extend detection libraries.
+- Types of errors encountered (false positives/negatives)
+- Performance across different modalities
+- Historical feedback patterns
+
+### Real-time Processing
+
+For streaming applications, the platform provides real-time analysis:
 
 ```python
-from adversarial_misinfo_defense import AdversarialTrainingEngine
+from adversarial_misinfo_defense import RealTimeDetector, EnsembleDetector
 
-# Create training engine
-trainer = AdversarialTrainingEngine()
+ensemble_detector = EnsembleDetector()
+real_time_detector = RealTimeDetector(ensemble_detector)
 
-# Run adversarial training cycle
-training_results = trainer.run_adversarial_training_cycle(
-    modalities=["text", "image"],
-    epochs_per_gan=100,
-    samples_per_modality=50,
-    target_concepts=["clickbait", "emotional_manipulation"]
-)
+content_stream = [
+    {"text": "First content item"},
+    {"text": "Second content item"}
+]
 
-print(f"Training completed: {training_results['cycle_completed']}")
+results = real_time_detector.analyze_content_stream(content_stream)
 ```
 
-### 4. Red/Blue Team Exercises
+## Performance Optimization
 
-Manage adversarial exercises with the scenario builder UI.
+### GPU Acceleration
+
+The platform includes GPU acceleration for compute-intensive operations:
+
+- **Availability Detection**: Automatically detects available GPU resources
+- **Smart Transfer**: Efficiently moves data between CPU and GPU
+- **Fallback Handling**: Gracefully degrades to CPU when GPU unavailable
 
 ```python
-from adversarial_misinfo_defense import RedBlueTeamExerciseManager
+from adversarial_misinfo_defense import GPUAccelerator
 
-# Create exercise manager
-manager = RedBlueTeamExerciseManager()
-
-# Create scenario using CLI
-from adversarial_misinfo_defense import ScenarioBuilderCLI
-cli_builder = ScenarioBuilderCLI(manager)
-cli_builder.run_interactive_builder()
-
-# Or create programmatically
-scenario = manager.create_scenario(
-    name="Example Scenario",
-    description="Test scenario for demonstration",
-    exercise_type="social_engineering",
-    difficulty="beginner",
-    objectives=["Objective 1", "Objective 2"],
-    created_by="Example User"
-)
-
-# Start exercise session
-session = manager.start_exercise_session(
-    scenario_id=scenario.scenario_id,
-    participating_teams=[
-        {"role": "red_team_attacker", "members": ["alice"]},
-        {"role": "blue_team_defender", "members": ["bob"]}
-    ]
-)
+accelerator = GPUAccelerator()
+if accelerator.gpu_available:
+    # Perform GPU-accelerated computation
+    result = accelerator.gpu_accelerate_computation(function, *args)
 ```
 
-### 5. Validation Suite
+### Caching
 
-Validate platform performance against benchmarks and real-world attacks.
+The platform implements LRU caching to speed up repeated operations:
 
 ```python
-from adversarial_misinfo_defense import ValidationBenchmark
+from adversarial_misinfo_defense import PerformanceOptimizer
 
-# Create validation benchmark
-validator = ValidationBenchmark()
-
-# Run validation
-results = validator.run_comprehensive_validation()
-
-# Generate detailed report
-report = validator.generate_validation_report(results)
-print(report)
-
-# Compare with benchmarks
-comparison = validator.compare_with_benchmarks("state_of_the_art")
-comparison_report = validator.generate_comparison_report(comparison)
-print(comparison_report)
+optimizer = PerformanceOptimizer()
+cached_function = optimizer.cache_optimization(max_size=500)(function)
 ```
 
-## Advanced Usage
+### Parallel Processing
 
-### Custom Detection Patterns
-
-Extend detection libraries with custom patterns:
+The platform supports parallel processing for improved throughput:
 
 ```python
-# Add custom patterns to text detector
-detector = platform['detector']
-detector.text_detector.add_custom_patterns([
-    "custom_adversarial_pattern_1",
-    "custom_adversarial_pattern_2"
-])
+# Thread-based parallel processing
+results = optimizer.parallel_detector_processing(detector_func, data_list)
 
-# Update detection model with new patterns
-detector.text_detector.update_model_with_patterns()
+# Async processing for I/O-bound operations
+results = optimizer.async_detector_processing(detector_func, data_list)
+
+# Batch processing for memory efficiency
+results = optimizer.batch_process_optimization(detector_func, data_list)
 ```
 
-### Batch Processing
+### Optimized Detector
 
-Process large datasets efficiently:
+The platform provides an optimized detector that combines multiple performance techniques:
 
 ```python
-# Batch process text samples
-large_text_dataset = ["Text sample 1", "Text sample 2", ...]  # Large dataset
+from adversarial_misinfo_defense import OptimizedAdversarialDetector
 
-# Process in batches to manage memory
-batch_size = 100
-results = []
-
-for i in range(0, len(large_text_dataset), batch_size):
-    batch = large_text_dataset[i:i+batch_size]
-    batch_results = detector.detect_text_misinfo(batch)
-    results.extend(batch_results)
-
-print(f"Processed {len(results)} text samples")
+optimized_detector = OptimizedAdversarialDetector()
+results = optimized_detector.detect_optimized(content)
 ```
 
-### Integration with External Systems
+## Security Features
 
-Integrate with existing security infrastructure:
+### Input Validation
+
+The platform includes comprehensive input validation to prevent injection attacks:
 
 ```python
-# Export results to external system
-import json
+from adversarial_misinfo_defense import SecureInputValidator
 
-validation_results = validator.run_comprehensive_validation()
-with open("validation_results.json", "w") as f:
-    json.dump(validation_results, f, indent=2)
+validator = SecureInputValidator()
 
-# Import results from external system
-with open("external_results.json", "r") as f:
-    external_results = json.load(f)
+# Validate text input
+text_result = validator.validate_text_input("Text to analyze")
+if text_result['is_valid']:
+    # Process sanitized content
+    content = text_result['sanitized_text']
 
-# Combine with platform results
-combined_results = {
-    "platform_results": validation_results,
-    "external_results": external_results
-}
+# Validate file paths
+path_result = validator.validate_file_path("/path/to/file.jpg",
+                                         allowed_extensions=['.jpg', '.png'])
 ```
+
+The validator checks for:
+
+- Injection patterns (script tags, SQL injection)
+- Path traversal attempts
+- Dangerous file extensions
+- Content length limits
+
+### Secure Communication
+
+The platform includes mechanisms for secure data transmission:
+
+```python
+from adversarial_misinfo_defense import SecureCommunication
+
+comm = SecureCommunication(secret_key="your-secret-key")
+
+# Encrypt sensitive data
+encrypted = comm.encrypt_data("sensitive information")
+
+# Decrypt received data
+is_valid, decrypted = comm.decrypt_data(encrypted)
+
+# Create authentication tokens
+token = comm.create_jwt_token({"user_id": "123", "role": "user"})
+```
+
+### Security Scanning
+
+The platform includes automated security scanning:
+
+```python
+from adversarial_misinfo_defense import SecurityScanner
+
+scanner = SecurityScanner()
+vulnerabilities = scanner.scan_for_vulnerabilities("./detection_modules/")
+report_path = scanner.generate_security_report()
+```
+
+The scanner identifies:
+
+- Hardcoded secrets
+- Insecure deserialization
+- SQL injection vulnerabilities
+- Insecure random number usage
+
+### Security Hardening
+
+The platform includes built-in security hardening:
+
+```python
+from adversarial_misinfo_defense import SecurityHardener
+
+hardener = SecurityHardener()
+results = hardener.apply_security_policies()
+sanitized_output = hardener.sanitize_output(data)
+```
+
+## Testing and Validation
+
+### Component Testing
+
+The platform includes comprehensive component testing:
+
+```python
+from adversarial_misinfo_defense import ComponentTester
+
+tester = ComponentTester()
+
+# Test text detector
+text_test_cases = [
+    {"text": "Normal content", "expected_label": "benign"},
+    {"text": "Misleading content", "expected_label": "malicious"}
+]
+results = tester.test_text_detector(text_test_cases)
+
+# Generate comprehensive report
+tester.generate_test_report("test_results.json")
+```
+
+Individual component tests measure:
+
+- Accuracy, precision, recall, F1 score
+- Response times
+- Error rates
+- Detailed results for each test case
+
+### Performance Testing
+
+The platform includes performance testing capabilities:
+
+```python
+from adversarial_misinfo_defense import PerformanceTester
+
+tester = PerformanceTester()
+
+# Measure response times
+timing_results = tester.measure_response_time(detector_func, test_data)
+
+# Stress test under load
+stress_results = tester.stress_test(detector, test_data, duration=60)
+
+# Measure memory usage
+memory_results = tester.memory_usage_test(detector, test_data)
+```
+
+### Comprehensive Test Suite
+
+Run the complete test suite:
+
+```python
+from adversarial_misinfo_defense import run_advanced_tests
+
+results = run_advanced_tests()
+```
+
+## Command Line Interface
+
+The platform provides a comprehensive command-line interface for various operations.
+
+### Detection Commands
+
+```
+python main.py detect --text "Text to analyze" --image "/path/to/image.jpg"
+```
+
+Options:
+
+- `--text`: Text content to analyze
+- `--image`: Path to image file
+- `--audio`: Path to audio file
+- `--video`: Path to video file
+- `--meme`: Path to meme file
+
+### Validation Commands
+
+```
+python main.py validate --benchmark --output "validation_results.json"
+```
+
+Options:
+
+- `--output`: Path to save validation results
+- `--benchmark`: Run benchmark tests
+
+### Training Commands
+
+```
+python main.py train --data "/path/to/training/data" --epochs 50
+```
+
+Options:
+
+- `--data`: Path to training data directory
+- `--epochs`: Number of training epochs (default: 100)
+
+### Exercise Commands
+
+```
+python main.py exercise --interactive
+```
+
+Options:
+
+- `--interactive`: Run interactive scenario builder
+- `--scenario`: Path to scenario file
+
+### Evolution Commands
+
+```
+python main.py evolve --cycles 10
+```
+
+Options:
+
+- `--cycles`: Number of evolution cycles (default: 5)
+
+### Security Audit
+
+```
+python main.py security-audit --output "security_report.json"
+```
+
+Options:
+
+- `--output`: Path to save security report
 
 ### Performance Optimization
 
-Optimize platform performance for specific use cases:
-
-```python
-# Adjust detection thresholds
-detector.set_detection_threshold("text", 0.6)  # More sensitive
-detector.set_detection_threshold("image", 0.9)  # Less sensitive
-
-# Configure parallel processing
-detector.set_max_workers(8)  # Use 8 worker threads
-
-# Enable/disable specific modalities
-detector.enable_modality("text", True)
-detector.enable_modality("audio", False)  # Disable audio detection
 ```
+python main.py optimize
+```
+
+### Advanced Testing
+
+```
+python main.py test --component all --output "test_results.json"
+```
+
+Options:
+
+- `--component`: Component to test (text, image, audio, video, meme, all)
+- `--output`: Path to save test results
 
 ## API Reference
 
-### Main Platform API
+### Core Platform API
 
-```python
-# Create platform
-platform = create_platform()
+#### `create_platform()`
 
-# Access components
-detector = platform['detector']
-trainer = platform['trainer']
-evolver = platform['evolver']
-exercise_manager = platform['exercise_manager']
-validator = platform['validator']
-```
+Creates the basic platform instance with all core components.
+
+Returns: Dictionary containing all platform components.
+
+#### `create_enhanced_platform()`
+
+Creates the enhanced platform instance with additional features like ensemble detection, adaptive learning, and real-time processing.
+
+Returns: Dictionary containing enhanced platform components.
 
 ### Detector API
 
-```python
-# Text detection
-results = detector.detect_text_misinfo(text_samples)
+#### `AdversarialMisinfoDetector`
 
-# Image detection
-results = detector.detect_image_misinfo(image_paths)
+Primary detection class with methods for multi-modal analysis.
 
-# Audio detection
-results = detector.detect_audio_misinfo(audio_paths)
+**Methods:**
 
-# Video detection
-results = detector.detect_video_misinfo(video_paths)
+- `detect(content: Dict[str, Any]) -> Dict[str, Any]`: Perform unified detection across all modalities
+- `add_pattern(modality: str, pattern: Any)`: Add new pattern to detection library
+- `get_patterns(modality: str) -> list`: Get all patterns for a specific modality
 
-# Meme detection
-results = detector.detect_meme_misinfo(meme_paths)
+#### `EnsembleDetector`
 
-# Deepfake detection
-results = detector.detect_deepfake_misinfo(media_paths, media_types)
+Advanced detection using ensemble methods.
 
-# Multi-modal detection
-all_results = detector.detect_all_modalities({
-    'text': text_samples,
-    'images': image_paths,
-    'audio': audio_paths,
-    'videos': video_paths,
-    'memes': meme_paths
-})
-```
+**Methods:**
 
-### Validator API
+- `detect_misinfo_ensemble(...) -> Dict[str, Any]`: Perform detection using ensemble of detectors
 
-```python
-# Run validation
-results = validator.run_comprehensive_validation()
+#### `AdaptiveDetector`
 
-# Generate report
-report = validator.generate_validation_report(results)
+Adaptive detection that learns from feedback.
 
-# Compare with benchmarks
-comparison = validator.compare_with_benchmarks("state_of_the_art")
-comparison_report = validator.generate_comparison_report(comparison)
+**Methods:**
 
-# Save results
-validator.save_validation_results("results.json", results)
-```
+- `update_from_feedback(...) -> Dict[str, Any]`: Update detection based on feedback
+- `detect_with_adaptation(...) -> Dict[str, Any]`: Perform detection with learned adaptations
 
-### Trainer API
+#### `RealTimeDetector`
 
-```python
-# Run adversarial training
-results = trainer.run_adversarial_training_cycle(
-    modalities=["text", "image"],
-    epochs_per_gan=100,
-    samples_per_modality=50
-)
+Real-time content analysis capabilities.
 
-# Generate adversarial samples
-samples = trainer.generate_adversarial_samples(
-    base_data=["text1", "text2"],
-    num_samples=10
-)
-```
+**Methods:**
 
-### Evolver API
+- `analyze_content_stream(...) -> List[Dict[str, Any]]`: Process stream of content in real-time
 
-```python
-# Register threat actor
-evolver.register_threat_actor(actor_profile)
+### Security API
 
-# Evolve tactics
-evolved_tactics = evolver.evolve_tactics_based_on_detection_rates(performance_data)
+#### `SecureInputValidator`
 
-# Predict future tactics
-predicted_tactics = evolver.predict_future_tactics("actor_id", prediction_horizon=5)
+Input validation to prevent security vulnerabilities.
 
-# Get actor report
-report = evolver.get_threat_actor_report("actor_id")
-```
+**Methods:**
 
-### Exercise Manager API
+- `validate_text_input(text: str) -> Dict[str, Any]`: Validate text input
+- `validate_file_path(path: str) -> Dict[str, Any]`: Validate file path
+- `validate_url(url: str) -> Dict[str, Any]`: Validate URL
 
-```python
-# Create scenario
-scenario = manager.create_scenario(
-    name="Scenario Name",
-    description="Scenario Description",
-    exercise_type="social_engineering",
-    difficulty="intermediate",
-    objectives=["Objective 1", "Objective 2"],
-    created_by="User"
-)
+#### `SecureCommunication`
 
-# Start session
-session = manager.start_exercise_session(
-    scenario_id=scenario.scenario_id,
-    participating_teams=[{"role": "red_team", "members": ["alice"]}]
-)
+Secure data transmission.
 
-# Update metrics
-manager.update_exercise_metrics(session.session_id, {"accuracy": 0.85})
+**Methods:**
 
-# Record incident
-manager.record_incident(session.session_id, {"type": "phishing_attempt", "severity": "high"})
+- `encrypt_data(data: str) -> str`: Encrypt data
+- `decrypt_data(encrypted_data: str) -> tuple[bool, str]`: Decrypt data
+- `create_jwt_token(payload: Dict[str, Any]) -> str`: Create authentication token
+- `verify_jwt_token(token: str) -> Dict[str, Any]`: Verify authentication token
 
-# Complete session
-report = manager.complete_exercise_session(session.session_id, {"final_score": 0.88})
-```
+#### `SecurityScanner`
+
+Security vulnerability scanning.
+
+**Methods:**
+
+- `scan_for_vulnerabilities(path: str) -> List[Dict[str, Any]]`: Scan for vulnerabilities
+- `generate_security_report(path: str) -> str`: Generate security report
+
+### Performance API
+
+#### `PerformanceOptimizer`
+
+Performance optimization tools.
+
+**Methods:**
+
+- `parallel_detector_processing(...) -> List[Any]`: Process items in parallel
+- `async_detector_processing(...) -> List[Any]`: Process items asynchronously
+- `batch_process_optimization(...) -> List[Any]`: Process items in optimized batches
+- `cache_optimization(max_size: int)`: Create cached function decorator
+
+#### `GPUAccelerator`
+
+GPU acceleration utilities.
+
+**Methods:**
+
+- `check_gpu_availability() -> bool`: Check if GPU is available
+- `transfer_to_gpu(data) -> Any`: Transfer data to GPU
+- `gpu_accelerate_computation(...) -> Any`: Accelerate computation on GPU
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Import Errors**
-   ```
-   ImportError: No module named 'torch'
-   ```
-   **Solution**: Install PyTorch:
-   ```bash
-   pip install torch torchvision torchaudio
-   ```
+#### GPU Not Detected
 
-2. **GPU Memory Issues**
-   ```
-   CUDA out of memory
-   ```
-   **Solution**: Reduce batch size or disable GPU processing:
-   ```python
-   detector.set_max_workers(4)  # Reduce parallel processing
-   ```
+If GPU acceleration is not working:
 
-3. **Missing Dependencies**
-   ```
-   ModuleNotFoundError: No module named 'transformers'
-   ```
-   **Solution**: Install missing dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+1. Verify CUDA toolkit installation
+2. Check PyTorch installation with CUDA support
+3. Run `nvidia-smi` to confirm GPU availability
 
-4. **Permission Errors**
-   ```
-   PermissionError: [Errno 13] Permission denied
-   ```
-   **Solution**: Check file permissions or run with elevated privileges:
-   ```bash
-   sudo python main.py
-   ```
+#### Memory Issues
 
-### Performance Tuning
+For memory-related problems:
 
-1. **Adjust Worker Count**
-   ```python
-   detector.set_max_workers(4)  # Adjust based on CPU cores
-   ```
+1. Use batch processing for large datasets
+2. Call `optimizer.optimize_memory_usage()` periodically
+3. Monitor with `ResourceMonitor` to track memory usage
 
-2. **Optimize Memory Usage**
-   ```python
-   detector.set_batch_size(32)  # Reduce batch size for memory constraints
-   ```
+#### Performance Issues
 
-3. **Enable Caching**
-   ```python
-   detector.enable_caching(True)  # Enable result caching
-   ```
+For slow performance:
 
-## Contributing
+1. Verify that optimizations are enabled
+2. Check if GPU acceleration is available and being used
+3. Use `OptimizedAdversarialDetector` for better performance
 
-### Development Setup
+#### Security Scanner False Positives
 
-1. **Fork the Repository**
-   ```bash
-   git fork <repository-url>
-   ```
+If the security scanner flags legitimate code:
 
-2. **Create Feature Branch**
-   ```bash
-   git checkout -b feature/my-new-feature
-   ```
+1. Review the flagged code to verify it's actually safe
+2. Add appropriate comments explaining why the code is safe
+3. Consider refactoring to use safer alternatives if possible
 
-3. **Install Development Dependencies**
-   ```bash
-   pip install -e .[dev]
-   ```
+### Performance Monitoring
 
-4. **Run Tests**
-   ```bash
-   python -m pytest tests/
-   ```
-
-5. **Code Formatting**
-   ```bash
-   black .
-   flake8 .
-   ```
-
-6. **Submit Pull Request**
-   ```bash
-   git push origin feature/my-new-feature
-   ```
-
-### Code Style
-
-Follow these guidelines:
-- Use Black for code formatting
-- Follow PEP 8 style guide
-- Include type hints for all functions
-- Write comprehensive docstrings
-- Add unit tests for new functionality
-
-### Testing
-
-All contributions must include appropriate tests:
+Use the ResourceMonitor to track platform performance:
 
 ```python
-# Example test structure
-def test_text_detector_basic():
-    """Test basic text detection functionality"""
-    detector = TextDetector()
-    result = detector.detect_misinfo(["Test text"])
-    assert isinstance(result, list)
-    assert len(result) == 1
-    assert 'misinfo_score' in result[0]
+from adversarial_misinfo_defense import ResourceMonitor
+
+monitor = ResourceMonitor()
+monitor.start_monitoring()
+
+# Perform operations
+results = detector.detect(content)
+
+# Get performance metrics
+metrics = monitor.get_performance_metrics()
+print(f"Average CPU usage: {metrics['cpu_average']:.2f}%")
+print(f"Average memory usage: {metrics['memory_average']:.2f}%")
+
+monitor.stop_monitoring()
 ```
 
-## License
+### Getting Help
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+For additional support:
 
-## Support
+1. Check the comprehensive documentation
+2. Review the example usage files
+3. Run the built-in tests to verify functionality
+4. Consult the validation and security reports
 
-For questions, issues, or contributions, please:
-1. Open an issue on the GitHub repository
-2. Join our community Discord server
-3. Contact the development team at support@example.com
-
----
-
-This user guide provides a comprehensive overview of the Adversarial Misinformation Defense Platform. For detailed API documentation, see the inline code documentation and examples in each module.
+This guide provides comprehensive information for using all features of the Adversarial Misinformation Defense Platform. For the most up-to-date information, always refer to the latest codebase and generated documentation.

@@ -11,6 +11,7 @@ import logging
 import sys
 from pathlib import Path
 from typing import Any
+from datetime import datetime
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.absolute()
@@ -48,56 +49,60 @@ def create_parser() -> argparse.ArgumentParser:
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         default="INFO",
-        help="Set logging level (default: INFO)",
+        help="Set the logging level",
     )
 
-    # Add subcommands
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-    # Detect subcommand
+    # Detection command
     detect_parser = subparsers.add_parser("detect", help="Run detection on content")
-    detect_parser.add_argument("--text", help="Text content to analyze")
-    detect_parser.add_argument("--file", help="File to analyze")
+    detect_parser.add_argument("--text", type=str, help="Text to analyze for misinformation")
+    detect_parser.add_argument("--image", type=str, help="Path to image file for analysis")
+    detect_parser.add_argument("--audio", type=str, help="Path to audio file for analysis")
+    detect_parser.add_argument("--video", type=str, help="Path to video file for analysis")
+    detect_parser.add_argument("--meme", type=str, help="Path to meme file for analysis")
 
-    # Validate subcommand
+    # Validation command
     validate_parser = subparsers.add_parser("validate", help="Run validation suite")
-    validate_parser.add_argument(
-        "--output", "-o", help="Output file for validation results (JSON format)"
-    )
-    validate_parser.add_argument(
-        "--benchmark",
-        "-b",
-        default="state_of_the_art",
-        help="Benchmark to compare against (default: state_of_the_art)",
-    )
+    validate_parser.add_argument("--output", type=str, help="Output path for validation results")
+    validate_parser.add_argument("--benchmark", action="store_true", help="Run benchmark tests")
 
-    # Train subcommand
-    train_parser = subparsers.add_parser("train", help="Run adversarial training")
-    train_parser.add_argument("--data", "-d", help="Training data directory")
-    train_parser.add_argument(
-        "--epochs", "-e", type=int, default=100, help="Number of training epochs (default: 100)"
-    )
-
-    # Exercise subcommand
+    # Exercise command
     exercise_parser = subparsers.add_parser("exercise", help="Manage red/blue team exercises")
-    exercise_parser.add_argument(
-        "--interactive", "-i", action="store_true", help="Run interactive scenario builder"
-    )
-    exercise_parser.add_argument(
-        "--list", "-l", action="store_true", help="List available scenarios"
-    )
+    exercise_parser.add_argument("--interactive", action="store_true", help="Run interactive exercise mode")
+    exercise_parser.add_argument("--scenario", type=str, help="Path to scenario file")
 
-    # Evolve subcommand
+    # Training command
+    train_parser = subparsers.add_parser("train", help="Run adversarial training")
+    train_parser.add_argument("--data", type=str, required=True, help="Path to training data")
+    train_parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
+
+    # Evolution command
     evolve_parser = subparsers.add_parser("evolve", help="Run autonomous tactic evolution")
-    evolve_parser.add_argument(
-        "--cycles", "-c", type=int, default=5, help="Number of evolution cycles to run (default: 5)"
-    )
-    evolve_parser.add_argument(
-        "--actors",
-        "-a",
-        nargs="+",
-        help="Specific threat actors to evolve (if not specified, evolves all)",
-    )
+    evolve_parser.add_argument("--cycles", type=int, default=5, help="Number of evolution cycles")
+
+    # Security audit command
+    security_parser = subparsers.add_parser("security-audit", help="Perform security audit")
+    security_parser.add_argument("--output", type=str, help="Output path for security report")
+
+    # Performance optimization command
+    optimize_parser = subparsers.add_parser("optimize", help="Optimize platform performance")
+
+    # Test command
+    test_parser = subparsers.add_parser("test", help="Run advanced tests")
+    test_parser.add_argument("--component", type=str, help="Test specific component",
+                             choices=["text", "image", "audio", "video", "meme", "all"])
+    test_parser.add_argument("--output", type=str, help="Output path for test results")
+
+    # Integration command
+    integration_parser = subparsers.add_parser("integrate", help="Platform integration with Summit")
+    integration_parser.add_argument("--api-url", type=str, help="Summit API base URL")
+    integration_parser.add_argument("--auth-token", type=str, help="Authentication token for Summit API")
+    integration_parser.add_argument("--action", type=str,
+                                   choices=["register", "test", "analyze"],
+                                   default="test",
+                                   help="Integration action to perform")
+    integration_parser.add_argument("--content", type=str, help="Content to analyze for integration test")
 
     return parser
 
@@ -313,6 +318,168 @@ def run_evolution(args: argparse.Namespace, platform: dict[str, Any]) -> int:
         return 1
 
 
+def run_security_audit(args: argparse.Namespace, platform: dict[str, Any]) -> int:
+    """
+    Run security audit on the platform
+    """
+    setup_logging(args.log_level)
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info("Starting security audit...")
+
+        # Perform security audit
+        results = perform_security_audit()
+
+        if args.output:
+            import json
+            with open(args.output, 'w') as f:
+                json.dump(results, f, indent=2)
+            logger.info(f"Security audit report saved to {args.output}")
+        else:
+            print(json.dumps(results, indent=2, default=str))
+            logger.info("Security audit completed and report displayed")
+
+        return 0
+
+    except Exception as e:
+        logger.error(f"Error during security audit: {str(e)}", exc_info=True)
+        return 1
+
+
+def run_optimization(args: argparse.Namespace, platform: dict[str, Any]) -> int:
+    """
+    Run performance optimization
+    """
+    setup_logging(args.log_level)
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info("Starting performance optimization...")
+
+        # Apply performance optimizations
+        results = optimize_platform_performance()
+
+        print(json.dumps(results, indent=2, default=str))
+        logger.info("Performance optimization completed")
+
+        return 0
+
+    except Exception as e:
+        logger.error(f"Error during optimization: {str(e)}", exc_info=True)
+        return 1
+
+
+def run_tests(args: argparse.Namespace, platform: dict[str, Any]) -> int:
+    """
+    Run advanced tests on the platform
+    """
+    setup_logging(args.log_level)
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info("Starting advanced tests...")
+
+        if args.component == "all" or args.component is None:
+            # Run comprehensive test suite
+            results = run_advanced_tests()
+        else:
+            # Run specific component test (would require more detailed implementation)
+            tester = ComponentTester()
+            if args.component == "text":
+                # Example test cases (in practice these would be more comprehensive)
+                test_cases = [
+                    {"text": "This is a normal sentence.", "expected_label": "benign"},
+                    {"text": "This is definitely fake news!", "expected_label": "malicious"}
+                ]
+                results = tester.test_text_detector(test_cases)
+            elif args.component == "image":
+                # Run image detector tests
+                results = tester.test_image_detector([
+                    {"image_path": "/fake/path/normal.jpg", "expected_label": "original"},
+                    {"image_path": "/fake/path/edited.jpg", "expected_label": "manipulated"}
+                ])
+            else:
+                logger.error(f"Component {args.component} not implemented in CLI")
+                return 1
+
+        if args.output:
+            import json
+            with open(args.output, 'w') as f:
+                json.dump(results, f, indent=2)
+            logger.info(f"Test results saved to {args.output}")
+        else:
+            print(json.dumps(results, indent=2, default=str))
+            logger.info("Tests completed and results displayed")
+
+        return 0
+
+    except Exception as e:
+        logger.error(f"Error during testing: {str(e)}", exc_info=True)
+        return 1
+
+
+def run_integration(args: argparse.Namespace, platform: dict[str, Any]) -> int:
+    """
+    Run integration with Summit platform
+    """
+    setup_logging(args.log_level)
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info("Starting Summit integration...")
+
+        # Create integration instance
+        integration = create_summit_integration(
+            api_base_url=args.api_url or "http://localhost:8080/api",
+            auth_token=args.auth_token
+        )
+
+        if args.action == "register":
+            # Register platform with Summit
+            result = integration.register_platform_with_summit()
+            print(json.dumps(result, indent=2, default=str))
+            logger.info("Platform registration completed")
+
+        elif args.action == "test":
+            # Test connection to Summit
+            is_connected = integration.connect_to_summit_services()
+            result = {
+                "connection_status": "connected" if is_connected else "failed",
+                "api_url": integration.summit_api_base_url,
+                "timestamp": datetime.now().isoformat()
+            }
+            print(json.dumps(result, indent=2, default=str))
+            logger.info("Connection test completed")
+
+        elif args.action == "analyze":
+            # Analyze content with Summit integration
+            if args.content:
+                content = {"text": args.content}
+                context = {}  # Would typically come from Summit
+                result = integration.analyze_content_with_summit_context(content, context)
+
+                # Send results to Summit
+                summit_response = integration.send_detection_results_to_summit(result)
+                result["summit_response"] = summit_response
+
+                print(json.dumps(result, indent=2, default=str))
+                logger.info("Content analysis with Summit integration completed")
+            else:
+                logger.error("--content argument required for analyze action")
+                return 1
+
+        else:
+            logger.error(f"Unknown integration action: {args.action}")
+            return 1
+
+        return 0
+
+    except Exception as e:
+        logger.error(f"Error during integration: {str(e)}", exc_info=True)
+        return 1
+
+
 def main() -> int:
     """
     Main entry point for the application
@@ -339,6 +506,14 @@ def main() -> int:
         return run_exercise(args, platform)
     elif args.command == "evolve":
         return run_evolution(args, platform)
+    elif args.command == "security-audit":
+        return run_security_audit(args, platform)
+    elif args.command == "optimize":
+        return run_optimization(args, platform)
+    elif args.command == "test":
+        return run_tests(args, platform)
+    elif args.command == "integrate":
+        return run_integration(args, platform)
     else:
         print(f"Unknown command: {args.command}")
         return 1
