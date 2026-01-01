@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Integrity Metadata",
+  "description": "Metadata schema for tracking the integrity and adversarial resilience of an information object.",
+  "type": "object",
+  "properties": {
+    "integrity_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "The composite integrity score (0.0 = Hostile, 1.0 = Ironclad)."
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["IRONCLAD", "VERIFIED", "CONTESTED", "HOSTILE"],
+      "description": "The operational tier derived from the score."
+    },
+    "vectors": {
+      "type": "object",
+      "properties": {
+        "volatility": { "type": "number", "minimum": 0, "maximum": 1 },
+        "correlation": { "type": "number", "minimum": 0, "maximum": 1 },
+        "history": { "type": "number", "minimum": 0, "maximum": 1 },
+        "narrative_velocity": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": ["volatility", "correlation", "history", "narrative_velocity"]
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "suspected_coordination",
+          "high_velocity",
+          "ghost_protocol_active",
+          "break_glass_override",
+          "quarantine_active"
+        ]
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "source_id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "signature": { "type": "string" }
+      },
+      "required": ["source_id", "timestamp"]
+    }
+  },
+  "required": ["integrity_score", "tier", "vectors"]
+}
