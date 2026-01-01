@@ -1,3 +1,30 @@
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'localhost'];
+  if (insecureValues.includes(value.toLowerCase())) {
+    console.error(`FATAL: ${name} is set to an insecure default value: "${value}"`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 export const config = {
   server: {
     port: parseInt(process.env.ML_ENGINE_PORT || '4003'),
@@ -13,7 +40,7 @@ export const config = {
       host: process.env.POSTGRES_HOST || 'localhost',
       port: parseInt(process.env.POSTGRES_PORT || '5432'),
       user: process.env.POSTGRES_USER || 'intelgraph',
-      password: process.env.POSTGRES_PASSWORD || 'password',
+      password: requireSecret('POSTGRES_PASSWORD', process.env.POSTGRES_PASSWORD),
       database: process.env.POSTGRES_DB || 'intelgraph',
       ssl:
         process.env.NODE_ENV === 'production'
@@ -24,7 +51,7 @@ export const config = {
     neo4j: {
       uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
       user: process.env.NEO4J_USERNAME || 'neo4j',
-      password: process.env.NEO4J_PASSWORD || 'password',
+      password: requireSecret('NEO4J_PASSWORD', process.env.NEO4J_PASSWORD),
     },
   },
 

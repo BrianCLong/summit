@@ -16,6 +16,33 @@ import { WarehouseManager } from '@intelgraph/data-warehouse';
 import { ModelingManager } from '@intelgraph/dimensional-modeling';
 import { CubeManager } from '@intelgraph/olap-engine';
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'localhost'];
+  if (insecureValues.includes(value.toLowerCase())) {
+    console.error(`FATAL: ${name} is set to an insecure default value: "${value}"`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 const app = express();
 app.use(express.json());
 
@@ -25,7 +52,7 @@ const mainPool = new Pool({
   port: parseInt(process.env.POSTGRES_PORT || '5432'),
   database: process.env.POSTGRES_DB || 'warehouse',
   user: process.env.POSTGRES_USER || 'postgres',
-  password: process.env.POSTGRES_PASSWORD || 'password',
+  password: requireSecret('POSTGRES_PASSWORD', process.env.POSTGRES_PASSWORD),
   max: 100,
 });
 
