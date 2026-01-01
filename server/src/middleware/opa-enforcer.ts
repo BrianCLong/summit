@@ -65,6 +65,8 @@ export class OPAEnforcer {
     string,
     { decision: OPADecision; expiresAt: number }
   >();
+  private cacheHits = 0;
+  private cacheMisses = 0;
 
   constructor(options: OPAEnforcerOptions = {}) {
     this.options = {
@@ -92,6 +94,7 @@ export class OPAEnforcer {
     if (this.options.cacheDecisions) {
       const cached = this.decisionCache.get(cacheKey);
       if (cached && Date.now() < cached.expiresAt) {
+        this.cacheHits += 1;
         logger.debug('OPA decision cache hit', {
           tenantId: input.tenant_id,
           requestId: input.request_id,
@@ -99,6 +102,8 @@ export class OPAEnforcer {
         return cached.decision;
       }
     }
+
+    this.cacheMisses += 1;
 
     try {
       const data = await this.buildOPAData(input);
@@ -336,7 +341,10 @@ export class OPAEnforcer {
             req.get('x-tenant-id') || (req as any).user?.tenantId || 'default',
           user_id: (req as any).user?.id || req.get('x-user-id') || 'anonymous',
           mutation: req.body.operationName || 'unnamed',
-          field_name: this.extractMutationField(req.body.query),
+          field_name: this.extractMutationField(
+            req.body.query,
+            req.body.operationName,
+          ),
           est_usd: parseFloat(req.get('x-estimated-usd') || '0'),
           est_total_tokens: parseInt(req.get('x-estimated-tokens') || '0'),
           risk_tag: req.get('x-risk-tag'),
@@ -383,9 +391,13 @@ export class OPAEnforcer {
   /**
    * Extract mutation field name from GraphQL query
    */
-  private extractMutationField(query: string): string | undefined {
+  private extractMutationField(
+    query: string,
+    operationName?: string,
+  ): string | undefined {
     const mutationMatch = query.match(/mutation\s+\w*\s*{[^{]*(\w+)\s*\(/);
-    return mutationMatch?.[1];
+    const fieldName = mutationMatch?.[1];
+    return fieldName && fieldName.length > 2 ? fieldName : operationName;
   }
 
   /**
@@ -430,10 +442,12 @@ export class OPAEnforcer {
     cacheSize: number;
     cacheHitRate: number;
   } {
+    const totalCacheChecks = this.cacheHits + this.cacheMisses;
     return {
       enabled: this.options.enabled,
       cacheSize: this.decisionCache.size,
-      cacheHitRate: 0, // TODO: Track cache hits/misses
+      cacheHitRate:
+        totalCacheChecks === 0 ? 0 : this.cacheHits / totalCacheChecks,
     };
   }
 }
