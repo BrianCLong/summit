@@ -1,25 +1,26 @@
-# Institutionalization Strategy & Documentation
+# Institutional Documentation
 
-This directory contains the strategic documentation for transforming Summit into an institution-grade system of record. These documents outline the roadmap for protocolization, sovereign deployment, and governance.
+This directory contains the authoritative documentation for the platform's Operating Doctrine, Capability Contracts, Roles, Lifecycle Playbooks, and Governance.
 
-## Core Strategy Documents
+## Core Doctrine
 
-| Document | Description | Owner |
-| :--- | :--- | :--- |
-| **[Institutional Strategy](INSTITUTIONAL_STRATEGY.md)** | The master strategy and 5-10 year vision for the Summit Control Plane. | **Orchestrator** |
-| **[Protocols & Standards](PROTOCOLS.md)** | Definitions of the open protocol boundaries (PMP, PDI, AES). | **Protocol Agent** |
-| **[Sovereign Deployments](SOVEREIGN_DEPLOYMENTS.md)** | Strategy for air-gapped, disconnected, and hardware-backed deployments. | **Sovereign Agent** |
-| **[Governance & Alignment](INSTITUTIONAL_GOVERNANCE.md)** | External oversight models and alignment with regulatory frameworks. | **Governance Agent** |
-| **[Value & Control](VALUE_CONTROL.md)** | Strategy for preserving commercial value and licensing models. | **Value Agent** |
-| **[Risk & Misuse Analysis](INSTITUTIONAL_RISK_MAP.md)** | Analysis of fork risks, adversarial misuse, and mitigation strategies. | **Risk Agent** |
+*   **[Operating Doctrine](./OPERATING_DOCTRINE.md)**: The "Constitution" of the system.
+*   **[Executive Summary](./EXECUTIVE_DOCTRINE.md)**: One-page executive overview.
+*   **[Org & Funding Model](./ORG_AND_FUNDING.md)**: How the organization and budget align with the doctrine.
 
-## Mission Statement
+## Governance & Strategy
 
-To transform Summit from a proprietary platform into a **recognized, interoperable, institution-grade system of record** by:
+*   **[Institutional Strategy](./INSTITUTIONAL_STRATEGY.md)**
+*   **[Institutional Governance](./INSTITUTIONAL_GOVERNANCE.md)**
+*   **[Risk Map](./INSTITUTIONAL_RISK_MAP.md)**
+*   **[Value Control](./VALUE_CONTROL.md)**
 
-*   Defining what parts of Summit become **protocols**.
-*   Enabling **sovereign, air-gapped, and regulated deployments**.
-*   Establishing Summit as a **reference architecture** others must align to.
-*   Preserving commercial advantage while standardizing the right layers.
+## Templates
 
-> "We standardize the rails, not the train."
+*   **[Quarterly Optimization Cycle (QOC) Template](./templates/QOC_TEMPLATE.md)**
+*   **[Annual Re-Certification Cycle (ARC) Template](./templates/ARC_TEMPLATE.md)**
+
+## Other
+
+*   **[Protocols](./PROTOCOLS.md)**
+*   **[Sovereign Deployments](./SOVEREIGN_DEPLOYMENTS.md)**
