@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Full history for accurate diffs
 
@@ -72,7 +72,7 @@ jobs:
           ts-node scripts/schema-diff.ts --version=${{ github.event.inputs.version || 'v1' }} --output=text
 
       - name: Upload diff report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: schema-diff-report
@@ -227,7 +227,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Download diff report
         uses: actions/download-artifact@v4
@@ -259,7 +259,7 @@ jobs:
           echo "✅ Audit entry recorded"
 
       - name: Upload audit log
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: audit-log
           path: audit/ga-evidence/api-contracts/audit-log/
