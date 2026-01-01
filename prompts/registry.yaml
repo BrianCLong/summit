@@ -28,3 +28,28 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: innovation-delivery
+    version: v1
+    path: prompts/innovation/innovation-delivery.md
+    sha256: b03ceaf3f7bd5530081c380d2d66d514d3b06962c331da7d87aa1793891135be
+    description: Innovation deliverables covering ideation through PRD with governance readiness.
+    scope:
+      paths:
+        - docs/innovation/
+        - docs/roadmap/
+        - prompts/
+        - .github/
+        - AGENTS.md
+      domains:
+        - innovation
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
