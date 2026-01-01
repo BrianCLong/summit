@@ -18,16 +18,16 @@ export interface MakeServerOptions {
   scopes?: string[];
   // Provide or augment context for unit tests (in-memory stubs, tenant, etc.)
   context?:
-    | Record<string, unknown>
-    | ((
-        base: AuthContext,
-      ) => Promise<Record<string, unknown>> | Record<string, unknown>);
+  | Record<string, unknown>
+  | ((
+    base: AuthContext,
+  ) => Promise<Record<string, unknown>> | Record<string, unknown>);
 }
 
 export async function makeGraphServer(opts: MakeServerOptions = {}) {
   let schema = makeExecutableSchema({
     typeDefs,
-    resolvers: resolvers as Record<string, unknown>,
+    resolvers: resolvers as any,
   });
   schema = authDirectiveTransformer(schema);
 
@@ -49,21 +49,21 @@ export async function makeGraphServer(opts: MakeServerOptions = {}) {
         opts.user ??
         (opts.tenant || opts.role || opts.scopes
           ? {
-              id: 'test-user',
-              email: 'test@intelgraph.local',
-              role: opts.role ?? 'ADMIN',
-              tenant: opts.tenant ?? 'test-tenant',
-              scopes: opts.scopes ?? ['*'],
-            }
+            id: 'test-user',
+            email: 'test@intelgraph.local',
+            role: opts.role ?? 'ADMIN',
+            tenant: opts.tenant ?? 'test-tenant',
+            scopes: opts.scopes ?? ['*'],
+          }
           : null);
 
       const withUser = injectedUser
         ? {
-            ...base,
-            user: injectedUser,
-            isAuthenticated: true,
-            tenantId: injectedUser.tenant,
-          }
+          ...base,
+          user: injectedUser,
+          isAuthenticated: true,
+          tenantId: injectedUser.tenant,
+        }
         : base;
       // Merge/override additional context
       if (opts.context) {
