@@ -1,6 +1,7 @@
 [![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 [![CI (Lint & Unit)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml)
+[![GA Gate](https://github.com/BrianCLong/summit/actions/workflows/ga-gate.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ga-gate.yml)
 [![CI (Golden Path)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml)
 [![Developer Radar](https://img.shields.io/badge/Developer%20Radar-Active-blue)](docs/dev/radar-dashboard.md)
 [![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
@@ -45,6 +46,21 @@ make up
 # 3. Verify (Smoke Test)
 make smoke
 ```
+
+### GA Gate (Pre-Flight)
+
+Before submitting PRs or deploying, run the enforced GA Gate:
+
+```bash
+make ga
+```
+
+This runs the full readiness sequence:
+1. Lint & Unit Tests
+2. Clean Environment Reset
+3. Deep Health Checks
+4. End-to-End Smoke Tests
+5. Security Scanning
 
 ### GA Readiness
 
