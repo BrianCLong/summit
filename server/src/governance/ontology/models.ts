@@ -81,3 +81,42 @@ export interface ChangeRequest {
   createdAt: Date;
   updatedAt: Date;
 }
+
+// --- Execution & Runtime Extensions ---
+
+export interface TemporalScope {
+  validFrom: Date;
+  validTo?: Date; // If undefined, assumed current/ongoing
+}
+
+export interface ProbabilisticMetadata {
+  confidence: number; // 0.0 to 1.0
+  source: string; // Agent ID, User ID, or System Process
+  method?: string; // e.g., "inference", "extraction", "user-input"
+}
+
+export interface OntologyAssertion {
+  id: string;
+  entityType: string; // matches EntityDefinition.name
+  entityId: string;
+  property: string; // matches FieldDefinition.name
+  value: any;
+
+  // Metadata
+  temporal: TemporalScope;
+  probabilistic: ProbabilisticMetadata;
+  provenance: {
+      derivedFrom?: string[]; // IDs of other assertions
+      ruleId?: string; // If inferred, which rule?
+  };
+}
+
+export interface InferenceResult {
+    assertions: OntologyAssertion[];
+    explanation?: string; // Human readable explanation
+}
+
+export interface ValidationResult {
+    valid: boolean;
+    errors: string[];
+}
