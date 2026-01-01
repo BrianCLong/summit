@@ -846,17 +846,14 @@ export class FaceDetectionEngine {
 
     // Factor in landmark confidence if available
     let landmarkScore = 1.0;
-    if (detection.landmarks?.leftEye?.confidence) {
-      const avgLandmarkConfidence =
-        [
-          detection.landmarks.leftEye.confidence,
-          detection.landmarks.rightEye.confidence,
-          detection.landmarks.nose.confidence,
-          detection.landmarks.leftMouth.confidence,
-          detection.landmarks.rightMouth.confidence,
-        ].reduce((sum, conf) => sum + (conf || 0), 0) / 5;
-
-      landmarkScore = avgLandmarkConfidence;
+    if (detection.landmarks) {
+      const landmarks = detection.landmarks as any;
+      landmarkScore =
+        Object.values(landmarks).reduce((sum: number, conf: any) => {
+          return (
+            sum + (typeof conf === 'number' ? conf : (conf as any).confidence || 0)
+          );
+        }, 0) / Object.keys(landmarks).length;
     }
 
     // Combined quality score
