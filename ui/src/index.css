@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.glass-card {
+  @apply bg-white/85 backdrop-blur-lg border border-white/20;
+}
+
+.gradient-bg {
+  @apply bg-gradient-to-br from-blue-400 via-blue-500 to-purple-600;
+}
+
+.status-indicator {
+  @apply w-2 h-2 rounded-full animate-pulse;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.reduce-motion {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Console text styling */
+.console-text {
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    "Courier New", monospace;
+}
