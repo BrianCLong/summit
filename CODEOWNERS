@@ -57,3 +57,7 @@
 # Provenance & Audit
 /audit/                       @acme/provenance-team
 /server/src/audit/            @acme/provenance-team
+
+# Legal & Security Docs
+/docs/legal/ @acme/legal-team
+/docs/security/ @acme/security-team
