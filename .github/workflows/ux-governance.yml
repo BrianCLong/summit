@@ -1,0 +1,33 @@
+name: UX Governance Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  ux-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run UX Governance Check
+        run: |
+          node scripts/ux-ci-enforcer.js
+
+      - name: Upload UX Governance Report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ux-governance-report
+          path: ux-governance-report.json
