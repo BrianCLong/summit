@@ -1,131 +1,65 @@
-# 🚀 Summit: 10-Minute Developer Onboarding
+# Onboarding Checklist
 
-Welcome to the Summit Platform! This guide will get you from a fresh `git clone` to a running, validated local environment in under 10 minutes.
+This checklist matches the command flow and endpoints published in the main README.
 
-Our core principle is **Deployable First**: if the local environment is broken, we stop and fix it. Every developer is a guardian of the golden path.
+## Prerequisites (must-have)
 
-> 📚 **AI Assistants:** For deep context, conventions, and architecture, see [`CLAUDE.md`](../CLAUDE.md).
+- [ ] Docker Desktop installed (README calls out Docker Desktop ≥ 4.x).
+- [ ] Node.js installed at **20.11.0** (README says it matches `.tool-versions`).
+- [ ] `pnpm` installed (README calls out pnpm 9).
+- [ ] Python 3.11+ installed (README calls out Python 3.11+).
 
----
+## Golden Path: “running stack in minutes”
 
-## 🗓️ Day-One Plan (15–30 minutes)
+- [ ] Clone and enter repo:
+  - `git clone https://github.com/BrianCLong/summit.git`
+  - `cd summit`
 
-1. **Clone & verify**: `git clone … && cd summit && ./scripts/validate-env.sh`.
-2. **Boot the stack**: `npm run quickstart -- --ai --kafka` (or omit flags for the base stack). This command validates required paths, installs dependencies, seeds the demo dataset, and launches both API and UI.
-3. **Read the runbooks**: keep [RUNBOOK.md](../RUNBOOK.md), [RUNBOOKS/CI.md](../RUNBOOKS/CI.md), and [RUNBOOKS/ONCALL.md](../RUNBOOKS/ONCALL.md) open while you work; they mirror the golden path checks in CI.
-4. **Smoke + health**: `make smoke` to mirror CI’s golden path and sanity-check health endpoints before you write code.
-5. **Watch the walkthrough**: skim the narrated flow in [docs/ONBOARDING_WALKTHROUGH.md](./ONBOARDING_WALKTHROUGH.md) to see the first-30-minutes demo.
+- [ ] Bootstrap dev environment:
+  - `make bootstrap`
 
----
+- [ ] Start the Docker stack:
+  - `make up`
 
-### ✅ Step 1: Validate Your Local Environment
+- [ ] Validate baseline health:
+  - `make smoke`
 
-Before you begin, run the environment validator to ensure your machine has the required dependencies and available ports. This script checks for Docker, Node.js, pnpm, Python, and verifies that critical ports are free.
+## Confirm you can reach required endpoints
 
-```bash
-./scripts/validate-env.sh
-```
+Open these in a browser (from README):
 
-If the script reports any failures, resolve them before proceeding. Common issues include:
-- **Docker not running**: Start Docker Desktop.
-- **Missing dependencies**: Install the required versions (Node 18+, pnpm 9+, Python 3.11+).
-- **Port conflicts**: Shut down services using ports 3000, 4000, 5432, 6379, 7474, 7687, or 8080.
+- [ ] Frontend: `http://localhost:3000`
+- [ ] GraphQL API: `http://localhost:4000/graphql`
+- [ ] Neo4j Browser: `http://localhost:7474` (README lists `neo4j` / `devpassword`)
+- [ ] Adminer: `http://localhost:8080`
+- [ ] Grafana: `http://localhost:3001`
 
----
+## GA Gate: contribution-grade validation (pre-PR)
 
-### 📦 Step 2: Bootstrap and Start the Platform
+- [ ] Run the enforced pre-flight:
+  - `make ga`
 
-The `start.sh` script is your golden path to a running environment. It automates dependency installation, environment file setup, Docker container startup, and initial health checks.
+- [ ] Confirm the gate covers the full readiness sequence (README states):
+  - Lint & unit
+  - Clean environment reset
+  - Deep health checks
+  - E2E smoke tests
+  - Security scanning
 
-```bash
-./start.sh
-```
-This single command will:
-1.  **Run Validator**: Execute the environment check from Step 1.
-2.  **Install Dependencies**: Run `pnpm install` for all workspace packages.
-3.  **Create `.env`**: Copy `.env.example` to `.env` if it doesn't exist.
-4.  **Launch Services**: Start the entire stack (API, UI, databases, etc.) using Docker Compose.
-5.  **Run Migrations & Seeds**: Apply database migrations and seed the `quickstart-investigation` dataset.
-6.  **Run Smoke Test**: Automatically validate the core workflow against the seeded data.
+## First contribution workflow (recommended)
 
-When the script finishes, you will have a fully functional development environment.
+- [ ] Pick a bounded area (examples by directory):
+  - UI: `client/` or `conductor-ui/`
+  - Backend/API: `backend/`, `api/`, `api-schemas/`
+  - Orchestration: `.maestro/`, `.orchestrator/`
+  - Ops/Governance: `RUNBOOKS/`, `SECURITY/`, `compliance/`, `audit/`, `.ga-check/`
 
-- **Optional AI + Streaming Stack**: Use `./start.sh --ai` (or `make up-ai` if you prefer Make targets) to layer in the AI/ML services from `deploy/compose/docker-compose.ai.yml`. This also wires the stack to the optional Kafka broker in `deploy/compose/docker-compose.full.yml` when you need event-driven or streaming flows.
-- **Manual Mode (complex workflows)**: For fine-grained control, run the steps individually and add overlays as needed:
-  1) `make bootstrap` (dependencies) → 2) `make up` (core stack) → 3) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.ai.yml up -d intelgraph-ai` (add AI service) → 4) `docker compose -f deploy/compose/docker-compose.dev.yml -f deploy/compose/docker-compose.full.yml up -d kafka` (start Kafka when testing ingestion/streaming) → 5) `make smoke` (golden path validation).
-  This manual path is safer for troubleshooting specific layers (e.g., isolating database vs. AI service health) and for high-RAM flows such as bulk ingestion + AI enrichment.
+- [ ] Create a branch using a consistent naming convention.
+- [ ] Implement change + tests.
+- [ ] Re-run `make ga` before opening PR (treat as non-negotiable).
 
----
+## “If it fails” triage checklist
 
-### 🔬 Step 3: Explore the Golden Path Workflow
-
-The smoke test in the previous step already validated the core application workflow. Now, walk through it yourself to understand the user experience.
-
-**Golden Path**: **Investigation → Entities → Relationships → Copilot → Results**
-
-1.  **Open the Frontend**: Navigate to **http://localhost:3000**.
-2.  **Find the Demo Investigation**: On the dashboard, you'll find the pre-seeded "Quickstart Investigation". Click to open it.
-3.  **Explore the Graph**:
-    - The graph explorer will display entities and relationships from the `quickstart-investigation` dataset.
-    - Click on nodes and edges to see their properties.
-    - Use the layout tools to rearrange the graph.
-4.  **Run the Copilot**:
-    - In the investigation panel, click the "Run Copilot Goal" button.
-    - This will trigger an AI-driven analysis based on a predefined goal for the dataset.
-5.  **View the Results**:
-    - Observe as the Copilot streams its findings into the results panel.
-    - The graph may update in real time with newly discovered entities or relationships.
-
-This workflow is the backbone of the Summit platform. `make smoke` automates these exact steps, ensuring that our core functionality is always working.
-
----
-
-### 🧑‍💻 Your First Commit: Development Workflow
-
-Now that your environment is running and validated, you're ready to contribute.
-
-1.  **Create a Branch**: Use the format `feature/<thing>` or `fix/<thing>`.
-    ```bash
-    git checkout -b feature/my-new-feature
-    ```
-2.  **Write Code**: Make your changes to the codebase. The `client/` and `server/` directories are the primary application folders.
-3.  **Run Tests**: Before committing, run local checks.
-    ```bash
-    make smoke      # Always run the smoke test
-    pnpm test       # Run unit/integration tests
-    pnpm lint       # Check for linting errors
-    ```
-4.  **Commit Your Changes**: Use the [Conventional Commits](https://www.conventionalcommits.org/) format.
-    ```bash
-    git commit -m "feat: add user profile page"
-    ```
-5.  **Open a Pull Request**: Push your branch to GitHub and create a PR against `main`. Ensure all CI checks pass.
-
----
-
-### 🛠️ Helpful Commands
-
-- `make help`: Display all available `make` commands.
-- `make up`: Start all services.
-- `make down`: Stop and remove all services.
-- `make smoke`: Run the end-to-end smoke test.
-- `pnpm test`: Run unit and integration tests.
-- `docker-compose logs -f <service-name>`: Tail logs for a specific service (e.g., `api`, `client`).
-
-### 🤖 Using the AI/Kafka Add-On
-
-These commands assume you started with `./start.sh --ai` (or added the overlays manually as described above):
-
-- **AI inference API**: `curl http://localhost:8000/health` should return the AI container health. Invoke extraction with `curl -X POST http://localhost:8000/extract -H 'Content-Type: application/json' -d '{"text":"Sample document"}'` and watch the response in `docker compose -f deploy/compose/docker-compose.ai.yml logs -f intelgraph-ai`.
-- **GraphQL wired to AI**: The server forwards AI requests through `AI_SERVICE_URL`; validate with `curl -X POST http://localhost:4000/graphql -H 'Content-Type: application/json' -d '{"query":"{health{status timestamp version}}"}'` and confirm the service status is `HEALTHY` when AI is up.
-- **Kafka smoke check (optional streaming)**: If you started Kafka via the `docker-compose.full.yml` overlay, open a shell with `docker compose -f deploy/compose/docker-compose.full.yml exec kafka bash` and run `kafka-topics.sh --list --bootstrap-server localhost:9092` to verify the broker. The standard ingestion topics (e.g., `ingest.raw`, `ingest.enriched`) should appear after you trigger an ingest job.
-
----
-
-### 🆘 Troubleshooting
-
-- **`make smoke` fails**: Run `pnpm smoke` for a more detailed, verbose output to pinpoint the failure.
-- **Health checks failing**: Use `curl http://localhost:4000/health/detailed | jq` to see the status of all backend services.
-- **Docker issues**: A clean restart often helps. Run `make down` followed by `./start.sh`.
-
-For more detailed guides, see the [documentation index](./README.md). Welcome to the team!
+- [ ] Re-run `make ga` after a clean reset (the gate includes a reset stage; reproduce locally).
+- [ ] If service endpoints fail, validate Docker services are up (compose/ and charts/ exist as repo-level infrastructure hints).
+- [ ] If tests are brittle, consult `TESTING.md` (explicitly linked from README as the test runtime source of truth).

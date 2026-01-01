@@ -1,165 +1,138 @@
-[![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
-[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
-[![CI (Lint & Unit)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml)
-[![GA Gate](https://github.com/BrianCLong/summit/actions/workflows/ga-gate.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ga-gate.yml)
-[![CI (Golden Path)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml)
-[![Developer Radar](https://img.shields.io/badge/Developer%20Radar-Active-blue)](docs/dev/radar-dashboard.md)
-[![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
-[![Release](https://github.com/BrianCLong/summit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/release.yml)
-[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
+# Summit (IntelGraph)
 
-## 🎉 **NEW in v2.0.0** (December 2025)
+Enterprise Intelligence Platform: graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
 
-**Summit v2.0.0 is a major release** consolidating 12,000+ PRs into an enterprise-grade intelligence platform:
+## NEW in v2.0.0 (December 2025)
 
-- ✅ **Enterprise Infrastructure**: Load balancing, multi-tier caching, telemetry
-- ✅ **Advanced AI/ML**: Multimodal extraction with 8 Black Projects modules
-- ✅ **Security Hardening**: Rate limiting, GraphQL complexity limits, IDOR fixes
-- ✅ **Real-Time Systems**: Narrative simulation engine with REST API
-
-**[View Release Notes](docs/archive/root-history/CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/archived/MIGRATION-v0.1-to-v2.0.md)** | **[Roadmap](docs/roadmap.md)**
+Summit v2.0.0 consolidates major platform capabilities (infrastructure, AI/ML, security hardening, real-time systems).  
+See: Release Notes | Migration Guide | Roadmap.
 
 ---
 
-# Summit (IntelGraph)
+## Quickstart (Golden Path)
 
-> **Enterprise Intelligence Platform** - Graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
-
-## 🚀 Quickstart (< 60 Seconds)
-
-We follow a **"Golden Path"** philosophy. If the build breaks, we stop and fix it.
-
-**Prerequisites:** Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 9, Python 3.11+.
-
-### Setup
+Prerequisites: Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 9, Python 3.11+.
 
 ```bash
-# 1. Clone & Bootstrap
+# 1) Clone & Bootstrap
 git clone https://github.com/BrianCLong/summit.git
 cd summit
 make bootstrap
 
-# 2. Start the Stack (Docker)
+# 2) Start the Stack (Docker)
 make up
 
-# 3. Verify (Smoke Test)
+# 3) Verify (Smoke Test)
 make smoke
 ```
 
 ### GA Gate (Pre-Flight)
 
-Before submitting PRs or deploying, run the enforced GA Gate:
+Before submitting PRs or deploying:
 
 ```bash
 make ga
 ```
 
-This runs the full readiness sequence:
-1. Lint & Unit Tests
-2. Clean Environment Reset
-3. Deep Health Checks
-4. End-to-End Smoke Tests
-5. Security Scanning
+This runs the enforced readiness sequence:
 
-### GA Readiness
-
-Follow the **[GA Operator Handbook](docs/ga/OPERATOR_HANDBOOK.md)** for the clone→production rollout path, golden-path commands (`make bootstrap && make up && make smoke`), env/secrets, health probes, backups, and scaling knobs. Use the **[Runbooks](docs/ga/RUNBOOKS.md)** for the top operational incidents and quick fixes.
-
-**That's it.** You now have a running stack with API, UI, Graph DB, and Relational DB.
-
-### Service Endpoints
-
-- **Frontend**: http://localhost:3000
-- **GraphQL API**: http://localhost:4000/graphql (Apollo Playground)
-- **Neo4j Browser**: http://localhost:7474 (User: `neo4j`, Pass: `devpassword`)
-- **Adminer**: http://localhost:8080 (Postgres Admin)
-- **Grafana**: http://localhost:3001 (Observability)
-
-👉 **[Detailed Onboarding Guide](docs/ONBOARDING.md)**
+1. Lint & unit tests
+2. Clean environment reset
+3. Deep health checks
+4. End-to-end smoke tests
+5. Security scanning
 
 ---
 
-## 🏗️ Architecture
+## Service Endpoints (Local)
 
-Summit is built on a modern, distributed stack designed for scalability and auditability.
-
-- **Frontend**: React 18, Vite, Material-UI.
-- **Backend**: Node.js, Express, Apollo GraphQL.
-- **Data Layer**:
-  - **Neo4j**: Graph relationships (Entities, Events).
-  - **PostgreSQL**: Structured data, Audit logs, Vector embeddings.
-  - **TimescaleDB**: Telemetry and metrics.
-  - **Redis**: Caching, Rate limiting, Real-time Pub/Sub.
-- **Orchestration**: Maestro (BullMQ) for background jobs and AI pipelines.
-
-👉 **[Read the full Architecture Guide](docs/ARCHITECTURE.md)**
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- GraphQL API: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (User: `neo4j`, Pass: `devpassword`)
+- Adminer: [http://localhost:8080](http://localhost:8080)
+- Grafana: [http://localhost:3001](http://localhost:3001)
 
 ---
 
-## 📦 Release Cadence
+## Architecture (System View)
 
-We operate on a **2-week sprint cycle** managed by our automated Release Captain, **Jules**.
+Summit is built on a modern distributed stack designed for scalability and auditability:
 
-- **Current Status**: Q4 2025 Strategic Sprints (Sprint 25+).
-- **Process**: Merge Train -> Golden Path CI -> Automated Release.
-- **Versioning**: Semantic Versioning (vX.Y.Z).
+- Frontend: React 18, Vite, Material-UI (`client/`)
+- Backend: Node.js, Express, Apollo GraphQL (`backend/`, `api/`)
+- Data Layer:
+  - Neo4j (graph relationships)
+  - PostgreSQL (structured data, audit logs, vectors/embeddings)
+  - TimescaleDB (telemetry and metrics)
+  - Redis (caching, rate limiting, real-time Pub/Sub)
 
-👉 **[View Release Cadence & Process](docs/RELEASE_CADENCE.md)**
+- Orchestration: Maestro (BullMQ) for background jobs and AI pipelines (`.maestro/`)
 
----
+See also:
 
-## 📏 Known Limits & Supportability
-
-Summit ships with explicit, evidence-backed limits covering scale, performance, and operational boundaries. Review the current declarations and update them as new validation runs complete.
-
-👉 **[Known Limits](docs/LIMITS.md)**
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from humans and AI agents alike!
-
-- **Atomic PRs**: One feature per PR.
-- **Bootstrap First**: Run `pnpm bootstrap` to ensure dependencies are installed.
-- **Verify Before Commit**: Run `pnpm verify` to check GA features and structure.
-- **Golden Path**: Ensure `pnpm lint && pnpm verify && pnpm build` passes before submitting.
-- **Testing Conventions**: Use Jest for unit tests, node-native for verification. See [TESTING.md](TESTING.md).
-- **Bots/Co-authors**: Please sign your commits and follow our [Agent Guidelines](AGENTS.md).
-
-👉 **[Read the Contributing Guide](CONTRIBUTING.md)**
+- docs/ARCHITECTURE.md
 
 ---
 
-## ✅ CI & Quality Gates
+## Repo Map (Where Things Live)
 
-Our CI pipeline ("Fast Lane") enforces high standards:
+This repository is a large monorepo containing:
 
-1.  **Lint**: Fast static analysis (ESLint + Ruff).
-2.  **Verify**: Deterministic verification suite for GA features (Auth, Rate Limits, Policies, etc.). **BLOCKS CI on failure.**
-3.  **Test**: Jest unit and integration tests.
-4.  **Golden Path**: Full-stack integration test (`make smoke`) in a clean environment.
-5.  **Security**: SAST, Dependency Scanning, Secret Detection.
+1. **Platform Runtime**
+   - `client/` — Primary user-facing UI
+   - `conductor-ui/` — Admin/Ops UI
+   - `backend/` — API runtime services
+   - `api/`, `apis/`, `api-schemas/` — API surfaces, schemas, contracts
+   - `cli/` — Operator/developer CLI tooling
+   - `.maestro/`, `.orchestrator/` — job orchestration, pipelines, worker controls
+   - `compose/`, `charts/`, `config/`, `configs/` — infra, deployment & configuration
 
-**New in this release:** We've established a deterministic verification suite using node-native tests (tsx + node:assert) to avoid Jest ESM/CJS brittleness. See [TESTING.md](TESTING.md) for details.
+2. **Governance, Security, Operations**
+   - `RUNBOOKS/` — incident playbooks, operational procedures
+   - `SECURITY/`, `.security/` — security policies & automation scaffolding
+   - `compliance/` — compliance controls and mapping artifacts
+   - `audit/` — audit readiness artifacts and evidence workflows
+   - `.ci/`, `ci/`, `.ga-check/`, `.github/` — CI and GA readiness gates
+   - `__tests__/`, `__mocks__/`, `GOLDEN/ datasets`, `.evidence/` — tests, fixtures, evidence
+
+3. **Agentic Development Tooling**
+   - `.agentic-prompts/`, `.agent-guidance/` — standardized prompts and guidance
+   - `.claude/`, `.gemini/`, `.jules/`, `.qwen/` — per-agent workflows and configuration
+   - `.devcontainer/` — standardized dev environment
+
+4. **AI/ML and Domain Modules**
+   - `ai-ml-suite/` plus multiple domain modules (e.g., `cognitive-*`, `active-measures-module/`, etc.)
 
 ---
 
-## 📚 Documentation
+## CI & Quality Gates
 
-- **[Documentation Index](docs/README.md)**: The central hub for all docs.
-- **[Onboarding](docs/ONBOARDING.md)**: Detailed setup guide.
-- **[API Reference](docs/api/README.md)**: GraphQL and REST API details.
-- **[Security](SECURITY.md)**: Security policy and reporting.
+Our CI pipeline ("Fast Lane") enforces:
 
----
+1. Lint (ESLint + Ruff)
+2. Verify (deterministic GA verification for critical features)
+3. Test (unit/integration)
+4. Golden Path (full-stack integration via `make smoke`)
+5. Security (SAST, dependency scanning, secret detection)
 
-## 📄 License
-
-**Summit Enterprise Edition**: Proprietary (see [LICENSE](LICENSE)).
-**Historical Open Source**: MIT (see [OSS-MIT-LICENSE](OSS-MIT-LICENSE)).
+See: TESTING.md
 
 ---
 
-**Summit Platform** - Next-Generation Intelligence Analysis
+## Contributing
+
+- Follow the Golden Path and GA Gate requirements.
+- Prefer small, reviewable PRs with explicit scope.
+- If the build breaks, stop and fix it: the Golden Path is enforced.
+
+See:
+
+- CONTRIBUTING.md
+- docs/ONBOARDING.md
+
+---
+
+## License
+
+Summit Enterprise Edition: Proprietary (see LICENSE).
+Historical Open Source: MIT (see OSS-MIT-LICENSE).

@@ -32,7 +32,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(
-    morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }),
+    morgan('combined', { stream: { write: (msg: string) => logger.info(msg.trim()) } }),
   );
 
   app.get('/health', (req, res) => {

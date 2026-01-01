@@ -351,7 +351,7 @@ export class EmbeddingService {
 
       const result = await this.db.query(query, params);
 
-      const similarities: SimilarityResult[] = result.rows.map((row) => ({
+      const similarities: SimilarityResult[] = result.rows.map((row: any) => ({
         id: row.id,
         similarity: row.similarity,
         metadata: row.metadata,
@@ -714,7 +714,7 @@ export class EmbeddingService {
 
     const result = await this.db.query(query, [ids]);
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       vector: JSON.parse(row.vector),
       metadata: row.metadata,
