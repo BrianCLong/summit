@@ -38,7 +38,7 @@ jobs:
 
       - name: Upload Provenance Artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: governance-provenance
           path: pr-provenance.json

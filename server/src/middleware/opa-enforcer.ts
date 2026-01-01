@@ -337,7 +337,10 @@ export class OPAEnforcer {
             req.get('x-tenant-id') || (req as any).user?.tenantId || 'default',
           user_id: (req as any).user?.id || req.get('x-user-id') || 'anonymous',
           mutation: req.body.operationName || 'unnamed',
-          field_name: this.extractMutationField(req.body.query),
+          field_name: this.extractMutationField(
+            req.body.query,
+            req.body.operationName,
+          ),
           est_usd: parseFloat(req.get('x-estimated-usd') || '0'),
           est_total_tokens: parseInt(req.get('x-estimated-tokens') || '0'),
           risk_tag: req.get('x-risk-tag'),
@@ -384,9 +387,19 @@ export class OPAEnforcer {
   /**
    * Extract mutation field name from GraphQL query
    */
+<<<<<<< HEAD
   private extractMutationField(query: string): string | undefined {
     const mutationMatch = query.match(/mutation\s+\w*\s*{\s*(\w+)\s*\(/);
     return mutationMatch?.[1];
+=======
+  private extractMutationField(
+    query: string,
+    operationName?: string,
+  ): string | undefined {
+    const mutationMatch = query.match(/mutation\s+\w*\s*{[^{]*(\w+)\s*\(/);
+    const fieldName = mutationMatch?.[1];
+    return fieldName && fieldName.length > 2 ? fieldName : operationName;
+>>>>>>> origin/main
   }
 
   /**
@@ -463,12 +476,18 @@ export class OPAEnforcer {
     cacheMisses: number;
     cacheHitRate: number;
   } {
+    const totalCacheChecks = this.cacheHits + this.cacheMisses;
     return {
       enabled: this.options.enabled,
       cacheSize: this.decisionCache.size,
+<<<<<<< HEAD
       cacheHits: this.cacheHits,
       cacheMisses: this.cacheMisses,
       cacheHitRate: this.calculateCacheHitRate(),
+=======
+      cacheHitRate:
+        totalCacheChecks === 0 ? 0 : this.cacheHits / totalCacheChecks,
+>>>>>>> origin/main
     };
   }
 }

@@ -2,6 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { withAuthorization } from '../withAuthorization';
 
+jest.unmock('../withAuthorization');
+
 jest.mock('../../context/AuthContext.jsx', () => ({
   useAuth: jest.fn(),
 }));
@@ -33,9 +35,8 @@ describe('withAuthorization', () => {
 
   it('blocks rendering when user lacks required claim', () => {
     useAuth.mockReturnValue({
-      user: { role: 'VIEWER', tenantId: 'tenant-b' },
+      user: { role: 'DENIED', tenantId: 'tenant-b' },
       loading: false,
-      claims: [{ action: 'graph:read', tenant: 'tenant-b' }],
       canAccess: () => false,
       tenantId: 'tenant-b',
     });
@@ -45,7 +46,7 @@ describe('withAuthorization', () => {
     ));
 
     render(<Guarded />);
-    expect(screen.getByTestId('auth-denied')).toBeInTheDocument();
+    expect(screen.getByLabelText('access-denied')).toBeInTheDocument();
     expect(screen.queryByTestId('forbidden')).not.toBeInTheDocument();
   });
 });

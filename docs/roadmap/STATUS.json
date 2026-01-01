@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T00:00:00Z",
-  "revision_note": "Updated OPA enforcement telemetry with cache hit/miss accounting and hit rate reporting",
+  "last_updated": "2026-01-01T06:40:00Z",
+  "revision_note": "OPA cache hit/miss metrics; severity ledger CI gate; partner operating model; Sprint N+3 planning",
   "initiatives": [
     {
       "id": "A",

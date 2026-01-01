@@ -24,54 +24,71 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock budget ledger
-jest.mock('../../db/budgetLedger', () => ({
-  getBudgetLedgerManager: jest.fn(() => ({
+jest.mock('../../db/budgetLedger', () => {
+  const ledger = {
     getTenantBudget: jest.fn(),
     getSpendingSummary: jest.fn(),
     getSpendingEntries: jest.fn(),
     checkTenantBudget: jest.fn(),
-  })),
-}));
+  };
+
+  return {
+    getBudgetLedgerManager: jest.fn(() => ledger),
+    __mockLedger: ledger,
+  };
+});
+
+const budgetLedgerModule = jest.requireMock('../../db/budgetLedger') as {
+  __mockLedger: {
+    getTenantBudget: jest.MockedFunction<(...args: any[]) => any>;
+    getSpendingSummary: jest.MockedFunction<(...args: any[]) => any>;
+    getSpendingEntries: jest.MockedFunction<(...args: any[]) => any>;
+    checkTenantBudget: jest.MockedFunction<(...args: any[]) => any>;
+  };
+  getBudgetLedgerManager: () => any;
+};
+
+const mockBudgetLedger = budgetLedgerModule.__mockLedger;
+
+const buildEnforcer = (
+  options?: ConstructorParameters<typeof OPAEnforcer>[0],
+): OPAEnforcer => {
+  const enforcer = new OPAEnforcer(options);
+  (enforcer as any).budgetLedger = mockBudgetLedger;
+  return enforcer;
+};
 
 describe('OPAEnforcer', () => {
   let opaEnforcer: OPAEnforcer;
-  let mockBudgetLedger: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Get mocked budget ledger
-    const mockedGetBudgetLedgerManager =
-      getBudgetLedgerManager as jest.MockedFunction<
-        typeof getBudgetLedgerManager
-      >;
-
-    mockBudgetLedger = {
-      getTenantBudget: jest.fn(async () => null),
-      getSpendingSummary: jest.fn(async () => ({
+    // Reset mock budget ledger methods with default implementations
+    if (mockBudgetLedger) {
+      mockBudgetLedger.getTenantBudget.mockReset().mockResolvedValue(null);
+      mockBudgetLedger.getSpendingSummary.mockReset().mockResolvedValue({
         tenantId: 'tenant-123',
         totalOperations: 0,
         estimatedUsd: 0,
         totalUsd: 0,
-      })),
-      getSpendingEntries: jest.fn(async () => []),
-      checkTenantBudget: jest.fn(async () => ({
+      });
+      mockBudgetLedger.getSpendingEntries.mockReset().mockResolvedValue([]);
+      mockBudgetLedger.checkTenantBudget.mockReset().mockResolvedValue({
         canAfford: true,
         budgetLimit: 0,
         currentSpend: 0,
         utilizationPct: 0,
         reason: '',
-      })),
-    } as unknown as BudgetLedgerManager;
-
-    mockedGetBudgetLedgerManager.mockReturnValue(mockBudgetLedger);
+      });
+    }
 
     // Reset environment variables
     delete process.env.OPA_ENFORCEMENT;
     delete process.env.FOUR_EYES_THRESHOLD_USD;
     delete process.env.FOUR_EYES_THRESHOLD_TOKENS;
 
-    opaEnforcer = new OPAEnforcer({
+    opaEnforcer = buildEnforcer({
       enabled: true,
       opaUrl: 'http://localhost:8181',
       cacheDecisions: false, // Disable cache for most tests
@@ -330,7 +347,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should use fallback decision when OPA is disabled', async () => {
-      const disabledEnforcer = new OPAEnforcer({
+      const disabledEnforcer = buildEnforcer({
         enabled: false,
       });
 
@@ -384,7 +401,7 @@ describe('OPAEnforcer', () => {
     };
 
     it('should cache decisions when enabled', async () => {
-      const cachedEnforcer = new OPAEnforcer({
+      const cachedEnforcer = buildEnforcer({
         enabled: true,
         cacheDecisions: true,
         cacheTtlMs: 60000,
@@ -427,7 +444,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should not cache when disabled', async () => {
-      const noCacheEnforcer = new OPAEnforcer({
+      const noCacheEnforcer = buildEnforcer({
         enabled: true,
         cacheDecisions: false,
       });
@@ -466,8 +483,13 @@ describe('OPAEnforcer', () => {
       expect(mockedAxios.post).toHaveBeenCalledTimes(2);
     });
 
+<<<<<<< HEAD
     it('should track cache hits, misses, and hit rate', async () => {
       const cacheStatsEnforcer = new OPAEnforcer({
+=======
+    it('should report cache hit rate statistics', async () => {
+      const statsEnforcer = buildEnforcer({
+>>>>>>> origin/main
         enabled: true,
         cacheDecisions: true,
         cacheTtlMs: 60000,
@@ -500,6 +522,7 @@ describe('OPAEnforcer', () => {
 
       mockedAxios.post.mockResolvedValue(mockOPAResponse);
 
+<<<<<<< HEAD
       await cacheStatsEnforcer.evaluatePolicy(mockInput); // miss
       await cacheStatsEnforcer.evaluatePolicy(mockInput); // hit
 
@@ -507,6 +530,13 @@ describe('OPAEnforcer', () => {
 
       expect(stats.cacheHits).toBe(1);
       expect(stats.cacheMisses).toBe(1);
+=======
+      await statsEnforcer.evaluatePolicy(mockInput); // miss
+      await statsEnforcer.evaluatePolicy(mockInput); // hit
+
+      const stats = statsEnforcer.getStats();
+      expect(stats.cacheSize).toBe(1);
+>>>>>>> origin/main
       expect(stats.cacheHitRate).toBeCloseTo(0.5);
     });
   });
@@ -566,7 +596,11 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
+<<<<<<< HEAD
         return headers[header as string];
+=======
+        return headers[typeof header === 'string' ? header : ''];
+>>>>>>> origin/main
       });
 
       const mockOPAResponse = {
@@ -614,7 +648,11 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '100000',
           'x-request-id': 'req-789',
         };
+<<<<<<< HEAD
         return headers[header as string];
+=======
+        return headers[typeof header === 'string' ? header : ''];
+>>>>>>> origin/main
       });
 
       const mockOPAResponse = {
@@ -687,7 +725,11 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
+<<<<<<< HEAD
         return headers[header as string];
+=======
+        return headers[typeof header === 'string' ? header : ''];
+>>>>>>> origin/main
       });
 
       mockReq.body = {
@@ -741,7 +783,7 @@ describe('OPAEnforcer', () => {
 
   describe('fallback decision', () => {
     it('should allow low-cost operations when budget is available', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -767,7 +809,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should deny when budget is exceeded', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -793,7 +835,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should require four-eyes approval for high-cost operations', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -820,7 +862,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should require four-eyes approval for destructive operations', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',
@@ -847,7 +889,7 @@ describe('OPAEnforcer', () => {
     });
 
     it('should allow high-cost operation with sufficient approvers', async () => {
-      const fallbackEnforcer = new OPAEnforcer({ enabled: false });
+      const fallbackEnforcer = buildEnforcer({ enabled: false });
 
       const input = {
         tenant_id: 'tenant-123',

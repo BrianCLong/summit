@@ -32,7 +32,7 @@ jobs:
         run: node scripts/sbom-policy-check.mjs
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json

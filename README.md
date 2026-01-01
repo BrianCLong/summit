@@ -48,13 +48,7 @@ make smoke
 
 ### GA Readiness
 
-This release (MVP-4 GA) includes hardened reliability and observability defaults.
-- **Environment**: Ensure `NODE_ENV=production` in production.
-- **Secrets**: Provide `OPENAI_API_KEY`, `POSTGRES_PASSWORD`, etc. via `.env` or secret manager.
-- **Health Checks**:
-  - `/health`: Basic liveness (200 OK).
-  - `/health/detailed`: Deep dependency checks (Neo4j, Postgres, Redis).
-  - `/health/ready`: Kubernetes readiness probe.
+Follow the **[GA Operator Handbook](docs/ga/OPERATOR_HANDBOOK.md)** for the clone→production rollout path, golden-path commands (`make bootstrap && make up && make smoke`), env/secrets, health probes, backups, and scaling knobs. Use the **[Runbooks](docs/ga/RUNBOOKS.md)** for the top operational incidents and quick fixes.
 
 **That's it.** You now have a running stack with API, UI, Graph DB, and Relational DB.
 
@@ -96,6 +90,14 @@ We operate on a **2-week sprint cycle** managed by our automated Release Captain
 - **Versioning**: Semantic Versioning (vX.Y.Z).
 
 👉 **[View Release Cadence & Process](docs/RELEASE_CADENCE.md)**
+
+---
+
+## 📏 Known Limits & Supportability
+
+Summit ships with explicit, evidence-backed limits covering scale, performance, and operational boundaries. Review the current declarations and update them as new validation runs complete.
+
+👉 **[Known Limits](docs/LIMITS.md)**
 
 ---
 
