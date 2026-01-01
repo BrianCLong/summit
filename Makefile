@@ -255,3 +255,59 @@ demo-seed: ## Seed demo data
 
 demo-smoke: ## Run demo smoke tests
 	@./scripts/demo-smoke-test.sh
+# Conductor / Maestro / Pipeline Commands
+
+SRV_PORT ?= 4000
+UI_PORT ?= 3000
+CONDUCTOR_ENABLED ?= true
+CONDUCTOR_TIMEOUT_MS ?= 60000
+CONDUCTOR_MAX_CONCURRENT ?= 5
+CONDUCTOR_AUDIT_ENABLED ?= true
+
+# Helper for wait-for
+wait-for:
+	@echo "Waiting for $(host):$(port)..."
+	@timeout 60s bash -c 'until echo > /dev/tcp/$(host)/$(port); do sleep 1; done'
+
+# IntelGraph server (Conductor enabled)
+conductor-server-up:
+	@mkdir -p .run
+	CONDUCTOR_ENABLED=$(CONDUCTOR_ENABLED) \
+	CONDUCTOR_TIMEOUT_MS=$(CONDUCTOR_TIMEOUT_MS) \
+	CONDUCTOR_MAX_CONCURRENT=$(CONDUCTOR_MAX_CONCURRENT) \
+	CONDUCTOR_AUDIT_ENABLED=$(CONDUCTOR_AUDIT_ENABLED) \
+	pnpm -C server start:conductor > .run/server.log 2>&1 & echo $$! > .run/server.pid
+	@$(MAKE) wait-for host=localhost port=$(SRV_PORT)
+
+conductor-client-up:
+	@mkdir -p .run
+	pnpm -C client dev > .run/client.log 2>&1 & echo $$! > .run/client.pid
+	@$(MAKE) wait-for host=localhost port=$(UI_PORT)
+
+conductor-up: dev-prereqs conductor-server-up conductor-client-up ## Start Conductor stack (infra+server+client)
+	@echo "✅ Conductor stack is live at http://localhost:$(UI_PORT)/conductor"
+
+conductor-down: ## Stop Conductor app layer (leaves infra)
+	@pkill -F .run/server.pid 2>/dev/null || true
+	@pkill -F .run/client.pid 2>/dev/null || true
+	@echo "🛑 Conductor app layer stopped."
+
+conductor-restart: conductor-down conductor-up ## Restart Conductor app layer
+
+conductor-status: ## Check Maestro status
+	@echo "🔎 Maestro status"
+	@curl -fsS http://localhost:$(SRV_PORT)/healthz >/dev/null 2>&1 && echo "server: OK" || echo "server: FAIL"
+	@curl -fsS http://localhost:$(UI_PORT) >/dev/null 2>&1 && echo "ui: OK" || echo "ui: OFF"
+
+conductor-logs: ## Tail Conductor logs
+	@echo "--- server ---"
+	@tail -n 20 .run/server.log 2>/dev/null || echo "No server logs."
+	@echo "--- client ---"
+	@tail -n 20 .run/client.log 2>/dev/null || echo "No client logs."
+
+# Pipeline Orchestration
+pipelines-list: ## List registered pipelines
+	@python3 pipelines/cli.py list --format table
+
+pipelines-validate: ## Validate pipeline manifests
+	@python3 pipelines/cli.py validate
