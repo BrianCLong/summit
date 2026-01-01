@@ -1,15 +1,24 @@
 export interface Quota {
-    tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+    tier: 'FREE' | 'CORE' | 'PRO' | 'ENTERPRISE';
     requestsPerMinute: number;
     ingestEventsPerMinute: number;
     maxTokensPerRequest: number;
     storageLimitBytes: number;
     seatCap: number;
+    features: {
+        sso: boolean;
+        auditLogsRetentionDays: number;
+        advancedGraphAnalytics: boolean;
+        customRoles: boolean;
+        dataResidency: boolean;
+        prioritySupport: boolean;
+        sla: boolean;
+    };
 }
 
 export class QuotaManager {
     private static instance: QuotaManager;
-    private tenantTiers: Map<string, 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE'> = new Map();
+    private tenantTiers: Map<string, 'FREE' | 'CORE' | 'PRO' | 'ENTERPRISE'> = new Map();
 
     private constructor() {
         // Seed with some dummy data or defaults
@@ -37,7 +46,16 @@ export class QuotaManager {
                     ingestEventsPerMinute: 50000,
                     maxTokensPerRequest: 32000,
                     storageLimitBytes: 1_000_000_000_000, // 1 TB
-                    seatCap: 500,
+                    seatCap: Infinity,
+                    features: {
+                        sso: true,
+                        auditLogsRetentionDays: 365,
+                        advancedGraphAnalytics: true,
+                        customRoles: true,
+                        dataResidency: true,
+                        prioritySupport: true,
+                        sla: true
+                    }
                 };
             case 'PRO':
                 return {
@@ -46,16 +64,35 @@ export class QuotaManager {
                     ingestEventsPerMinute: 5000,
                     maxTokensPerRequest: 16000,
                     storageLimitBytes: 250_000_000_000, // 250 GB
-                    seatCap: 150,
+                    seatCap: 20,
+                    features: {
+                        sso: true,
+                        auditLogsRetentionDays: 30,
+                        advancedGraphAnalytics: true,
+                        customRoles: false,
+                        dataResidency: false,
+                        prioritySupport: true,
+                        sla: false
+                    }
                 };
-            case 'STARTER':
+            case 'CORE':
+            case 'STARTER': // Backwards compatibility alias
                 return {
-                    tier: 'STARTER',
+                    tier: 'CORE',
                     requestsPerMinute: 100,
                     ingestEventsPerMinute: 500,
                     maxTokensPerRequest: 4000,
                     storageLimitBytes: 50_000_000_000, // 50 GB
-                    seatCap: 50,
+                    seatCap: 5,
+                    features: {
+                        sso: false,
+                        auditLogsRetentionDays: 7,
+                        advancedGraphAnalytics: false,
+                        customRoles: false,
+                        dataResidency: false,
+                        prioritySupport: false,
+                        sla: false
+                    }
                 };
             case 'FREE':
             default:
@@ -66,11 +103,20 @@ export class QuotaManager {
                     maxTokensPerRequest: 1000,
                     storageLimitBytes: 5_000_000_000, // 5 GB
                     seatCap: 5,
+                    features: {
+                        sso: false,
+                        auditLogsRetentionDays: 1,
+                        advancedGraphAnalytics: false,
+                        customRoles: false,
+                        dataResidency: false,
+                        prioritySupport: false,
+                        sla: false
+                    }
                 };
         }
     }
 
-    public setTenantTier(tenantId: string, tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE') {
+    public setTenantTier(tenantId: string, tier: 'FREE' | 'CORE' | 'PRO' | 'ENTERPRISE') {
         this.tenantTiers.set(tenantId, tier);
     }
 }
