@@ -97,19 +97,19 @@ export class DataLineageSystem {
     `;
 
     const res = await this.pool.query(query, [nodeId, depth]);
-    const edges = res.rows.map(row => ({
+    const edges = res.rows.map((row: any) => ({
       sourceId: row.source_id,
       targetId: row.target_id,
       type: row.type,
       createdAt: new Date() // Placeholder as CTE doesn't select it, can optimize
     } as LineageEdge));
 
-    const sourceIds = [...new Set(edges.map(e => e.sourceId))];
+    const sourceIds = [...new Set(edges.map((e: any) => e.sourceId))];
     if (sourceIds.length === 0) return { nodes: [], edges: [] };
 
     const nodesRes = await this.pool.query(
-        `SELECT * FROM lineage_nodes WHERE id = ANY($1)`,
-        [sourceIds]
+      `SELECT * FROM lineage_nodes WHERE id = ANY($1)`,
+      [sourceIds]
     );
 
     const nodes = nodesRes.rows.map(this.mapRowToNode);
@@ -120,8 +120,8 @@ export class DataLineageSystem {
    * Get downstream lineage (impact analysis)
    */
   public async getDownstream(nodeId: string, depth: number = 5): Promise<{ nodes: LineageNode[], edges: LineageEdge[] }> {
-      // Recursive CTE for downstream
-      const query = `
+    // Recursive CTE for downstream
+    const query = `
         WITH RECURSIVE downstream AS (
           SELECT source_id, target_id, type, 1 as depth
           FROM lineage_edges
@@ -135,35 +135,35 @@ export class DataLineageSystem {
         SELECT * FROM downstream;
       `;
 
-      const res = await this.pool.query(query, [nodeId, depth]);
-      const edges = res.rows.map(row => ({
-        sourceId: row.source_id,
-        targetId: row.target_id,
-        type: row.type,
-        createdAt: new Date()
-      } as LineageEdge));
+    const res = await this.pool.query(query, [nodeId, depth]);
+    const edges = res.rows.map((row: any) => ({
+      sourceId: row.source_id,
+      targetId: row.target_id,
+      type: row.type,
+      createdAt: new Date()
+    } as LineageEdge));
 
-      const targetIds = [...new Set(edges.map(e => e.targetId))];
-      if (targetIds.length === 0) return { nodes: [], edges: [] };
+    const targetIds = [...new Set(edges.map((e: any) => e.targetId))];
+    if (targetIds.length === 0) return { nodes: [], edges: [] };
 
-      const nodesRes = await this.pool.query(
-          `SELECT * FROM lineage_nodes WHERE id = ANY($1)`,
-          [targetIds]
-      );
+    const nodesRes = await this.pool.query(
+      `SELECT * FROM lineage_nodes WHERE id = ANY($1)`,
+      [targetIds]
+    );
 
-      const nodes = nodesRes.rows.map(this.mapRowToNode);
-      return { nodes, edges };
+    const nodes = nodesRes.rows.map(this.mapRowToNode);
+    return { nodes, edges };
   }
 
   private mapRowToNode(row: any): LineageNode {
-      return {
-          id: row.id,
-          name: row.name,
-          type: row.type,
-          schemaHash: row.schema_hash,
-          metadata: row.metadata,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at
-      };
+    return {
+      id: row.id,
+      name: row.name,
+      type: row.type,
+      schemaHash: row.schema_hash,
+      metadata: row.metadata,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
   }
 }

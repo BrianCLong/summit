@@ -40,7 +40,7 @@ export class FunnelService {
 
         const dropOffRates: Record<string, number> = {};
         for (let i = 1; i < funnel.steps.length; i++) {
-            const prev = stepCounts[i-1];
+            const prev = stepCounts[i - 1];
             const curr = stepCounts[i];
             dropOffRates[i] = prev === 0 ? 0 : ((prev - curr) / prev) * 100;
         }
@@ -90,8 +90,8 @@ export class FunnelService {
                         // Ideally we keep sliding. But simplified:
                         // If we see step 0 again, do we reset?
                         if (this.matchStep(e, funnel.steps[0])) {
-                             maxStepReached = 0;
-                             startTime = now;
+                            maxStepReached = 0;
+                            startTime = now;
                         }
                         continue;
                     }
@@ -124,20 +124,20 @@ export class FunnelService {
         const map = new Map<string, TelemetryEvent[]>();
         if (!fs.existsSync(this.logDir)) return map;
 
-        const files = fs.readdirSync(this.logDir).filter(f => f.endsWith('.jsonl'));
+        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.jsonl'));
         for (const file of files) {
-             const content = fs.readFileSync(path.join(this.logDir, file), 'utf-8');
-             const lines = content.split('\n');
-             for (const line of lines) {
-                 if (!line.trim()) continue;
-                 try {
-                     const e: TelemetryEvent = JSON.parse(line);
-                     // Group by user hash
-                     const uid = e.scopeHash;
-                     if (!map.has(uid)) map.set(uid, []);
-                     map.get(uid)!.push(e);
-                 } catch (err) {}
-             }
+            const content = fs.readFileSync(path.join(this.logDir, file), 'utf-8');
+            const lines = content.split('\n');
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                try {
+                    const e: TelemetryEvent = JSON.parse(line);
+                    // Group by user hash
+                    const uid = e.scopeHash;
+                    if (!map.has(uid)) map.set(uid, []);
+                    map.get(uid)!.push(e);
+                } catch (err) { }
+            }
         }
         return map;
     }
