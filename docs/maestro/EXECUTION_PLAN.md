@@ -1,24 +1,34 @@
-Maestro Expansion Plan (Dev → Full Orchestrator)
+# Execution Plan Update - Sprint: Governed Runtime & Security Incident Pipeline
 
-Scope
+## Overview
+This sprint focused on hardening the runtime environment for AI agents and establishing a formal security incident response pipeline. The following components have been implemented and verified.
 
-- PM integrations (GitHub/Jira), workflow editor, observability, autonomy/RBAC, recipes, UAT, reporting.
+## 1. Governed Agent Runtime
+- **Snapshot-Only Execution**: Agents are now forced to use `snapshot` access mode by default. Live data access is detected and blocked unless explicitly authorized (currently mocked as 'live' metadata check).
+- **Resource Limits**: Hard limits on execution time, memory usage (simulated), and output size have been implemented in `GovernedAgentRuntime`.
+- **Kill-Switch**: A Redis-backed `KillSwitchService` allows immediate termination of agent capabilities globally or per-agent.
+- **Language Filter**: Output is scrubbed for dangerous SQL/System command patterns.
 
-Phases
+## 2. Security Incident Pipeline
+- **Pipeline Service**: A `SecurityIncidentPipeline` now orchestrates the response to security events.
+- **Triage**: Integration with `AlertTriageV2Service` ensures low-risk events are filtered out.
+- **Forensics**: Automated capture of Audit Logs (via `AdvancedAuditSystem`) and Graph Neighborhoods (via `Neo4jService`).
+- **CI Gate**: A new CI gate `scripts/ci-security-gate.sh` ensures the pipeline logic remains intact.
 
-1. Edge & E2E: CF Full(strict), Apache Origin CA, `/graphql` proxy, Playwright e2e.
-2. PM Integration: GitHub App + Jira sync, tickets model, board and details UI.
-3. Workflow Editor: React Flow DAG editor, runs viewer, policy gates.
-4. Observability: OTEL traces, Prom metrics, logs; embedded dashboards.
-5. Autonomy & RBAC: roles, approvals, audit, autonomy levels.
-6. Recipes: registry + initial catalog, run from UI.
-7. UAT: intelgraph-dev targets, gating and reports.
+## 3. Admin & Scaling Configuration
+- **Validation**: `AdminConfigManager` enforces strict schema validation using `zod` for critical settings (`PG_POOL_SIZE`, `JWT_SECRET`, etc.).
+- **Scaling Guardrails**: `ScalingConfig` defines safe operational boundaries for HPA, Redis, and Neo4j connections.
+- **Verification**: Runtime validation prevents the server from starting with unsafe configurations in production.
 
-Validation
+## 4. Copilot Policy & Guardrails
+- **Policy Engine**: `CopilotPolicyService` acts as a central decision point for all copilot actions.
+- **Boundaries**: Strictly enforces "Recommend" vs "Execute". Execution requires explicit user confirmation and authorized roles.
+- **Sensitive Resources**: Modifying configuration, secrets, or IAM resources is restricted to Admin roles.
 
-- Playwright: routes, /api/health, /api/status, GraphQL probe, optional mutation roundtrip.
-- UAT checklists, promotion gates, defect auto-linking.
+## New CI/CD Gates
+- `scripts/ci-security-gate.sh`: Runs security pipeline integration tests.
+- `AdminConfig` validation runs on server startup; integration tests verify this behavior.
 
-Security
-
-- Secrets via env/SSM; RBAC; audit logs; feature flag gates; outbox + saga; canary rollouts.
+## Rollback Procedures
+- **Kill Switch**: If agents misbehave, set `killswitch:global` to `true` in Redis.
+- **Config**: Revert environment variables to previous known-good values if startup fails.
