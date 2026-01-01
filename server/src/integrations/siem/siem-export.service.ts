@@ -202,7 +202,7 @@ export class SIEMExportService {
     query += ` ORDER BY ae.timestamp ASC, ae.id ASC LIMIT $${paramIndex}`;
     params.push(limit + 1); // Fetch one extra to determine hasMore
 
-    const result = await pg.query(query, params);
+    const result = await pg.readMany(query, params);
     const hasMore = result.rows.length > limit;
     const rows = hasMore ? result.rows.slice(0, limit) : result.rows;
 
@@ -245,7 +245,7 @@ export class SIEMExportService {
     }
 
     // Fetch audit event
-    const result = await pg.query(
+    const result = await pg.readMany(
       `SELECT * FROM audit.events WHERE id = $1 AND tenant_id = $2`,
       [auditEventId, tenantId]
     );
@@ -499,7 +499,7 @@ export class SIEMExportService {
    * Check if event already exported (idempotency)
    */
   private async isAlreadyExported(tenantId: string, eventId: string): Promise<boolean> {
-    const result = await pg.query(
+    const result = await pg.readMany(
       `SELECT 1 FROM siem_export_idempotency
        WHERE tenant_id = $1 AND event_id = $2`,
       [tenantId, eventId]
@@ -520,7 +520,7 @@ export class SIEMExportService {
       .update(JSON.stringify(signal))
       .digest('hex');
 
-    await pg.query(
+    await pg.readMany(
       `INSERT INTO siem_export_idempotency (id, tenant_id, event_id, exported_at, hash)
        VALUES ($1, $2, $3, NOW(), $4)
        ON CONFLICT (tenant_id, event_id) DO NOTHING`,

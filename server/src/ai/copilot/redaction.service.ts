@@ -223,6 +223,17 @@ export class RedactionService {
   }
 
   /**
+   * Generic redact method for simple string redaction
+   */
+  async redact(
+    text: string,
+    _policy?: { maxClassification?: string; policyLabels?: string[] }
+  ): Promise<string> {
+    const result = this.redactText(text, 'generic', []);
+    return result.content;
+  }
+
+  /**
    * Redact a single citation
    */
   private redactCitation(citation: Citation): RedactionResult<Citation> {

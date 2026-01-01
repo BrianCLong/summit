@@ -199,7 +199,7 @@ export class GRCExportService {
 
     query += ` ORDER BY cm.framework, cm.framework_control_id`;
 
-    const result = await pg.query(query, params);
+    const result = await pg.readMany(query, params);
 
     // Map to GRCControlMappingExport format
     const controlMappings = await Promise.all(
@@ -355,7 +355,7 @@ export class GRCExportService {
 
     query += ` ORDER BY vr.verified_at DESC`;
 
-    const result = await pg.query(query, params);
+    const result = await pg.readMany(query, params);
     return result.rows;
   }
 
