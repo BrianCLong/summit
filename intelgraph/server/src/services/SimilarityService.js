@@ -40,31 +40,96 @@ class SimilarityService {
 
   /**
    * Finds potential duplicate entities based on text, topology, and provenance similarity.
-   * This implementation has a time complexity of O(n^2) and may not scale well for very large datasets.
-   * Future optimizations could include using a blocking or indexing technique to reduce the number of pairs to compare.
+   *
+   * PERFORMANCE OPTIMIZATIONS APPLIED:
+   * - Caches relationship IDs to avoid repeated map operations
+   * - Early exits when text similarity is too low to meet threshold
+   * - Skips comparisons for entities with missing labels
+   * - Pre-filters by label prefix for large datasets (blocking)
+   *
+   * Time complexity: O(n^2) in worst case, but with early exits and blocking
+   * Space complexity: O(n) for caches
+   *
    * @param {Array<Object>} entities A list of entities to compare.
    * @param {number} threshold The similarity threshold.
    * @returns {Array<Object>} A list of potential duplicate pairs.
    */
   findDuplicateCandidates(entities, threshold = 0.8) {
     const candidates = [];
+
+    // Pre-compute relationship IDs for each entity (caching)
+    const relationshipCache = new Map();
     for (let i = 0; i < entities.length; i++) {
-      for (let j = i + 1; j < entities.length; j++) {
-        const entityA = entities[i];
+      const entity = entities[i];
+      if (entity.relationships && Array.isArray(entity.relationships)) {
+        relationshipCache.set(i, entity.relationships.map(r => r.targetEntity?.id).filter(Boolean));
+      } else {
+        relationshipCache.set(i, []);
+      }
+    }
+
+    // For large datasets (>1000 entities), use simple blocking by label prefix
+    const useBlocking = entities.length > 1000;
+    let blocks = null;
+
+    if (useBlocking) {
+      blocks = new Map();
+      for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        if (!entity.label) continue;
+        const prefix = entity.label.substring(0, 3).toLowerCase();
+        if (!blocks.has(prefix)) {
+          blocks.set(prefix, []);
+        }
+        blocks.get(prefix).push(i);
+      }
+    }
+
+    // Main comparison loop
+    for (let i = 0; i < entities.length; i++) {
+      const entityA = entities[i];
+
+      // Skip entities without labels
+      if (!entityA.label) continue;
+
+      // Determine comparison range based on blocking
+      let compareIndices;
+      if (useBlocking) {
+        const prefix = entityA.label.substring(0, 3).toLowerCase();
+        compareIndices = blocks.get(prefix) || [];
+      } else {
+        compareIndices = Array.from({ length: entities.length }, (_, idx) => idx);
+      }
+
+      for (const j of compareIndices) {
+        if (j <= i) continue; // Only compare once (i, j) where j > i
+
         const entityB = entities[j];
 
+        // Skip entities without labels
+        if (!entityB.label) continue;
+
+        // Calculate text similarity first (most discriminative)
         const labelSimilarity = this.calculateTextSimilarity(entityA.label, entityB.label);
         const descriptionSimilarity = this.calculateTextSimilarity(entityA.description, entityB.description);
         const textSimilarity = (labelSimilarity * 0.7) + (descriptionSimilarity * 0.3);
 
+        // Early exit: if text similarity is very low, skip expensive topology check
+        // Text has 0.6 weight in overall score, so if textSim * 0.6 < threshold - 0.4,
+        // we can't possibly meet threshold even with perfect topology and provenance
+        if (textSimilarity * 0.6 < threshold - 0.4) {
+          continue;
+        }
+
+        // Calculate topology similarity using cached relationship IDs
         const topologySimilarity = this.calculateTopologySimilarity(
-          entityA.relationships.map(r => r.targetEntity.id),
-          entityB.relationships.map(r => r.targetEntity.id)
+          relationshipCache.get(i),
+          relationshipCache.get(j)
         );
 
         const provenanceSimilarity = this.calculateProvenanceSimilarity(entityA.source, entityB.source);
 
-        // A simple weighted average
+        // Weighted average
         const overallSimilarity = (textSimilarity * 0.6) + (topologySimilarity * 0.3) + (provenanceSimilarity * 0.1);
 
         if (overallSimilarity >= threshold) {

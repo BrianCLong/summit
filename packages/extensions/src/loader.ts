@@ -250,39 +250,81 @@ export class ExtensionLoader {
     const defaultAPI: ExtensionAPI = {
       entities: {
         create: async (entity) => {
-          throw new Error('entities.create not implemented');
+          this.observability.recordLog('extension-api', 'warn', 'entities.create called but not connected to graph DB');
+          throw new Error(
+            'Extension API entities.create requires graph database connection. ' +
+            'Configure ExtensionLoader with api.entities.create implementation that connects to Neo4j/PostgreSQL. ' +
+            'See server/src/graphql/resolvers/crudResolvers.ts for reference implementation.'
+          );
         },
         update: async (id, data) => {
-          throw new Error('entities.update not implemented');
+          this.observability.recordLog('extension-api', 'warn', `entities.update called for ${id} but not connected`);
+          throw new Error(
+            'Extension API entities.update requires graph database connection. ' +
+            'Configure ExtensionLoader with api.entities.update implementation.'
+          );
         },
         delete: async (id) => {
-          throw new Error('entities.delete not implemented');
+          this.observability.recordLog('extension-api', 'warn', `entities.delete called for ${id} but not connected`);
+          throw new Error(
+            'Extension API entities.delete requires graph database connection. ' +
+            'Configure ExtensionLoader with api.entities.delete implementation.'
+          );
         },
         query: async (filter) => {
-          throw new Error('entities.query not implemented');
+          this.observability.recordLog('extension-api', 'warn', 'entities.query called but not connected');
+          throw new Error(
+            'Extension API entities.query requires graph database connection. ' +
+            'Configure ExtensionLoader with api.entities.query implementation.'
+          );
         },
       },
       relationships: {
         create: async (rel) => {
-          throw new Error('relationships.create not implemented');
+          this.observability.recordLog('extension-api', 'warn', 'relationships.create called but not connected');
+          throw new Error(
+            'Extension API relationships.create requires graph database connection. ' +
+            'Configure ExtensionLoader with api.relationships.create implementation. ' +
+            'See server/src/graphql/resolvers/crudResolvers.ts for reference implementation.'
+          );
         },
         query: async (filter) => {
-          throw new Error('relationships.query not implemented');
+          this.observability.recordLog('extension-api', 'warn', 'relationships.query called but not connected');
+          throw new Error(
+            'Extension API relationships.query requires graph database connection. ' +
+            'Configure ExtensionLoader with api.relationships.query implementation.'
+          );
         },
       },
       investigations: {
         create: async (inv) => {
-          throw new Error('investigations.create not implemented');
+          this.observability.recordLog('extension-api', 'warn', 'investigations.create called but not connected');
+          throw new Error(
+            'Extension API investigations.create requires investigation service connection. ' +
+            'Configure ExtensionLoader with api.investigations.create implementation. ' +
+            'See server/src/graphql/resolvers/crudResolvers.ts for reference implementation.'
+          );
         },
         get: async (id) => {
-          throw new Error('investigations.get not implemented');
+          this.observability.recordLog('extension-api', 'warn', `investigations.get called for ${id} but not connected`);
+          throw new Error(
+            'Extension API investigations.get requires investigation service connection. ' +
+            'Configure ExtensionLoader with api.investigations.get implementation.'
+          );
         },
         update: async (id, data) => {
-          throw new Error('investigations.update not implemented');
+          this.observability.recordLog('extension-api', 'warn', `investigations.update called for ${id} but not connected`);
+          throw new Error(
+            'Extension API investigations.update requires investigation service connection. ' +
+            'Configure ExtensionLoader with api.investigations.update implementation.'
+          );
         },
       },
       storage: {
         get: async (key) => {
+          if (!key || typeof key !== 'string') {
+            throw new Error('Storage key must be a non-empty string');
+          }
           const file = path.join(storagePath, `${key}.json`);
           try {
             const data = await fs.readFile(file, 'utf-8');
@@ -292,11 +334,17 @@ export class ExtensionLoader {
           }
         },
         set: async (key, value) => {
+          if (!key || typeof key !== 'string') {
+            throw new Error('Storage key must be a non-empty string');
+          }
           const file = path.join(storagePath, `${key}.json`);
           await fs.mkdir(storagePath, { recursive: true });
           await fs.writeFile(file, JSON.stringify(value, null, 2));
         },
         delete: async (key) => {
+          if (!key || typeof key !== 'string') {
+            throw new Error('Storage key must be a non-empty string');
+          }
           const file = path.join(storagePath, `${key}.json`);
           await fs.unlink(file).catch(() => {});
         },
@@ -304,6 +352,7 @@ export class ExtensionLoader {
     };
 
     // Merge with provided API overrides
+    // This allows the host application to inject proper implementations
     return {
       ...defaultAPI,
       ...this.options.api,

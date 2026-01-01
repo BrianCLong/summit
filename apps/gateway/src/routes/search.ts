@@ -78,8 +78,28 @@ router.post('/v1/search/suggest', async (req: Request, res: Response) => {
     }
 });
 
+/**
+ * Admin endpoint to trigger reindexing
+ * Requires admin role for security
+ */
 router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
-    // TODO: Add proper RBAC here
+    // RBAC: Only admin users can trigger reindex operations
+    const userRoles = (req as any).user?.roles || [];
+
+    if (!userRoles.includes('admin')) {
+        return res.status(403).json({
+            error: 'forbidden',
+            message: 'Admin role required to trigger reindex operations'
+        });
+    }
+
+    // Audit log the admin operation
+    console.info('[AUDIT] Reindex triggered', {
+        userId: (req as any).user?.sub,
+        tenantId: getTenantId(req),
+        timestamp: new Date().toISOString(),
+    });
+
     res.json({ status: 'triggered', job_id: 'job-' + Date.now() });
 });
 
