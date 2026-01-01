@@ -56,6 +56,7 @@ make ga
 ```
 
 This runs the full readiness sequence:
+
 1. Lint & Unit Tests
 2. Clean Environment Reset
 3. Deep Health Checks
@@ -82,18 +83,57 @@ Follow the **[GA Operator Handbook](docs/ga/OPERATOR_HANDBOOK.md)** for the clon
 
 ## 🏗️ Architecture
 
-Summit is built on a modern, distributed stack designed for scalability and auditability.
+Summit is built on a modern, distributed stack designed for scalability, observability, and auditability.
 
-- **Frontend**: React 18, Vite, Material-UI.
-- **Backend**: Node.js, Express, Apollo GraphQL.
-- **Data Layer**:
-  - **Neo4j**: Graph relationships (Entities, Events).
-  - **PostgreSQL**: Structured data, Audit logs, Vector embeddings.
-  - **TimescaleDB**: Telemetry and metrics.
-  - **Redis**: Caching, Rate limiting, Real-time Pub/Sub.
-- **Orchestration**: Maestro (BullMQ) for background jobs and AI pipelines.
+### System Topology
 
-👉 **[Read the full Architecture Guide](docs/ARCHITECTURE.md)**
+```mermaid
+flowchart LR
+    subgraph Client
+      UI[React/Vite UI]
+    end
+    subgraph API[Edge/API Layer]
+      GQL[GraphQL Gateway / Apollo Server]
+      REST[REST/Health & Ops Routes]
+    end
+    subgraph Orchestrators
+      MQ[BullMQ Queue]
+      Maestro[Maestro Pipelines]
+    end
+    subgraph DataPlane[Data Plane]
+      PG[(PostgreSQL + TimescaleDB)]
+      Neo[(Neo4j Graph)]
+      Redis[(Redis Cache/Streams)]
+    end
+    subgraph Observability
+      Grafana[Grafana]
+    end
+
+    UI -->|GraphQL/WebSocket| GQL
+    UI -.->|Operational| REST
+    GQL -->|Queries/Mutations| Neo
+    GQL -->|Reads/Writes| PG
+    GQL -->|Caching| Redis
+    GQL -->|Jobs| MQ
+    MQ --> Maestro
+    Maestro -->|Enrichment/ETL| Neo
+    Maestro -->|Batch Writes| PG
+    Redis -->|Pub/Sub| UI
+    PG --> Grafana
+    Neo --> Grafana
+```
+
+### Subsystem Map
+
+- **APIs**: GraphQL gateway with health/ops routes; subscriptions for live investigations; WebSockets used for collaboration.
+- **Data flows**: Ingest → Normalize → Persist (Neo4j + Postgres/Timescale) → Enrich (Maestro + BullMQ) → Serve (GraphQL + subscriptions) → Observe (Grafana/metrics).
+- **Orchestration**: Maestro pipelines schedule enrichment, entity resolution, and policy enforcement jobs; BullMQ handles job dispatch and retry semantics.
+- **Security & compliance**: ABAC/OPA checks guard mutations; audit trails land in Postgres; provenance metadata is included in graph mutations.
+
+### Reference Material
+
+- 👉 **[Developer Architecture Overview](docs/developer/architecture-overview.md)**
+- 👉 **[Full Architecture Guide](docs/ARCHITECTURE.md)**
 
 ---
 

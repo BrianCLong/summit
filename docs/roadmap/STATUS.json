@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-01T17:05:00Z",
+  "revision_note": "Documented architecture/data flows and API contracts across README and developer docs",
   "initiatives": [
     {
       "id": "A",

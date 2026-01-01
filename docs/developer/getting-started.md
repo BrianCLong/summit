@@ -4,6 +4,8 @@
 
 Welcome to IntelGraph development! This guide will help you set up your development environment and get started contributing to the IntelGraph platform, including both IntelGraph Core and Maestro autonomous orchestration systems.
 
+> Need a mental model before you dive in? Start with the [Developer Architecture Overview](architecture-overview.md) for subsystem diagrams, data flows, and API contract pointers.
+
 ## Development Environment Setup
 
 ### Prerequisites
@@ -134,13 +136,13 @@ docker-compose -f docker-compose.dev.yml logs redis
 **docker-compose.dev.yml:**
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   neo4j:
     image: neo4j:5.15-community
     ports:
-      - '7474:7474'
-      - '7687:7687'
+      - "7474:7474"
+      - "7687:7687"
     environment:
       NEO4J_AUTH: neo4j/devpassword
       NEO4J_PLUGINS: '["apoc"]'
@@ -156,7 +158,7 @@ services:
   postgres:
     image: postgres:15-alpine
     ports:
-      - '5432:5432'
+      - "5432:5432"
     environment:
       POSTGRES_DB: intelgraph_dev
       POSTGRES_USER: intelgraph
@@ -170,7 +172,7 @@ services:
   redis:
     image: redis:7.2-alpine
     ports:
-      - '6379:6379'
+      - "6379:6379"
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
@@ -180,12 +182,12 @@ services:
   elasticsearch:
     image: elasticsearch:8.11.0
     ports:
-      - '9200:9200'
-      - '9300:9300'
+      - "9200:9200"
+      - "9300:9300"
     environment:
       discovery.type: single-node
       xpack.security.enabled: false
-      ES_JAVA_OPTS: '-Xms1g -Xmx1g'
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
@@ -442,17 +444,17 @@ export async function up(client: Client) {
 
 ```typescript
 // Good: Organized imports
-import React from 'react';
-import { type ReactNode } from 'react';
+import React from "react";
+import { type ReactNode } from "react";
 
-import { GraphQLClient } from 'graphql-request';
-import { z } from 'zod';
+import { GraphQLClient } from "graphql-request";
+import { z } from "zod";
 
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { logger } from '@/utils/logger';
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { logger } from "@/utils/logger";
 
-import type { User } from './types';
+import type { User } from "./types";
 
 // Good: Type-first development
 interface UserProfileProps {
@@ -461,11 +463,7 @@ interface UserProfileProps {
   className?: string;
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({
-  user,
-  onUpdate,
-  className,
-}) => {
+export const UserProfile: React.FC<UserProfileProps> = ({ user, onUpdate, className }) => {
   // Component implementation
 };
 
@@ -473,7 +471,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
 const CreateUserSchema = z.object({
   email: z.string().email(),
   name: z.string().min(2).max(100),
-  role: z.enum(['user', 'analyst', 'admin']).default('user'),
+  role: z.enum(["user", "analyst", "admin"]).default("user"),
 });
 
 export type CreateUserInput = z.infer<typeof CreateUserSchema>;
@@ -482,7 +480,7 @@ export type CreateUserInput = z.infer<typeof CreateUserSchema>;
 export class UserService {
   constructor(
     private readonly db: Database,
-    private readonly logger: Logger,
+    private readonly logger: Logger
   ) {}
 
   async createUser(input: CreateUserInput): Promise<User> {
@@ -493,11 +491,11 @@ export class UserService {
         data: validatedInput,
       });
 
-      this.logger.info('User created successfully', { userId: user.id });
+      this.logger.info("User created successfully", { userId: user.id });
       return user;
     } catch (error) {
-      this.logger.error('Failed to create user', { error, input });
-      throw new Error('Failed to create user');
+      this.logger.error("Failed to create user", { error, input });
+      throw new Error("Failed to create user");
     }
   }
 }
@@ -510,21 +508,21 @@ export class UserService {
 ```javascript
 // jest.config.js
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/server/src', '<rootDir>/apps'],
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/server/src", "<rootDir>/apps"],
   testMatch: [
-    '**/__tests__/**/*.test.ts',
-    '**/__tests__/**/*.test.tsx',
-    '**/*.test.ts',
-    '**/*.test.tsx',
+    "**/__tests__/**/*.test.ts",
+    "**/__tests__/**/*.test.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
   ],
   collectCoverageFrom: [
-    'server/src/**/*.ts',
-    'apps/**/*.{ts,tsx}',
-    '!server/src/**/*.d.ts',
-    '!**/__tests__/**',
-    '!**/node_modules/**',
+    "server/src/**/*.ts",
+    "apps/**/*.{ts,tsx}",
+    "!server/src/**/*.d.ts",
+    "!**/__tests__/**",
+    "!**/node_modules/**",
   ],
   coverageThreshold: {
     global: {
@@ -534,10 +532,10 @@ module.exports = {
       statements: 80,
     },
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
   moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/server/src/$1',
-    '^@/components/(.*)$': '<rootDir>/apps/web/src/components/$1',
+    "^@/(.*)$": "<rootDir>/server/src/$1",
+    "^@/components/(.*)$": "<rootDir>/apps/web/src/components/$1",
   },
 };
 ```
@@ -546,10 +544,10 @@ module.exports = {
 
 ```typescript
 // server/src/services/__tests__/user.service.test.ts
-import { UserService } from '../user.service';
-import { mockDatabase, mockLogger } from '../../__mocks__';
+import { UserService } from "../user.service";
+import { mockDatabase, mockLogger } from "../../__mocks__";
 
-describe('UserService', () => {
+describe("UserService", () => {
   let userService: UserService;
 
   beforeEach(() => {
@@ -557,17 +555,17 @@ describe('UserService', () => {
     jest.clearAllMocks();
   });
 
-  describe('createUser', () => {
-    it('should create a user successfully', async () => {
+  describe("createUser", () => {
+    it("should create a user successfully", async () => {
       // Arrange
       const input = {
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'user' as const,
+        email: "test@example.com",
+        name: "Test User",
+        role: "user" as const,
       };
 
       const expectedUser = {
-        id: 'user-123',
+        id: "user-123",
         ...input,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -583,18 +581,17 @@ describe('UserService', () => {
       expect(mockDatabase.user.create).toHaveBeenCalledWith({
         data: input,
       });
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'User created successfully',
-        { userId: 'user-123' },
-      );
+      expect(mockLogger.info).toHaveBeenCalledWith("User created successfully", {
+        userId: "user-123",
+      });
     });
 
-    it('should throw error for invalid email', async () => {
+    it("should throw error for invalid email", async () => {
       // Arrange
       const input = {
-        email: 'invalid-email',
-        name: 'Test User',
-        role: 'user' as const,
+        email: "invalid-email",
+        name: "Test User",
+        role: "user" as const,
       };
 
       // Act & Assert
@@ -608,14 +605,14 @@ describe('UserService', () => {
 
 ```typescript
 // server/src/__tests__/integration/graphql.integration.test.ts
-import { ApolloServer } from '@apollo/server';
-import { createTestClient } from 'apollo-server-testing';
-import { gql } from 'graphql-tag';
+import { ApolloServer } from "@apollo/server";
+import { createTestClient } from "apollo-server-testing";
+import { gql } from "graphql-tag";
 
-import { createServer } from '../server';
-import { setupTestDatabase, cleanupTestDatabase } from '../../tests/helpers';
+import { createServer } from "../server";
+import { setupTestDatabase, cleanupTestDatabase } from "../../tests/helpers";
 
-describe('GraphQL Integration Tests', () => {
+describe("GraphQL Integration Tests", () => {
   let server: ApolloServer;
   let query: any;
   let mutate: any;
@@ -633,8 +630,8 @@ describe('GraphQL Integration Tests', () => {
     await server.stop();
   });
 
-  describe('User Queries', () => {
-    it('should fetch user profile', async () => {
+  describe("User Queries", () => {
+    it("should fetch user profile", async () => {
       // Arrange
       const GET_USER = gql`
         query GetUser($id: ID!) {
@@ -650,13 +647,13 @@ describe('GraphQL Integration Tests', () => {
       // Act
       const response = await query({
         query: GET_USER,
-        variables: { id: 'test-user-id' },
+        variables: { id: "test-user-id" },
       });
 
       // Assert
       expect(response.errors).toBeUndefined();
       expect(response.data.user).toMatchObject({
-        id: 'test-user-id',
+        id: "test-user-id",
         email: expect.any(String),
         name: expect.any(String),
         role: expect.any(String),
@@ -670,57 +667,52 @@ describe('GraphQL Integration Tests', () => {
 
 ```typescript
 // tests/e2e/graph-analysis.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Graph Analysis Flow', () => {
+test.describe("Graph Analysis Flow", () => {
   test.beforeEach(async ({ page }) => {
     // Login
-    await page.goto('/login');
-    await page.fill('[data-testid=email-input]', 'analyst@example.com');
-    await page.fill('[data-testid=password-input]', 'password123');
-    await page.click('[data-testid=login-button]');
-    await expect(page).toHaveURL('/dashboard');
+    await page.goto("/login");
+    await page.fill("[data-testid=email-input]", "analyst@example.com");
+    await page.fill("[data-testid=password-input]", "password123");
+    await page.click("[data-testid=login-button]");
+    await expect(page).toHaveURL("/dashboard");
   });
 
-  test('should create and analyze a graph', async ({ page }) => {
+  test("should create and analyze a graph", async ({ page }) => {
     // Navigate to graph creation
-    await page.click('[data-testid=create-graph-button]');
+    await page.click("[data-testid=create-graph-button]");
 
     // Fill graph details
-    await page.fill('[data-testid=graph-name-input]', 'Test Analysis Graph');
-    await page.fill('[data-testid=graph-description-input]', 'E2E test graph');
-    await page.click('[data-testid=create-button]');
+    await page.fill("[data-testid=graph-name-input]", "Test Analysis Graph");
+    await page.fill("[data-testid=graph-description-input]", "E2E test graph");
+    await page.click("[data-testid=create-button]");
 
     // Wait for graph to be created
-    await expect(page.locator('[data-testid=graph-canvas]')).toBeVisible();
+    await expect(page.locator("[data-testid=graph-canvas]")).toBeVisible();
 
     // Add an entity
-    await page.click('[data-testid=add-entity-button]');
-    await page.selectOption('[data-testid=entity-type-select]', 'Person');
-    await page.fill('[data-testid=entity-name-input]', 'John Doe');
-    await page.click('[data-testid=confirm-entity-button]');
+    await page.click("[data-testid=add-entity-button]");
+    await page.selectOption("[data-testid=entity-type-select]", "Person");
+    await page.fill("[data-testid=entity-name-input]", "John Doe");
+    await page.click("[data-testid=confirm-entity-button]");
 
     // Verify entity was added
-    await expect(page.locator('[data-testid=graph-node]')).toHaveCount(1);
+    await expect(page.locator("[data-testid=graph-node]")).toHaveCount(1);
 
     // Run AI analysis
-    await page.click('[data-testid=ai-analysis-button]');
-    await page.selectOption(
-      '[data-testid=analysis-type-select]',
-      'community_detection',
-    );
-    await page.click('[data-testid=start-analysis-button]');
+    await page.click("[data-testid=ai-analysis-button]");
+    await page.selectOption("[data-testid=analysis-type-select]", "community_detection");
+    await page.click("[data-testid=start-analysis-button]");
 
     // Wait for analysis to complete
-    await expect(page.locator('[data-testid=analysis-results]')).toBeVisible({
+    await expect(page.locator("[data-testid=analysis-results]")).toBeVisible({
       timeout: 30000,
     });
 
     // Verify analysis results
-    const resultsText = await page.textContent(
-      '[data-testid=analysis-results]',
-    );
-    expect(resultsText).toContain('Analysis completed');
+    const resultsText = await page.textContent("[data-testid=analysis-results]");
+    expect(resultsText).toContain("Analysis completed");
   });
 });
 ```
@@ -758,12 +750,7 @@ type Graph {
   updatedAt: DateTime!
   owner: User!
   collaborators: [Collaborator!]!
-  entities(
-    type: String
-    search: String
-    page: Int = 1
-    limit: Int = 20
-  ): EntityConnection!
+  entities(type: String, search: String, page: Int = 1, limit: Int = 20): EntityConnection!
 }
 
 type Entity {
@@ -780,12 +767,7 @@ type Query {
   me: User
   user(id: ID!): User
   graph(id: ID!): Graph
-  graphs(
-    search: String
-    tags: [String!]
-    page: Int = 1
-    limit: Int = 20
-  ): GraphConnection!
+  graphs(search: String, tags: [String!], page: Int = 1, limit: Int = 20): GraphConnection!
 
   # AI-powered queries
   analyzeGraph(id: ID!, type: AnalysisType!): AnalysisResult!
@@ -829,25 +811,25 @@ type Subscription {
 ```yaml
 # codegen.yml
 overwrite: true
-schema: 'server/src/graphql/schema.graphql'
-documents: 'apps/web/src/**/*.graphql'
+schema: "server/src/graphql/schema.graphql"
+documents: "apps/web/src/**/*.graphql"
 generates:
   server/src/generated/graphql-types.ts:
     plugins:
-      - 'typescript'
-      - 'typescript-resolvers'
+      - "typescript"
+      - "typescript-resolvers"
     config:
       useIndexSignature: true
       mappers:
-        User: '../db/models/User#UserModel'
-        Graph: '../db/models/Graph#GraphModel'
-        Entity: '../db/models/Entity#EntityModel'
+        User: "../db/models/User#UserModel"
+        Graph: "../db/models/Graph#GraphModel"
+        Entity: "../db/models/Entity#EntityModel"
 
   apps/web/src/generated/graphql.ts:
     plugins:
-      - 'typescript'
-      - 'typescript-operations'
-      - 'typescript-react-apollo'
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
     config:
       withHooks: true
       withHOC: false
@@ -858,32 +840,32 @@ generates:
 
 ```typescript
 // server/src/graphql/resolvers/user.resolvers.ts
-import { Resolvers, User } from '../generated/graphql-types';
-import { Context } from '../context';
-import { ForbiddenError, UserInputError } from 'apollo-server-express';
+import { Resolvers, User } from "../generated/graphql-types";
+import { Context } from "../context";
+import { ForbiddenError, UserInputError } from "apollo-server-express";
 
 export const userResolvers: Resolvers = {
   Query: {
     me: async (_parent, _args, context: Context): Promise<User | null> => {
       if (!context.user) {
-        throw new ForbiddenError('Authentication required');
+        throw new ForbiddenError("Authentication required");
       }
       return context.dataSources.userService.findById(context.user.id);
     },
 
     user: async (_parent, { id }, context: Context): Promise<User | null> => {
       if (!context.user) {
-        throw new ForbiddenError('Authentication required');
+        throw new ForbiddenError("Authentication required");
       }
 
       const user = await context.dataSources.userService.findById(id);
       if (!user) {
-        throw new UserInputError('User not found');
+        throw new UserInputError("User not found");
       }
 
       // Check permissions
-      if (user.id !== context.user.id && context.user.role !== 'ADMIN') {
-        throw new ForbiddenError('Insufficient permissions');
+      if (user.id !== context.user.id && context.user.role !== "ADMIN") {
+        throw new ForbiddenError("Insufficient permissions");
       }
 
       return user;
@@ -892,15 +874,15 @@ export const userResolvers: Resolvers = {
 
   Mutation: {
     createUser: async (_parent, { input }, context: Context): Promise<User> => {
-      if (!context.user || context.user.role !== 'ADMIN') {
-        throw new ForbiddenError('Admin access required');
+      if (!context.user || context.user.role !== "ADMIN") {
+        throw new ForbiddenError("Admin access required");
       }
 
       try {
         return await context.dataSources.userService.create(input);
       } catch (error) {
-        context.logger.error('Failed to create user', { error, input });
-        throw new UserInputError('Failed to create user');
+        context.logger.error("Failed to create user", { error, input });
+        throw new UserInputError("Failed to create user");
       }
     },
   },
@@ -919,16 +901,16 @@ export const userResolvers: Resolvers = {
 
 ```tsx
 // apps/web/src/components/graph/GraphCanvas.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import cytoscape from 'cytoscape';
-import $ from 'jquery';
+import React, { useEffect, useRef, useState } from "react";
+import cytoscape from "cytoscape";
+import $ from "jquery";
 
-import { useGraph } from '@/hooks/useGraph';
-import { useRealtime } from '@/hooks/useRealtime';
-import { GraphLayoutEngine } from '@/services/graph-layout';
-import { GraphEventHandler } from '@/services/graph-events';
+import { useGraph } from "@/hooks/useGraph";
+import { useRealtime } from "@/hooks/useRealtime";
+import { GraphLayoutEngine } from "@/services/graph-layout";
+import { GraphEventHandler } from "@/services/graph-events";
 
-import type { Graph, Entity, Relationship } from '@/types';
+import type { Graph, Entity, Relationship } from "@/types";
 
 interface GraphCanvasProps {
   graphId: string;
@@ -943,7 +925,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   readonly = false,
   onEntitySelect,
   onRelationshipSelect,
-  className = '',
+  className = "",
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
@@ -959,7 +941,7 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     const cy = cytoscape({
       container: canvasRef.current,
       style: getGraphStyles(),
-      layout: { name: 'force-directed', animate: true },
+      layout: { name: "force-directed", animate: true },
       minZoom: 0.1,
       maxZoom: 5,
       wheelSensitivity: 0.1,
@@ -988,15 +970,12 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
   useEffect(() => {
     if (!cyRef.current || !graph) return;
 
-    const elements = GraphLayoutEngine.convertToElements(
-      graph.entities,
-      graph.relationships,
-    );
+    const elements = GraphLayoutEngine.convertToElements(graph.entities, graph.relationships);
 
     cyRef.current.batch(() => {
       cyRef.current!.elements().remove();
       cyRef.current!.add(elements);
-      cyRef.current!.layout({ name: 'force-directed' }).run();
+      cyRef.current!.layout({ name: "force-directed" }).run();
     });
   }, [graph]);
 
@@ -1006,22 +985,20 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
       if (!cyRef.current) return;
 
       switch (update.type) {
-        case 'ENTITY_ADDED':
+        case "ENTITY_ADDED":
           cyRef.current.add(GraphLayoutEngine.convertEntity(update.entity));
           break;
-        case 'ENTITY_UPDATED':
+        case "ENTITY_UPDATED":
           const entityNode = cyRef.current.$(`#${update.entity.id}`);
           entityNode.data(update.entity.properties);
           break;
-        case 'ENTITY_REMOVED':
+        case "ENTITY_REMOVED":
           cyRef.current.$(`#${update.entityId}`).remove();
           break;
-        case 'RELATIONSHIP_ADDED':
-          cyRef.current.add(
-            GraphLayoutEngine.convertRelationship(update.relationship),
-          );
+        case "RELATIONSHIP_ADDED":
+          cyRef.current.add(GraphLayoutEngine.convertRelationship(update.relationship));
           break;
-        case 'RELATIONSHIP_REMOVED':
+        case "RELATIONSHIP_REMOVED":
           cyRef.current.$(`#${update.relationshipId}`).remove();
           break;
       }
@@ -1051,60 +1028,54 @@ export const GraphCanvas: React.FC<GraphCanvasProps> = ({
     );
   }
 
-  return (
-    <div
-      ref={canvasRef}
-      className={`graph-canvas ${className}`}
-      data-testid="graph-canvas"
-    />
-  );
+  return <div ref={canvasRef} className={`graph-canvas ${className}`} data-testid="graph-canvas" />;
 };
 
 // Helper function for graph styles
 function getGraphStyles(): cytoscape.Stylesheet[] {
   return [
     {
-      selector: 'node',
+      selector: "node",
       style: {
-        'background-color': '#4A90E2',
-        'border-color': '#2E5A8A',
-        'border-width': 2,
-        label: 'data(label)',
-        'text-valign': 'center',
-        'text-halign': 'center',
-        color: 'white',
-        'font-size': '12px',
-        width: 'mapData(weight, 0, 100, 20, 80)',
-        height: 'mapData(weight, 0, 100, 20, 80)',
+        "background-color": "#4A90E2",
+        "border-color": "#2E5A8A",
+        "border-width": 2,
+        label: "data(label)",
+        "text-valign": "center",
+        "text-halign": "center",
+        color: "white",
+        "font-size": "12px",
+        width: "mapData(weight, 0, 100, 20, 80)",
+        height: "mapData(weight, 0, 100, 20, 80)",
       },
     },
     {
-      selector: 'edge',
+      selector: "edge",
       style: {
-        'line-color': '#9CA3AF',
-        'target-arrow-color': '#9CA3AF',
-        'target-arrow-shape': 'triangle',
-        'curve-style': 'bezier',
+        "line-color": "#9CA3AF",
+        "target-arrow-color": "#9CA3AF",
+        "target-arrow-shape": "triangle",
+        "curve-style": "bezier",
         width: 2,
-        label: 'data(label)',
-        'font-size': '10px',
-        'text-rotation': 'autorotate',
-        'text-margin-y': -10,
+        label: "data(label)",
+        "font-size": "10px",
+        "text-rotation": "autorotate",
+        "text-margin-y": -10,
       },
     },
     {
-      selector: 'node:selected',
+      selector: "node:selected",
       style: {
-        'background-color': '#F59E0B',
-        'border-color': '#D97706',
-        'border-width': 3,
+        "background-color": "#F59E0B",
+        "border-color": "#D97706",
+        "border-width": 3,
       },
     },
     {
-      selector: 'edge:selected',
+      selector: "edge:selected",
       style: {
-        'line-color': '#F59E0B',
-        'target-arrow-color': '#F59E0B',
+        "line-color": "#F59E0B",
+        "target-arrow-color": "#F59E0B",
         width: 3,
       },
     },
@@ -1116,19 +1087,19 @@ function getGraphStyles(): cytoscape.Stylesheet[] {
 
 ```typescript
 // apps/web/src/hooks/useGraph.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 
-import { graphService } from '@/services/graph.service';
-import { useAuth } from './useAuth';
+import { graphService } from "@/services/graph.service";
+import { useAuth } from "./useAuth";
 
-import type { Graph, CreateGraphInput, UpdateGraphInput } from '@/types';
+import type { Graph, CreateGraphInput, UpdateGraphInput } from "@/types";
 
 export function useGraph(graphId: string) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['graph', graphId],
+    queryKey: ["graph", graphId],
     queryFn: () => graphService.getGraph(graphId),
     enabled: !!user && !!graphId,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -1139,7 +1110,7 @@ export function useGraphs(filters?: GraphFilters) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['graphs', filters],
+    queryKey: ["graphs", filters],
     queryFn: () => graphService.getGraphs(filters),
     enabled: !!user,
   });
@@ -1151,8 +1122,8 @@ export function useCreateGraph() {
   return useMutation({
     mutationFn: (input: CreateGraphInput) => graphService.createGraph(input),
     onSuccess: (newGraph) => {
-      queryClient.invalidateQueries({ queryKey: ['graphs'] });
-      queryClient.setQueryData(['graph', newGraph.id], newGraph);
+      queryClient.invalidateQueries({ queryKey: ["graphs"] });
+      queryClient.setQueryData(["graph", newGraph.id], newGraph);
     },
   });
 }
@@ -1161,11 +1132,10 @@ export function useUpdateGraph(graphId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: UpdateGraphInput) =>
-      graphService.updateGraph(graphId, input),
+    mutationFn: (input: UpdateGraphInput) => graphService.updateGraph(graphId, input),
     onSuccess: (updatedGraph) => {
-      queryClient.setQueryData(['graph', graphId], updatedGraph);
-      queryClient.invalidateQueries({ queryKey: ['graphs'] });
+      queryClient.setQueryData(["graph", graphId], updatedGraph);
+      queryClient.invalidateQueries({ queryKey: ["graphs"] });
     },
   });
 }
@@ -1176,8 +1146,8 @@ export function useDeleteGraph() {
   return useMutation({
     mutationFn: (graphId: string) => graphService.deleteGraph(graphId),
     onSuccess: (_, graphId) => {
-      queryClient.removeQueries({ queryKey: ['graph', graphId] });
-      queryClient.invalidateQueries({ queryKey: ['graphs'] });
+      queryClient.removeQueries({ queryKey: ["graph", graphId] });
+      queryClient.invalidateQueries({ queryKey: ["graphs"] });
     },
   });
 }
@@ -1191,14 +1161,14 @@ export function useGraphOperations(graphId: string) {
     (input: CreateGraphInput) => {
       return createGraphMutation.mutateAsync(input);
     },
-    [createGraphMutation],
+    [createGraphMutation]
   );
 
   const updateGraph = useCallback(
     (input: UpdateGraphInput) => {
       return updateGraphMutation.mutateAsync(input);
     },
-    [updateGraphMutation],
+    [updateGraphMutation]
   );
 
   const deleteGraph = useCallback(() => {
@@ -1396,26 +1366,23 @@ class NewAnalysisServiceAPI:
 
 ```typescript
 // server/src/ai/new-analysis.service.ts
-import { Injectable } from '@nestjs/common';
-import { spawn } from 'child_process';
-import { promisify } from 'util';
+import { Injectable } from "@nestjs/common";
+import { spawn } from "child_process";
+import { promisify } from "util";
 
-import { Logger } from '../utils/logger';
-import { GraphService } from '../services/graph.service';
+import { Logger } from "../utils/logger";
+import { GraphService } from "../services/graph.service";
 
-import type { AnalysisResult, NewAnalysisOptions } from '../types';
+import type { AnalysisResult, NewAnalysisOptions } from "../types";
 
 @Injectable()
 export class NewAnalysisService {
   constructor(
     private readonly logger: Logger,
-    private readonly graphService: GraphService,
+    private readonly graphService: GraphService
   ) {}
 
-  async analyzeGraph(
-    graphId: string,
-    options: NewAnalysisOptions = {},
-  ): Promise<AnalysisResult> {
+  async analyzeGraph(graphId: string, options: NewAnalysisOptions = {}): Promise<AnalysisResult> {
     const startTime = Date.now();
 
     try {
@@ -1443,21 +1410,21 @@ export class NewAnalysisService {
 
       // Call Python service
       const result = await this.callPythonService(
-        'new_analysis_service',
-        'analyze_graph',
-        analysisRequest,
+        "new_analysis_service",
+        "analyze_graph",
+        analysisRequest
       );
 
       const executionTime = Date.now() - startTime;
 
-      this.logger.info('New analysis completed', {
+      this.logger.info("New analysis completed", {
         graphId,
         executionTime,
         insights: result.data.insights.length,
       });
 
       return {
-        analysisType: 'new_analysis',
+        analysisType: "new_analysis",
         graphId,
         results: result.data.results,
         insights: result.data.insights,
@@ -1468,32 +1435,28 @@ export class NewAnalysisService {
         },
       };
     } catch (error) {
-      this.logger.error('New analysis failed', { graphId, error });
+      this.logger.error("New analysis failed", { graphId, error });
       throw new Error(`Analysis failed: ${error.message}`);
     }
   }
 
-  private async callPythonService(
-    service: string,
-    method: string,
-    data: any,
-  ): Promise<any> {
+  private async callPythonService(service: string, method: string, data: any): Promise<any> {
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn('python', [
-        '-c',
+      const pythonProcess = spawn("python", [
+        "-c",
         `
 import sys
 import json
 from ml.services.${service} import ${service
-          .split('_')
+          .split("_")
           .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join('')}API
+          .join("")}API
 
 try:
     service = ${service
-      .split('_')
+      .split("_")
       .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-      .join('')}API()
+      .join("")}API()
     data = json.loads(sys.argv[1])
     result = await service.${method}(data['graph_data'], data['options'])
     print(json.dumps(result))
@@ -1503,18 +1466,18 @@ except Exception as e:
         JSON.stringify(data),
       ]);
 
-      let output = '';
-      let error = '';
+      let output = "";
+      let error = "";
 
-      pythonProcess.stdout.on('data', (data) => {
+      pythonProcess.stdout.on("data", (data) => {
         output += data.toString();
       });
 
-      pythonProcess.stderr.on('data', (data) => {
+      pythonProcess.stderr.on("data", (data) => {
         error += data.toString();
       });
 
-      pythonProcess.on('close', (code) => {
+      pythonProcess.on("close", (code) => {
         if (code === 0) {
           try {
             const result = JSON.parse(output);
@@ -1527,9 +1490,7 @@ except Exception as e:
             reject(new Error(`Failed to parse Python response: ${output}`));
           }
         } else {
-          reject(
-            new Error(`Python process exited with code ${code}: ${error}`),
-          );
+          reject(new Error(`Python process exited with code ${code}: ${error}`));
         }
       });
     });
