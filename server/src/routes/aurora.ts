@@ -65,6 +65,9 @@ router.post('/handshake/:implantId', async (req, res, next) => {
     const implant = await auroraService.neuralHandshake(implantId);
     res.json(implant);
   } catch (error) {
+    if (error instanceof Error && error.message.includes('not found')) {
+      return res.status(404).json({ message: error.message });
+    }
     next(error);
   }
 });
