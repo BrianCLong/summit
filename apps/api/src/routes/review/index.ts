@@ -1,9 +1,12 @@
 import express from 'express';
 import { ReviewQueueService } from '../../review/ReviewQueueService.js';
 import { ReviewDecisionAction, ReviewStatus, ReviewType } from '../../review/models.js';
+import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
+import { requirePermission } from '../../middleware/security.js';
 
 export interface ReviewRouterDeps {
   queue: ReviewQueueService;
+  rbacManager: RBACManager;
 }
 
 function parseArrayParam(value?: string | string[]) {
@@ -12,10 +15,10 @@ function parseArrayParam(value?: string | string[]) {
   return values.map((v) => v.trim()).filter(Boolean);
 }
 
-export function createReviewRouter({ queue }: ReviewRouterDeps) {
+export function createReviewRouter({ queue, rbacManager }: ReviewRouterDeps) {
   const router = express.Router();
 
-  router.get('/queue', (req, res) => {
+  router.get('/queue', requirePermission(rbacManager, 'review', 'read'), (req, res) => {
     const types = parseArrayParam(req.query.type as string | undefined) as ReviewType[] | undefined;
     const statuses = parseArrayParam(req.query.status as string | undefined) as
       | ReviewStatus[]
@@ -28,7 +31,7 @@ export function createReviewRouter({ queue }: ReviewRouterDeps) {
     res.json({ items, nextCursor });
   });
 
-  router.get('/item/:id', (req, res) => {
+  router.get('/item/:id', requirePermission(rbacManager, 'review', 'read'), (req, res) => {
     const item = queue.getById(req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'item_not_found' });
@@ -36,7 +39,7 @@ export function createReviewRouter({ queue }: ReviewRouterDeps) {
     return res.json(item);
   });
 
-  router.post('/item/:id/decision', (req, res) => {
+  router.post('/item/:id/decision', requirePermission(rbacManager, 'review', 'decide'), (req, res) => {
     const correlationId = req.header('x-correlation-id');
     const { action, reasonCode, note } = req.body as {
       action?: ReviewDecisionAction;

@@ -1,22 +1,30 @@
 import { Router } from 'express';
 
-import {
-  ReceiptStore,
-  ReceiptVerifier,
-} from '@intelgraph/receipt-signer';
+import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
+import { requirePermission } from '../../middleware/security.js';
+
+export interface ReceiptStore {
+  get(id: string): Promise<unknown> | unknown;
+}
+
+export interface ReceiptVerifier {
+  verify(receipt: unknown): Promise<boolean> | boolean;
+}
 
 export interface GetReceiptDependencies {
   store: ReceiptStore;
   verifier: ReceiptVerifier;
+  rbacManager: RBACManager;
 }
 
 export const createGetReceiptRouter = ({
   store,
   verifier,
+  rbacManager,
 }: GetReceiptDependencies) => {
   const router = Router();
 
-  router.get('/:id', async (req, res) => {
+  router.get('/:id', requirePermission(rbacManager, 'receipts', 'read'), async (req, res) => {
     try {
       const receipt = await store.get(req.params.id);
       if (!receipt) {

@@ -1,4 +1,5 @@
 import { hashExecutionInput } from '../lib/hash.js';
+import { type PreflightRequestContract } from '../contracts/actions.js';
 
 export interface PreflightRecord {
   id: string;
@@ -6,6 +7,7 @@ export interface PreflightRecord {
   action?: string;
   expiresAt?: string;
   context?: Record<string, unknown>;
+  request?: PreflightRequestContract;
 }
 
 export interface ExecutionRecord {
@@ -45,6 +47,7 @@ export class InMemoryPolicyDecisionStore implements PolicyDecisionStore {
     action?: string;
     expiresAt?: string;
     context?: Record<string, unknown>;
+    request?: PreflightRequestContract;
   }): PreflightRecord {
     const record: PreflightRecord = {
       id: payload.id,
@@ -55,6 +58,7 @@ export class InMemoryPolicyDecisionStore implements PolicyDecisionStore {
       }),
       expiresAt: payload.expiresAt,
       context: payload.context,
+      request: payload.request,
     };
     this.preflights.set(payload.id, record);
     return record;

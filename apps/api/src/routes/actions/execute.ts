@@ -11,6 +11,8 @@ import {
 import { type EventPublisher } from '../../services/EventPublisher.js';
 import { type PolicySimulationService } from '../../services/policyService.js';
 import type { AuthenticatedRequest } from '../../middleware/security.js';
+import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
+import { requirePermission } from '../../middleware/security.js';
 
 interface ExecuteRequestBody {
   preflight_id?: string;
@@ -37,12 +39,14 @@ export const createExecuteRouter = (
   store: PolicyDecisionStore,
   events: EventPublisher,
   policyService?: PolicySimulationService,
+  rbacManager?: RBACManager,
 ): Router => {
   const router = Router();
 
   router.post(
     '/execute',
-    async (req: AuthenticatedRequest<unknown, unknown, ExecuteRequestBody>, res: Response) => {
+    rbacManager ? requirePermission(rbacManager, 'actions:execute', 'invoke') : (_req, _res, next) => next(),
+    async (req: AuthenticatedRequest, res: Response) => {
       const correlationId = resolveCorrelationId(req, res);
       const { preflight_id: preflightId, action, input } = req.body ?? {};
 

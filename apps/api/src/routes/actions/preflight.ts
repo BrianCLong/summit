@@ -12,10 +12,13 @@ import {
   type PolicyDecisionResult,
   type PolicySimulationService
 } from '../../services/policyService.js';
+import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
+import { requirePermission } from '../../middleware/security.js';
 
 interface PreflightRouterDeps {
   policyService: PolicySimulationService;
   decisionStore: PolicyDecisionStore;
+  rbacManager: RBACManager;
 }
 
 function normalizeRequest(body: Partial<PreflightRequestContract>): {
@@ -100,12 +103,14 @@ function mergeRedactions(decision: PolicyDecisionResult): PolicyDecisionResult {
 
 export function createPreflightRouter({
   decisionStore,
-  policyService
+  policyService,
+  rbacManager
 }: PreflightRouterDeps): Router {
   const router = Router();
 
   router.post(
     '/preflight',
+    requirePermission(rbacManager, 'actions:preflight', 'evaluate'),
     async (
       req: Request<unknown, unknown, Partial<PreflightRequestContract>>,
       res: Response
