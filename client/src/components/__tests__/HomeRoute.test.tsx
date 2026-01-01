@@ -2,8 +2,9 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { createStore } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import HomeRoute from '../../routes/HomeRoute';
+import { withUser } from '../ai-enhanced/test-utils/user';
 
 // Mock components to avoid complex dependencies
 jest.mock('../../components/ServerStatus', () => {
@@ -70,8 +71,11 @@ jest.mock('../../components/PerformanceMonitor', () => {
 });
 
 // Create a simple Redux store for testing
-const createMockStore = (initialState = {}) => {
-  return createStore((state = initialState) => state);
+const createMockStore = (state: any) => {
+  return configureStore({
+    reducer: (s = state) => s,
+    preloadedState: state,
+  });
 };
 
 const renderWithProviders = (
@@ -254,8 +258,8 @@ describe('HomeRoute', () => {
 
     expect(screen.getByText('🌐 Graph Analysis')).toBeInTheDocument();
     expect(screen.getAllByText('🧬 Behavioral Analytics')[0]).toBeInTheDocument();
-    expect(screen.getByText('🎯 Threat Hunting')).toBeInTheDocument();
-    expect(screen.getByText('🔒 Security & Compliance')).toBeInTheDocument();
+    expect(screen.getAllByText('🎯 Threat Hunting')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('🔒 Security & Compliance')[0]).toBeInTheDocument();
   });
 
   test('handles missing graph stats gracefully', () => {
