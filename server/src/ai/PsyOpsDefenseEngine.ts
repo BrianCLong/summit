@@ -52,11 +52,11 @@ interface DefensiveStrategy {
   targetProfile: string;
   tactics: Array<{
     type:
-      | 'INOCULATION'
-      | 'COUNTER_NARRATIVE'
-      | 'FACT_INJECTION'
-      | 'EMOTIONAL_REGULATION'
-      | 'CRITICAL_THINKING_PROMPT';
+    | 'INOCULATION'
+    | 'COUNTER_NARRATIVE'
+    | 'FACT_INJECTION'
+    | 'EMOTIONAL_REGULATION'
+    | 'CRITICAL_THINKING_PROMPT';
     content: string;
     timing: 'IMMEDIATE' | 'DELAYED' | 'CONTEXTUAL';
     effectiveness: number;
@@ -69,7 +69,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
   private signatures: Map<string, PsyOpsSignature> = new Map();
   private cognitiveProfiles: Map<string, CognitiveProfile> = new Map();
   private defensiveStrategies: Map<string, DefensiveStrategy> = new Map();
-  private mlModels: {
+  private mlModels!: {
     threatClassifier: any;
     behaviorPredictor: any;
     responseOptimizer: any;
@@ -192,10 +192,10 @@ export class PsyOpsDefenseEngine extends EventEmitter {
     strengthAreas: string[];
     personalizedTraining: Array<{
       type:
-        | 'INOCULATION'
-        | 'AWARENESS'
-        | 'CRITICAL_THINKING'
-        | 'EMOTIONAL_REGULATION';
+      | 'INOCULATION'
+      | 'AWARENESS'
+      | 'CRITICAL_THINKING'
+      | 'EMOTIONAL_REGULATION';
       content: string;
       priority: number;
     }>;

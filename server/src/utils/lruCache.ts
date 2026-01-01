@@ -54,7 +54,10 @@ class LRUCache<K, V> {
       this.cache.delete(key);
     } else if (this.cache.size >= this.capacity) {
       // Remove the least recently used item (first item in Map)
-      this.cache.delete(this.cache.keys().next().value);
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
     }
     this.cache.set(key, value);
   }
