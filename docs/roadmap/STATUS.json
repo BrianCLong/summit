@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T09:30:00Z",
-  "revision_note": "Roadmap priorities; Agent guardrails; GA accessibility gate; Postgres metering; Billing locks; OPA cache",
+  "last_updated": "2026-01-01T10:00:00Z",
+  "revision_note": "Roadmap priorities update; all GA features merged",
   "initiatives": [
     {
       "id": "A",
