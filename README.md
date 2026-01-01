@@ -93,6 +93,14 @@ We operate on a **2-week sprint cycle** managed by our automated Release Captain
 
 ---
 
+## 📏 Known Limits & Supportability
+
+Summit ships with explicit, evidence-backed limits covering scale, performance, and operational boundaries. Review the current declarations and update them as new validation runs complete.
+
+👉 **[Known Limits](docs/LIMITS.md)**
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions from humans and AI agents alike!
