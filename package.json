@@ -22,6 +22,7 @@
     "test:client": "cd client && npm test",
     "test:web": "cd apps/web && npm test",
     "test:e2e": "npx playwright test",
+    "test:a11y-gate": "pnpm exec playwright test -c playwright.a11y-keyboard.config.ts",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
