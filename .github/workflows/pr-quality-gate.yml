@@ -37,3 +37,41 @@ jobs:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14
+
+  enforce-agent-contract:
+    name: Enforce Agent Contract
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.body, 'TASK-ID-')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify agent contract
+        run: |
+          set -e
+
+          # Extract Task ID from PR body
+          TASK_ID=$(echo "${{ github.event.pull_request.body }}" | grep -o 'TASK-ID-[0-9]*' | head -n 1)
+
+          if [ -z "$TASK_ID" ]; then
+            echo "::error::Could not find Task ID in PR body."
+            exit 1
+          fi
+
+          echo "Found Task ID: $TASK_ID"
+
+          # Check task status in TASK_BACKLOG.md
+          TASK_STATUS_LINE=$(grep "$TASK_ID" TASK_BACKLOG.md)
+
+          if echo "$TASK_STATUS_LINE" | grep -q "Queued"; then
+            echo "::error::Task $TASK_ID is still in 'Queued' status. Please update it to 'In Progress' or 'Review'."
+            exit 1
+          fi
+
+          # Check for a link to the plan in the PR body
+          if ! echo "${{ github.event.pull_request.body }}" | grep -q "AGENT_PLANS.md"; then
+            echo "::error::PR body must contain a link to the implementation plan in AGENT_PLANS.md."
+            exit 1
+          fi
+
+          echo "Agent contract verified successfully."
