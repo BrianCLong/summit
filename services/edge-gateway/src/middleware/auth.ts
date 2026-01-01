@@ -1,7 +1,30 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// SECURITY: Fail-closed JWT secret validation
+const JWT_SECRET = (() => {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    console.error('FATAL: JWT_SECRET environment variable is required but not set');
+    console.error('Generate a secure secret: openssl rand -base64 32');
+    process.exit(1);
+  }
+
+  if (secret.length < 32) {
+    console.error(`FATAL: JWT_SECRET must be at least 32 characters (current: ${secret.length})`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['your-secret-key', 'secret', 'changeme', 'default', 'password'];
+  if (insecureValues.some(v => secret.toLowerCase().includes(v))) {
+    console.error(`FATAL: JWT_SECRET contains insecure value: "${secret}"`);
+    console.error('Use a strong, unique secret generated via: openssl rand -base64 32');
+    process.exit(1);
+  }
+
+  return secret;
+})();
 
 export interface AuthRequest extends Request {
   user?: {
