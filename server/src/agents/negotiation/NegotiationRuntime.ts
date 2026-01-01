@@ -244,11 +244,18 @@ export class NegotiationRuntime extends EventEmitter {
     }
 
     // Emit audit event
+    // Extract agentId from metadata (not all message types have it)
+    const agentId = 'metadata' in fullMessage &&
+      fullMessage.metadata &&
+      'agentId' in fullMessage.metadata
+        ? (fullMessage.metadata as { agentId: string }).agentId
+        : undefined;
+
     this.emitAuditEvent({
       eventType: 'negotiation_turn',
       negotiationId,
       turn: session.currentTurn,
-      agentId: fullMessage.metadata?.agentId,
+      agentId,
       role: fullMessage.role,
       policyVerdict: verdict.action,
       timestamp: new Date().toISOString(),
