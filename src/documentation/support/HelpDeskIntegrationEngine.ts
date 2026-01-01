@@ -638,6 +638,78 @@ export class HelpDeskIntegrationEngine extends EventEmitter {
 abstract class IntegrationHandler {
   constructor(protected integration: SupportIntegration) {}
 
+  protected async request(
+    path: string,
+    options: RequestInit & { expectedStatus?: number | number[] } = {},
+  ): Promise<any> {
+    const url = `${this.integration.configuration.baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+    const expected = options.expectedStatus || [200, 201, 202, 204];
+    const headers = this.buildHeaders(options.headers);
+
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      // default timeout handling
+      signal:
+        options.signal ||
+        AbortSignal.timeout(this.integration.configuration.timeout || 5000),
+    });
+
+    const statusList = Array.isArray(expected) ? expected : [expected];
+    if (!statusList.includes(response.status)) {
+      const body = await response.text();
+      throw new Error(
+        `${this.integration.name} API responded with ${response.status}: ${body}`,
+      );
+    }
+
+    if (response.status === 204) return null;
+    const contentType = response.headers.get('content-type') || '';
+    return contentType.includes('application/json')
+      ? response.json()
+      : response.text();
+  }
+
+  private buildHeaders(extraHeaders?: HeadersInit): HeadersInit {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...extraHeaders,
+    };
+
+    switch (this.integration.authentication.type) {
+      case 'api_key':
+        return {
+          ...headers,
+          Authorization: `Bearer ${this.integration.authentication.credentials.apiKey}`,
+        };
+      case 'bearer':
+        return {
+          ...headers,
+          Authorization: `Bearer ${this.integration.authentication.credentials.token}`,
+        };
+      case 'basic':
+        return {
+          ...headers,
+          Authorization: `Basic ${Buffer.from(
+            `${this.integration.authentication.credentials.username}:${this.integration.authentication.credentials.password}`,
+          ).toString('base64')}`,
+        };
+      default:
+        return headers;
+    }
+  }
+
+  protected mapTicket(ticket: Ticket) {
+    return {
+      subject: ticket.title,
+      description: ticket.description,
+      priority: ticket.priority,
+      tags: ticket.tags,
+      requester: ticket.reporter,
+      metadata: ticket.metadata,
+    };
+  }
+
   abstract testConnection(): Promise<void>;
   abstract setupWebhooks(): Promise<void>;
   abstract initializeSync(): Promise<void>;
@@ -647,74 +719,195 @@ abstract class IntegrationHandler {
 // Specific integration handlers
 class ZendeskHandler extends IntegrationHandler {
   async testConnection(): Promise<void> {
-    // Implement Zendesk connection test
+    await this.request('/api/v2/users/me.json', { method: 'GET', expectedStatus: 200 });
   }
 
   async setupWebhooks(): Promise<void> {
-    // Setup Zendesk webhooks
+    await this.request('/api/v2/webhooks', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'documentation-updates',
+        endpoint: this.integration.configuration.webhookUrl,
+        http_method: 'POST',
+      }),
+      expectedStatus: [200, 201],
+    });
   }
 
   async initializeSync(): Promise<void> {
-    // Initialize Zendesk sync
+    await this.request('/api/v2/incremental/tickets/cursor.json', { method: 'GET' });
   }
 
   async syncTicket(ticket: Ticket): Promise<void> {
-    // Sync ticket to Zendesk
+    await this.request('/api/v2/tickets.json', {
+      method: 'POST',
+      body: JSON.stringify({ ticket: this.mapTicket(ticket) }),
+      expectedStatus: [200, 201],
+    });
   }
 }
 
 class FreshdeskHandler extends IntegrationHandler {
   async testConnection(): Promise<void> {
-    // Implement Freshdesk connection test
+    await this.request('/api/v2/tickets?per_page=1', { method: 'GET' });
   }
 
   async setupWebhooks(): Promise<void> {
-    // Setup Freshdesk webhooks
+    await this.request('/api/v2/webhooks', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'doc-feedback-hook',
+        callback_url: this.integration.configuration.webhookUrl,
+        content_type: 'json',
+        events: ['TicketUpdated', 'TicketCreated'],
+      }),
+    });
   }
 
   async initializeSync(): Promise<void> {
-    // Initialize Freshdesk sync
+    await this.request('/api/v2/tickets?updated_since=2020-01-01', {
+      method: 'GET',
+    });
   }
 
   async syncTicket(ticket: Ticket): Promise<void> {
-    // Sync ticket to Freshdesk
+    await this.request('/api/v2/tickets', {
+      method: 'POST',
+      body: JSON.stringify(this.mapTicket(ticket)),
+    });
   }
 }
 
 // Additional handlers...
 class ServiceNowHandler extends IntegrationHandler {
-  async testConnection(): Promise<void> {}
-  async setupWebhooks(): Promise<void> {}
-  async initializeSync(): Promise<void> {}
-  async syncTicket(ticket: Ticket): Promise<void> {}
+  async testConnection(): Promise<void> {
+    await this.request('/api/now/table/sys_user?sysparm_limit=1', { method: 'GET' });
+  }
+  async setupWebhooks(): Promise<void> {
+    await this.request('/api/now/table/sys_event', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'doc_feedback',
+        endpoint: this.integration.configuration.webhookUrl,
+      }),
+    });
+  }
+  async initializeSync(): Promise<void> {
+    await this.request('/api/now/table/incident?sysparm_limit=1', { method: 'GET' });
+  }
+  async syncTicket(ticket: Ticket): Promise<void> {
+    await this.request('/api/now/table/incident', {
+      method: 'POST',
+      body: JSON.stringify(this.mapTicket(ticket)),
+    });
+  }
 }
 
 class JiraHandler extends IntegrationHandler {
-  async testConnection(): Promise<void> {}
-  async setupWebhooks(): Promise<void> {}
-  async initializeSync(): Promise<void> {}
-  async syncTicket(ticket: Ticket): Promise<void> {}
+  async testConnection(): Promise<void> {
+    await this.request('/rest/api/3/myself', { method: 'GET' });
+  }
+  async setupWebhooks(): Promise<void> {
+    await this.request('/rest/webhooks/1.0/webhook', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Doc feedback',
+        url: this.integration.configuration.webhookUrl,
+        events: ['jira:issue_created', 'jira:issue_updated'],
+      }),
+    });
+  }
+  async initializeSync(): Promise<void> {
+    await this.request('/rest/api/3/search?maxResults=1', { method: 'GET' });
+  }
+  async syncTicket(ticket: Ticket): Promise<void> {
+    await this.request('/rest/api/3/issue', {
+      method: 'POST',
+      body: JSON.stringify({
+        fields: {
+          project: { key: this.integration.configuration.projectKey },
+          summary: ticket.title,
+          description: ticket.description,
+          issuetype: { name: 'Task' },
+          labels: ticket.tags,
+        },
+      }),
+    });
+  }
 }
 
 class SlackHandler extends IntegrationHandler {
-  async testConnection(): Promise<void> {}
-  async setupWebhooks(): Promise<void> {}
-  async initializeSync(): Promise<void> {}
-  async syncTicket(ticket: Ticket): Promise<void> {}
+  async testConnection(): Promise<void> {
+    await this.request('/api/auth.test', { method: 'GET', expectedStatus: 200 });
+  }
+  async setupWebhooks(): Promise<void> {
+    await this.request('/api/conversations.list', { method: 'GET' });
+  }
+  async initializeSync(): Promise<void> {
+    await this.request('/api/chat.scheduledMessages.list', { method: 'GET' });
+  }
+  async syncTicket(ticket: Ticket): Promise<void> {
+    await this.request('/api/chat.postMessage', {
+      method: 'POST',
+      body: JSON.stringify({
+        channel: this.integration.configuration.channel,
+        text: `New doc issue: ${ticket.title}\n${ticket.description}`,
+      }),
+    });
+  }
 }
 
 class TeamsHandler extends IntegrationHandler {
-  async testConnection(): Promise<void> {}
-  async setupWebhooks(): Promise<void> {}
-  async initializeSync(): Promise<void> {}
-  async syncTicket(ticket: Ticket): Promise<void> {}
+  async testConnection(): Promise<void> {
+    await this.request('/v1.0/me', { method: 'GET' });
+  }
+  async setupWebhooks(): Promise<void> {
+    await this.request('/v1.0/subscriptions', {
+      method: 'POST',
+      body: JSON.stringify({
+        changeType: 'updated',
+        notificationUrl: this.integration.configuration.webhookUrl,
+        resource: '/teams',
+        expirationDateTime: new Date(Date.now() + 3600 * 1000).toISOString(),
+      }),
+    });
+  }
+  async initializeSync(): Promise<void> {
+    await this.request('/v1.0/me/joinedTeams', { method: 'GET' });
+  }
+  async syncTicket(ticket: Ticket): Promise<void> {
+    await this.request(`/v1.0/teams/${this.integration.configuration.teamId}/channels/${this.integration.configuration.channelId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({
+        body: { content: `New documentation ticket: ${ticket.title}` },
+      }),
+    });
+  }
 }
 
 class CustomHandler extends IntegrationHandler {
-  async testConnection(): Promise<void> {}
-  async setupWebhooks(): Promise<void> {}
-  async initializeSync(): Promise<void> {}
-  async syncTicket(ticket: Ticket): Promise<void> {}
+  async testConnection(): Promise<void> {
+    await this.request('/health', { method: 'GET', expectedStatus: [200, 204] });
+  }
+  async setupWebhooks(): Promise<void> {
+    if (this.integration.configuration.webhookUrl) {
+      await this.request('/webhooks', {
+        method: 'POST',
+        body: JSON.stringify({ url: this.integration.configuration.webhookUrl }),
+        expectedStatus: [200, 201, 204],
+      });
+    }
+  }
+  async initializeSync(): Promise<void> {
+    await this.request('/sync/initialize', { method: 'POST', expectedStatus: [200, 202, 204] });
+  }
+  async syncTicket(ticket: Ticket): Promise<void> {
+    await this.request('/tickets', {
+      method: 'POST',
+      body: JSON.stringify(this.mapTicket(ticket)),
+      expectedStatus: [200, 201, 202],
+    });
+  }
 }
 
 // Knowledge base implementation
