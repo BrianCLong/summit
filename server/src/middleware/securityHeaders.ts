@@ -28,6 +28,7 @@ export function securityHeaders({
 
   return helmet({
     frameguard: { action: 'deny' },
+    noSniff: true, // X-Content-Type-Options: nosniff
     referrerPolicy: { policy: 'no-referrer' },
     crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: { policy: 'same-origin' },

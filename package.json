@@ -6,6 +6,9 @@
   "type": "module",
   "packageManager": "pnpm@10.0.0",
   "scripts": {
+    "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
+    "verify": "tsx scripts/verify.ts",
+    "verify:verbose": "tsx scripts/verify.ts --verbose",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
@@ -19,6 +22,7 @@
     "test:client": "cd client && npm test",
     "test:web": "cd apps/web && npm test",
     "test:e2e": "npx playwright test",
+    "test:a11y-gate": "pnpm exec playwright test -c playwright.a11y-keyboard.config.ts",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
@@ -73,10 +77,12 @@
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "check:governance": "node scripts/check-governance.cjs",
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
+    "partners:check": "node scripts/ci/check_partner_model.js",
     "compliance:check": "npx tsx scripts/compliance/check_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },
   "keywords": [

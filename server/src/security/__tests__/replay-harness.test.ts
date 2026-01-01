@@ -37,6 +37,22 @@ jest.mock('../../provenance/ledger.js', () => ({
   })),
 }));
 
+// Mock monitoring routes to prevent health.js import issues
+jest.mock('../../routes/monitoring.js', () => ({
+  monitoringRouter: {
+    get: jest.fn(),
+    use: jest.fn(),
+  },
+}));
+
+// Mock monitoring/health.js to prevent ESM import issues
+jest.mock('../../monitoring/health.js', () => ({
+  performHealthCheck: jest.fn().mockResolvedValue({ status: 'healthy' }),
+  getCachedHealthStatus: jest.fn().mockReturnValue({ status: 'healthy' }),
+  livenessProbe: jest.fn().mockResolvedValue({ status: 'ok' }),
+  readinessProbe: jest.fn().mockResolvedValue({ status: 'ready' }),
+}));
+
 // Mock config BEFORE importing app
 jest.mock('../../config.js', () => ({
   cfg: {

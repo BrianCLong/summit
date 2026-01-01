@@ -1,5 +1,20 @@
 # Repository Guidelines
 
+## Scope & Precedence
+
+This file applies to `docs/archived/`.
+If any instruction conflicts, follow this order:
+
+1. `docs/governance/CONSTITUTION.md` and `docs/governance/META_GOVERNANCE.md`
+2. `docs/governance/AGENT_MANDATES.md` and GA guardrails in `docs/ga/`
+3. `AGENTS.md` at repo root
+4. This file and local README instructions
+
+## Status
+
+Archived snapshot. For current instructions, follow `AGENTS.md` at repo root and
+`docs/governance/AGENT_MANDATES.md`.
+
 ## Project Structure & Module Organization
 
 - Apps: `server/` (Node/Express/GraphQL), `client/` (React/Vite).

@@ -1,0 +1,56 @@
+{
+  "claims": [
+    {
+      "id": "insights-readonly",
+      "description": "Provides read-only analytics from Summit into partner surfaces",
+      "allowed_for": ["isv", "observability", "compliance-tool", "data-provider"],
+      "pattern": "read-only-insight-api",
+      "disclaimers": [
+        "No write, delete, or impersonation actions are possible",
+        "Data remains in tenant region; partner caches must respect TTL"
+      ],
+      "evidence": "partners/certification.json#verified",
+      "negative_tests": ["reject mutation attempt", "reject cross-tenant fetch"],
+      "last_reviewed_by": "Jules"
+    },
+    {
+      "id": "event-observer",
+      "description": "Consumes event streams for monitoring, GRC, or telemetry without mutation",
+      "allowed_for": ["si", "observability", "compliance-tool"],
+      "pattern": "event-listener-no-mutation",
+      "disclaimers": [
+        "No ability to replay, mutate, or enqueue internal tasks",
+        "Topics scoped to evidence-only or telemetry-only payloads"
+      ],
+      "evidence": "partners/certification.json#compatible",
+      "negative_tests": ["reject replay", "reject mutation payload"],
+      "last_reviewed_by": "Jules"
+    },
+    {
+      "id": "sandboxed-ui",
+      "description": "Allows rendering of partner UI extensions inside Summit via wasm sandbox",
+      "allowed_for": ["isv"],
+      "pattern": "sandboxed-plugin",
+      "disclaimers": [
+        "No local storage, custom runtimes, or unbounded network egress",
+        "Execution capped with kill switch and syscall allowlist"
+      ],
+      "evidence": "partners/certification.json#verified",
+      "negative_tests": ["deny filesystem call", "deny external egress"],
+      "last_reviewed_by": "Jules"
+    },
+    {
+      "id": "controlled-ingest",
+      "description": "Sidecar adapters ingest data with normalization and attestations",
+      "allowed_for": ["si", "data-provider"],
+      "pattern": "sidecar-adapter",
+      "disclaimers": [
+        "Adapters operate with read-only tokens and cannot touch core DB",
+        "Adapters must support scale-to-zero and revocation within 60s"
+      ],
+      "evidence": "partners/certification.json#trusted",
+      "negative_tests": ["deny adapter write-core-db", "deny bypass of residency pin"],
+      "last_reviewed_by": "Jules"
+    }
+  ]
+}
