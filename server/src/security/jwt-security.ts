@@ -47,6 +47,7 @@ class JWTSecurityManager {
   private redis: ReturnType<typeof createClient>;
   private currentKey: JWTKey | null = null;
   private keyCache: Map<string, JWTKey> = new Map();
+  private rotationTimer: NodeJS.Timeout | null = null;
 
   constructor(config: JWTConfig) {
     this.config = config;
@@ -165,7 +166,7 @@ class JWTSecurityManager {
    * Schedule automatic key rotation
    */
   private scheduleKeyRotation(): void {
-    setInterval(async () => {
+    this.rotationTimer = setInterval(async () => {
       try {
         if (this.currentKey && this.currentKey.expiresAt <= new Date()) {
           await this.rotateKey();
@@ -419,6 +420,9 @@ class JWTSecurityManager {
    */
   async shutdown(): Promise<void> {
     console.log('🛑 Shutting down JWT Security Manager...');
+    if (this.rotationTimer) {
+      clearInterval(this.rotationTimer);
+    }
     if (this.redis) {
       await this.redis.quit();
     }

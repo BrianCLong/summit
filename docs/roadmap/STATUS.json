@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T09:00:00Z",
-  "revision_note": "Added human steering controls, restricted-path guardrails, and agent activity logging to reduce thrash; GA accessibility + keyboard smoke gate; Postgres usage metering; Billing advisory locks; OPA cache metrics; severity ledger; partner model",
+  "last_updated": "2026-01-01T09:30:00Z",
+  "revision_note": "Roadmap priorities; Agent guardrails; GA accessibility gate; Postgres metering; Billing locks; OPA cache",
   "initiatives": [
     {
       "id": "A",
