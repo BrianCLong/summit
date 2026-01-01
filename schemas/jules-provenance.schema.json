@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Jules Provenance Metadata",
+  "type": "object",
+  "properties": {
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "generator": {
+          "type": "string",
+          "enum": ["Jules"]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "seed_commit": {
+          "type": "string"
+        },
+        "requirements_summary": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string",
+          "enum": ["passed", "failed", "pending"]
+        }
+      },
+      "required": ["generator", "timestamp", "seed_commit", "verification"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["provenance"]
+}
