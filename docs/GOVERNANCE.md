@@ -64,6 +64,23 @@ OPA/Rego packages:
 - SBOM verification
 - deploy execution
 
+### Release Integrity & PR Normalization
+
+We enforce a strict "Golden Path" for all contributions and releases:
+
+1.  **PR Normalization**:
+    All PRs must strictly adhere to the `PR_NORMALIZATION_CHECKLIST.md`.
+    - **Atomic Commits**: Changes must be scoped to a single feature or fix.
+    - **Evidence**: All changes must include evidence artifacts (tests, screenshots).
+
+2.  **Release Gates**:
+    - **SBOM**: A Software Bill of Materials (CycloneDX) is generated for every build (`.evidence/sbom.json`).
+    - **Signing**: All release artifacts are cryptographically signed.
+    - **Vulnerability Gating**: Releases are blocked if critical vulnerabilities are detected.
+
+3.  **SOC 2 Compliance**:
+    See `docs/compliance/SOC_MAPPING.md` for a detailed mapping of technical controls to SOC 2 criteria.
+
 ### Developer usage
 
 Local checks:

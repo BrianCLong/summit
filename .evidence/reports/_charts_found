@@ -1,8 +1,0 @@
-charts/worker-gpu/Chart.yaml
-charts/maestro/Chart.yaml
-charts/replicator/Chart.yaml
-charts/flow-audit/Chart.yaml
-charts/satellite/Chart.yaml
-charts/monitoring/Chart.yaml
-charts/backup/Chart.yaml
-charts/gateway/Chart.yaml
