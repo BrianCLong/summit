@@ -3,6 +3,17 @@ freeze_windows:
     cron: "0 0 29-31 * *"
     allowed_changes: ["hotfix", "security"]
 
+# GA Risk Gate Configuration
+ga_gate:
+  freeze_mode: "advisory" # Options: advisory, blocking
+  required_checks:
+    - "secrets"
+    - "dependencies"
+    - "licenses"
+    - "sbom"
+    - "provenance"
+    - "opa"
+
 high_risk_actions:
   require_webauthn_step_up: true
 

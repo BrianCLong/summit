@@ -229,6 +229,14 @@ jobs:
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
+  ga-risk-gate:
+    name: GA Risk Gate
+    needs: [lint] # Run early to fail fast
+    uses: ./.github/workflows/ga-risk-gate.yml
+    with:
+      ref: ${{ github.sha }}
+    secrets: inherit
+
   build-server-image:
     name: Build Server Image (Governance)
     needs: test
