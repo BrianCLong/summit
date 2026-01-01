@@ -1,3 +1,30 @@
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 30): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['summit:password', 'postgres:password', 'password', 'secret', 'changeme', 'default'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} contains insecure credentials`);
+    console.error(`Use a strong connection string with unique credentials`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import pino from 'pino';
@@ -31,7 +58,7 @@ const config = {
   kafkaBrokers: (process.env.KAFKA_BROKERS || 'kafka:9092').split(','),
   topics: (process.env.KAFKA_TOPICS || 'events').split(','),
   consumerGroup: process.env.KAFKA_CONSUMER_GROUP || 'streaming-ingest',
-  postgresUrl: process.env.DATABASE_URL || 'postgresql://summit:password@postgres:5432/summit_dev',
+  postgresUrl: requireSecret('DATABASE_URL', process.env.DATABASE_URL, 30),
   batchMode: process.env.BATCH_MODE === 'true',
   batchSize: parseInt(process.env.BATCH_SIZE || '100', 10),
 };

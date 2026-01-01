@@ -4,6 +4,33 @@
  * for unified compliance reporting and forensic analysis.
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 32): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'default-audit-secret'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import { EventEmitter } from 'eventemitter3';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
@@ -69,7 +96,7 @@ export class UnifiedAuditAggregator extends EventEmitter<AggregatorEvents> {
     this.db = config.postgres;
     this.redis = config.redis;
     this.logger = config.logger || pino({ name: 'unified-audit' });
-    this.signingSecret = config.signingSecret || process.env.AUDIT_SIGNING_SECRET || 'default-audit-secret';
+    this.signingSecret = config.signingSecret || requireSecret('AUDIT_SIGNING_SECRET', process.env.AUDIT_SIGNING_SECRET, 32);
     this.batchSize = config.batchSize || 100;
     this.flushIntervalMs = config.flushIntervalMs || 5000;
     this.retentionDays = config.retentionDays || 2555; // 7 years default
