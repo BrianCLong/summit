@@ -1,0 +1,172 @@
+# Alertmanager Configuration for IntelGraph Safe Mutations
+# Production-ready alert routing and notification setup
+
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@intelgraph.com'
+  smtp_auth_username: 'alerts@intelgraph.com'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+# Alert routing configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+  receiver: 'default'
+
+  routes:
+    # Critical alerts - immediate notification
+    - matchers:
+        - severity = "critical"
+      group_wait: 0s
+      group_interval: 5m
+      repeat_interval: 15m
+      receiver: 'critical-alerts'
+      continue: true
+
+    # Budget-related alerts
+    - matchers:
+        - alertname =~ "Budget.*"
+      receiver: 'budget-team'
+      continue: false
+
+    # Rollback/compensation alerts
+    - matchers:
+        - alertname =~ "Rollback.*|Compensation.*"
+      receiver: 'engineering-team'
+      continue: false
+
+    # Performance alerts
+    - matchers:
+        - alertname =~ ".*Latency.*|.*Performance.*"
+      receiver: 'sre-team'
+      continue: false
+
+    # Provider/external service alerts
+    - matchers:
+        - alertname =~ "Provider.*|.*External.*"
+      receiver: 'integrations-team'
+      continue: false
+
+# Alert suppression rules
+inhibit_rules:
+  # Suppress individual tenant alerts if global alert is firing
+  - source_matchers:
+      - alertname = "SystemDown"
+    target_matchers:
+      - alertname =~ "Budget.*|Mutation.*"
+
+  # Suppress estimation accuracy alerts during rollback storms
+  - source_matchers:
+      - alertname = "RollbackStorm"
+    target_matchers:
+      - alertname = "TokenEstimationAccuracyPoor"
+
+# Notification receivers
+receivers:
+  - name: 'default'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#intelgraph-alerts'
+        title: 'IntelGraph Alert: {{ .GroupLabels.alertname }}'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Details:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+
+  - name: 'critical-alerts'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: 'Critical IntelGraph Safe Mutations Alert'
+        details:
+          summary: '{{ .GroupLabels.alertname }}'
+          details: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#intelgraph-critical'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        color: 'danger'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Details:* {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+    email_configs:
+      - to: '${ONCALL_EMAIL}'
+        subject: 'CRITICAL: IntelGraph Safe Mutations Alert'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Details: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+
+  - name: 'budget-team'
+    email_configs:
+      - to: 'budget-team@intelgraph.com'
+        subject: 'Budget Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          A budget-related issue has been detected:
+
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Tenant: {{ .Labels.tenant }}
+          Severity: {{ .Labels.severity }}
+
+          Please review tenant spending and budget allocations.
+
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#finops'
+        title: '💰 Budget Alert: {{ .GroupLabels.alertname }}'
+        color: 'warning'
+
+  - name: 'engineering-team'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#engineering'
+        title: '⚠️ Engineering Alert: {{ .GroupLabels.alertname }}'
+        color: 'warning'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Details:* {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+
+  - name: 'sre-team'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#sre'
+        title: '📊 SRE Alert: {{ .GroupLabels.alertname }}'
+        color: 'warning'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Details:* {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}
+
+  - name: 'integrations-team'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#integrations'
+        title: '🔌 Integration Alert: {{ .GroupLabels.alertname }}'
+        color: 'warning'
+        text: >-
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Details:* {{ .Annotations.description }}
+          *Provider:* {{ .Labels.provider }}
+          *Runbook:* {{ .Annotations.runbook_url }}
+          {{ end }}

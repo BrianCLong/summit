@@ -1,0 +1,30 @@
+ID,Epic,Story,Priority,MosCow,Owner,Estimate,Deps,Risk,Status
+IG-1,"Collaboration (E)","Case spaces with immutable audit + SLA timers","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-2,"Collaboration (E)","Comment threads bound to graph nodes","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-3,"Collaboration (E)","Live co-editing of link charts","P1 - Love",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-4,"Integrations (G)","'@Mentions with inline entity previews'","P1 - Love",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-5,"Integrations (G)","STIX/TAXII + MISP bi-directional connectors","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-6,"Integrations (G)","Slack/Teams + Jira/ServiceNow integration","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-7,"Integrations (G)","Push graph updates into chat with visual snippets","P1 - Love",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-8,"Ops & Reliability (H)","Magic paste (auto-entity creation from raw text/CSV/URL)","P2 - Delight",COULD,TBD,3d,None,Low,Post-GA
+IG-9,"Ops & Reliability (H)","Metrics/Prometheus + DR/BCP baseline","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-10,"Ops & Reliability (H)","Smart query budgeter with optimization hints","P1 - Love",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-11,"Frontend Experience (I)","Predictive latency heatmaps","P2 - Fearsome Delight",COULD,TBD,3d,None,Low,Post-GA
+IG-12,"Frontend Experience (I)","Tri-pane Timeline + Map + Graph view","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-13,"Frontend Experience (I)","Undo/Redo + Explain-this-view panel","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-14,"Frontend Experience (I)","Drag-and-drop narrative builder","P1 - Love",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-15,"Frontend Experience (I)","Beautiful graph expansion animations","P2 - Delight",COULD,TBD,3d,None,Low,Post-GA
+IG-16,"Platform Governance (K)","UI clutter dimming for focus (cognitive load guardrails)","P2 - Fearsome Delight",COULD,TBD,3d,None,Low,Post-GA
+IG-17,"Platform Governance (K)","Paved-Road Service Template v0.1","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-18,"Platform Governance (K)","Local Dev Stack for Paved-Road Services","P1 - Should",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-19,"Platform Governance (K)","Observability Baseline for Reference Service","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-20,"Platform Governance (K)","Post-Deploy Validation & Runbook v0.1","P2 - Stretch",COULD,TBD,3d,None,Low,Post-GA
+IG-21,"Platform Governance (K)","SBOM Generation in CI","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-22,"Platform Governance (K)","Container Signing & Verification","P1 - Should",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-23,"Platform Governance (K)","OPA Policy Gate on PR & Release","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-24,"Agentic Capabilities (L)","Evidence Pack v0.1","P2 - Stretch",COULD,TBD,3d,None,Low,Post-GA
+IG-25,"Agentic Capabilities (L)","Agentic Prompt Library","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-26,"Agentic Capabilities (L)","Adaptive Agent Orchestration","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
+IG-27,"Agentic Capabilities (L)","Agent Feedback Loop","P1 - Love",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-28,"Agentic Capabilities (L)","Multi-Agent Collaboration Workflows","P1 - Love",SHOULD,SeniorDev,3d,None,Medium,GA-Critical
+IG-29,"Agentic Capabilities (L)","Agent Security & Compliance Audits","P0 - Must",MUST,EngLead,3d,None,High,GA-Blocker
