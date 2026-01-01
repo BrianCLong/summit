@@ -16,8 +16,6 @@ import { jest } from '@jest/globals';
 import type { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { OPAEnforcer, createOPAMiddleware } from '../opa-enforcer';
-import { getBudgetLedgerManager } from '../../db/budgetLedger';
-import type { BudgetLedgerManager } from '../../db/budgetLedger';
 
 // Mock axios
 jest.mock('axios');
@@ -63,24 +61,8 @@ describe('OPAEnforcer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mock budget ledger methods with default implementations
     if (mockBudgetLedger) {
-      mockBudgetLedger.getTenantBudget.mockReset().mockResolvedValue(null);
-      mockBudgetLedger.getSpendingSummary.mockReset().mockResolvedValue({
-        tenantId: 'tenant-123',
-        totalOperations: 0,
-        estimatedUsd: 0,
-        totalUsd: 0,
-      });
-      mockBudgetLedger.getSpendingEntries.mockReset().mockResolvedValue([]);
-      mockBudgetLedger.checkTenantBudget.mockReset().mockResolvedValue({
-        canAfford: true,
-        budgetLimit: 0,
-        currentSpend: 0,
-        utilizationPct: 0,
-        reason: '',
-      });
+      Object.values(mockBudgetLedger).forEach((fn) => fn.mockReset());
     }
 
     // Reset environment variables
@@ -483,13 +465,8 @@ describe('OPAEnforcer', () => {
       expect(mockedAxios.post).toHaveBeenCalledTimes(2);
     });
 
-<<<<<<< HEAD
-    it('should track cache hits, misses, and hit rate', async () => {
-      const cacheStatsEnforcer = new OPAEnforcer({
-=======
     it('should report cache hit rate statistics', async () => {
       const statsEnforcer = buildEnforcer({
->>>>>>> origin/main
         enabled: true,
         cacheDecisions: true,
         cacheTtlMs: 60000,
@@ -522,21 +499,11 @@ describe('OPAEnforcer', () => {
 
       mockedAxios.post.mockResolvedValue(mockOPAResponse);
 
-<<<<<<< HEAD
-      await cacheStatsEnforcer.evaluatePolicy(mockInput); // miss
-      await cacheStatsEnforcer.evaluatePolicy(mockInput); // hit
-
-      const stats = cacheStatsEnforcer.getStats();
-
-      expect(stats.cacheHits).toBe(1);
-      expect(stats.cacheMisses).toBe(1);
-=======
       await statsEnforcer.evaluatePolicy(mockInput); // miss
       await statsEnforcer.evaluatePolicy(mockInput); // hit
 
       const stats = statsEnforcer.getStats();
       expect(stats.cacheSize).toBe(1);
->>>>>>> origin/main
       expect(stats.cacheHitRate).toBeCloseTo(0.5);
     });
   });
@@ -596,11 +563,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
-<<<<<<< HEAD
-        return headers[header as string];
-=======
         return headers[typeof header === 'string' ? header : ''];
->>>>>>> origin/main
       });
 
       const mockOPAResponse = {
@@ -648,11 +611,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '100000',
           'x-request-id': 'req-789',
         };
-<<<<<<< HEAD
-        return headers[header as string];
-=======
         return headers[typeof header === 'string' ? header : ''];
->>>>>>> origin/main
       });
 
       const mockOPAResponse = {
@@ -725,11 +684,7 @@ describe('OPAEnforcer', () => {
           'x-estimated-tokens': '1000',
           'x-request-id': 'req-789',
         };
-<<<<<<< HEAD
-        return headers[header as string];
-=======
         return headers[typeof header === 'string' ? header : ''];
->>>>>>> origin/main
       });
 
       mockReq.body = {

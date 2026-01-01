@@ -387,11 +387,6 @@ export class OPAEnforcer {
   /**
    * Extract mutation field name from GraphQL query
    */
-<<<<<<< HEAD
-  private extractMutationField(query: string): string | undefined {
-    const mutationMatch = query.match(/mutation\s+\w*\s*{\s*(\w+)\s*\(/);
-    return mutationMatch?.[1];
-=======
   private extractMutationField(
     query: string,
     operationName?: string,
@@ -399,7 +394,6 @@ export class OPAEnforcer {
     const mutationMatch = query.match(/mutation\s+\w*\s*{[^{]*(\w+)\s*\(/);
     const fieldName = mutationMatch?.[1];
     return fieldName && fieldName.length > 2 ? fieldName : operationName;
->>>>>>> origin/main
   }
 
   /**
@@ -480,14 +474,9 @@ export class OPAEnforcer {
     return {
       enabled: this.options.enabled,
       cacheSize: this.decisionCache.size,
-<<<<<<< HEAD
       cacheHits: this.cacheHits,
       cacheMisses: this.cacheMisses,
-      cacheHitRate: this.calculateCacheHitRate(),
-=======
-      cacheHitRate:
-        totalCacheChecks === 0 ? 0 : this.cacheHits / totalCacheChecks,
->>>>>>> origin/main
+      cacheHitRate: totalCacheChecks === 0 ? 0 : this.cacheHits / totalCacheChecks,
     };
   }
 }
