@@ -1,0 +1,35 @@
+name: Verify on Deploy
+
+on:
+  deployment:
+    types: [created]
+
+jobs:
+  verify:
+    if: github.event.deployment.environment == 'production'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.3.0
+
+      - name: Install SLSA Verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.4.1
+
+      - name: Verify Signature
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}:${{ github.event.deployment.payload.tag }}"
+          cosign verify \
+            --certificate-identity-regexp "https://github.com/intelgraph-server/.*" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            $IMAGE
+
+      - name: Verify Provenance
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}:${{ github.event.deployment.payload.tag }}"
+          slsa-verifier verify-image \
+            $IMAGE \
+            --source-uri "github.com/${{ github.repository }}" \
+            --provenance-repository "${{ github.repository }}"

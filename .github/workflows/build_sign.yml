@@ -1,0 +1,162 @@
+name: Build, Sign, and Publish
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  security-events: write
+
+jobs:
+  build-sign-publish:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.3.0
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0.15.8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Unit Tests
+        run: pnpm test
+
+      - name: Audit Dependencies
+        run: pnpm audit --prod
+
+      - name: Run OSV Scanner
+        uses: google/osv-scanner-action@v1.6.1
+        with:
+          scan-args: |-
+            --recursive
+            ./
+
+      - name: Run Gitleaks
+        uses: zricethezav/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate SBOM (CycloneDX)
+        uses: CycloneDX/gh-node-module-sbom@v1
+        with:
+          output: sbom.json
+          omit-dev: true
+
+      - name: Generate SBOM (Syft)
+        run: syft . -o cyclonedx-json=syft-sbom.json
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image (Load)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          outputs: type=docker,dest=/tmp/image.tar
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@0.17.0
+        with:
+          input: /tmp/image.tar
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Build NPM Package
+        run: pnpm pack
+
+      - name: Sign NPM Package
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TARBALL=$(ls *.tgz | head -n 1)
+          echo "Signing $TARBALL..."
+          cosign sign-blob --yes --keyless --output-signature ${TARBALL}.sig $TARBALL
+          cosign attest-blob --yes --keyless --predicate sbom.json --type cyclonedx --output-attestation ${TARBALL}.attestation $TARBALL
+
+      - name: Login to GitHub Container Registry
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker Image
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: push
+        run: |
+          docker load --input /tmp/image.tar
+          docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+
+          # Capture Digest
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/${{ github.repository }}:${{ github.ref_name }} | cut -d'@' -f2)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
+      - name: Sign Docker Image
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cosign sign --yes --keyless ghcr.io/${{ github.repository }}:${{ github.sha }}
+          cosign sign --yes --keyless ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+
+      - name: Attest Docker Image
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cosign attest --yes --keyless --predicate sbom.json --type cyclonedx ghcr.io/${{ github.repository }}:${{ github.sha }}
+          cosign attest --yes --keyless --predicate syft-sbom.json --type cyclonedx ghcr.io/${{ github.repository }}:${{ github.sha }}
+
+      - name: Upload Artifacts
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            sbom.json
+            syft-sbom.json
+            *.tgz
+            *.tgz.sig
+            *.tgz.attestation
+
+  provenance:
+    needs: [build-sign-publish]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.9.0
+    with:
+      image: ghcr.io/${{ github.repository }}
+      digest: ${{ needs.build-sign-publish.outputs.digest }}
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}

@@ -79,3 +79,43 @@ else
 fi
 
 echo -e "${GREEN}Release verification completed successfully.${NC}"
+
+# 4. Supply Chain Security Check
+if [ -n "$1" ] && [[ "$1" == v* ]]; then
+    echo -e "${GREEN}Starting Supply Chain Verification...${NC}"
+    TAG=$1
+
+    # Try to detect repo, fallback to prompt default
+    DETECTED_REPO=$(git config --get remote.origin.url | sed 's/.*github.com[:\/]\(.*\).git/\1/' || echo "")
+    if [ -z "$DETECTED_REPO" ]; then
+        DETECTED_REPO="intelgraph-server/intelgraph-server"
+    fi
+
+    REPO=${2:-$DETECTED_REPO}
+    IMAGE="ghcr.io/$REPO:$TAG"
+
+    echo "Verifying signature for $IMAGE..."
+    if command -v cosign &> /dev/null; then
+        cosign verify \
+          --certificate-identity-regexp "https://github.com/$REPO/.*" \
+          --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+          "$IMAGE"
+    else
+        echo -e "${YELLOW}Warning: cosign not found, skipping signature verification.${NC}"
+    fi
+
+    echo "Verifying provenance for $IMAGE..."
+    if command -v slsa-verifier &> /dev/null; then
+        slsa-verifier verify-image \
+          "$IMAGE" \
+          --source-uri "github.com/$REPO" \
+          --provenance-repository "$REPO"
+    else
+        echo -e "${YELLOW}Warning: slsa-verifier not found, skipping provenance verification.${NC}"
+    fi
+
+    echo -e "${GREEN}Supply Chain Verification completed.${NC}"
+else
+    echo -e "${YELLOW}Skipping Supply Chain Verification (no tag provided).${NC}"
+    echo "Usage: $0 <tag> [repo] to verify signatures."
+fi

@@ -109,3 +109,16 @@ Our CI/CD pipeline enforces a number of security controls on every pull request 
 ## Reporting a Vulnerability
 
 Please report any security vulnerabilities to our security team at `security@summit.ai`. We appreciate your efforts to disclose your findings responsibly.
+
+## Supply Chain Security Gate
+
+We enforce a strict supply chain security gate for all releases. This includes:
+
+- **SBOM Generation**: Software Bill of Materials (SBOM) are generated for every build using CycloneDX and Syft.
+- **Vulnerability Scanning**: All artifacts are scanned for vulnerabilities using OSV, Trivy, and Snyk. High severity vulnerabilities block the release.
+- **Secret Scanning**: Gitleaks checks for hardcoded secrets in every commit.
+- **SLSA Provenance**: We generate SLSA Level 3 provenance attestations for all build artifacts.
+- **Signing**: All container images and artifacts are signed using Cosign (Keyless OIDC).
+- **Verification**: Signatures and provenance are cryptographically verified before deployment to production.
+
+See [SUPPLYCHAIN.md](SUPPLYCHAIN.md) for more details.

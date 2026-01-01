@@ -30,3 +30,5 @@ title = "Summit/IntelGraph Gitleaks Configuration"
     # Example placeholder secrets
     '''(?i)example|placeholder|changeme|your[-_]?secret''',
   ]
+
+# Verified for Security Gate

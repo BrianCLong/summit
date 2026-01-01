@@ -51,3 +51,10 @@
 # CI/CD & Deploy (Overrides)
 /.github/workflows/ @team-ops
 /deploy/ @team-ops
+
+# Security Critical Files (Added via Feature Gate)
+.github/workflows/ @security-team
+Dockerfile* @security-team
+package.json @security-team
+pnpm-lock.yaml @security-team
+package-lock.json @security-team
