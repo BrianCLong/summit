@@ -23,6 +23,8 @@ import { workflowRoutes } from './workflow-routes.js';
 import { workflowExecutor } from '../workflows/workflow-executor.js';
 import logger from '../../config/logger.js';
 import { pricingReadRoutes } from './pricing-read-routes.js';
+import { agentAttestationVerifier } from '../security/agent-attestation.js';
+import { detectDiffAnomalies } from '../observability/anomaly-detector.js';
 
 const router = Router();
 
@@ -627,6 +629,51 @@ router.post(
     } catch (error) {
       logger.error('❌ Failed to rotate keys', { error: error.message });
       res.status(500).json({ error: 'Failed to rotate keys' });
+    }
+  },
+);
+
+router.post(
+  '/pull-requests/attestations',
+  requirePermission('workflow:execute'),
+  async (req: Request, res: Response) => {
+    try {
+      const { prNumber, repository, attestation, tenantId } = req.body;
+
+      if (!prNumber || !repository || !attestation || !tenantId) {
+        return res.status(400).json({
+          error: 'Missing required fields for PR attestation',
+        });
+      }
+
+      await agentAttestationVerifier.verifyAndRecord({
+        tenantId,
+        taskId: `pr-${prNumber}`,
+        agentId: attestation.agentId,
+        signedPayload: attestation.signedPayload,
+        signature: attestation.signature,
+        resourceType: 'pull_request',
+        resourceRef: `${repository}#${prNumber}`,
+        humanApprover: attestation.humanApprover,
+        policyRefs: attestation.policyRefs,
+        issuedAt: attestation.issuedAt,
+      });
+
+      if (attestation.diffPatch) {
+        detectDiffAnomalies(attestation.diffPatch, `${repository}#${prNumber}`);
+      }
+
+      res.status(201).json({
+        status: 'recorded',
+        prNumber,
+        repository,
+      });
+    } catch (error) {
+      logger.error('Failed to record PR attestation', { error: error.message });
+      res.status(400).json({
+        error: 'Unable to verify attestation',
+        details: error.message,
+      });
     }
   },
 );

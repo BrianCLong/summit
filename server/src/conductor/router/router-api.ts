@@ -7,6 +7,8 @@ import { adaptiveExpertRouter } from './router-v2.js';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import logger from '../../config/logger.js';
 import { RequestContext } from '../middleware/context-binding.js';
+import { agentAttestationVerifier } from '../security/agent-attestation.js';
+import { detectTaskIdAnomalies } from '../observability/anomaly-detector.js';
 
 const router = express.Router();
 
@@ -16,6 +18,22 @@ const routeRequestSchema = z.object({
   tenantId: z.string(),
   context: z.record(z.any()).optional(),
   candidates: z.array(z.string()).optional(),
+  attestation: z.object({
+    agentId: z.string(),
+    signedPayload: z.string(),
+    signature: z.object({
+      keyId: z.string(),
+      signature: z.string(),
+      algorithm: z.string(),
+      keyVersion: z.number().optional(),
+      certificateChain: z.array(z.string()).optional(),
+      timestampToken: z.string().optional(),
+      metadata: z.record(z.any()).optional(),
+    }),
+    humanApprover: z.string(),
+    policyRefs: z.array(z.string()).nonempty(),
+    issuedAt: z.string(),
+  }),
 });
 
 const rewardRequestSchema = z.object({
@@ -48,7 +66,8 @@ router.post('/route', async (req, res) => {
       });
     }
 
-    const { taskId, tenantId, context = {}, candidates } = validation.data;
+    const { taskId, tenantId, context = {}, candidates, attestation } =
+      validation.data;
 
     // Check tenant isolation
     if (!req.user || req.user.tenantId !== tenantId) {
@@ -85,6 +104,20 @@ router.post('/route', async (req, res) => {
         approvalReason,
       });
     }
+
+    await agentAttestationVerifier.verifyAndRecord({
+      tenantId,
+      taskId,
+      agentId: attestation.agentId,
+      signedPayload: attestation.signedPayload,
+      signature: attestation.signature,
+      resourceType: 'task',
+      humanApprover: attestation.humanApprover,
+      policyRefs: attestation.policyRefs,
+      issuedAt: attestation.issuedAt,
+    });
+
+    detectTaskIdAnomalies(taskId);
 
     // Route the task
     const routingResponse = await adaptiveExpertRouter.route({

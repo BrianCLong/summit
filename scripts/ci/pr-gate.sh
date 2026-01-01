@@ -39,6 +39,9 @@ fi
 log "Using runner: ${RUNNER}"
 log "Comparing changes against: ${TARGET_REF}"
 
+log "Running high-risk diff guardrail"
+node scripts/ci/high-risk-diff-check.cjs
+
 run_cmd install --frozen-lockfile
 
 if ! run_cmd run lint; then

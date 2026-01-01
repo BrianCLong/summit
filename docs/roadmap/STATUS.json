@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T04:11:56Z",
-  "revision_note": "Added Sprint N+3 Freeze/Certify/Release planning pack; refreshed SummitThreat roadmap narrative for 2026",
+  "last_updated": "2026-01-01T06:45:00Z",
+  "revision_note": "Enforced per-agent attestation for Maestro tasks/PRs and added high-risk diff guardrails with anomaly surfacing",
   "initiatives": [
     {
       "id": "A",
