@@ -2897,6 +2897,9 @@ importers:
       babel-plugin-transform-import-meta:
         specifier: 2.3.3
         version: 2.3.3(@babel/core@7.28.5)
+      babel-plugin-transform-vite-meta-env:
+        specifier: ^1.0.3
+        version: 1.0.3
       eslint:
         specifier: 9.39.1
         version: 9.39.1(jiti@2.6.1)
@@ -36569,6 +36572,9 @@ packages:
     resolution: {integrity: sha512-bbh30qz1m6ZU1ybJoNOhA2zaDvmeXMnGNBMVMDOJ1Fni4+wMBoy/j7MTRVmqAUCIcy54/rEnr9VEBsfcgbpm3Q==}
     peerDependencies:
       '@babel/core': ^7.10.0
+
+  babel-plugin-transform-vite-meta-env@1.0.3:
+    resolution: {integrity: sha512-eyfuDEXrMu667TQpmctHeTlJrZA6jXYHyEJFjcM0yEa60LS/LXlOg2PBbMb8DVS+V9CnTj/j9itdlDVMcY2zEg==}
 
   babel-preset-current-node-syntax@1.2.0:
     resolution: {integrity: sha512-E/VlAEzRrsLEb2+dv8yp3bo4scof3l9nR4lrld+Iy5NyVqgVYUJnDAmunkhPMisRI32Qc4iRiz425d8vM++2fg==}
@@ -74093,6 +74099,11 @@ snapshots:
       '@babel/core': 7.28.5
       '@babel/template': 7.27.2
       tslib: 2.8.1
+
+  babel-plugin-transform-vite-meta-env@1.0.3:
+    dependencies:
+      '@babel/runtime': 7.28.4
+      '@types/babel__core': 7.20.5
 
   babel-preset-current-node-syntax@1.2.0(@babel/core@7.28.5):
     dependencies:

@@ -16,7 +16,7 @@ const config = {
         module: 'commonjs'
       }
     }],
-    '^.+\\.(js|jsx)$': 'babel-jest', // Assuming you might have some JS/JSX files
+    '^.+\\.(js|jsx)$': ['babel-jest', { configFile: path.resolve(__dirname, 'babel.config.cjs') }],
   },
   testMatch: [
     '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',

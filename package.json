@@ -83,7 +83,8 @@
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "perf:ui-ux": "node perf/comprehensive/run-performance-tests.js"
   },
   "keywords": [
     "intelligence-analysis",
