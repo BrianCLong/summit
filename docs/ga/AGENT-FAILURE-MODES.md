@@ -1,5 +1,11 @@
 # Agent Failure Modes and Remediation
 
+## Status & Precedence
+
+This document defines GA failure classifications. It is subordinate to
+`docs/governance/CONSTITUTION.md` and `docs/governance/AGENT_MANDATES.md`, and complements
+`docs/ga/AGENTS.md` and root `AGENTS.md`.
+
 Failures are first-class outcomes. Every CI failure must be classified, archived, and remediated through a constrained loop.
 
 ## Failure Codes

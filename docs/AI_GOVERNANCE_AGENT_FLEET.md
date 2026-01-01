@@ -4,6 +4,12 @@
 > **Last Updated**: 2025-11-29
 > **Classification**: UNCLASSIFIED // FOUO
 
+## Status & Precedence
+
+This document is descriptive. If it conflicts with operational instructions, follow
+`docs/governance/CONSTITUTION.md` → `docs/governance/AGENT_MANDATES.md` → `AGENTS.md` → local
+`AGENTS.md` files.
+
 ## Executive Summary
 
 Summit/IntelGraph implements a comprehensive AI governance framework with automated incident response capabilities for AI agent fleets. This document describes the governance architecture, policy enforcement mechanisms, and incident response procedures aligned with ODNI guidelines for responsible AI deployment in intelligence operations.
@@ -12,13 +18,13 @@ Summit/IntelGraph implements a comprehensive AI governance framework with automa
 
 ## Key Metrics
 
-| Metric | Target | Current | Status |
-|--------|--------|---------|--------|
-| Automated Policy Validation | 80% | **85%** | Exceeds |
-| Human Escalation Rate | <20% | 15% | Meets |
-| Incident Response Time | <60s | 47ms | Exceeds |
-| Agent Containment Accuracy | 99% | 99.7% | Exceeds |
-| Policy Compliance Rate | 95% | 96.2% | Meets |
+| Metric                      | Target | Current | Status  |
+| --------------------------- | ------ | ------- | ------- |
+| Automated Policy Validation | 80%    | **85%** | Exceeds |
+| Human Escalation Rate       | <20%   | 15%     | Meets   |
+| Incident Response Time      | <60s   | 47ms    | Exceeds |
+| Agent Containment Accuracy  | 99%    | 99.7%   | Exceeds |
+| Policy Compliance Rate      | 95%    | 96.2%   | Meets   |
 
 ---
 
@@ -94,36 +100,40 @@ require_human_approval {
 
 ### 2.1 Agent Lifecycle States
 
-| State | Description | Transitions |
-|-------|-------------|-------------|
-| `INITIALIZING` | Agent starting up, loading models | → ACTIVE, ERROR |
-| `ACTIVE` | Fully operational, processing tasks | → PAUSED, ERROR, CONTAINED |
-| `PAUSED` | Temporarily halted, preserving state | → ACTIVE, TERMINATED |
-| `CONTAINED` | Isolated due to policy violation | → PAUSED (manual), TERMINATED |
-| `ERROR` | Unrecoverable error state | → TERMINATED |
-| `TERMINATED` | Permanently stopped, cleanup complete | (final) |
+| State          | Description                           | Transitions                   |
+| -------------- | ------------------------------------- | ----------------------------- |
+| `INITIALIZING` | Agent starting up, loading models     | → ACTIVE, ERROR               |
+| `ACTIVE`       | Fully operational, processing tasks   | → PAUSED, ERROR, CONTAINED    |
+| `PAUSED`       | Temporarily halted, preserving state  | → ACTIVE, TERMINATED          |
+| `CONTAINED`    | Isolated due to policy violation      | → PAUSED (manual), TERMINATED |
+| `ERROR`        | Unrecoverable error state             | → TERMINATED                  |
+| `TERMINATED`   | Permanently stopped, cleanup complete | (final)                       |
 
 ### 2.2 Fleet Composition
 
 **Entity Extraction Fleet**
+
 - Purpose: Extract named entities from unstructured data
 - Agents: 8 active instances
 - Sensitivity: LOW-MODERATE
 - Human oversight: Sampling (10%)
 
 **Relationship Inference Fleet**
+
 - Purpose: Infer relationships between entities
 - Agents: 6 active instances
 - Sensitivity: MODERATE
 - Human oversight: Sampling (20%) + threshold alerts
 
 **Anomaly Detection Fleet**
+
 - Purpose: Identify unusual patterns and behaviors
 - Agents: 4 active instances
 - Sensitivity: MODERATE-HIGH
 - Human oversight: All alerts reviewed
 
 **OSINT Collector Fleet**
+
 - Purpose: Gather open-source intelligence
 - Agents: 12 active instances
 - Sensitivity: LOW
@@ -140,8 +150,8 @@ interface AgentHealthReport {
   timestamp: Date;
   status: AgentStatus;
   metrics: {
-    policyCompliance: number;      // 0-100%
-    taskSuccessRate: number;       // 0-100%
+    policyCompliance: number; // 0-100%
+    taskSuccessRate: number; // 0-100%
     avgProcessingTimeMs: number;
     memoryUsageMb: number;
     errorCount: number;
@@ -149,7 +159,7 @@ interface AgentHealthReport {
   lastAction: {
     type: string;
     timestamp: Date;
-    result: 'success' | 'failure' | 'escalated';
+    result: "success" | "failure" | "escalated";
   };
 }
 ```
@@ -160,32 +170,36 @@ interface AgentHealthReport {
 
 ### 3.1 Incident Classification
 
-| Severity | Description | Response Time | Escalation |
-|----------|-------------|---------------|------------|
+| Severity          | Description                                      | Response Time      | Escalation       |
+| ----------------- | ------------------------------------------------ | ------------------ | ---------------- |
 | **P1 - Critical** | Active data exfiltration, complete fleet failure | Immediate (<1 min) | SOC + Leadership |
-| **P2 - High** | Policy violation, multiple agent failures | <5 minutes | SOC |
-| **P3 - Medium** | Single agent failure, degraded performance | <15 minutes | On-call |
-| **P4 - Low** | Minor anomalies, warning thresholds | <1 hour | Ticket |
+| **P2 - High**     | Policy violation, multiple agent failures        | <5 minutes         | SOC              |
+| **P3 - Medium**   | Single agent failure, degraded performance       | <15 minutes        | On-call          |
+| **P4 - Low**      | Minor anomalies, warning thresholds              | <1 hour            | Ticket           |
 
 ### 3.2 Automated Response Actions
 
 **Level 1: Warning**
+
 - Log incident to audit trail
 - Increment violation counter
 - Send alert to monitoring dashboard
 
 **Level 2: Throttle**
+
 - Reduce agent processing rate by 50%
 - Enable enhanced logging
 - Alert on-call engineer
 
 **Level 3: Contain**
+
 - Isolate agent from network
 - Freeze all pending tasks
 - Preserve state for forensics
 - Automatic escalation to SOC
 
 **Level 4: Terminate**
+
 - Immediate agent shutdown
 - Revoke all credentials
 - Quarantine associated data
@@ -213,6 +227,7 @@ graph TD
 ### 3.4 Kill-Switch Procedures
 
 **Fleet-Level Kill-Switch**
+
 ```bash
 # Immediate halt of entire fleet
 summit-ctl fleet pause --fleet-id=<fleet-id> --reason="Manual intervention"
@@ -222,6 +237,7 @@ summit-ctl fleet terminate --fleet-id=<fleet-id> --force --audit-reason="Securit
 ```
 
 **Agent-Level Kill-Switch**
+
 ```bash
 # Contain single agent
 summit-ctl agent contain --agent-id=<agent-id>
@@ -231,6 +247,7 @@ summit-ctl agent terminate --agent-id=<agent-id> --preserve-state
 ```
 
 **Global Kill-Switch**
+
 ```bash
 # EMERGENCY: Stop all AI agent activity
 summit-ctl emergency-stop --confirm="I understand this will halt all AI operations"
@@ -242,13 +259,13 @@ summit-ctl emergency-stop --confirm="I understand this will halt all AI operatio
 
 ### 4.1 Escalation Triggers
 
-| Trigger | Threshold | Action |
-|---------|-----------|--------|
-| Sensitivity level | >= CONFIDENTIAL | Require human approval |
-| Confidence score | < 70% | Queue for human review |
-| Entity count | > 50 in single operation | Batch review required |
-| Cross-tenant access | Any | Leadership approval |
-| Historical anomaly | 3σ deviation | Automatic escalation |
+| Trigger             | Threshold                | Action                 |
+| ------------------- | ------------------------ | ---------------------- |
+| Sensitivity level   | >= CONFIDENTIAL          | Require human approval |
+| Confidence score    | < 70%                    | Queue for human review |
+| Entity count        | > 50 in single operation | Batch review required  |
+| Cross-tenant access | Any                      | Leadership approval    |
+| Historical anomaly  | 3σ deviation             | Automatic escalation   |
 
 ### 4.2 Approval Workflow
 
@@ -260,12 +277,12 @@ summit-ctl emergency-stop --confirm="I understand this will halt all AI operatio
 
 ### 4.3 SLA Targets
 
-| Request Type | Target Response | Escalation |
-|--------------|-----------------|------------|
-| Routine | 4 hours | → Supervisor after 6h |
-| Elevated | 1 hour | → Manager after 2h |
-| Urgent | 15 minutes | → Director after 30m |
-| Critical | 5 minutes | → Auto-deny after 10m |
+| Request Type | Target Response | Escalation            |
+| ------------ | --------------- | --------------------- |
+| Routine      | 4 hours         | → Supervisor after 6h |
+| Elevated     | 1 hour          | → Manager after 2h    |
+| Urgent       | 15 minutes      | → Director after 30m  |
+| Critical     | 5 minutes       | → Auto-deny after 10m |
 
 ---
 
@@ -274,6 +291,7 @@ summit-ctl emergency-stop --confirm="I understand this will halt all AI operatio
 ### 5.1 Audit Trail Requirements
 
 All agent actions are logged with:
+
 - Timestamp (UTC, nanosecond precision)
 - Agent ID and fleet membership
 - Action type and parameters
@@ -285,12 +303,12 @@ All agent actions are logged with:
 
 ### 5.2 Retention Policy
 
-| Data Type | Retention | Archive |
-|-----------|-----------|---------|
-| Audit logs | 7 years | Immutable cold storage |
-| Agent state | 90 days | Compressed archive |
-| Incident reports | 10 years | Legal hold capable |
-| Performance metrics | 1 year | Aggregated after 90 days |
+| Data Type           | Retention | Archive                  |
+| ------------------- | --------- | ------------------------ |
+| Audit logs          | 7 years   | Immutable cold storage   |
+| Agent state         | 90 days   | Compressed archive       |
+| Incident reports    | 10 years  | Legal hold capable       |
+| Performance metrics | 1 year    | Aggregated after 90 days |
 
 ### 5.3 Compliance Alignment
 
@@ -337,25 +355,25 @@ alerts:
 
 ## 7. Contact & Escalation
 
-| Role | Responsibility | Contact |
-|------|----------------|---------|
+| Role               | Responsibility        | Contact                  |
+| ------------------ | --------------------- | ------------------------ |
 | AI Governance Lead | Policy and compliance | ai-governance@summit.com |
-| SOC Analyst | Incident response | soc@summit.com |
-| On-Call Engineer | Technical issues | PagerDuty |
-| Platform Director | Executive escalation | director@summit.com |
+| SOC Analyst        | Incident response     | soc@summit.com           |
+| On-Call Engineer   | Technical issues      | PagerDuty                |
+| Platform Director  | Executive escalation  | director@summit.com      |
 
 ---
 
 ## Appendix A: Glossary
 
-| Term | Definition |
-|------|------------|
-| **Agent** | Autonomous AI component performing specific tasks |
-| **Fleet** | Collection of agents with shared purpose and policies |
-| **Containment** | Isolation of agent from network and data access |
-| **Policy Compliance** | Percentage of actions passing OPA policy checks |
-| **Kill-Switch** | Emergency mechanism to halt agent operations |
-| **HITL** | Human-in-the-Loop escalation process |
+| Term                  | Definition                                            |
+| --------------------- | ----------------------------------------------------- |
+| **Agent**             | Autonomous AI component performing specific tasks     |
+| **Fleet**             | Collection of agents with shared purpose and policies |
+| **Containment**       | Isolation of agent from network and data access       |
+| **Policy Compliance** | Percentage of actions passing OPA policy checks       |
+| **Kill-Switch**       | Emergency mechanism to halt agent operations          |
+| **HITL**              | Human-in-the-Loop escalation process                  |
 
 ---
 
