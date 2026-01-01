@@ -2,8 +2,8 @@
  * Tests for Enhanced AI Assistant Component - Deterministic Version
  */
 
-import React from 'react';
-import { render, screen, within, act } from '@testing-library/react';
+import React, { act } from 'react';
+import { render, screen, within } from '@testing-library/react';
 import { withUser } from '../test-utils/user';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import EnhancedAIAssistant, { AssistantEvent } from '../EnhancedAIAssistant';
@@ -92,7 +92,9 @@ describe('EnhancedAIAssistant', () => {
 
     const input = screen.getByRole('textbox', { name: /assistant-input/i });
     await withUser(async (u) => {
-      await u.type(input, 'Hello{enter}');
+      await act(async () => {
+        await u.type(input, 'Hello{enter}');
+      });
     });
 
     // Wait for microtasks to complete
@@ -273,11 +275,19 @@ describe('EnhancedAIAssistant', () => {
 
     await withUser(async (u) => {
       // Try to send empty message
-      await u.type(input, '   '); // Only spaces
+      await act(async () => {
+        await u.type(input, '   '); // Only spaces
+      });
       expect(sendButton).toBeDisabled();
 
-      await u.clear(input);
-      await u.keyboard('{Enter}');
+      await act(async () => {
+        await u.clear(input);
+      });
+      expect(sendButton).toBeDisabled();
+
+      await act(async () => {
+        await u.keyboard('{Enter}');
+      });
     });
 
     // Should not add any new messages beyond the initial welcome

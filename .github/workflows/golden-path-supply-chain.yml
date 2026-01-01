@@ -75,7 +75,7 @@ jobs:
           sha256sum artifacts/sbom.spdx.json | awk '{print "sbom_spdx_digest=" $1}' >> $GITHUB_OUTPUT
 
       - name: Upload evidence bundle
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: golden-path-bundle-${{ github.run_id }}
           path: |
