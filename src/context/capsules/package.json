@@ -1,0 +1,50 @@
+{
+  "name": "@summit/ic3-system",
+  "version": "1.0.0",
+  "description": "Invariant-Carrying Context Capsules (IC³) System",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "demo": "ts-node src/context/capsules/demo.ts",
+    "advanced-demo": "ts-node src/context/capsules/advanced-example.ts",
+    "test:unit": "jest src/context/capsules/__tests__",
+    "lint": "eslint src/context/capsules/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "ai",
+    "security",
+    "context",
+    "invariants",
+    "validation",
+    "provenance"
+  ],
+  "author": "Summit Team",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^4.9.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^18.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "ts-node": "^10.9.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/context/capsules/**/*.ts",
+      "!src/context/capsules/__tests__/**/*.ts"
+    ]
+  }
+}
