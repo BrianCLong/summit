@@ -1,44 +1,33 @@
-# Rollback Runbook (GA)
+# Rollback Runbook
 
-## 1. Overview
-This runbook describes the procedures for rolling back the Summit application to a previous stable state.
+## Overview
+This runbook describes the procedure for rolling back a release, specifically focusing on the canary rollback scenario.
 
-## 2. Triggers for Rollback
-*   Post-deployment health check failure.
-*   Error rate spike > 1% within 15 minutes of deployment.
-*   Critical functionality (Auth, Ingestion) broken.
-*   Security vulnerability discovered immediately post-deploy.
+## Triggers
+- Canary SLO violation (Error Rate > 1% or Latency p95 > 1s).
+- Synthetic probe failure in canary environment.
+- Manual determination of critical defect.
 
-## 3. Standard Rollback (Stateless)
-If the deployment involved only code changes (no DB migrations):
+## Immediate Actions
+1. **Stop the Line**: Pause any ongoing pipelines.
+2. **Revert Traffic**: Switch 100% traffic back to the stable baseline.
+   ```bash
+   # Example command (adjust for actual ingress controller)
+   kubectl patch virtualservice summit-api -n production --type='json' -p='[{"op": "replace", "path": "/spec/http/0/route/0/weight", "value": 100}, {"op": "replace", "path": "/spec/http/0/route/1/weight", "value": 0}]'
+   ```
+3. **Verify Health**: Check `/health` endpoint of stable version.
+   ```bash
+   curl -I https://api.summit.intelgraph.io/health
+   ```
 
-1.  **Identify Previous Version:**
-    Find the previous stable tag (e.g., `v1.0.1` if `v1.0.2` failed).
-2.  **Execute Rollback:**
-    ```bash
-    helm rollback summit 0
-    # OR
-    kubectl set image deployment/summit-server server=ghcr.io/org/summit-server:v1.0.1
-    ```
-3.  **Verify:**
-    Ensure pods restart and `/health` returns 200 OK.
+## Post-Rollback
+1. Capture logs from failed canary pods.
+2. Generate incident report using `scripts/incident-report.ts`.
+3. Mark the release version as bad in the registry.
 
-## 4. Database Rollback (Stateful)
-If the deployment involved database migrations:
+## Automation
+The auto-rollback mechanism is triggered by Prometheus alerts:
+- `CanaryHighErrorRate`
+- `CanaryHighLatency`
 
-1.  **Assess Risk:**
-    *   **Forward-Compatible:** If the new schema is compatible with old code, perform Standard Rollback first.
-    *   **Breaking Change:** You MUST revert the migration.
-2.  **Revert Migration (Postgres):**
-    ```bash
-    npm run migrate:down
-    ```
-3.  **Revert Migration (Neo4j):**
-    *   Neo4j migrations are typically additive. If data was corrupted, restore from backup.
-4.  **Restore from Backup (Last Resort):**
-    *   Locate latest PITR backup.
-    *   Coordinate with Data Team.
-
-## 5. Communications
-*   Notify `#ops-channel` immediately.
-*   Update Status Page if user impact occurred.
+Check `RUNBOOKS/maestro-rollback.md` for orchestrator-specific details.

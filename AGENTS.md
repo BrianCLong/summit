@@ -93,6 +93,7 @@ analytics designed for the intelligence community.
 - Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
 
 - **Golden Path**: `make bootstrap && make up && make smoke` - fresh clones must go green
+- **Task Runner**: `Makefile` is the single source of truth. `Justfile` is deprecated and removed.
 - **Deployable-First**: Maintain the workflow: Investigation -> Entities -> Relationships -> Copilot
   -> Results
 - **Production-Ready MVP**: Every commit should maintain production readiness
@@ -227,11 +228,13 @@ pnpm typecheck
 ### Make Targets
 
 ```bash
-make bootstrap    # Setup: install deps, create .env
-make up           # Start dev stack
-make up-ai        # Start dev + AI stack
-make down         # Stop services
-make smoke        # Run golden path tests
+make bootstrap       # Setup: install deps, create .env
+make up              # Start dev stack
+make up-ai           # Start dev + AI stack
+make down            # Stop services
+make smoke           # Run golden path tests
+make conductor-up    # Start Conductor/Maestro stack
+make conductor-logs  # Tail Conductor logs
 ```
 
 ### Summit CLI (`summitctl`)
