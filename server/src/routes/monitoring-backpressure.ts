@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { BackpressureController } from '../../runtime/backpressure/BackpressureController.js';
+import { BackpressureController } from '../runtime/backpressure/BackpressureController.js';
 
 const router = Router();
 

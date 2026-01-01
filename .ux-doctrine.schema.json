@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UX Doctrine Schema",
+  "description": "Machine-readable representation of the authoritative UX doctrine for IntelGraph/Summit platform",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "corePrinciples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "enforcementLevel": {
+            "type": "string",
+            "enum": ["mandatory", "recommended", "optional"]
+          }
+        },
+        "required": ["id", "name", "description", "enforcementLevel"]
+      }
+    },
+    "interactionPatterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9-]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "implementationGuidelines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "validationCriteria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "name", "description", "implementationGuidelines", "validationCriteria"]
+      }
+    },
+    "accessibilityRequirements": {
+      "type": "object",
+      "properties": {
+        "wcagLevel": {
+          "type": "string",
+          "enum": ["A", "AA", "AAA"]
+        },
+        "standards": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "validationTools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "criticalOperations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "operationType": {
+            "type": "string"
+          },
+          "requiredConfirmations": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minimumDelay": {
+            "type": "integer",
+            "description": "Minimum delay in seconds between steps",
+            "minimum": 0
+          },
+          "loggingRequired": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "priorityIssues": {
+      "type": "object",
+      "properties": {
+        "P0": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "P1": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "P2": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "P3": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "version",
+    "corePrinciples",
+    "interactionPatterns",
+    "accessibilityRequirements",
+    "criticalOperations",
+    "priorityIssues"
+  ]
+}
