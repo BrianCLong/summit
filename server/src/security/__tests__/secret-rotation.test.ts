@@ -10,36 +10,42 @@ import {
   resetSecretRotationManager,
 } from '../secret-rotation.js';
 
-// Mock Redis
-jest.mock('ioredis', () => {
-  const storage = new Map<string, string>();
-  const sets = new Map<string, Set<string>>();
+// Mock Redis with clearable storage
+const mockRedisStorage = new Map<string, string>();
+const mockRedisSets = new Map<string, Set<string>>();
 
+// Function to clear mock storage between tests
+export function clearMockRedisStorage() {
+  mockRedisStorage.clear();
+  mockRedisSets.clear();
+}
+
+jest.mock('ioredis', () => {
   return jest.fn().mockImplementation(() => ({
     connect: jest.fn().mockResolvedValue(undefined),
     quit: jest.fn().mockResolvedValue(undefined),
     ping: jest.fn().mockResolvedValue('PONG'),
-    get: jest.fn((key: string) => Promise.resolve(storage.get(key) || null)),
+    get: jest.fn((key: string) => Promise.resolve(mockRedisStorage.get(key) || null)),
     set: jest.fn((key: string, value: string) => {
-      storage.set(key, value);
+      mockRedisStorage.set(key, value);
       return Promise.resolve('OK');
     }),
     del: jest.fn((key: string) => {
-      storage.delete(key);
+      mockRedisStorage.delete(key);
       return Promise.resolve(1);
     }),
     keys: jest.fn((pattern: string) => {
       const regex = new RegExp(pattern.replace('*', '.*'));
-      return Promise.resolve(Array.from(storage.keys()).filter(k => regex.test(k)));
+      return Promise.resolve(Array.from(mockRedisStorage.keys()).filter(k => regex.test(k)));
     }),
     expire: jest.fn().mockResolvedValue(1),
     sadd: jest.fn((key: string, ...values: string[]) => {
-      if (!sets.has(key)) sets.set(key, new Set());
-      values.forEach(v => sets.get(key)!.add(v));
+      if (!mockRedisSets.has(key)) mockRedisSets.set(key, new Set());
+      values.forEach(v => mockRedisSets.get(key)!.add(v));
       return Promise.resolve(values.length);
     }),
     smembers: jest.fn((key: string) => {
-      return Promise.resolve(Array.from(sets.get(key) || []));
+      return Promise.resolve(Array.from(mockRedisSets.get(key) || []));
     }),
     on: jest.fn(),
   }));
@@ -49,6 +55,8 @@ describe('SecretRotationManager', () => {
   let manager: SecretRotationManager;
 
   beforeEach(async () => {
+    // Clear mock Redis storage between tests
+    clearMockRedisStorage();
     resetSecretRotationManager();
     manager = new SecretRotationManager(undefined, {
       enabled: true,
