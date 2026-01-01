@@ -24,4 +24,26 @@ describe('Accessibility', () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
+
+  it('Button loading state UX', () => {
+    // Standard button: shows spinner + text
+    const { container: stdContainer, getByText: getByTextStd } = render(
+      <Button loading>Click me</Button>
+    );
+    expect(getByTextStd('Click me')).toBeDefined();
+    const stdSpinner = stdContainer.querySelector('.animate-spin');
+    expect(stdSpinner).toBeDefined();
+    expect(stdSpinner?.classList.contains('mr-2')).toBe(true);
+
+    // Icon button: shows ONLY spinner (no text, no margin)
+    const { container: iconContainer, queryByTestId } = render(
+      <Button size="icon" loading>
+        <span data-testid="icon-child">Icon</span>
+      </Button>
+    );
+    expect(queryByTestId('icon-child')).toBeNull();
+    const iconSpinner = iconContainer.querySelector('.animate-spin');
+    expect(iconSpinner).toBeDefined();
+    expect(iconSpinner?.classList.contains('mr-2')).toBe(false);
+  });
 });
