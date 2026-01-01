@@ -19,6 +19,31 @@
     "ciCommands": ["make ga-verify"],
     "provenance": "Changes must cite evidence artifacts in PR summaries."
   },
+  "restrictedAreas": [
+    {
+      "name": "Secrets",
+      "paths": ["secrets/", "sealed-secrets/"],
+      "overrideLabel": "restricted-area-override",
+      "notes": "Credential and secret material are human-only unless explicitly overridden."
+    },
+    {
+      "name": "SecurityHardening",
+      "paths": ["security-hardening/", "security/", "trust/"],
+      "overrideLabel": "restricted-area-override",
+      "notes": "Defense-in-depth policy, attestations, and trust stores require human review."
+    },
+    {
+      "name": "ProductionInfra",
+      "paths": ["terraform/prod/"],
+      "overrideLabel": "restricted-area-override",
+      "notes": "Production infrastructure definitions cannot be modified by agents without a human override."
+    }
+  ],
+  "activityTracking": {
+    "ledger": "AGENT_ACTIVITY.md",
+    "backlog": "TASK_BACKLOG.md",
+    "policy": "Log branches/PRs, agent owner, and status for every task change."
+  },
   "stopConditions": [
     "Tooling instability that blocks deterministic verification",
     "Requests to bypass Legacy Mode guardrails",

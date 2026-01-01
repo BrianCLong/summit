@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-01-01T05:15:00Z",
+  "revision_note": "Added human steering controls, restricted-path guardrails, and agent activity logging to reduce thrash",
   "initiatives": [
     {
       "id": "A",
