@@ -5,7 +5,13 @@
  */
 
 import { EventEmitter } from 'events';
-import { createHash, randomBytes, createHmac } from 'crypto';
+import {
+  createHash,
+  randomBytes,
+  createHmac,
+  createVerify,
+} from 'crypto';
+import cbor from 'cbor';
 
 /**
  * WebAuthn credential types
@@ -953,6 +959,10 @@ export class WebAuthnManager extends EventEmitter {
         this.arrayBufferToString(response.clientDataJSON),
       );
 
+      if (clientDataJSON.type !== 'webauthn.get') {
+        return { verified: false, errors: ['Invalid client data type'] };
+      }
+
       if (
         clientDataJSON.challenge !==
         this.arrayBufferToBase64(challengeData.challenge)
@@ -965,25 +975,55 @@ export class WebAuthnManager extends EventEmitter {
         return { verified: false, errors: ['Origin mismatch'] };
       }
 
-      // Verify signature (simplified)
-      const authData = this.parseAuthenticatorData(response.authenticatorData);
+      const parsedAuthData = this.parseAuthenticatorData(
+        response.authenticatorData,
+      );
+
+      const rpIdHash = createHash('sha256')
+        .update(this.config.rpId)
+        .digest();
+
+      if (!Buffer.from(parsedAuthData.rpIdHash).equals(rpIdHash)) {
+        return { verified: false, errors: ['RP ID hash mismatch'] };
+      }
+
+      if (
+        this.config.requireUserVerification &&
+        (parsedAuthData.flags & 0x04) === 0
+      ) {
+        return {
+          verified: false,
+          errors: ['User verification required but not provided'],
+        };
+      }
+
+      const clientDataHash = createHash('sha256')
+        .update(Buffer.from(response.clientDataJSON))
+        .digest();
+      const signatureBase = Buffer.concat([
+        Buffer.from(response.authenticatorData),
+        clientDataHash,
+      ]);
+
+      const signatureValid = this.verifySignature(
+        storedCredential.publicKey,
+        response.signature,
+        signatureBase,
+        storedCredential.algorithm,
+      );
+
+      if (!signatureValid) {
+        return { verified: false, errors: ['Invalid signature'] };
+      }
 
       // Check counter
-      if (authData.counter <= storedCredential.counter) {
+      if (parsedAuthData.counter <= storedCredential.counter) {
         return { verified: false, errors: ['Invalid counter'] };
       }
 
-      // In production, would verify the signature using the stored public key
-      // const signatureValid = await this.verifySignature(
-      //   storedCredential.publicKey,
-      //   response.signature,
-      //   authData,
-      //   clientDataJSON
-      // );
-
       return {
         verified: true,
-        newCounter: authData.counter,
+        newCounter: parsedAuthData.counter,
       };
     } catch (error) {
       return {
@@ -1202,23 +1242,91 @@ export class WebAuthnManager extends EventEmitter {
   }
 
   private parseAttestationObject(attestationObject: ArrayBuffer): any {
-    // Simplified parsing - in production would use proper CBOR library
+    const decoded = cbor.decodeFirstSync(Buffer.from(attestationObject));
+    const authData = new Uint8Array(decoded.authData).buffer;
+    const parsedAuthData = this.parseAuthenticatorData(authData, {
+      expectAttestedCredentialData: true,
+    });
+
+    const cosePublicKey = parsedAuthData.credentialPublicKey;
+    const algorithm = (cosePublicKey && cosePublicKey.get(3)) || -7;
+
+    const publicKeyPem = this.coseToPem(cosePublicKey);
+
     return {
-      publicKey: new ArrayBuffer(32),
-      algorithm: -7, // ES256
-      counter: 0,
-      aaguid: new ArrayBuffer(16),
-      credentialBackedUp: false,
-      credentialDeviceType: 'singleDevice',
-      fmt: 'none',
+      publicKey: this.stringToArrayBuffer(publicKeyPem),
+      algorithm,
+      counter: parsedAuthData.counter,
+      aaguid: parsedAuthData.aaguid,
+      credentialBackedUp: parsedAuthData.credentialBackedUp,
+      credentialDeviceType: parsedAuthData.credentialDeviceType,
+      fmt: decoded.fmt,
     };
   }
 
-  private parseAuthenticatorData(authData: ArrayBuffer): any {
-    // Simplified parsing - in production would properly parse
+  private parseAuthenticatorData(
+    authData: ArrayBuffer,
+    options: { expectAttestedCredentialData?: boolean } = {},
+  ): any {
+    const dataView = new DataView(authData);
+
+    const rpIdHash = new Uint8Array(authData.slice(0, 32));
+    const flags = dataView.getUint8(32);
+    const counter = dataView.getUint32(33, false);
+
+    const attestedCredentialDataFlag = (flags & 0x40) !== 0;
+    let cursor = 37;
+    let credentialPublicKey;
+    let aaguid = new ArrayBuffer(16);
+    let credentialBackedUp = false;
+    let credentialDeviceType: 'singleDevice' | 'multiDevice' = 'singleDevice';
+
+    if (options.expectAttestedCredentialData && attestedCredentialDataFlag) {
+      aaguid = authData.slice(cursor, cursor + 16);
+      cursor += 16;
+      const credentialIdLength = dataView.getUint16(cursor, false);
+      cursor += 2;
+
+      // Skip credentialId
+      cursor += credentialIdLength;
+
+      const remaining = new Uint8Array(authData.slice(cursor));
+      credentialPublicKey = cbor.decodeFirstSync(Buffer.from(remaining));
+
+      credentialBackedUp = (flags & 0b10000000) !== 0;
+      credentialDeviceType = credentialBackedUp ? 'multiDevice' : 'singleDevice';
+    }
+
     return {
-      counter: Math.floor(Math.random() * 1000000),
+      rpIdHash,
+      flags,
+      counter,
+      credentialPublicKey,
+      aaguid,
+      credentialBackedUp,
+      credentialDeviceType,
     };
+  }
+
+  private coseToPem(cosePublicKey: Map<number, any>): string {
+    // Only handle EC2 keys (kty = 2)
+    const x = cosePublicKey.get(-2);
+    const y = cosePublicKey.get(-3);
+
+    const publicKeyBuffer = Buffer.concat([
+      Buffer.from([0x04]),
+      Buffer.from(x),
+      Buffer.from(y),
+    ]);
+
+    const keyInfo = Buffer.concat([
+      Buffer.from('3059301306072a8648ce3d020106082a8648ce3d030107034200', 'hex'),
+      publicKeyBuffer,
+    ]);
+
+    const pem = keyInfo.toString('base64');
+    const formattedPem = pem.match(/.{1,64}/g)?.join('\n');
+    return `-----BEGIN PUBLIC KEY-----\n${formattedPem}\n-----END PUBLIC KEY-----`;
   }
 
   private generateDeviceFingerprint(options: any): string {
@@ -1226,6 +1334,27 @@ export class WebAuthnManager extends EventEmitter {
       .update(options.userAgent + options.ipAddress)
       .digest('hex')
       .substring(0, 16);
+  }
+
+  private verifySignature(
+    publicKey: ArrayBuffer,
+    signature: ArrayBuffer,
+    data: Buffer,
+    algorithm: number,
+  ): boolean {
+    const verify = createVerify('SHA256');
+    verify.update(data);
+    verify.end();
+
+    const keyPem = this.arrayBufferToString(publicKey);
+    const signatureBuffer = Buffer.from(signature);
+
+    // Support ES256 (-7) and RS256 (-257)
+    if (algorithm === -7 || algorithm === -257) {
+      return verify.verify(keyPem, signatureBuffer);
+    }
+
+    return false;
   }
 
   private generateChallengeId(): string {
@@ -1254,12 +1383,7 @@ export class WebAuthnManager extends EventEmitter {
   }
 
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
+    return Buffer.from(buffer).toString('base64');
   }
 
   private startBackgroundTasks(): void {

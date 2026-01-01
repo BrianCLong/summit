@@ -7,8 +7,16 @@ const DeduplicationInspector = () => {
   const [feedback, setFeedback] = useState(null);
   const [mergeInFlight, setMergeInFlight] = useState(null);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
+  const [mergeProgress, setMergeProgress] = useState("");
   const { loading, error, data } = useQuery(GET_DEDUPLICATION_CANDIDATES);
   const [suggestMerge] = useMutation(SUGGEST_MERGE);
+
+  useEffect(() => {
+    const savedThreshold = localStorage.getItem("deduplication.similarityThreshold");
+    if (savedThreshold) {
+      setSimilarityThreshold(Number(savedThreshold));
+    }
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -16,24 +24,35 @@ const DeduplicationInspector = () => {
     }
   }, [data]);
 
+  useEffect(() => {
+    localStorage.setItem("deduplication.similarityThreshold", similarityThreshold.toString());
+  }, [similarityThreshold]);
+
   const handleMerge = async (sourceId, targetId) => {
     setFeedback(null);
     setMergeInFlight(`${sourceId}-${targetId}`);
+    setMergeProgress("Validating merge request...");
     try {
+      setMergeProgress("Submitting merge to server...");
       await suggestMerge({ variables: { sourceId, targetId } });
       // Remove the merged candidate from the list
       setCandidates((prev) =>
         prev.filter((c) => c.entityA.id !== sourceId && c.entityB.id !== sourceId)
       );
       setFeedback({ type: "success", message: "Merge completed successfully." });
+      setMergeProgress("Merge committed");
     } catch (err) {
       console.error("Error merging entities:", err);
-      setFeedback({ type: "error", message: "Merge failed. Please try again." });
+      setFeedback({
+        type: "error",
+        message: `Merge failed: ${err.message || "Please try again."}`,
+      });
+      setMergeProgress("");
     }
     setMergeInFlight(null);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p aria-live="polite">Loading candidates...</p>;
   if (error) return <p>Error :(</p>;
 
   const filteredCandidates = candidates.filter(
@@ -68,6 +87,52 @@ const DeduplicationInspector = () => {
     );
   };
 
+  const renderComparisonDetails = (entityA, entityB) => {
+    const attributeKeys = Array.from(
+      new Set([
+        ...(entityA.attributes ? Object.keys(entityA.attributes) : []),
+        ...(entityB.attributes ? Object.keys(entityB.attributes) : []),
+      ])
+    );
+
+    return (
+      <div>
+        <h4>Field comparison</h4>
+        <table
+          aria-label="Entity comparison table"
+          style={{ width: "100%", borderCollapse: "collapse" }}
+        >
+          <thead>
+            <tr>
+              <th style={{ textAlign: "left" }}>Field</th>
+              <th style={{ textAlign: "left" }}>Entity A</th>
+              <th style={{ textAlign: "left" }}>Entity B</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Label</td>
+              <td>{entityA.label}</td>
+              <td>{entityB.label}</td>
+            </tr>
+            <tr>
+              <td>Description</td>
+              <td>{entityA.description}</td>
+              <td>{entityB.description}</td>
+            </tr>
+            {attributeKeys.map((key) => (
+              <tr key={key}>
+                <td>{key}</td>
+                <td>{entityA.attributes ? String(entityA.attributes[key]) : "-"}</td>
+                <td>{entityB.attributes ? String(entityB.attributes[key]) : "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   return (
     <div>
       <h2>Deduplication Inspector</h2>
@@ -91,6 +156,11 @@ const DeduplicationInspector = () => {
           {feedback.message}
         </div>
       ) : null}
+      {mergeProgress && (
+        <p aria-live="polite" style={{ color: "#555" }}>
+          {mergeProgress}
+        </p>
+      )}
       {filteredCandidates.map(({ entityA, entityB, similarity, reasons }) => (
         <div
           key={`${entityA.id}-${entityB.id}`}
@@ -102,6 +172,7 @@ const DeduplicationInspector = () => {
             {renderEntityDetails(entityA)}
             {renderEntityDetails(entityB)}
           </div>
+          {renderComparisonDetails(entityA, entityB)}
           <button
             onClick={() => handleMerge(entityA.id, entityB.id)}
             disabled={mergeInFlight === `${entityA.id}-${entityB.id}`}
