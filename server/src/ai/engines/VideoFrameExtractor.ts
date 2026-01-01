@@ -183,7 +183,7 @@ export class VideoFrameExtractor {
    */
   private async getVideoMetadata(videoPath: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      ffmpeg.ffprobe(videoPath, (err, metadata) => {
+      ffmpeg.ffprobe(videoPath, (err: any, metadata: any) => {
         if (err) {
           reject(err);
         } else {

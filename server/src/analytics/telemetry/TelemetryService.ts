@@ -38,11 +38,11 @@ export class TelemetryService {
       }
       this.currentLogFile = filepath;
       this.logStream = fs.createWriteStream(filepath, { flags: 'a' });
-      this.logStream.on('error', (err) => {
+      this.logStream!.on('error', (err: any) => {
         console.error('[TelemetryService] Stream error:', err);
       });
-      this.logStream.on('open', (fd) => {
-         console.log(`[TelemetryService] Stream opened for ${filepath}, fd: ${fd}`);
+      this.logStream!.on('open', (fd: any) => {
+        console.log(`[TelemetryService] Stream opened for ${filepath}, fd: ${fd}`);
       });
     }
   }
