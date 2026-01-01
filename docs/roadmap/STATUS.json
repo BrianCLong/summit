@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T04:11:56Z",
-  "revision_note": "Added Sprint N+3 Freeze/Certify/Release planning pack; refreshed SummitThreat roadmap narrative for 2026",
+  "last_updated": "2026-01-01T06:40:00Z",
+  "revision_note": "Added institutional continuity/succession doctrine and policy guardrails to resist capture",
   "initiatives": [
     {
       "id": "A",
@@ -134,14 +134,28 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Institutional Continuity & Succession Safety",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Continuity doctrine, capture resistance, and succession controls",
+          "status": "rc-ready",
+          "owner": "Jules",
+          "evidence": "Continuity artifacts added under docs/continuity with enforcement policy in policies/continuity.rego",
+          "notes": "Includes Purpose Lock, Authority Transition Protocol, Drift Sentinel playbook, capture incentives map, merger safety checklist, and custodianship register"
+        }
+      ]
     }
   ],
   "summary": {
-    "rc_ready": 2,
+    "rc_ready": 3,
     "partial": 2,
     "incomplete": 2,
     "not_started": 5,
-    "total": 11,
+    "total": 12,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

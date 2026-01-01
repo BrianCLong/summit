@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-label="Continuity defense system architecture diagram">
+  <style>
+    .title { font: bold 20px sans-serif; }
+    .label { font: 14px sans-serif; }
+    .box { fill:#f5f5f5; stroke:#1f2d3d; stroke-width:2; rx:8; ry:8; }
+    .pill { fill:#e8f4ff; stroke:#2563eb; stroke-width:1.5; rx:8; ry:8; }
+    .accent { fill:#ecfdf3; stroke:#15803d; stroke-width:1.5; rx:8; ry:8; }
+    .risk { fill:#fff7ed; stroke:#f97316; stroke-width:1.5; rx:8; ry:8; }
+    .arrow { stroke:#4b5563; stroke-width:2; marker-end:url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4b5563" />
+    </marker>
+  </defs>
+
+  <text x="20" y="30" class="title">Continuity Defense: Purpose Lock → Transition Safety → Drift & Capture Control</text>
+
+  <rect class="box" x="40" y="60" width="260" height="120" />
+  <text x="60" y="90" class="label">Purpose Lock Charter</text>
+  <text x="60" y="115" class="label">• Encodes mission, non-purposes, red-lines</text>
+  <text x="60" y="140" class="label">• Policy-as-code bindings</text>
+  <text x="60" y="165" class="label">• Amendment path with quorum + cooling</text>
+
+  <rect class="box" x="320" y="60" width="260" height="120" />
+  <text x="340" y="90" class="label">Authority Transition Protocol</text>
+  <text x="340" y="115" class="label">• Tightened controls during handoff</text>
+  <text x="340" y="140" class="label">• Evidence re-validation + key rotation</text>
+  <text x="340" y="165" class="label">• Immutable handoff log & review</text>
+
+  <rect class="box" x="600" y="60" width="260" height="120" />
+  <text x="620" y="90" class="label">Custodianship Register</text>
+  <text x="620" y="115" class="label">• Named owners for invariants</text>
+  <text x="620" y="140" class="label">• Review cadence & succession drill</text>
+  <text x="620" y="165" class="label">• Crisis fallback & evidence links</text>
+
+  <line class="arrow" x1="300" y1="120" x2="320" y2="120" />
+  <line class="arrow" x1="580" y1="120" x2="600" y2="120" />
+
+  <rect class="accent" x="120" y="220" width="240" height="120" />
+  <text x="140" y="250" class="label">Drift Sentinel</text>
+  <text x="140" y="275" class="label">• Semantic diff vs baselines</text>
+  <text x="140" y="300" class="label">• Policy hash + waiver monitoring</text>
+  <text x="140" y="325" class="label">• Alerts with mandatory justification</text>
+
+  <rect class="risk" x="380" y="220" width="240" height="120" />
+  <text x="400" y="250" class="label">Anti-Capture Incentives</text>
+  <text x="400" y="275" class="label">• Incentive vectors & friction triggers</text>
+  <text x="400" y="300" class="label">• Budget guards & waiver decay</text>
+  <text x="400" y="325" class="label">• Performance metrics tied to safety</text>
+
+  <rect class="accent" x="640" y="220" width="200" height="120" />
+  <text x="660" y="250" class="label">Merger Safety</text>
+  <text x="660" y="275" class="label">• Pre/post constraints & evidence continuity</text>
+  <text x="660" y="300" class="label">• Policy gate on integrations</text>
+  <text x="660" y="325" class="label">• Rollback to safe baseline</text>
+
+  <line class="arrow" x1="240" y1="180" x2="240" y2="220" />
+  <line class="arrow" x1="460" y1="180" x2="460" y2="220" />
+  <line class="arrow" x1="740" y1="180" x2="740" y2="220" />
+
+  <rect class="pill" x="200" y="370" width="500" height="110" />
+  <text x="220" y="400" class="label">Runtime Enforcement</text>
+  <text x="220" y="425" class="label">• Policy-as-code (continuity.rego)</text>
+  <text x="220" y="450" class="label">• Immutable audit & provenance ledger</text>
+  <text x="220" y="475" class="label">• Incident routing + dashboarding</text>
+
+  <line class="arrow" x1="340" y1="340" x2="340" y2="370" />
+  <line class="arrow" x1="500" y1="340" x2="500" y2="370" />
+  <line class="arrow" x1="740" y1="340" x2="700" y2="370" />
+</svg>
