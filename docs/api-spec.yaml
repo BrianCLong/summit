@@ -279,7 +279,42 @@ paths:
                 type: object
 
 components:
+  parameters:
+    ApprovalReceiptHeader:
+      name: x-summit-approval-receipt
+      in: header
+      description: Signed receipt from a second approver for sensitive operations (Dual Control).
+      required: false
+      schema:
+        type: string
+
+  headers:
+    ProvenanceReceipt:
+      description: Unique ID of the provenance receipt generated for this operation.
+      schema:
+        type: string
+    PolicyDecision:
+      description: The policy decision result (allow/deny).
+      schema:
+        type: string
+        enum: [allow, deny]
+
   schemas:
+    PolicyViolationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Policy Violation"
+        message:
+          type: string
+          example: "Access denied by policy enforcement"
+        requestId:
+          type: string
+        policy:
+          type: string
+          description: The policy path that triggered the denial.
+
     HealthStatus:
       type: object
       properties:

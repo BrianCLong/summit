@@ -42,29 +42,31 @@ jest.mock('node-fetch', () => ({
   Request: jest.fn(),
 }));
 
-// Mock apollo-server-express for ESM compatibility
-jest.mock('apollo-server-express', () => ({
-  __esModule: true,
-  ApolloServer: jest.fn().mockImplementation(() => ({
-    start: jest.fn().mockResolvedValue(undefined),
-    stop: jest.fn().mockResolvedValue(undefined),
-    applyMiddleware: jest.fn(),
-    executeOperation: jest.fn().mockResolvedValue({ data: {} }),
-  })),
-  AuthenticationError: class AuthenticationError extends Error {
-    constructor(message) {
-      super(message);
-      this.name = 'AuthenticationError';
-    }
-  },
-  ForbiddenError: class ForbiddenError extends Error {
-    constructor(message) {
-      super(message);
-      this.name = 'ForbiddenError';
-    }
-  },
-  gql: (strings) => strings.join(''),
-}));
+// Mock apollo-server-express for ESM compatibility - Simplified for missing dependency
+jest.mock('apollo-server-express', () => {
+  return {
+    __esModule: true,
+    ApolloServer: jest.fn().mockImplementation(() => ({
+      start: jest.fn().mockResolvedValue(undefined),
+      stop: jest.fn().mockResolvedValue(undefined),
+      applyMiddleware: jest.fn(),
+      executeOperation: jest.fn().mockResolvedValue({ data: {} }),
+    })),
+    AuthenticationError: class AuthenticationError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'AuthenticationError';
+      }
+    },
+    ForbiddenError: class ForbiddenError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'ForbiddenError';
+      }
+    },
+    gql: (strings) => strings.join(''),
+  };
+}, { virtual: true }); // Use virtual: true since module might be missing
 
 // Mock IORedis globally to prevent connection errors
 jest.mock('ioredis', () => {
