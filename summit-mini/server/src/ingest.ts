@@ -24,7 +24,7 @@ export function extractGraph(content: string): Extracted {
 
   const counts = new Map<string, number>();
   for (const t of tokens) {
-    if (t.length < 3) continue;
+    if (t.length < 3) {continue;}
     const key = t.trim();
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }

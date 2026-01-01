@@ -1,0 +1,28 @@
+{
+  "name": "@summit/explainability-sdk",
+  "version": "0.1.0",
+  "description": "SDK for instrumenting Summit AI operations with inference chain capture",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0",
+    "redis": "^5.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.7.3",
+    "jest": "^29.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit",
+    "directory": "packages/explainability-sdk"
+  },
+  "keywords": ["explainability", "ai-trust", "provenance", "audit"],
+  "license": "MIT"
+}

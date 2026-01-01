@@ -1,0 +1,20 @@
+{
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "plugins": ["ux-governance"],
+  "rules": {
+    "ux-governance/critical-action-pattern": "error",
+    "ux-governance/accessibility-compliance": "error",
+    "ux-governance/design-system-consistency": "error",
+    "ux-governance/information-hierarchy": "warn",
+    "ux-governance/trust-boundaries": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["*.jsx", "*.tsx"],
+      "rules": {
+        "ux-governance/critical-action-pattern": "error",
+        "ux-governance/accessibility-compliance": "error"
+      }
+    }
+  ]
+}

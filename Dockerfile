@@ -1,23 +1,24 @@
 # Multi-stage build for IntelGraph
-FROM node:25-alpine AS base
+FROM node:20.18.3-alpine AS base
 WORKDIR /app
-COPY package*.json ./
-COPY turbo.json ./
-RUN npm ci --only=production && npm cache clean --force
+# Use pnpm for package management
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml turbo.json ./
+RUN pnpm install --frozen-lockfile --prod
 
-FROM node:25-alpine AS build
+FROM node:20.18.3-alpine AS build
 WORKDIR /app
-COPY package*.json ./
-COPY turbo.json ./
-RUN npm ci
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml turbo.json ./
+RUN pnpm install --frozen-lockfile
 COPY . .
 ARG API_BASE_URL
 ENV API_BASE_URL=$API_BASE_URL
 ARG GRAPHQL_SCHEMA_URL
 ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
-RUN npm run build
+RUN pnpm run build
 
-FROM cgr.dev/chainguard/node:20 AS runtime
+FROM node:20.18.3-alpine AS runtime
 WORKDIR /app
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist

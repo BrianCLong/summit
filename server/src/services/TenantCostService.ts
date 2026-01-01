@@ -1211,9 +1211,11 @@ export class TenantCostService extends EventEmitter {
       const costCategory = this.config.costCategories.find(
         (c) => c.name === category,
       );
-      if (costCategory) {
+      if (costCategory && typeof rate === 'number') {
         costCategory.ratePerUnit = rate;
         logger.info('Updated cost rate', { category, rate });
+      } else if (costCategory) {
+        logger.warn('Skipped updating cost rate due to undefined value', { category });
       }
     }
   }

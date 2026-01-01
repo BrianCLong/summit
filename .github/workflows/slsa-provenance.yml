@@ -1,0 +1,45 @@
+name: SLSA Provenance
+on: [push]
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      hashes: ${{ steps.hash.outputs.hashes }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Summit artifacts
+        run: |
+          mkdir -p dist
+          echo "Building Summit..."
+          touch dist/summit-binary
+      - name: Generate hashes
+        id: hash
+        run: |
+          cd dist
+          sha256sum * > ../checksums.txt
+          echo "hashes=$(cat ../checksums.txt | base64 -w0)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: summit-artifacts
+          path: |
+            dist/
+            checksums.txt
+
+  provenance:
+    needs: [build]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
+    with:
+      base64-subjects: "${{ needs.build.outputs.hashes }}"
+      upload-assets: true
+
+# Linked: https://linear.app/summi7/issue/SUM-10197

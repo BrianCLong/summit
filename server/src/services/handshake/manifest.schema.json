@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.platform/schemas/handshake/v1",
+  "title": "HANDSHAKE Connector Manifest",
+  "description": "Self-describing manifest for data source connectors",
+  "type": "object",
+  "required": ["version", "connector", "capabilities", "auth", "endpoints"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Manifest schema version"
+    },
+    "connector": {
+      "type": "object",
+      "required": ["id", "name", "provider", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique connector identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable connector name"
+        },
+        "provider": {
+          "type": "string",
+          "description": "Organization providing the connector"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed connector description"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Connector version (semver)"
+        },
+        "deprecationNotice": {
+          "type": "string",
+          "description": "Notice if connector is deprecated"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "object",
+      "required": ["entityTypes", "updateFrequency"],
+      "properties": {
+        "entityTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["Person", "Organization", "Event", "Document", "Location"]
+          },
+          "description": "Types of entities this connector can provide"
+        },
+        "updateFrequency": {
+          "type": "object",
+          "required": ["mode"],
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["polling", "webhook", "streaming"],
+              "description": "How the connector delivers updates"
+            },
+            "pollingInterval": {
+              "type": "integer",
+              "minimum": 60,
+              "description": "Polling interval in seconds (if mode=polling)"
+            },
+            "webhookUrl": {
+              "type": "string",
+              "format": "uri",
+              "description": "Webhook URL to register (if mode=webhook)"
+            }
+          }
+        },
+        "quality": {
+          "type": "object",
+          "properties": {
+            "entityResolutionConfidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Average confidence score for entity resolution"
+            },
+            "dataFreshness": {
+              "type": "string",
+              "description": "How fresh the data is (e.g., 'real-time', '1-hour', '1-day')"
+            }
+          }
+        },
+        "rateLimit": {
+          "type": "object",
+          "properties": {
+            "requestsPerMinute": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "burstSize": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "required": ["method"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["oauth2", "api_key", "mtls", "none"],
+          "description": "Authentication method"
+        },
+        "oauth2": {
+          "type": "object",
+          "properties": {
+            "authorizationUrl": { "type": "string", "format": "uri" },
+            "tokenUrl": { "type": "string", "format": "uri" },
+            "scopes": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "apiKey": {
+          "type": "object",
+          "properties": {
+            "headerName": { "type": "string" },
+            "prefix": { "type": "string" }
+          }
+        }
+      }
+    },
+    "endpoints": {
+      "type": "object",
+      "required": ["baseUrl", "health"],
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL for connector API"
+        },
+        "health": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Health check endpoint (relative to baseUrl)"
+        },
+        "data": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Data retrieval endpoint"
+        }
+      }
+    }
+  }
+}

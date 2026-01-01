@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { PROD, VITE_FEATURE_FLAGS } from '../config/env.js';
 
 type FlagType = 'boolean' | 'percentage' | 'variant';
 
@@ -37,7 +38,7 @@ const FLAG_CATALOG: Record<string, FlagDefinition> = {
   'ui.a11yGuardrails': { type: 'boolean', defaultValue: true },
 };
 
-const envOverrides = parseOverrides(import.meta.env.VITE_FEATURE_FLAGS, import.meta.env.PROD);
+const envOverrides = parseOverrides(VITE_FEATURE_FLAGS, PROD);
 
 export function useFeatureFlag(
   flagName: string,
@@ -126,7 +127,7 @@ function evaluateFlag(
 }
 
 function buildOverrides(seed: OverrideValueMap): OverrideValueMap {
-  const local = parseOverrides(readLocalOverrides(), import.meta.env.PROD);
+  const local = parseOverrides(readLocalOverrides(), PROD);
   return { ...seed, ...local };
 }
 

@@ -135,7 +135,7 @@ backlog:
     component: "AI/Governance"
     epic: "Policy Fuzzer Development"
     type: "Feature"
-    status: "Ready"
+    status: "In Progress"
     priority: "P0"
     acceptance_criteria:
       - "Given a policy and query, the fuzzer generates adversarial pairs"

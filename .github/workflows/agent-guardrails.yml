@@ -1,0 +1,56 @@
+name: agent-guardrails
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, labeled]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  restricted-path-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate restricted path changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const restrictedPrefixes = [
+              'secrets/',
+              'security-hardening/',
+              'security/',
+              'trust/',
+              'sealed-secrets/',
+              'terraform/prod/'
+            ];
+            const overrideLabel = 'restricted-area-override';
+            const overrideToken = '"restricted_override": true';
+
+            const pr = context.payload.pull_request;
+            const labels = (pr.labels || []).map(label => label.name);
+            const hasOverride = labels.includes(overrideLabel) || (pr.body || '').includes(overrideToken);
+
+            if (hasOverride) {
+              core.info('Override detected via label or metadata token; restricted path check skipped.');
+              return;
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+
+            const violations = files
+              .map(file => file.filename)
+              .filter(name => restrictedPrefixes.some(prefix => name.startsWith(prefix)));
+
+            if (violations.length > 0) {
+              const message = `Restricted paths modified without override: ${violations.join(', ')}. ` +
+                `Add the ${overrideLabel} label or include ${overrideToken} in the AGENT-METADATA block with justification.`;
+              core.setFailed(message);
+            } else {
+              core.info('No restricted path changes detected.');
+            }

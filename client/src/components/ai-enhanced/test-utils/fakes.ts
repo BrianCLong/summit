@@ -43,8 +43,10 @@ export function makeFakeTransport(
 
   return {
     on: (fn) => {
+      console.log('FAKE TRANSPORT: on called');
       handler = fn;
       return () => {
+        console.log('FAKE TRANSPORT: unsubscribe called');
         handler = null;
       };
     },
@@ -57,7 +59,12 @@ export function makeFakeTransport(
 
       seq.forEach((evt, idx) => {
         const run = () => {
-          if (!cancelled && handler) handler(evt);
+          console.log('FAKE TRANSPORT: running event', evt.type, evt.type === 'token' ? evt.value : '');
+          if (!cancelled && handler) {
+            handler(evt);
+          } else {
+            console.log('FAKE TRANSPORT: skipped (cancelled:', cancelled, 'handler:', !!handler, ')');
+          }
         };
         if (mode === 'timer') {
           const id = scheduleTimer(run, idx * spacingMs);

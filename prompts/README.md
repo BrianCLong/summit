@@ -59,6 +59,13 @@ Each agent prompt is stored as a standalone file, and the Meta-Router chooses th
 | `review.security-check@v1.yaml` | Security review checklist |
 | `code.critic@v1.yaml` | Code review template |
 
+### Marketing & Positioning
+
+| File | Purpose |
+|------|---------|
+| `marketing.master-generator@v1.yaml` | Master system for generating/auditing all marketing artifacts |
+| `marketing.artifact-perfection@v1.yaml` | Sub-agent for refining specific marketing content |
+
 ---
 
 ## Usage

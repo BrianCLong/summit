@@ -19,15 +19,30 @@ interface ForecastResult {
     confidenceLevel: number;
     lastUpdated: Date;
   };
+  provenance: {
+    source: string;
+    model: string;
+    version: string;
+    timestamp: string;
+    experimental: boolean;
+  };
 }
 
 interface SimulationResult {
   scenarioId: string;
+  isSimulated: true;
   originalForecast: ForecastPoint[];
   adjustedForecast: ForecastPoint[];
   impact: {
     delta: number;
     percentageChange: number;
+  };
+  provenance: {
+    source: string;
+    model: string;
+    version: string;
+    timestamp: string;
+    experimental: boolean;
   };
 }
 
@@ -195,6 +210,13 @@ export class PredictiveThreatService extends EventEmitter {
         model: 'linear_regression_alpha',
         confidenceLevel: 0.95,
         lastUpdated: new Date()
+      },
+      provenance: {
+        source: 'historical_data',
+        model: 'linear_regression_alpha',
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        experimental: false
       }
     };
   }
@@ -226,13 +248,26 @@ export class PredictiveThreatService extends EventEmitter {
 
     return {
       scenarioId: `${scenario.action}_${Date.now()}`,
+      isSimulated: true,
       originalForecast: forecast.points,
       adjustedForecast: adjustedPoints,
       impact: {
         delta,
         percentageChange
+      },
+      provenance: {
+        source: 'simulation_engine',
+        model: 'counterfactual_alpha',
+        version: '1.0.0',
+        timestamp: new Date().toISOString(),
+        experimental: true
       }
     };
+  }
+
+  public _resetForTesting(): void {
+    this.historicalData.clear();
+    this.seedMockData();
   }
 }
 

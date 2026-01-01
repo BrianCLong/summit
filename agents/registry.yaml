@@ -1,0 +1,467 @@
+# Agent Capability Registry
+# Authoritative source of truth for agent capabilities, limits, and governance
+# Last Updated: 2025-12-31
+# Version: 1.0.0
+
+agents:
+  # Code Review Agent
+  - identity:
+      id: "agent-code-reviewer-001"
+      name: "code-review-agent"
+      version: "2.1.0"
+      agent_type: "internal"
+      status: "active"
+      is_certified: true
+      certification_expires_at: "2026-12-31T23:59:59Z"
+      owner_id: "system"
+      organization_id: "platform-engineering"
+
+    capabilities:
+      - name: "repository:read"
+        scope:
+          tenant_scopes: ["*"]
+          project_scopes: ["*"]
+          data_classifications: ["internal", "confidential"]
+          allowed_domains: ["github.com", "gitlab.com"]
+          allowed_apis:
+            - "github:repos/*"
+            - "github:pulls/*"
+            - "github:commits/*"
+          allowed_tools: ["git", "grep", "ast-parser"]
+          read_only: true
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "low"
+        requires_approval: false
+        approval_class: "auto"
+
+      - name: "comment:write"
+        scope:
+          tenant_scopes: ["*"]
+          project_scopes: ["*"]
+          data_classifications: ["internal"]
+          allowed_apis:
+            - "github:pulls/*/comments"
+            - "github:commits/*/comments"
+          read_only: false
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "low"
+        requires_approval: false
+        approval_class: "auto"
+
+      - name: "analysis:execute"
+        scope:
+          tenant_scopes: ["*"]
+          data_classifications: ["internal"]
+          allowed_tools: ["eslint", "prettier", "typescript-compiler"]
+          read_only: true
+        risk_level: "low"
+        requires_approval: false
+        approval_class: "auto"
+
+    limits:
+      execution:
+        max_wall_clock_ms: 300000  # 5 minutes
+        max_steps: 50
+        max_tool_calls: 100
+        max_tokens_total: 100000
+        max_memory_mb: 512
+        max_concurrent_requests: 10
+        max_runs_per_minute: 10
+        max_runs_per_hour: 100
+        max_runs_per_day: 1000
+
+      budget:
+        max_cost_per_run_usd: 0.50
+        max_cost_per_day_usd: 50.00
+        max_cost_per_month_usd: 1000.00
+        quota_type: "daily_runs"
+        quota_limit: 1000
+        on_limit_breach: "deny"
+
+    restrictions:
+      allowed_operation_modes: ["SIMULATION", "DRY_RUN", "ENFORCED"]
+      requires_human_oversight: false
+      max_trust_level: "elevated"
+      compliance_tags: ["SOC2", "GDPR"]
+
+  # Incident Response Agent
+  - identity:
+      id: "agent-incident-responder-001"
+      name: "incident-response-agent"
+      version: "3.0.0"
+      agent_type: "internal"
+      status: "active"
+      is_certified: true
+      certification_expires_at: "2026-06-30T23:59:59Z"
+      owner_id: "sre-team"
+      organization_id: "platform-engineering"
+
+    capabilities:
+      - name: "monitoring:read"
+        scope:
+          tenant_scopes: ["*"]
+          data_classifications: ["internal", "confidential"]
+          allowed_apis:
+            - "prometheus:query"
+            - "prometheus:query_range"
+            - "datadog:metrics"
+            - "datadog:logs"
+          allowed_tools: ["promql", "log-analyzer"]
+          read_only: true
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "low"
+        requires_approval: false
+        approval_class: "auto"
+
+      - name: "deployment:rollback"
+        scope:
+          tenant_scopes: ["*"]
+          project_scopes: ["production-*"]
+          data_classifications: ["internal"]
+          allowed_apis:
+            - "kubernetes:apps/v1/deployments/*/rollback"
+            - "helm:rollback"
+          read_only: false
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "critical"
+        requires_approval: true
+        approval_class: "gated"
+
+      - name: "communication:send"
+        scope:
+          tenant_scopes: ["*"]
+          allowed_apis:
+            - "slack:chat.postMessage"
+            - "pagerduty:incidents"
+          read_only: false
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "medium"
+        requires_approval: false
+        approval_class: "auto"
+
+      - name: "incident:create"
+        scope:
+          tenant_scopes: ["*"]
+          allowed_apis:
+            - "pagerduty:incidents/create"
+            - "incident-io:incidents/create"
+          read_only: false
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "medium"
+        requires_approval: false
+        approval_class: "auto"
+
+    limits:
+      execution:
+        max_wall_clock_ms: 600000  # 10 minutes for incident response
+        max_steps: 100
+        max_tool_calls: 200
+        max_tokens_total: 500000
+        max_memory_mb: 1024
+        max_concurrent_requests: 20
+        max_runs_per_minute: 50
+        max_runs_per_hour: 500
+        max_runs_per_day: 5000
+
+      budget:
+        max_cost_per_run_usd: 5.00
+        max_cost_per_day_usd: 500.00
+        max_cost_per_month_usd: 10000.00
+        quota_type: "daily_runs"
+        quota_limit: 5000
+        on_limit_breach: "escalate"
+
+    restrictions:
+      allowed_operation_modes: ["ENFORCED"]
+      requires_human_oversight: true
+      max_trust_level: "privileged"
+      compliance_tags: ["SOC2", "INCIDENT_RESPONSE"]
+
+  # Database Migration Agent
+  - identity:
+      id: "agent-db-migrator-001"
+      name: "database-migration-agent"
+      version: "1.5.0"
+      agent_type: "internal"
+      status: "active"
+      is_certified: true
+      certification_expires_at: "2026-12-31T23:59:59Z"
+      owner_id: "database-team"
+      organization_id: "platform-engineering"
+
+    capabilities:
+      - name: "database:read"
+        scope:
+          tenant_scopes: ["*"]
+          data_classifications: ["internal", "confidential", "restricted"]
+          allowed_apis:
+            - "postgres:SELECT"
+            - "postgres:SHOW"
+            - "postgres:EXPLAIN"
+          read_only: true
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "medium"
+        requires_approval: false
+        approval_class: "auto"
+
+      - name: "database:schema_modify"
+        scope:
+          tenant_scopes: ["*"]
+          project_scopes: ["*"]
+          data_classifications: ["internal", "confidential"]
+          allowed_apis:
+            - "postgres:CREATE TABLE"
+            - "postgres:ALTER TABLE"
+            - "postgres:CREATE INDEX"
+            - "postgres:DROP INDEX"
+          read_only: false
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "critical"
+        requires_approval: true
+        approval_class: "human_in_the_loop"
+
+      - name: "database:write"
+        scope:
+          tenant_scopes: ["*"]
+          data_classifications: ["internal"]
+          allowed_apis:
+            - "postgres:INSERT"
+            - "postgres:UPDATE"
+          read_only: false
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "high"
+        requires_approval: true
+        approval_class: "gated"
+
+    limits:
+      execution:
+        max_wall_clock_ms: 1800000  # 30 minutes for migrations
+        max_steps: 200
+        max_tool_calls: 500
+        max_tokens_total: 200000
+        max_memory_mb: 2048
+        max_concurrent_requests: 5
+        max_runs_per_minute: 5
+        max_runs_per_hour: 20
+        max_runs_per_day: 100
+
+      budget:
+        max_cost_per_run_usd: 10.00
+        max_cost_per_day_usd: 100.00
+        max_cost_per_month_usd: 2000.00
+        quota_type: "daily_runs"
+        quota_limit: 100
+        on_limit_breach: "deny"
+
+    restrictions:
+      allowed_operation_modes: ["SIMULATION", "DRY_RUN", "ENFORCED"]
+      requires_human_oversight: true
+      max_trust_level: "privileged"
+      compliance_tags: ["SOC2", "DATA_GOVERNANCE"]
+
+  # Security Audit Agent
+  - identity:
+      id: "agent-security-auditor-001"
+      name: "security-audit-agent"
+      version: "4.0.0"
+      agent_type: "internal"
+      status: "active"
+      is_certified: true
+      certification_expires_at: "2026-12-31T23:59:59Z"
+      owner_id: "security-team"
+      organization_id: "security"
+
+    capabilities:
+      - name: "security:scan"
+        scope:
+          tenant_scopes: ["*"]
+          data_classifications: ["internal", "confidential", "restricted", "secret"]
+          allowed_apis:
+            - "vault:secrets/metadata/*"
+            - "github:security/*"
+            - "snyk:test"
+          allowed_tools: ["trivy", "semgrep", "gitleaks"]
+          read_only: true
+          secrets_access: true  # Can read secret metadata, not values
+          cross_tenant: true    # Security team can audit all tenants
+        risk_level: "medium"
+        requires_approval: false
+        approval_class: "auto"
+
+      - name: "security:report"
+        scope:
+          tenant_scopes: ["*"]
+          data_classifications: ["internal", "confidential"]
+          allowed_apis:
+            - "jira:issues/create"
+            - "slack:chat.postMessage"
+          read_only: false
+          secrets_access: false
+          cross_tenant: true
+        risk_level: "low"
+        requires_approval: false
+        approval_class: "auto"
+
+      - name: "security:remediate"
+        scope:
+          tenant_scopes: ["*"]
+          data_classifications: ["internal"]
+          allowed_apis:
+            - "github:pulls/create"
+            - "vault:secrets/rotate"
+          read_only: false
+          secrets_access: true
+          cross_tenant: true
+        risk_level: "critical"
+        requires_approval: true
+        approval_class: "gated"
+
+    limits:
+      execution:
+        max_wall_clock_ms: 1800000  # 30 minutes for comprehensive scans
+        max_steps: 500
+        max_tool_calls: 1000
+        max_tokens_total: 1000000
+        max_memory_mb: 4096
+        max_concurrent_requests: 50
+        max_runs_per_minute: 10
+        max_runs_per_hour: 100
+        max_runs_per_day: 500
+
+      budget:
+        max_cost_per_run_usd: 20.00
+        max_cost_per_day_usd: 1000.00
+        max_cost_per_month_usd: 20000.00
+        quota_type: "daily_runs"
+        quota_limit: 500
+        on_limit_breach: "alert"
+
+    restrictions:
+      allowed_operation_modes: ["ENFORCED"]
+      requires_human_oversight: false
+      max_trust_level: "sovereign"
+      compliance_tags: ["SOC2", "SECURITY", "AUDIT"]
+
+  # Data Export Agent (Example of restricted agent)
+  - identity:
+      id: "agent-data-exporter-001"
+      name: "data-export-agent"
+      version: "1.0.0"
+      agent_type: "internal"
+      status: "suspended"  # Currently suspended
+      is_certified: false
+      owner_id: "data-team"
+      organization_id: "analytics"
+
+    capabilities:
+      - name: "data:read"
+        scope:
+          tenant_scopes: ["tenant-analytics-001"]
+          project_scopes: ["project-analytics-*"]
+          data_classifications: ["internal"]
+          allowed_apis:
+            - "postgres:SELECT"
+          read_only: true
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "medium"
+        requires_approval: true
+        approval_class: "human_in_the_loop"
+
+      - name: "data:export"
+        scope:
+          tenant_scopes: ["tenant-analytics-001"]
+          data_classifications: ["internal"]
+          allowed_apis:
+            - "s3:PutObject"
+          read_only: false
+          secrets_access: false
+          cross_tenant: false
+        risk_level: "critical"
+        requires_approval: true
+        approval_class: "human_in_the_loop"
+
+    limits:
+      execution:
+        max_wall_clock_ms: 300000
+        max_steps: 50
+        max_tool_calls: 100
+        max_tokens_total: 50000
+        max_memory_mb: 1024
+        max_concurrent_requests: 2
+        max_runs_per_minute: 1
+        max_runs_per_hour: 5
+        max_runs_per_day: 20
+
+      budget:
+        max_cost_per_run_usd: 2.00
+        max_cost_per_day_usd: 20.00
+        max_cost_per_month_usd: 400.00
+        quota_type: "daily_runs"
+        quota_limit: 20
+        on_limit_breach: "deny"
+
+    restrictions:
+      allowed_operation_modes: ["DRY_RUN", "ENFORCED"]
+      requires_human_oversight: true
+      max_trust_level: "basic"
+      compliance_tags: ["GDPR", "DATA_EXPORT"]
+
+# Global Defaults (applied if not specified per agent)
+defaults:
+  limits:
+    execution:
+      max_wall_clock_ms: 300000
+      max_steps: 50
+      max_tool_calls: 100
+      max_tokens_total: 100000
+      max_memory_mb: 512
+      max_concurrent_requests: 10
+      max_runs_per_minute: 10
+      max_runs_per_hour: 100
+      max_runs_per_day: 1000
+
+    budget:
+      max_cost_per_run_usd: 1.00
+      max_cost_per_day_usd: 100.00
+      max_cost_per_month_usd: 2000.00
+      on_limit_breach: "deny"
+
+  restrictions:
+    allowed_operation_modes: ["SIMULATION", "DRY_RUN", "ENFORCED"]
+    requires_human_oversight: false
+    max_trust_level: "basic"
+    compliance_tags: []
+
+# Revocation Registry (agents/capabilities currently revoked)
+revocations:
+  agents:
+    # Example: revoked agent
+    # - agent_id: "agent-xyz-123"
+    #   reason: "Security incident 2025-12-15"
+    #   revoked_at: "2025-12-15T10:00:00Z"
+    #   revoked_by: "security-team"
+
+  capabilities:
+    # Example: globally revoked capability
+    # - capability: "secrets:write"
+    #   reason: "Temporary lockdown during security review"
+    #   revoked_at: "2025-12-20T15:00:00Z"
+    #   revoked_by: "ciso"
+    #   applies_to: ["*"]  # All agents
+
+# Metadata
+metadata:
+  schema_version: "1.0.0"
+  last_updated: "2025-12-31T00:00:00Z"
+  updated_by: "agent-governance-system"
+  checksum: "sha256:to-be-computed"

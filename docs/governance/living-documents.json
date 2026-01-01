@@ -1,0 +1,12 @@
+{
+  "rules": [
+    {
+      "document": "docs/governance/SERVICE_INVENTORY.md",
+      "source": {
+        "type": "directory_listing",
+        "path": "services/"
+      },
+      "marker": "LIVING_DOCUMENTS"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+name: Jules PR Check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  verify-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check PR Body for Provenance
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [[ ! "$PR_BODY" =~ "provenance:" ]]; then
+            echo "Error: PR body missing provenance block"
+            exit 1
+          fi
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: pnpm install
+      - run: pnpm lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: pnpm install
+      - run: pnpm test

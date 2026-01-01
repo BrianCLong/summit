@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <!-- Definitions for gradients and markers -->
+  <defs>
+    <linearGradient id="mandateGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357abd;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="policyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f5a623;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d48806;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="agentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7ed321;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#417505;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="evidenceGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9013fe;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#bd10e0;stop-opacity:1" />
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#333" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f8f9fa" />
+
+  <!-- Title -->
+  <text x="400" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">The Authority Stack</text>
+  <text x="400" y="70" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" fill="#666">"Power You Can Point To"</text>
+
+  <!-- Level 1: Human Mandate -->
+  <g transform="translate(200, 100)">
+    <rect width="400" height="80" rx="10" ry="10" fill="url(#mandateGrad)" filter="drop-shadow(3px 3px 2px rgba(0,0,0,0.2))" />
+    <text x="200" y="30" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">1. Human Mandate</text>
+    <text x="200" y="55" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white">Root of Trust & Institutional Will</text>
+  </g>
+
+  <!-- Connector 1 -->
+  <line x1="400" y1="180" x2="400" y2="210" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Level 2: Policy Authorization -->
+  <g transform="translate(200, 210)">
+    <rect width="400" height="80" rx="10" ry="10" fill="url(#policyGrad)" filter="drop-shadow(3px 3px 2px rgba(0,0,0,0.2))" />
+    <text x="200" y="30" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">2. Policy Authorization</text>
+    <text x="200" y="55" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white">Machine-Readable Rules & Constraints</text>
+  </g>
+
+  <!-- Connector 2 -->
+  <line x1="400" y1="290" x2="400" y2="320" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Level 3: Agent Execution -->
+  <g transform="translate(200, 320)">
+    <rect width="400" height="80" rx="10" ry="10" fill="url(#agentGrad)" filter="drop-shadow(3px 3px 2px rgba(0,0,0,0.2))" />
+    <text x="200" y="30" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">3. Agent Execution</text>
+    <text x="200" y="55" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white">Bounded Action & Capability</text>
+  </g>
+
+  <!-- Connector 3 -->
+  <line x1="400" y1="400" x2="400" y2="430" stroke="#333" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Level 4: Evidence & Replay -->
+  <g transform="translate(200, 430)">
+    <rect width="400" height="80" rx="10" ry="10" fill="url(#evidenceGrad)" filter="drop-shadow(3px 3px 2px rgba(0,0,0,0.2))" />
+    <text x="200" y="30" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="white">4. Evidence & Replay</text>
+    <text x="200" y="55" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white">Cryptographic Proof & Audit Trail</text>
+  </g>
+
+  <!-- Side Annotations -->
+  <g transform="translate(620, 140)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="12" fill="#333">"Who authorizes?"</text>
+  </g>
+  <g transform="translate(620, 250)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="12" fill="#333">"What is allowed?"</text>
+  </g>
+  <g transform="translate(620, 360)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="12" fill="#333">"Who acts?"</text>
+  </g>
+  <g transform="translate(620, 470)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="12" fill="#333">"Who verifies?"</text>
+  </g>
+
+</svg>

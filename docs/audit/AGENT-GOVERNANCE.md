@@ -1,5 +1,11 @@
 # Agent Governance for Auditors
 
+## Status & Precedence
+
+This document is auditor-facing and descriptive. If it conflicts with operational instructions,
+follow `docs/governance/CONSTITUTION.md` → `docs/governance/AGENT_MANDATES.md` → `AGENTS.md` → local
+`AGENTS.md` files.
+
 This document explains how Summit governs autonomous and semi-autonomous agents in auditor-friendly terms.
 
 ## What Agents Are

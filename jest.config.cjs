@@ -1,5 +1,5 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
@@ -8,7 +8,6 @@ module.exports = {
       {
         useESM: true,
         tsconfig: 'tsconfig.test.json',
-        isolatedModules: true,
       },
     ],
   },
@@ -77,6 +76,8 @@ module.exports = {
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',
+    '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src/index.ts',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|.*\\.mjs$))',

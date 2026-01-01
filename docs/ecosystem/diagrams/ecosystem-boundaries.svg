@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <!-- Ecosystem Boundaries Diagram -->
+  <defs>
+    <style>
+      .layer { fill: #f8f9fa; stroke: #333; stroke-width: 2; }
+      .core { fill: #e9ecef; stroke: #000; stroke-width: 3; }
+      .text { font-family: sans-serif; font-size: 14px; text-anchor: middle; }
+      .title { font-size: 18px; font-weight: bold; }
+    </style>
+  </defs>
+
+  <rect x="50" y="50" width="500" height="300" fill="none" stroke="none" />
+
+  <!-- Tier 1 -->
+  <rect x="100" y="50" width="400" height="80" class="layer" />
+  <text x="300" y="95" class="text title">Tier 1: Insight & Intelligence</text>
+  <text x="300" y="115" class="text">Read-only Value Creation</text>
+
+  <!-- Tier 2 -->
+  <rect x="100" y="130" width="400" height="80" class="layer" />
+  <text x="300" y="175" class="text title">Tier 2: Recommendation & Analysis</text>
+  <text x="300" y="195" class="text">Propose, Never Decide</text>
+
+  <!-- Core Layer -->
+  <rect x="100" y="210" width="400" height="80" class="core" />
+  <text x="300" y="255" class="text title">Summit Authority Core</text>
+  <text x="300" y="275" class="text">Authority & Execution (Sealed)</text>
+
+  <!-- Flow Arrows -->
+  <line x1="50" y1="90" x2="90" y2="90" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="70" y="80" class="text" font-size="10">Data</text>
+
+  <line x1="550" y1="250" x2="510" y2="250" stroke="#000" stroke-width="2" marker-end="url(#arrow)" />
+  <text x="530" y="240" class="text" font-size="10">Decisions</text>
+
+</svg>

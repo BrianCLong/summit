@@ -1,0 +1,55 @@
+name: GA Gate
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ga-gate:
+    name: GA Readiness Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        run: |
+          make bootstrap
+
+      - name: Run GA Gate
+        run: |
+          make ga
+
+      - name: Upload GA Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-report
+          path: artifacts/ga/
+
+      - name: Job Summary
+        if: always()
+        run: |
+          if [ -f artifacts/ga/ga_report.md ]; then
+            cat artifacts/ga/ga_report.md >> $GITHUB_STEP_SUMMARY
+          fi

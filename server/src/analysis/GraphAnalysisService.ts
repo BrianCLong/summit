@@ -19,7 +19,7 @@ import logger from '../utils/logger.js';
 export class GraphAnalysisService {
   private static instance: GraphAnalysisService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): GraphAnalysisService {
     if (!GraphAnalysisService.instance) {
@@ -56,45 +56,45 @@ export class GraphAnalysisService {
     `;
 
     try {
-        const driver = getNeo4jDriver();
-        const session = driver.session();
+      const driver = getNeo4jDriver();
+      const session = driver.session();
 
-        const nodeResult = await session.run(nodeQuery, { tenantId, nodeLabels });
-        const edgeResult = await session.run(edgeQuery, { tenantId, edgeTypes });
+      const nodeResult = await session.run(nodeQuery, { tenantId, nodeLabels });
+      const edgeResult = await session.run(edgeQuery, { tenantId, edgeTypes });
 
-        const nodes: GraphNode[] = nodeResult.records.map(record => {
-            const n = record.get('n').properties;
-            const lbls = record.get('lbls');
-            return {
-                id: n.id,
-                type: lbls[0] || 'Unknown', // Primary label
-                label: n.label || n.name || n.id,
-                tenantId: n.tenantId,
-                properties: n
-            };
-        });
+      const nodes: GraphNode[] = nodeResult.records.map((record: any) => {
+        const n = record.get('n').properties;
+        const lbls = record.get('lbls');
+        return {
+          id: n.id,
+          type: lbls[0] || 'Unknown', // Primary label
+          label: n.label || n.name || n.id,
+          tenantId: n.tenantId,
+          properties: n
+        };
+      });
 
-        const edges: GraphEdge[] = edgeResult.records.map(record => {
-            const r = record.get('r').properties;
-            return {
-                id: r.id || `${record.get('source')}-${record.get('type')}-${record.get('target')}`, // Fallback ID
-                source: record.get('source'),
-                target: record.get('target'),
-                type: record.get('type'),
-                tenantId: tenantId, // Assumed from context
-                properties: r,
-                weight: r.weight ? Number(r.weight) : undefined
-            };
-        });
+      const edges: GraphEdge[] = edgeResult.records.map((record: any) => {
+        const r = record.get('r').properties;
+        return {
+          id: r.id || `${record.get('source')}-${record.get('type')}-${record.get('target')}`, // Fallback ID
+          source: record.get('source'),
+          target: record.get('target'),
+          type: record.get('type'),
+          tenantId: tenantId, // Assumed from context
+          properties: r,
+          weight: r.weight ? Number(r.weight) : undefined
+        };
+      });
 
-        logger.info(`Loaded graph slice for tenant ${tenantId}: ${nodes.length} nodes, ${edges.length} edges in ${Date.now() - start}ms`);
+      logger.info(`Loaded graph slice for tenant ${tenantId}: ${nodes.length} nodes, ${edges.length} edges in ${Date.now() - start}ms`);
 
-        await session.close();
-        return { nodes, edges };
+      await session.close();
+      return { nodes, edges };
 
     } catch (error) {
-        logger.error('Error loading graph slice', { error, tenantId });
-        throw error;
+      logger.error('Error loading graph slice', { error, tenantId });
+      throw error;
     }
   }
 
@@ -133,39 +133,39 @@ export class GraphAnalysisService {
 
       switch (job.algorithm) {
         case 'shortestPath': {
-            const p = job.params as unknown as ShortestPathParams;
-            if (!p.sourceNodeId || !p.targetNodeId) throw new Error("Missing sourceNodeId or targetNodeId");
-            result = shortestPath(graph, p.sourceNodeId, p.targetNodeId, p.maxDepth);
-            break;
+          const p = job.params as unknown as ShortestPathParams;
+          if (!p.sourceNodeId || !p.targetNodeId) throw new Error("Missing sourceNodeId or targetNodeId");
+          result = shortestPath(graph, p.sourceNodeId, p.targetNodeId, p.maxDepth);
+          break;
         }
         case 'kHopNeighborhood': {
-            const p = job.params as unknown as KHopParams;
-            if (!p.sourceNodeId || !p.k) throw new Error("Missing sourceNodeId or k");
-            result = kHopNeighborhood(graph, p.sourceNodeId, p.k, p.direction);
-            break;
+          const p = job.params as unknown as KHopParams;
+          if (!p.sourceNodeId || !p.k) throw new Error("Missing sourceNodeId or k");
+          result = kHopNeighborhood(graph, p.sourceNodeId, p.k, p.direction);
+          break;
         }
         case 'degreeCentrality': {
-            const p = job.params as unknown as DegreeCentralityParams;
-            result = degreeCentrality(graph, p.direction, p.topK);
-            break;
+          const p = job.params as unknown as DegreeCentralityParams;
+          result = degreeCentrality(graph, p.direction, p.topK);
+          break;
         }
         case 'connectedComponents': {
-            result = connectedComponents(graph);
-            break;
+          result = connectedComponents(graph);
+          break;
         }
         default:
-            throw new Error(`Unknown algorithm: ${job.algorithm}`);
+          throw new Error(`Unknown algorithm: ${job.algorithm}`);
       }
 
       job.result = result;
       job.status = 'completed';
     } catch (error: any) {
-        logger.error(`Graph analysis job ${jobId} failed`, error);
-        job.status = 'failed';
-        job.error = error.message;
+      logger.error(`Graph analysis job ${jobId} failed`, error);
+      job.status = 'failed';
+      job.error = error.message;
     } finally {
-        job.endTime = new Date();
-        this.jobs.set(jobId, job);
+      job.endTime = new Date();
+      this.jobs.set(jobId, job);
     }
 
     return job;

@@ -3,6 +3,12 @@
 > **Last Updated:** 2025-11-20
 > **Purpose:** Document how multiple AI agents (Jules, Claude, Codex, GitHub Actions) collaborate on the Summit codebase.
 
+## Status & Precedence
+
+This document is descriptive. If it conflicts with operational instructions, follow
+`docs/governance/CONSTITUTION.md` → `docs/governance/AGENT_MANDATES.md` → `AGENTS.md` → local
+`AGENTS.md` files.
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -36,6 +42,7 @@ Summit leverages a multi-agent AI ecosystem to accelerate development while main
 **Role:** Primary code generation, refactoring, architecture, and documentation
 
 **Capabilities:**
+
 - Complex code generation and refactoring
 - Architecture design and review
 - Documentation writing and updates
@@ -44,12 +51,14 @@ Summit leverages a multi-agent AI ecosystem to accelerate development while main
 - Multi-file code modifications
 
 **Access Pattern:**
+
 - Via Claude Code CLI or API
 - Branch naming: `claude/<session-id>`
 - Context window: 200K tokens
 - Can read entire codebase context via CLAUDE.md
 
 **Typical Tasks:**
+
 ```bash
 # Example Claude workflow
 claude code "Add authentication middleware to GraphQL API"
@@ -62,6 +71,7 @@ claude code "Generate integration tests for copilot service"
 **Role:** Pull request automation, issue triage, workflow orchestration
 
 **Capabilities:**
+
 - Automated PR reviews and feedback
 - Issue labeling and prioritization
 - Workflow automation
@@ -70,11 +80,13 @@ claude code "Generate integration tests for copilot service"
 - Dependency updates
 
 **Access Pattern:**
+
 - Automatically triggered on PR creation
 - Branch naming: `jules/<session-id>` or any branch
 - Integrates with GitHub Actions
 
 **Typical Tasks:**
+
 - Review PRs for code quality
 - Suggest improvements and best practices
 - Flag security issues
@@ -86,6 +98,7 @@ claude code "Generate integration tests for copilot service"
 **Role:** In-editor code completions and suggestions
 
 **Capabilities:**
+
 - Real-time code suggestions
 - Function and test generation
 - Code explanation
@@ -93,11 +106,13 @@ claude code "Generate integration tests for copilot service"
 - Quick fixes
 
 **Access Pattern:**
+
 - IDE integration (VS Code, IntelliJ, etc.)
 - Context-aware suggestions based on current file
 - No direct git operations
 
 **Typical Tasks:**
+
 - Autocomplete function implementations
 - Generate boilerplate code
 - Suggest test cases
@@ -108,6 +123,7 @@ claude code "Generate integration tests for copilot service"
 **Role:** Automated testing, builds, and deployments
 
 **Capabilities:**
+
 - Run test suites (unit, integration, E2E)
 - Execute smoke tests
 - Build Docker images
@@ -116,10 +132,12 @@ claude code "Generate integration tests for copilot service"
 - Generate SBOM and provenance
 
 **Access Pattern:**
+
 - Automatically triggered on push, PR, or schedule
 - Configured in `.github/workflows/`
 
 **Typical Tasks:**
+
 - Validate golden path on every commit
 - Run security scans
 - Build and push container images
@@ -131,6 +149,7 @@ claude code "Generate integration tests for copilot service"
 **Role:** Automated PR reviews with AI-powered insights
 
 **Capabilities:**
+
 - Deep code analysis
 - Performance recommendations
 - Security vulnerability detection
@@ -138,6 +157,7 @@ claude code "Generate integration tests for copilot service"
 - Code complexity analysis
 
 **Access Pattern:**
+
 - Automatically reviews all PRs
 - Provides inline comments and suggestions
 
@@ -206,6 +226,7 @@ sequenceDiagram
     - Prettier (formatting)
     - Ruff/Black (Python)
 11. **Claude:** Commit with conventional message:
+
     ```bash
     git commit -m "feat(api): add entity search endpoint
 
@@ -214,6 +235,7 @@ sequenceDiagram
     - Include relevance scoring
     - Add integration tests"
     ```
+
 12. **Claude:** Push to remote: `git push -u origin claude/<session-id>`
 
 #### Phase 4: Continuous Integration
@@ -232,11 +254,14 @@ sequenceDiagram
 #### Phase 5: Pull Request Review
 
 14. **Claude/Human:** Create Pull Request with description:
+
     ```markdown
     ## Summary
+
     Adds entity search endpoint with full-text search, pagination, and relevance scoring.
 
     ## Changes
+
     - Added `searchEntities` GraphQL query
     - Implemented Neo4j full-text index
     - Added pagination with cursor-based approach
@@ -244,6 +269,7 @@ sequenceDiagram
     - Added integration tests with 85% coverage
 
     ## Testing
+
     - [x] Unit tests pass locally
     - [x] Integration tests pass locally
     - [x] Smoke tests pass locally
@@ -251,6 +277,7 @@ sequenceDiagram
     - [x] Documentation updated
 
     ## Checklist
+
     - [x] Code follows TypeScript conventions
     - [x] Tests included and passing
     - [x] Documentation updated
@@ -297,6 +324,7 @@ sequenceDiagram
 ### Claude Guidelines
 
 #### Before Starting
+
 ```bash
 # 1. Pull latest changes
 git checkout main
@@ -310,6 +338,7 @@ cat CLAUDE.md  # Understand codebase structure and conventions
 ```
 
 #### During Development
+
 - Follow patterns in CLAUDE.md
 - Use TypeScript types, no `any`
 - Write tests for all new code
@@ -317,6 +346,7 @@ cat CLAUDE.md  # Understand codebase structure and conventions
 - Validate incrementally
 
 #### Before Committing
+
 ```bash
 # Run full validation suite
 make typecheck
@@ -335,6 +365,7 @@ git push -u origin claude/<session-id>
 Jules operates automatically but can be configured via:
 
 **Configuration File:** `.github/jules.yml`
+
 ```yaml
 version: 1
 automation:
@@ -358,6 +389,7 @@ rules:
 ### GitHub Actions Guidelines
 
 **CI Workflow:** `.github/workflows/ci.yml`
+
 ```yaml
 name: CI
 
@@ -375,7 +407,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Bootstrap environment
         run: make bootstrap
@@ -549,21 +581,21 @@ try {
   const results = await searchEntities(params);
   return results;
 } catch (error) {
-  logger.error('Search failed', { params, error });
-  throw new SearchError('Entity search failed', { cause: error });
+  logger.error("Search failed", { params, error });
+  throw new SearchError("Entity search failed", { cause: error });
 }
 
 // 3. Write comprehensive tests
-describe('searchEntities', () => {
-  it('should return entities matching query', async () => {
+describe("searchEntities", () => {
+  it("should return entities matching query", async () => {
     // Test implementation
   });
 
-  it('should handle pagination correctly', async () => {
+  it("should handle pagination correctly", async () => {
     // Test implementation
   });
 
-  it('should throw error for invalid query', async () => {
+  it("should throw error for invalid query", async () => {
     // Test implementation
   });
 });
@@ -594,6 +626,7 @@ try {
 **Symptoms:** GitHub Actions CI workflow fails
 
 **Diagnosis:**
+
 ```bash
 # Check CI logs in GitHub Actions UI
 # Common failures:
@@ -604,6 +637,7 @@ try {
 ```
 
 **Resolution:**
+
 ```bash
 # 1. Pull latest changes
 git pull origin main
@@ -624,6 +658,7 @@ git push --force-with-lease
 **Symptoms:** Git reports conflicts when pulling or merging
 
 **Diagnosis:**
+
 ```bash
 # Check conflict files
 git status
@@ -633,6 +668,7 @@ git diff
 ```
 
 **Resolution:**
+
 ```bash
 # 1. Fetch latest changes
 git fetch origin main
@@ -657,6 +693,7 @@ git push --force-with-lease
 **Symptoms:** Commit rejected by pre-commit hooks
 
 **Diagnosis:**
+
 ```bash
 # Hooks run automatically:
 # - Gitleaks (secrets)
@@ -665,6 +702,7 @@ git push --force-with-lease
 ```
 
 **Resolution:**
+
 ```bash
 # 1. Fix linting issues
 pnpm lint:fix
@@ -685,6 +723,7 @@ git commit -m "your message"
 **Symptoms:** `make smoke` fails
 
 **Diagnosis:**
+
 ```bash
 # Check logs
 make logs
@@ -695,6 +734,7 @@ curl http://localhost:3000
 ```
 
 **Resolution:**
+
 ```bash
 # 1. Restart services
 make down
@@ -717,6 +757,7 @@ docker-compose logs neo4j
 **Symptoms:** Two agents working on same code create conflicts
 
 **Resolution:**
+
 1. **Designate lead agent** - One agent owns the feature
 2. **Use branch isolation** - Each agent on separate branch
 3. **Coordinate timing** - Sequential rather than parallel work
@@ -728,6 +769,7 @@ docker-compose logs neo4j
 ## Additional Resources
 
 ### Documentation
+
 - [CLAUDE.md](../CLAUDE.md) - Complete codebase guide for AI assistants
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines with AI agent section
 - [ONBOARDING.md](ONBOARDING.md) - 30-minute developer quickstart
@@ -735,12 +777,14 @@ docker-compose logs neo4j
 - [Multi-Agent Frameworks 2025](multi-agent-frameworks-2025.md) - Framework comparison
 
 ### External References
+
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [Claude Code Documentation](https://docs.anthropic.com/claude/docs)
 - [GitHub Copilot Documentation](https://docs.github.com/en/copilot)
 
 ### Getting Help
+
 - **Slack:** #summit-dev, #ai-agents
 - **GitHub Discussions:** https://github.com/BrianCLong/summit/discussions
 - **Documentation:** [docs/README.md](README.md)

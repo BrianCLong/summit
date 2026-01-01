@@ -75,7 +75,7 @@ export class RetentionPolicyEngine {
     // For MVP, we ignore tenantId filtering for global policies, but could add it.
     const policies = await this.pool.query(`SELECT * FROM retention_policies WHERE is_active = TRUE`);
 
-    return policies.rows.map(row => ({
+    return policies.rows.map((row: any) => ({
       id: row.id,
       targetType: row.target_type,
       retentionDays: row.retention_days,

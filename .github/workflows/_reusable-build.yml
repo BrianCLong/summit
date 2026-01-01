@@ -5,27 +5,27 @@ on:
   workflow_call:
     inputs:
       node-version:
-        description: 'Node.js version'
+        description: "Node.js version"
         required: false
         type: string
-        default: '20.x'
+        default: "20.x"
       build-command:
-        description: 'Build command to run'
+        description: "Build command to run"
         required: false
         type: string
-        default: 'pnpm run build'
+        default: "pnpm run build"
       upload-artifacts:
-        description: 'Upload build artifacts'
+        description: "Upload build artifacts"
         required: false
         type: boolean
         default: true
       artifact-name:
-        description: 'Name for build artifacts'
+        description: "Name for build artifacts"
         required: false
         type: string
-        default: 'build-artifacts'
+        default: "build-artifacts"
       artifact-path:
-        description: 'Path to build artifacts'
+        description: "Path to build artifacts"
         required: false
         type: string
         default: |
@@ -39,10 +39,10 @@ on:
           packages/*/dist/
     outputs:
       build-success:
-        description: 'Whether build succeeded'
+        description: "Whether build succeeded"
         value: ${{ jobs.build.outputs.success }}
       artifact-name:
-        description: 'Name of uploaded artifact'
+        description: "Name of uploaded artifact"
         value: ${{ jobs.build.outputs.artifact }}
 
 permissions:
@@ -62,7 +62,7 @@ jobs:
       artifact: ${{ inputs.artifact-name }}-${{ github.run_number }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Enable Corepack
         run: corepack enable
@@ -76,7 +76,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Get pnpm store path
         id: pnpm-store
@@ -139,7 +139,7 @@ jobs:
 
       - name: Upload build artifacts
         if: inputs.upload-artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifact-name }}-${{ github.run_number }}
           path: ${{ inputs.artifact-path }}

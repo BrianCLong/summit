@@ -146,7 +146,7 @@ export class RedactionService {
     const answerResult = this.redactText(
       answer.answer,
       'answer_text',
-      answer.citations.flatMap((c) => c.policyLabels || []),
+      answer.citations.flatMap((c: any) => c.policyLabels || []),
     );
     decisions.push(...answerResult.decisions);
     if (answerResult.wasRedacted) redactedCount++;
@@ -220,6 +220,17 @@ export class RedactionService {
       uncertaintyLevel,
       explanation,
     };
+  }
+
+  /**
+   * Generic redact method for simple string redaction
+   */
+  async redact(
+    text: string,
+    _policy?: { maxClassification?: string; policyLabels?: string[] }
+  ): Promise<string> {
+    const result = this.redactText(text, 'generic', []);
+    return result.content;
   }
 
   /**
@@ -394,29 +405,29 @@ export class RedactionService {
     // Get IDs of redacted citations
     const redactedEntityIds = new Set(
       redactedCitations
-        .filter((c) => c.wasRedacted && c.sourceType === 'graph_entity')
-        .map((c) => c.sourceId),
+        .filter((c: Citation) => c.wasRedacted && c.sourceType === 'graph_entity')
+        .map((c: Citation) => c.sourceId),
     );
     const redactedEvidenceIds = new Set(
       redactedCitations
-        .filter((c) => c.wasRedacted && c.sourceType === 'evidence')
-        .map((c) => c.sourceId),
+        .filter((c: Citation) => c.wasRedacted && c.sourceType === 'evidence')
+        .map((c: Citation) => c.sourceId),
     );
     const redactedClaimIds = new Set(
       redactedCitations
-        .filter((c) => c.wasRedacted && c.sourceType === 'claim')
-        .map((c) => c.sourceId),
+        .filter((c: Citation) => c.wasRedacted && c.sourceType === 'claim')
+        .map((c: Citation) => c.sourceId),
     );
 
     // Filter provenance
     const filteredEntityIds = provenance.entityIds.filter(
-      (id) => !redactedEntityIds.has(id),
+      (id: string) => !redactedEntityIds.has(id),
     );
     const filteredEvidenceIds = provenance.evidenceIds.filter(
-      (id) => !redactedEvidenceIds.has(id),
+      (id: string) => !redactedEvidenceIds.has(id),
     );
     const filteredClaimIds = provenance.claimIds.filter(
-      (id) => !redactedClaimIds.has(id),
+      (id: string) => !redactedClaimIds.has(id),
     );
 
     const wasRedacted =

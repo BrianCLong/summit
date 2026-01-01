@@ -46,6 +46,13 @@ export enum CostDomain {
   WRITE_ACTIONS = 'write_actions',
   MARKETPLACE = 'marketplace',
   CI_ASSURANCE = 'ci_assurance',
+  API_REQUEST = 'api_request',
+}
+
+export interface CostAttribution {
+    agentId?: string;
+    capability?: string;
+    tenantId: string;
 }
 
 export interface BudgetConfig {
@@ -54,6 +61,7 @@ export interface BudgetConfig {
   period: 'daily' | 'monthly';
   currency: string; // e.g., 'USD', 'CREDITS'
   alertThresholds: number[]; // e.g., [0.5, 0.8, 1.0]
+  hardStop: boolean; // Enforce hard stop when budget exceeded
 }
 
 export interface BudgetStatus extends BudgetConfig {

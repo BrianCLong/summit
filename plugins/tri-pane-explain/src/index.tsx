@@ -403,7 +403,7 @@ const useCommandPalette = () => {
         shortcut: 'Ctrl+S',
         action: () => {
           const name = prompt('View name:');
-          if (name) store.saveView(name);
+          if (name) {store.saveView(name);}
         },
       },
       {

@@ -57,7 +57,7 @@ describe("DeduplicationInspector", () => {
       </MockedProvider>
     );
 
-    expect(screen.getByText("Loading...")).toBeInTheDocument();
+    expect(screen.getByText("Loading candidates...")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText("Deduplication Inspector")).toBeInTheDocument();
@@ -82,6 +82,7 @@ describe("DeduplicationInspector", () => {
     await waitFor(() => {
       fireEvent.click(screen.getByText("Merge into Entity B"));
       expect(screen.getByText("Merging...")).toBeInTheDocument();
+      expect(screen.getByText("Submitting merge to server...")).toBeInTheDocument();
     });
 
     // We can't easily test the result of the mutation, but we can
@@ -115,7 +116,7 @@ describe("DeduplicationInspector", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent("Merge failed. Please try again.");
+      expect(screen.getByRole("alert")).toHaveTextContent("Merge failed: network");
     });
   });
 
@@ -134,6 +135,7 @@ describe("DeduplicationInspector", () => {
 
     await waitFor(() => {
       expect(screen.getByText("No candidates match the current threshold.")).toBeInTheDocument();
+      expect(localStorage.getItem("deduplication.similarityThreshold")).toBe("0.95");
     });
   });
 });

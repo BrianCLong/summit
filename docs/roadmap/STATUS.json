@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-01-01T12:30:00Z",
+  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
   "initiatives": [
     {
       "id": "A",
@@ -90,6 +90,18 @@
             "No centralized log aggregation"
           ],
           "target_completion": "Sprint N+1 (CRITICAL for GA)"
+        },
+        {
+          "id": "C3",
+          "name": "Counterfactual Context Reassembly (CCR)",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "ADR 0010 defines CCR perturbation, divergence analysis, and enforcement hooks for MCP poisoning detection",
+          "blockers": [
+            "Need perturbation library and divergence metrics",
+            "Execution budget and observability controls not implemented"
+          ],
+          "target_completion": "Sprint N+2"
         }
       ]
     },
@@ -140,8 +152,8 @@
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 5,
-    "total": 11,
+    "not_started": 6,
+    "total": 12,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

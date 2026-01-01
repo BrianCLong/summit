@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+
+  <rect width="800" height="600" fill="#f8f9fa"/>
+  <text x="400" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">Summit Adoption Flywheel</text>
+
+  <!-- Nodes -->
+  <g transform="translate(400, 300)">
+    <!-- Incident Governance -->
+    <g transform="translate(0, -200)">
+      <rect x="-100" y="-30" width="200" height="60" rx="10" ry="10" fill="#e1f5fe" stroke="#0288d1" stroke-width="2"/>
+      <text x="0" y="5" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#01579b">Incident Governance</text>
+    </g>
+
+    <!-- Decision Memory -->
+    <g transform="translate(173, -100)">
+      <rect x="-100" y="-30" width="200" height="60" rx="10" ry="10" fill="#e1f5fe" stroke="#0288d1" stroke-width="2"/>
+      <text x="0" y="5" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#01579b">Decision Memory</text>
+    </g>
+
+    <!-- Audit Confidence -->
+    <g transform="translate(173, 100)">
+      <rect x="-100" y="-30" width="200" height="60" rx="10" ry="10" fill="#e1f5fe" stroke="#0288d1" stroke-width="2"/>
+      <text x="0" y="5" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#01579b">Audit Confidence</text>
+    </g>
+
+    <!-- Executive Trust -->
+    <g transform="translate(0, 200)">
+      <rect x="-100" y="-30" width="200" height="60" rx="10" ry="10" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+      <text x="0" y="5" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#f57f17">Executive Trust</text>
+    </g>
+
+    <!-- Platform Expansion -->
+    <g transform="translate(-173, 100)">
+      <rect x="-100" y="-30" width="200" height="60" rx="10" ry="10" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+      <text x="0" y="5" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1b5e20">Platform Expansion</text>
+    </g>
+
+    <!-- Economic Lock-In -->
+    <g transform="translate(-173, -100)">
+      <rect x="-100" y="-30" width="200" height="60" rx="10" ry="10" fill="#ffebee" stroke="#d32f2f" stroke-width="2"/>
+      <text x="0" y="5" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#b71c1c">Economic Lock-In</text>
+    </g>
+  </g>
+
+  <!-- Connections -->
+  <g fill="none" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)">
+    <!-- Incident Governance -> Decision Memory -->
+    <path d="M 460 130 Q 520 150 540 180" />
+
+    <!-- Decision Memory -> Audit Confidence -->
+    <path d="M 600 240 Q 620 300 600 360" />
+
+    <!-- Audit Confidence -> Executive Trust -->
+    <path d="M 540 420 Q 520 450 460 470" />
+
+    <!-- Executive Trust -> Platform Expansion -->
+    <path d="M 340 470 Q 280 450 260 420" />
+
+    <!-- Platform Expansion -> Economic Lock-In -->
+    <path d="M 200 360 Q 180 300 200 240" />
+
+    <!-- Economic Lock-In -> Incident Governance -->
+    <path d="M 260 180 Q 280 150 340 130" />
+  </g>
+
+</svg>

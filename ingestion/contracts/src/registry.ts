@@ -44,7 +44,7 @@ export class ContractRegistry {
   update(spec: ContractSpec): string[] {
     const previous = this.specs.get(spec.id);
     this.register(spec);
-    if (!previous) return ['new spec registered'];
+    if (!previous) {return ['new spec registered'];}
     const drift = diffSpecs(previous, spec);
     if (drift.length > 0) {
       this.audit.record({ actor: 'registry', action: 'drift-detected', details: { id: spec.id, drift } });
@@ -58,7 +58,7 @@ export class ContractRegistry {
 
   async certify(contractId: string, secret: string, validUntil?: string): Promise<Certification | undefined> {
     const spec = this.get(contractId);
-    if (!spec) return undefined;
+    if (!spec) {return undefined;}
     const certificate = await this.workflow.issueCertificate(spec, secret, validUntil);
     this.certificates.set(contractId, certificate);
     spec.status = 'certified';
@@ -143,7 +143,7 @@ export class ContractRegistry {
 
   recertifyAfterResolution(contractId: string, secret: string): Promise<Certification | undefined> {
     const spec = this.get(contractId);
-    if (!spec) return Promise.resolve(undefined);
+    if (!spec) {return Promise.resolve(undefined);}
     spec.status = 'certified';
     return this.certify(contractId, secret);
   }

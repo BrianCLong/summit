@@ -92,6 +92,10 @@ const extractionEngineConfig: ExtractionEngineConfig = {
   tempPath: process.env.TEMP_PATH || './temp', // Ensure this is configured
   maxConcurrentJobs: 5,
   enableGPU: process.env.ENABLE_GPU === 'true',
+  allowedPaths: [
+    process.env.MEDIA_UPLOAD_PATH || '/tmp/intelgraph/uploads',
+    process.env.TEMP_PATH || './temp'
+  ],
 };
 const extractionEngine = new ExtractionEngine(
   extractionEngineConfig,
