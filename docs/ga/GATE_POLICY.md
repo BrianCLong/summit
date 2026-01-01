@@ -11,19 +11,26 @@ The policy is defined in `ops/gates/gates.yaml` and validated against `schemas/g
 The policy is divided into three tiers:
 
 ### 1. PR Gates
+
 These gates run on every Pull Request.
+
 - **Focus:** Speed and basic correctness.
 - **Typical Checks:** Linting, unit tests, basic security scans.
+- **Required:** GA Accessibility + Keyboard Smoke (`pnpm run test:a11y-gate` via `.github/workflows/a11y-keyboard-smoke.yml`) with axe artifacts uploaded on every run.
 - **Behavior:** Most checks should be blocking. Fast feedback is crucial.
 
 ### 2. Nightly Gates
+
 These gates run once every 24 hours (usually overnight).
+
 - **Focus:** Comprehensive verification and long-running tests.
 - **Typical Checks:** Full security scans, performance tests, integration tests, fuzzing.
 - **Behavior:** Often configured as warn-only to track regression without blocking daily work, but failures should be triaged the next day.
 
 ### 3. Release Gates
+
 These gates run before a release is cut (on release branches or tags).
+
 - **Focus:** Production readiness and compliance.
 - **Typical Checks:** GA verification, governance checks, final security audits.
 - **Behavior:** Strictly blocking. "Stop-the-line" if any gate fails.

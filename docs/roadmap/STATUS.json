@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-02-14T00:00:00Z",
+  "revision_note": "Added GA accessibility + keyboard smoke gate to PR policy and CI coverage",
   "initiatives": [
     {
       "id": "A",

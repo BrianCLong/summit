@@ -1,0 +1,99 @@
+name: "GA Gate: Accessibility lint + keyboard smoke"
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  a11y-keyboard-gate:
+    name: "Accessibility + keyboard smoke"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_URL: http://127.0.0.1:4173
+      VITE_DEMO_MODE: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Start web UI in demo mode
+        run: |
+          VITE_DEMO_MODE=true pnpm --filter @intelgraph/web dev -- --host 0.0.0.0 --port 4173 --strictPort > /tmp/web.log 2>&1 &
+          echo $! > /tmp/web.pid
+          for attempt in {1..30}; do
+            if curl -sSf http://127.0.0.1:4173 > /dev/null; then
+              echo "Web UI is ready"
+              break
+            fi
+            sleep 2
+          done
+          if ! curl -sSf http://127.0.0.1:4173 > /dev/null; then
+            echo "Web UI failed to start"
+            cat /tmp/web.log
+            exit 1
+          fi
+
+      - name: Run accessibility + keyboard smoke
+        env:
+          CI: true
+          BASE_URL: http://127.0.0.1:4173
+          VITE_DEMO_MODE: "true"
+        run: pnpm run test:a11y-gate
+
+      - name: Upload accessibility artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-keyboard-smoke-reports
+          path: |
+            reports/a11y-keyboard/**/*
+            playwright-report/**/*
+          if-no-files-found: warn
+
+      - name: Upload dev server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-keyboard-web-log
+          path: /tmp/web.log
+          if-no-files-found: warn
+
+      - name: Stop web server
+        if: always()
+        run: |
+          if [ -f /tmp/web.pid ]; then
+            kill $(cat /tmp/web.pid) || true
+          fi
