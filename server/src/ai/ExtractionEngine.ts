@@ -214,7 +214,7 @@ export class ExtractionEngine {
           logger.info(
             `Completed ${method} for job ${jobId}: ${result.entities.length} entities, ${methodDuration}ms`,
           );
-        } catch (methodError) {
+        } catch (methodError: any) {
           const errorMsg = `Failed ${method}: ${methodError.message}`;
           overallErrors.push(errorMsg);
           logger.error(
@@ -230,7 +230,7 @@ export class ExtractionEngine {
       );
 
       return results;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Extraction job ${jobId} failed:`, error);
       throw error;
     } finally {
@@ -298,7 +298,7 @@ export class ExtractionEngine {
         },
         errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       errors.push(error.message);
       throw error;
     }
@@ -366,7 +366,7 @@ export class ExtractionEngine {
         },
         errors: [],
       };
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -433,7 +433,7 @@ export class ExtractionEngine {
         },
         errors: [],
       };
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -505,7 +505,7 @@ export class ExtractionEngine {
         },
         errors: [],
       };
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -629,7 +629,7 @@ export class ExtractionEngine {
         },
         errors: [],
       };
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -693,7 +693,7 @@ export class ExtractionEngine {
         },
         errors: [],
       };
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -742,7 +742,7 @@ export class ExtractionEngine {
       const processingTime = Date.now() - startTime;
       const avgConfidence =
         mergedEntities.reduce((sum, e) => sum + e.confidence, 0) /
-          mergedEntities.length || 0;
+        mergedEntities.length || 0;
 
       return {
         jobId,
@@ -757,7 +757,7 @@ export class ExtractionEngine {
         },
         errors: [],
       };
-    } catch (error) {
+    } catch (error: any) {
       throw error;
     }
   }
@@ -894,7 +894,7 @@ export class ExtractionEngine {
       const processingTime = Date.now() - startTime;
       const avgConfidence =
         allEntities.reduce((sum, e) => sum + e.confidence, 0) /
-          allEntities.length || 0;
+        allEntities.length || 0;
 
       return {
         jobId,

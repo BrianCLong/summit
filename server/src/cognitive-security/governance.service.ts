@@ -609,7 +609,7 @@ export class GovernanceService {
         { limit },
       );
 
-      return result.records.map((r) => this.recordToAppeal(r.get('a')));
+      return result.records.map((r: any) => this.recordToAppeal(r.get('a')));
     } finally {
       await session.close();
     }
@@ -648,7 +648,7 @@ export class GovernanceService {
         { userId },
       );
 
-      return result.records.map((r) => this.recordToAppeal(r.get('a')));
+      return result.records.map((r: any) => this.recordToAppeal(r.get('a')));
     } finally {
       await session.close();
     }
