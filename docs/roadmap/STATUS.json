@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-01-01T04:59:10Z",
+  "revision_note": "Added 2026-01-01 priority slate emphasizing audit log, vector store, and connector registry.",
   "initiatives": [
     {
       "id": "A",

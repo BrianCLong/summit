@@ -1,0 +1,43 @@
+task_id: TASK-RDMP-20260101
+agent_id: summit-maintainer
+prompt_ref:
+  id: agent-native-loop-n4
+  version: v1
+  sha256: 419717c7891d6943a948ae678ae59f03092e30a699083765300081a38c30cd94
+  path: prompts/governance/agent-native-loop-n4.md
+declared_scope:
+  paths:
+    - docs/roadmap/STATUS.json
+    - docs/roadmap/next-priorities-2026-01-01.md
+    - agents/examples/roadmap-priorities-20260101.yaml
+    - prompts/registry.yaml
+  domains:
+    - roadmap
+    - governance
+    - documentation
+allowed_operations:
+  - create
+  - edit
+verification_requirements:
+  tier: A
+  artifacts:
+    - ci:prompt-integrity
+    - ci:pr-metadata
+    - evidence:docs-update
+debt_budget:
+  permitted: 0
+  retirement_target: 1
+success_criteria:
+  - Priority slate is recorded with risks and acceptance criteria for top roadmap items.
+  - STATUS.json revision metadata reflects the updated priorities.
+  - Scope of edits matches declared paths; no cross-zone boundary violations.
+  - PR metadata references this task and prompt hash.
+stop_conditions:
+  - Prompt hash mismatch or registry drift.
+  - Scope violations detected by boundary checks.
+  - Governance reviewer flags missing acceptance criteria or tests.
+dependencies:
+  - prompts/registry.yaml
+  - docs/roadmap/STATUS.json
+approvals:
+  - governance-council
