@@ -4,6 +4,7 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
+    "moduleResolution": "node",
     "allowImportingTsExtensions": false
   },
   "include": [
