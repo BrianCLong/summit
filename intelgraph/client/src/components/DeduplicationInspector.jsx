@@ -8,7 +8,7 @@ const DeduplicationInspector = () => {
   const [mergeInFlight, setMergeInFlight] = useState(null);
   const [similarityThreshold, setSimilarityThreshold] = useState(0.5);
   const [expandedDetails, setExpandedDetails] = useState(new Set());
-  const { loading, error, data} = useQuery(GET_DEDUPLICATION_CANDIDATES);
+  const { loading, error, data } = useQuery(GET_DEDUPLICATION_CANDIDATES);
   const [suggestMerge] = useMutation(SUGGEST_MERGE);
 
   const toggleDetails = (pairId) => {
@@ -39,15 +39,15 @@ const DeduplicationInspector = () => {
       setFeedback({
         type: "success",
         message: "Merge completed successfully.",
-        details: `Entities ${sourceId} and ${targetId} have been merged.`
+        details: `Entities ${sourceId} and ${targetId} have been merged.`,
       });
 
       // Emit success event for observability
       if (window.analytics) {
-        window.analytics.track('entity_merge_success', {
+        window.analytics.track("entity_merge_success", {
           sourceId,
           targetId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     } catch (err) {
@@ -64,9 +64,10 @@ const DeduplicationInspector = () => {
       } else if (err.graphQLErrors && err.graphQLErrors.length > 0) {
         const graphQLError = err.graphQLErrors[0];
         errorMessage += "Validation error.";
-        errorDetails = graphQLError.message || "The entities cannot be merged due to data constraints.";
+        errorDetails =
+          graphQLError.message || "The entities cannot be merged due to data constraints.";
         retryable = false;
-      } else if (err.message && err.message.includes('timeout')) {
+      } else if (err.message && err.message.includes("timeout")) {
         errorMessage += "Request timed out.";
         errorDetails = "The operation took too long. Please try again.";
       } else {
@@ -80,17 +81,17 @@ const DeduplicationInspector = () => {
         details: errorDetails,
         retryable,
         sourceId,
-        targetId
+        targetId,
       });
 
       // Emit error event for observability
       if (window.analytics) {
-        window.analytics.track('entity_merge_error', {
+        window.analytics.track("entity_merge_error", {
           sourceId,
           targetId,
-          errorType: err.networkError ? 'network' : err.graphQLErrors ? 'validation' : 'unknown',
+          errorType: err.networkError ? "network" : err.graphQLErrors ? "validation" : "unknown",
           errorMessage: err.message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     } finally {
@@ -132,9 +133,9 @@ const DeduplicationInspector = () => {
 
   const renderSimilarityBreakdown = (similarity, reasons, entityA, entityB) => {
     // Calculate component scores (approximation based on reasons)
-    const hasHighTextSimilarity = reasons.includes('High text similarity');
-    const hasNeighborOverlap = reasons.includes('Significant neighbor overlap');
-    const hasSameSource = reasons.includes('Same source');
+    const hasHighTextSimilarity = reasons.includes("High text similarity");
+    const hasNeighborOverlap = reasons.includes("Significant neighbor overlap");
+    const hasSameSource = reasons.includes("Same source");
 
     return (
       <div style={{ fontSize: "0.9em", marginTop: "8px" }}>
@@ -145,7 +146,8 @@ const DeduplicationInspector = () => {
             {hasHighTextSimilarity && " ✓"}
           </li>
           <li>
-            Topology Similarity (30% weight): {hasNeighborOverlap ? "Significant overlap" : "Low overlap"}
+            Topology Similarity (30% weight):{" "}
+            {hasNeighborOverlap ? "Significant overlap" : "Low overlap"}
             {hasNeighborOverlap && " ✓"}
           </li>
           <li>
@@ -159,13 +161,21 @@ const DeduplicationInspector = () => {
 
   const renderEntityComparison = (entityA, entityB, pairId, isExpanded, similarity, reasons) => {
     const attributeDiff = getAttributeDiff(entityA, entityB);
-    const differentAttributes = attributeDiff.filter(attr => attr.isDifferent);
+    const differentAttributes = attributeDiff.filter((attr) => attr.isDifferent);
 
     return (
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
           {/* Entity A */}
-          <div style={{ flex: 1, marginRight: "10px", padding: "8px", backgroundColor: "#f5f5f5", borderRadius: "4px" }}>
+          <div
+            style={{
+              flex: 1,
+              marginRight: "10px",
+              padding: "8px",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "4px",
+            }}
+          >
             <h4 style={{ margin: "0 0 8px 0" }}>{entityA.label}</h4>
             <p style={{ fontSize: "0.85em", color: "#666", margin: "4px 0" }}>
               <strong>ID:</strong> {entityA.id}
@@ -179,7 +189,15 @@ const DeduplicationInspector = () => {
           </div>
 
           {/* Entity B */}
-          <div style={{ flex: 1, marginLeft: "10px", padding: "8px", backgroundColor: "#f5f5f5", borderRadius: "4px" }}>
+          <div
+            style={{
+              flex: 1,
+              marginLeft: "10px",
+              padding: "8px",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "4px",
+            }}
+          >
             <h4 style={{ margin: "0 0 8px 0" }}>{entityB.label}</h4>
             <p style={{ fontSize: "0.85em", color: "#666", margin: "4px 0" }}>
               <strong>ID:</strong> {entityB.id}
@@ -210,7 +228,14 @@ const DeduplicationInspector = () => {
         </button>
 
         {isExpanded && (
-          <div style={{ marginTop: "12px", padding: "12px", backgroundColor: "#fafafa", borderRadius: "4px" }}>
+          <div
+            style={{
+              marginTop: "12px",
+              padding: "12px",
+              backgroundColor: "#fafafa",
+              borderRadius: "4px",
+            }}
+          >
             {/* Similarity breakdown */}
             {renderSimilarityBreakdown(similarity, reasons, entityA, entityB)}
 
@@ -223,14 +248,29 @@ const DeduplicationInspector = () => {
                     {differentAttributes.length} attribute(s) differ
                   </p>
                 )}
-                <table style={{ width: "100%", marginTop: "8px", borderCollapse: "collapse", fontSize: "0.85em" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    marginTop: "8px",
+                    borderCollapse: "collapse",
+                    fontSize: "0.85em",
+                  }}
+                >
                   <thead>
                     <tr style={{ backgroundColor: "#e0e0e0" }}>
-                      <th style={{ padding: "6px", textAlign: "left", border: "1px solid #bdbdbd" }}>Attribute</th>
-                      <th style={{ padding: "6px", textAlign: "left", border: "1px solid #bdbdbd" }}>
+                      <th
+                        style={{ padding: "6px", textAlign: "left", border: "1px solid #bdbdbd" }}
+                      >
+                        Attribute
+                      </th>
+                      <th
+                        style={{ padding: "6px", textAlign: "left", border: "1px solid #bdbdbd" }}
+                      >
                         {entityA.label}
                       </th>
-                      <th style={{ padding: "6px", textAlign: "left", border: "1px solid #bdbdbd" }}>
+                      <th
+                        style={{ padding: "6px", textAlign: "left", border: "1px solid #bdbdbd" }}
+                      >
                         {entityB.label}
                       </th>
                     </tr>
@@ -243,17 +283,27 @@ const DeduplicationInspector = () => {
                           backgroundColor: attr.isDifferent ? "#fff3e0" : "transparent",
                         }}
                       >
-                        <td style={{ padding: "6px", border: "1px solid #bdbdbd", fontWeight: "500" }}>
+                        <td
+                          style={{ padding: "6px", border: "1px solid #bdbdbd", fontWeight: "500" }}
+                        >
                           {attr.key}
                           {attr.isDifferent && " ⚠️"}
                         </td>
                         <td style={{ padding: "6px", border: "1px solid #bdbdbd" }}>
                           {attr.onlyInA && <em style={{ color: "#666" }}>(unique)</em>}
-                          {attr.valueA !== undefined ? String(attr.valueA) : <em style={{ color: "#999" }}>—</em>}
+                          {attr.valueA !== undefined ? (
+                            String(attr.valueA)
+                          ) : (
+                            <em style={{ color: "#999" }}>—</em>
+                          )}
                         </td>
                         <td style={{ padding: "6px", border: "1px solid #bdbdbd" }}>
                           {attr.onlyInB && <em style={{ color: "#666" }}>(unique)</em>}
-                          {attr.valueB !== undefined ? String(attr.valueB) : <em style={{ color: "#999" }}>—</em>}
+                          {attr.valueB !== undefined ? (
+                            String(attr.valueB)
+                          ) : (
+                            <em style={{ color: "#999" }}>—</em>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -284,9 +334,17 @@ const DeduplicationInspector = () => {
             )}
 
             {/* Audit trail placeholder */}
-            <div style={{ marginTop: "16px", padding: "8px", backgroundColor: "#e3f2fd", borderRadius: "4px" }}>
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "8px",
+                backgroundColor: "#e3f2fd",
+                borderRadius: "4px",
+              }}
+            >
               <p style={{ fontSize: "0.85em", color: "#1565c0", margin: 0 }}>
-                💡 <strong>Audit Trail:</strong> View full provenance and modification history in the entity detail page.
+                💡 <strong>Audit Trail:</strong> View full provenance and modification history in
+                the entity detail page.
               </p>
             </div>
           </div>
@@ -332,9 +390,7 @@ const DeduplicationInspector = () => {
             {feedback.message}
           </div>
           {feedback.details && (
-            <div style={{ fontSize: "0.9em", marginTop: "4px" }}>
-              {feedback.details}
-            </div>
+            <div style={{ fontSize: "0.9em", marginTop: "4px" }}>{feedback.details}</div>
           )}
           {feedback.type === "error" && feedback.retryable && (
             <button
@@ -406,11 +462,13 @@ const DeduplicationInspector = () => {
                 disabled={mergeInFlight === `${entityA.id}-${entityB.id}`}
                 style={{
                   padding: "10px 20px",
-                  backgroundColor: mergeInFlight === `${entityA.id}-${entityB.id}` ? "#bdbdbd" : "#1976d2",
+                  backgroundColor:
+                    mergeInFlight === `${entityA.id}-${entityB.id}` ? "#bdbdbd" : "#1976d2",
                   color: "white",
                   border: "none",
                   borderRadius: "4px",
-                  cursor: mergeInFlight === `${entityA.id}-${entityB.id}` ? "not-allowed" : "pointer",
+                  cursor:
+                    mergeInFlight === `${entityA.id}-${entityB.id}` ? "not-allowed" : "pointer",
                   fontSize: "0.95em",
                   fontWeight: "500",
                 }}
@@ -430,11 +488,13 @@ const DeduplicationInspector = () => {
                 disabled={mergeInFlight === `${entityB.id}-${entityA.id}`}
                 style={{
                   padding: "10px 20px",
-                  backgroundColor: mergeInFlight === `${entityB.id}-${entityA.id}` ? "#bdbdbd" : "#1976d2",
+                  backgroundColor:
+                    mergeInFlight === `${entityB.id}-${entityA.id}` ? "#bdbdbd" : "#1976d2",
                   color: "white",
                   border: "none",
                   borderRadius: "4px",
-                  cursor: mergeInFlight === `${entityB.id}-${entityA.id}` ? "not-allowed" : "pointer",
+                  cursor:
+                    mergeInFlight === `${entityB.id}-${entityA.id}` ? "not-allowed" : "pointer",
                   fontSize: "0.95em",
                   fontWeight: "500",
                 }}
