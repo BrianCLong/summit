@@ -11,6 +11,11 @@ on:
         required: false
         type: boolean
         default: true
+      run_snyk:
+        description: "Enable or disable Snyk dependency scanning."
+        required: false
+        type: boolean
+        default: false
     secrets:
       snyk_token:
         description: "Snyk API token when invoking as a reusable workflow."
@@ -33,6 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       run_dast: ${{ steps.flags.outputs.run_dast }}
+      run_snyk: ${{ steps.flags.outputs.run_snyk }}
     steps:
       - id: flags
         run: |
@@ -45,6 +51,15 @@ jobs:
             fi
           fi
           echo "run_dast=$RUN_DAST" >> "$GITHUB_OUTPUT"
+
+          RUN_SNYK="false"
+          if command -v jq >/dev/null 2>&1 && [ -f "$GITHUB_EVENT_PATH" ]; then
+            VALUE=$(jq -r '.inputs.run_snyk // empty' "$GITHUB_EVENT_PATH")
+            if [ "$VALUE" = "true" ]; then
+              RUN_SNYK="true"
+            fi
+          fi
+          echo "run_snyk=$RUN_SNYK" >> "$GITHUB_OUTPUT"
 
   secret-scan:
     name: Secret scanning (Gitleaks)
@@ -133,6 +148,7 @@ jobs:
     name: Dependency vulnerability scan (Snyk)
     runs-on: ubuntu-latest
     needs: context
+    if: ${{ needs.context.outputs.run_snyk == 'true' }}
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
