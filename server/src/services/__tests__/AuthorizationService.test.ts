@@ -6,7 +6,12 @@ jest.mock('../../config/database.js', () => ({
     query: jest.fn(),
     connect: jest.fn(),
     end: jest.fn(),
-  })),
+    // Mock additional Pool properties to satisfy type requirements
+    totalCount: 0,
+    idleCount: 0,
+    waitingCount: 0,
+    expiredCount: 0,
+  } as any)), // eslint-disable-line @typescript-eslint/no-explicit-any
 }));
 
 jest.mock('../../auth/multi-tenant-rbac.js', () => {
@@ -20,13 +25,17 @@ jest.mock('../../auth/multi-tenant-rbac.js', () => {
   };
 });
 
+const mockLogger = {
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn(),
+  child: jest.fn(() => mockLogger),
+};
+
 jest.mock('../../utils/logger.js', () => ({
-  default: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-  },
+  default: mockLogger,
+  __esModule: true,
 }));
 
 import { AuthorizationServiceImpl } from '../AuthorizationService.js';
@@ -35,17 +44,12 @@ import type { Principal, ResourceRef } from '../../types/identity.js';
 
 describe('AuthorizationService', () => {
   let authService: AuthorizationServiceImpl;
-  let mockRbac: {
-    hasPermission: jest.Mock;
-    evaluateAccess: jest.Mock;
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockRbac: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRbac = getMultiTenantRBAC() as unknown as {
-      hasPermission: jest.Mock;
-      evaluateAccess: jest.Mock;
-    };
+    mockRbac = getMultiTenantRBAC();
     authService = new AuthorizationServiceImpl();
   });
 
@@ -55,8 +59,8 @@ describe('AuthorizationService', () => {
       kind: 'user',
       tenantId: 'tenant-a',
       roles: ['analyst'],
+      scopes: ['investigation:view', 'investigation:read'],
       user: {
-        id: 'user-123',
         email: 'analyst@example.com',
         username: 'analyst1',
       },
@@ -159,6 +163,7 @@ describe('AuthorizationService', () => {
       kind: 'user',
       tenantId: 'tenant-a',
       roles: ['analyst'],
+      scopes: ['report:view', 'investigation:read'],
     };
 
     const resource: ResourceRef = {

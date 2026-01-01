@@ -9,7 +9,7 @@ import {
   ApiKey,
 } from '../types/identity.js';
 import { getPostgresPool } from '../config/database.js';
-import { Pool } from 'pg';
+import type { ManagedPostgresPool } from '../db/postgres.js';
 import logger from '../utils/logger.js';
 import { MultiTenantRBACManager, getMultiTenantRBAC } from '../auth/multi-tenant-rbac.js';
 
@@ -75,7 +75,7 @@ export interface AuthorizationService {
  */
 export class AuthorizationServiceImpl implements AuthorizationService {
   private rbac: MultiTenantRBACManager;
-  private pool: Pool;
+  private pool: ManagedPostgresPool;
 
   /**
    * @constructor
