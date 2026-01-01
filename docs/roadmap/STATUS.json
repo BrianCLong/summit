@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-01-01T04:11:56Z",
+  "revision_note": "Added Sprint N+3 Freeze/Certify/Release planning pack and certification templates (security, integrity, limits)",
   "initiatives": [
     {
       "id": "A",

@@ -38,6 +38,11 @@
 - **Key Artifacts:** `PORTFOLIO_SCORECARD.md`, `PORTFOLIO_DECISIONS.md`, `docs/GOVERNANCE.md` (Updated).
 - **Incoming Prompt:** **IntelGraph Disinformation GA “Proof-First” Sprint (10 business days)** — see `sprint/edops-ga-sprint-prompt.md` for the full execution brief, acceptance criteria, KPIs, and quick decision questions.
 
+### Next Sprint (N+3)
+
+- **Sprint N+3 — Freeze, Certify, Release** (`sprint/sprint-n+3-freeze-certify-release.md`): Enforces feature freeze, change classification gates, certification evidence packs, reproducible release builds, backup/restore proof, operator Go/No-Go automation, and RC tagging.
+- **Goal:** Produce a certifiable, reproducible release candidate suitable for a serious pilot without caveats.
+
 ### Upcoming Sprint (26)
 
 - **Sprint 26 — Release Integrity & Audit Readiness** (`sprint/sprint-26-release-integrity-audit-readiness.md`): Evidence-first releases with GA tagging, signing, and auditor-ready bundles while keeping the Golden Path (`make smoke`) green.
