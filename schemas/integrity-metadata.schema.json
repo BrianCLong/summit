@@ -1,0 +1,582 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.anthropic.com/schemas/integrity-metadata.schema.json",
+  "title": "Summit Truth Operations Integrity Metadata",
+  "description": "Schema for adversarial-resistant information integrity metadata",
+  "type": "object",
+  "required": [
+    "claim_id",
+    "timestamp",
+    "confidence",
+    "integrity_score",
+    "integrity_breakdown",
+    "threat_assessment"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "Unique identifier for the information claim",
+      "pattern": "^claim_[0-9]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the claim was received"
+    },
+    "claim_content": {
+      "type": "string",
+      "description": "The actual claim or information content"
+    },
+    "source": {
+      "type": "object",
+      "required": ["source_id", "source_type"],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "description": "Unique identifier for the information source"
+        },
+        "source_type": {
+          "type": "string",
+          "enum": ["automated_system", "human_operator", "external_api", "monitoring_system", "user_input"],
+          "description": "Type of information source"
+        },
+        "source_age_days": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How long this source has been operational"
+        },
+        "authority_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Overall authority score for this source"
+        }
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Statistical confidence in the claim (traditional metric)"
+    },
+    "integrity_score": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Composite integrity score (adversarial-aware metric)"
+    },
+    "integrity_breakdown": {
+      "type": "object",
+      "required": [
+        "source_volatility",
+        "correlation_independence",
+        "historical_adversarial_behavior",
+        "narrative_shift_velocity",
+        "verification_depth"
+      ],
+      "properties": {
+        "source_volatility": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Stability of source reporting patterns (1.0 = stable)"
+        },
+        "correlation_independence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Degree of independent verification (1.0 = fully independent)"
+        },
+        "historical_adversarial_behavior": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Source's history as attack vector (1.0 = clean record)"
+        },
+        "narrative_shift_velocity": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Rate of explanatory framework changes (1.0 = stable)"
+        },
+        "verification_depth": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Quality of evidence chain (1.0 = complete verification)"
+        }
+      }
+    },
+    "integrity_zone": {
+      "type": "string",
+      "enum": ["HIGH", "MEDIUM", "LOW"],
+      "description": "Operational integrity classification"
+    },
+    "recommended_action": {
+      "type": "string",
+      "enum": [
+        "PROCEED_NORMALLY",
+        "ESCALATE_SCRUTINY",
+        "REQUIRE_VERIFICATION",
+        "QUARANTINE",
+        "REJECT"
+      ],
+      "description": "Recommended handling based on integrity assessment"
+    },
+    "threat_assessment": {
+      "type": "object",
+      "properties": {
+        "threat_classes_detected": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "NOISE_ATTACK",
+              "POISONING_ATTACK",
+              "NARRATIVE_ATTACK",
+              "TIMING_ATTACK",
+              "AUTHORITY_ATTACK"
+            ]
+          },
+          "description": "Which threat classes are potentially present"
+        },
+        "attack_probability": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Estimated probability this is adversarial"
+        },
+        "attack_indicators": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["indicator", "severity"],
+            "properties": {
+              "indicator": {
+                "type": "string",
+                "description": "Specific indicator of potential attack"
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+              },
+              "evidence": {
+                "type": "string",
+                "description": "Supporting evidence for this indicator"
+              }
+            }
+          }
+        }
+      }
+    },
+    "narrative_metadata": {
+      "type": "object",
+      "description": "Narrative collision detection metadata",
+      "properties": {
+        "is_narrative": {
+          "type": "boolean",
+          "description": "Whether this claim is explanatory narrative vs. fact"
+        },
+        "event_id": {
+          "type": "string",
+          "description": "Associated event being explained"
+        },
+        "narrative_metrics": {
+          "type": "object",
+          "properties": {
+            "explanatory_diversity": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of competing narratives"
+            },
+            "convergence_velocity": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Rate of consensus formation (sources/hour)"
+            },
+            "unexplained_elements_ratio": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Portion of facts not explained by narrative"
+            },
+            "suppression_score": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Rate of alternative dismissal"
+            },
+            "narrative_diversity_index": {
+              "type": "number",
+              "minimum": 0.0,
+              "description": "Entropy-based diversity measure"
+            }
+          }
+        },
+        "unexplained_elements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Facts not explained by current narrative"
+        },
+        "alternative_narratives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "narrative_id": {
+                "type": "string"
+              },
+              "explanation": {
+                "type": "string"
+              },
+              "support_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "coherence_score": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "temporal_metadata": {
+      "type": "object",
+      "description": "Temporal truth protection metadata",
+      "properties": {
+        "information_arrival_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expected_arrival_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When information was expected"
+        },
+        "delay_seconds": {
+          "type": "number",
+          "description": "Delay beyond expected arrival (negative if early)"
+        },
+        "delay_anomaly_score": {
+          "type": "number",
+          "description": "Statistical anomaly score for delay"
+        },
+        "temporal_relevance": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Current decision relevance given elapsed time"
+        },
+        "decision_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When decision must be made"
+        },
+        "time_to_decision_minutes": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minutes remaining before decision deadline"
+        }
+      }
+    },
+    "authority_metadata": {
+      "type": "object",
+      "description": "Authority validation metadata",
+      "properties": {
+        "identity_verification": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "x509_certificate",
+                "api_key",
+                "oauth_token",
+                "mutual_tls",
+                "cryptographic_signature",
+                "biometric"
+              ]
+            },
+            "verified": {
+              "type": "boolean"
+            },
+            "verification_strength": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "last_verified": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "authority_continuity": {
+          "type": "object",
+          "properties": {
+            "behavioral_deviation_score": {
+              "type": "number",
+              "minimum": 0.0,
+              "description": "Overall behavioral change (>3.0 is significant)"
+            },
+            "alert_rate_anomaly": {
+              "type": "number",
+              "description": "Deviation in message frequency"
+            },
+            "confidence_shift": {
+              "type": "number",
+              "description": "Change in typical confidence levels"
+            },
+            "severity_inflation_score": {
+              "type": "number",
+              "description": "Escalation in claimed urgency"
+            },
+            "linguistic_drift": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Communication style change (>0.3 significant)"
+            }
+          }
+        },
+        "authority_events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "event_type": {
+                "type": "string",
+                "enum": [
+                  "credential_rotation",
+                  "compromise_detected",
+                  "false_positive_spike",
+                  "accuracy_degradation",
+                  "recovery"
+                ]
+              },
+              "impact": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "containment_metadata": {
+      "type": "object",
+      "description": "Blast-radius containment metadata",
+      "properties": {
+        "quarantined": {
+          "type": "boolean",
+          "description": "Whether information is quarantined"
+        },
+        "quarantine_reason": {
+          "type": "string"
+        },
+        "quarantine_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "dependencies": {
+          "type": "object",
+          "properties": {
+            "pending_decisions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Decisions not yet made"
+            },
+            "completed_decisions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Decisions already made"
+            },
+            "executed_actions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Actions already taken"
+            }
+          }
+        },
+        "blast_radius": {
+          "type": "object",
+          "properties": {
+            "propagation_depth": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Maximum dependency chain length"
+            },
+            "cascade_width": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of dependent decisions"
+            },
+            "reversibility_index": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0,
+              "description": "Proportion of reversible decisions"
+            },
+            "temporal_spread_hours": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Time between introduction and detection"
+            }
+          }
+        },
+        "containment_status": {
+          "type": "string",
+          "enum": ["ACTIVE", "MONITORING", "RESOLVED", "ESCALATED"],
+          "description": "Current containment state"
+        }
+      }
+    },
+    "silence_metadata": {
+      "type": "object",
+      "description": "Strategic silence decision metadata",
+      "properties": {
+        "silence_chosen": {
+          "type": "boolean",
+          "description": "Whether strategic silence was selected"
+        },
+        "silence_type": {
+          "type": "string",
+          "enum": [
+            "OBSERVATIONAL",
+            "DENIAL",
+            "PRIORITIZATION",
+            "UNCERTAINTY"
+          ],
+          "description": "Type of strategic silence"
+        },
+        "silence_justification": {
+          "type": "string",
+          "description": "Why silence was chosen"
+        },
+        "silence_start_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "review_deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When silence decision must be reviewed"
+        },
+        "escalation_triggers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Conditions that would break silence"
+        },
+        "max_silence_duration_hours": {
+          "type": "number",
+          "description": "Maximum acceptable silence period"
+        }
+      }
+    },
+    "policy_compliance": {
+      "type": "object",
+      "description": "Truth defense policy compliance status",
+      "properties": {
+        "policy_version": {
+          "type": "string",
+          "description": "Version of truth defense policy applied"
+        },
+        "compliant": {
+          "type": "boolean",
+          "description": "Whether claim processing is policy-compliant"
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["DENY", "WARN", "INFO"]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "overrides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule": {
+                "type": "string"
+              },
+              "override_by": {
+                "type": "string"
+              },
+              "justification": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "audit_trail": {
+      "type": "object",
+      "description": "Immutable audit trail",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "modifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "modified_by": {
+                "type": "string"
+              },
+              "field": {
+                "type": "string"
+              },
+              "old_value": {},
+              "new_value": {},
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
