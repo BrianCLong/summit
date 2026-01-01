@@ -1,0 +1,161 @@
+{
+  "archetypes": [
+    {
+      "id": "isv",
+      "name": "Independent Software Vendor",
+      "owner": "Jules",
+      "customer_problem": "Customers want Summit insights embedded into downstream workspaces without losing safety, residency, or auditability.",
+      "supported_patterns": ["read-only-insight-api", "sandboxed-plugin"],
+      "non_goals": [
+        "No direct database writes or privilege escalation",
+        "No custom runtimes or bespoke networking",
+        "No by-default access to tenant encryption keys"
+      ],
+      "guardrails": {
+        "read-only-insight-api": {
+          "budget": "<=600 rpm, 500MB/day analytics payloads",
+          "residency": "regional pins with per-tenant stateless workers",
+          "enforcement": ["OPA policy bundle", "JWT audience pinning", "kill-switch flag"]
+        },
+        "sandboxed-plugin": {
+          "budget": "500 cpu_millis, 256MB, 1.5s wall clock",
+          "residency": "inherits tenant region; wasm sandbox only",
+          "enforcement": ["syscall allowlist", "blocked local storage", "mesh-only egress"]
+        }
+      },
+      "evidence": {
+        "certification_target": "Verified",
+        "tests": ["plugin sandbox conformance", "residency pinning"],
+        "audit": "OPA decision logs exported to prov-ledger"
+      }
+    },
+    {
+      "id": "si",
+      "name": "Systems Integrator",
+      "owner": "Jules",
+      "customer_problem": "Enterprises need packaged onboarding, mapping, and monitoring without exposing raw systems to SI code.",
+      "supported_patterns": ["sidecar-adapter", "event-listener-no-mutation"],
+      "non_goals": [
+        "No privileged admin access to Summit tenants",
+        "No bypass of policy-engine or claims registry",
+        "No long-lived credentials outside managed secrets"
+      ],
+      "guardrails": {
+        "sidecar-adapter": {
+          "budget": "750 cpu_millis, 512MB, 2.5s with throughput <=2GB/day",
+          "residency": "customer-selected region with per-tenant containers",
+          "enforcement": [
+            "read-only tokens",
+            "orchestrator scale-to-zero",
+            "revocable adapter manifest"
+          ]
+        },
+        "event-listener-no-mutation": {
+          "budget": "<=1200 epm, 500ms delivery lag, 24h retention",
+          "residency": "regional broker isolating consumer groups",
+          "enforcement": ["ACL-gated topics", "webhook mutual TLS", "replay protection"]
+        }
+      },
+      "evidence": {
+        "certification_target": "Trusted",
+        "tests": ["adapter rollback smoke", "event listener mutation-negative"],
+        "audit": "revocation ledger entries required for every adapter install"
+      }
+    },
+    {
+      "id": "data-provider",
+      "name": "Data Provider",
+      "owner": "Jules",
+      "customer_problem": "Customers need curated datasets to enrich investigations without violating residency or provenance rules.",
+      "supported_patterns": ["sidecar-adapter", "read-only-insight-api"],
+      "non_goals": [
+        "No bulk exfiltration of Summit tenant data",
+        "No cross-tenant mixing of datasets",
+        "No unverified lineage ingestion"
+      ],
+      "guardrails": {
+        "sidecar-adapter": {
+          "budget": "750 cpu_millis, 512MB, 2.5s throughput <=2GB/day",
+          "residency": "customer-selected region with per-tenant containers",
+          "enforcement": ["source attestation", "checksum validation", "kill-switch token revoke"]
+        },
+        "read-only-insight-api": {
+          "budget": "<=600 rpm, 500MB/day analytics payloads",
+          "residency": "regional pins with per-tenant stateless workers",
+          "enforcement": [
+            "attribute-based access control",
+            "audit-only tokens",
+            "rate limit policy"
+          ]
+        }
+      },
+      "evidence": {
+        "certification_target": "Verified",
+        "tests": ["lineage validation", "exfiltration guardrail negative"],
+        "audit": "dataset fingerprints stored in prov-ledger"
+      }
+    },
+    {
+      "id": "compliance-tool",
+      "name": "Compliance & GRC Tool",
+      "owner": "Jules",
+      "customer_problem": "Security teams must observe Summit controls and evidence without granting mutation or broad access.",
+      "supported_patterns": ["event-listener-no-mutation", "read-only-insight-api"],
+      "non_goals": [
+        "No configuration drift remediation writes",
+        "No policy overrides or risk score modification",
+        "No direct access to customer data outside evidence scope"
+      ],
+      "guardrails": {
+        "event-listener-no-mutation": {
+          "budget": "<=1200 epm, 500ms delivery lag, 24h retention",
+          "residency": "regional broker isolating consumer groups",
+          "enforcement": ["evidence-only topics", "OPA guardrail on payload shape", "webhook mTLS"]
+        },
+        "read-only-insight-api": {
+          "budget": "<=600 rpm, 500MB/day analytics payloads",
+          "residency": "regional pins with per-tenant stateless workers",
+          "enforcement": ["claims registry gating", "least-privilege scopes", "kill-switch"]
+        }
+      },
+      "evidence": {
+        "certification_target": "Compatible",
+        "tests": ["claims registry drift block", "policy override negative"],
+        "audit": "access logs forwarded to prov-ledger and SIEM"
+      }
+    },
+    {
+      "id": "observability",
+      "name": "Observability Platform",
+      "owner": "Jules",
+      "customer_problem": "Ops teams need metrics and traces for Summit workloads without altering execution paths or secrets.",
+      "supported_patterns": ["event-listener-no-mutation", "read-only-insight-api"],
+      "non_goals": [
+        "No secret scraping or credential caching",
+        "No mutation of runtime configuration",
+        "No cross-tenant visibility"
+      ],
+      "guardrails": {
+        "event-listener-no-mutation": {
+          "budget": "<=1200 epm, 500ms delivery lag, 24h retention",
+          "residency": "regional broker isolating consumer groups",
+          "enforcement": [
+            "telemetry-only topics",
+            "token-bound service accounts",
+            "revocation tested"
+          ]
+        },
+        "read-only-insight-api": {
+          "budget": "<=600 rpm, 500MB/day analytics payloads",
+          "residency": "regional pins with per-tenant stateless workers",
+          "enforcement": ["read-only scopes", "OPA residency guard", "kill-switch"]
+        }
+      },
+      "evidence": {
+        "certification_target": "Trusted",
+        "tests": ["scope creep negative", "observability payload PII scrub"],
+        "audit": "traces exported with tenant tag and residency marker"
+      }
+    }
+  ]
+}

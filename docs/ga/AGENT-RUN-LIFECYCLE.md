@@ -1,5 +1,11 @@
 # Agent Run Lifecycle (Closed-Loop)
 
+## Status & Precedence
+
+This document defines GA execution requirements. It is subordinate to
+`docs/governance/CONSTITUTION.md` and `docs/governance/AGENT_MANDATES.md`, and complements
+`docs/ga/AGENTS.md` and root `AGENTS.md`.
+
 This lifecycle makes every agent action governable, reproducible, and auditable.
 
 ## 1. Prompt Capture (Immutable Origin)

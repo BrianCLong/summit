@@ -329,6 +329,14 @@ function HomeRouteInner() {
       },
       category: 'Investigations',
     },
+    {
+      keys: ['escape'],
+      description: 'Close modals and panels',
+      action: () => {
+        setShowShortcutsHelp(false);
+      },
+      category: 'General',
+    },
   ];
 
   useKeyboardShortcuts(shortcuts);

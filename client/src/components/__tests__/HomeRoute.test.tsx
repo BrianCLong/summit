@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { createStore } from '@reduxjs/toolkit';
@@ -252,17 +252,17 @@ describe('HomeRoute', () => {
   test('renders feature cards in overview', () => {
     renderWithProviders(<HomeRoute />);
 
-    expect(screen.getByText('📊 Graph Analysis')).toBeInTheDocument();
-    expect(screen.getByText('📈 Analytics Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('🛡️ Action Safety')).toBeInTheDocument();
-    expect(screen.getByText('🔗 GraphQL API')).toBeInTheDocument();
+    expect(screen.getByText('🌐 Graph Analysis')).toBeInTheDocument();
+    expect(screen.getAllByText('🧬 Behavioral Analytics')[0]).toBeInTheDocument();
+    expect(screen.getByText('🎯 Threat Hunting')).toBeInTheDocument();
+    expect(screen.getByText('🔒 Security & Compliance')).toBeInTheDocument();
   });
 
   test('handles missing graph stats gracefully', () => {
     renderWithProviders(<HomeRoute />, { graph: {} });
 
     expect(screen.getByText('Graph Nodes:')).toBeInTheDocument();
-    expect(screen.getByText('0')).toBeInTheDocument(); // Default value
+    expect(screen.getAllByText('0')[0]).toBeInTheDocument(); // Use getAllByText for multiple 0s
   });
 });
 
@@ -300,7 +300,10 @@ describe('HomeRoute Keyboard Shortcuts Integration', () => {
     });
 
     // Press Escape to close
-    fireEvent.keyDown(document, { key: 'Escape' });
+    await withUser(async (u) => {
+      await u.keyboard('{Escape}');
+    });
+
     await waitFor(() => {
       expect(screen.queryByText('Keyboard Shortcuts')).not.toBeInTheDocument();
     });
