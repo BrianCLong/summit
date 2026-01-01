@@ -1,0 +1,234 @@
+/* App.css */
+.app {
+  font-family:
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+.header {
+  background: linear-gradient(135deg, #1e40af 0%, #3730a3 100%);
+  color: white;
+  padding: 2rem 0;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.status-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.status-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid;
+  position: relative;
+}
+
+.status-card.go {
+  border-left-color: #10b981;
+}
+.status-card.warning {
+  border-left-color: #f59e0b;
+}
+.status-card.no-go {
+  border-left-color: #ef4444;
+}
+
+.status-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.status-card .metric {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.status-card.go .metric {
+  color: #10b981;
+}
+.status-card.warning .metric {
+  color: #f59e0b;
+}
+.status-card.no-go .metric {
+  color: #ef4444;
+}
+
+.status-card .target {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.go {
+  background: #10b981;
+}
+.progress-fill.warning {
+  background: #f59e0b;
+}
+.progress-fill.no-go {
+  background: #ef4444;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.chart-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.acceptance-criteria {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.acceptance-criteria h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.criteria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.criteria-item {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+}
+
+.criteria-item.passed {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.criteria-item.warning {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.criteria-item.failed {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.criteria-item h4 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.criteria-item.passed h4 {
+  color: #059669;
+}
+.criteria-item.warning h4 {
+  color: #d97706;
+}
+.criteria-item.failed h4 {
+  color: #dc2626;
+}
+
+.go-no-go-decision {
+  text-align: center;
+  padding: 3rem 2rem;
+  margin-top: 2rem;
+}
+
+.decision-badge {
+  display: inline-block;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.decision-badge.go {
+  background: #10b981;
+  color: white;
+}
+
+.decision-badge.warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.decision-badge.no-go {
+  background: #ef4444;
+  color: white;
+}
+
+.last-updated {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
