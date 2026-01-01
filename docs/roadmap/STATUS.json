@@ -1,6 +1,6 @@
 {
-  "last_updated": "2025-12-30T22:21:04Z",
-  "revision_note": "Added Graph-XAI differentiation track with publications, benchmarks, and case studies",
+  "last_updated": "2026-01-01T00:21:00Z",
+  "revision_note": "Added items 60-95 phased plan with CI/CD gates for cost, change, security, and trust controls",
   "initiatives": [
     {
       "id": "A",
@@ -143,5 +143,21 @@
     "not_started": 5,
     "total": 11,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
+  },
+  "tracked_items": {
+    "items_60_95": {
+      "plan_path": "docs/roadmap/items-60-95-plan.json",
+      "phases": ["Cost", "Change", "Security", "Trust"],
+      "cadence": "Weekly status + risk burndown (Mondays, UTC)",
+      "integration_points": {
+        "budgets_and_quotas": "CI gate reads budget/quota manifests before merge",
+        "waf_and_rate_limits": "Security lint + simulation job blocks missing WAF/rate-limit configs",
+        "canary_and_rollback": "Deploy requires canary metrics with auto-rollback hooks"
+      },
+      "drift_controls": "Items marked complete/descoped are locked except for evidence updates",
+      "owner": "Jules",
+      "next_checkpoint": "2026-W01",
+      "status": "planned"
+    }
   }
 }
