@@ -1,5 +1,11 @@
 # Agentic Operations Handbook
 
+## Status & Precedence
+
+This handbook is operational guidance. If it conflicts with governance, follow
+`docs/governance/CONSTITUTION.md` → `docs/governance/AGENT_MANDATES.md` → `AGENTS.md` → local
+`AGENTS.md` files.
+
 ## Overview
 
 The **Agentic Control Plane** automates the lifecycle of AI-driven development tasks in the Summit platform. It allows "Zero-touch" management where humans prioritize and approve, while agents (Claude, Codex, Jules) handle the execution.

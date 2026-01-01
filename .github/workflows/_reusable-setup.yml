@@ -63,7 +63,7 @@ jobs:
       cache-hit: ${{ steps.cache-pnpm.outputs.cache-hit }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Resolve versions
         id: versions

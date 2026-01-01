@@ -48,8 +48,15 @@ global.IntersectionObserver = class IntersectionObserver {
     }
 };
 
-// scrollTo
-window.scrollTo = jest.fn();
+// scroll polyfills for JSDOM
+const noop = () => { };
+Element.prototype.scrollTo = noop;
+Element.prototype.scrollBy = noop;
+Element.prototype.scrollIntoView = noop;
+HTMLElement.prototype.scrollTo = noop;
+HTMLElement.prototype.scrollBy = noop;
+HTMLElement.prototype.scrollIntoView = noop;
+window.scrollTo = noop;
 
 // HTMLCanvasElement.prototype.getContext
 Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
@@ -136,5 +143,35 @@ jest.mock('react-router-dom', () => {
             state: null,
         })),
         useParams: jest.fn(() => ({})),
+    };
+});
+
+// Mock recharts as it relies on DOM measurements
+jest.mock('recharts', () => {
+    const React = require('react');
+    return {
+        ResponsiveContainer: ({ children }) => <div>{children}</div>,
+        BarChart: ({ children }) => <div>{children}</div>,
+        Bar: () => <div />,
+        XAxis: () => <div />,
+        YAxis: () => <div />,
+        CartesianGrid: () => <div />,
+        Tooltip: () => <div />,
+        Legend: () => <div />,
+        LineChart: ({ children }) => <div>{children}</div>,
+        Line: () => <div />,
+        PieChart: ({ children }) => <div>{children}</div>,
+        Pie: () => <div />,
+        Cell: () => <div />,
+        AreaChart: ({ children }) => <div>{children}</div>,
+        Area: () => <div />,
+        ScatterChart: ({ children }) => <div>{children}</div>,
+        Scatter: () => <div />,
+        ZAxis: () => <div />,
+        RadarChart: ({ children }) => <div>{children}</div>,
+        Radar: () => <div />,
+        PolarGrid: () => <div />,
+        PolarAngleAxis: () => <div />,
+        PolarRadiusAxis: () => <div />,
     };
 });
