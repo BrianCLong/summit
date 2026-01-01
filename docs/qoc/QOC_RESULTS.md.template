@@ -1,0 +1,79 @@
+# QOC <YYYY_QN> - Results
+
+**Do not edit this template directly. Create a copy named `QOC_<YYYY_QN>_RESULTS.md`.**
+
+---
+
+## Overview
+
+*   **Quarter:** `<YYYY_QN>`
+*   **Cycle Lead:** `<Name>`
+*   **Hypotheses Document:** [QOC_<YYYY_QN>_HYPOTHESES.md](./QOC_<YYYY_QN>_HYPOTHESES.md)
+*   **Status:** `Provisional` | `Final`
+
+---
+
+## Final Results
+
+*This section documents the outcome of each implemented hypothesis from Week 2-4.*
+
+### Hypothesis 1: <Concise Title from Hypotheses Doc>
+
+*   **Outcome:** `Succeeded` | `Failed` | `Aborted`
+*   **Summary:** A brief narrative of what happened.
+    > *Example: "The CPU allocation was reduced, and the service remained stable throughout the validation period. The cost savings were slightly higher than projected."*
+*   **Proof / Evidence Link:** A direct link to the dashboard, report, or PR that proves the outcome.
+    > *Example: "[Grafana Dashboard](http://grafana.example.com/d/abcdefg)"*
+
+### Hypothesis 2: <Title>
+
+*   **Outcome:**
+*   **Summary:**
+*   **Proof / Evidence Link:**
+
+### Hypothesis 3: <Title>
+
+*   **Outcome:**
+*   **Summary:**
+*   **Proof / Evidence Link:**
+
+---
+
+## Required Metrics (Final)
+
+*The final, validated metrics for this QOC. No metric -> no credit.*
+
+| Metric | Before | After | Delta (abs) | Delta (%) | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Δ Cost** | `$10,000` | `$8,500` | `-$1,500` | `-15%` | `[Link]` |
+| **Δ p95 Latency** | `250ms` | `245ms` | `-5ms` | `-2%` | `[Link]` |
+| **Δ Error Budget Burn** | `1.5%` | `1.2%` | `-0.3%` | `-20%` | `[Link]` |
+| **Δ Autonomy Demotions**| `2` | `0` | `-2` | `-100%` | `[Link]` |
+| **Incidents Prevented** | `N/A` | `1` | `+1` | `N/A` | `[Link]` |
+| **Controls Triggered** | `15` | `15` | `0` | `0%` | `[Link]` |
+
+---
+
+## Lock-In Mechanisms
+
+*Describe the mechanisms now in place to "lock in" the improvements.*
+
+*   **Improvement 1:**
+    *   **Mechanism:** `Budget` | `Threshold` | `CI Gate` | `Alert`
+    *   **Description:**
+        > *Example: "A new budget alert has been configured in the cloud provider's console to trigger if the monthly cost of the `data-processing` service exceeds $9,000."*
+    *   **Evidence Link:** `[Link to budget configuration]`
+
+---
+
+## Exit Criteria Attestation
+
+*The Cycle Lead must attest that all hard exit criteria have been met.*
+
+- [ ] At least one metric improved measurably.
+- [ ] All changes are guardrailed or locked-in.
+- [ ] All evidence is archived and linked in this document.
+- [ ] Rollback plans remain available and tested.
+
+**Attested by:** `<Name>`
+**Date:** `<YYYY-MM-DD>`
