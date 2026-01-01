@@ -1,4 +1,4 @@
-const natural = require('natural');
+const natural = require("natural");
 
 class SimilarityService {
   /**
@@ -23,7 +23,7 @@ class SimilarityService {
   calculateTopologySimilarity(neighbors1, neighbors2) {
     const set1 = new Set(neighbors1);
     const set2 = new Set(neighbors2);
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
+    const intersection = new Set([...set1].filter((x) => set2.has(x)));
     const union = new Set([...set1, ...set2]);
     return intersection.size / union.size;
   }
@@ -47,7 +47,7 @@ class SimilarityService {
    */
   _generateNGrams(text, n = 3) {
     if (!text || text.length < n) {
-      return [text || ''];
+      return [text || ""];
     }
     const normalized = text.toLowerCase().trim();
     const ngrams = [];
@@ -69,7 +69,7 @@ class SimilarityService {
 
     entities.forEach((entity, idx) => {
       const labelNGrams = this._generateNGrams(entity.label, ngramSize);
-      labelNGrams.forEach(ngram => {
+      labelNGrams.forEach((ngram) => {
         if (!index.has(ngram)) {
           index.set(ngram, new Set());
         }
@@ -94,10 +94,10 @@ class SimilarityService {
     const candidates = new Set();
     const labelNGrams = this._generateNGrams(entity.label, ngramSize);
 
-    labelNGrams.forEach(ngram => {
+    labelNGrams.forEach((ngram) => {
       const matchingEntities = index.get(ngram);
       if (matchingEntities) {
-        matchingEntities.forEach(idx => {
+        matchingEntities.forEach((idx) => {
           // Only add indices greater than current to avoid duplicates
           if (idx > entityIdx) {
             candidates.add(idx);
@@ -130,9 +130,8 @@ class SimilarityService {
    * @returns {Array<Object>} A list of potential duplicate pairs with similarity scores.
    */
   findDuplicateCandidates(entities, threshold = 0.8, options = {}) {
-    const useBlocking = options.useBlocking !== undefined
-      ? options.useBlocking
-      : entities.length > 100; // Auto-enable for large datasets
+    const useBlocking =
+      options.useBlocking !== undefined ? options.useBlocking : entities.length > 100; // Auto-enable for large datasets
     const ngramSize = options.ngramSize || 3;
 
     if (!useBlocking) {
@@ -161,30 +160,37 @@ class SimilarityService {
         comparisonsPerformed++;
 
         const labelSimilarity = this.calculateTextSimilarity(entityA.label, entityB.label);
-        const descriptionSimilarity = this.calculateTextSimilarity(entityA.description, entityB.description);
-        const textSimilarity = (labelSimilarity * 0.7) + (descriptionSimilarity * 0.3);
+        const descriptionSimilarity = this.calculateTextSimilarity(
+          entityA.description,
+          entityB.description
+        );
+        const textSimilarity = labelSimilarity * 0.7 + descriptionSimilarity * 0.3;
 
         const topologySimilarity = this.calculateTopologySimilarity(
-          entityA.relationships.map(r => r.targetEntity.id),
-          entityB.relationships.map(r => r.targetEntity.id)
+          entityA.relationships.map((r) => r.targetEntity.id),
+          entityB.relationships.map((r) => r.targetEntity.id)
         );
 
-        const provenanceSimilarity = this.calculateProvenanceSimilarity(entityA.source, entityB.source);
+        const provenanceSimilarity = this.calculateProvenanceSimilarity(
+          entityA.source,
+          entityB.source
+        );
 
         // Weighted average
-        const overallSimilarity = (textSimilarity * 0.6) + (topologySimilarity * 0.3) + (provenanceSimilarity * 0.1);
+        const overallSimilarity =
+          textSimilarity * 0.6 + topologySimilarity * 0.3 + provenanceSimilarity * 0.1;
 
         if (overallSimilarity >= threshold) {
           const reasons = [];
-          if (textSimilarity > 0.8) reasons.push('High text similarity');
-          if (topologySimilarity > 0.5) reasons.push('Significant neighbor overlap');
-          if (provenanceSimilarity > 0) reasons.push('Same source');
+          if (textSimilarity > 0.8) reasons.push("High text similarity");
+          if (topologySimilarity > 0.5) reasons.push("Significant neighbor overlap");
+          if (provenanceSimilarity > 0) reasons.push("Same source");
 
           candidates.push({
             entityA,
             entityB,
             similarity: overallSimilarity,
-            reasons: reasons.length > 0 ? reasons : ['Overall similarity threshold met'],
+            reasons: reasons.length > 0 ? reasons : ["Overall similarity threshold met"],
           });
         }
       }
@@ -194,11 +200,16 @@ class SimilarityService {
 
     // Log performance metrics (for observability)
     const totalPossibleComparisons = (entities.length * (entities.length - 1)) / 2;
-    const reductionPercentage = ((1 - (comparisonsPerformed / totalPossibleComparisons)) * 100).toFixed(1);
+    const reductionPercentage = (
+      (1 - comparisonsPerformed / totalPossibleComparisons) *
+      100
+    ).toFixed(1);
 
-    console.log(`[SimilarityService] Performance: indexed ${entities.length} entities in ${indexingTime}ms, ` +
-                `performed ${comparisonsPerformed}/${totalPossibleComparisons} comparisons (${reductionPercentage}% reduction) ` +
-                `in ${comparisonTime}ms, found ${candidates.length} candidates`);
+    console.log(
+      `[SimilarityService] Performance: indexed ${entities.length} entities in ${indexingTime}ms, ` +
+        `performed ${comparisonsPerformed}/${totalPossibleComparisons} comparisons (${reductionPercentage}% reduction) ` +
+        `in ${comparisonTime}ms, found ${candidates.length} candidates`
+    );
 
     return candidates;
   }
@@ -219,29 +230,36 @@ class SimilarityService {
         const entityB = entities[j];
 
         const labelSimilarity = this.calculateTextSimilarity(entityA.label, entityB.label);
-        const descriptionSimilarity = this.calculateTextSimilarity(entityA.description, entityB.description);
-        const textSimilarity = (labelSimilarity * 0.7) + (descriptionSimilarity * 0.3);
+        const descriptionSimilarity = this.calculateTextSimilarity(
+          entityA.description,
+          entityB.description
+        );
+        const textSimilarity = labelSimilarity * 0.7 + descriptionSimilarity * 0.3;
 
         const topologySimilarity = this.calculateTopologySimilarity(
-          entityA.relationships.map(r => r.targetEntity.id),
-          entityB.relationships.map(r => r.targetEntity.id)
+          entityA.relationships.map((r) => r.targetEntity.id),
+          entityB.relationships.map((r) => r.targetEntity.id)
         );
 
-        const provenanceSimilarity = this.calculateProvenanceSimilarity(entityA.source, entityB.source);
+        const provenanceSimilarity = this.calculateProvenanceSimilarity(
+          entityA.source,
+          entityB.source
+        );
 
-        const overallSimilarity = (textSimilarity * 0.6) + (topologySimilarity * 0.3) + (provenanceSimilarity * 0.1);
+        const overallSimilarity =
+          textSimilarity * 0.6 + topologySimilarity * 0.3 + provenanceSimilarity * 0.1;
 
         if (overallSimilarity >= threshold) {
           const reasons = [];
-          if (textSimilarity > 0.8) reasons.push('High text similarity');
-          if (topologySimilarity > 0.5) reasons.push('Significant neighbor overlap');
-          if (provenanceSimilarity > 0) reasons.push('Same source');
+          if (textSimilarity > 0.8) reasons.push("High text similarity");
+          if (topologySimilarity > 0.5) reasons.push("Significant neighbor overlap");
+          if (provenanceSimilarity > 0) reasons.push("Same source");
 
           candidates.push({
             entityA,
             entityB,
             similarity: overallSimilarity,
-            reasons: reasons.length > 0 ? reasons : ['Overall similarity threshold met'],
+            reasons: reasons.length > 0 ? reasons : ["Overall similarity threshold met"],
           });
         }
       }

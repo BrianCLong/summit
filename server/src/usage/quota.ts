@@ -2,6 +2,19 @@ import { getPostgresPool } from '../db/postgres.js';
 import { planService, Plan } from './plans';
 import { UsageDimension } from './events';
 
+export interface QuotaLimit {
+  limit: number;
+  hardLimit?: boolean;
+}
+
+export type TenantQuotaConfig = Partial<Record<UsageDimension, QuotaLimit>>;
+export type TenantUsageTotals = Partial<Record<UsageDimension, number>>;
+
+export interface QuotaDataSource {
+  loadTenantQuota(tenantId: string): Promise<TenantQuotaConfig>;
+  loadTenantUsage(tenantId: string): Promise<TenantUsageTotals>;
+}
+
 export interface QuotaCheck {
   tenantId: string;
   dimension: UsageDimension;
@@ -22,59 +35,55 @@ export interface QuotaService {
 }
 
 export class PostgresQuotaService implements QuotaService {
-  private readonly pool = getPostgresPool();
+  constructor(private readonly dataSource: QuotaDataSource = new InMemoryQuotaDataSource()) {}
 
   async check(check: QuotaCheck): Promise<QuotaDecision> {
-    const plan = await planService.getPlanForTenant(check.tenantId);
-    const quotaTarget = this.resolveLimit(plan, check.dimension);
+    if (check.quantity < 0) {
+      throw new Error('Quantity must be non-negative');
+    }
 
-    if (!quotaTarget) {
+    const [quotaConfig, usageTotals] = await Promise.all([
+      this.dataSource.loadTenantQuota(check.tenantId),
+      this.dataSource.loadTenantUsage(check.tenantId),
+    ]);
+
+    const limit = quotaConfig[check.dimension];
+    // No limit configured for this dimension; allow by default.
+    if (!limit || limit.limit === undefined || limit.limit === null) {
       return {
         allowed: true,
-        remaining: Infinity,
-        limit: Infinity,
+        remaining: undefined,
+        limit: undefined,
+        hardLimit: limit?.hardLimit,
       };
     }
 
-    const { limit, windowStart, hardLimit } = quotaTarget;
-    if (!Number.isFinite(limit)) {
-      return { allowed: true, remaining: Infinity, limit };
+    const consumed = usageTotals[check.dimension] ?? 0;
+    const remainingBeforeRequest = limit.limit - consumed;
+    const projectedRemaining = remainingBeforeRequest - check.quantity;
+    const allowed = projectedRemaining >= 0;
+
+    const decision: QuotaDecision = {
+      allowed,
+      remaining: Math.max(projectedRemaining, 0),
+      limit: limit.limit,
+      hardLimit: Boolean(limit.hardLimit),
+    };
+
+    if (!allowed) {
+      const quotaType = limit.hardLimit ? 'Hard' : 'Soft';
+      decision.reason = `${quotaType} quota exceeded for ${check.dimension}: limit=${limit.limit}, used=${consumed}, requested=${check.quantity}`;
     }
 
-    const client = await this.pool.connect();
-    try {
-      const { rows } = await client.query(
-        `SELECT COALESCE(SUM(quantity), 0) as total
-           FROM usage_events
-          WHERE tenant_id = $1
-            AND dimension = $2
-            AND occurred_at >= $3`,
-        [check.tenantId, check.dimension, windowStart.toISOString()],
-      );
-
-      const used = Number(rows[0]?.total ?? 0);
-      const projected = used + check.quantity;
-      const remaining = Math.max(0, limit - projected);
-      const allowed = projected <= limit;
-
-      return {
-        allowed,
-        remaining,
-        limit,
-        hardLimit,
-        reason: allowed
-          ? undefined
-          : `Quota exceeded for ${check.dimension}: limit=${limit}, used=${used}, requested=${check.quantity}`,
-      };
-    } finally {
-      client.release();
-    }
+    return decision;
   }
 
   async assert(check: QuotaCheck): Promise<void> {
     const decision = await this.check(check);
     if (!decision.allowed) {
-      throw new Error(decision.reason || 'QUOTA_EXCEEDED');
+      const prefix = decision.hardLimit ? 'HARD_QUOTA_EXCEEDED' : 'SOFT_QUOTA_EXCEEDED';
+      const details = decision.reason ? `${prefix}: ${decision.reason}` : prefix;
+      throw new Error(details);
     }
   }
 
@@ -114,5 +123,38 @@ export class PostgresQuotaService implements QuotaService {
       default:
         return null;
     }
+  }
+}
+
+export class InMemoryQuotaDataSource implements QuotaDataSource {
+  private quotas: Map<string, TenantQuotaConfig> = new Map();
+  private usage: Map<string, TenantUsageTotals> = new Map();
+
+  constructor(
+    initialQuotas: Record<string, TenantQuotaConfig> = {},
+    initialUsage: Record<string, TenantUsageTotals> = {},
+  ) {
+    Object.entries(initialQuotas).forEach(([tenantId, config]) => {
+      this.setTenantQuota(tenantId, config);
+    });
+    Object.entries(initialUsage).forEach(([tenantId, totals]) => {
+      this.setTenantUsage(tenantId, totals);
+    });
+  }
+
+  async loadTenantQuota(tenantId: string): Promise<TenantQuotaConfig> {
+    return { ...(this.quotas.get(tenantId) || {}) };
+  }
+
+  async loadTenantUsage(tenantId: string): Promise<TenantUsageTotals> {
+    return { ...(this.usage.get(tenantId) || {}) };
+  }
+
+  setTenantQuota(tenantId: string, config: TenantQuotaConfig): void {
+    this.quotas.set(tenantId, { ...config });
+  }
+
+  setTenantUsage(tenantId: string, totals: TenantUsageTotals): void {
+    this.usage.set(tenantId, { ...totals });
   }
 }

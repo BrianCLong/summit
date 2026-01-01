@@ -41,6 +41,9 @@ log "Comparing changes against: ${TARGET_REF}"
 
 run_cmd install --frozen-lockfile
 
+log "Validating severity ledger zero-tolerance gate"
+run_cmd exec tsx scripts/ci/validate-severity-ledger.ts --ledger governance/severity-ledger.yaml --base "${TARGET_REF}" --report artifacts/severity-ledger-report.json
+
 if ! run_cmd run lint; then
   log "lint script unavailable; falling back to eslint ."
   run_cmd exec eslint .

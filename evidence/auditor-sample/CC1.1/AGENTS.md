@@ -44,11 +44,11 @@ Snapshot for audit evidence. The authoritative instructions live in `AGENTS.md` 
   - Notify `security-council` on policy violations.
   - Notify `devops` on persistent CI failures.
 
-### Role: Codex (Documentation & Standards)
+### Role: Codex (Implementation & Engineering)
 
 - **Permissions**:
-  - Write access to `docs/` and markdown files.
-  - Read-only access to source code.
+  - Implement features and fixes in scope with tests and documentation.
+  - Update `docs/` and markdown to reflect changes.
 - **Stop Conditions**:
   - Generated documentation contradicts code (detected via drift check).
 

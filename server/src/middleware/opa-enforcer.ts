@@ -94,16 +94,12 @@ export class OPAEnforcer {
     if (this.options.cacheDecisions) {
       const cached = this.decisionCache.get(cacheKey);
       if (cached && Date.now() < cached.expiresAt) {
-        this.cacheHits += 1;
-        logger.debug('OPA decision cache hit', {
-          tenantId: input.tenant_id,
-          requestId: input.request_id,
-        });
+        this.recordCacheHit(input);
         return cached.decision;
       }
-    }
 
-    this.cacheMisses += 1;
+      this.recordCacheMiss(input, cached ? 'expired' : 'miss');
+    }
 
     try {
       const data = await this.buildOPAData(input);
@@ -434,20 +430,53 @@ export class OPAEnforcer {
     ); // Every 5 minutes
   }
 
+  private calculateCacheHitRate(): number {
+    const total = this.cacheHits + this.cacheMisses;
+    if (total === 0) return 0;
+
+    return this.cacheHits / total;
+  }
+
+  private recordCacheHit(input: OPAInput): void {
+    this.cacheHits += 1;
+    logger.debug('OPA decision cache hit', {
+      tenantId: input.tenant_id,
+      requestId: input.request_id,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: this.calculateCacheHitRate(),
+    });
+  }
+
+  private recordCacheMiss(input: OPAInput, reason: string): void {
+    this.cacheMisses += 1;
+    logger.debug('OPA decision cache miss', {
+      tenantId: input.tenant_id,
+      requestId: input.request_id,
+      reason,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: this.calculateCacheHitRate(),
+    });
+  }
+
   /**
    * Get enforcement statistics
    */
   getStats(): {
     enabled: boolean;
     cacheSize: number;
+    cacheHits: number;
+    cacheMisses: number;
     cacheHitRate: number;
   } {
     const totalCacheChecks = this.cacheHits + this.cacheMisses;
     return {
       enabled: this.options.enabled,
       cacheSize: this.decisionCache.size,
-      cacheHitRate:
-        totalCacheChecks === 0 ? 0 : this.cacheHits / totalCacheChecks,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      cacheHitRate: totalCacheChecks === 0 ? 0 : this.cacheHits / totalCacheChecks,
     };
   }
 }
