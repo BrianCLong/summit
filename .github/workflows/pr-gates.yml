@@ -33,16 +33,8 @@ jobs:
       - name: Check Migration Gate
         id: migration-check
         run: |
-          CHANGED_MIGRATIONS=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E 'server/migrations/|server/db/migrations/|prisma/migrations/' || true)
-          if [ -n "$CHANGED_MIGRATIONS" ]; then
-            echo "Migration files changed: $CHANGED_MIGRATIONS"
-            if [ "$MIGRATION_GATE" != "true" ]; then
-              echo "Error: Database migrations detected but MIGRATION_GATE is not set to true."
-              exit 1
-            fi
-          fi
-        env:
-          MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
+          chmod +x scripts/check-migration-gate.sh
+          ./scripts/check-migration-gate.sh
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

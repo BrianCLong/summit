@@ -208,12 +208,20 @@ jobs:
 
       - name: GraphQL schema compatibility check
         run: |
-          if npm run graphql:schema:check 2>/dev/null; then
-            echo "✅ GraphQL schema is compatible"
-          else
-            echo "GraphQL schema check skipped (may not be configured)"
+          echo "=== Checking GraphQL Schema Compatibility ==="
+          if [ ! -f "packages/graphql/schema.graphql" ]; then
+            echo "No GraphQL schema found, skipping check"
+            exit 0
           fi
-        continue-on-error: true  # Non-blocking until graphql-inspector is fixed
+
+          npm run graphql:schema:check || {
+            echo "::error::GraphQL schema has breaking changes - CI BLOCKED"
+            echo "::error::Run 'npm run graphql:schema:check' locally to see details"
+            exit 1
+          }
+
+          echo "✅ GraphQL schema is backwards compatible"
+        continue-on-error: false  # BLOCKING: breaking schema changes block merge
 
       - name: API schema validation
         run: |
@@ -290,12 +298,17 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.schema-validation.result }}" != "success" ]]; then
+            echo "::error::Schema Validation FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
-          # Governance, provenance, schema, compliance are non-blocking until implementation complete
+          # Governance, provenance, compliance-evidence are non-blocking until implementation complete
 
           echo ""
           echo "✅ CI VERIFY GATE: PASSED"
-          echo "All critical security and compliance checks passed."
+          echo "All critical security, compliance, and API compatibility checks passed."
 
       - name: Post summary
         run: |
@@ -304,11 +317,11 @@ jobs:
           echo "### Critical Gates (BLOCKING)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Schema Validation (GraphQL breaking changes)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Provenance & SBOM" >> $GITHUB_STEP_SUMMARY
-          echo "- ℹ️ Schema Validation" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Compliance Evidence" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Security and compliance verified" >> $GITHUB_STEP_SUMMARY

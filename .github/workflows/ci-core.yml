@@ -213,14 +213,16 @@ jobs:
 
       - name: Bootstrap and smoke test
         run: |
+          set -euo pipefail
+
           echo "=== Bootstrap ==="
-          make bootstrap || echo "Bootstrap step skipped or failed (non-critical)"
+          make bootstrap
 
           echo "=== Starting Services ==="
-          make up || echo "Service startup skipped (Docker may not be available)"
+          make up
 
           echo "=== Smoke Test ==="
-          make smoke || echo "Smoke test skipped (services may not be running)"
+          make smoke
 
           echo "=== Cleanup ==="
           make down || true
