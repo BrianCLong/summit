@@ -98,9 +98,19 @@ async function ping(target: string): Promise<{
     return {
       status: 'unhealthy',
       response_time_ms: responseTime,
-      details: { error: error.message },
+      details: { error: toErrorMessage(error) },
     };
   }
+}
+
+function toErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'Unknown error';
 }
 
 // Get system resource usage
@@ -115,7 +125,7 @@ function getSystemUsage() {
   let totalTick = 0;
 
   for (const cpu of cpus) {
-    for (const type in cpu.times) {
+    for (const type of Object.keys(cpu.times) as Array<keyof typeof cpu.times>) {
       totalTick += cpu.times[type];
     }
     totalIdle += cpu.times.idle;
@@ -139,7 +149,7 @@ async function getBudgetStatus() {
     return status;
   } catch (error) {
     return {
-      error: error.message,
+      error: toErrorMessage(error),
       status: 'unknown',
     };
   }
@@ -222,8 +232,8 @@ statusRouter.get('/status', async (_req, res) => {
         conductorHealth = await getConductorHealth();
         budgetStatus = await getBudgetStatus();
       } catch (error) {
-        conductorHealth = { status: 'error', error: error.message };
-        budgetStatus = { status: 'error', error: error.message };
+        conductorHealth = { status: 'error', error: toErrorMessage(error) };
+        budgetStatus = { status: 'error', error: toErrorMessage(error) };
       }
     }
 
@@ -292,7 +302,7 @@ statusRouter.get('/status', async (_req, res) => {
       host: os.hostname(),
       overall_status: 'unhealthy',
       error: 'Internal status check error',
-      details: error.message,
+      details: toErrorMessage(error),
     });
   }
 });
@@ -358,7 +368,7 @@ statusRouter.get('/health/conductor', async (_req, res) => {
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      error: error.message,
+      error: toErrorMessage(error),
       conductor_enabled: process.env.CONDUCTOR_ENABLED === 'true',
     });
   }
@@ -386,7 +396,7 @@ statusRouter.get('/status/budget', async (_req, res) => {
     res.status(500).json({
       timestamp: new Date().toISOString(),
       status: 'error',
-      error: error.message,
+      error: toErrorMessage(error),
     });
   }
 });
@@ -426,7 +436,7 @@ statusRouter.get('/health/:service', async (req, res) => {
       service,
       timestamp: new Date().toISOString(),
       status: 'unhealthy',
-      error: error.message,
+      error: toErrorMessage(error),
     });
   }
 });
