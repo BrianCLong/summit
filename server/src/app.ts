@@ -153,7 +153,7 @@ export const createApp = async () => {
 
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
+    .map((origin: string) => origin.trim())
     .filter(Boolean);
   const securityHeadersEnabled = process.env.SECURITY_HEADERS_ENABLED !== 'false';
   const cspReportOnly = process.env.SECURITY_HEADERS_CSP_REPORT_ONLY === 'true';
@@ -527,7 +527,7 @@ export const createApp = async () => {
         session.run(countQuery, { query: q }),
       ]);
 
-      const evidence = searchResult.records.map((record) => ({
+      const evidence = searchResult.records.map((record: any) => ({
         node: record.get('node').properties,
         score: record.get('score'),
       }));

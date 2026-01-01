@@ -24,12 +24,12 @@ enum RedactionStrategy {
   REDACT = '[REDACTED]',
   MASK_PARTIAL = 'MASK_PARTIAL', // e.g., email: user***@example.com
   HASH = 'HASH', // e.g., email: sha256(user@example.com)
-  NULL = null,
+  NULL = 'NULL', // Indicates field should be set to null
 }
 
 // Define roles and their associated redaction policies
 // This is a simplified example; a real system would have more granular policies
-const REDACTION_POLICIES_BY_ROLE = {
+const REDACTION_POLICIES_BY_ROLE: Record<string, Record<string, RedactionStrategy>> = {
   ADMIN: {
     // Admins see everything, no redaction by default
   },

@@ -155,7 +155,7 @@ export class ClaimsService {
         },
       );
 
-      return result.records.map((r) => ({
+      return result.records.map((r: any) => ({
         claim: this.recordToClaim(r.get('c')),
         similarity: r.get('similarity'),
       }));
@@ -188,7 +188,7 @@ export class ClaimsService {
         { text, threshold },
       );
 
-      return result.records.map((r) => ({
+      return result.records.map((r: any) => ({
         claim: this.recordToClaim(r.get('c')),
         similarity: r.get('similarity'),
       }));
@@ -790,7 +790,7 @@ export class ClaimsService {
         { claimId },
       );
 
-      return result.records.map((r) => ({
+      return result.records.map((r: any) => ({
         channel: this.recordToChannel(r.get('ch')),
         timestamp: r.get('timestamp'),
       }));
@@ -995,13 +995,13 @@ export class ClaimsService {
         typeof props.velocity === 'string'
           ? JSON.parse(props.velocity)
           : props.velocity || {
-              spreadRate: 0,
-              acceleration: 0,
-              estimatedReach: 0,
-              platformCount: 0,
-              languageCount: 1,
-              regions: [],
-            },
+            spreadRate: 0,
+            acceleration: 0,
+            estimatedReach: 0,
+            platformCount: 0,
+            languageCount: 1,
+            regions: [],
+          },
       createdAt: props.createdAt?.toString() || props.createdAt,
       updatedAt: props.updatedAt?.toString() || props.updatedAt,
     };

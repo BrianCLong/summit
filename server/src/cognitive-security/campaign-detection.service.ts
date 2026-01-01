@@ -857,7 +857,7 @@ export class CampaignDetectionService {
         { campaignId },
       );
 
-      return result.records.map((r) =>
+      return result.records.map((r: any) =>
         this.recordToSignal(r.get('s')),
       );
     } finally {

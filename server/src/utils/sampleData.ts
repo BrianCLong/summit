@@ -134,7 +134,7 @@ async function createSampleRelationships(): Promise<void> {
     const entitiesResult = await session.run(
       'MATCH (e:Entity) RETURN e LIMIT 5',
     );
-    const entities = entitiesResult.records.map((r) => r.get('e'));
+    const entities = entitiesResult.records.map((r: { get: (key: string) => unknown }) => r.get('e'));
 
     if (entities.length >= 2) {
       const relationships: RelationshipData[] = [

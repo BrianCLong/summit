@@ -222,7 +222,7 @@ export class EvaluationService {
         { startDate, endDate },
       );
 
-      const claims = result.records.map((r) => r.get('c').properties);
+      const claims = result.records.map((r: any) => r.get('c').properties);
 
       // Calculate precision/recall if ground truth provided
       let precision = 0;
@@ -754,7 +754,7 @@ export class EvaluationService {
         { startDate, endDate, metricName },
       );
 
-      return result.records.map((r) => ({
+      return result.records.map((r: any) => ({
         date: r.get('metricDate').toString(),
         value: r.get('value') || 0,
       }));
