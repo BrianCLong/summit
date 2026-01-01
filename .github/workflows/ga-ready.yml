@@ -1,0 +1,106 @@
+name: GA Readiness Check
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  ga-ready:
+    name: GA Readiness Gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+      checks: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Boot Minimal Stack
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.minimal.yml up -d
+          # Wait for services to be healthy (basic wait)
+          echo "Waiting for stack to boot..."
+          sleep 30
+          # We could use wait-for-it or healthcheck here
+
+      - name: Install Security Tools
+        run: |
+          # Install Gitleaks
+          wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz
+          tar -xzf gitleaks_8.18.2_linux_x64.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+
+          # Install Trivy
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz
+          tar -xzf trivy_0.50.1_Linux-64bit.tar.gz
+          sudo mv trivy /usr/local/bin/
+
+      - name: Run Gitleaks
+        run: |
+          gitleaks detect --source . --report-path gitleaks.json --no-git || true
+          # Note: We allow failure here so ga-check can report it,
+          # but usually we want to fail fast.
+          # bin/ga-check expects gitleaks.json to exist.
+
+      - name: Run Trivy
+        run: |
+          trivy fs --format json --output trivy-results.json . || true
+
+      - name: Run GA Readiness Check
+        id: ga_check
+        run: |
+          ./bin/ga-check.mjs
+
+      - name: Upload Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-evidence
+          path: .evidence/ga/
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Find the report file
+            // Since sha might differ, we look in .evidence/ga/
+            const evidenceDir = '.evidence/ga';
+            if (!fs.existsSync(evidenceDir)) return;
+
+            const dirs = fs.readdirSync(evidenceDir);
+            if (dirs.length === 0) return;
+
+            const reportPath = path.join(evidenceDir, dirs[0], 'report.md');
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+              const status = '${{ job.status }}' === 'success' ? '✅ GA Ready' : '❌ GA Checks Failed';
+
+              const body = `### ${status}\n\n${report}`;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
