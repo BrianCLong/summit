@@ -1,0 +1,53 @@
+# Claims & Evidence Matrix
+
+# This file serves as the Single Source of Truth for all external marketing and sales claims.
+# Every claim MUST be backed by a verifiable control or artifact.
+# If it is not here, it is not a verified claim.
+
+claims:
+  - id: "CLM-001"
+    topic: "Auditability"
+    claim: "Summit provides a mathematically verifiable audit trail of all actions."
+    control: "Provenance Ledger (Merkle Tree)"
+    evidence_artifact: "server/src/provenance/ledger.ts"
+    verification_method: "Run `summit verify ledger` to re-hash the chain."
+
+  - id: "CLM-002"
+    topic: "Security"
+    claim: "No AI agent can execute high-risk actions without human approval."
+    control: "Arbitration Engine / Human-in-the-Loop Gate"
+    evidence_artifact: "server/src/coordination/ArbitrationEngine.ts"
+    verification_method: "Review OPA policy `policy/release-gates/gate.rego`."
+
+  - id: "CLM-003"
+    topic: "Compliance"
+    claim: "Summit detects configuration drift in real-time."
+    control: "Drift Detection Service"
+    evidence_artifact: "server/scripts/detect_runtime_drift.ts"
+    verification_method: "Trigger a drift event and observe the alert within 5 minutes."
+
+  - id: "CLM-004"
+    topic: "Privacy"
+    claim: "PII is redacted before it leaves the security boundary."
+    control: "PII Ingestion Hooks"
+    evidence_artifact: "server/src/pii/ingestionHooks.ts"
+    verification_method: "Unit test `server/src/pii/ingestionHooks.test.ts` with sample PII."
+
+  - id: "CLM-005"
+    topic: "Identity"
+    claim: "Every action is attributable to a specific verified identity."
+    control: "Zero Trust Identity Layer"
+    evidence_artifact: "server/src/services/AuthService.ts"
+    verification_method: "Inspect `audit_events` table for `actor_id` on all rows."
+
+  - id: "CLM-006"
+    topic: "Resilience"
+    claim: "The system fails safe (closed) under pressure."
+    control: "Circuit Breakers & Quota Manager"
+    evidence_artifact: "server/src/lib/resources/quota-manager.ts"
+    verification_method: "Load test `k6/stress-test.js` and verify 503s instead of crashes."
+
+meta:
+  version: "1.0"
+  last_updated: "2025-10-24"
+  status: "LOCKED"
