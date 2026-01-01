@@ -76,6 +76,7 @@
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "check:governance": "node scripts/check-governance.cjs",
+    "verify:living-documents": "node scripts/governance/verify-living-documents.cjs",
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
     "partners:check": "node scripts/ci/check_partner_model.js",
     "compliance:check": "npx tsx scripts/compliance/check_drift.ts",
