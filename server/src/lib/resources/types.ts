@@ -48,12 +48,19 @@ export enum CostDomain {
   CI_ASSURANCE = 'ci_assurance',
 }
 
+export interface CostAttribution {
+    agentId?: string;
+    capability?: string;
+    tenantId: string;
+}
+
 export interface BudgetConfig {
   domain: CostDomain;
   limit: number;
   period: 'daily' | 'monthly';
   currency: string; // e.g., 'USD', 'CREDITS'
   alertThresholds: number[]; // e.g., [0.5, 0.8, 1.0]
+  hardStop: boolean; // Enforce hard stop when budget exceeded
 }
 
 export interface BudgetStatus extends BudgetConfig {
