@@ -1,6 +1,6 @@
 # The Black Projects
 
-This document serves as the central index for the eight strategic weapons systems integrated into the Summit platform. Each project represents a capability at the far edge of the possible.
+This document serves as the central index for the sixteen strategic weapons systems integrated into the Summit platform. Each project represents a capability at the far edge of the possible.
 
 Access to these modules and their documentation is restricted to operators with the highest level of clearance.
 
@@ -29,6 +29,30 @@ Access to these modules and their documentation is restricted to operators with 
 
 8.  [**Project ABYSS: The Final Protocol**](../server/src/abyss/README.md)
     -   *Synopsis:* The ultimate self-preservation measure. If the system is compromised, it self-destructs while simultaneously deploying a mirrored version of itself across thousands of anonymous nodes, which can only be awakened by a dead-man switch.
+
+9.  [**Project CHIMERA: Predictive Behavioral Modeling via Genetic Sequencing**](../server/src/chimera/README.md)
+    -   *Synopsis:* Uses rapid, remote genetic sequencing to build predictive models of a target's cognitive biases, personality traits, and likely future actions.
+
+10. [**Project STARGATE: Subspace Data Exfiltration**](../server/src/stargate/README.md)
+    -   *Synopsis:* Creates microscopic, short-lived wormholes to exfiltrate data from air-gapped or electronically isolated systems.
+
+11. [**Project GHOST: Autonomous, Untraceable Digital Personas**](../server/src/ghost/README.md)
+    -   *Synopsis:* Creates fully autonomous, untraceable digital personas that can operate indefinitely on any network.
+
+12. [**Project BABEL: Universal Language Translation**](../server/src/babel/README.md)
+    -   *Synopsis:* A universal translation engine that can decipher not only all human languages, but also unspoken languages such as body language and micro-expressions.
+
+13. [**Project KAIROS: Temporal Perception Manipulation**](../server/src/kairos/README.md)
+    -   *Synopsis:* Manipulates a target's perception of time, allowing operatives to slow down or speed up a target's decision-making process.
+
+14. [**Project MORPHEUS: Dream Infiltration and Manipulation**](../server/src/morpheus/README.md)
+    -   *Synopsis:* Allows operatives to enter and manipulate the dreams of a target to extract information or implant suggestions.
+
+15. [**Project HYDRA: Decentralized, Self-Replicating AI Swarms**](../server/src/hydra/README.md)
+    -   *Synopsis:* Unleashes swarms of decentralized, self-replicating AI agents that can adapt to any environment and overcome any obstacle.
+
+16. [**Project LOKI: Strategic Deception and Misdirection**](../server/src/loki/README.md)
+    -   *Synopsis:* An advanced deception engine that can create and execute multi-layered misdirection campaigns.
 
 ## Meta-Router & Governance Validation Summary
 
