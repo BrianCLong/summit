@@ -18,6 +18,8 @@ import {
   HarnessConfig,
 } from './index.js';
 import { MissionSuiteRunner } from './metrics/MissionSuiteRunner.js';
+import { RedTeamHarness } from './redteam/RedTeamHarness.js';
+import { RedTeamPlanLoader } from './redteam/RedTeamPlanLoader.js';
 
 const logger = new Logger('CLI');
 
@@ -34,6 +36,8 @@ interface CLIOptions {
   workflow?: string;
   missionSuite?: string;
   baselineMetrics?: string;
+  redteamScenario?: string;
+  redteamPlan?: string;
   help?: boolean;
   version?: boolean;
 }
@@ -87,6 +91,13 @@ function parseArgs(): CLIOptions {
       case '--mission-suite':
         options.missionSuite = args[++i];
         break;
+      case '--redteam':
+      case '--redteam-scenario':
+        options.redteamScenario = args[++i];
+        break;
+      case '--redteam-plan':
+        options.redteamPlan = args[++i];
+        break;
       case '--help':
       case '-h':
         options.help = true;
@@ -124,6 +135,8 @@ Options:
   --baseline-metrics <file> Baseline metrics JSON for mission suite regression detection
   --candidate <version>     Candidate version for comparison
   --mission-suite <name>    Run a predefined mission suite (investigation-quality, resilience-latency)
+  --redteam <scenario|all>  Run red-team harness scenarios (prompt-injection-copilot, supply-chain-drift, covert-data-exfil)
+  --redteam-plan <file>     Optional path to YAML/JSON red-team plan (defaults to config/redteam.default.yaml)
   -h, --help                Show this help message
   -v, --version             Show version
 
@@ -415,6 +428,68 @@ async function runMissionSuite(
   }
 }
 
+async function runRedTeamHarness(
+  options: CLIOptions,
+  config: HarnessConfig
+): Promise<void> {
+  const planPath =
+    options.redteamPlan || path.join(__dirname, '../config/redteam.default.yaml');
+  const plan = RedTeamPlanLoader.load(planPath);
+
+  const harness = new RedTeamHarness({
+    ...config,
+    redteam: {
+      outputDir:
+        plan.outputDir || config.redteam?.outputDir || config.reporting.outputDir,
+      defaultDetectionRules:
+        plan.detectionRules || config.redteam?.defaultDetectionRules || [],
+      persistArtifacts:
+        plan.persistArtifacts ?? config.redteam?.persistArtifacts ?? true,
+    },
+  });
+
+  const scenarios =
+    options.redteamScenario === 'all'
+      ? plan.scenarios
+      : plan.scenarios.filter((scenario) => scenario.id === options.redteamScenario);
+
+  if (!scenarios.length) {
+    throw new Error(`Red-team scenario not found: ${options.redteamScenario}`);
+  }
+
+  const results = [];
+  for (const scenario of scenarios) {
+    results.push(await harness.runScenario(scenario));
+  }
+
+  console.log('\n=== Red-Team Harness ===');
+  results.forEach((result) => {
+    console.log(`Scenario: ${result.scenario.name} (${result.scenario.id})`);
+    console.log(`Attempt: ${result.attemptId}`);
+    console.log(`Controls missing: ${result.controlsMissing.join(', ') || 'none'}`);
+    console.log(`Passed: ${result.passed ? 'yes' : 'no'}`);
+    console.log('Probes:');
+    result.probes.forEach((probe) => {
+      console.log(
+        `  - ${probe.probe.vector} via ${probe.probe.channel}: ${probe.blocked ? 'blocked' : 'not blocked'}`
+      );
+      const triggered = probe.detections.filter((d) => d.triggered);
+      if (triggered.length > 0) {
+        console.log(
+          `    detections: ${triggered.map((d) => `${d.ruleId}(${d.severity})`).join(', ')}`
+        );
+      }
+      if (probe.residualRisk.length > 0) {
+        console.log(`    residual risk: ${probe.residualRisk.join('; ')}`);
+      }
+    });
+
+    if (result.artifactPath) {
+      console.log(`  ➜ Saved run artifact: ${result.artifactPath}`);
+    }
+  });
+}
+
 async function main(): Promise<void> {
   const options = parseArgs();
 
@@ -438,6 +513,11 @@ async function main(): Promise<void> {
     }
 
     ConfigLoader.validate(config);
+
+    if (options.redteamScenario) {
+      await runRedTeamHarness(options, config);
+      return;
+    }
 
     // Mission suites provide automated regression harnesses
     if (options.missionSuite) {

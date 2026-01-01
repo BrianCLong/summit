@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T04:11:56Z",
-  "revision_note": "Added Sprint N+3 Freeze/Certify/Release planning pack; refreshed SummitThreat roadmap narrative for 2026",
+  "last_updated": "2026-01-01T07:15:00Z",
+  "revision_note": "Added red-team harness defaults and counter-intel scenarios to the simulation harness to stress agent safety controls",
   "initiatives": [
     {
       "id": "A",
