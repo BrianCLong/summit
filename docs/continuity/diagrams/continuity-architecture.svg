@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="900" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 26px; font-weight: bold; fill: #2c3e50; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 14px; fill: #7f8c8d; }
+      .layer-title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; fill: #fff; }
+      .layer-text { font-family: Arial, sans-serif; font-size: 12px; fill: #fff; }
+      .component-text { font-family: Arial, sans-serif; font-size: 11px; fill: #34495e; }
+      .arrow-text { font-family: Arial, sans-serif; font-size: 10px; fill: #7f8c8d; font-style: italic; }
+      .layer1 { fill: #3498db; stroke: #2980b9; stroke-width: 2; }
+      .layer2 { fill: #e67e22; stroke: #d35400; stroke-width: 2; }
+      .layer3 { fill: #9b59b6; stroke: #8e44ad; stroke-width: 2; }
+      .layer4 { fill: #1abc9c; stroke: #16a085; stroke-width: 2; }
+      .layer5 { fill: #e74c3c; stroke: #c0392b; stroke-width: 2; }
+      .component-box { fill: #ecf0f1; stroke: #95a5a6; stroke-width: 1; }
+      .threat-box { fill: #fff5f5; stroke: #e74c3c; stroke-width: 2; stroke-dasharray: 5,5; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="450" y="35" class="title" text-anchor="middle">Institutional Continuity Architecture</text>
+  <text x="450" y="55" class="subtitle" text-anchor="middle">Defense in Depth Against Mission Drift &amp; Capture</text>
+
+  <!-- Threat Context (Left Side) -->
+  <rect x="20" y="90" width="200" height="680" class="threat-box" rx="8"/>
+  <text x="120" y="115" class="component-text" text-anchor="middle" font-weight="bold">THREAT VECTORS</text>
+
+  <text x="30" y="145" class="component-text" font-weight="bold">Leadership</text>
+  <text x="30" y="165" class="component-text">• Hostile CEO</text>
+  <text x="30" y="180" class="component-text">• Compromised exec</text>
+  <text x="30" y="195" class="component-text">• Founder exit</text>
+
+  <text x="30" y="225" class="component-text" font-weight="bold">Economic</text>
+  <text x="30" y="245" class="component-text">• Acquisition</text>
+  <text x="30" y="260" class="component-text">• Revenue pressure</text>
+  <text x="30" y="275" class="component-text">• Investor demands</text>
+
+  <text x="30" y="305" class="component-text" font-weight="bold">Political</text>
+  <text x="30" y="325" class="component-text">• Regulatory capture</text>
+  <text x="30" y="340" class="component-text">• Gov't pressure</text>
+  <text x="30" y="355" class="component-text">• Policy changes</text>
+
+  <text x="30" y="385" class="component-text" font-weight="bold">Organizational</text>
+  <text x="30" y="405" class="component-text">• Cultural drift</text>
+  <text x="30" y="420" class="component-text">• Scope creep</text>
+  <text x="30" y="435" class="component-text">• Standard erosion</text>
+  <text x="30" y="450" class="component-text">• Memory loss</text>
+
+  <text x="30" y="480" class="component-text" font-weight="bold">Slow Erosion</text>
+  <text x="30" y="500" class="component-text">• "Just this once"</text>
+  <text x="30" y="515" class="component-text">• Normalization</text>
+  <text x="30" y="530" class="component-text">• Silent drift</text>
+
+  <!-- Layer 1: Legal & Governance -->
+  <rect x="250" y="90" width="620" height="110" class="layer1" rx="8"/>
+  <text x="560" y="115" class="layer-title" text-anchor="middle">LAYER 1: LEGAL &amp; GOVERNANCE</text>
+  <text x="260" y="140" class="layer-text">• Benefit corp structure</text>
+  <text x="260" y="160" class="layer-text">• Charter-level mission lock</text>
+  <text x="260" y="180" class="layer-text">• Independent oversight board</text>
+  <text x="560" y="140" class="layer-text">• Irrevocable public commitments</text>
+  <text x="560" y="160" class="layer-text">• Supermajority requirements</text>
+  <text x="560" y="180" class="layer-text">• Governance firewalls</text>
+
+  <!-- Layer 2: Economic Alignment -->
+  <rect x="250" y="215" width="620" height="110" class="layer2" rx="8"/>
+  <text x="560" y="240" class="layer-title" text-anchor="middle">LAYER 2: ECONOMIC ALIGNMENT</text>
+  <text x="260" y="265" class="layer-text">• Incentives tied to mission adherence</text>
+  <text x="260" y="285" class="layer-text">• Mission-aligned funding</text>
+  <text x="560" y="265" class="layer-text">• Cost-of-betrayal mechanisms</text>
+  <text x="560" y="285" class="layer-text">• Investor agreement protections</text>
+
+  <!-- Layer 3: Technical Enforcement -->
+  <rect x="250" y="340" width="620" height="110" class="layer3" rx="8"/>
+  <text x="560" y="365" class="layer-title" text-anchor="middle">LAYER 3: TECHNICAL ENFORCEMENT</text>
+  <text x="260" y="390" class="layer-text">• Automated invariant monitoring</text>
+  <text x="260" y="410" class="layer-text">• Drift detection systems</text>
+  <text x="260" y="430" class="layer-text">• Immutable audit logs</text>
+  <text x="560" y="390" class="layer-text">• External verification hooks</text>
+  <text x="560" y="410" class="layer-text">• Cryptographic attestation</text>
+  <text x="560" y="430" class="layer-text">• Behavioral compliance tracking</text>
+
+  <!-- Layer 4: Cultural & Memory -->
+  <rect x="250" y="465" width="620" height="110" class="layer4" rx="8"/>
+  <text x="560" y="490" class="layer-title" text-anchor="middle">LAYER 4: CULTURAL &amp; INSTITUTIONAL MEMORY</text>
+  <text x="260" y="515" class="layer-text">• Comprehensive documentation</text>
+  <text x="260" y="535" class="layer-text">• Oral history program</text>
+  <text x="260" y="555" class="layer-text">• Mission education &amp; onboarding</text>
+  <text x="560" y="515" class="layer-text">• Case studies preservation</text>
+  <text x="560" y="535" class="layer-text">• Succession protocols</text>
+  <text x="560" y="555" class="layer-text">• Cultural storytelling</text>
+
+  <!-- Layer 5: External Accountability & Escape Hatches -->
+  <rect x="250" y="590" width="620" height="110" class="layer5" rx="8"/>
+  <text x="560" y="615" class="layer-title" text-anchor="middle">LAYER 5: EXTERNAL ACCOUNTABILITY &amp; ESCAPE HATCHES</text>
+  <text x="260" y="640" class="layer-text">• Public transparency reports</text>
+  <text x="260" y="660" class="layer-text">• Stakeholder intervention rights</text>
+  <text x="260" y="680" class="layer-text">• Protected whistleblowing</text>
+  <text x="560" y="640" class="layer-text">• Mission successor provisions</text>
+  <text x="560" y="660" class="layer-text">• Graceful shutdown option</text>
+  <text x="560" y="680" class="layer-text">• Fork-and-compete rights</text>
+
+  <!-- Defense Principle -->
+  <rect x="250" y="720" width="620" height="50" fill="#34495e" stroke="#2c3e50" stroke-width="2" rx="8"/>
+  <text x="560" y="740" style="font-family: Arial, sans-serif; font-size: 14px; fill: #fff; font-weight: bold;" text-anchor="middle">
+    DEFENSE IN DEPTH PRINCIPLE
+  </text>
+  <text x="560" y="760" style="font-family: Arial, sans-serif; font-size: 12px; fill: #ecf0f1;" text-anchor="middle">
+    Failure at any single layer is recoverable • No single point of compromise
+  </text>
+</svg>
