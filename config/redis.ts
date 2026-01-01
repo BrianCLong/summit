@@ -108,10 +108,10 @@ export class RedisCacheManager {
    * Update cache statistics
    */
   private updateStats(prefix: string, operation: 'hit' | 'miss' | 'set' | 'delete' | 'error'): void {
-    if (!this.enableMetrics) return;
+    if (!this.enableMetrics) {return;}
 
     const stats = this.getStats(prefix);
-    stats[operation === 'hit' || operation === 'miss' ? operation + 's' : operation + 's']++;
+    stats[operation === 'hit' || operation === 'miss' ? `${operation  }s` : `${operation  }s`]++;
 
     const total = stats.hits + stats.misses;
     stats.hitRate = total > 0 ? stats.hits / total : 0;

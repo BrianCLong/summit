@@ -21,7 +21,7 @@ export default function Home() {
   }, []);
 
   const handleSearch = async (q: string) => {
-    if (!token) return;
+    if (!token) {return;}
     const results = await searchEntities(q, token, tenant, caseId);
     setSearchResults(results);
 

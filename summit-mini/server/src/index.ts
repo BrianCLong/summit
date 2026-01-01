@@ -22,7 +22,7 @@ app.post("/api/ingest", (req, res) => {
   const content = String(req.body?.content ?? "");
   const actorId = String(req.body?.actorId ?? "local-user");
 
-  if (!content.trim()) return res.status(400).json({ error: "content_required" });
+  if (!content.trim()) {return res.status(400).json({ error: "content_required" });}
 
   const createdAt = new Date().toISOString();
   const extracted = extractGraph(content);

@@ -653,7 +653,7 @@ export class MPCProtocol extends EventEmitter {
   }
 
   private reconstructSecret(shares: SecretShare[]): number {
-    if (!shares || shares.length === 0) return 0;
+    if (!shares || shares.length === 0) {return 0;}
 
     let sum = 0;
     for (const share of shares) {

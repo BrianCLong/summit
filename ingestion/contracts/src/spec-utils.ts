@@ -10,8 +10,8 @@ export function normalizeSpec(spec: ContractSpec): string {
 }
 
 function validateType(field: ContractField, value: unknown): boolean {
-  if (field.type === 'array') return Array.isArray(value);
-  if (field.type === 'object') return typeof value === 'object' && value !== null && !Array.isArray(value);
+  if (field.type === 'array') {return Array.isArray(value);}
+  if (field.type === 'object') {return typeof value === 'object' && value !== null && !Array.isArray(value);}
   return typeof value === field.type;
 }
 
@@ -66,10 +66,10 @@ export function diffSpecs(previous: ContractSpec, current: ContractSpec): string
       return;
     }
     const updated = currentMap.get(name)!;
-    if (field.type !== updated.type) diffs.push(`Field ${name} type changed: ${field.type} -> ${updated.type}`);
+    if (field.type !== updated.type) {diffs.push(`Field ${name} type changed: ${field.type} -> ${updated.type}`);}
     if (field.nullable !== updated.nullable)
-      diffs.push(`Field ${name} nullability changed: ${field.nullable} -> ${updated.nullable}`);
-    if (field.unit !== updated.unit) diffs.push(`Field ${name} unit changed: ${field.unit} -> ${updated.unit}`);
+      {diffs.push(`Field ${name} nullability changed: ${field.nullable} -> ${updated.nullable}`);}
+    if (field.unit !== updated.unit) {diffs.push(`Field ${name} unit changed: ${field.unit} -> ${updated.unit}`);}
   });
 
   currentMap.forEach((field, name) => {

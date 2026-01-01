@@ -485,7 +485,7 @@ class NLQCompiler {
     // Suggest limited version
     if (!mainCypher.includes('LIMIT')) {
       alternatives.push({
-        cypher: mainCypher + ' LIMIT 10',
+        cypher: `${mainCypher  } LIMIT 10`,
         description: 'Limited result set',
         tradeoff: 'Faster but may miss results',
       });
@@ -524,7 +524,7 @@ class NLQCompiler {
       parts.push(`Returns at most ${limit} results`);
     }
 
-    return parts.join('. ') + '.';
+    return `${parts.join('. ')  }.`;
   }
 
   private emptyEstimates(): QueryEstimates {

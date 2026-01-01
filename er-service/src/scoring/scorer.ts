@@ -199,22 +199,22 @@ export class ProbabilisticScorer implements Scorer {
     const signals: number[] = [];
 
     // Strong signals (high weight)
-    if (features.nameSimilarity > 0.8) signals.push(1.0);
-    else if (features.nameSimilarity > 0.6) signals.push(0.7);
-    else if (features.nameSimilarity > 0.4) signals.push(0.4);
+    if (features.nameSimilarity > 0.8) {signals.push(1.0);}
+    else if (features.nameSimilarity > 0.6) {signals.push(0.7);}
+    else if (features.nameSimilarity > 0.4) {signals.push(0.4);}
 
-    if (features.typeMatch) signals.push(0.8);
+    if (features.typeMatch) {signals.push(0.8);}
 
     // Medium signals
-    if (features.deviceIdMatch > 0.5) signals.push(0.9);
-    if (features.accountIdMatch > 0.5) signals.push(0.7);
-    if (features.geographicProximity > 0.8) signals.push(0.7);
-    if (features.semanticSimilarity > 0.5) signals.push(0.6);
+    if (features.deviceIdMatch > 0.5) {signals.push(0.9);}
+    if (features.accountIdMatch > 0.5) {signals.push(0.7);}
+    if (features.geographicProximity > 0.8) {signals.push(0.7);}
+    if (features.semanticSimilarity > 0.5) {signals.push(0.6);}
 
     // Weak signals
-    if (features.propertyOverlap > 0.5) signals.push(0.5);
-    if (features.temporalCoOccurrence > 0.5) signals.push(0.5);
-    if (features.phoneticSimilarity === 1) signals.push(0.4);
+    if (features.propertyOverlap > 0.5) {signals.push(0.5);}
+    if (features.temporalCoOccurrence > 0.5) {signals.push(0.5);}
+    if (features.phoneticSimilarity === 1) {signals.push(0.4);}
 
     // Combine signals using noisy-OR model
     let confidence = 0;

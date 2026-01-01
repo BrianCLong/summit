@@ -35,6 +35,7 @@
     "optimize:check": "npx tsx scripts/optimization/check_optimization_metrics.ts",
     "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
+    "ga": "./scripts/release/ga-gate.sh",
     "lint": "eslint . && (ruff check . || true)",
     "lint:strict": "eslint . && (ruff check . || true)",
     "security:check": "node scripts/security-check.js",

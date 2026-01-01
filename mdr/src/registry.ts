@@ -160,8 +160,8 @@ export class MetricRegistry {
       ensureDir(baseDir);
       const viewPath = path.join(baseDir, 'view.sql');
       const udfPath = path.join(baseDir, 'udf.sql');
-      fs.writeFileSync(viewPath, artifacts.view.trim() + '\n', 'utf8');
-      fs.writeFileSync(udfPath, artifacts.udf.trim() + '\n', 'utf8');
+      fs.writeFileSync(viewPath, `${artifacts.view.trim()  }\n`, 'utf8');
+      fs.writeFileSync(udfPath, `${artifacts.udf.trim()  }\n`, 'utf8');
       written.push(viewPath, udfPath);
     }
     return written;

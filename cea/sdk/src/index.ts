@@ -409,7 +409,7 @@ function computeTargetCounts(total: number, variants: VariantConfig[], weights: 
     remainders.push({ name: variant.name, fraction: expected - base });
     assigned += base;
   }
-  let remainder = total - assigned;
+  const remainder = total - assigned;
   if (remainder > 0) {
     remainders.sort((a, b) => {
       if (a.fraction === b.fraction) {

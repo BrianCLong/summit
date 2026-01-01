@@ -403,7 +403,7 @@ export class CachePerformanceMonitor {
   getStats(cacheType?: string): any {
     if (cacheType) {
       const stats = this.stats.get(cacheType);
-      if (!stats) return null;
+      if (!stats) {return null;}
 
       const total = stats.hits + stats.misses;
       return {

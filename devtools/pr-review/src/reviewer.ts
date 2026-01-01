@@ -13,7 +13,7 @@ export class Reviewer {
     this.checkMissingTests();
 
     for (const file of this.diffs) {
-      if (!file.to || file.to === '/dev/null') continue; // Skip deleted files
+      if (!file.to || file.to === '/dev/null') {continue;} // Skip deleted files
 
       this.checkRiskyFiles(file.to);
 

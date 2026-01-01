@@ -1,7 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-export let options = {
+export const options = {
   scenarios: {
     gold_mix: {
       executor: 'constant-vus',
@@ -20,7 +20,7 @@ export let options = {
 
 function payload(exploration) {
   return JSON.stringify({
-    tenantId: __ENV.TIER + '_tenant',
+    tenantId: `${__ENV.TIER  }_tenant`,
     tenantTier: __ENV.TIER,
     expert: ['graph_ops', 'rag_retrieval', 'osint_analysis'][
       Math.floor(Math.random() * 3)
@@ -30,7 +30,7 @@ function payload(exploration) {
 }
 
 export default function () {
-  const url = __ENV.SCHEDULER_URL + '/enqueue';
+  const url = `${__ENV.SCHEDULER_URL  }/enqueue`;
   // Alternate exploration/exploitation to exercise caps
   const exploration = Math.random() < 0.1;
   const res = http.post(url, payload(exploration), {

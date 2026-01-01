@@ -35,7 +35,7 @@ export function ensureDir(dirPath: string): void {
 }
 
 export function writeFileIfChanged(filePath: string, content: string): boolean {
-  const normalized = content.trimEnd() + '\n';
+  const normalized = `${content.trimEnd()  }\n`;
   if (fs.existsSync(filePath)) {
     const existing = fs.readFileSync(filePath, 'utf8');
     if (existing === normalized) {

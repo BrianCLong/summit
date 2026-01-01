@@ -28,16 +28,16 @@ export function jaccardSimilarity(a: string[], b: string[]): number {
  * Calculate Levenshtein distance between two strings
  */
 function levenshteinDistance(a: string, b: string): number {
-  if (a === b) return 0;
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
+  if (a === b) {return 0;}
+  if (a.length === 0) {return b.length;}
+  if (b.length === 0) {return a.length;}
 
   const matrix: number[][] = Array.from({ length: a.length + 1 }, () =>
     Array(b.length + 1).fill(0),
   );
 
-  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
-  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+  for (let i = 0; i <= a.length; i++) {matrix[i][0] = i;}
+  for (let j = 0; j <= b.length; j++) {matrix[0][j] = j;}
 
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
@@ -57,7 +57,7 @@ function levenshteinDistance(a: string, b: string): number {
  * Normalized Levenshtein distance (0 = different, 1 = identical)
  */
 export function normalizedLevenshtein(a: string, b: string): number {
-  if (a === b) return 1;
+  if (a === b) {return 1;}
   const distance = levenshteinDistance(a.toLowerCase(), b.toLowerCase());
   return 1 - distance / Math.max(a.length, b.length, 1);
 }
@@ -67,7 +67,7 @@ export function normalizedLevenshtein(a: string, b: string): number {
  */
 export function phoneticSignature(text: string): string {
   const cleaned = text.toLowerCase().replace(/[^a-z]/g, '');
-  if (!cleaned) return '';
+  if (!cleaned) {return '';}
 
   const first = cleaned[0];
   const consonants = cleaned.replace(/[aeiou]/g, '');

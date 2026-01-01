@@ -4,7 +4,7 @@ export async function ingest(payload: { source: string; content: string; actorId
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!r.ok) throw new Error(await r.text());
+  if (!r.ok) {throw new Error(await r.text());}
   return r.json();
 }
 

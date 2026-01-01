@@ -57,7 +57,7 @@ async function recordAudit({ actor, action, targetType, targetId, details }) {
 }
 
 function sanitizeAppeal(appeal) {
-  if (!appeal) return null;
+  if (!appeal) {return null;}
   return {
     ...appeal,
     approvals: appeal.approvals ?? [],

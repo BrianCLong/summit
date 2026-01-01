@@ -11,21 +11,21 @@ import { check, sleep } from 'k6';
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 // Custom metrics for trend analysis
-export let apiLatencyP95 = new Trend('api_latency_p95', true);
-export let apiLatencyP99 = new Trend('api_latency_p99', true);
-export let apiErrorRate = new Rate('api_error_rate');
-export let apiThroughput = new Counter('api_requests_total');
-export let activeUsers = new Gauge('api_active_users');
+export const apiLatencyP95 = new Trend('api_latency_p95', true);
+export const apiLatencyP99 = new Trend('api_latency_p99', true);
+export const apiErrorRate = new Rate('api_error_rate');
+export const apiThroughput = new Counter('api_requests_total');
+export const activeUsers = new Gauge('api_active_users');
 
 // Health check specific metrics
-export let healthCheckLatency = new Trend('health_check_latency');
-export let graphqlLatency = new Trend('graphql_latency');
-export let dbConnectionTime = new Trend('db_connection_time');
+export const healthCheckLatency = new Trend('health_check_latency');
+export const graphqlLatency = new Trend('graphql_latency');
+export const dbConnectionTime = new Trend('db_connection_time');
 
 // Business logic metrics
-export let entityRetrievalTime = new Trend('entity_retrieval_time');
-export let searchLatency = new Trend('search_latency');
-export let authenticationTime = new Trend('authentication_time');
+export const entityRetrievalTime = new Trend('entity_retrieval_time');
+export const searchLatency = new Trend('search_latency');
+export const authenticationTime = new Trend('authentication_time');
 
 // Configuration with environment overrides
 const config = {
@@ -397,7 +397,7 @@ function generatePrometheusMetrics(data) {
   const timestamp = Date.now();
   const labels = `target="${config.target}",scenario="${__ENV.EXEC_SCENARIO || 'default'}"`;
 
-  let metrics = [];
+  const metrics = [];
 
   // Add main SLO metrics
   if (data.metrics.api_latency_p95?.values?.['p(95)']) {
@@ -418,7 +418,7 @@ function generatePrometheusMetrics(data) {
     );
   }
 
-  return metrics.join('\n') + '\n';
+  return `${metrics.join('\n')  }\n`;
 }
 
 // Enhanced text summary
