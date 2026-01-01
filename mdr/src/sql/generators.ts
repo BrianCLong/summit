@@ -65,17 +65,17 @@ export function buildSqlPieces(spec: MetricSpec, dialect: Dialect): SqlPieces {
   });
 
   const whereClause = conditions.length
-    ? 'WHERE\n' +
+    ? `WHERE\n${ 
       conditions
         .map((condition, index) => (index === 0 ? `  ${condition}` : `  AND ${condition}`))
-        .join('\n')
+        .join('\n')}`
     : undefined;
 
   const groupByClause = grainColumns.length
-    ? 'GROUP BY\n' +
+    ? `GROUP BY\n${ 
       grainColumns
         .map((column, index) => (index === grainColumns.length - 1 ? `  ${column}` : `  ${column},`))
-        .join('\n')
+        .join('\n')}`
     : undefined;
 
   return { selectClause, fromClause, whereClause, groupByClause };

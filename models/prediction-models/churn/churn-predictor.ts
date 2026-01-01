@@ -39,7 +39,7 @@ export class ChurnPredictor {
     const iterations = 1000;
     const nFeatures = X[0].length;
 
-    let weights = new Array(nFeatures).fill(0);
+    const weights = new Array(nFeatures).fill(0);
     this.intercept = 0;
 
     for (let iter = 0; iter < iterations; iter++) {
@@ -121,8 +121,8 @@ export class ChurnPredictor {
    * Get risk level
    */
   private getRiskLevel(probability: number): 'low' | 'medium' | 'high' {
-    if (probability >= 0.7) return 'high';
-    if (probability >= 0.4) return 'medium';
+    if (probability >= 0.7) {return 'high';}
+    if (probability >= 0.4) {return 'medium';}
     return 'low';
   }
 

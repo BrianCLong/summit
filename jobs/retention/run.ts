@@ -285,7 +285,7 @@ class RetentionJobRunner {
       `  📊 Found ${recordCount} records with label '${label}' older than ${cutoffDate.toISOString()}`,
     );
 
-    if (recordCount === 0) return;
+    if (recordCount === 0) {return;}
 
     if (this.config.dryRun) {
       console.log(
@@ -388,7 +388,7 @@ class RetentionJobRunner {
         `  🗑️  Neo4j Batch ${batchCount}: Deleted ${deletedInBatch} nodes (Total: ${totalDeleted})`,
       );
 
-      if (deletedInBatch === 0) break;
+      if (deletedInBatch === 0) {break;}
 
       await new Promise((resolve) => setTimeout(resolve, 500)); // Longer pause for Neo4j
     }

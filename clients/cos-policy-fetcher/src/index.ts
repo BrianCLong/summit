@@ -19,15 +19,15 @@ function sh(
     p.stdout.on('data', (d) => (stdout += d.toString()));
     p.stderr.on('data', (d) => (stderr += d.toString()));
     p.on('close', (code) => resolve({ code: code ?? 1, stdout, stderr }));
-    if (input) p.stdin.end(input);
+    if (input) {p.stdin.end(input);}
   });
 }
 
 export async function fetchAttestation(url: string): Promise<string> {
   const { body, statusCode } = await request(url, { method: 'GET' });
-  if (statusCode !== 200) throw new Error(`HTTP ${statusCode}`);
+  if (statusCode !== 200) {throw new Error(`HTTP ${statusCode}`);}
   let data = '';
-  for await (const chunk of body as any) data += chunk.toString('utf8');
+  for await (const chunk of body as any) {data += chunk.toString('utf8');}
   return data;
 }
 
@@ -38,10 +38,10 @@ export async function fetchAndVerify({
   const tmpdir = await fs.mkdtemp(path.join(os.tmpdir(), 'policy-pack-'));
   const tarPath = path.join(tmpdir, 'pack.tar');
   const { body, headers, statusCode } = await request(url, { method: 'GET' });
-  if (statusCode !== 200) throw new Error(`HTTP ${statusCode}`);
+  if (statusCode !== 200) {throw new Error(`HTTP ${statusCode}`);}
   const digestHeader = headers['digest'];
   const bundleHeader = headers['x-cosign-bundle'];
-  if (!digestHeader) throw new Error('missing verification headers');
+  if (!digestHeader) {throw new Error('missing verification headers');}
 
   const file = createWriteStream(tarPath);
   await new Promise<void>((res, rej) => {
@@ -55,7 +55,7 @@ export async function fetchAndVerify({
   const sha = shaOut.trim().split(' ')[0];
   const expected = String(digestHeader).replace('sha-256=', '').trim();
   if (sha !== expected)
-    throw new Error(`digest mismatch: ${sha} != ${expected}`);
+    {throw new Error(`digest mismatch: ${sha} != ${expected}`);}
 
   // Verify cosign bundle (offline)
   process.env.COSIGN_EXPERIMENTAL = '1';
@@ -68,7 +68,7 @@ export async function fetchAndVerify({
     ['verify-blob', '--bundle', '-', tarPath],
     bundle,
   );
-  if (code !== 0) throw new Error(`cosign verify failed: ${stderr}`);
+  if (code !== 0) {throw new Error(`cosign verify failed: ${stderr}`);}
 
   // Extract to a directory and return path
   const extractDir = path.join(tmpdir, 'unpacked');

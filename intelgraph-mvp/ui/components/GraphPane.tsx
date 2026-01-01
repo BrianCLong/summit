@@ -7,7 +7,7 @@ export default function GraphPane({ data }: { data: any }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current || !data) return;
+    if (!containerRef.current || !data) {return;}
 
     const cy = cytoscape({
       container: containerRef.current,
