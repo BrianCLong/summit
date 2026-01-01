@@ -360,7 +360,7 @@ export class RegulatoryPackService {
 
     const { rows } = await pool.query(query, params);
 
-    return rows.map((row) => ({
+    return rows.map((row: { id: string; name: string; framework: string; version: string; status: string; control_count?: number; updated_at: Date }) => ({
       id: row.id,
       name: row.name,
       framework: row.framework as ComplianceFramework,
@@ -597,7 +597,7 @@ export class RegulatoryPackService {
       [controlId]
     );
 
-    return rows.map((row) => ({
+    return rows.map((row: { id: string; test_id: string; control_id: string; executed_at: Date; executed_by: string; status: string; details: unknown; evidence: unknown; duration: number; failure_reason?: string }) => ({
       id: row.id,
       testId: row.test_id,
       controlId: row.control_id,

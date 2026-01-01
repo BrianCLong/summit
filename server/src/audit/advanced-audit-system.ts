@@ -379,7 +379,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
 
       return event.id;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -463,8 +463,8 @@ export class AdvancedAuditSystem extends EventEmitter {
       }
 
       const result = await this.db.query(sql, params);
-      return result.rows.map((row) => this.deserializeEvent(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.deserializeEvent(row));
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -584,7 +584,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
 
       return report;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -691,7 +691,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       );
 
       return analysis;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           error: error.message,
@@ -782,7 +782,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       this.logger.info(result, 'Audit trail integrity verification completed');
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         { error: error.message },
         'Failed to verify audit trail integrity',
@@ -916,7 +916,7 @@ export class AdvancedAuditSystem extends EventEmitter {
         },
         'Audit events flushed to database',
       );
-    } catch (error) {
+    } catch (error: any) {
       // Re-add events to buffer if flush fails
       this.eventBuffer.unshift(...eventsToFlush);
       throw error;

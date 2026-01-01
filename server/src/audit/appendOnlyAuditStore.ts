@@ -132,7 +132,6 @@ export class AppendOnlyAuditStore {
 
   async append(event: AuditEventV1): Promise<AuditRecord> {
     const candidate: AuditEventV1 = {
-      version: 'audit_event_v1',
       ...event,
       trace_id: event.trace_id || crypto.randomUUID(),
       timestamp: event.timestamp || new Date().toISOString(),
@@ -175,7 +174,7 @@ export class AppendOnlyAuditStore {
     const errors: string[] = [];
     let lastHash: string | undefined;
 
-    lines.forEach((line, index) => {
+    lines.forEach((line: string, index: number) => {
       let record: AuditRecord;
       try {
         record = JSON.parse(line) as AuditRecord;
@@ -226,8 +225,8 @@ export class AppendOnlyAuditStore {
     const toTime = options.to ? new Date(options.to).getTime() : null;
 
     return lines
-      .map((line) => JSON.parse(line) as AuditRecord)
-      .filter((record) => {
+      .map((line: string) => JSON.parse(line) as AuditRecord)
+      .filter((record: AuditRecord) => {
         const eventTime = new Date(record.event.timestamp).getTime();
         const matchesCustomer = options.customer
           ? record.event.customer === options.customer

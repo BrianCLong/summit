@@ -113,7 +113,7 @@ export class TimescaleConnector implements TimeSeriesConnector {
       .join(' ');
 
     const result = await this.pool.query(sql, values);
-    return result.rows.map((row) => ({
+    return result.rows.map((row: { timestamp: string; fields: unknown; tags: unknown }) => ({
       timestamp: new Date(row.timestamp),
       values: row.fields as Record<string, number>,
       tags: row.tags as Tags,
@@ -155,7 +155,7 @@ export class TimescaleConnector implements TimeSeriesConnector {
     `;
 
     const result = await this.pool.query(sql, values);
-    return result.rows.map((row) => ({
+    return result.rows.map((row: { timestamp: string; values: unknown; tags: unknown }) => ({
       timestamp: new Date(row.timestamp),
       values: row.values as Record<string, number>,
       tags: row.tags as Tags,
