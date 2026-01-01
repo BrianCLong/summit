@@ -1,6 +1,4 @@
-import { Service } from '../lib/service.js'; // Assuming base class
-// If Service doesn't exist, I'll remove the extends or find the right one.
-// Based on memory, there isn't a strict BaseService, usually classes.
+// PythiaService - Counterfactual simulation service
 
 export interface SimulationScenario {
   name: string;
