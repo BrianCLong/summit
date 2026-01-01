@@ -1,0 +1,43 @@
+{
+  "stages": [
+    {
+      "id": "onboard",
+      "entry_criteria": ["archetype mapped", "pattern selected", "evidence plan accepted"],
+      "controls": [
+        "identity verified",
+        "sandbox credentials issued",
+        "claims registry entry created"
+      ]
+    },
+    {
+      "id": "operate",
+      "entry_criteria": ["pattern guardrails validated", "negative tests passing"],
+      "controls": [
+        "continuous monitoring",
+        "kill-switch drill quarterly",
+        "evidence refreshed every 90 days"
+      ]
+    },
+    {
+      "id": "review",
+      "entry_criteria": ["evidence bundle delivered", "claims links validated"],
+      "controls": ["drift scan", "residency validation", "security posture reassessed"]
+    },
+    {
+      "id": "renew",
+      "entry_criteria": ["no critical findings", "customer satisfaction >= baseline"],
+      "controls": ["update certification tier", "reaffirm claims registry", "rotate credentials"]
+    },
+    {
+      "id": "exit",
+      "entry_criteria": ["DRI-initiated or violation detected"],
+      "controls": ["access removal", "data separation", "artifact cleanup", "audit trail export"],
+      "post_conditions": ["no residual credentials", "prov-ledger exit record", "customer sign-off"]
+    }
+  ],
+  "revocation": {
+    "triggers": ["pattern drift", "evidence expired", "scope creep detected", "security incident"],
+    "mechanics": ["token revoke", "scale adapters to zero", "webhook revoke", "sandbox disable"],
+    "validation": ["post-revocation isolation scan", "residency check", "access logs reviewed"]
+  }
+}

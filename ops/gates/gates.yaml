@@ -13,6 +13,12 @@ gates:
       command: "echo 'running sec-verify'"
       severity: "warn"
       timeout_seconds: 300
+    - name: "a11y-keyboard-smoke"
+      command: "pnpm run test:a11y-gate"
+      severity: "block"
+      timeout_seconds: 600
+      artifacts_expected:
+        - "reports/a11y-keyboard"
   nightly:
     - name: "sec-verify"
       command: "echo 'running sec-verify'"

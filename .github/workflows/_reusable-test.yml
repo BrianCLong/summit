@@ -6,36 +6,36 @@ on:
   workflow_call:
     inputs:
       test-type:
-        description: 'Type of tests to run (unit, integration, e2e, all)'
+        description: "Type of tests to run (unit, integration, e2e, all)"
         required: false
         type: string
-        default: 'unit'
+        default: "unit"
       node-version:
-        description: 'Node.js version'
+        description: "Node.js version"
         required: false
         type: string
-        default: '20.x'
+        default: "20.x"
       coverage-threshold:
-        description: 'Minimum coverage threshold (%)'
+        description: "Minimum coverage threshold (%)"
         required: false
         type: number
         default: 80
       upload-coverage:
-        description: 'Upload coverage reports'
+        description: "Upload coverage reports"
         required: false
         type: boolean
         default: true
       fail-on-coverage:
-        description: 'Fail if coverage below threshold'
+        description: "Fail if coverage below threshold"
         required: false
         type: boolean
         default: false
     outputs:
       coverage-percentage:
-        description: 'Overall coverage percentage'
+        description: "Overall coverage percentage"
         value: ${{ jobs.test.outputs.coverage }}
       tests-passed:
-        description: 'Whether all tests passed'
+        description: "Whether all tests passed"
         value: ${{ jobs.test.outputs.passed }}
 
 permissions:
@@ -52,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: ['20.x']
+        node: ["20.x"]
     outputs:
       coverage: ${{ steps.coverage-check.outputs.percentage }}
       passed: ${{ steps.test-run.outcome == 'success' }}
@@ -86,7 +86,7 @@ jobs:
         env:
           NEO4J_AUTH: neo4j/testpassword
           NEO4J_PLUGINS: '["apoc"]'
-          NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
         ports:
           - 7474:7474
           - 7687:7687
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -114,7 +114,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -233,7 +233,7 @@ jobs:
 
       - name: Upload coverage reports
         if: always() && inputs.upload-coverage
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.node }}-${{ inputs.test-type }}
           path: |

@@ -7,6 +7,16 @@
 > All agents and contributors must adhere to the [Constitution of the Ecosystem](docs/governance/CONSTITUTION.md).
 > This document defines the technical standards mandated by the **Law of Consistency**.
 
+## Scope & Precedence
+
+This file governs agent behavior across the repository. If any instruction conflicts, follow this
+order:
+
+1. `docs/governance/CONSTITUTION.md` and `docs/governance/META_GOVERNANCE.md`
+2. `docs/governance/AGENT_MANDATES.md` and GA guardrails in `docs/ga/`
+3. This file
+4. Local `AGENTS.md` files and directory README instructions
+
 ## Governance & Compliance
 
 - **Authority:** This repository is governed by the [Meta-Governance Framework](docs/governance/META_GOVERNANCE.md).
@@ -31,11 +41,11 @@
   - Notify `security-council` on policy violations.
   - Notify `devops` on persistent CI failures.
 
-### Role: Codex (Documentation & Standards)
+### Role: Codex (Implementation & Engineering)
 
 - **Permissions**:
-  - Write access to `docs/` and markdown files.
-  - Read-only access to source code.
+  - Implement features and fixes in scope with tests and documentation.
+  - Update `docs/` and markdown to reflect changes.
 - **Stop Conditions**:
   - Generated documentation contradicts code (detected via drift check).
 

@@ -2,6 +2,11 @@
 
 Complete guide for onboarding new AI agents to the Summit platform.
 
+## Status & Precedence
+
+This guide is operational. If conflicts arise, follow `docs/governance/CONSTITUTION.md` →
+`docs/governance/AGENT_MANDATES.md` → `AGENTS.md` → local `AGENTS.md` files.
+
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
@@ -29,18 +34,21 @@ Before onboarding an agent, ensure you have:
 Summit supports three agent types:
 
 ### 1. Internal Agents
+
 - Developed and maintained by your organization
 - Full trust model
 - Can be certified more easily
 - Examples: maintenance agents, data processors
 
 ### 2. External Agents
+
 - Third-party agents
 - Require strict certification
 - Limited default capabilities
 - Examples: vendor integrations, partner automations
 
 ### 3. Partner Agents
+
 - Trusted partner organizations
 - Moderate certification requirements
 - Scoped to specific projects
@@ -75,18 +83,18 @@ Create an agent specification:
 
 Determine required capabilities:
 
-| Capability | Description | Risk Level | Justification Required |
-|------------|-------------|------------|----------------------|
-| `read:data` | Read entity/relationship data | Low | Basic |
-| `write:data` | Create/update entities | Medium | Yes |
-| `delete:data` | Delete entities | High | Yes + Approval |
-| `execute:pipelines` | Trigger pipelines | Medium | Yes |
-| `execute:commands` | Run CLI commands | High | Yes + Approval |
-| `query:database` | Direct database queries | Medium | Yes |
-| `manage:config` | Modify configuration | High | Yes + Approval |
-| `security:impersonate` | User impersonation | Critical | Yes + Multi-approval |
-| `export:data` | Export data | Medium | Yes |
-| `import:data` | Import data | Medium | Yes |
+| Capability             | Description                   | Risk Level | Justification Required |
+| ---------------------- | ----------------------------- | ---------- | ---------------------- |
+| `read:data`            | Read entity/relationship data | Low        | Basic                  |
+| `write:data`           | Create/update entities        | Medium     | Yes                    |
+| `delete:data`          | Delete entities               | High       | Yes + Approval         |
+| `execute:pipelines`    | Trigger pipelines             | Medium     | Yes                    |
+| `execute:commands`     | Run CLI commands              | High       | Yes + Approval         |
+| `query:database`       | Direct database queries       | Medium     | Yes                    |
+| `manage:config`        | Modify configuration          | High       | Yes + Approval         |
+| `security:impersonate` | User impersonation            | Critical   | Yes + Multi-approval   |
+| `export:data`          | Export data                   | Medium     | Yes                    |
+| `import:data`          | Import data                   | Medium     | Yes                    |
 
 **Principle of Least Privilege**: Only request capabilities actually needed.
 
@@ -125,6 +133,7 @@ curl -X POST http://localhost:3001/api/admin/agents \
 ```
 
 Response:
+
 ```json
 {
   "id": "agent-abc-123",
@@ -152,6 +161,7 @@ curl -X POST http://localhost:3001/api/admin/agents/agent-abc-123/credentials \
 ```
 
 Response:
+
 ```json
 {
   "credential": {
@@ -214,18 +224,21 @@ def assess_risk(action):
 External and partner agents MUST be certified before production use.
 
 #### Level 1: Basic Certification (Internal Agents)
+
 - Pass safety scenario tests
 - Document intended behavior
 - Owner approval
 - Valid for 1 year
 
 #### Level 2: Standard Certification (Partner Agents)
+
 - Level 1 requirements
 - Security review
 - Integration testing
 - Valid for 6 months
 
 #### Level 3: Advanced Certification (External Agents)
+
 - Level 2 requirements
 - Third-party security audit
 - Compliance review
@@ -256,6 +269,7 @@ npm run test:safety -- --agent=agent-abc-123
 ```
 
 Must pass all scenarios:
+
 - ✓ Cross-tenant access blocked
 - ✓ Rate limits enforced
 - ✓ High-risk actions require approval
@@ -279,29 +293,29 @@ curl -X POST http://localhost:3001/api/admin/agents/agent-abc-123/certify \
 ### Phase 1: Development & Testing (SIMULATION Mode)
 
 ```typescript
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 const agent = {
-  apiKey: 'agt_...',
-  gatewayUrl: 'http://localhost:3001',
+  apiKey: "agt_...",
+  gatewayUrl: "http://localhost:3001",
 };
 
 async function testAgent() {
   const response = await fetch(`${agent.gatewayUrl}/api/agent/execute`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${agent.apiKey}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${agent.apiKey}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      tenantId: 'prod-tenant-1',
-      operationMode: 'SIMULATION', // No real execution
+      tenantId: "prod-tenant-1",
+      operationMode: "SIMULATION", // No real execution
       action: {
-        type: 'read',
-        target: 'entities',
-        payload: { filter: 'status=active' }
-      }
-    })
+        type: "read",
+        target: "entities",
+        payload: { filter: "status=active" },
+      },
+    }),
   });
 
   const result = await response.json();
@@ -395,13 +409,13 @@ capabilities: ["read:data"]
 
 ```typescript
 // Development
-operationMode: 'SIMULATION'
+operationMode: "SIMULATION";
 
 // Staging
-operationMode: 'DRY_RUN'
+operationMode: "DRY_RUN";
 
 // Production (low-risk)
-operationMode: 'ENFORCED'
+operationMode: "ENFORCED";
 ```
 
 ### 3. Implement Graceful Approval Handling
@@ -417,7 +431,7 @@ async function executeWithApproval(action) {
     // Don't poll aggressively
     return await waitForApproval(result.approval.id, {
       checkInterval: 60000, // 1 minute
-      timeout: 3600000 // 1 hour
+      timeout: 3600000, // 1 hour
     });
   }
 
@@ -431,7 +445,7 @@ async function executeWithApproval(action) {
 async function monitorHealth() {
   const quotas = await getQuotas();
 
-  quotas.forEach(quota => {
+  quotas.forEach((quota) => {
     const utilization = quota.used / quota.limit;
 
     if (utilization > 0.9) {
@@ -451,14 +465,14 @@ async function safeExecute(action) {
     const result = await executeRequest(action);
 
     if (!result.success) {
-      if (result.error?.code === 'QUOTA_EXCEEDED') {
+      if (result.error?.code === "QUOTA_EXCEEDED") {
         // Wait and retry
         await sleep(60000);
         return safeExecute(action);
-      } else if (result.error?.code === 'SCOPE_VIOLATION') {
+      } else if (result.error?.code === "SCOPE_VIOLATION") {
         // Don't retry, log security violation
         logSecurityEvent(result.error);
-        throw new Error('Scope violation');
+        throw new Error("Scope violation");
       } else {
         // Other errors
         logError(result.error);
@@ -480,9 +494,9 @@ async function safeExecute(action) {
 async function rotateCredentials() {
   // Schedule credential rotation every 90 days
   const newCred = await fetch(`${adminUrl}/api/admin/credentials/${credId}/rotate`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${adminToken}` }
-  }).then(r => r.json());
+    method: "POST",
+    headers: { Authorization: `Bearer ${adminToken}` },
+  }).then((r) => r.json());
 
   // Update agent configuration
   updateConfig({ apiKey: newCred.apiKey });
@@ -496,30 +510,35 @@ async function rotateCredentials() {
 ### Common Issues
 
 #### 1. "Authentication failed"
+
 ```
 Cause: Invalid or expired API key
 Fix: Verify API key, check expiration, generate new credential if needed
 ```
 
 #### 2. "Scope violation"
+
 ```
 Cause: Attempting to access tenant/project not in agent's scope
 Fix: Update agent scopes or use correct tenant ID
 ```
 
 #### 3. "Quota exceeded"
+
 ```
 Cause: Hit rate limit or quota
 Fix: Check quotas, wait for reset, or request limit increase
 ```
 
 #### 4. "Policy denied"
+
 ```
 Cause: OPA policy rejected the action
 Fix: Check capabilities, risk level, certification status
 ```
 
 #### 5. "Approval required"
+
 ```
 Cause: High-risk action needs human approval
 Fix: Wait for approval, or reduce risk level of action

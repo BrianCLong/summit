@@ -1,5 +1,9 @@
 # Issue Closed: autonomous_counter_psyops_agents
 
+## Status
+
+Archived snapshot. This record does not provide operational guidance.
+
 This issue has been resolved and is now closed.
 
 ## Summary
