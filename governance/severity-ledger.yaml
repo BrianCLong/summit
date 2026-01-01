@@ -1,0 +1,5 @@
+metadata:
+  description: "Normalized severity ledger for Summit P0/P1/P2 governance gate."
+  last_updated: "2026-01-01T03:54:00Z"
+  schema: "./severity-ledger.schema.json"
+issues: []
