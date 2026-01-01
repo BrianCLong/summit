@@ -234,7 +234,11 @@ secrets/lint:
 
 # --- GA Hardening ---
 
-.PHONY: ga-verify
+.PHONY: ga ga-verify
+ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
+	@mkdir -p artifacts/ga
+	@./scripts/ga-gate.sh
+
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
