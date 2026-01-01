@@ -1,12 +1,9 @@
+const path = require('path');
+
 /** @type {import('jest').Config} */
 const config = {
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.json',
-    },
-  },
+  setupFilesAfterEnv: [path.resolve(__dirname, 'src/setupTests.js')],
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
@@ -15,7 +12,8 @@ const config = {
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: {
-        jsx: 'react-jsx'
+        jsx: 'react-jsx',
+        module: 'commonjs'
       }
     }],
     '^.+\\.(js|jsx)$': 'babel-jest', // Assuming you might have some JS/JSX files
@@ -24,6 +22,7 @@ const config = {
     '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
   ],
+
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
     '!src/**/*.d.ts',
@@ -52,16 +51,13 @@ const config = {
       },
     ],
   ],
-  testPathIgnorePatterns: [
-    '<rootDir>/src/tests/',
-    '<rootDir>/src/__tests__/ServiceHealthCard.test.jsx',
-    '<rootDir>/src/__tests__/Dashboard.test.jsx',
-    '<rootDir>/src/components/graph/__tests__/GraphContextMenu.test.jsx',
-    '<rootDir>/src/components/graph/__tests__/AIInsightsPanel.test.jsx',
-    '<rootDir>/src/components/visualization/__tests__/InteractiveGraphCanvas.test.tsx',
-    '<rootDir>/src/components/mlops/__tests__/ModelManagementDashboard.test.tsx',
-    '<rootDir>/src/components/dashboard/__tests__/StatsOverview.test.tsx',
+  transformIgnorePatterns: [
+    '/node_modules/',
   ],
+  testPathIgnorePatterns: [],
+
+
+
 };
 
 module.exports = config;

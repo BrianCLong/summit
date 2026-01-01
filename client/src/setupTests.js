@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import './test/mocks/browserAPIs.js';
 
-// Manual fetch mock since whatwg-fetch might be missing
+global.importMeta = { env: {} };
 global.fetch = jest.fn(() =>
     Promise.resolve({
         ok: true,

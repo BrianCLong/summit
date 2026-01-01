@@ -9,13 +9,22 @@
     "dev": "tsc --watch",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prebuild": "rm -rf dist"
   },
   "dependencies": {
     "react": "^19.2.1",
     "react-dom": "^18.3.1",
     "d3": "^7.9.0",
+    "d3-force": "^3.0.0",
+    "d3-zoom": "^3.0.0",
+    "d3-drag": "^3.0.0",
+    "d3-selection": "^3.0.0",
     "@types/d3": "^7.4.3",
+    "@types/d3-force": "^3.0.10",
+    "@types/d3-zoom": "^3.0.8",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-selection": "^3.0.10",
     "lodash": "^4.17.21",
     "@types/lodash": "^4.17.7"
   },

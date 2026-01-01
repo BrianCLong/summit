@@ -309,7 +309,11 @@
       "Bash(git ls-tree:*)",
       "Bash(npm test:*)",
       "Bash(gh pr comment:*)",
-      "Bash(for branch in ga-unified-release-gate-14166621867316161839 ga-readiness-sweep-rc-1.0-14547096107927117009)"
+      "Bash(for branch in ga-unified-release-gate-14166621867316161839 ga-readiness-sweep-rc-1.0-14547096107927117009)",
+      "Bash(npm run lint:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && head -50 {}')",
+      "Bash(gh pr create:*)",
+      "Bash(NODE_OPTIONS=\"--experimental-vm-modules\" npx jest:*)"
     ],
     "deny": [],
     "ask": []
