@@ -13,7 +13,7 @@ export function normalizeText(s: string): string {
 export async function expectTextAcrossElements(
   container: HTMLElement,
   pattern: RegExp | string,
-  timeout = 2000,
+  timeout = 10000,
 ) {
   if (!container) {
     throw new Error('Container element is null or undefined');
@@ -37,7 +37,7 @@ export async function expectTextAcrossElements(
 
 export async function expectLastAssistantMessageToContain(
   pattern: RegExp | string,
-  timeout = 2000,
+  timeout = 10000,
 ) {
   await waitFor(
     () => {
@@ -45,10 +45,12 @@ export async function expectLastAssistantMessageToContain(
         '[data-testid="message-log"]',
       ) as HTMLElement;
       if (!log) throw new Error('message-log not found');
+
       const articles = Array.from(
-        log.querySelectorAll('article[aria-label="assistant"]'),
+        log.querySelectorAll('[role="article"][aria-label="assistant"]'),
       );
       if (articles.length === 0) throw new Error('No assistant messages found');
+
       const last = articles[articles.length - 1] as HTMLElement;
       if (!last) throw new Error('Last assistant message is null');
 

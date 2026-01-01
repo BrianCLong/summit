@@ -149,7 +149,7 @@ export default function App() {
 
   const moveSelection = useCallback(
     (direction: number) => {
-      if (appeals.length === 0) return;
+      if (appeals.length === 0) {return;}
       const currentIndex = appeals.findIndex((item) => item.id === selectedAppealId);
       const nextIndex =
         currentIndex === -1 ? 0 : Math.max(0, Math.min(appeals.length - 1, currentIndex + direction));
@@ -160,7 +160,7 @@ export default function App() {
 
   const handleDecision = useCallback(
     async (decision: 'approve' | 'deny') => {
-      if (!selectedAppeal) return;
+      if (!selectedAppeal) {return;}
       if (!['admin', 'reviewer'].includes(actor.role)) {
         setStatus('Only admins and reviewers can register decisions.');
         return;
@@ -228,7 +228,7 @@ export default function App() {
   };
 
   const handleQueueAppeal = async () => {
-    if (!selectedAppeal) return;
+    if (!selectedAppeal) {return;}
     try {
       await client.post(`/appeals/${selectedAppeal.id}/queue`);
       setStatus('Appeal moved to triage queue.');
@@ -240,7 +240,7 @@ export default function App() {
 
   const handleAddEvidence = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedAppeal) return;
+    if (!selectedAppeal) {return;}
     try {
       await client.post(`/appeals/${selectedAppeal.id}/evidence`, evidenceForm);
       setEvidenceForm({ label: '', description: '', url: '' });
@@ -253,7 +253,7 @@ export default function App() {
 
   const handleAddSuggestion = async (event: FormEvent) => {
     event.preventDefault();
-    if (!selectedAppeal) return;
+    if (!selectedAppeal) {return;}
     try {
       await client.post(`/appeals/${selectedAppeal.id}/policy-suggestions`, policySuggestion);
       setPolicySuggestion({ summary: '', rationale: '' });
@@ -293,7 +293,7 @@ export default function App() {
   };
 
   const handleImport = async () => {
-    if (!importInput.trim()) return;
+    if (!importInput.trim()) {return;}
     try {
       const payload = JSON.parse(importInput);
       await client.post('/import', payload);
