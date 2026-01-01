@@ -1,0 +1,14 @@
+{
+  "investigationId": "inv-2024-001",
+  "generatedAt": "2024-03-20T10:00:00Z",
+  "files": [
+    {
+      "path": "suspect_transactions.csv",
+      "hash": "a5acf703a3c4d755344af46e91adbbb86d724f3150a6af06dc732175ce6d411d"
+    },
+    {
+      "path": "threat_intel.stix",
+      "hash": "44552784246a169bb065c6feede0849f4babd3a0dd8a7be255a96a9722e1fdf7"
+    }
+  ]
+}

@@ -50,6 +50,7 @@ const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
+const GADashboard = React.lazy(() => import('@/pages/GADashboard'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -126,6 +127,7 @@ function App() {
                     />
                     <Route path="/maestro/*" element={<MaestroDashboard />} />
                     <Route path="/trust" element={<TrustDashboard />} />
+                    <Route path="/ga-dashboard" element={<GADashboard />} />
 
                     {/* Workbench Route - intentionally outside main layout for focus mode, or inside if desired.
                         The prompts asked for a "shell", usually implying it might stand alone or take over.

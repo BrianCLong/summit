@@ -1,0 +1,38 @@
+{
+  "type": "bundle",
+  "id": "bundle--36248967-277c-4424-8178-52c657740263",
+  "objects": [
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--e2b83c7d-94c6-47b6-a05e-1413fc47752a",
+      "created": "2024-01-01T00:00:00.000Z",
+      "modified": "2024-01-01T00:00:00.000Z",
+      "name": "John Doe",
+      "identity_class": "individual",
+      "contact_information": "j.doe@example.com",
+      "description": "Person of interest in financial investigation."
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--8d14736f-5762-4318-8422-771191567119",
+      "created": "2024-01-10T00:00:00.000Z",
+      "modified": "2024-01-10T00:00:00.000Z",
+      "name": "Malicious Email Address",
+      "pattern": "[email-addr:value = 'j.doe@example.com']",
+      "pattern_type": "stix",
+      "valid_from": "2024-01-01T00:00:00Z"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--44298a74-87ee-4c87-90bb-28bd28d99803",
+      "created": "2024-01-10T00:00:00.000Z",
+      "modified": "2024-01-10T00:00:00.000Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "indicator--8d14736f-5762-4318-8422-771191567119",
+      "target_ref": "identity--e2b83c7d-94c6-47b6-a05e-1413fc47752a"
+    }
+  ]
+}

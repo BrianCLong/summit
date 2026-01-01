@@ -15,6 +15,7 @@ export default defineConfig({
     'tests/e2e/**/*.spec.ts',
     'tests/performance.spec.ts',
     'e2e/simple.spec.ts',
+    'e2e/ga_golden_run.spec.ts',
   ],
   timeout: 60_000,
   retries: 2,
