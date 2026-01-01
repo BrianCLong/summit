@@ -8,6 +8,33 @@ import type {
   ProvenanceMetadata,
 } from '../types';
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'demo', 'demo-api-key', 'api-key'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 const tracer = trace.getTracer('intelgraph-http-connector');
 
 interface HTTPConfig extends ConnectorConfig {
@@ -384,7 +411,7 @@ export class HTTPConnector extends BaseConnector {
         resolved[key] = process.env[envVar] || value;
       } else if (value.startsWith('secretref://')) {
         // In production, integrate with actual secret resolution
-        resolved[key] = process.env.TOPICALITY_API_KEY || 'demo-api-key';
+        resolved[key] = requireSecret('TOPICALITY_API_KEY', process.env.TOPICALITY_API_KEY, 32);
       } else {
         resolved[key] = value;
       }

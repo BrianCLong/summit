@@ -9,6 +9,33 @@
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 32): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'default-key', 'signing-key'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 export interface AuditConfig {
   enableImmutableLogging: boolean;
   enableHashChains: boolean;
@@ -395,8 +422,7 @@ export class AuditEngine {
 
   constructor(config: AuditConfig, signingKey?: string) {
     this.config = config;
-    this.signingKey =
-      signingKey || process.env.AUDIT_SIGNING_KEY || 'default-key';
+    this.signingKey = signingKey || requireSecret('AUDIT_SIGNING_KEY', process.env.AUDIT_SIGNING_KEY, 32);
 
     // Initialize genesis hash
     if (config.enableHashChains && this.hashChain.length === 0) {

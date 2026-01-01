@@ -19,6 +19,33 @@
  * 3. Actionable Early-Warning Threshold System
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 32): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'pepper', 'default-pepper'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 // Core Types
 export * from './core/types';
 
@@ -100,7 +127,7 @@ export function createFederatedCampaignRadar(config: FederatedCampaignRadarConfi
   // Initialize Signal Normalizer
   const signalNormalizer = new SignalNormalizer({
     enableC2PAValidation: enableC2PA,
-    hashPepper: process.env.SIGNAL_HASH_PEPPER || 'default-pepper-change-in-production',
+    hashPepper: requireSecret('SIGNAL_HASH_PEPPER', process.env.SIGNAL_HASH_PEPPER, 32),
     embeddingDimension: 768,
   });
 

@@ -17,6 +17,33 @@ import { Pool } from 'pg';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'localhost', 'postgres', 'dev-signing-key', 'signing-key'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import { ImmutableAuditStore } from './store/immutable-store.js';
 import { AuditEventBuffer } from './core/event-buffer.js';
 import { RedactionService } from './redaction/redaction-service.js';
@@ -368,9 +395,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
       database: process.env.POSTGRES_DATABASE || 'audit_blackbox',
       user: process.env.POSTGRES_USER || 'postgres',
-      password: process.env.POSTGRES_PASSWORD || 'postgres',
+      password: requireSecret('POSTGRES_PASSWORD', process.env.POSTGRES_PASSWORD),
     },
-    signingKey: process.env.AUDIT_SIGNING_KEY || 'dev-signing-key-change-in-production',
+    signingKey: requireSecret('AUDIT_SIGNING_KEY', process.env.AUDIT_SIGNING_KEY, 32),
     apiPort: parseInt(process.env.API_PORT || '4001', 10),
     apiHost: process.env.API_HOST || '0.0.0.0',
     logLevel: (process.env.LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error') || 'info',
