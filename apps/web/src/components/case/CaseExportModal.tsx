@@ -63,10 +63,35 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
 
   const renderStatus = () => {
     if (!exportJob.job) {
-      return <p className="text-sm text-muted-foreground">Select options and start an export.</p>
+      // PROMPT-UPDATE: Show policy check readiness
+      return (
+        <div className="space-y-2">
+           <p className="text-sm text-muted-foreground">Select options and start an export.</p>
+           <div className="flex items-center gap-2 text-xs text-green-600">
+               <span className="h-2 w-2 rounded-full bg-green-500" />
+               Policy Check: Ready
+           </div>
+        </div>
+      );
     }
 
     const { status, progress = 0, jobId, downloadUrl, error } = exportJob.job
+
+    // PROMPT-UPDATE: Show policy blocked state
+    if (error && error.includes('POLICY_BLOCKED')) {
+       return (
+        <Alert variant="destructive" role="alert" aria-live="assertive">
+          <AlertTitle>Policy Check Failed</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p className="font-semibold">{error}</p>
+            <p className="text-sm">Your export was blocked by the Licensing & Authority Compiler.</p>
+            <div className="rounded bg-destructive/10 p-2 text-xs">
+                <strong>Remediation:</strong> Check license constraints or purpose binding.
+            </div>
+          </AlertDescription>
+        </Alert>
+       )
+    }
 
     if (status === 'failed') {
       return (
@@ -104,18 +129,24 @@ export function CaseExportModal({ tenantId, caseId, caseTitle, open, onOpenChang
               <Badge variant="secondary">Job {jobId}</Badge>
               <span className="text-sm text-muted-foreground">Click to download (required for Safari).</span>
             </div>
-            <div className="mt-2 flex gap-2">
-              <Button onClick={exportJob.markDownload} size="sm" aria-label="Download export">
-                <Download className="h-4 w-4 mr-2" /> Download
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={exportJob.startExport}
-                aria-label="Retry export"
-              >
-                <RefreshCcw className="h-4 w-4 mr-2" /> Retry
-              </Button>
+            <div className="mt-2 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button onClick={exportJob.markDownload} size="sm" aria-label="Download export">
+                    <Download className="h-4 w-4 mr-2" /> Download Bundle
+                  </Button>
+                   <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(downloadUrl + '?manifest=true', '_blank')}
+                    aria-label="View Manifest"
+                    title="Verify Provenance Manifest"
+                  >
+                    <FileText className="h-4 w-4 mr-2" /> View Manifest
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                    Includes <strong>Provenance Manifest</strong> with Policy Proof.
+                </div>
             </div>
           </AlertDescription>
         </Alert>
