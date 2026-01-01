@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-01T16:45:00Z",
+  "revision_note": "Seeded Summit memory layer package with local provider and context builder",
   "initiatives": [
     {
       "id": "A",
@@ -9,10 +9,10 @@
         {
           "id": "A1",
           "name": "Local Vector Store",
-          "status": "incomplete",
+          "status": "in-progress",
           "owner": "Jules",
-          "evidence": "No dedicated vector store service found in /server/src/services/",
-          "blockers": ["Need to implement vector store service", "No storage backend configured"],
+          "evidence": "packages/memory adds scoped memory records, redaction, and similarity search with recency boost",
+          "blockers": ["Wire into server chat pipeline", "Add durable database-backed embeddings"],
           "target_completion": "Sprint N+1"
         },
         {
