@@ -40,7 +40,7 @@ jobs:
       pnpm: ${{ steps.resolve-pnpm.outputs.pnpm }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Detect Node.js version
         id: detect

@@ -1,5 +1,10 @@
 # Quick Start: Agentic Task Execution System
 
+## Status
+
+Archived snapshot. For current operational guidance, follow `AGENTS.md` and governance in
+`docs/governance/`.
+
 ## 🚀 Get Started in 5 Minutes
 
 ### 1. Initialize Your First Task
@@ -10,7 +15,7 @@
 
 # It will ask:
 # - Task ID: 1
-# - Task name: my-first-task  
+# - Task name: my-first-task
 # - Agent choice: 1 (Claude Code)
 
 # This creates:
@@ -23,6 +28,7 @@ The task file opens automatically. Add your requirements:
 
 ```markdown
 ## Task Requirements
+
 - Implement user authentication endpoint
 - Add JWT token generation
 - Include refresh token logic
@@ -59,7 +65,7 @@ git add -A
 git commit -m "feat: implement user authentication
 
 - Add JWT authentication endpoint
-- Add refresh token logic  
+- Add refresh token logic
 - Add rate limiting middleware
 - Add comprehensive tests
 - Update API documentation
@@ -165,11 +171,13 @@ gh pr merge --auto --squash
 ## 🎯 Target Metrics
 
 ### Daily Goals
+
 - **3-5 tasks completed**
 - **<2 hours average time to PR**
 - **>95% CI pass rate**
 
 ### Weekly Goals
+
 - **15-25 tasks completed**
 - **>90% first-time merge rate**
 - **Zero TODOs in code**
@@ -177,12 +185,12 @@ gh pr merge --auto --squash
 
 ## 🛠️ Available Scripts
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `init-task.sh` | Create new task prompt | `./scripts/agentic/init-task.sh` |
-| `archive-task.sh` | Archive completed task | `./scripts/agentic/archive-task.sh <id>` |
-| `report-velocity.sh` | Show velocity metrics | `./scripts/agentic/report-velocity.sh` |
-| `select-agent.sh` | Agent selection wizard | `./scripts/agentic/select-agent.sh` |
+| Script               | Purpose                | Usage                                    |
+| -------------------- | ---------------------- | ---------------------------------------- |
+| `init-task.sh`       | Create new task prompt | `./scripts/agentic/init-task.sh`         |
+| `archive-task.sh`    | Archive completed task | `./scripts/agentic/archive-task.sh <id>` |
+| `report-velocity.sh` | Show velocity metrics  | `./scripts/agentic/report-velocity.sh`   |
+| `select-agent.sh`    | Agent selection wizard | `./scripts/agentic/select-agent.sh`      |
 
 ## 📚 Learn More
 
@@ -194,12 +202,14 @@ gh pr merge --auto --squash
 ## ❓ Troubleshooting
 
 ### Scripts don't execute
+
 ```bash
 # Make scripts executable
 chmod +x scripts/agentic/*.sh
 ```
 
 ### Can't find gh command
+
 ```bash
 # Install GitHub CLI
 brew install gh
@@ -207,6 +217,7 @@ brew install gh
 ```
 
 ### Quality checks fail
+
 ```bash
 # Run individually to identify issue
 pnpm build

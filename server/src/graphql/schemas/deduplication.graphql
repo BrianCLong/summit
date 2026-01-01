@@ -1,0 +1,63 @@
+# Entity Deduplication Schema
+# Modern pgvector-based duplicate detection
+
+"""
+Entity involved in a potential duplicate pair
+"""
+type DuplicateEntity {
+  id: ID!
+  label: String!
+  description: String
+}
+
+"""
+Breakdown of similarity scores by component
+"""
+type SimilarityScores {
+  """Semantic embedding similarity (0-1)"""
+  semantic: Float!
+
+  """Topology/neighbor overlap similarity (0-1)"""
+  topology: Float!
+
+  """Provenance/source system similarity (0-1)"""
+  provenance: Float!
+}
+
+"""
+A potential duplicate entity pair with similarity scoring
+"""
+type DeduplicationCandidate {
+  """First entity in the pair"""
+  entityA: DuplicateEntity!
+
+  """Second entity in the pair"""
+  entityB: DuplicateEntity!
+
+  """Overall weighted similarity score (0-1)"""
+  similarity: Float!
+
+  """Detailed similarity scores by component"""
+  scores: SimilarityScores!
+
+  """Human-readable reasons for the match"""
+  reasons: [String!]!
+}
+
+extend type Query {
+  """
+  Find potential duplicate entities within an investigation
+
+  Uses hybrid similarity scoring:
+  - Semantic similarity: 60% (pgvector embeddings)
+  - Topology similarity: 30% (neighbor overlap)
+  - Provenance similarity: 10% (same source)
+  """
+  deduplicationCandidates(
+    """Investigation ID to search within"""
+    investigationId: ID!
+
+    """Minimum similarity threshold (0-1), default 0.7"""
+    threshold: Float
+  ): [DeduplicationCandidate!]!
+}

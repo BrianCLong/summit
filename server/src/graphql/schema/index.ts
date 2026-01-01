@@ -32,6 +32,10 @@ const collabTypeDefs = fs.readFileSync(collabSchemaPath, 'utf8');
 const cogSecSchemaPath = path.join(__dirname, './cognitive-security.graphql');
 const cogSecTypeDefs = fs.readFileSync(cogSecSchemaPath, 'utf8');
 
+// Load Deduplication schema
+const dedupSchemaPath = path.join(__dirname, '../schemas/deduplication.graphql');
+const dedupTypeDefs = fs.readFileSync(dedupSchemaPath, 'utf8');
+
 const base = gql`
   scalar JSON
   scalar DateTime
@@ -68,6 +72,7 @@ export const typeDefs = [
   ewTypeDefs,
   collabTypeDefs,
   cogSecTypeDefs,
+  dedupTypeDefs,
 ];
 
 export default typeDefs;

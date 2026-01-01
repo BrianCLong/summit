@@ -1,3 +1,5 @@
+import { getPostgresPool } from '../db/postgres.js';
+import { planService, Plan } from './plans';
 import { UsageDimension } from './events';
 
 export interface QuotaLimit {
@@ -82,6 +84,44 @@ export class PostgresQuotaService implements QuotaService {
       const prefix = decision.hardLimit ? 'HARD_QUOTA_EXCEEDED' : 'SOFT_QUOTA_EXCEEDED';
       const details = decision.reason ? `${prefix}: ${decision.reason}` : prefix;
       throw new Error(details);
+    }
+  }
+
+  private resolveLimit(
+    plan: Plan,
+    dimension: UsageDimension,
+  ): { limit: number; windowStart: Date; hardLimit: boolean } | null {
+    const startOfMonth = new Date();
+    startOfMonth.setUTCDate(1);
+    startOfMonth.setUTCHours(0, 0, 0, 0);
+
+    switch (dimension) {
+      case 'api.requests':
+        return {
+          limit: plan.limits.monthlyRequests,
+          windowStart: startOfMonth,
+          hardLimit: true,
+        };
+      case 'maestro.runtime':
+        return {
+          limit: plan.limits.monthlyComputeMs,
+          windowStart: startOfMonth,
+          hardLimit: true,
+        };
+      case 'llm.tokens':
+        return {
+          limit: plan.limits.monthlyLlmTokens,
+          windowStart: startOfMonth,
+          hardLimit: true,
+        };
+      case 'data.storage.bytes':
+        return {
+          limit: plan.limits.maxStorageBytes,
+          windowStart: new Date(0),
+          hardLimit: true,
+        };
+      default:
+        return null;
     }
   }
 }

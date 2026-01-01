@@ -66,4 +66,23 @@ describe('PostgresQuotaService', () => {
 
     await expect(service.assert(quotaCheck)).rejects.toThrow('HARD_QUOTA_EXCEEDED');
   });
+
+  it('allows usage when no limit is configured for dimension', async () => {
+    const service = buildService({}, {});
+
+    const decision = await check(service, 'graph.queries', 100);
+
+    expect(decision.allowed).toBe(true);
+    expect(decision.limit).toBeUndefined();
+    expect(decision.remaining).toBeUndefined();
+  });
+
+  it('rejects negative quantity', async () => {
+    const service = buildService(
+      { 'api.requests': { limit: 100, hardLimit: true } },
+      {},
+    );
+
+    await expect(check(service, 'api.requests', -5)).rejects.toThrow('Quantity must be non-negative');
+  });
 });

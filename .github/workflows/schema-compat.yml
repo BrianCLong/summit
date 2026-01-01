@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node
@@ -50,7 +50,7 @@ jobs:
           fi
 
       - name: Upload schema compatibility reports
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: schema-compatibility-reports
           path: schema-compat-artifacts/*.md
