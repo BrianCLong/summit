@@ -1,0 +1,73 @@
+{
+  "patterns": [
+    {
+      "id": "read-only-insight-api",
+      "capabilities": ["read", "list", "filter"],
+      "forbidden": ["mutate", "delete", "impersonate"],
+      "budgets": {
+        "requests_per_minute": 600,
+        "burst": 100,
+        "data_mb_per_day": 500
+      },
+      "isolation": {
+        "execution": "per-tenant stateless function",
+        "data_residency": "regional",
+        "network": "egress restricted via policy gateway"
+      },
+      "kill_switch": "centralized toggle via policy-engine",
+      "notes": "Default integration path for ISVs and observability tools requiring analytics without mutation."
+    },
+    {
+      "id": "event-listener-no-mutation",
+      "capabilities": ["subscribe", "filter", "decrypt-signed"],
+      "forbidden": ["enqueue-internal", "replay", "stateful-transform"],
+      "budgets": {
+        "events_per_minute": 1200,
+        "max_delivery_lag_ms": 500,
+        "retention_hours": 24
+      },
+      "isolation": {
+        "execution": "broker-isolated consumer group",
+        "data_residency": "regional",
+        "network": "egress through curated webhooks with mutual TLS"
+      },
+      "kill_switch": "event-bus ACL revocation + webhook revoke",
+      "notes": "Partners can listen for signals but cannot mutate Summit state."
+    },
+    {
+      "id": "sandboxed-plugin",
+      "capabilities": ["ui-embed", "query-invoke", "render"],
+      "forbidden": ["local-storage", "credential-access", "unbounded-network"],
+      "budgets": {
+        "cpu_millis": 500,
+        "memory_mb": 256,
+        "timeout_ms": 1500
+      },
+      "isolation": {
+        "execution": "wasm sandbox with syscall allowlist",
+        "data_residency": "inherits-tenant",
+        "network": "egress denied except approved service mesh"
+      },
+      "kill_switch": "plugin registry disable + wasm sandbox teardown",
+      "notes": "Used for certified UI plug-ins with strict syscall and resource caps."
+    },
+    {
+      "id": "sidecar-adapter",
+      "capabilities": ["ingest", "normalize", "forward"],
+      "forbidden": ["write-core-db", "bypass-policy", "store-long-term"],
+      "budgets": {
+        "cpu_millis": 750,
+        "memory_mb": 512,
+        "timeout_ms": 2500,
+        "throughput_mb_per_day": 2048
+      },
+      "isolation": {
+        "execution": "per-tenant container with read-only tokens",
+        "data_residency": "customer-selected region",
+        "network": "egress pinned to Summit ingress allowlist"
+      },
+      "kill_switch": "orchestrator-scale-to-zero + token revoke",
+      "notes": "Adapters are reversible and shippable with default kill switches and residency pins."
+    }
+  ]
+}
