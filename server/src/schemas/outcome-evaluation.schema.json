@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Outcome Evaluation",
+  "description": "Schema for recording verified outcomes of decisions to enable bounded learning.",
+  "type": "object",
+  "properties": {
+    "decisionId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier of the decision being evaluated."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the outcome was verified."
+    },
+    "expectedOutcome": {
+      "type": "object",
+      "description": "The outcome the system predicted or aimed for.",
+      "additionalProperties": true
+    },
+    "actualOutcome": {
+      "type": "object",
+      "description": "The verified real-world outcome.",
+      "additionalProperties": true
+    },
+    "deltaExplanation": {
+      "type": "string",
+      "description": "Human or automated analysis of the difference between expected and actual."
+    },
+    "eligibilityForLearning": {
+      "type": "boolean",
+      "description": "Whether this outcome is valid for training/adaptation.",
+      "default": false
+    },
+    "verificationSource": {
+      "type": "string",
+      "description": "Identity of the verifier (User ID, Trusted System ID)."
+    },
+    "confidenceDelta": {
+      "type": "number",
+      "description": "The calculated impact on system confidence (-1.0 to 1.0)."
+    }
+  },
+  "required": [
+    "decisionId",
+    "timestamp",
+    "actualOutcome",
+    "eligibilityForLearning",
+    "verificationSource"
+  ]
+}
