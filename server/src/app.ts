@@ -30,6 +30,7 @@ import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mo
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import { securityHeaders } from './middleware/securityHeaders.js';
+import { graphqlRequestGuard } from './middleware/request-validation.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
@@ -627,6 +628,7 @@ export const createApp = async () => {
   app.use(
     '/graphql',
     express.json(),
+    graphqlRequestGuard,
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, {
