@@ -14,6 +14,7 @@ import {
   PluginExecutionResult,
   PluginLogEntry,
   PluginMetrics,
+  PluginResourceLimits,
 } from './types/Plugin.js';
 import logger from '../utils/logger.js';
 
@@ -25,8 +26,9 @@ export interface SandboxConfig {
   maxExecutionTimeMs: number;
   maxMemoryMb: number;
   maxApiCalls: number;
-  allowedDomains?: string[];
-  blockedOperations?: string[];
+  maxTokens: number;
+  allowedDomains: string[];
+  blockedOperations: string[];
 }
 
 export interface SandboxedExecution {
@@ -43,8 +45,9 @@ const DEFAULT_CONFIG: SandboxConfig = {
   maxExecutionTimeMs: 30000,
   maxMemoryMb: 128,
   maxApiCalls: 100,
+  maxTokens: 1000, // Default limit
   allowedDomains: ['*'],
-  blockedOperations: ['eval', 'Function'],
+  blockedOperations: ['eval', 'Function', 'child_process', 'fs'],
 };
 
 // ============================================================================
@@ -71,12 +74,14 @@ export class PluginSandbox {
     const startTime = Date.now();
     const logs: PluginLogEntry[] = [];
     let apiCallCount = 0;
+    let tokensConsumed = 0;
 
-    // Create sandboxed context with resource tracking
-    const sandboxedContext: PluginContext = {
-      ...context,
-      // In production, would wrap with proxies to track/limit resource usage
-    };
+    // Determine limits: Use plugin manifest resources if defined, otherwise sandbox default
+    const pluginLimits = plugin.manifest.resources || {};
+    const effectiveTimeout = timeout || pluginLimits.timeoutMs || this.config.maxExecutionTimeMs;
+    const maxApiCalls = pluginLimits.apiCalls ?? this.config.maxApiCalls;
+    const maxTokens = pluginLimits.tokens ?? this.config.maxTokens;
+    const allowedDomains = pluginLimits.network?.domains ?? this.config.allowedDomains;
 
     // Create a logger for the plugin
     const pluginLogger = {
@@ -94,15 +99,48 @@ export class PluginSandbox {
       },
     };
 
+    // Create restricted HTTP client
+    const httpClient = {
+      fetch: async (url: string, options?: globalThis.RequestInit) => {
+        // Check call limit
+        if (apiCallCount >= maxApiCalls) {
+          throw new Error(`API call limit exceeded (max: ${maxApiCalls})`);
+        }
+
+        // Check domain allowlist
+        const urlObj = new URL(url);
+        const isAllowed = this.isDomainAllowed(urlObj.hostname, allowedDomains);
+        if (!isAllowed) {
+          throw new Error(`Domain not allowed: ${urlObj.hostname}`);
+        }
+
+        apiCallCount++;
+
+        // Add correlation ID to requests
+        const headers = new Headers(options?.headers);
+        headers.set('X-Correlation-ID', context.correlationId);
+        headers.set('X-Plugin-ID', plugin.manifest.id);
+
+        return fetch(url, { ...options, headers });
+      },
+    };
+
+    // Sandboxed context
+    const sandboxedContext: PluginContext = {
+      ...context,
+      // @ts-ignore - injecting safe utilities
+      fetch: httpClient.fetch,
+      log: pluginLogger,
+      // In production, we would use VM2 or similar for true isolation
+    };
+
     try {
       // Execute with timeout
-      const timeoutMs = timeout || this.config.maxExecutionTimeMs;
-
       const executionPromise = plugin.execute(action, params, sandboxedContext);
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => {
-          reject(new Error(`Plugin execution timed out after ${timeoutMs}ms`));
-        }, timeoutMs);
+          reject(new Error(`Plugin execution timed out after ${effectiveTimeout}ms`));
+        }, effectiveTimeout);
       });
 
       const result = await Promise.race([executionPromise, timeoutPromise]);
@@ -115,6 +153,7 @@ export class PluginSandbox {
         metrics: {
           executionTimeMs,
           apiCallCount,
+          tokensConsumed,
           ...(result.metrics || {}),
         },
       };
@@ -130,9 +169,26 @@ export class PluginSandbox {
         metrics: {
           executionTimeMs,
           apiCallCount,
+          tokensConsumed,
         },
       };
     }
+  }
+
+  /**
+   * Check if a domain matches the allowed list (supports wildcards like *.example.com)
+   */
+  private isDomainAllowed(domain: string, allowedDomains: string[]): boolean {
+    if (allowedDomains.includes('*')) return true;
+
+    return allowedDomains.some((pattern) => {
+      if (pattern === domain) return true;
+      if (pattern.startsWith('*.')) {
+        const suffix = pattern.slice(2);
+        return domain.endsWith(suffix) && domain.split('.').length === suffix.split('.').length + 1;
+      }
+      return false;
+    });
   }
 
   /**
@@ -150,68 +206,6 @@ export class PluginSandbox {
     return {
       valid: violations.length === 0,
       violations,
-    };
-  }
-
-  /**
-   * Create a resource-limited HTTP client for plugins
-   */
-  createHttpClient(context: PluginContext) {
-    let callCount = 0;
-    const maxCalls = this.config.maxApiCalls;
-    const allowedDomains = this.config.allowedDomains || ['*'];
-
-    return {
-      fetch: async (url: string, options?: globalThis.RequestInit) => {
-        // Check call limit
-        if (callCount >= maxCalls) {
-          throw new Error(`API call limit exceeded (max: ${maxCalls})`);
-        }
-
-        // Check domain allowlist
-        if (!allowedDomains.includes('*')) {
-          const urlObj = new URL(url);
-          if (!allowedDomains.includes(urlObj.hostname)) {
-            throw new Error(`Domain not allowed: ${urlObj.hostname}`);
-          }
-        }
-
-        callCount++;
-
-        // Add correlation ID to requests
-        const headers = new Headers(options?.headers);
-        headers.set('X-Correlation-ID', context.correlationId);
-        headers.set('X-Plugin-ID', 'plugin-request');
-
-        return fetch(url, { ...options, headers });
-      },
-      getCallCount: () => callCount,
-    };
-  }
-
-  /**
-   * Create a sandboxed storage interface for plugins
-   */
-  createStorage(pluginId: string, tenantId: string) {
-    const storageKey = `plugin:${pluginId}:${tenantId}`;
-    const memoryStore: Map<string, unknown> = new Map();
-
-    return {
-      get: async (key: string): Promise<unknown> => {
-        return memoryStore.get(`${storageKey}:${key}`);
-      },
-      set: async (key: string, value: unknown): Promise<void> => {
-        memoryStore.set(`${storageKey}:${key}`, value);
-      },
-      delete: async (key: string): Promise<void> => {
-        memoryStore.delete(`${storageKey}:${key}`);
-      },
-      list: async (): Promise<string[]> => {
-        const prefix = `${storageKey}:`;
-        return Array.from(memoryStore.keys())
-          .filter((k) => k.startsWith(prefix))
-          .map((k) => k.slice(prefix.length));
-      },
     };
   }
 
