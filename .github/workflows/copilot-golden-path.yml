@@ -1,30 +1,36 @@
 name: Copilot Golden Path
 
+# Disabled: reusable workflow references need refactoring
+# TODO: Move _golden-path-pipeline.yml to top-level workflows directory
 on:
-  push:
-    branches: [main]
-    paths:
-      - "services/copilot/**"
-      - ".github/workflows/copilot-golden-path.yml"
-  pull_request:
-    branches: [main]
-    paths:
-      - "services/copilot/**"
-      - ".github/workflows/copilot-golden-path.yml"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual run"
+        required: false
+        type: string
 
 jobs:
-  pipeline:
-    uses: ./.github/workflows/golden-path/_golden-path-pipeline.yml
-    with:
-      service: copilot
-      working-directory: services/copilot
-      node-version: "20"
-      coverage-threshold: 80
-    secrets: inherit
+  # DISABLED: Reusable workflows in subdirectories are not supported by GitHub Actions
+  # The referenced workflows need to be moved to the top-level workflows directory
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "This workflow is disabled pending refactoring of reusable workflow locations"
 
-  canary-rollback:
-    needs: pipeline
-    if: github.event_name == 'push'
-    uses: ./.github/workflows/reusable/canary-rollback.yml
-    with:
-      service-name: copilot
+  # pipeline:
+  #   uses: ./.github/workflows/golden-path/_golden-path-pipeline.yml
+  #   with:
+  #     service: copilot
+  #     working-directory: services/copilot
+  #     node-version: "20"
+  #     coverage-threshold: 80
+  #   secrets: inherit
+
+  # canary-rollback:
+  #   needs: pipeline
+  #   if: github.event_name == 'push'
+  #   uses: ./.github/workflows/reusable/canary-rollback.yml
+  #   with:
+  #     service-name: copilot
