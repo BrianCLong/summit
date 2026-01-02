@@ -113,7 +113,7 @@ router.get(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -142,7 +142,7 @@ router.get(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -168,7 +168,7 @@ router.get(
       }
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -190,7 +190,7 @@ router.post(
       await supportCenterService.voteArticle(id, helpful);
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -215,7 +215,7 @@ router.get(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -243,7 +243,7 @@ router.post(
       });
 
       res.status(201).json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -272,7 +272,7 @@ router.post(
       );
 
       res.status(201).json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -294,7 +294,7 @@ router.post(
       const result = await supportCenterService.escalateTicket(ticketId, reason || 'User requested escalation');
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -325,7 +325,7 @@ router.get(
         ...result,
         data: publicConfig,
       });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }

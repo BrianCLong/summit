@@ -43,7 +43,7 @@ router.post('/fabricate', async (req, res, next) => {
     }
     const job = await mnemosyneService.fabricateAndDeploy(payload);
     res.status(202).json(job);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -80,7 +80,7 @@ router.get('/job/:jobId', async (req, res, next) => {
     } else {
       res.status(404).json({ message: `Memory fabrication job with ID ${jobId} not found.` });
     }
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

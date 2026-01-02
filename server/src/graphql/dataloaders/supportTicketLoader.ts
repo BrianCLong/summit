@@ -56,7 +56,7 @@ const batchGetComments = async (ticketIds: readonly string[]): Promise<SupportTi
           missedTicketIds.push(ticketIds[index]);
         }
       });
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Redis MGET failed for support ticket loader');
       // On error, treat all as misses
       ticketIds.forEach((id, index) => {
@@ -116,7 +116,7 @@ const batchGetComments = async (ticketIds: readonly string[]): Promise<SupportTi
             pipeline.exec().catch(err => logger.warn({ err }, 'Redis pipeline write failed'));
         }
 
-      } catch (err) {
+      } catch (err: any) {
           logger.error({ err }, 'DB Fetch failed in support ticket loader');
           // If DB fails, we return Errors for the missed items
           missedIndices.forEach(index => {

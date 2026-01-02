@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-01-02T06:12:01Z",
+  "testDirectory": "./server/__tests__/soc-controls",
+  "reportDirectory": "./soc-test-reports",
+  "totalTestFiles":        2,
+  "testSubDirectories":        3,
+  "totalTests": 0,
+  "passedTests": 0,
+  "failedTests": 0,
+  "passRate": 0,
+  "requiredPassRate": 100,
+  "complianceMet": false,
+  "exitCode": 1,
+  "testResultsFile": "./soc-test-reports/results-2026-01-02T06:12:01Z/test-results.json",
+  "failOnMissingTests": false,
+  "config": {
+    "requiredComplianceRate": 100,
+    "failOnMissingTests": false
+  }
+}

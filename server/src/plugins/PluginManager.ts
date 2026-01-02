@@ -129,7 +129,7 @@ export class PluginManager {
           evaluator: 'PluginManager',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId: manifest.id }, 'Failed to install plugin');
       throw error;
     }
@@ -221,7 +221,7 @@ export class PluginManager {
           evaluator: 'PluginManager',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId }, 'Failed to enable plugin');
       throw error;
     }
@@ -266,7 +266,7 @@ export class PluginManager {
           evaluator: 'PluginManager',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId }, 'Failed to disable plugin');
       throw error;
     }
@@ -432,7 +432,7 @@ export class PluginManager {
         };
 
         await plugin.onEvent(event, payload, context);
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, pluginId, event }, 'Plugin event handler error');
       }
     }
@@ -485,7 +485,7 @@ export class PluginManager {
           evaluator: 'PluginManager',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId }, 'Failed to uninstall plugin');
       throw error;
     }
@@ -606,7 +606,7 @@ export class PluginManager {
           entry.governanceVerdict || GovernanceResult.ALLOW,
         ]
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to log plugin audit');
     }
   }

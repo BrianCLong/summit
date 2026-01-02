@@ -65,7 +65,7 @@ export async function parseC2PAManifest(
     // Parse JUMBF structure (simplified - real implementation would use c2pa-node)
     const manifest = await extractManifestFromJUMBF(buffer, markerIndex);
     return manifest;
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Failed to parse C2PA manifest');
     return null;
   }
@@ -253,7 +253,7 @@ export class ProvenanceService {
         { manifestId: manifest.manifestId, valid: result.valid },
         'C2PA manifest verification completed',
       );
-    } catch (error) {
+    } catch (error: any) {
       result.errors.push(
         `Verification error: ${error instanceof Error ? error.message : 'Unknown'}`,
       );

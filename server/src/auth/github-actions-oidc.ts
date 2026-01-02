@@ -206,7 +206,7 @@ export class GitHubActionsOIDC {
       });
 
       return identity;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('GitHub Actions OIDC verification failed', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -469,7 +469,7 @@ export function createGitHubActionsAuth(authenticator: GitHubActionsOIDC) {
       });
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('GitHub Actions OIDC authentication failed', {
         error: error instanceof Error ? error.message : String(error),
       });

@@ -44,7 +44,7 @@ export class GraphConsistencyService {
       const result = await session.run(
         `MATCH (n) WHERE NOT (n)--() RETURN n LIMIT 1000`
       );
-      return result.records.map((r) => r.get('n').properties);
+      return result.records.map((r: any) => r.get('n').properties);
     } finally {
       await session.close();
     }
@@ -64,11 +64,11 @@ export class GraphConsistencyService {
 
       // Get all relationship types
       const relTypesResult = await session.run(`CALL db.relationshipTypes()`);
-      const allRelTypes = relTypesResult.records.map(r => r.get('relationshipType'));
+      const allRelTypes = relTypesResult.records.map((r: any) => r.get('relationshipType'));
 
       for (const relType of allRelTypes) {
         // Find rules for this relationship type
-        const rules = this.schemaRules.filter(r => r.relationship === relType);
+        const rules = this.schemaRules.filter((r: any) => r.relationship === relType);
 
         if (rules.length === 0) {
           // If no rules are defined for this relationship type, we might consider all of them valid
@@ -93,7 +93,7 @@ export class GraphConsistencyService {
         `;
 
         const result = await session.run(query);
-        result.records.forEach(r => {
+        result.records.forEach((r: any) => {
           violations.push({
             type: 'SchemaViolation',
             relationshipType: relType,
@@ -155,15 +155,15 @@ export class GraphConsistencyService {
   }
 
   private async queueRepairTasks(type: string, items: any[]) {
-     // implementation of queueing logic
-     // In a real system, this would push to Redis/BullMQ.
-     // For this MVP, we might log it or insert into a "RepairQueue" node in the graph itself or Postgres.
-     if (this.logger) {
-       this.logger.info(`[Queue] Queuing ${items.length} tasks of type ${type}`);
-     } else {
-       console.log(`[Queue] Queuing ${items.length} tasks of type ${type}`);
-     }
-     // Simulate queueing
+    // implementation of queueing logic
+    // In a real system, this would push to Redis/BullMQ.
+    // For this MVP, we might log it or insert into a "RepairQueue" node in the graph itself or Postgres.
+    if (this.logger) {
+      this.logger.info(`[Queue] Queuing ${items.length} tasks of type ${type}`);
+    } else {
+      console.log(`[Queue] Queuing ${items.length} tasks of type ${type}`);
+    }
+    // Simulate queueing
   }
 
   async generateWeeklyReport(): Promise<string> {

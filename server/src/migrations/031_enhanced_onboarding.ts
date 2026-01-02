@@ -158,7 +158,7 @@ export async function up(pool: Pool): Promise<void> {
 
     await client.query('COMMIT');
     logger.info('Migration 031 completed: Enhanced onboarding system');
-  } catch (error) {
+  } catch (error: any) {
     await client.query('ROLLBACK');
     logger.error('Migration 031 failed', { error });
     throw error;
@@ -184,7 +184,7 @@ export async function down(pool: Pool): Promise<void> {
 
     await client.query('COMMIT');
     logger.info('Migration 031 rolled back: Enhanced onboarding system');
-  } catch (error) {
+  } catch (error: any) {
     await client.query('ROLLBACK');
     logger.error('Migration 031 rollback failed', { error });
     throw error;

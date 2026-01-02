@@ -67,7 +67,7 @@ export class PostgresEvidenceRepository implements IEvidenceRepository {
         [caseId, query, maxSnippets],
       );
 
-      const snippets: EvidenceSnippet[] = result.rows.map((row) => ({
+      const snippets: EvidenceSnippet[] = result.rows.map((row: any) => ({
         evidenceId: row.evidence_id,
         claimId: row.claim_id,
         sourceSystem: row.source_system,
@@ -86,7 +86,7 @@ export class PostgresEvidenceRepository implements IEvidenceRepository {
       });
 
       return snippets;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to search evidence snippets',
         caseId,
@@ -127,7 +127,7 @@ export class PostgresEvidenceRepository implements IEvidenceRepository {
         [caseId, query, maxSnippets],
       );
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         evidenceId: row.evidence_id,
         claimId: row.claim_id,
         sourceSystem: row.source_system,
@@ -137,7 +137,7 @@ export class PostgresEvidenceRepository implements IEvidenceRepository {
         licenseId: row.license_id,
         metadata: row.metadata,
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Fallback evidence search also failed',
         caseId,
@@ -181,7 +181,7 @@ export class PostgresEvidenceRepository implements IEvidenceRepository {
         licenseId: row.license_id,
         metadata: row.metadata,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to get evidence by ID',
         evidenceId,

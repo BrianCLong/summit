@@ -86,7 +86,7 @@ export class RetentionManager {
             { category: mapping.category, count: deletedCount, table: tableName }
           );
         }
-      } catch (err) {
+      } catch (err: any) {
         logger.error(
           { table: tableName, err },
           'Failed to clean up expired records'

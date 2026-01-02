@@ -48,7 +48,7 @@ export class PaletteProvenanceRecorder {
           paletteId: event.paletteId,
         },
       });
-    } catch (err) {
+    } catch (err: any) {
       // Fall back to console to avoid breaking runtime when ledger is unavailable
       console.warn('Failed to append palette provenance entry', err);
     }

@@ -76,7 +76,7 @@ export class PostgresMeterRepository {
       // If INSERT returns nothing, it means it was a duplicate.
       return (result.rowCount ?? 0) > 0;
 
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error({ error, event }, 'Failed to record meter event to Postgres');
       throw error;
@@ -158,7 +158,7 @@ export class PostgresTenantUsageRepository extends TenantUsageDailyRepository {
       }
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error({ error }, 'Failed to save usage summaries to Postgres');
       throw error;

@@ -28,7 +28,7 @@ export const handleTelemetryEvent = (req: Request, res: Response) => {
     telemetryService.track(eventType, tenantId, userId, role, props || {});
 
     res.status(202).send({ status: 'accepted' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Telemetry Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }

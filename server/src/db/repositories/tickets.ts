@@ -55,7 +55,7 @@ async function ensureTable() {
   `;
   try {
     await pool.query(sql);
-  } catch (e) {
+  } catch (e: any) {
     logger.warn(
       { err: e },
       'failed to ensure maestro_tickets table (mock mode?)',
@@ -101,7 +101,7 @@ export async function upsertTickets(items: Ticket[]) {
         t.created_at ?? null,
       ]);
       count++;
-    } catch (e) {
+    } catch (e: any) {
       logger.warn({ err: e, t }, 'ticket upsert failed');
     }
   }
@@ -158,7 +158,7 @@ export async function listTickets(
     `;
     params.push(limit, offset);
     const res = await pool.query(sql, params);
-    return res.rows.map((r) => ({
+    return res.rows.map((r: any) => ({
       provider: r.provider,
       external_id: r.external_id,
       title: r.title,
@@ -177,7 +177,7 @@ export async function listTickets(
       created_at: r.created_at,
       updated_at: r.updated_at,
     }));
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'listTickets fell back to empty');
     return [];
   }
@@ -191,8 +191,8 @@ export async function listTicketRuns(provider: string, externalId: string) {
       'SELECT run_id FROM ticket_runs WHERE ticket_provider=$1 AND ticket_external_id=$2',
       [provider, externalId],
     );
-    return res.rows.map((r) => ({ id: r.run_id, status: null }));
-  } catch (e) {
+    return res.rows.map((r: any) => ({ id: r.run_id, status: null }));
+  } catch (e: any) {
     return [];
   }
 }
@@ -208,12 +208,12 @@ export async function listTicketDeployments(
       'SELECT deployment_id, env FROM ticket_deployments WHERE ticket_provider=$1 AND ticket_external_id=$2',
       [provider, externalId],
     );
-    return res.rows.map((r) => ({
+    return res.rows.map((r: any) => ({
       id: r.deployment_id,
       env: r.env,
       status: null,
     }));
-  } catch (e) {
+  } catch (e: any) {
     return [];
   }
 }
@@ -276,7 +276,7 @@ export async function addTicketRunLink(
       [provider, externalId, runId],
     );
     return { ok: true };
-  } catch (e) {
+  } catch (e: any) {
     return { ok: false };
   }
 }
@@ -296,7 +296,7 @@ export async function addTicketDeploymentLink(
       [provider, externalId, deploymentId, env || null],
     );
     return { ok: true };
-  } catch (e) {
+  } catch (e: any) {
     return { ok: false };
   }
 }

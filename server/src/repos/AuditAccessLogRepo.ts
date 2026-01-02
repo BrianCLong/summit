@@ -149,7 +149,7 @@ export class AuditAccessLogRepo {
       if (rows[0]?.hash) {
         this.lastHash = rows[0].hash;
       }
-    } catch (error) {
+    } catch (error: any) {
       repoLogger.warn(
         { error: (error as Error).message },
         'Failed to initialize last hash',
@@ -241,7 +241,7 @@ export class AuditAccessLogRepo {
       );
 
       return log;
-    } catch (error) {
+    } catch (error: any) {
       repoLogger.error(
         {
           error: (error as Error).message,

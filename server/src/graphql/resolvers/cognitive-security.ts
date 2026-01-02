@@ -46,7 +46,7 @@ const getServices = () => {
       evaluation: getEvaluationService(),
       provenance: getProvenanceService(),
     };
-  } catch (error) {
+  } catch (error: any) {
     throw new GraphQLError('Cognitive Security module not initialized', {
       extensions: { code: 'SERVICE_UNAVAILABLE' },
     });

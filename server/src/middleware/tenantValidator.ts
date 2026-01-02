@@ -289,7 +289,7 @@ export class TenantValidator {
 
           // Call original resolver with enhanced context
           return await resolver(parent, args, enhancedContext, info);
-        } catch (error) {
+        } catch (error: any) {
           logger.error(
             `Tenant validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
           );

@@ -26,7 +26,7 @@ export class PluginWeaverService {
     for (const handler of handlers) {
       try {
         await handler(data);
-      } catch (e) {
+      } catch (e: any) {
         console.error(`[PluginWeaver] Pipe error on ${sourceEvent}:`, e);
       }
     }

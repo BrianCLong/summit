@@ -299,7 +299,7 @@ export class PolicyExplainer {
       }
 
       return { matched, result, context };
-    } catch (error) {
+    } catch (error: any) {
       return {
         matched: false,
         result: 'allow',

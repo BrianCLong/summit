@@ -91,7 +91,7 @@ export class BudgetAdmissionController {
     const expertDecision = this.filterExperts(
       expert,
       admissionMode,
-      options?.isEmergency,
+      options?.isEmergency || false,
     );
 
     // Emergency override logic

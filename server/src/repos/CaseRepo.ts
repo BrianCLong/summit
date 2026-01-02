@@ -74,7 +74,7 @@ interface CaseRow {
 }
 
 export class CaseRepo {
-  constructor(private pg: Pool) {}
+  constructor(private pg: Pool) { }
 
   /**
    * Create a new case
@@ -226,7 +226,7 @@ export class CaseRepo {
       }
 
       return rowCount !== null && rowCount > 0;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -368,7 +368,7 @@ export class CaseRepo {
     const { rows } = (await this.pg.query(query, params)) as {
       rows: CaseRow[];
     };
-    const casesMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
+    const casesMap = new Map(rows.map((row: any) => [row.id, this.mapRow(row)]));
 
     return ids.map((id) => casesMap.get(id) || null);
   }

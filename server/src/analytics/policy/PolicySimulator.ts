@@ -429,7 +429,7 @@ export class PolicySimulator {
         classification: DataClassification.CONFIDENTIAL,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { error, simulationId, tenantId: request.tenantId },
         'Policy simulation failed'

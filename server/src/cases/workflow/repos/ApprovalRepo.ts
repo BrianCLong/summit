@@ -153,7 +153,7 @@ export class ApprovalRepo {
       [userId],
     );
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       approvalId: row.approval_id,
       caseId: row.case_id,
       caseTitle: row.case_title,
@@ -315,7 +315,7 @@ export class ApprovalRepo {
 
   // ==================== MAPPERS ====================
 
-  private mapApprovalRow(row: any): CaseApproval {
+  private mapApprovalRow(row): CaseApproval {
     return {
       id: row.id,
       caseId: row.case_id,
@@ -333,7 +333,7 @@ export class ApprovalRepo {
     };
   }
 
-  private mapVoteRow(row: any): CaseApprovalVote {
+  private mapVoteRow(row): CaseApprovalVote {
     return {
       id: row.id,
       approvalId: row.approval_id,

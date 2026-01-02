@@ -100,7 +100,7 @@ export class WriteQuorumRouter {
       } else {
         return await this.executePrimaryWrite(cypher, params, tenant);
       }
-    } catch (error) {
+    } catch (error: any) {
         log.error({ err: error, tenant }, 'Write failed');
         throw error;
     } finally {
@@ -112,7 +112,7 @@ export class WriteQuorumRouter {
   private async executePrimaryWrite(cypher: string, params: any, tenant: string) {
     const session = this.driver.session();
     try {
-      return await session.writeTransaction((tx) => tx.run(cypher, params));
+      return await session.writeTransaction((tx: any) => tx.run(cypher, params));
     } finally {
       await session.close();
     }
@@ -148,7 +148,7 @@ export class WriteQuorumRouter {
 
             // Log that we WOULD write here
             log.debug({ region, tenant }, 'Executing secondary write (simulated)');
-        } catch (e) {
+        } catch (e: any) {
             log.error({ region, error: e }, 'Secondary write failed');
             throw e;
         }

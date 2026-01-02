@@ -37,86 +37,86 @@ const BatchDecisionsSchema = z.object({
 });
 
 // Middleware to ensure tenant context
-// Assuming req.user.tenantId is populated by ensureAuthenticated
+// Assuming req.user!.tenantId is populated by ensureAuthenticated
 const ensureTenant = (req: any, res: any, next: any) => {
-    if (!req.user || !req.user.tenantId) {
+    if (!req.user || !req.user!.tenantId) {
         return next(new AppError('Tenant context missing', 403));
     }
     next();
 };
 
 // Create a new review queue
-router.post('/queues', ensureAuthenticated, ensureTenant, async (req, res, next) => {
+router.post('/queues', ensureAuthenticated, ensureTenant, async (req: any, res: any, next: any) => {
     try {
         const { name, priorityConfig } = CreateQueueSchema.parse(req.body);
         const queue = await reviewQueueService.createQueue(
-            req.user.tenantId,
+            req.user!.tenantId,
             name,
             priorityConfig
         );
         res.status(201).json(queue);
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
 
 // List queues
-router.get('/queues', ensureAuthenticated, ensureTenant, async (req, res, next) => {
+router.get('/queues', ensureAuthenticated, ensureTenant, async (req: any, res: any, next: any) => {
     try {
-        const queues = await reviewQueueService.listQueues(req.user.tenantId);
+        const queues = await reviewQueueService.listQueues(req.user!.tenantId);
         res.json(queues);
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
 
 // Update queue
-router.put('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req, res, next) => {
+router.put('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req: any, res: any, next: any) => {
     try {
         const { queueId } = req.params;
         const updates = UpdateQueueSchema.parse(req.body);
         const queue = await reviewQueueService.updateQueue(
             queueId,
-            req.user.tenantId,
+            req.user!.tenantId,
             updates
         );
         res.json(queue);
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
 
 // Delete queue
-router.delete('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req, res, next) => {
+router.delete('/queues/:queueId', ensureAuthenticated, ensureTenant, async (req: any, res: any, next: any) => {
     try {
         const { queueId } = req.params;
-        await reviewQueueService.deleteQueue(queueId, req.user.tenantId);
+        await reviewQueueService.deleteQueue(queueId, req.user!.tenantId);
         res.status(204).send();
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
 
 // Enqueue an item (likely called by internal services, but exposed for flexibility/testing)
 // Should probably be protected by specific permission
-router.post('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (req, res, next) => {
+router.post('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (req: any, res, next) => {
     try {
         const { queueId } = req.params;
         const { data, confidence } = EnqueueItemSchema.parse(req.body);
         const item = await reviewQueueService.enqueueItem(
             queueId,
-            req.user.tenantId,
+            req.user!.tenantId,
             data,
             confidence
         );
         res.status(201).json(item);
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
 
 // Get items for review (with priority sampling)
-router.get('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (req, res, next) => {
+router.get('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (req: any, res, next) => {
     try {
         const { queueId } = req.params;
         let limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
@@ -125,30 +125,31 @@ router.get('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (r
 
         const items = await reviewQueueService.getItemsForReview(
             queueId,
-            req.user.tenantId,
+            req.user!.tenantId,
             limit
         );
         res.json(items);
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
 
 // Submit a review decision
-router.post('/items/:itemId/decision', ensureAuthenticated, ensureTenant, async (req, res, next) => {
+router.post('/items/:itemId/decision', ensureAuthenticated, ensureTenant, async (req: any, res, next) => {
     try {
         const { itemId } = req.params;
+        const userId = req.user!.id;
         const { decision, metadata } = SubmitDecisionSchema.parse(req.body);
 
         await reviewQueueService.submitDecision(
             itemId,
-            req.user.tenantId,
-            req.user.id,
+            req.user!.tenantId,
+            userId,
             decision,
             metadata
         );
         res.status(200).json({ success: true });
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
@@ -160,11 +161,11 @@ router.post('/items/batch-decision', ensureAuthenticated, ensureTenant, async (r
 
         await reviewQueueService.submitBatchDecisions(
             decisions,
-            req.user.tenantId,
-            req.user.id
+            req.user!.tenantId,
+            req.user!.id
         );
         res.status(200).json({ success: true, count: decisions.length });
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });
@@ -175,10 +176,10 @@ router.get('/queues/:queueId/stats', ensureAuthenticated, ensureTenant, async (r
         const { queueId } = req.params;
         const stats = await reviewQueueService.getQueueStats(
             queueId,
-            req.user.tenantId
+            req.user!.tenantId
         );
         res.json(stats);
-    } catch (e) {
+    } catch (e: any) {
         next(e);
     }
 });

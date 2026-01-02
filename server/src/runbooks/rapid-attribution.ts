@@ -276,7 +276,7 @@ export class RapidAttributionRunbook {
       },
     };
 
-    return createSpan('rapid-attribution-runbook', async (span) => {
+    return createSpan('rapid-attribution-runbook', async (span: any) => {
       span.setAttributes({
         'runbook.run_id': runId,
         'runbook.case_id': caseId,
@@ -335,7 +335,7 @@ export class RapidAttributionRunbook {
         );
 
         return hypothesis;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ runId, error }, 'Rapid attribution runbook failed');
         span.recordException(error as Error);
         throw error;
@@ -350,7 +350,7 @@ export class RapidAttributionRunbook {
   ): Promise<void> {
     const nodeStartTime = Date.now();
 
-    return createSpan(`runbook-node-${node.id}`, async (span) => {
+    return createSpan(`runbook-node-${node.id}`, async (span: any) => {
       span.setAttributes({
         'node.id': node.id,
         'node.type': node.type,
@@ -398,7 +398,7 @@ export class RapidAttributionRunbook {
           },
           'DAG node completed',
         );
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ nodeId: node.id, error }, 'DAG node failed');
         throw error;
       }

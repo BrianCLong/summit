@@ -7,7 +7,7 @@ cacheAnalyticsRouter.get('/analytics', async (_req, res) => {
   try {
     const analytics = await collectCacheAnalytics();
     res.json({ status: 'ok', analytics });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       status: 'error',
       message: (error as Error).message,

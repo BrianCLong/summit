@@ -57,7 +57,7 @@ export class TrainingPipelineManager {
             payload: { modelName, datasetId, parameters },
             metadata: { jobId }
         });
-    } catch (e) {
+    } catch (e: any) {
         logger.warn('Failed to log training trigger to ledger', e);
     }
 

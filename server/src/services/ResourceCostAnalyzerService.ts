@@ -81,7 +81,7 @@ export class ResourceCostAnalyzerService {
         optimizations: mappedOptimizations
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate resource cost analysis', { tenantId, error: (error as Error).message });
       throw error;
     }

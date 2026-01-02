@@ -52,7 +52,7 @@ router.get('/query-previews/:id/stream', async (req, res) => {
   let service: QueryPreviewService;
   try {
     service = getPreviewService();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Failed to initialise query preview stream service');
     res.write(`event: error\ndata:${JSON.stringify({ message: 'Unable to initialise streaming service' })}\n\n`);
     res.end();
@@ -82,7 +82,7 @@ router.get('/query-previews/:id/stream', async (req, res) => {
         })}\n\n`,
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ error, previewId }, 'Failed to load streaming cache warm start');
   }
 

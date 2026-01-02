@@ -83,10 +83,10 @@ export class EnforcementService {
         // We assume allowedUses contains specific actions or categories.
         // For strict matching:
         const isAllowed = purposeDef.allowedUses.includes(context.action.target) ||
-                          purposeDef.allowedUses.includes(type); // Allow by category (e.g. 'query')
+          purposeDef.allowedUses.includes(type); // Allow by category (e.g. 'query')
 
         if (!isAllowed) {
-           return {
+          return {
             allowed: false,
             reason: {
               code: 'PURPOSE_MISMATCH',
@@ -103,13 +103,13 @@ export class EnforcementService {
         // Purpose provided but not found in registry.
         // Should we allow or deny? Strict: Deny.
         return {
-            allowed: false,
-            reason: {
-              code: 'INVALID_PURPOSE',
-              humanMessage: `The purpose '${context.purpose}' is not recognized by the current policy.`,
-              remediationSteps: []
-            },
-            decisionId
+          allowed: false,
+          reason: {
+            code: 'INVALID_PURPOSE',
+            humanMessage: `The purpose '${context.purpose}' is not recognized by the current policy.`,
+            remediationSteps: []
+          },
+          decisionId
         };
       }
     }
@@ -122,7 +122,7 @@ export class EnforcementService {
       // For MVP, if target matches a key in retentionRegistry, we enforce.
       const retentionRule = plan.retentionRegistry[context.action.target];
       if (retentionRule) {
-        if (!modifications) modifications = { redactFields: [], filterClauses: [] };
+        if (!modifications) modifications = { redactFields: [] as string[], filterClauses: [] as string[] };
         // Generate a filter clause
         // e.g. "created_at > NOW() - retentionDays"
         modifications.filterClauses.push(`age_in_days <= ${retentionRule.retentionDays}`);
@@ -179,7 +179,7 @@ export class EnforcementService {
     switch (condition.type) {
       case 'authority':
         if (condition.operator === 'contains') {
-           return (context.activeAuthority || []).includes(condition.value);
+          return (context.activeAuthority || []).includes(condition.value);
         }
         break;
       // Future: Attribute-based checks

@@ -143,7 +143,7 @@ async function writeAudit({
         userAgent || null,
       ],
     );
-  } catch (e) {
+  } catch (e: any) {
     // non-fatal, avoid throwing in hot paths
   }
 }

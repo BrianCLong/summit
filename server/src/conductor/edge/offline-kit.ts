@@ -200,7 +200,7 @@ export class OfflineKit extends EventEmitter {
       });
 
       this.emit('initialized', { online: this.connectivity.online });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Offline Kit initialization failed', { error });
       throw error;
     }
@@ -225,7 +225,7 @@ export class OfflineKit extends EventEmitter {
 
       clearTimeout(timeout);
       this.connectivity.online = response.ok;
-    } catch (error) {
+    } catch (error: any) {
       this.connectivity.online = false;
     }
 
@@ -520,7 +520,7 @@ export class OfflineKit extends EventEmitter {
       this.emit('sync_completed', result);
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Cloud sync failed', { error });
       prometheusConductorMetrics.recordOperationalEvent(
       'offline_kit_sync_failed',

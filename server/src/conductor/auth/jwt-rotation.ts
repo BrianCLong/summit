@@ -73,7 +73,7 @@ export class JWTRotationManager {
         activeKeyId: this.activeKeyId,
         rotationInterval: `${this.keyRotationIntervalMs / (60 * 1000)} minutes`,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to initialize JWT rotation manager', {
         error: error.message,
       });
@@ -162,7 +162,7 @@ export class JWTRotationManager {
       });
 
       return token;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to sign JWT token', {
         error: error.message,
         keyId: activeKey.keyId,
@@ -212,7 +212,7 @@ export class JWTRotationManager {
       });
 
       return payload;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to verify JWT token', {
         error: error.message,
         keyId: verifyKey.keyId,
@@ -340,7 +340,7 @@ export class JWTRotationManager {
       try {
         await this.generateNewKeyPair();
         await this.cleanupExpiredKeys();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('❌ Scheduled JWT key rotation failed', {
           error: error.message,
         });
@@ -366,7 +366,7 @@ export class JWTRotationManager {
         keysLoaded: this.keys.size,
         activeKeyId: this.activeKeyId,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to load keys from storage', {
         error: error.message,
       });
@@ -390,7 +390,7 @@ export class JWTRotationManager {
 
         this.keys.set(keyId, jwtKeyPair);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to load key from storage', {
         keyId,
         error: error.message,
@@ -418,7 +418,7 @@ export class JWTRotationManager {
           Math.floor(key.expiresAt.getTime() / 1000),
         ),
       ]);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to save key to storage', {
         keyId: key.keyId,
         error: error.message,

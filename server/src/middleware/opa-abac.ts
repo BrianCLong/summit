@@ -98,7 +98,7 @@ export class OPAClient implements IOPAClient {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
 
@@ -218,7 +218,7 @@ export function validateOIDCToken(
 
     span.end();
     return next();
-  } catch (error) {
+  } catch (error: any) {
     span.recordException(error as Error);
     span.setStatus({ code: 2, message: (error as Error).message });
     span.end();
@@ -328,7 +328,7 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
                  });
 
                  currentAcr = 'loa2';
-             } catch (err) {
+             } catch (err: any) {
                  logger.warn('Step-Up token verification failed', { error: (err as Error).message });
              }
           }
@@ -411,7 +411,7 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
 
       span.end();
       next();
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
       span.end();
@@ -528,7 +528,7 @@ export function createAuthzDirective(opaClient: OPAClient) {
           span.end();
 
           return resolve.call(this, source, args, context, info);
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           span.end();

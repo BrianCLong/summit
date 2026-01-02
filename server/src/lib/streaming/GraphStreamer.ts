@@ -81,7 +81,7 @@ export class GraphStreamer extends EventEmitter {
 
     try {
       await this.processStream(streamId, query, streamParams, batchSize, config);
-    } catch (err) {
+    } catch (err: any) {
       logger.error(`Stream ${streamId} failed:`, err);
       this.emit(`error:${streamId}`, err);
       // Ensure cleanup happens even if processStream throws synchronously
@@ -124,7 +124,7 @@ export class GraphStreamer extends EventEmitter {
             this.streamedRecordsCounter.inc();
 
             if (batch.length >= batchSize) {
-              this.emitBatch(redis, streamId, batch, config).catch((err) => {
+              this.emitBatch(redis, streamId, batch, config).catch((err: any) => {
                 // If emitting fails (e.g. Redis down), stop the stream
                 logger.error(
                   `Failed to emit batch for stream ${streamId}`,
@@ -138,7 +138,7 @@ export class GraphStreamer extends EventEmitter {
           },
           onCompleted: () => {
             if (batch.length > 0) {
-              this.emitBatch(redis, streamId, batch, config).catch((err) =>
+              this.emitBatch(redis, streamId, batch, config).catch((err: any) =>
                 logger.error(
                   `Failed to emit final batch for stream ${streamId}`,
                   err,
@@ -154,7 +154,7 @@ export class GraphStreamer extends EventEmitter {
           },
         });
       });
-    } catch (error) {
+    } catch (error: any) {
       // Re-throw to be caught by executeStream for logging, but we handled emitError in subscribe
       throw error;
     } finally {
@@ -185,7 +185,7 @@ export class GraphStreamer extends EventEmitter {
         const compressedData =
           await CompressionUtils.compressToString(normalizedBatch);
         payload = { type: 'batch', data: compressedData, compressed: true };
-      } catch (e) {
+      } catch (e: any) {
         logger.error('Streaming compression failed', e);
         // Fallback to uncompressed
       }

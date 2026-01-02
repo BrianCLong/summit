@@ -201,7 +201,7 @@ export class VideoFrameExtractor {
     try {
       await fs.rm(dirPath, { recursive: true, force: true });
       logger.info(`Cleaned up temporary directory: ${dirPath}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to clean up directory ${dirPath}: ${error}`);
     }
   }

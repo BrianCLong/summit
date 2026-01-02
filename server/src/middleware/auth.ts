@@ -22,7 +22,7 @@ export async function ensureAuthenticated(
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
     req.user = user;
     next();
-  } catch (e) {
+  } catch (e: any) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 }
@@ -54,7 +54,7 @@ export function requirePermission(permission: string) {
           level: 'warn',
           details: { permission, role: user.role }
         });
-      } catch (error) {
+      } catch (error: any) {
          if (process.env.NODE_ENV !== 'test') {
              logger.error('Failed to log audit event', error);
          }

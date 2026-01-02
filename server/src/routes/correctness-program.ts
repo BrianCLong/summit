@@ -34,7 +34,7 @@ router.post('/reconciliation/run', async (req, res, next) => {
     const { pairId } = req.body;
     const run = await correctnessProgram.reconciliation.runPair(pairId);
     res.json(run);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

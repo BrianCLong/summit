@@ -25,7 +25,7 @@ router.get('/:id', async (req, res) => {
     }
 
     res.json(receipt);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });

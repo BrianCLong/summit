@@ -23,7 +23,7 @@ router.get('/investigation/:id', (req, res) => {
     const { id } = req.params;
     const scenarios = scenarioService.getScenariosForInvestigation(id);
     res.json(scenarios);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to list scenarios');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -41,7 +41,7 @@ router.get('/:id', (req, res) => {
       return res.status(404).json({ error: 'Scenario not found' });
     }
     res.json(scenario);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to get scenario');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
 
     const scenario = await scenarioService.createScenario(investigationId, name, description, userId);
     res.status(201).json(scenario);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to create scenario');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -84,7 +84,7 @@ router.post('/:id/modifications', async (req, res) => {
 
     const scenario = await scenarioService.addModification(id, type as ModificationType, data, targetId, userId);
     res.json(scenario);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to add modification');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -109,7 +109,7 @@ router.post('/:id/resolve', async (req, res) => {
             timeline || []
         );
         res.json(result);
-    } catch (error) {
+    } catch (error: any) {
         routeLogger.error({ error: (error as Error).message }, 'Failed to resolve scenario');
         res.status(500).json({ error: (error as Error).message });
     }

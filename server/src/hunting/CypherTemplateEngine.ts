@@ -86,7 +86,7 @@ export class CypherTemplateEngine {
         templateCount: this.templates.size,
         categories: this.getAvailableCategories(),
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize Cypher template engine', {
         error: (error as Error).message,
       });
@@ -108,7 +108,7 @@ export class CypherTemplateEngine {
         for (const template of templates) {
           this.templates.set(template.name, template);
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to load template file', {
           file,
           error: (error as Error).message,
@@ -156,7 +156,7 @@ export class CypherTemplateEngine {
         if (template) {
           templates.push(template);
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to parse template section', {
           file: filePath,
           error: (error as Error).message,

@@ -61,7 +61,7 @@ export class AdvancedMLService {
         timeout: 5000,
       });
       return response.status === 200;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('ML service health check failed', { error: error instanceof Error ? error.message : String(error) });
       return false;
     }
@@ -76,7 +76,7 @@ export class AdvancedMLService {
         timeout: this.defaultTimeout,
       });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get ML system info', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('ML service unavailable');
     }
@@ -101,7 +101,7 @@ export class AdvancedMLService {
       });
 
       return modelId;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to create ML model', {
         error: error instanceof Error ? error.message : String(error),
         config,
@@ -119,7 +119,7 @@ export class AdvancedMLService {
         timeout: this.defaultTimeout,
       });
       return response.data.models;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to list ML models', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('Failed to retrieve ML models');
     }
@@ -137,7 +137,7 @@ export class AdvancedMLService {
         },
       );
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get ML model info', {
         error: error instanceof Error ? error.message : String(error),
         modelId,
@@ -155,7 +155,7 @@ export class AdvancedMLService {
         timeout: this.defaultTimeout,
       });
       logger.info('ML model deleted successfully', { modelId });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to delete ML model', {
         error: error instanceof Error ? error.message : String(error),
         modelId,
@@ -182,7 +182,7 @@ export class AdvancedMLService {
 
       logger.info('ML model training started', { modelId: request.model_id });
       return response.data.message;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to start ML model training', {
         error: error instanceof Error ? error.message : String(error),
         modelId: request.model_id,
@@ -233,7 +233,7 @@ export class AdvancedMLService {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('ML inference failed', {
         error: error instanceof Error ? error.message : String(error),
         modelId: request.model_id,
@@ -277,7 +277,7 @@ export class AdvancedMLService {
         optimizationType,
       });
       return response.data.message;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('ML model optimization failed', {
         error: error instanceof Error ? error.message : String(error),
         modelId,
@@ -315,7 +315,7 @@ export class AdvancedMLService {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Quantum optimization failed', {
         error: error instanceof Error ? error.message : String(error),
         problemType: request.problem_type,
@@ -352,7 +352,7 @@ export class AdvancedMLService {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Quantum feature mapping failed', { error: error instanceof Error ? error.message : String(error) });
       throw new Error(`Quantum feature mapping failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -367,7 +367,7 @@ export class AdvancedMLService {
         timeout: this.defaultTimeout,
       });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get ML metrics', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('Failed to retrieve ML metrics');
     }
@@ -382,7 +382,7 @@ export class AdvancedMLService {
         timeout: this.defaultTimeout,
       });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get model metrics', { error: error instanceof Error ? error.message : String(error) });
       throw new Error('Failed to retrieve model metrics');
     }
@@ -434,7 +434,7 @@ export class AdvancedMLService {
           quantized: modelConfig.use_quantization,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Graph ML analysis failed', {
         error: error instanceof Error ? error.message : String(error),
         analysisType,
@@ -476,7 +476,7 @@ export class AdvancedMLService {
           edges: graphData.edges?.length || 0,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Quantum graph optimization failed', {
         error: error instanceof Error ? error.message : String(error),
       });

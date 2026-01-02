@@ -12,7 +12,7 @@ const createClaimSchema = z.object({
   subject: z.string().optional(),
   predicate: z.string().optional(),
   object: z.string().optional(),
-  effective_date: z.string().transform(d => new Date(d)).optional(),
+  effective_date: z.string().transform((d: string) => new Date(d)).optional(),
   location: z.record(z.any()).optional(),
   extraction_method: z.string().optional(),
   claim_type: z.string(),
@@ -37,7 +37,7 @@ const linkEvidenceSchema = z.object({
 });
 
 // Create a new claim
-router.post('/', ensureAuthenticated, async (req, res, next) => {
+router.post('/', ensureAuthenticated, async (req: any, res: any, next: any) => {
   try {
     const validated = createClaimSchema.parse(req.body);
     const claim = await service.registerClaim({
@@ -46,13 +46,13 @@ router.post('/', ensureAuthenticated, async (req, res, next) => {
       tenant_id: req.user!.tenantId,
     });
     res.status(201).json(claim);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
 
 // Link evidence to an existing claim
-router.post('/:id/evidence', ensureAuthenticated, async (req, res, next) => {
+router.post('/:id/evidence', ensureAuthenticated, async (req: any, res: any, next: any) => {
   try {
     const validated = linkEvidenceSchema.parse(req.body);
     const link = await service.linkClaimToEvidence({
@@ -62,7 +62,7 @@ router.post('/:id/evidence', ensureAuthenticated, async (req, res, next) => {
       tenant_id: req.user!.tenantId,
     });
     res.status(201).json(link);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

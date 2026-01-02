@@ -15,7 +15,7 @@ export interface DualWriteOptions<T> {
 }
 
 export class DualWriter<T> {
-  constructor(private pool: MigrationPool, private options: DualWriteOptions<T>) {}
+  constructor(private pool: MigrationPool, private options: DualWriteOptions<T>) { }
 
   async write(payload: T) {
     const migration = this.options.migrationKey;
@@ -38,11 +38,11 @@ export class DualWriter<T> {
         { migration, operation },
         (Date.now() - start) / 1000,
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
-      client.release();
+      client.release?.();
     }
   }
 }

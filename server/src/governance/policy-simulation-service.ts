@@ -229,7 +229,7 @@ export class PolicySimulationService {
         );
         CREATE INDEX IF NOT EXISTS idx_policy_drafts_tenant ON policy_drafts(tenant_id);
       `);
-    } catch (e) {
+    } catch (e: any) {
       logger.warn({ error: e }, "Could not initialize DB schema for PolicySimulationService");
     }
   }
@@ -263,7 +263,7 @@ export class PolicySimulationService {
       let candidateDecision: SimulationDecision;
       try {
         candidateDecision = await this.evaluator.evaluate(event, options.candidatePolicy);
-      } catch (error) {
+      } catch (error: any) {
         fallbackUsed = true;
         candidateDecision = {
           allow: baselineAllow,
@@ -426,7 +426,7 @@ export class PolicySimulationService {
               role: ae.details?.role || 'unknown' // assuming role might be in details
           }));
 
-      } catch (e) {
+      } catch (e: any) {
           logger.error({ error: e }, "Failed to fetch historical events for simulation");
           // Fail fast!
           throw new Error("Could not fetch historical events. Simulation aborted to prevent misleading results.");
@@ -496,7 +496,7 @@ export class PolicySimulationService {
                 purpose: 'governance_policy_update'
             }
         });
-      } catch (e) {
+      } catch (e: any) {
           logger.error({ error: e }, "Failed to log policy publish to provenance ledger");
       }
 

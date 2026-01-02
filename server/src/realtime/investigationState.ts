@@ -61,11 +61,11 @@ try {
       password: redisPassword,
     });
   }
-  redis?.on('error', (err) => {
+  redis?.on('error', (err: any) => {
     logger.warn({ err }, 'Redis unavailable for investigation state, using memory');
     redis = null;
   });
-} catch (err) {
+} catch (err: any) {
   logger.warn({ err }, 'Failed to init Redis for investigation state');
   redis = null;
 }
@@ -146,7 +146,7 @@ export async function getAnnotations(
       values.sort((a, b) => a.createdAt - b.createdAt);
       values.forEach((val) => upsertMemory(annotationsStore, investigationId, val));
       return values;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to fetch annotations from Redis');
     }
   }
@@ -171,7 +171,7 @@ export async function addAnnotation(
         annotation.id,
         JSON.stringify(annotation),
       );
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to persist annotation to Redis');
     }
   }
@@ -189,7 +189,7 @@ export async function updateAnnotation(
     try {
       const raw = await redis.hget(annotationKey(investigationId), annotationId);
       current = raw ? JSON.parse(raw) : null;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to load annotation from Redis');
     }
   }
@@ -207,7 +207,7 @@ export async function updateAnnotation(
         annotationId,
         JSON.stringify(next),
       );
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to update annotation in Redis');
     }
   }
@@ -222,7 +222,7 @@ export async function deleteAnnotation(
   if (redis) {
     try {
       await redis.hdel(annotationKey(investigationId), annotationId);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to delete annotation from Redis');
     }
   }
@@ -241,7 +241,7 @@ export async function getComments(
       values.sort((a, b) => a.createdAt - b.createdAt);
       values.forEach((val) => upsertMemory(commentsStore, investigationId, val));
       return values;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to fetch comments from Redis');
     }
   }
@@ -266,7 +266,7 @@ export async function addComment(
         comment.id,
         JSON.stringify(comment),
       );
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to persist comment to Redis');
     }
   }
@@ -284,7 +284,7 @@ export async function updateComment(
     try {
       const raw = await redis.hget(commentKey(investigationId), commentId);
       current = raw ? JSON.parse(raw) : null;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to load comment from Redis');
     }
   }
@@ -302,7 +302,7 @@ export async function updateComment(
         commentId,
         JSON.stringify(next),
       );
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to update comment in Redis');
     }
   }
@@ -317,7 +317,7 @@ export async function deleteComment(
   if (redis) {
     try {
       await redis.hdel(commentKey(investigationId), commentId);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to delete comment from Redis');
     }
   }
@@ -342,7 +342,7 @@ export async function recordActivity(
     try {
       await redis.lpush(activityKey(investigationId), JSON.stringify(activity));
       await redis.ltrim(activityKey(investigationId), 0, ACTIVITY_LIMIT - 1);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to append activity to Redis');
     }
   }
@@ -356,12 +356,12 @@ export async function getActivity(
   if (redis) {
     try {
       const raw = await redis.lrange(activityKey(investigationId), 0, limit - 1);
-      const list = raw.map((value) => JSON.parse(value) as ActivityEntry);
+      const list = raw.map((value: string) => JSON.parse(value) as ActivityEntry);
       if (list.length > 0) {
         activityStore.set(investigationId, list);
       }
       return list;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to fetch activity from Redis');
     }
   }
@@ -383,7 +383,7 @@ export async function setPresence(
         JSON.stringify(entry),
       );
       await redis.expire(presenceKey(investigationId), 120);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to update presence in Redis');
     }
   }
@@ -415,7 +415,7 @@ export async function touchPresence(
         JSON.stringify(next),
       );
       await redis.expire(presenceKey(investigationId), 120);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to refresh presence in Redis');
     }
   }
@@ -436,7 +436,7 @@ export async function removePresence(
   if (redis) {
     try {
       await redis.hdel(presenceKey(investigationId), userId);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to remove presence from Redis');
     }
   }
@@ -455,11 +455,11 @@ export async function getPresence(
         try {
           const parsed = JSON.parse(value as unknown as string) as PresenceUser;
           map.set(userId, parsed);
-        } catch (err) {
+        } catch (err: any) {
           logger.warn({ err, investigationId }, 'Failed to parse presence');
         }
       });
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to load presence from Redis');
     }
   }
@@ -472,7 +472,7 @@ export async function getPresence(
       if (redis) {
         redis
           ?.hdel(presenceKey(investigationId), entry.userId)
-          .catch((err) =>
+          .catch((err: any) =>
             logger.warn({ err }, 'Failed to prune stale presence in Redis'),
           );
       }

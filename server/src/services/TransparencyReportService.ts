@@ -136,7 +136,7 @@ export class TransparencyReportService {
       });
 
       return report;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to generate transparency report',
         report_id: reportId,
@@ -245,7 +245,7 @@ export class TransparencyReportService {
       filter.start_date,
       filter.end_date,
     ]);
-    const byDay = byDayResult.rows.map((row) => ({
+    const byDay = byDayResult.rows.map((row: any) => ({
       date: row.date,
       count: parseInt(row.count, 10),
     }));

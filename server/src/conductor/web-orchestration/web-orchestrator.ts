@@ -201,7 +201,7 @@ export class WebOrchestrator {
       });
 
       return synthesizedResult;
-    } catch (error) {
+    } catch (error: any) {
       const totalTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
@@ -311,7 +311,7 @@ export class WebOrchestrator {
         allowed: result.result?.allow || false,
         reason: result.result?.explanations || 'Policy denied',
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Policy validation error', { error: error.message });
       return { allowed: false, reason: 'Policy validation failed' };
     }
@@ -401,7 +401,7 @@ export class WebOrchestrator {
         }
 
         return response;
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Query execution failed', {
           domain: iface.domain,
           error: error.message,

@@ -20,7 +20,7 @@ router.post('/playbook', async (req, res) => {
     const playbook = await growthPlaybookService.generatePlaybook(profile);
 
     res.json({ data: playbook });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to generate playbook', error);
     res.status(500).json({ error: 'Internal server error' });
   }

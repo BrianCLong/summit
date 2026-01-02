@@ -152,7 +152,7 @@ export class FeatureFlagService {
 
       this.initialized = true;
       this.logger.info('Feature flag service initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to initialize feature flag service', error);
       throw new Error(`Feature flag initialization failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -190,11 +190,11 @@ export class FeatureFlagService {
       try {
         await this.ldClient.waitForInitialization({ timeout });
         this.logger.info('LaunchDarkly client initialized successfully');
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error('LaunchDarkly client initialization timeout', error);
         throw new Error('LaunchDarkly client failed to initialize within timeout');
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn('LaunchDarkly SDK not available, falling back to local provider');
       throw error;
     }
@@ -235,7 +235,7 @@ export class FeatureFlagService {
       }
 
       this.logger.info(`Loaded ${this.localFlags.size} feature flags from local file`);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to load local feature flags', error);
       throw new Error(`Failed to load feature flags from ${file}: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -262,7 +262,7 @@ export class FeatureFlagService {
     try {
       const value = await this.getValue(flagKey, user, defaultValue);
       return Boolean(value);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error checking flag ${flagKey}`, error);
       return defaultValue;
     }
@@ -316,7 +316,7 @@ export class FeatureFlagService {
       this.trackFlagEvaluation(flagKey, user, value);
 
       return value as T;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error evaluating flag ${flagKey}`, error);
       return defaultValue;
     }
@@ -352,7 +352,7 @@ export class FeatureFlagService {
     if (typeof value === 'string') {
       try {
         return JSON.parse(value);
-      } catch (error) {
+      } catch (error: any) {
         this.logger.warn(`Failed to parse JSON for flag ${flagKey}`, error);
         return defaultValue;
       }
@@ -624,7 +624,7 @@ export class FeatureFlagService {
       try {
         await this.ldClient.close();
         this.logger.info('LaunchDarkly client closed');
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error('Error closing LaunchDarkly client', error);
       }
     }

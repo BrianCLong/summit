@@ -492,7 +492,7 @@ export class RTBFAuditService extends EventEmitter {
 
           const duration = (Date.now() - startTime) / 1000;
           this.metrics.observeHistogram('rtbf_audit_write_duration', duration);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to write audit entry', {
             entryId: entry.id,
             error: error.message,
@@ -513,7 +513,7 @@ export class RTBFAuditService extends EventEmitter {
 
     try {
       await this.batchInsertAuditEntries(entries);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to flush audit buffer', {
         entryCount: entries.length,
         error: error.message,
@@ -628,7 +628,7 @@ export class RTBFAuditService extends EventEmitter {
           });
 
           return analysis;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Dry-run analysis failed', {
             jobId: job.id,
             error: error.message,
@@ -959,7 +959,7 @@ export class RTBFAuditService extends EventEmitter {
           });
 
           return report;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to generate compliance report', {
             tenantId,
             error: error.message,
@@ -996,7 +996,7 @@ export class RTBFAuditService extends EventEmitter {
       params,
     );
 
-    return result.rows.map((row) => JSON.parse(row.entry_data));
+    return result.rows.map((row: any) => JSON.parse(row.entry_data));
   }
 
   private calculateSummaryStats(
@@ -1378,7 +1378,7 @@ export class RTBFAuditService extends EventEmitter {
       entry.result.recordsAffected.toString(),
     ]);
 
-    return [headers, ...rows].map((row) => row.join(',')).join('\n');
+    return [headers, ...rows].map((row: any) => row.join(',')).join('\n');
   }
 
   private convertToXML(auditData: RTBFAuditEntry[]): string {

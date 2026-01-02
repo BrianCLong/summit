@@ -61,7 +61,7 @@ export class CoherenceSignalIngest {
       // Store in Neo4j
       const session = this.neo4j.getSession();
       try {
-        await session.executeWrite(async (tx) => {
+        await session.executeWrite(async (tx: any) => {
           // Ensure tenant exists
           await tx.run(
             `
@@ -101,7 +101,7 @@ export class CoherenceSignalIngest {
         });
 
         // Trigger materialization job (async)
-        this.triggerMaterializationJob(validatedInput.tenantId).catch((err) =>
+        this.triggerMaterializationJob(validatedInput.tenantId).catch((err: any) =>
           logger.error('Materialization job failed', {
             err,
             tenantId: validatedInput.tenantId,
@@ -123,7 +123,7 @@ export class CoherenceSignalIngest {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         logger.warn('Invalid signal schema', { errors: error.errors });
         return res.status(400).json({
@@ -146,7 +146,7 @@ export class CoherenceSignalIngest {
     // In production, this would trigger a background job
     const session = this.neo4j.getSession();
     try {
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)

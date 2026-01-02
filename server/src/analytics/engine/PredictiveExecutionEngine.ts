@@ -216,7 +216,7 @@ export class PredictiveExecutionEngine extends EventEmitter {
       });
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       // Emit failure audit event
       if (this.config.enableAuditLog) {
         this.emitAuditEvent({

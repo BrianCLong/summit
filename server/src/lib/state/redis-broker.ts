@@ -29,8 +29,8 @@ export class RedisMessageBroker implements MessageBroker {
     this.publisher = createClient({ url: redisUrl });
     this.subscriber = createClient({ url: redisUrl });
 
-    this.publisher.on('error', (err) => console.error('Redis Publisher Error', err));
-    this.subscriber.on('error', (err) => console.error('Redis Subscriber Error', err));
+    this.publisher.on('error', (err: any) => console.error('Redis Publisher Error', err));
+    this.subscriber.on('error', (err: any) => console.error('Redis Subscriber Error', err));
   }
 
   async connect() {

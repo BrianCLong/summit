@@ -50,7 +50,7 @@ router.post('/honeypots', async (req: AuthenticatedRequest, res: Response) => {
     const validatedData = deployHoneypotSchema.parse(req.body);
     const id = await deceptionService.deployHoneypot(validatedData, req.tenantId);
     res.status(201).json({ id, message: 'Honeypot deployed successfully' });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
     }
@@ -76,14 +76,14 @@ router.post('/interactions', async (req: AuthenticatedRequest, res: Response) =>
     try {
         const id = await deceptionService.logInteraction(honeypotId, interactionData, req.tenantId);
         res.status(201).json({ id, message: 'Interaction logged' });
-    } catch (err) {
+    } catch (err: any) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         if (errorMessage === 'Honeypot not found') {
             return res.status(404).json({ error: 'Honeypot not found' });
         }
         throw err;
     }
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
     }
@@ -102,7 +102,7 @@ router.get('/profiles', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const profile = await deceptionService.profileAttacker(ip, req.tenantId);
         res.json(profile);
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error in GET /profiles:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
@@ -113,7 +113,7 @@ router.get('/threat-intel', async (req: AuthenticatedRequest, res: Response) => 
     try {
         const report = await deceptionService.generateThreatIntelligence(req.tenantId);
         res.json(report);
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error in GET /threat-intel:', error);
         res.status(500).json({ error: 'Internal server error' });
     }

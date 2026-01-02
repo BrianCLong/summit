@@ -133,7 +133,7 @@ export class SearchIndexService {
     const offset = query.cursor || 0;
     const pagedResults = results.slice(offset, offset + limit);
 
-    return pagedResults.map(r => {
+    return pagedResults.map((r: any) => {
       // Generate snippet (simple substring for now, MiniSearch doesn't do full snippets out of box easily without raw access)
       // We stored content.
       const content = r.content || '';
@@ -197,7 +197,7 @@ export class SearchIndexService {
       } finally {
         await session.close();
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.error('Reindexing failed to fetch data from DB', err);
     }
 
@@ -214,7 +214,7 @@ export class SearchIndexService {
       }
       await fs.promises.writeFile(INDEX_FILE_PATH, json);
       this.isDirty = false;
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Failed to save search index', e);
     }
   }
@@ -237,7 +237,7 @@ export class SearchIndexService {
         });
         logger.info('Search index loaded from disk.');
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Failed to load search index', e);
     }
   }

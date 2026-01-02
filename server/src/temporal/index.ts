@@ -49,7 +49,7 @@ export async function getTemporalClient() {
     const { Connection, Client } = await import('temporalio');
     const connection = await Connection.connect();
     return new Client({ connection });
-  } catch (e) {
+  } catch (e: any) {
     logger.warn('Temporal client not available');
     return null;
   }

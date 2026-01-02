@@ -463,7 +463,7 @@ export class I18nService {
       };
 
       return new Intl.DateTimeFormat(options.locale, intlOptions).format(date);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error formatting date', { error, locale: options.locale });
       return date.toISOString();
     }
@@ -475,7 +475,7 @@ export class I18nService {
   formatNumber(value: number, locale: SupportedLocale): string {
     try {
       return new Intl.NumberFormat(locale).format(value);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error formatting number', { error, locale });
       return value.toString();
     }
@@ -493,7 +493,7 @@ export class I18nService {
         minimumFractionDigits: options.minimumFractionDigits,
         maximumFractionDigits: options.maximumFractionDigits,
       }).format(value);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error formatting currency', { error, locale: options.locale });
       return `${options.currency} ${value}`;
     }

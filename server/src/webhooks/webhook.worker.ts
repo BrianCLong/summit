@@ -173,7 +173,7 @@ export const webhookWorker = new Worker<WebhookJobData>(
   }
 );
 
-webhookWorker.on('completed', (job) => {
+webhookWorker.on('completed', (job: any) => {
   logger.info(`Webhook delivery ${job.data.deliveryId} completed`);
 });
 

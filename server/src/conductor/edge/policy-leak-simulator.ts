@@ -288,7 +288,7 @@ export class PolicyLeakSimulator {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Policy leak simulation failed', { error });
       throw error;
     }

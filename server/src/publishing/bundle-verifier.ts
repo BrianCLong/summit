@@ -75,7 +75,7 @@ export class BundleVerifier {
       const hashTreeResult = this.verifyHashTree(manifest.hashTree);
       checks.hashTreeValid = hashTreeResult.valid;
       errors.push(...hashTreeResult.errors);
-    } catch (error) {
+    } catch (error: any) {
       errors.push(`Hash tree verification failed: ${error}`);
     }
 
@@ -85,7 +85,7 @@ export class BundleVerifier {
       if (!checks.signatureValid) {
         errors.push('Manifest signature is invalid');
       }
-    } catch (error) {
+    } catch (error: any) {
       errors.push(`Signature verification failed: ${error}`);
     }
 
@@ -95,7 +95,7 @@ export class BundleVerifier {
       checks.citationsComplete = citationResult.complete;
       errors.push(...citationResult.errors);
       warnings.push(...citationResult.warnings);
-    } catch (error) {
+    } catch (error: any) {
       errors.push(`Citation verification failed: ${error}`);
     }
 
@@ -105,7 +105,7 @@ export class BundleVerifier {
       checks.licensesValid = licenseResult.valid;
       errors.push(...licenseResult.errors);
       warnings.push(...licenseResult.warnings);
-    } catch (error) {
+    } catch (error: any) {
       errors.push(`License verification failed: ${error}`);
     }
 
@@ -119,7 +119,7 @@ export class BundleVerifier {
             `Bundle is revoked: ${revocationResult.reason || 'No reason provided'}`
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         warnings.push(`Revocation check failed: ${error}`);
         // Don't fail verification if revocation check fails
         checks.notRevoked = true;
@@ -135,7 +135,7 @@ export class BundleVerifier {
         if (!checks.notExpired) {
           errors.push('Bundle has expired');
         }
-      } catch (error) {
+      } catch (error: any) {
         errors.push(`Expiration check failed: ${error}`);
       }
     } else {
@@ -152,7 +152,7 @@ export class BundleVerifier {
         if (!artifactResult.valid) {
           errors.push(...artifactResult.errors);
         }
-      } catch (error) {
+      } catch (error: any) {
         warnings.push(`Artifact verification failed: ${error}`);
       }
     }
@@ -203,7 +203,7 @@ export class BundleVerifier {
       verify.end();
 
       return verify.verify(manifest.publicKey, signature, 'hex');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signature verification error:', error);
       return false;
     }
@@ -326,7 +326,7 @@ export class BundleVerifier {
               reason: record?.reason || 'Unknown',
             };
           }
-        } catch (error) {
+        } catch (error: any) {
           console.warn(`Failed to load revocation list ${path}:`, error);
         }
       }
@@ -375,7 +375,7 @@ export class BundleVerifier {
         if (!isValid) {
           errors.push(`Artifact ${leaf.path} hash mismatch`);
         }
-      } catch (error) {
+      } catch (error: any) {
         errors.push(`Failed to verify artifact ${leaf.path}: ${error}`);
       }
     }
@@ -406,7 +406,7 @@ export class BundleVerifier {
       if (!signatureValid) {
         errors.push('Wallet signature is invalid');
       }
-    } catch (error) {
+    } catch (error: any) {
       errors.push(`Wallet signature verification failed: ${error}`);
     }
 

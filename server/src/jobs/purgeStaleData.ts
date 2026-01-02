@@ -95,7 +95,7 @@ export async function fetchCandidateIds(
 ): Promise<unknown[]> {
   const query = buildCandidateQuery(target, now, limit);
   const { rows } = await client.query(query);
-  return rows.map((row) => row[target.idColumn]);
+  return rows.map((row: any) => row[target.idColumn]);
 }
 
 async function deleteByIds(

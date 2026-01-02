@@ -184,7 +184,7 @@ export class VerdictExplainerService implements IVerdictExplainerService {
       });
 
       return explanation;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate verdict explanation', { error, verdict });
       throw error;
     }
@@ -384,7 +384,7 @@ export class VerdictExplainerService implements IVerdictExplainerService {
 
         this.statistics.llmUsed++;
         return { text: llmResponse.text, usedLLM: true };
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({ error }, 'LLM explanation failed, falling back to template');
         // Fall through to template-based generation
       }

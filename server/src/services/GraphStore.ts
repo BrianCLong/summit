@@ -70,13 +70,13 @@ export function createGraphStore(
             `CALL db.index.fulltext.queryNodes('entity_fulltext', $q) YIELD node WHERE $type IS NULL OR node.type = $type RETURN node LIMIT $limit`,
             { q, type, limit },
           );
-          return res.records.map((r) => nodeToEntity(r.get('node')));
+          return res.records.map((r: any) => nodeToEntity(r.get('node')));
         }
         const res = await session.run(
           `MATCH (e:Entity) WHERE $type IS NULL OR e.type = $type RETURN e LIMIT $limit`,
           { type, limit },
         );
-        return res.records.map((r) => nodeToEntity(r.get('e')));
+        return res.records.map((r: any) => nodeToEntity(r.get('e')));
       } finally {
         await session.close();
       }
@@ -89,7 +89,7 @@ export function createGraphStore(
           `MATCH (:Entity {id: $id})-[r:RELATIONSHIP]-(:Entity) RETURN r`,
           { id: entityId },
         );
-        return res.records.map((r) => relToRelationship(r.get('r')));
+        return res.records.map((r: any) => relToRelationship(r.get('r')));
       } finally {
         await session.close();
       }
@@ -113,7 +113,7 @@ export function createGraphStore(
             },
           });
           provenanceId = claim.id;
-        } catch (err) {
+        } catch (err: any) {
           logger.error('Failed to create claim for entity', { error: err, entityId: e.id });
           // Fallback: proceed without provenance ID if ledger is down (or should we block?)
           // For RC, we should probably proceed but log.
@@ -123,7 +123,7 @@ export function createGraphStore(
       const entityWithProv = { ...e, provenanceId };
 
       try {
-        const res = await session.writeTransaction((tx) =>
+        const res = await session.writeTransaction((tx: any) =>
           tx.run(
             `MERGE (n:Entity {id: $id})
              ON CREATE SET n.type=$type, n.value=$value, n.label=$label, n.provenanceId=$provenanceId, n.createdAt=timestamp()
@@ -134,8 +134,8 @@ export function createGraphStore(
         );
         const entity = nodeToEntity(res.records[0].get('n'));
         // Ingest into Search Index
-        SearchIndexService.getInstance().onEntityUpsert(entity).catch(err => {
-            logger.error({ err }, 'Failed to index entity on upsert');
+        SearchIndexService.getInstance().onEntityUpsert(entity).catch((err: any) => {
+          logger.error({ err }, 'Failed to index entity on upsert');
         });
         return entity;
       } finally {
@@ -161,7 +161,7 @@ export function createGraphStore(
             },
           });
           provenanceId = claim.id;
-        } catch (err) {
+        } catch (err: any) {
           logger.error('Failed to create claim for relationship', { error: err, relId: r.id });
         }
       }
@@ -169,7 +169,7 @@ export function createGraphStore(
       const relWithProv = { ...r, provenanceId };
 
       try {
-        const res = await session.writeTransaction((tx) =>
+        const res = await session.writeTransaction((tx: any) =>
           tx.run(
             `MATCH (a:Entity {id: $fromId}), (b:Entity {id: $toId})
              MERGE (a)-[rel:RELATIONSHIP {id: $id}]->(b)
@@ -188,7 +188,7 @@ export function createGraphStore(
     async deleteEntity(id: string) {
       const session = driver.session();
       try {
-        await session.writeTransaction((tx) =>
+        await session.writeTransaction((tx: any) =>
           tx.run(`MATCH (n:Entity {id: $id}) DETACH DELETE n`, { id }),
         );
       } finally {
@@ -199,7 +199,7 @@ export function createGraphStore(
     async deleteRelationship(id: string) {
       const session = driver.session();
       try {
-        await session.writeTransaction((tx) =>
+        await session.writeTransaction((tx: any) =>
           tx.run(`MATCH ()-[r:RELATIONSHIP {id: $id}]-() DELETE r`, { id }),
         );
       } finally {

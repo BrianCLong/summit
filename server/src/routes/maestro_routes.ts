@@ -130,7 +130,7 @@ export function createMaestroOPAEnforcer(
 
       (req as any).opaDecision = decision;
       return next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           event: 'maestro_opa_error',
@@ -186,7 +186,7 @@ export function buildMaestroRouter(
 
       const result = await maestro.runPipeline(userId, requestText);
       return res.json(result);
-    } catch (e) {
+    } catch (e: any) {
       next(e);
     }
   });
@@ -200,7 +200,7 @@ export function buildMaestroRouter(
         return res.status(404).json({ error: 'Run not found' });
       }
       return res.json(response);
-    } catch (e) {
+    } catch (e: any) {
       next(e);
     }
   });
@@ -212,7 +212,7 @@ export function buildMaestroRouter(
       const run = await queries.getRunResponse(runId);
       if (!run) return res.status(404).json({ error: 'Run not found' });
       return res.json(run.tasks);
-    } catch (e) {
+    } catch (e: any) {
       next(e);
     }
   });
@@ -224,7 +224,7 @@ export function buildMaestroRouter(
       const result = await queries.getTaskWithArtifacts(taskId);
       if (!result) return res.status(404).json({ error: 'Task not found' });
       return res.json(result);
-    } catch (e) {
+    } catch (e: any) {
       next(e);
     }
   });

@@ -11,7 +11,7 @@ const weightsPath = path.join(modelsDir, 'weights.json');
 let checksums: any = {};
 try {
   checksums = require(path.join(modelsDir, 'checksums.json'));
-} catch (e) {
+} catch (e: any) {
   // Fallback for dev/test environments without models
   checksums = { 'weights.json': 'mock' };
 }
@@ -25,7 +25,7 @@ export class RiskService {
     let data;
     try {
       data = verifyWeights(weightsPath, checksums['weights.json']);
-    } catch (e) {
+    } catch (e: any) {
        // Fallback for dev/test
        data = { weights: {}, bias: 0, version: 'v1' };
     }

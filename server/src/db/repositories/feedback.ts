@@ -1,5 +1,5 @@
 export class FeedbackRepo {
-  constructor(private pool: any) {}
+  constructor(private pool: any) { }
   async insert(row: any) {
     const q = `INSERT INTO ml_feedback (id, insight_id, decision, created_at) VALUES ($1,$2,$3,$4)`;
     await this.pool.query(q, [
@@ -39,7 +39,7 @@ export class FeedbackRepo {
       params,
     );
 
-    return rows.reduce((acc, row) => {
+    return rows.reduce((acc: any, row: any) => {
       acc[row.decision] = parseInt(row.count);
       return acc;
     }, {});

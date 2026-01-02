@@ -125,7 +125,7 @@ class JWTSecurityManager {
 
       // Generate new key if none exists or current is expired
       await this.rotateKey();
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to load current JWT key:', error);
       throw error;
     }
@@ -171,7 +171,7 @@ class JWTSecurityManager {
         if (this.currentKey && this.currentKey.expiresAt <= new Date()) {
           await this.rotateKey();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Scheduled key rotation failed:', error);
       }
     }, 60000); // Check every minute
@@ -194,7 +194,7 @@ class JWTSecurityManager {
           this.keyCache.delete(key.kid);
           console.log(`🗑️  Cleaned up expired JWT key: ${key.kid}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`⚠️  Failed to cleanup key ${keyName}:`, error);
       }
     }
@@ -267,7 +267,7 @@ class JWTSecurityManager {
 
       console.log(`✅ Verified JWT: ${payload.jti} (kid: ${kid})`);
       return payload;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       console.error('❌ JWT verification failed:', err.message);
       throw error;
@@ -293,7 +293,7 @@ class JWTSecurityManager {
         this.keyCache.set(kid, key);
         return key;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to load key ${kid}:`, error);
     }
 
@@ -404,7 +404,7 @@ class JWTSecurityManager {
           cacheSize: this.keyCache.size,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       return {
         status: 'unhealthy',

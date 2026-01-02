@@ -145,7 +145,7 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-// const enrichmentWorker = new Worker<EnrichmentJobData>('enrichment-queue', async (job) => {
+// const enrichmentWorker = new Worker<EnrichmentJobData>('enrichment-queue', async (job: any) => {
 //   const { entityId, enrichmentType, data } = job.data;
 //   logger.info(`Processing enrichment job ${job.id} for entity ${entityId} (${enrichmentType})`);
 
@@ -153,7 +153,7 @@ function nowIso() {
 //     const result = await performEnrichment(enrichmentType, data);
 //     logger.info(`Enrichment job ${job.id} completed for entity ${entityId}`);
 //     return result;
-//   } catch (error) {
+//   } catch (error: any) {
 //     logger.error(`Enrichment job ${job.id} failed for entity ${entityId}: ${error.message}`);
 //     throw error;
 //   }

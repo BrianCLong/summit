@@ -61,7 +61,7 @@ export class OnlineMigrationToolkit {
                updated_at = now()`,
         [migrationKey, phase, metadataValue],
       );
-    } catch (error) {
+    } catch (error: any) {
       const metadataJson =
         typeof metadataValue === 'string'
           ? metadataValue

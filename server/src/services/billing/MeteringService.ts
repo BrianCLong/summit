@@ -117,7 +117,7 @@ export class MeteringService {
         timestamp: new Date()
       };
 
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       this.metrics.incrementCounter('billable_events_total', { kind: event.eventType, status: 'error' });
       throw error;
@@ -138,7 +138,7 @@ export class MeteringService {
         try {
             const receipt = await this.recordUsage(event);
             receipts.push(receipt);
-        } catch (e) {
+        } catch (e: any) {
             // Log error but continue? Or fail all?
             // "Metering pipeline... Is tenant-scoped and time-bounded... No double-counting"
             // We should probably best effort here or atomic batch.

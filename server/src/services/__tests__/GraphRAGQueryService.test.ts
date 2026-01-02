@@ -156,7 +156,7 @@ describe('GraphRAGQueryService', () => {
             valid: preview.syntacticallyValid,
             error: preview.validationErrors.join(', '),
           });
-        } catch (error) {
+        } catch (error: any) {
           results.push({
             prompt,
             valid: false,

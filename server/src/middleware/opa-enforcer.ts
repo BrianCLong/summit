@@ -128,7 +128,7 @@ export class OPAEnforcer {
       });
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('OPA policy evaluation failed', {
         error: error instanceof Error ? error.message : String(error),
         tenantId: input.tenant_id,
@@ -261,7 +261,7 @@ export class OPAEnforcer {
         }
 
         return response.data.result;
-      } catch (error) {
+      } catch (error: any) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         if (attempt < this.options.retries) {
@@ -372,7 +372,7 @@ export class OPAEnforcer {
         // Attach decision to request for downstream use
         (req as any).opaDecision = decision;
         next();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('OPA middleware error', {
           error: error instanceof Error ? error.message : String(error),
           url: req.originalUrl,
@@ -404,7 +404,7 @@ export class OPAEnforcer {
 
     try {
       return JSON.parse(decodeURIComponent(approversHeader));
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to parse approvers header', {
         header: approversHeader,
         error,

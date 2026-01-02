@@ -190,7 +190,7 @@ export class ActivityFingerprintIndex {
       });
 
       return fingerprints;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to index activity', {
         error,
         tenantId,
@@ -243,7 +243,7 @@ export class ActivityFingerprintIndex {
           params.endTime = timeRange.end;
         }
 
-        const result = await session.executeRead(async (tx) => {
+        const result = await session.executeRead(async (tx: any) => {
           return await tx.run(
             `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_ACTIVITY]->(af:ActivityFingerprint)
@@ -291,7 +291,7 @@ export class ActivityFingerprintIndex {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get activity fingerprints', {
         error,
         tenantId,
@@ -313,7 +313,7 @@ export class ActivityFingerprintIndex {
 
     try {
       // Analyze fingerprint evolution over time
-      const trendResult = await session.executeRead(async (tx) => {
+      const trendResult = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_ACTIVITY]->(af:ActivityFingerprint)
@@ -340,7 +340,7 @@ export class ActivityFingerprintIndex {
       }));
 
       // Identify emerging patterns (high confidence, recent)
-      const emergingResult = await session.executeRead(async (tx) => {
+      const emergingResult = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_ACTIVITY]->(af:ActivityFingerprint)
@@ -625,7 +625,7 @@ export class ActivityFingerprintIndex {
 
     const session = this.neo4j.getSession();
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         for (const fp of fingerprints) {
           await tx.run(
             `

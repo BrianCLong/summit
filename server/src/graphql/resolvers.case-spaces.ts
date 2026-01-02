@@ -3,11 +3,11 @@ import { pool } from '../db/pg';
 
 export const caseSpacesResolvers = {
   Query: {
-    caseSpace: async (_, { id }) => {
+    caseSpace: async (_: any, { id }: any) => {
       const { rows } = await pool.query('SELECT * FROM case_spaces WHERE id = $1', [id]);
       return rows[0];
     },
-    caseSpaces: async (_, { status, priority, limit, offset }) => {
+    caseSpaces: async (_: any, { status, priority, limit, offset }: any) => {
       let query = 'SELECT * FROM case_spaces';
       const params = [];
       if (status) {
@@ -25,7 +25,7 @@ export const caseSpacesResolvers = {
     },
   },
   Mutation: {
-    createCaseSpace: async (_, { input }, { user }) => {
+    createCaseSpace: async (_: any, { input }: any, { user }: any) => {
       const { name, description, status, priority, slaStartTime, slaEndTime } = input;
       await pool.query("SET LOCAL user.id = $1", [user.id]);
       const { rows } = await pool.query(
@@ -34,7 +34,7 @@ export const caseSpacesResolvers = {
       );
       return rows[0];
     },
-    updateCaseSpace: async (_, { input }, { user }) => {
+    updateCaseSpace: async (_: any, { input }: any, { user }: any) => {
       const { id, name, description, status, priority, slaStartTime, slaEndTime } = input;
       await pool.query("SET LOCAL user.id = $1", [user.id]);
       const { rows } = await pool.query(
@@ -43,14 +43,14 @@ export const caseSpacesResolvers = {
       );
       return rows[0];
     },
-    deleteCaseSpace: async (_, { id }, { user }) => {
+    deleteCaseSpace: async (_: any, { id }: any, { user }: any) => {
       await pool.query("SET LOCAL user.id = $1", [user.id]);
       await pool.query('DELETE FROM case_spaces WHERE id = $1', [id]);
       return true;
     },
   },
   CaseSpace: {
-    auditLog: async (caseSpace) => {
+    auditLog: async (caseSpace: any) => {
       const { rows } = await pool.query('SELECT * FROM case_space_audit_log WHERE case_space_id = $1 ORDER BY timestamp DESC', [caseSpace.id]);
       return rows;
     },

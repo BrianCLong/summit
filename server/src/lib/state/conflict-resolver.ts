@@ -34,7 +34,7 @@ export class GCounter implements CRDT<number> {
   }
 
   get value(): number {
-    return Array.from(this.counts.values()).reduce((sum, count) => sum + count, 0);
+    return Array.from(this.counts.values()).reduce((sum: number, count: number) => sum + count, 0);
   }
 
   public increment(amount: number = 1): void {
@@ -204,7 +204,7 @@ export class ORSet<T> implements CRDT<Set<T>> {
 
   public remove(element: T): void {
     if (this.elements.has(element)) {
-      this.tombstones.set(element, this.elements.get(element));
+      this.tombstones.set(element, this.elements.get(element)!);
       this.elements.delete(element);
     }
   }
@@ -217,7 +217,7 @@ export class ORSet<T> implements CRDT<Set<T>> {
     allElements.forEach((tag, element) => {
       const existingTag = merged.elements.get(element);
       if (!existingTag || tag > existingTag) {
-        if (!allTombstones.has(element) || allTombstones.get(element) < tag) {
+        if (!allTombstones.has(element) || allTombstones.get(element)! < tag) {
           merged.elements.set(element, tag);
         }
       }
@@ -265,7 +265,7 @@ export class ConflictResolver {
 
   public resolve<T extends CRDT<any>>(key: string, a: T, b: T, factory: CRDTFactory<T>): T {
     if (this.customMergeFunctions.has(key)) {
-      const mergeFunc = this.customMergeFunctions.get(key);
+      const mergeFunc = this.customMergeFunctions.get(key)!;
       const resolvedValue = mergeFunc(a.value, b.value);
       this.logConflict(key, 'custom', resolvedValue);
       return factory.create(resolvedValue);

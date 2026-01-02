@@ -21,7 +21,7 @@ export const requireTenantContextMiddleware = () =>
       (req as any).tenantContext = tenantContext;
       res.locals.tenantContext = tenantContext;
       return next();
-    } catch (error) {
+    } catch (error: any) {
       const httpError = error as TenantContextHttpError;
       const status = httpError.status || 400;
       const code =

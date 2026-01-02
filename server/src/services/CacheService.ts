@@ -82,7 +82,7 @@ export class CacheService {
       }
       this.metrics.incrementCounter('ops_total', { operation: 'get', status: 'miss' });
       return null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, key }, 'Cache get error');
       this.metrics.incrementCounter('ops_total', { operation: 'get', status: 'error' });
       return null;
@@ -109,7 +109,7 @@ export class CacheService {
       const expiry = ttl || this.defaultTtl;
       await this.cacheManager.set(this.getKey(key), value, { ttl: expiry });
       this.metrics.incrementCounter('ops_total', { operation: 'set', status: 'success' });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, key }, 'Cache set error');
       this.metrics.incrementCounter('ops_total', { operation: 'set', status: 'error' });
     }
@@ -131,7 +131,7 @@ export class CacheService {
     try {
       await this.cacheManager.delete(this.getKey(key));
       this.metrics.incrementCounter('ops_total', { operation: 'del', status: 'success' });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, key }, 'Cache del error');
     }
   }
@@ -154,7 +154,7 @@ export class CacheService {
         const fullPattern = this.getKey(pattern);
         await this.cacheManager.invalidateByPattern(fullPattern);
         logger.info({ pattern: fullPattern }, 'Cache pattern invalidated');
-    } catch (error) {
+    } catch (error: any) {
         logger.error({ err: error, pattern }, 'Cache pattern invalidation error');
     }
   }

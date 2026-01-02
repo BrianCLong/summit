@@ -62,7 +62,7 @@ export const mergePolicyOverlay = (
   }, stableBaseRules);
 
   // Ensure deterministic ordering: base order preserved, appended rules follow insertion order
-  const stableRuleSet = patchedRules.filter((rule, idx, arr) => arr.findIndex((r) => r.id === rule.id) === idx);
+  const stableRuleSet = patchedRules.filter((rule, idx, arr) => arr.findIndex((r: any) => r.id === rule.id) === idx);
 
   return {
     base: overlay.base,

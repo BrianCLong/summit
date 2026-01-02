@@ -281,7 +281,7 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
       } else if (finalState.status === 'RUNNING') {
         await this.stateManager.completeExecution(executionId, actorId);
       }
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       try {
         await this.stateManager.failExecution(executionId, actorId, errorMessage);
@@ -364,7 +364,7 @@ export class RunbookRuntimeEngine implements RunbookRuntime {
         } else {
           throw new Error(result.errorMessage || 'Step failed without error message');
         }
-      } catch (error) {
+      } catch (error: any) {
         lastError = error instanceof Error ? error : new Error(String(error));
 
         // Check if we should retry

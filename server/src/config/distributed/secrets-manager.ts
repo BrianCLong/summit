@@ -133,7 +133,7 @@ export class SecretsManager {
       `);
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -218,7 +218,7 @@ export class SecretsManager {
       : 'SELECT * FROM secret_rotation_policies ORDER BY secret_id';
 
     const result = await this.pool.query(query);
-    return result.rows.map((row) => this.mapRowToPolicy(row));
+    return result.rows.map((row: any) => this.mapRowToPolicy(row));
   }
 
   /**
@@ -374,7 +374,7 @@ export class SecretsManager {
       [secretId],
     );
 
-    return result.rows.map((row) => this.mapRowToVersion(row));
+    return result.rows.map((row: any) => this.mapRowToVersion(row));
   }
 
   /**
@@ -439,7 +439,7 @@ export class SecretsManager {
     `,
     );
 
-    return result.rows.map((row) => this.mapRowToPolicy(row));
+    return result.rows.map((row: any) => this.mapRowToPolicy(row));
   }
 
   /**
@@ -496,7 +496,7 @@ export class SecretsManager {
     this.rotationTimer = setInterval(async () => {
       try {
         await this.runRotationCheck();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Rotation check error:', error);
       }
     }, this.rotationCheckInterval);
@@ -562,7 +562,7 @@ export class SecretsManager {
     return decrypted;
   }
 
-  private mapRowToPolicy(row: any): RotationPolicy {
+  private mapRowToPolicy(row): RotationPolicy {
     return {
       secretId: row.secret_id,
       rotationIntervalDays: row.rotation_interval_days,
@@ -575,7 +575,7 @@ export class SecretsManager {
     };
   }
 
-  private mapRowToVersion(row: any): SecretVersion {
+  private mapRowToVersion(row): SecretVersion {
     return {
       secretId: row.secret_id,
       version: row.version,

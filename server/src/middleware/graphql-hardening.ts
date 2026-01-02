@@ -93,7 +93,7 @@ export async function loadPersistedQueries(
 
       console.log(`Loaded ${persistedQueries.size} persisted queries`);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to load persisted queries:', error);
     if (defaultConfig.enforcePersistedQueries) {
       throw new Error('Failed to load required persisted queries');
@@ -364,7 +364,7 @@ export async function queryCacheMiddleware(
       res.json(result);
       return;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Cache read error:', error);
   }
 
@@ -411,7 +411,7 @@ export function securityValidationMiddleware(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       errors: [
         {

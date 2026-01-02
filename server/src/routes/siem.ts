@@ -58,7 +58,7 @@ router.get(
           types: [...new Set(providers.map((p) => p.type))],
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Failed to list SIEM providers', {
         component: 'SIEMRoutes',
@@ -93,7 +93,7 @@ router.get(
         success: true,
         data: status,
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       if (error instanceof AppError) {
         throw error;
@@ -154,7 +154,7 @@ router.put(
         success: true,
         message: 'SIEM provider updated successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       if (error instanceof AppError) {
         throw error;
@@ -204,7 +204,7 @@ router.post(
           testedAt: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('SIEM provider test failed', {
         component: 'SIEMRoutes',
@@ -275,7 +275,7 @@ router.post(
           severity: event.severity,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Failed to send manual SIEM event', {
         component: 'SIEMRoutes',
@@ -323,7 +323,7 @@ router.get(
         success: true,
         data: statusSummary,
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Failed to get SIEM status', {
         component: 'SIEMRoutes',
@@ -410,7 +410,7 @@ router.get(
         success: true,
         data: mockMetrics,
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Failed to get SIEM metrics', {
         component: 'SIEMRoutes',
@@ -490,7 +490,7 @@ router.post(
           severity: event.severity,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Failed to create security alert', {
         component: 'SIEMRoutes',
@@ -544,7 +544,7 @@ router.get('/health', async (req: Request, res: Response) => {
       success: health.status === 'healthy',
       data: health,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('SIEM health check failed', {
       component: 'SIEMRoutes',
       error: error.message,

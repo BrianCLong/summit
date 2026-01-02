@@ -158,7 +158,7 @@ export class DbObservabilityService {
 
         return {
           source: 'pg_stat_statements',
-          entries: rows.map((row) => ({
+          entries: rows.map((row: any) => ({
             ...row,
             source: 'pg_stat_statements',
           })),
@@ -168,7 +168,7 @@ export class DbObservabilityService {
               : `Top ${rows.length} statements from pg_stat_statements (ordered by mean_exec_time).`,
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error }, 'pg_stat_statements not available, falling back to app slow log');
     }
 
@@ -328,7 +328,7 @@ export class DbObservabilityService {
         complianceRelevant: false,
         complianceFrameworks: [],
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error }, 'Failed to emit db observability audit event');
     }
   }

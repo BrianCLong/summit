@@ -81,8 +81,8 @@ export interface IChatAdapter {
  * Chat Receiver that uses platform-specific adapters
  */
 export class ChatReceiver extends BaseReceiver {
-  private chatConfig: ChatReceiverConfig;
-  private adapter: IChatAdapter;
+  private chatConfig!: ChatReceiverConfig;
+  private adapter!: IChatAdapter;
 
   constructor() {
     super('chat', 'Chat Notifications');
@@ -134,7 +134,7 @@ export class ChatReceiver extends BaseReceiver {
           channel: message.channel,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         recipientId: recipient,
@@ -317,7 +317,7 @@ export class SlackAdapter implements IChatAdapter {
   private webhookUrl?: string;
   private apiToken?: string;
 
-  constructor(private readonly simulation?: SimulationConfig) {}
+  constructor(private readonly simulation?: SimulationConfig) { }
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -382,7 +382,7 @@ export class TeamsAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'teams';
   private webhookUrl?: string;
 
-  constructor(private readonly simulation?: SimulationConfig) {}
+  constructor(private readonly simulation?: SimulationConfig) { }
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -433,7 +433,7 @@ export class DiscordAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'discord';
   private webhookUrl?: string;
 
-  constructor(private readonly simulation?: SimulationConfig) {}
+  constructor(private readonly simulation?: SimulationConfig) { }
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -480,7 +480,7 @@ export class MattermostAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'mattermost';
   private webhookUrl?: string;
 
-  constructor(private readonly simulation?: SimulationConfig) {}
+  constructor(private readonly simulation?: SimulationConfig) { }
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -523,7 +523,7 @@ export class CustomChatAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'custom';
   private webhookUrl?: string;
 
-  constructor(private readonly simulation?: SimulationConfig) {}
+  constructor(private readonly simulation?: SimulationConfig) { }
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;

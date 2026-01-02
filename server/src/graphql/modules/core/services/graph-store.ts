@@ -11,7 +11,7 @@ export function createGraphStore(): GraphStore {
     },
     async getRelationships(entityId: string) {
       return relationships.filter(
-        (r) => r.source === entityId || r.target === entityId,
+        (r: any) => r.source === entityId || r.target === entityId,
       );
     },
     async upsertEntity(input) {

@@ -1,5 +1,5 @@
 export class AuditRepo {
-  constructor(private pool: any) {}
+  constructor(private pool: any) { }
   async insert(row: any) {
     const q = `INSERT INTO audit_events (id, type, actor_id, created_at, meta) VALUES ($1,$2,$3,$4,$5)`;
     await this.pool.query(q, [

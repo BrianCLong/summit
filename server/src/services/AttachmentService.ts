@@ -109,7 +109,7 @@ export class AttachmentService {
     const writeStream = createWriteStream(tempPath);
     await (pipeline as any)(
       stream,
-      async function* (source) {
+      async function* (source: any) {
         for await (const chunk of source) {
           hash.update(chunk);
           yield chunk;

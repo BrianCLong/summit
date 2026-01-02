@@ -230,7 +230,7 @@ export class MigrationSafetySimulator {
           durationMs: Date.now() - started,
           affectedRows: result.rowCount ?? null,
         });
-      } catch (error) {
+      } catch (error: any) {
         status = 'failed';
         const durationMs = Date.now() - started;
         const messageText = `${action.toUpperCase()} ${direction.toUpperCase()} failed: ${(
@@ -259,13 +259,13 @@ export class MigrationSafetySimulator {
       } else {
         message = 'Forward migration applied; rollback skipped (no down script).';
       }
-    } catch (error) {
+    } catch (error: any) {
       status = 'failed';
       message = (error as Error).message;
     } finally {
       try {
         await client.query(`ROLLBACK TO SAVEPOINT ${savepoint}`);
-      } catch (rollbackError) {
+      } catch (rollbackError: any) {
         message =
           message || `Failed to rollback to savepoint: ${(rollbackError as Error).message}`;
       }

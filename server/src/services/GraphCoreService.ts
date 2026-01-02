@@ -59,7 +59,7 @@ export class GraphCoreService {
     };
 
     try {
-      const result = await session.executeWrite(async (tx) => {
+      const result = await session.executeWrite(async (tx: any) => {
         // 1. Find existing current version
         const findQuery = `
           MATCH (e:CanonicalEntity {id: $id, tenantId: $tenantId})
@@ -178,7 +178,7 @@ export class GraphCoreService {
 
       query += ` RETURN e LIMIT 1`;
 
-      const result = await session.executeRead((tx) => tx.run(query, params));
+      const result = await session.executeRead((tx: any) => tx.run(query, params));
 
       if (result.records.length === 0) {
         return null;
@@ -206,7 +206,7 @@ export class GraphCoreService {
     const now = new Date();
 
     try {
-      const result = await session.executeWrite(async (tx) => {
+      const result = await session.executeWrite(async (tx: any) => {
         // Ensure both nodes exist and are current (or at least exist)
         // For relationships, we typically link the currently valid nodes.
 
@@ -296,7 +296,7 @@ export class GraphCoreService {
     if (p.policyLabels && typeof p.policyLabels === 'string') {
       try {
         p.policyLabels = JSON.parse(p.policyLabels);
-      } catch (e) {
+      } catch (e: any) {
         // keep as string if parse fails
       }
     }

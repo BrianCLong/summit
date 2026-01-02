@@ -36,11 +36,12 @@ export function startCostExporter(intervalMs = 60000) {
       [since],
     );
     const gpuByTenant = new Map(
-      gRows.map((r) => [r.tenant, Number(r.gpu || 0)]),
+      gRows.map((r: any) => [r.tenant, Number(r.gpu || 0)]),
     );
 
     // increment counters by delta amounts
     for (const r of rows) {
+      // const costs = result.rows.map((r: any) => parseFloat(r.daily_cost));
       const t = r.tenant as string;
       const usdCpu = Number(r.cpu || 0) * R.cpu;
       const usdGb = Number(r.gb || 0) * R.gb;

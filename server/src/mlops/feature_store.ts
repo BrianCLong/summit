@@ -21,11 +21,11 @@ export class FeatureStoreService {
       try {
         this.redis = new Redis(process.env.REDIS_URL);
         this.useRedis = true;
-        this.redis.on('error', (err) => {
+        this.redis.on('error', (err: any) => {
           logger.error({ err }, 'Redis Feature Store connection error, falling back to memory');
           this.useRedis = false;
         });
-      } catch (err) {
+      } catch (err: any) {
         logger.warn('Failed to initialize Redis for Feature Store, using memory fallback');
       }
     }
@@ -95,7 +95,7 @@ export class FeatureStoreService {
         }
         });
         return result;
-    } catch (e) {
+    } catch (e: any) {
         logger.error('Error parsing features', e);
         return null;
     }

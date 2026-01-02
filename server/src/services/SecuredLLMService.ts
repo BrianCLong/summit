@@ -151,7 +151,7 @@ export class SecuredLLMService {
         ...params,
         prompt: processedPrompt,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('LLM completion failed', {
         user_id: params.userId,
         audit_id: auditId,
@@ -273,7 +273,7 @@ export class SecuredLLMService {
         maxTokens: params.maxTokens,
         temperature: params.temperature,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('LLM chat failed', {
         user_id: params.userId,
         audit_id: auditId,

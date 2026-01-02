@@ -49,7 +49,7 @@ export class TimeSeriesService {
         logger.error({ err, metric }, 'Error checking alerts');
       });
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, metric }, 'Failed to add time series point');
       throw error;
     }
@@ -89,7 +89,7 @@ export class TimeSeriesService {
           tags: data.tags
         };
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, metric }, 'Failed to query time series data');
       return [];
     }
@@ -108,7 +108,7 @@ export class TimeSeriesService {
         metric,
         ...parsed
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, metric }, 'Failed to get latest time series value');
       return null;
     }

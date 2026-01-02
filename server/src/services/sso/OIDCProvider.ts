@@ -78,7 +78,7 @@ export class OIDCProvider implements SSOProvider {
                 headers: { Authorization: `Bearer ${access_token}` }
             });
             userInfo = uiRes.data;
-        } catch (e) {
+        } catch (e: any) {
             logger.warn('Failed to fetch user info', e);
         }
     }
@@ -163,7 +163,7 @@ export class OIDCProvider implements SSOProvider {
       try {
           const key = crypto.createPublicKey({ key: jwk, format: 'jwk' });
           return key.export({ type: 'spki', format: 'pem' }) as string;
-      } catch (e) {
+      } catch (e: any) {
           logger.error('Failed to convert JWK to PEM', e);
           throw new Error('Failed to convert JWK');
       }

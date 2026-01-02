@@ -16,7 +16,7 @@ export class Neo4jCacheService {
     ): Promise<T> {
         try {
             return await withCache(key, ttlSeconds, queryFn);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(`Cache failed for key ${key}, falling back to direct query`, error);
             return queryFn();
         }
