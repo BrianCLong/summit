@@ -18,7 +18,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (New features will be documented here)
 
 ### Changed
+- (Changes not yet released)
+
+## [4.0.4] - 2026-01-02
+
+### Added
+- Codified a single release doctrine in `docs/ops/RELEASING.md`, including dry-run, tagging, changelog, provenance, and rollback steps tied to the GitHub Actions workflows.
+- Added a version alignment check (`scripts/release/version-policy.mjs`) and Makefile target `release-check` to enforce that `package.json` and `CHANGELOG.md` stay in lockstep before tagging.
+
+### Changed
 - Documented Node.js 20.11.0 as the required runtime to match the repository toolchain.
+- Marked the legacy semantic-release guidance as superseded by the new release doctrine and current pipelines.
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 

@@ -32,6 +32,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
+    "release:version-check": "node scripts/release/version-policy.mjs",
     "deploy:dev": "scripts/deploy.sh dev",
     "deploy:staging": "scripts/deploy.sh staging",
     "deploy:prod": "scripts/deploy.sh prod",

@@ -1,5 +1,7 @@
 # Release Artifact Build Guide
 
+> Canonical release process and gating live in `docs/ops/RELEASING.md`. Use this guide for local artifact build details only.
+
 This guide describes how to build versioned release artifacts for the IntelGraph platform from a developer workstation or CI runner. The workflow uses `make release` to create both the Python wheel and a Docker image tagged with the project version derived from `pyproject.toml`.
 
 ## Prerequisites
