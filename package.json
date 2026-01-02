@@ -29,6 +29,7 @@
     "test:unit": "cd server && npm run test:unit",
     "test:integration": "cd server && npm run test:integration",
     "test:fuzz:graph-guardrails": "GRAPH_GUARDRAIL_FUZZ_ITERATIONS=${GRAPH_GUARDRAIL_FUZZ_ITERATIONS:-80} GRAPH_GUARDRAIL_FUZZ_SEED=${GRAPH_GUARDRAIL_FUZZ_SEED:-7331} jest --config test/fuzz/jest.config.cjs --runTestsByPath test/fuzz/graphGuardrails/generator.test.ts test/fuzz/graphGuardrails/graphGuardrails.fuzz.test.ts",
+    "fuzz:api": "node --test testing/ga-verification/api-fuzz.ga.test.mjs",
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
@@ -86,6 +87,7 @@
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "coverage:gate": "node scripts/ci/coverage-gate.mjs",
     "prepare": "husky"
   },
   "keywords": [

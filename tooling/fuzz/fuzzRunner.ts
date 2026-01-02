@@ -16,12 +16,20 @@ export type FuzzResult = {
     iteration: number;
     error: string;
     artifactPath: string;
+    seed: number;
   }>;
 };
 
 type RNG = () => number;
 
-const ARTIFACT_ROOT = path.join(process.cwd(), 'artifacts', 'fuzz');
+const DEFAULT_ARTIFACT_ROOT = path.join(process.cwd(), 'artifacts', 'fuzz');
+const DEFAULT_TIMEOUT_MS = 50;
+
+export type FuzzRunOptions = {
+  artifactRoot?: string;
+  maxDurationMs?: number;
+  logSeed?: boolean;
+};
 
 function mulberry32(seed: number): RNG {
   return function rng() {
@@ -72,46 +80,73 @@ function withTimeout<T>(promise: Promise<T>, ms: number, name: string): Promise<
   return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(handle!));
 }
 
-function ensureArtifactDir() {
-  fs.mkdirSync(ARTIFACT_ROOT, { recursive: true });
+function ensureArtifactDir(artifactRoot: string) {
+  fs.mkdirSync(artifactRoot, { recursive: true });
 }
 
-function persistArtifact(target: string, iteration: number, input: string): string {
-  ensureArtifactDir();
+function persistArtifact(
+  target: string,
+  iteration: number,
+  seed: number,
+  input: string,
+  artifactRoot: string,
+): string {
+  ensureArtifactDir(artifactRoot);
   const filePath = path.join(
-    ARTIFACT_ROOT,
-    `${target}-iteration-${iteration}-${Date.now()}.txt`,
+    artifactRoot,
+    `${target}-seed-${seed}-iteration-${iteration}.txt`,
   );
   fs.writeFileSync(filePath, input, 'utf8');
   return filePath;
 }
 
-export async function runFuzzTargets(targets: FuzzTarget[], seed = 1337): Promise<FuzzResult[]> {
+export async function runFuzzTargets(
+  targets: FuzzTarget[],
+  seed = 1337,
+  options: FuzzRunOptions = {},
+): Promise<FuzzResult[]> {
   const rng = mulberry32(seed);
+  const artifactRoot = options.artifactRoot ?? DEFAULT_ARTIFACT_ROOT;
+  const startedAt = Date.now();
   const results: FuzzResult[] = [];
 
   for (const target of targets) {
     const iterations = target.iterations ?? 50;
-    const timeoutMs = target.timeoutMs ?? 50;
+    const timeoutMs = target.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const failures: FuzzResult['failures'] = [];
 
     for (let i = 0; i < iterations; i += 1) {
+      if (options.maxDurationMs && Date.now() - startedAt > options.maxDurationMs) {
+        failures.push({
+          iteration: i,
+          error: `Aborted after exceeding ${options.maxDurationMs}ms budget`,
+          artifactPath: persistArtifact(target.name, i, seed, 'timed-out', artifactRoot),
+          seed,
+        });
+        break;
+      }
+
       const seedIndex = Math.floor(rng() * target.seeds.length);
       const mutated = mutateSeed(target.seeds[seedIndex], rng);
 
       try {
         await withTimeout(Promise.resolve(target.handler(mutated)), timeoutMs, target.name);
       } catch (error) {
-        const artifactPath = persistArtifact(target.name, i, mutated);
+        const artifactPath = persistArtifact(target.name, i, seed, mutated, artifactRoot);
         failures.push({
           iteration: i,
           error: error instanceof Error ? error.message : String(error),
           artifactPath,
+          seed,
         });
       }
     }
 
     results.push({ name: target.name, iterations, failures });
+  }
+
+  if (options.logSeed !== false && results.some((result) => result.failures.length > 0)) {
+    console.error(`Fuzz failures detected with seed=${seed}`);
   }
 
   return results;

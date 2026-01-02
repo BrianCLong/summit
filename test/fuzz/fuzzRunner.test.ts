@@ -29,12 +29,15 @@ describe('fuzz harness', () => {
       },
     ];
 
-    const results = await runFuzzTargets(targets, 7);
+    const seed = 7;
+    const results = await runFuzzTargets(targets, seed, { logSeed: false });
     expect(results).toHaveLength(1);
     const [result] = results;
     expect(result.failures.length).toBeGreaterThanOrEqual(1);
     const failure = result.failures[0];
+    expect(failure.seed).toBe(seed);
     expect(fs.existsSync(failure.artifactPath)).toBe(true);
+    expect(failure.artifactPath).toContain(`seed-${seed}-iteration-`);
     const persisted = fs.readFileSync(failure.artifactPath, 'utf8');
     expect(persisted.includes('boom')).toBe(true);
   });
@@ -50,7 +53,7 @@ describe('fuzz harness', () => {
       },
     ];
 
-    const results = await runFuzzTargets(targets, 1);
+    const results = await runFuzzTargets(targets, 1, { logSeed: false });
     expect(results[0].failures).toHaveLength(1);
     expect(results[0].failures[0].error).toContain('Timeout');
   });
