@@ -21,7 +21,7 @@ export async function cacheJobResult(
   try {
     const key = `ai:job:${jobId}`;
     await redisClient.setex(key, ttlSeconds, JSON.stringify(result));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to cache job result:', error);
   }
 }
@@ -33,7 +33,7 @@ export async function getCachedJobResult(jobId: string) {
     const key = `ai:job:${jobId}`;
     const cached = await redisClient.get(key);
     return cached ? JSON.parse(cached) : null;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get cached job result:', error);
     return null;
   }
@@ -50,7 +50,7 @@ export async function cacheGraphSnapshot(
   try {
     const key = `ai:graph:${snapshotId}`;
     await redisClient.setex(key, ttlSeconds, JSON.stringify(edges));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to cache graph snapshot:', error);
   }
 }
@@ -62,7 +62,7 @@ export async function getCachedGraphSnapshot(snapshotId: string) {
     const key = `ai:graph:${snapshotId}`;
     const cached = await redisClient.get(key);
     return cached ? JSON.parse(cached) : null;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get cached graph snapshot:', error);
     return null;
   }
@@ -79,7 +79,7 @@ export async function cachePrediction(
   try {
     const key = `ai:prediction:${predictionKey}`;
     await redisClient.setex(key, ttlSeconds, JSON.stringify(prediction));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to cache prediction:', error);
   }
 }
@@ -91,7 +91,7 @@ export async function getCachedPrediction(predictionKey: string) {
     const key = `ai:prediction:${predictionKey}`;
     const cached = await redisClient.get(key);
     return cached ? JSON.parse(cached) : null;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get cached prediction:', error);
     return null;
   }
@@ -115,7 +115,7 @@ export async function checkRateLimit(
     }
 
     return current <= maxRequests;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to check rate limit:', error);
     return true; // Allow on error
   }
@@ -131,7 +131,7 @@ export async function queueMLTask(taskId: string, taskData: any) {
 
     await redisClient.lpush(queueKey, taskId);
     await redisClient.setex(taskKey, 3600, JSON.stringify(taskData));
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to queue ML task:', error);
   }
 }
@@ -156,7 +156,7 @@ export async function dequeueMLTask(): Promise<{
       taskId,
       taskData: taskData ? JSON.parse(taskData) : null,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to dequeue ML task:', error);
     return null;
   }

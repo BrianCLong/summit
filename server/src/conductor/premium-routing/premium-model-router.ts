@@ -187,7 +187,7 @@ export class PremiumModelRouter {
       });
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       const routingTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
@@ -574,7 +574,7 @@ export class PremiumModelRouter {
         updatedSuccessRate:
           this.performanceData.get(performanceKey)?.successRate,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record execution result', {
         error: error.message,
         modelId,

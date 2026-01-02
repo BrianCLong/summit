@@ -185,7 +185,7 @@ export class LegalHoldOrchestrator {
             custodians: normalizedCustodians.map((c) => c.id),
           },
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { err: error },
           'Failed to append chain of custody event for legal hold',
@@ -255,7 +255,7 @@ export class LegalHoldOrchestrator {
         if (result.status === 'failed') {
           holdStatus = 'FAILED';
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { err: error, connectorId, holdId },
           'Connector failed to apply legal hold',
@@ -337,7 +337,7 @@ export class LegalHoldOrchestrator {
           details: verification.details,
           timestamp: verification.checkedAt,
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { err: error, connectorId: connectorResult.connectorId, holdId },
           'Failed to verify preservation hold',
@@ -430,7 +430,7 @@ export class LegalHoldOrchestrator {
           matterId: request.matterId ?? hold.eDiscovery?.matterId,
         });
         exportRequests.push(collection);
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { err: error, connectorId: connectorResult.connectorId, holdId },
           'Failed to collect e-discovery export',
@@ -551,7 +551,7 @@ export class LegalHoldOrchestrator {
       }
       try {
         await connector.releaseHold(holdId, hold.caseId);
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { err: error, connectorId: connectorResult.connectorId, holdId },
           'Failed to release legal hold from connector',
@@ -653,7 +653,7 @@ export class LegalHoldOrchestrator {
             .update(publicKeyPem)
             .digest('hex');
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { err: error, holdId },
           'Failed to sign tamper-proof seal',
@@ -691,7 +691,7 @@ export class LegalHoldOrchestrator {
             fingerprint: seal.publicKeyFingerprint,
           },
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { err: error, holdId },
           'Failed to append chain of custody seal event',
@@ -748,7 +748,7 @@ export class LegalHoldOrchestrator {
           );
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { err: error, holdId: hold.holdId },
         'Failed to send legal hold notifications',

@@ -218,7 +218,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
       console.log(`[PQC] Generated ${algorithm} key pair: ${keyId}`);
 
       return keyStore;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logOperation({
         success: false,
@@ -269,7 +269,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logOperation({
         success: false,
@@ -321,7 +321,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
       });
 
       return sharedSecret;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logOperation({
         success: false,
@@ -367,7 +367,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
       });
 
       return signature;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logOperation({
         success: false,
@@ -413,7 +413,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
       });
 
       return isValid;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logOperation({
         success: false,
@@ -479,7 +479,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
       console.log(`[PQC] Generated hybrid key pair: ${keyId}`);
 
       return keyStore;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logOperation({
         success: false,
@@ -826,7 +826,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
           });
 
           if (policy.autoRotate && daysUntilExpiry <= 0) {
-            this.rotateKey(keyId).catch((err) => {
+            this.rotateKey(keyId).catch((err: any) => {
               console.error(`[PQC] Auto-rotation failed for ${keyId}:`, err);
             });
           }

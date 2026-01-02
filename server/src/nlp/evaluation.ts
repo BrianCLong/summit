@@ -21,7 +21,7 @@ export class EvaluationHarness {
 
   async run(): Promise<EvaluationMetrics> {
     const dataset = loadDomainTestSet(this.testSetPath);
-    const documents: RawDocument[] = dataset.map((row) => ({
+    const documents: RawDocument[] = dataset.map((row: any) => ({
       source: 'file',
       payload: row,
     }));

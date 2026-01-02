@@ -22,7 +22,7 @@ export async function executeOnWorker(
   runId: string,
 ): Promise<any> {
   if (inflight >= MAX_INFLIGHT) {
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r: any) => setTimeout(r, 50));
   }
   const t = pickTarget();
   if (!t) throw new Error('no healthy workers');

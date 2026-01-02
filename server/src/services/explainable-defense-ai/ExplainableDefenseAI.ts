@@ -377,7 +377,7 @@ export class ExplainableDefenseAI extends EventEmitter {
         operation: 'RANK_ORDERING',
         description: 'Order items by composite score',
         inputs: scored.map((s) => `${s.id}:${s.score.toFixed(3)}`),
-        outputs: ranked.map((r) => `#${r.rank}:${r.id}`),
+        outputs: ranked.map((r: any) => `#${r.rank}:${r.id}`),
         algorithm: 'DescendingSort',
         parameters: {},
         confidenceIn: 0.95,
@@ -591,7 +591,7 @@ export class ExplainableDefenseAI extends EventEmitter {
       records = records.filter((r) => r.action === filter.action);
     }
     if (filter?.since) {
-      records = records.filter((r) => r.timestamp >= filter.since);
+      records = records.filter((r) => r.timestamp >= (filter.since as Date));
     }
 
     return records;
@@ -603,7 +603,7 @@ export class ExplainableDefenseAI extends EventEmitter {
     exportedAt: Date;
     signature: string;
   } {
-    const merkleRoot = this.computeMerkleRoot(this.auditChain.map((r) => r.chainHash));
+    const merkleRoot = this.computeMerkleRoot(this.auditChain.map((r: any) => r.chainHash));
     const exportedAt = new Date();
     const signature = this.sign(`${merkleRoot}:${exportedAt.toISOString()}`);
 

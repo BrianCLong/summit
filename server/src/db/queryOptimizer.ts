@@ -185,7 +185,7 @@ export class QueryOptimizer {
           });
 
           return plan;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -229,7 +229,7 @@ export class QueryOptimizer {
         resultCacheHits.inc({ tenant_id: context.tenantId, query_type: context.queryType });
         return cachedResult; // Already normalized/transformed when cached
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.warn('Failed to read from result cache', { error: e });
     }
 
@@ -244,7 +244,7 @@ export class QueryOptimizer {
     // 5. Cache result (using normalized data)
     try {
       await this.cacheResult(resultCacheKey, normalizedResult, plan.cacheStrategy.ttl);
-    } catch (e) {
+    } catch (e: any) {
       logger.warn('Failed to write to result cache', { error: e });
     }
 
@@ -336,7 +336,7 @@ export class QueryOptimizer {
           });
 
           stream.on('end', () => resolve());
-          stream.on('error', (err) => reject(err));
+          stream.on('error', (err: any) => reject(err));
         });
       };
 
@@ -344,7 +344,7 @@ export class QueryOptimizer {
         deletePattern(resultPattern),
         deletePattern(planPattern)
       ]);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to invalidate cache for tenant ${tenantId}`, { error });
     }
   }
@@ -591,7 +591,7 @@ export class QueryOptimizer {
             }
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         // Ignore explain errors, fallback to heuristics
       }
     }
@@ -916,13 +916,13 @@ export class QueryOptimizer {
           // Try Decompressing if it looks like base64
           // For now, assume it's JSON if it parses, otherwise try decompress
           return JSON.parse(cached);
-        } catch (e) {
+        } catch (e: any) {
           // Might be compressed
           return CompressionUtils.decompressFromString(cached);
         }
       }
       return null;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Query optimizer cache read error:', error);
       return null;
     }
@@ -936,7 +936,7 @@ export class QueryOptimizer {
       const redis = getRedisClient();
       const serialized = await CompressionUtils.compressToString(plan);
       await redis.set(cacheKey, serialized, 'EX', this.defaultTTL);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Query optimizer cache write error:', error);
     }
   }

@@ -131,7 +131,7 @@ export class NlToCypherService {
       );
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { queryId, userId, tenantId, error },
         'NL→Cypher translation failed',
@@ -202,7 +202,7 @@ export class NlToCypherService {
         executionTimeMs: executionTime,
         warnings: [],
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ queryId, error }, 'Sandbox execution failed');
       return {
         success: false,

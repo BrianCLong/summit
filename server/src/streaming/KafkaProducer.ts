@@ -32,7 +32,7 @@ export class KafkaProducerWrapper {
         await this.producer.connect();
         this.isConnected = true;
         this.logger.info('Connected to Kafka Producer');
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error('Failed to connect to Kafka Producer', error);
         throw error;
       }
@@ -74,7 +74,7 @@ export class KafkaProducerWrapper {
         topic,
         messages: kafkaMessages,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to send messages to topic ${topic}`, error);
       throw error;
     }

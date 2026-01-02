@@ -492,7 +492,7 @@ export class GraphRAGQueryServiceEnhanced {
       }, 'Completed enhanced GraphRAG query');
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
 
       metrics.graphragQueryTotal.inc({
@@ -651,7 +651,7 @@ export class GraphRAGQueryServiceEnhanced {
                 claimIds = (evidence.metadata as any).claimIds;
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             logger.warn({
               error,
               evidenceId: row.evidence_id,
@@ -682,7 +682,7 @@ export class GraphRAGQueryServiceEnhanced {
       }
 
       return enrichedCitations;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         entityIds,
@@ -750,7 +750,7 @@ export class GraphRAGQueryServiceEnhanced {
       }, 'Registered GraphRAG answer as claim');
 
       return claim.id;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         investigationId,
@@ -838,7 +838,7 @@ export class GraphRAGQueryServiceEnhanced {
       }
 
       return undefined;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         investigationId,

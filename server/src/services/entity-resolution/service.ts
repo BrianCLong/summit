@@ -30,7 +30,7 @@ export class EntityResolutionService {
    * This is a simplified "blocking" approach where we query for potential candidates.
    */
   async resolveBatch(entities: EntityInput[]): Promise<ResolutionDecision[]> {
-    return getTracer().withSpan('EntityResolutionService.resolveBatch', async (span) => {
+    return getTracer().withSpan('EntityResolutionService.resolveBatch', async (span: any) => {
         span.setAttribute('er.batch_size', entities.length);
         const limit = pLimit(10); // Concurrency limit
         const decisions: ResolutionDecision[] = [];
@@ -121,7 +121,7 @@ export class EntityResolutionService {
               tenantId: entity.tenantId
           };
       });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error finding candidates:', error);
         return [];
     } finally {

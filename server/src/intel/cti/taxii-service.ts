@@ -430,7 +430,7 @@ export class TaxiiService {
         };
         store.set(object.id, stored);
         successes.push(object.id);
-      } catch (error) {
+      } catch (error: any) {
         failures.push({
           id: object.id,
           message: (error as Error).message,
@@ -580,7 +580,7 @@ export class TaxiiService {
     query += ' ORDER BY updated_at DESC LIMIT 1000';
 
     const result = await this.deps.pg.query(query, params);
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       tenantId: row.tenant_id,
       kind: row.kind,

@@ -24,11 +24,11 @@ export interface DLPPolicy {
 
 export interface DLPCondition {
   type:
-    | 'content_match'
-    | 'field_match'
-    | 'metadata_match'
-    | 'user_role'
-    | 'tenant_id';
+  | 'content_match'
+  | 'field_match'
+  | 'metadata_match'
+  | 'user_role'
+  | 'tenant_id';
   field?: string;
   pattern?: string;
   operator: 'contains' | 'matches' | 'equals' | 'starts_with' | 'ends_with';
@@ -315,16 +315,16 @@ class DLPService {
           scanDuration,
           contentSize: contentStr.length,
           violationCount: results.length,
-          highSeverityViolations: results.filter((r) =>
+          highSeverityViolations: results.filter((r: any) =>
             r.recommendedActions.some(
-              (a) => a.severity === 'high' || a.severity === 'critical',
+              (a: any) => a.severity === 'high' || a.severity === 'critical',
             ),
           ).length,
         });
 
         return results;
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('DLP scan failed', {
         component: 'DLPService',
         error: error.message,
@@ -392,7 +392,7 @@ class DLPService {
               actionsApplied.push('audited');
               break;
           }
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to apply DLP action', {
             component: 'DLPService',
             action: action.type,
@@ -564,9 +564,9 @@ class DLPService {
       condition.value instanceof RegExp
         ? condition.value
         : new RegExp(
-            condition.value as string,
-            condition.caseSensitive ? 'g' : 'gi',
-          );
+          condition.value as string,
+          condition.caseSensitive ? 'g' : 'gi',
+        );
 
     switch (condition.operator) {
       case 'contains':
@@ -737,7 +737,7 @@ class DLPService {
             // Send to configured webhooks
             break;
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to send DLP notification', {
           component: 'DLPService',
           channel,
@@ -800,7 +800,7 @@ class DLPService {
   ): Promise<void> {
     try {
       await getRedisClient().setex(key, ttl, JSON.stringify(results));
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to cache DLP results', {
         component: 'DLPService',
         error: error.message,

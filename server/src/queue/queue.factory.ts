@@ -66,7 +66,7 @@ export class QueueFactory {
   }
 
   static createWorker(name: string, processor: Processor, options: Partial<WorkerOptions> = {}): Worker {
-    const worker = new Worker(name, async (job) => {
+    const worker = new Worker(name, async (job: any) => {
       const end = jobDurationHistogram.startTimer({ queue_name: name });
       try {
         logger.info(`Processing job ${job.id} in ${name}`);
@@ -85,7 +85,7 @@ export class QueueFactory {
       ...options,
     });
 
-    worker.on('completed', (job) => {
+    worker.on('completed', (job: any) => {
       logger.info(`Job ${job.id} completed in ${name}`);
     });
 

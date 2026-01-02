@@ -93,7 +93,7 @@ export class DeduplicationService {
         dedupeChecks.inc({ tenant_id: signal.tenantId, result: 'unique' });
 
         return false; // Not a duplicate
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
 
@@ -144,7 +144,7 @@ export class DeduplicationService {
       );
 
       return exists !== null;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Redis dedupe check failed:', error);
       return false; // Fail open
     }
@@ -157,7 +157,7 @@ export class DeduplicationService {
     try {
       const key = `${this.redisKeyPrefix}:${tenantId}:${dedupeHash}`;
       await redis.setWithTTL(key, '1', this.redisTTL);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to cache dedupe hash:', error);
       // Non-critical error, continue processing
     }
@@ -182,7 +182,7 @@ export class DeduplicationService {
       );
 
       return pgResult || neoResult;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Database dedupe check failed:', error);
       return false; // Fail open
     }
@@ -237,7 +237,7 @@ export class DeduplicationService {
         // Process in parallel for better performance
         const promises = signals.map((signal) => this.checkDuplicate(signal));
         return await Promise.all(promises);
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         throw error;
@@ -266,7 +266,7 @@ export class DeduplicationService {
       `);
 
       console.log('Neo4j deduplication indexes created');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create deduplication indexes:', error);
       throw error;
     }

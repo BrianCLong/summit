@@ -99,7 +99,7 @@ router.post('/templates', async (req, res) => {
         templates.push(newTemplate);
         await saveTemplates(templates);
         res.status(201).json(newTemplate);
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ error: (error as Error).message });
     }
 });
@@ -113,7 +113,7 @@ router.put('/templates/:id', async (req, res) => {
         templates[index] = { ...templates[index], ...req.body };
         await saveTemplates(templates);
         res.json(templates[index]);
-    } catch (error) {
+    } catch (error: any) {
          res.status(500).json({ error: (error as Error).message });
     }
 });
@@ -141,7 +141,7 @@ router.post('/generate', async (req, res) => {
     }
 
     res.send(artifact.buffer);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -168,7 +168,7 @@ router.post('/schedule', async (req, res) => {
         await BatchJobService.scheduleReport(name, cron, { request: reportRequest, userId: (req as any).accessContext.userId });
 
         res.status(201).json({ message: 'Report scheduled', reportName: name });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ error: (error as Error).message });
     }
 });

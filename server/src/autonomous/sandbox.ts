@@ -123,7 +123,7 @@ export class ActionSandbox {
       };
     } finally {
       // Cleanup sandbox directory
-      await this.cleanupSandbox(sandboxPath).catch((err) => {
+      await this.cleanupSandbox(sandboxPath).catch((err: any) => {
         this.logger.warn(
           { sandboxId, error: err.message },
           'Failed to cleanup sandbox',

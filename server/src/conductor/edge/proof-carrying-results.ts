@@ -260,7 +260,7 @@ export class ProofCarryingResultSystem {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to create proof-carrying result', { error });
       throw error;
     }
@@ -434,7 +434,7 @@ export class ProofCarryingResultSystem {
         errors,
         warnings,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Result verification failed', {
         error,
         resultId: result.resultId,
@@ -473,7 +473,7 @@ export class ProofCarryingResultSystem {
 
       const verification = await dualNotary.verifyNotarizedRoot(notarized);
       return verification.hsmVerification;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Proof verification failed', { error });
       return false;
     }
@@ -511,7 +511,7 @@ export class ProofCarryingResultSystem {
       const nonceValid = attestation.nonce.length === 64; // 32 bytes hex
 
       return verification.hsmVerification && nonceValid;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Attestation verification failed', { error });
       return false;
     }
@@ -636,7 +636,7 @@ export class ProofCarryingResultSystem {
       [sessionId],
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       resultId: row.result_id,
       sessionId: row.session_id,
       nodeId: row.node_id,

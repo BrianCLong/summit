@@ -33,7 +33,7 @@ export class PolicyService {
     // Default deny if decision is null/undefined
     const result: PolicyDecision = {
       allow: decision?.allow || false,
-      reason: decision?.reason || 'No matching policy allowed this action',
+      reason: (decision as any)?.reason || 'No matching policy allowed this action',
       obligations: []
     };
 

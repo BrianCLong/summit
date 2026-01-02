@@ -108,7 +108,7 @@ export class RelationshipShapeValidator {
        if (prop.name.includes('date') && normalized[prop.name]) {
          try {
            normalized[prop.name] = new Date(normalized[prop.name]).toISOString();
-         } catch (e) {
+         } catch (e: any) {
            // ignore or warn
          }
        }

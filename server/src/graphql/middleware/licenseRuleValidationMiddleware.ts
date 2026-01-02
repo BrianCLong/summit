@@ -118,7 +118,7 @@ function evaluateLicenseRules(
   const userNeedToKnow = new Set([...(user.needToKnowTags || []), ...(user.missionTags || [])]);
   if (
     requirements.requiredNeedToKnow.length > 0 &&
-    !requirements.requiredNeedToKnow.every((tag) => userNeedToKnow.has(tag))
+    !requirements.requiredNeedToKnow.every((tag: any) => userNeedToKnow.has(tag))
   ) {
     reasons.push(
       `Need-to-know tags required: ${requirements.requiredNeedToKnow.join(', ')}`,

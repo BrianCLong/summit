@@ -118,8 +118,8 @@ export class RealtimeSessionManager extends EventEmitter {
 }
 
 export class RealtimeReceiver extends BaseReceiver {
-  private realtimeConfig: RealtimeReceiverConfig;
-  private manager: RealtimeSessionManager;
+  private realtimeConfig!: RealtimeReceiverConfig;
+  private manager!: RealtimeSessionManager;
 
   constructor() {
     super('realtime', 'Realtime Notifications');

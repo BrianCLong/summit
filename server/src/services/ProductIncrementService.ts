@@ -129,7 +129,7 @@ export class ProductIncrementService {
       );
 
       return { success: true, data: increment };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, input }, 'Failed to create increment');
       return {
         success: false,
@@ -168,7 +168,7 @@ export class ProductIncrementService {
       serviceLogger.info({ incrementId: id }, 'Product increment updated');
 
       return { success: true, data: updated };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, id, input }, 'Failed to update increment');
       return {
         success: false,
@@ -206,7 +206,7 @@ export class ProductIncrementService {
       serviceLogger.info({ incrementId: id }, 'Product increment deleted');
 
       return { success: true, data: true };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, id }, 'Failed to delete increment');
       return {
         success: false,
@@ -372,7 +372,7 @@ export class ProductIncrementService {
       );
 
       return { success: true, data: goal };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, input }, 'Failed to create goal');
       return {
         success: false,
@@ -400,7 +400,7 @@ export class ProductIncrementService {
       }
 
       return { success: true, data: updated };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, id, input }, 'Failed to update goal');
       return {
         success: false,
@@ -416,7 +416,7 @@ export class ProductIncrementService {
     try {
       const deleted = await this.repo.deleteGoal(id);
       return { success: deleted, data: deleted };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -472,7 +472,7 @@ export class ProductIncrementService {
       );
 
       return { success: true, data: deliverable };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, input }, 'Failed to create deliverable');
       return {
         success: false,
@@ -512,7 +512,7 @@ export class ProductIncrementService {
       }
 
       return { success: true, data: updated };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, id, input }, 'Failed to update deliverable');
       return {
         success: false,
@@ -528,7 +528,7 @@ export class ProductIncrementService {
     try {
       const deleted = await this.repo.deleteDeliverable(id);
       return { success: deleted, data: deleted };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -603,7 +603,7 @@ export class ProductIncrementService {
       );
 
       return { success: true, data: assignment };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, input }, 'Failed to assign team member');
       return {
         success: false,
@@ -627,7 +627,7 @@ export class ProductIncrementService {
       }
 
       return { success: removed, data: removed };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -719,7 +719,7 @@ export class ProductIncrementService {
   async recordMetricsSnapshot(incrementId: string): Promise<MetricsSnapshot | null> {
     try {
       return await this.repo.recordMetricsSnapshot(incrementId);
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error, incrementId }, 'Failed to record metrics snapshot');
       return null;
     }

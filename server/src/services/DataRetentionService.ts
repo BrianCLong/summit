@@ -98,7 +98,7 @@ export class DataRetentionService {
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Error during data retention cleanup.');
     } finally {
       await session.close();

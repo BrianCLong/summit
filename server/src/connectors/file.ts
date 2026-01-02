@@ -57,7 +57,7 @@ export class FileSourceConnector extends BaseSourceConnector {
         records,
         nextCursor: fileToProcess,
       };
-    } catch (err) {
+    } catch (err: any) {
       this.handleError(ctx, err);
       throw err;
     }

@@ -41,7 +41,7 @@ export class PartitionManager {
       logger.info(`Created partition ${partitionName} for tenant ${tenantId}`);
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error(`Failed to create partition for tenant ${tenantId}`, error);
       throw error;
@@ -92,7 +92,7 @@ export class PartitionManager {
       logger.info(`Created monthly partition ${partitionName} (${startStr} to ${endStr})`);
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
        await client.query('ROLLBACK');
        // Don't log error if it's just that the parent table doesn't exist yet (might be dev env)
        if ((error as any).code === '42P01') {

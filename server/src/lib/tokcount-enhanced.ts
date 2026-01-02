@@ -164,7 +164,7 @@ async function tokenizePrecise(
           const text = serializePayload(payload);
           const tokens = encode(text, model).length;
           return { prompt: tokens, method: 'precise' };
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('GPT tokenizer failed, falling back to heuristic', {
             error: error instanceof Error ? error.message : String(error),
           });
@@ -184,7 +184,7 @@ async function tokenizePrecise(
       default:
         return tokenizeHeuristic(payload, provider);
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Precise tokenization failed', {
       provider,
       model,
@@ -461,7 +461,7 @@ export async function reconcileActualUsage(
       reconciliationConfidence: confidence,
       estimationMethod: 'reconciled',
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Token usage reconciliation failed', {
       error: error instanceof Error ? error.message : String(error),
       estimated,

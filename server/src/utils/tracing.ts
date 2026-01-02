@@ -62,7 +62,7 @@ export const tracer = {
     const span = new NoopSpan(name);
     try {
       return await handler(span);
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       throw error;
     } finally {

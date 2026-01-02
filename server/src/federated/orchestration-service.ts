@@ -112,7 +112,7 @@ export class FederatedOrchestrationService {
     setInterval(async () => {
       try {
         await this.discoverEnclaves();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Enclave discovery failed:', error);
       }
     }, 300000); // 5 minutes
@@ -399,7 +399,7 @@ export class FederatedOrchestrationService {
       transferMode: 'airgap',
       claims: request.claims,
       merkleRoot: '',
-      instructions: [],
+      instructions: [] as string[],
     };
 
     // Generate Merkle proof for integrity
@@ -416,7 +416,7 @@ export class FederatedOrchestrationService {
     );
 
     // Generate offline transfer instructions
-    const instructions = [
+    const instructions: string[] = [
       'Export signed claim manifest to removable media',
       `Transfer media from ${sourceEnclave.region} to ${targetEnclave.region}`,
       'Import and verify Merkle proof at target enclave',
@@ -447,7 +447,7 @@ export class FederatedOrchestrationService {
 
       verifier.update(contentToVerify);
       return verifier.verify(publicKey, claim.signature, 'base64');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Claim verification failed:', error);
       return false;
     }
@@ -583,7 +583,7 @@ export class FederatedOrchestrationService {
         ['active'],
       );
 
-      result.rows.forEach((row) => {
+      result.rows.forEach((row: any) => {
         const manifest: EnclaveManifest = {
           enclaveId: row.enclave_id,
           region: row.region,
@@ -597,7 +597,7 @@ export class FederatedOrchestrationService {
 
         this.registeredEnclaves.set(manifest.enclaveId, manifest);
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load registered enclaves:', error);
     }
   }
@@ -610,7 +610,7 @@ export class FederatedOrchestrationService {
 
       // Update enclave health status
       await this.updateEnclaveHealth();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Enclave discovery failed:', error);
     }
   }
@@ -635,7 +635,7 @@ export class FederatedOrchestrationService {
           'UPDATE federated_enclaves SET last_health_check = now(), health_status = $1 WHERE enclave_id = $2',
           [status, enclaveId],
         );
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Health check failed for enclave ${enclaveId}:`, error);
 
         await pool.query(
@@ -682,13 +682,13 @@ export class FederatedOrchestrationService {
       federation: {
         totalEnclaves: Array.from(this.registeredEnclaves.keys()).length,
         healthyEnclaves:
-          enclaveStats.rows.find((r) => r.health_status === 'healthy')?.total ||
+          enclaveStats.rows.find((r: any) => r.health_status === 'healthy')?.total ||
           0,
         unhealthyEnclaves:
-          enclaveStats.rows.find((r) => r.health_status === 'unhealthy')
+          enclaveStats.rows.find((r: any) => r.health_status === 'unhealthy')
             ?.total || 0,
         unreachableEnclaves:
-          enclaveStats.rows.find((r) => r.health_status === 'unreachable')
+          enclaveStats.rows.find((r: any) => r.health_status === 'unreachable')
             ?.total || 0,
       },
       activity: {

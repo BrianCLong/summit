@@ -59,7 +59,7 @@ router.post('/tenants/:targetTenantId/plan', (req: Request, res: Response) => {
             audited: true
         });
 
-    } catch (error) {
+    } catch (error: any) {
         logger.error({ err: error }, 'Admin route error');
         return res.status(500).json({ error: 'internal_error', message: String(error) });
     }
@@ -90,7 +90,7 @@ router.get('/tenants/:targetTenantId/quota', (req: Request, res: Response) => {
             }
         });
 
-    } catch (error) {
+    } catch (error: any) {
         logger.error({ err: error }, 'Admin route error');
         return res.status(500).json({ error: 'internal_error', message: String(error) });
     }

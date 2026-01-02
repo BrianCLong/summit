@@ -63,7 +63,7 @@ describe('Telemetry Service', () => {
     if (fs.existsSync(TEST_LOG_DIR)) {
        try {
         fs.rmSync(TEST_LOG_DIR, { recursive: true, force: true });
-       } catch (e) {
+       } catch (e: any) {
            console.error('Error cleaning up test logs:', e);
        }
     }

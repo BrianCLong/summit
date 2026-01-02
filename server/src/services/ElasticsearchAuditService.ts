@@ -105,7 +105,7 @@ export class ElasticsearchAuditService {
 
       // Create index templates
       await this.createIndexTemplates();
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message },
         'Failed to initialize Elasticsearch client',
@@ -230,7 +230,7 @@ export class ElasticsearchAuditService {
         });
 
         serviceLogger.info({ template: template.name }, 'Index template created');
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.error(
           { error: (error as Error).message, template: template.name },
           'Failed to create index template',
@@ -279,7 +279,7 @@ export class ElasticsearchAuditService {
       });
 
       serviceLogger.debug({ eventId: event.event_id }, 'Event indexed to Elasticsearch');
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message, eventId: event.event_id },
         'Failed to index event',
@@ -305,7 +305,7 @@ export class ElasticsearchAuditService {
       });
 
       serviceLogger.debug({ id: accessLog.id }, 'Access log indexed to Elasticsearch');
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message, id: accessLog.id },
         'Failed to index access log',
@@ -331,7 +331,7 @@ export class ElasticsearchAuditService {
       });
 
       serviceLogger.debug({ accessId: phiLog.access_id }, 'PHI access log indexed');
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message, accessId: phiLog.access_id },
         'Failed to index PHI access log',
@@ -430,7 +430,7 @@ export class ElasticsearchAuditService {
           source: hit._source,
         })),
       };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message },
         'Failed to search audit logs in Elasticsearch, falling back to PostgreSQL',
@@ -500,7 +500,7 @@ export class ElasticsearchAuditService {
       });
 
       return result.aggregations?.result;
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message },
         'Failed to aggregate data in Elasticsearch',
@@ -658,7 +658,7 @@ export class ElasticsearchAuditService {
           { count: rows.length, offset },
           'Bulk indexed audit events',
         );
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.error(
           { error: (error as Error).message, offset },
           'Failed to bulk index events',

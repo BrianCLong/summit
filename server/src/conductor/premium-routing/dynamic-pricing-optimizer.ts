@@ -406,7 +406,7 @@ export class DynamicPricingOptimizer {
         confidence,
         priceRange,
       };
-    } catch (error) {
+    } catch (error: any) {
       const calculationTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
@@ -447,7 +447,7 @@ export class DynamicPricingOptimizer {
           options,
         );
         recommendations.push(recommendation);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to generate pricing recommendation', {
           error: error.message,
           modelId,
@@ -476,7 +476,7 @@ export class DynamicPricingOptimizer {
       recommendationCount: recommendations.length,
       targetMetric: options?.targetMetric || 'revenue',
       significantChanges: recommendations.filter(
-        (r) => Math.abs(r.changePercent) > 0.05,
+        (r: any) => Math.abs(r.changePercent) > 0.05,
       ).length,
     });
 
@@ -494,7 +494,7 @@ export class DynamicPricingOptimizer {
         const ratio = await this.calculateModelQCR(modelId, pricingModel);
         ratios.set(modelId, ratio);
         this.qualityCostRatios.set(modelId, ratio);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to calculate quality-cost ratio', {
           error: error.message,
           modelId,
@@ -561,7 +561,7 @@ export class DynamicPricingOptimizer {
 
     const roi = expectedImprovement / Math.max(totalCost, 1);
     const timeline = Math.max(
-      ...selectedRecommendations.map((r) => r.timeline),
+      ...selectedRecommendations.map((r: any) => r.timeline),
     );
 
     // Record optimization results
@@ -651,7 +651,7 @@ export class DynamicPricingOptimizer {
             failed++;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         results.push({
           recommendationId,
           success: false,
@@ -1032,7 +1032,7 @@ export class DynamicPricingOptimizer {
     setInterval(async () => {
       try {
         await this.updateAllPricing();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Dynamic pricing update failed', { error: error.message });
       }
     }, this.PRICE_UPDATE_FREQUENCY);
@@ -1105,7 +1105,7 @@ export class DynamicPricingOptimizer {
             confidence: optimalPricing.confidence,
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to update pricing for model', {
           modelId,
           error: error.message,

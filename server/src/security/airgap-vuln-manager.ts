@@ -151,7 +151,7 @@ export class AirGapVulnManager {
 
       this.initialized = true;
       console.log('✅ Air-Gapped Vulnerability Manager initialized');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Failed to initialize vulnerability manager:', error);
       throw error;
     }

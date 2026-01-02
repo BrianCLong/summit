@@ -113,7 +113,7 @@ export class SOARPlaybookService {
 
       await this.completePlaybookExecution(playbook.id, 'completed');
       return playbook;
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Phishing containment playbook failed', {
         error: errorMessage,
@@ -201,7 +201,7 @@ export class SOARPlaybookService {
 
       await this.completePlaybookExecution(playbook.id, 'completed');
       return playbook;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Forced MFA reset playbook failed', { error, alertId });
       await this.completePlaybookExecution(playbook.id, 'failed', {
         error: error.message,
@@ -287,7 +287,7 @@ export class SOARPlaybookService {
 
       await this.completePlaybookExecution(playbook.id, 'completed');
       return playbook;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('URL block playbook failed', { error, alertId });
       await this.completePlaybookExecution(playbook.id, 'failed', {
         error: error.message,
@@ -312,7 +312,7 @@ export class SOARPlaybookService {
       });
 
       return execution as PlaybookExecution | null;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to get playbook execution', {
         error,
         executionId,
@@ -338,7 +338,7 @@ export class SOARPlaybookService {
       });
 
       return executions as PlaybookExecution[];
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to get playbook executions for alert', {
         error,
         alertId,
@@ -410,7 +410,7 @@ export class SOARPlaybookService {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       await this.prisma.playbookStep.update({
         where: { id: step.id },
         data: {

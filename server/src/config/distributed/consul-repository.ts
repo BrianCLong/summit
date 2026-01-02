@@ -182,7 +182,7 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
         }
 
         await callback({ configId, version });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error parsing Consul watch data:', error);
       }
     });
@@ -264,7 +264,7 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
         await this.consul.kv.del(key);
         await this.consul.kv.del(auditKey);
         deleted++;
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to delete version ${version.metadata.version}:`, error);
       }
     }
@@ -279,7 +279,7 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
     try {
       const health = await this.consul.agent.check.list();
       return !!health;
-    } catch (error) {
+    } catch (error: any) {
       return false;
     }
   }
@@ -342,7 +342,7 @@ export class ConsulConfigRepository<TConfig = Record<string, any>>
       }
 
       return JSON.parse(result.Value) as T;
-    } catch (error) {
+    } catch (error: any) {
       // Key doesn't exist
       const err = error as { statusCode?: number };
       if (err.statusCode === 404) {

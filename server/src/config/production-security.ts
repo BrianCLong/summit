@@ -34,7 +34,7 @@ export const productionAuthMiddleware = async (
     // Attach user to request
     (req as any).user = user;
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Authentication error:', error);
     return res.status(403).json({ error: 'Forbidden: Token verification failed' });
   }

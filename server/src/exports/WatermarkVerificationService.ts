@@ -117,7 +117,7 @@ export class WatermarkVerificationService {
         mismatches,
         reasonCodes: mismatches,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         valid: false,
         manifestHash: null,

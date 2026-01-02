@@ -45,7 +45,7 @@ export class TenantKillSwitch {
       this.cache = parsed;
       this.lastLoadedAt = stats.mtimeMs;
       return parsed;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         { filePath: this.filePath, error },
         'Kill-switch config unavailable, continuing without overrides',

@@ -116,7 +116,7 @@ export class TextAnalysisEngine {
 
       this.isInitialized = true;
       logger.info('Text Analysis Engine initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize Text Analysis Engine:', error);
       throw error;
     }
@@ -240,7 +240,7 @@ export class TextAnalysisEngine {
         `Text analysis completed: ${entities.length} entities, sentiment: ${sentiment?.label || 'N/A'}`,
       );
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Text analysis failed:', error);
       throw error;
     }
@@ -874,7 +874,7 @@ export class TextAnalysisEngine {
     try {
       // This would load spaCy models and other NLP models
       logger.info('Language models loaded successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load language models:', error);
       throw error;
     }

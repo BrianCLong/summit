@@ -122,12 +122,12 @@ class GraphIndexAdvisorService {
       let result;
       try {
         result = await session.run('SHOW INDEXES YIELD labelsOrTypes, properties');
-      } catch (e) {
+      } catch (e: any) {
         // Fallback for older versions
         result = await session.run('CALL db.indexes() YIELD labelsOrTypes, properties');
       }
 
-      result.records.forEach(record => {
+      result.records.forEach((record: any) => {
         const labels = record.get('labelsOrTypes');
         const properties = record.get('properties');
 
@@ -182,7 +182,7 @@ class GraphIndexAdvisorService {
 
       return recommendations;
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error fetching indexes or generating recommendations', error);
       throw error;
     } finally {

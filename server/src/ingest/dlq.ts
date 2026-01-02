@@ -18,7 +18,7 @@ export class DLQService {
         [record.id || id, record.tenantId, record.pipelineKey, record.stage, record.reason, JSON.stringify(record.payload)]
       );
       this.logger.warn({ dlqId: id, pipeline: record.pipelineKey }, 'Record sent to DLQ');
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error({ err, originalRecord: record }, 'Failed to write to DLQ');
       // Last resort: log it so it's not lost
     }

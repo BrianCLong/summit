@@ -98,7 +98,7 @@ export class SafeMutationTracing {
           ...attributes,
         },
       },
-      async (span) => {
+      async (span: any) => {
         const startTime = Date.now();
 
         try {
@@ -111,7 +111,7 @@ export class SafeMutationTracing {
           });
 
           return result;
-        } catch (error) {
+        } catch (error: any) {
           const errorMessage =
             error instanceof Error ? error.message : String(error);
 
@@ -155,12 +155,12 @@ export class SafeMutationTracing {
           ...attributes,
         },
       },
-      async (span) => {
+      async (span: any) => {
         try {
           const result = await operation(span);
           span.setStatus({ code: SpanStatusCode.OK });
           return result;
-        } catch (error) {
+        } catch (error: any) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
             message: error instanceof Error ? error.message : String(error),
@@ -358,7 +358,7 @@ export class SafeMutationMetrics {
         rateLimitHits: 0,
         activeTokenBuckets: 0,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get metrics snapshot', { error });
       return {
         budgetDenials: -1,
@@ -405,7 +405,7 @@ export class SafeMutationMetrics {
         metrics: metricNames,
         errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       errors.push(
         `Metrics health check failed: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -464,7 +464,7 @@ export function createMetricsContext() {
 export async function getPrometheusMetrics(): Promise<string> {
   try {
     return await register.metrics();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to export Prometheus metrics', { error });
     return '';
   }
@@ -491,7 +491,7 @@ export class MetricsCollector {
     this.intervalId = setInterval(async () => {
       try {
         await this.collectMetrics();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Metrics collection failed', { error });
       }
     }, this.collectionIntervalMs);
@@ -533,7 +533,7 @@ export class MetricsCollector {
       // SafeMutationMetrics.updateCompensationLogSize(compensationStats.totalEntries, 'all');
 
       logger.debug('Metrics collection completed');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error during metrics collection', { error });
     }
   }

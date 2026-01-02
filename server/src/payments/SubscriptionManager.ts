@@ -172,7 +172,7 @@ export class SubscriptionManager {
   ): Promise<number> {
     return this.usageRecords
       .filter(
-        (r) =>
+        (r: any) =>
           r.subscriptionId === subscriptionId &&
           r.metricName === metricName &&
           r.timestamp >= since,

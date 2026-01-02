@@ -95,7 +95,7 @@ export class TargetExpander {
         value: `docs.${url.hostname}`,
         source: `heuristic:api_docs`
       });
-    } catch (e) {
+    } catch (e: any) {
       // Invalid URL
     }
     return results;

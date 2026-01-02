@@ -34,13 +34,13 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
         this.redis = new Redis(process.env.REDIS_URL);
         this.pubsub = new Redis(process.env.REDIS_URL);
 
-        this.pubsub.subscribe('feature_flag_updates', (err) => {
+        this.pubsub.subscribe('feature_flag_updates', (err: any) => {
           if (err) {
             logger.error('Failed to subscribe to feature_flag_updates', err);
           }
         });
 
-        this.pubsub.on('message', (channel, message) => {
+        this.pubsub.on('message', (channel: any, message: any) => {
           if (channel === 'feature_flag_updates') {
             this.handleUpdate(message);
           }
@@ -52,7 +52,7 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
 
       this.ready = true;
       logger.info('PostgresFeatureFlagProvider initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize PostgresFeatureFlagProvider', error);
       throw error;
     }
@@ -73,7 +73,7 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
       // Refresh all for simplicity, or parse message for specific key
       await this.refreshCache();
       this.emit('update');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error handling flag update', error);
     }
   }
@@ -167,8 +167,8 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
 
     // Tenant check if applicable
     if (flag.metadata?.tenantId && context.tenantId && flag.metadata.tenantId !== context.tenantId) {
-       // Flag is specific to a tenant and context doesn't match
-       return {
+      // Flag is specific to a tenant and context doesn't match
+      return {
         key,
         value: defaultValue,
         exists: true,
@@ -181,36 +181,36 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
     if (flag.rules && flag.rules.length > 0) {
       for (const rule of flag.rules) {
         if (this.matchesRule(rule, context)) {
-           // Check for percentage rollout within rule
-           if (rule.rollout) {
-             const variationId = this.evaluateRollout(rule.rollout, context, key);
-             if (variationId) {
-                const variation = flag.variations.find(v => v.id === variationId);
-                if (variation) {
-                  return {
-                    key,
-                    value: variation.value as T,
-                    variation: variation.id,
-                    exists: true,
-                    reason: 'RULE_MATCH',
-                    timestamp: Date.now(),
-                  };
-                }
-             }
-           } else if (rule.variation) {
-             // Direct variation match
-             const variation = flag.variations.find(v => v.id === rule.variation);
-             if (variation) {
-               return {
+          // Check for percentage rollout within rule
+          if (rule.rollout) {
+            const variationId = this.evaluateRollout(rule.rollout, context, key);
+            if (variationId) {
+              const variation = flag.variations.find(v => v.id === variationId);
+              if (variation) {
+                return {
                   key,
                   value: variation.value as T,
                   variation: variation.id,
                   exists: true,
-                  reason: 'TARGET_MATCH',
+                  reason: 'RULE_MATCH',
                   timestamp: Date.now(),
-               };
-             }
-           }
+                };
+              }
+            }
+          } else if (rule.variation) {
+            // Direct variation match
+            const variation = flag.variations.find(v => v.id === rule.variation);
+            if (variation) {
+              return {
+                key,
+                value: variation.value as T,
+                variation: variation.id,
+                exists: true,
+                reason: 'TARGET_MATCH',
+                timestamp: Date.now(),
+              };
+            }
+          }
         }
       }
     }
@@ -282,7 +282,7 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
     const result: Record<string, FlagEvaluation> = {};
     for (const key of this.cache.keys()) {
       // Best effort type inference, assuming string for bulk fetch if not known
-      result[key] = await this.evaluate(key, null, context);
+      result[key] = await this.evaluate(key, null as any, context);
     }
     return result;
   }

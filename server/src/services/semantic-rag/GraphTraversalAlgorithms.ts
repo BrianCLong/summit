@@ -138,7 +138,7 @@ export class GraphTraversalAlgorithms {
       });
 
       // Get edges between high-scoring nodes
-      const nodeIds = pprResult.records.map(r => r.get('id'));
+      const nodeIds = pprResult.records.map((r: any) => r.get('id'));
       const edgesResult = await session.run(`
         MATCH (a)-[r]->(b)
         WHERE a.id IN $nodeIds AND b.id IN $nodeIds
@@ -152,7 +152,7 @@ export class GraphTraversalAlgorithms {
       const nodes = this.parseNodes(pprResult.records);
       const edges = this.parseEdges(edgesResult.records);
       const scores = new Map<string, number>(
-        pprResult.records.map(r => [r.get('id'), r.get('score')]),
+        pprResult.records.map((r: any) => [r.get('id'), r.get('score')]),
       );
 
       return {
@@ -217,7 +217,7 @@ export class GraphTraversalAlgorithms {
 
       const edges = this.parseEdges(edgesResult.records);
       const scores = new Map<string, number>(
-        result.records.map(r => [r.get('id'), r.get('score')]),
+        result.records.map((r: any) => [r.get('id'), r.get('score')]),
       );
 
       return {
@@ -388,7 +388,7 @@ export class GraphTraversalAlgorithms {
 
       const edges = this.parseEdges(edgesResult.records);
       const scores = new Map<string, number>(
-        result.records.map(r => [r.get('id'), r.get('score')]),
+        result.records.map((r: any) => [r.get('id'), r.get('score')]),
       );
 
       return {
@@ -487,7 +487,7 @@ export class GraphTraversalAlgorithms {
 
       const edges = this.parseEdges(edgesResult.records);
       const scores = new Map<string, number>(
-        result.records.map(r => [r.get('id'), r.get('score')]),
+        result.records.map((r: any) => [r.get('id'), r.get('score')]),
       );
 
       return {
@@ -651,7 +651,7 @@ export class GraphTraversalAlgorithms {
       pathScore as score
     `, { focusNodeIds, targetNodeIds });
 
-    return result.records.map(record => {
+    return result.records.map((record: any) => {
       const nodes = (record.get('nodes') || []).map((n: any) =>
         GraphNodeSchema.parse({
           id: n.id,

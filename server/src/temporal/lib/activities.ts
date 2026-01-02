@@ -26,7 +26,7 @@ export const activities = {
       step: input.step,
       idx: input.idx,
     });
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r: any) => setTimeout(r, 200));
     const res = {
       runId: input.runId,
       step: input.step,

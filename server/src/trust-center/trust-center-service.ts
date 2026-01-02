@@ -115,7 +115,7 @@ export class TrustCenterService {
     const filtered =
       allowSensitive || !allowedFields
         ? rows
-        : rows.map((row) => this.pickFields(row, allowedFields));
+        : rows.map((row: any) => this.pickFields(row, allowedFields));
 
     const policy = allowSensitive
       ? { rules: ['pii', 'financial', 'sensitive'] as const }
@@ -438,7 +438,7 @@ export class TrustCenterService {
               runId: runId,
             },
             resolvedDependencies: [
-              ...routerRows.map((r) => ({
+              ...routerRows.map((r: any) => ({
                 uri: `model://${r.selected_model}`,
                 digest: {
                   sha256: createHash('sha256')
@@ -552,7 +552,7 @@ export class TrustCenterService {
             version: '1.0.0',
           },
         },
-        components: componentRows.map((row) => ({
+        components: componentRows.map((row: any) => ({
           type: row.component_type,
           name: row.component_name,
           version: '1.0.0',
@@ -700,7 +700,7 @@ export class TrustCenterService {
       const hash = createHash('sha256').update(content).digest();
       // Submit hash to timestamp service
       // Store timestamp token in database
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Timestamp service submission failed:', error);
     }
   }
@@ -833,7 +833,7 @@ export class TrustCenterService {
           complianceScore:
             complianceResults.length > 0
               ? (complianceResults.filter(
-                  (r) => r.overallStatus === 'compliant',
+                  (r: any) => r.overallStatus === 'compliant',
                 ).length /
                   complianceResults.length) *
                 100
@@ -916,7 +916,7 @@ export class TrustCenterService {
 
     // Check compliance status
     const nonCompliantFrameworks = complianceResults.filter(
-      (r) => r.overallStatus !== 'compliant',
+      (r: any) => r.overallStatus !== 'compliant',
     ).length;
     riskScore += nonCompliantFrameworks;
 

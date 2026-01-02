@@ -151,7 +151,7 @@ const investigationResolvers = {
             relationships: []
           };
         }
-      } catch (e) {
+      } catch (e: any) {
         logger.warn(`Failed to fetch investigation details for snapshot, using placeholder: ${e}`);
         investigationData = {
           id: investigationId,

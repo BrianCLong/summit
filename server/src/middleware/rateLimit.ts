@@ -60,7 +60,7 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
                     else if (endpointClass === EndpointClass.EXPORT) limit = Math.max(5, Math.floor(quota.requestsPerMinute / 20));
                     else limit = quota.requestsPerMinute;
                 }
-            } catch (e) {
+            } catch (e: any) {
                 // Fallback to defaults
             }
 
@@ -189,7 +189,7 @@ export const createRateLimiter = (endpointClass: EndpointClass = EndpointClass.D
 
             next();
 
-        } catch (e) {
+        } catch (e: any) {
             console.error('Rate limit error', e);
             // Fail open if Redis is down? Or closed?
             // Usually fail open for reliability unless strict.

@@ -158,7 +158,7 @@ export class NarrativeConflictService extends EventEmitter {
 
       this.initialized = true;
       logger.info('NarrativeConflictService initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize NarrativeConflictService');
       throw error;
     }
@@ -368,7 +368,7 @@ export class NarrativeConflictService extends EventEmitter {
     );
 
     return {
-      clusters: dataResult.rows.map(row => this.mapRowToCluster(row)),
+      clusters: dataResult.rows.map((row: any) => this.mapRowToCluster(row)),
       total: parseInt(countResult.rows[0].count),
     };
   }
@@ -963,7 +963,7 @@ export class NarrativeConflictService extends EventEmitter {
       [tenantId]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       clusterId: row.id,
       theme: row.theme,
       lastActivity: row.last_activity,
@@ -985,7 +985,7 @@ export class NarrativeConflictService extends EventEmitter {
       [tenantId]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       theme: row.theme,
       count: parseInt(row.count),
       avgRisk: Math.round(parseFloat(row.avg_risk)),
@@ -1008,7 +1008,7 @@ export class NarrativeConflictService extends EventEmitter {
       [tenantId]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       date: row.day,
       avgRisk: Math.round(parseFloat(row.avg_risk)),
       clusterCount: parseInt(row.count),

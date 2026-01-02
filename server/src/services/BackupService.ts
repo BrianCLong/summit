@@ -23,7 +23,7 @@ const BACKUP_DIR = process.env.BACKUP_DIR || '/tmp/backups';
  *   try {
  *     const results = await backupService.performFullBackup();
  *     console.log('Backup completed:', results);
- *   } catch (error) {
+ *   } catch (error: any) {
  *     console.error('Backup failed:', error);
  *   }
  * }
@@ -78,21 +78,21 @@ export class BackupService {
     try {
       await this.backupPostgres(timestamp);
       results.postgres = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('PostgreSQL backup failed', error);
     }
 
     try {
       await this.backupNeo4j(timestamp);
       results.neo4j = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Neo4j backup failed', error);
     }
 
     try {
       await this.backupRedis(timestamp);
       results.redis = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Redis backup failed', error);
     }
 
@@ -110,45 +110,45 @@ export class BackupService {
     // This avoids putting it in CLI args
 
     // Construct args
-    const args = [];
+    const args: string[] = [];
 
     // If DATABASE_URL is set, pg_dump can use it directly via -d
     if (env.DATABASE_URL) {
-       args.push(env.DATABASE_URL);
+      args.push(env.DATABASE_URL);
     } else {
-       // Fallback to manual host/user/db params
-       if (env.POSTGRES_HOST) args.push('-h', env.POSTGRES_HOST);
-       if (env.POSTGRES_PORT) args.push('-p', env.POSTGRES_PORT);
-       if (env.POSTGRES_USER) args.push('-U', env.POSTGRES_USER);
-       if (env.POSTGRES_DB) args.push(env.POSTGRES_DB);
-       // Password is handled via PGPASSWORD env var which is already in `env` if loaded,
-       // or we explicitly set it if using manual fallback
-       if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
-          env.PGPASSWORD = env.POSTGRES_PASSWORD;
-       }
+      // Fallback to manual host/user/db params
+      if (env.POSTGRES_HOST) args.push('-h', env.POSTGRES_HOST);
+      if (env.POSTGRES_PORT) args.push('-p', env.POSTGRES_PORT);
+      if (env.POSTGRES_USER) args.push('-U', env.POSTGRES_USER);
+      if (env.POSTGRES_DB) args.push(env.POSTGRES_DB);
+      // Password is handled via PGPASSWORD env var which is already in `env` if loaded,
+      // or we explicitly set it if using manual fallback
+      if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
+        env.PGPASSWORD = env.POSTGRES_PASSWORD;
+      }
     }
 
     return new Promise((resolve, reject) => {
-        const child = spawn('pg_dump', args, { env });
+      const child = spawn('pg_dump', args, { env });
 
-        child.stdout.pipe(writeStream);
+      child.stdout.pipe(writeStream);
 
-        child.stderr.on('data', (data) => {
-            logger.debug(`pg_dump stderr: ${data}`);
-        });
+      child.stderr.on('data', (data) => {
+        logger.debug(`pg_dump stderr: ${data}`);
+      });
 
-        child.on('error', (err) => {
-            reject(err);
-        });
+      child.on('error', (err: any) => {
+        reject(err);
+      });
 
-        child.on('close', (code) => {
-            if (code === 0) {
-                logger.info(`PostgreSQL backup created at ${file}`);
-                resolve();
-            } else {
-                reject(new Error(`pg_dump exited with code ${code}`));
-            }
-        });
+      child.on('close', (code) => {
+        if (code === 0) {
+          logger.info(`PostgreSQL backup created at ${file}`);
+          resolve();
+        } else {
+          reject(new Error(`pg_dump exited with code ${code}`));
+        }
+      });
     });
   }
 
@@ -172,65 +172,65 @@ export class BackupService {
             YIELD data
             RETURN data
           `).subscribe({
-            onNext: record => {
-               apocSuccess = true;
-               const chunk = record.get('data');
-               if (chunk) writeStream.write(chunk);
+            onNext: (record: any) => {
+              apocSuccess = true;
+              const chunk = record.get('data');
+              if (chunk) writeStream.write(chunk);
             },
             onCompleted: () => resolve(),
-            onError: (err) => reject(err)
+            onError: (err: any) => reject(err)
           });
         });
         logger.info(`Neo4j backup (APOC) created at ${file}`);
-      } catch (err) {
-         // APOC failed, proceed to fallback
-         logger.warn('APOC export failed, falling back to manual stream', err);
-         apocSuccess = false;
+      } catch (err: any) {
+        // APOC failed, proceed to fallback
+        logger.warn('APOC export failed, falling back to manual stream', err);
+        apocSuccess = false;
       }
 
       if (!apocSuccess) {
-           // Manual Fallback: Stream Nodes then Relationships
-           // To ensure valid JSON, we manually construct the stream
-           writeStream.write('{"nodes":[');
-           let isFirstNode = true;
+        // Manual Fallback: Stream Nodes then Relationships
+        // To ensure valid JSON, we manually construct the stream
+        writeStream.write('{"nodes":[');
+        let isFirstNode = true;
 
-           await new Promise<void>((resolve, reject) => {
-               session.run('MATCH (n) RETURN n').subscribe({
-                   onNext: record => {
-                       const props = record.get('n').properties;
-                       if (!isFirstNode) writeStream.write(',');
-                       writeStream.write(JSON.stringify(props));
-                       isFirstNode = false;
-                   },
-                   onCompleted: () => resolve(),
-                   onError: err => reject(err)
-               });
-           });
+        await new Promise<void>((resolve, reject) => {
+          session.run('MATCH (n) RETURN n').subscribe({
+            onNext: (record: any) => {
+              const props = record.get('n').properties;
+              if (!isFirstNode) writeStream.write(',');
+              writeStream.write(JSON.stringify(props));
+              isFirstNode = false;
+            },
+            onCompleted: () => resolve(),
+            onError: (err: any) => reject(err)
+          });
+        });
 
-           writeStream.write('],"relationships":[');
-           let isFirstRel = true;
+        writeStream.write('],"relationships":[');
+        let isFirstRel = true;
 
-           await new Promise<void>((resolve, reject) => {
-               session.run('MATCH ()-[r]->() RETURN r').subscribe({
-                   onNext: record => {
-                       const r = record.get('r');
-                       const rel = {
-                           type: r.type,
-                           properties: r.properties,
-                           start: r.startNodeElementId,
-                           end: r.endNodeElementId
-                       };
-                       if (!isFirstRel) writeStream.write(',');
-                       writeStream.write(JSON.stringify(rel));
-                       isFirstRel = false;
-                   },
-                   onCompleted: () => resolve(),
-                   onError: err => reject(err)
-               });
-           });
+        await new Promise<void>((resolve, reject) => {
+          session.run('MATCH ()-[r]->() RETURN r').subscribe({
+            onNext: (record: any) => {
+              const r = record.get('r');
+              const rel = {
+                type: r.type,
+                properties: r.properties,
+                start: r.startNodeElementId,
+                end: r.endNodeElementId
+              };
+              if (!isFirstRel) writeStream.write(',');
+              writeStream.write(JSON.stringify(rel));
+              isFirstRel = false;
+            },
+            onCompleted: () => resolve(),
+            onError: (err: any) => reject(err)
+          });
+        });
 
-           writeStream.write(']}');
-           logger.info(`Neo4j manual backup created at ${file}`);
+        writeStream.write(']}');
+        logger.info(`Neo4j manual backup created at ${file}`);
       }
 
     } finally {
@@ -245,13 +245,13 @@ export class BackupService {
 
     // Trigger BGSAVE for RDB persistence on disk
     try {
-        await client.bgsave();
-    } catch (err) {
-        // Ignore "Background save already in progress" error
-        const message = err instanceof Error ? err.message : String(err);
-        if (!message.includes('already in progress')) {
-            throw err;
-        }
+      await client.bgsave();
+    } catch (err: any) {
+      // Ignore "Background save already in progress" error
+      const message = err instanceof Error ? err.message : String(err);
+      if (!message.includes('already in progress')) {
+        throw err;
+      }
     }
 
     // Also perform JSON dump for portability (streaming)
@@ -265,20 +265,20 @@ export class BackupService {
     const stream = client.scanStream({ match: '*', count: 100 });
 
     for await (const keys of stream) {
-        if (keys.length > 0) {
-            const pipeline = client.pipeline();
-            keys.forEach((key: string) => pipeline.get(key));
-            const values = await pipeline.exec();
+      if (keys.length > 0) {
+        const pipeline = client.pipeline();
+        keys.forEach((key: string) => pipeline.get(key));
+        const values = await pipeline.exec();
 
-            keys.forEach((key: string, index: number) => {
-                const val = values?.[index]?.[1];
-                if (typeof val === 'string') {
-                    if (!isFirstKey) writeStream.write(',');
-                    writeStream.write(`"${key}":${JSON.stringify(val)}`);
-                    isFirstKey = false;
-                }
-            });
-        }
+        keys.forEach((key: string, index: number) => {
+          const val = values?.[index]?.[1];
+          if (typeof val === 'string') {
+            if (!isFirstKey) writeStream.write(',');
+            writeStream.write(`"${key}":${JSON.stringify(val)}`);
+            isFirstKey = false;
+          }
+        });
+      }
     }
 
     writeStream.write('}');

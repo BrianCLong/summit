@@ -1,243 +1,243 @@
-import { useEffect, useMemo, useState } from 'react';
-import { PROD, VITE_FEATURE_FLAGS } from '../config/env.js';
+// client/src/hooks/useFeatureFlag.ts
+import { useState, useEffect, useContext, createContext } from 'react';
 
-type FlagType = 'boolean' | 'percentage' | 'variant';
-
-type FlagDefinition =
-  | { type: 'boolean'; defaultValue: boolean }
-  | { type: 'percentage'; defaultValue: boolean; rollout: number }
-  | { type: 'variant'; defaultValue: string; variants: string[] };
-
-type OverrideValue = boolean | number | string;
-
-type FlagContext = {
-  userId?: string;
-  sessionId?: string;
-  tenantId?: string;
-};
-
-type Evaluation = {
+// Define types for feature flags
+export interface FeatureFlag {
+  key: string;
   enabled: boolean;
-  variant?: string;
-  type: FlagType;
-};
-
-const FLAG_CATALOG: Record<string, FlagDefinition> = {
-  'graph-query-optimizer': { type: 'boolean', defaultValue: false },
-  'ai-orchestrator-v2': { type: 'percentage', defaultValue: false, rollout: 0 },
-  'cache-strategy': {
-    type: 'variant',
-    defaultValue: 'control',
-    variants: ['control', 'aggressive-cache'],
-  },
-  'ui-insights-panel': {
-    type: 'variant',
-    defaultValue: 'control',
-    variants: ['control', 'insights-v2'],
-  },
-  'ui.a11yGuardrails': { type: 'boolean', defaultValue: true },
-};
-
-const envOverrides = parseOverrides(VITE_FEATURE_FLAGS, PROD);
-
-export function useFeatureFlag(
-  flagName: string,
-  context?: FlagContext,
-): boolean {
-  const [overrides, setOverrides] = useState<OverrideValueMap>(() =>
-    buildOverrides(envOverrides),
-  );
-
-  useEffect(() => {
-    const listener = () => setOverrides(buildOverrides(envOverrides));
-    window.addEventListener('feature-flags-updated', listener);
-    window.addEventListener('storage', listener);
-    return () => {
-      window.removeEventListener('feature-flags-updated', listener);
-      window.removeEventListener('storage', listener);
-    };
-  }, []);
-
-  return useMemo(() => {
-    const evaluation = evaluateFlag(flagName, overrides, context);
-    return evaluation.enabled;
-  }, [flagName, overrides, context]);
+  value?: any;
+  variants?: Record<string, any>;
+  lastUpdated?: Date;
 }
 
-export function useFeatureVariant(
-  flagName: string,
-  context?: FlagContext,
-): string | undefined {
-  const [overrides, setOverrides] = useState<OverrideValueMap>(() =>
-    buildOverrides(envOverrides),
-  );
-
-  useEffect(() => {
-    const listener = () => setOverrides(buildOverrides(envOverrides));
-    window.addEventListener('feature-flags-updated', listener);
-    window.addEventListener('storage', listener);
-    return () => {
-      window.removeEventListener('feature-flags-updated', listener);
-      window.removeEventListener('storage', listener);
-    };
-  }, []);
-
-  return useMemo(() => {
-    const evaluation = evaluateFlag(flagName, overrides, context);
-    return evaluation.variant;
-  }, [flagName, overrides, context]);
+export interface FeatureFlagContextType {
+  flags: Record<string, FeatureFlag>;
+  isLoading: boolean;
+  refreshFlags: () => Promise<void>;
+  getFlag: (key: string) => FeatureFlag | null;
+  getFlagValue: <T = any>(key: string, defaultValue?: T) => T | boolean | undefined;
 }
 
-type OverrideValueMap = Record<string, OverrideValue>;
+// Create the context with default values
+const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(undefined);
 
-function evaluateFlag(
-  flagName: string,
-  overrides: OverrideValueMap,
-  context?: FlagContext,
-): Evaluation {
-  const definition = FLAG_CATALOG[flagName];
-
-  if (!definition) {
-    return { enabled: false, type: 'boolean' };
-  }
-
-  const override = overrides[flagName];
-
-  if (definition.type === 'boolean') {
-    const value = coerceBoolean(override, definition.defaultValue);
-    return { enabled: value, type: 'boolean' };
-  }
-
-  if (definition.type === 'percentage') {
-    const rollout = clampRollout(
-      typeof override === 'number' ? override : definition.rollout,
-    );
-    const identifier = getIdentifier(context);
-    const bucket = getBucket(`${flagName}:${identifier}`);
-    const enabled = rollout > 0 && bucket < rollout;
-    return { enabled, type: 'percentage' };
-  }
-
-  const variant = selectVariant(definition, override, context, flagName);
-  return {
-    enabled: variant !== 'control',
-    variant,
-    type: 'variant',
-  };
+// Provider component
+interface FeatureFlagProviderProps {
+  children: React.ReactNode;
+  apiUrl?: string;
+  userId?: string;
+  autoRefresh?: boolean;
+  refreshInterval?: number; // in milliseconds
 }
 
-function buildOverrides(seed: OverrideValueMap): OverrideValueMap {
-  const local = parseOverrides(readLocalOverrides(), PROD);
-  return { ...seed, ...local };
-}
+const DEFAULT_API_URL = '/api/feature-flags';
+const DEFAULT_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-function parseOverrides(
-  rawValue?: string,
-  isProd: boolean = false,
-): OverrideValueMap {
-  if (!rawValue || isProd) {
-    return {};
-  }
+export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
+  children,
+  apiUrl = DEFAULT_API_URL,
+  userId,
+  autoRefresh = true,
+  refreshInterval = DEFAULT_REFRESH_INTERVAL
+}) => {
+  const [flags, setFlags] = useState<Record<string, FeatureFlag>>({});
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  return rawValue.split(',').reduce<OverrideValueMap>((acc, token) => {
-    const [key, value] = token.split('=').map((part) => part.trim());
-    if (!key || value === undefined) {
-      return acc;
-    }
+  // Fetch flags from the server
+  const fetchFlags = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    if (value.endsWith('%')) {
-      const percentValue = Number.parseInt(value.slice(0, -1), 10);
-      if (!Number.isNaN(percentValue)) {
-        acc[key] = percentValue;
+      const queryParams = new URLSearchParams();
+      if (userId) {
+        queryParams.append('userId', userId);
       }
-      return acc;
+
+      const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any auth headers if needed
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: FeatureFlag[] = await response.json();
+      
+      // Transform array to record for easier access
+      const flagsRecord: Record<string, FeatureFlag> = {};
+      data.forEach(flag => {
+        flagsRecord[flag.key] = {
+          ...flag,
+          lastUpdated: new Date()
+        };
+      });
+
+      setFlags(flagsRecord);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      setError(error);
+      console.error('Error fetching feature flags:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Effect to fetch flags on mount
+  useEffect(() => {
+    fetchFlags();
+  }, []);
+
+  // Effect to set up auto-refresh if enabled
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const intervalId = setInterval(fetchFlags, refreshInterval);
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [autoRefresh, refreshInterval]);
+
+  // Function to refresh flags manually
+  const refreshFlags = async (): Promise<void> => {
+    await fetchFlags();
+  };
+
+  // Function to get a specific flag
+  const getFlag = (key: string): FeatureFlag | null => {
+    return flags[key] || null;
+  };
+
+  // Function to get a specific flag's value with type safety
+  const getFlagValue = <T = any>(key: string, defaultValue?: T): T | boolean | undefined => {
+    const flag = getFlag(key);
+    if (!flag) {
+      return defaultValue;
     }
 
-    if (value.toLowerCase() === 'true') {
-      acc[key] = true;
-      return acc;
+    // If the flag has variants, return the first variant's value
+    if (flag.variants && Object.keys(flag.variants).length > 0) {
+      const variantKeys = Object.keys(flag.variants);
+      return flag.variants[variantKeys[0]] as T;
     }
 
-    if (value.toLowerCase() === 'false') {
-      acc[key] = false;
-      return acc;
-    }
+    // Otherwise return the boolean enabled value or the specific value
+    return (flag.value !== undefined ? flag.value : flag.enabled) as T | boolean;
+  };
 
-    const numeric = Number(value);
-    if (!Number.isNaN(numeric)) {
-      acc[key] = numeric;
-      return acc;
-    }
+  const contextValue: FeatureFlagContextType = {
+    flags,
+    isLoading,
+    error,
+    refreshFlags,
+    getFlag,
+    getFlagValue
+  };
 
-    acc[key] = value;
-    return acc;
-  }, {});
-}
-
-function readLocalOverrides(): string | undefined {
-  if (typeof window === 'undefined') {
-    return undefined;
-  }
-  return window.localStorage.getItem('featureFlagOverrides') || undefined;
-}
-
-function coerceBoolean(value: OverrideValue | undefined, fallback: boolean): boolean {
-  if (typeof value === 'boolean') {
-    return value;
-  }
-  if (typeof value === 'number') {
-    return value > 0;
-  }
-  if (typeof value === 'string') {
-    const normalized = value.toLowerCase();
-    if (normalized === 'true') {
-      return true;
-    }
-    if (normalized === 'false') {
-      return false;
-    }
-  }
-  return fallback;
-}
-
-function clampRollout(rollout: number): number {
-  if (Number.isNaN(rollout)) {
-    return 0;
-  }
-  return Math.min(100, Math.max(0, rollout));
-}
-
-function getBucket(value: string): number {
-  let hash = 0;
-  for (let i = 0; i < value.length; i += 1) {
-    const char = value.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return Math.abs(hash) % 100;
-}
-
-function getIdentifier(context?: FlagContext): string {
   return (
-    context?.userId || context?.tenantId || context?.sessionId || 'anonymous'
+    <FeatureFlagContext.Provider value={contextValue}>
+      {children}
+    </FeatureFlagContext.Provider>
   );
-}
+};
 
-function selectVariant(
-  definition: Extract<FlagDefinition, { type: 'variant' }>,
-  override: OverrideValue | undefined,
-  context: FlagContext | undefined,
-  flagName: string,
-): string {
-  if (typeof override === 'string' && definition.variants.includes(override)) {
-    return override;
+// Hook to use the feature flag context
+export const useFeatureFlag = (flagKey: string): { 
+  enabled: boolean; 
+  value?: any; 
+  isLoading: boolean; 
+  error: Error | null;
+  refresh: () => Promise<void>;
+} => {
+  const context = useContext(FeatureFlagContext);
+  
+  if (!context) {
+    throw new Error('useFeatureFlag must be used within a FeatureFlagProvider');
   }
 
-  if (definition.variants.length <= 1) {
-    return definition.defaultValue;
+  const flag = context.getFlag(flagKey);
+  const value = context.getFlagValue(flagKey);
+
+  return {
+    enabled: flag ? (flag.value !== undefined ? !!flag.value : flag.enabled) : false,
+    value: flag ? (flag.value !== undefined ? flag.value : flag.enabled) : undefined,
+    isLoading: context.isLoading,
+    error: context.error,
+    refresh: context.refreshFlags
+  };
+};
+
+// Hook to get multiple flags
+export const useMultipleFeatureFlags = (flagKeys: string[]): {
+  flags: Record<string, boolean>;
+  values: Record<string, any>;
+  isLoading: boolean;
+  error: Error | null;
+} => {
+  const context = useContext(FeatureFlagContext);
+
+  if (!context) {
+    throw new Error('useMultipleFeatureFlags must be used within a FeatureFlagProvider');
   }
 
-  const bucket = getBucket(`${flagName}:${getIdentifier(context)}`);
-  const index = bucket % definition.variants.length;
-  return definition.variants[index];
-}
+  const flags: Record<string, boolean> = {};
+  const values: Record<string, any> = {};
+
+  flagKeys.forEach(key => {
+    const flag = context.getFlag(key);
+    flags[key] = flag ? (flag.value !== undefined ? !!flag.value : flag.enabled) : false;
+    values[key] = flag ? (flag.value !== undefined ? flag.value : flag.enabled) : undefined;
+  });
+
+  return {
+    flags,
+    values,
+    isLoading: context.isLoading,
+    error: context.error
+  };
+};
+
+// Hook to check if all flags are enabled
+export const useFeatureFlagAll = (flagKeys: string[]): {
+  allEnabled: boolean;
+  isLoading: boolean;
+  error: Error | null;
+} => {
+  const { flags, isLoading, error } = useMultipleFeatureFlags(flagKeys);
+
+  // Check if all flags are enabled
+  const allEnabled = flagKeys.every(key => flags[key]);
+
+  return {
+    allEnabled,
+    isLoading,
+    error
+  };
+};
+
+// Hook to check if any flag is enabled
+export const useFeatureFlagAny = (flagKeys: string[]): {
+  anyEnabled: boolean;
+  isLoading: boolean;
+  error: Error | null;
+} => {
+  const { flags, isLoading, error } = useMultipleFeatureFlags(flagKeys);
+
+  // Check if any flag is enabled
+  const anyEnabled = flagKeys.some(key => flags[key]);
+
+  return {
+    anyEnabled,
+    isLoading,
+    error
+  };
+};
+
+// Export the context for advanced use cases
+export { FeatureFlagContext };

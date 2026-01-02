@@ -15,7 +15,7 @@ export async function retentionProcessor(job: Job<JobData>) {
     await retentionEngine.purgeDataset(datasetId, mode || 'scheduled');
     logger.info(`Retention purge for dataset ${datasetId} completed.`);
     return { success: true, datasetId };
-  } catch (error) {
+  } catch (error: any) {
     logger.error(`Retention purge failed: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }

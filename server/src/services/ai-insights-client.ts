@@ -117,7 +117,7 @@ export class AIInsightsClient {
           );
 
           return response.matches;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           console.error('❌ Entity resolution failed:', error);
           return []; // Fail gracefully
@@ -169,7 +169,7 @@ export class AIInsightsClient {
           );
 
           return response.scores;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           console.error('❌ Link scoring failed:', error);
           return []; // Fail gracefully
@@ -191,7 +191,7 @@ export class AIInsightsClient {
   } | null> {
     try {
       return await this.makeRequest('/health', null, 'GET');
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ AI health check failed:', error);
       return null;
     }
@@ -249,7 +249,7 @@ export class AIInsightsClient {
       // For MVP, return this simple calculation
       // In future versions, use ML model prediction
       return Math.min(score, 1.0);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Entity scoring failed:', error);
       return 0.5;
     }
@@ -291,7 +291,7 @@ export class AIInsightsClient {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch (error: any) {
       if (error.name === 'AbortError') {
         throw new Error(
           `AI service request timeout after ${this.config.timeout}ms`,
@@ -332,7 +332,7 @@ export async function validateAIInsightsConnection(): Promise<boolean> {
       console.warn('⚠️  AI Insights service is not healthy:', health);
       return false;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(
       '❌ Failed to connect to AI Insights service:',
       error.message,

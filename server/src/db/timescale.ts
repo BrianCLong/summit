@@ -36,7 +36,7 @@ const config: TimescaleConfig = {
 export const timescalePool = new Pool(config);
 
 // Enhanced error handling for GA-Core reliability
-timescalePool.on('error', (err) => {
+timescalePool.on('error', (err: any) => {
   logger.error({
     message: 'TimescaleDB pool error',
     error: err instanceof Error ? err.message : String(err),
@@ -218,7 +218,7 @@ export async function healthCheck(): Promise<boolean> {
   try {
     const result = await query('SELECT NOW(), version()');
     return result.rowCount !== null && result.rowCount > 0;
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'TimescaleDB health check failed',
       error: error instanceof Error ? error.message : String(error),
@@ -232,7 +232,7 @@ export async function closePool(): Promise<void> {
   try {
     await timescalePool.end();
     logger.info({ message: 'TimescaleDB pool closed gracefully' });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Error closing TimescaleDB pool',
       error: error instanceof Error ? error.message : String(error),

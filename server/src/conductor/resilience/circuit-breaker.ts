@@ -264,7 +264,7 @@ export class ResourcePool {
     try {
       const result = await fn();
       resolve(result);
-    } catch (error) {
+    } catch (error: any) {
       reject(error);
     } finally {
       this.activeRequests--;

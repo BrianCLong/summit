@@ -155,7 +155,7 @@ export class MeteringEmitter {
   private async safeEmit(event: MeterEvent): Promise<void> {
     try {
       await this.emit(event);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error, event }, 'Failed to emit meter event');
     }
   }

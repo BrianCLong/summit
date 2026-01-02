@@ -176,7 +176,7 @@ export class ProofOfNonCollectionService {
     try {
       this.redis = await getRedisClient();
       this.postgres = getPostgresPool();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize ProofOfNonCollectionService connections', {
         error: error instanceof Error ? error.message : String(error)
       });
@@ -187,7 +187,7 @@ export class ProofOfNonCollectionService {
   private async ensureReportsDirectory(): Promise<void> {
     try {
       await fs.mkdir(this.REPORTS_DIR, { recursive: true });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to create PNC reports directory', {
         error: error instanceof Error ? error.message : String(error)
       });
@@ -329,7 +329,7 @@ export class ProofOfNonCollectionService {
 
         return report;
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate PNC report', { error, tenantId, year, month });
       throw error;
     }
@@ -844,7 +844,7 @@ export class ProofOfNonCollectionService {
   /**
    * Map database row to report object
    */
-  private mapRowToReport(row: any): PNCReport {
+  private mapRowToReport(row): PNCReport {
     return {
       id: row.id,
       tenantId: row.tenant_id,

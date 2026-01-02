@@ -30,7 +30,7 @@ export function scheduleDailyMetricsCalculation() {
     try {
       await tripwireMetricsService.calculateDailyMetricsForAllTenants();
       logger.info('Daily tripwire metrics calculation completed');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to calculate daily tripwire metrics', { error });
     }
   });
@@ -53,13 +53,13 @@ export function scheduleWeeklyMetricsCalculation() {
       for (const tenantId of tenants) {
         try {
           await tripwireMetricsService.calculateWeeklyMetrics(tenantId);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to calculate weekly metrics for tenant', { error, tenantId });
         }
       }
 
       logger.info('Weekly tripwire metrics calculation completed', { tenantsProcessed: tenants.length });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to calculate weekly tripwire metrics', { error });
     }
   });
@@ -82,13 +82,13 @@ export function scheduleMonthlyMetricsCalculation() {
       for (const tenantId of tenants) {
         try {
           await tripwireMetricsService.calculateMonthlyMetrics(tenantId);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to calculate monthly metrics for tenant', { error, tenantId });
         }
       }
 
       logger.info('Monthly tripwire metrics calculation completed', { tenantsProcessed: tenants.length });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to calculate monthly tripwire metrics', { error });
     }
   });
@@ -141,13 +141,13 @@ export function scheduleMonthlyPNCReports() {
               violations: report.violationsDetected,
             });
           }
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to generate PNC report for tenant', { error, tenantId });
         }
       }
 
       logger.info('Monthly PNC report generation completed', { tenantsProcessed: tenants.length });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate monthly PNC reports', { error });
     }
   });
@@ -180,13 +180,13 @@ export function scheduleReportArchival() {
       for (const row of result.rows) {
         try {
           await proofOfNonCollectionService.archiveReport(row.id);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to archive PNC report', { error, reportId: row.id });
         }
       }
 
       logger.info('PNC report archival completed', { reportsArchived: result.rows.length });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to archive PNC reports', { error });
     }
   });
@@ -220,7 +220,7 @@ export function scheduleMetricsCleanup() {
           retentionDays,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to clean up query scope metrics', { error });
     }
   });
@@ -267,7 +267,7 @@ export function scheduleBaselineRecalculation() {
       }
 
       logger.info('Baseline recalculation check completed');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to recalculate baselines', { error });
     }
   });
@@ -292,7 +292,7 @@ async function getActiveTenants(): Promise<string[]> {
   `;
 
   const result = await postgres.query(query);
-  return result.rows.map((row) => row.tenant_id);
+  return result.rows.map((row: any) => row.tenant_id);
 }
 
 // ============================================================================
@@ -315,7 +315,7 @@ export function initializeSelectorMinimizationJobs() {
     scheduleBaselineRecalculation();
 
     logger.info('All selector minimization scheduled jobs initialized successfully');
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to initialize selector minimization jobs', { error });
     throw error;
   }

@@ -53,7 +53,7 @@ export function monitorPostgresPool(
         },
         'PostgreSQL pool stats',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ poolName, error: (error as Error).message }, 'Failed to collect pool stats');
     }
   }, intervalMs);
@@ -114,7 +114,7 @@ export function instrumentPostgresPool(pool: Pool, poolName: string = 'default')
       // Trace the database query
       return await tracer.withSpan(
         `db.postgresql.${operation}`,
-        async (span) => {
+        async (span: any) => {
           span.setAttributes({
             'db.system': 'postgresql',
             'db.operation': operation,
@@ -147,7 +147,7 @@ export function instrumentPostgresPool(pool: Pool, poolName: string = 'default')
         },
         { kind: SpanKind.CLIENT },
       );
-    } catch (error) {
+    } catch (error: any) {
       const duration = (Date.now() - startTime) / 1000;
 
       dbQueryDuration.observe({ database: 'postgresql', operation }, duration);

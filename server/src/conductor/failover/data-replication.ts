@@ -218,7 +218,7 @@ export class DataReplicationEngine extends EventEmitter {
       }
 
       // Process operations in parallel
-      const processingPromises = operationIds.map(async (opId) => {
+      const processingPromises = operationIds.map(async (opId: any) => {
         try {
           // Get operation details
           const opData = await this.redis.get(`replication_op:${opId}`);
@@ -229,7 +229,7 @@ export class DataReplicationEngine extends EventEmitter {
 
           const operation: ReplicationOperation = JSON.parse(opData);
           await this.processOperation(operation);
-        } catch (error) {
+        } catch (error: any) {
           console.error(
             `Failed to process replication operation ${opId}:`,
             error,
@@ -238,7 +238,7 @@ export class DataReplicationEngine extends EventEmitter {
       });
 
       await Promise.allSettled(processingPromises);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing replication operations:', error);
     }
   }
@@ -279,10 +279,10 @@ export class DataReplicationEngine extends EventEmitter {
 
       // Update metrics
       prometheusConductorMetrics.recordOperationalEvent(
-      'replication_success',
-      { success: true },
-    );
-    } catch (error) {
+        'replication_success',
+        { success: true },
+      );
+    } catch (error: any) {
       operation.status = 'failed';
       operation.error = error.message;
       operation.retryCount++;
@@ -299,9 +299,9 @@ export class DataReplicationEngine extends EventEmitter {
       }
 
       prometheusConductorMetrics.recordOperationalEvent(
-      'replication_failure',
-      { success: false },
-    );
+        'replication_failure',
+        { success: false },
+      );
     }
 
     // Update operation in storage

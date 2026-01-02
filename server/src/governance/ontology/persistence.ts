@@ -29,7 +29,7 @@ export class FilePersistenceAdapter<T> implements PersistenceAdapter<T> {
     try {
       const content = await fs.promises.readFile(filePath, 'utf-8');
       return JSON.parse(content) as T;
-    } catch (e) {
+    } catch (e: any) {
       return null;
     }
   }

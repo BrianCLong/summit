@@ -134,7 +134,7 @@ export class AlertTriageV2Service {
           mlScore = modelResult.score;
           modelVersion = modelResult.version;
           factors.push(...modelResult.factors);
-        } catch (error) {
+        } catch (error: any) {
           this.logger.warn(
             'ML model invocation failed, using deterministic fallback',
             {
@@ -200,7 +200,7 @@ export class AlertTriageV2Service {
       });
 
       return triageScore;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Alert triage scoring failed, using fallback', {
         alertId,
         error: (error as Error).message,
@@ -248,7 +248,7 @@ export class AlertTriageV2Service {
             alertData: { id: alertData.id, type: alertData.type },
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         this.logger.warn('Policy rule evaluation failed', {
           rule: rule.name,
           error: (error as Error).message,
@@ -548,7 +548,7 @@ export class AlertTriageV2Service {
     try {
       const cached = await this.redis.get(`triage:score:${alertId}`);
       return cached ? JSON.parse(cached) : null;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn('Cache retrieval failed', {
         alertId,
         error: (error as Error).message,
@@ -564,7 +564,7 @@ export class AlertTriageV2Service {
         this.CACHE_TTL,
         JSON.stringify(score),
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn('Cache storage failed', {
         alertId,
         error: (error as Error).message,
@@ -704,7 +704,7 @@ export class AlertTriageV2Service {
 
       // Would send to metrics backend
       this.logger.debug('Triage scoring metrics', metrics);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn('Failed to record metrics', { error: (error as Error).message });
     }
   }

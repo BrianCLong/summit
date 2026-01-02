@@ -517,8 +517,8 @@ export class EnhancedOnboardingService {
     );
 
     // Calculate aggregated metrics
-    const totalStarted = result.rows.reduce((sum, r) => sum + parseInt(r.total_started), 0);
-    const totalCompleted = result.rows.reduce((sum, r) => sum + parseInt(r.total_completed), 0);
+    const totalStarted = result.rows.reduce((sum: number, r: any) => sum + parseInt(r.total_started), 0);
+    const totalCompleted = result.rows.reduce((sum: number, r: any) => sum + parseInt(r.total_completed), 0);
 
     const summary: OnboardingAnalyticsSummary = {
       period,

@@ -194,7 +194,7 @@ export class PolicyEngine {
       );
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           subject,
@@ -324,7 +324,7 @@ export class PolicyEngine {
         reason: result.reason,
         conditions: result.conditions || {},
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({ error: error.message }, 'OPA evaluation failed');
 
       // Fallback to local policy evaluation
@@ -513,7 +513,7 @@ export class PolicyEngine {
           conditions: row.conditions || {},
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(
         { error: error.message },
         'Failed to get cached policy decision',
@@ -549,7 +549,7 @@ export class PolicyEngine {
           JSON.stringify(decision.conditions || {}),
         ],
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(
         { error: error.message },
         'Failed to cache policy decision',

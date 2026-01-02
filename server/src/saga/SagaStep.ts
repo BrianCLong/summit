@@ -166,7 +166,7 @@ export class SagaStep<TPayload = unknown, TResult = unknown> {
       } else {
         throw new Error(result.error || 'Step execution failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       this.state.status = 'failed';
       this.state.error = error instanceof Error ? error.message : String(error);
       this.state.completedAt = new Date().toISOString();
@@ -250,7 +250,7 @@ export class SagaStep<TPayload = unknown, TResult = unknown> {
       } else {
         throw new Error(result.error || 'Compensation failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           error,
@@ -338,7 +338,7 @@ export class SagaStep<TPayload = unknown, TResult = unknown> {
       const result = await Promise.race([operation(), timeoutPromise]);
       clearTimeout(timeoutId!);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       clearTimeout(timeoutId!);
       throw error;
     }

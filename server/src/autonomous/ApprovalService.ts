@@ -87,7 +87,7 @@ export class ApprovalService {
             [tenantId]
         );
 
-        return result.rows.map((row: { id: string; action_type: string; payload: unknown; tenant_id: string; reason: string; status: string; created_at: Date; updated_at: Date; requested_by: string; approved_by: string | null; expires_at: Date }) => ({
+        return result.rows.map((row: { id: string; action_type: string; payload: unknown; tenant_id: string; reason: string; status: string; requested_at: Date; expires_at: Date }) => ({
             id: row.id,
             action: {
                 type: row.action_type,

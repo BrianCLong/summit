@@ -23,7 +23,7 @@ export class MessagingService {
       const message = await this.repo.create(payload);
       // Future: emit socket event, send push notification via NotificationService, etc.
       return message;
-    } catch (err) {
+    } catch (err: any) {
         logger.error({ err, payload }, 'Error sending message');
         throw err;
     }

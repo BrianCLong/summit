@@ -45,7 +45,7 @@ async function batchLoadInvestigations(
 
     // Create a map of id -> investigation
     const investigationMap = new Map<string, Investigation>();
-    result.rows.forEach((row) => {
+    result.rows.forEach((row: any) => {
       const investigation: Investigation = {
         id: row.id,
         name: row.name,
@@ -77,7 +77,7 @@ async function batchLoadInvestigations(
       }
       return investigation;
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, ids }, 'Error in investigation batch loader');
     return ids.map(() => error as Error);
   } finally {
@@ -124,7 +124,7 @@ export function createInvestigationsByUserLoader(
 
         const investigationsByUser = new Map<string, Investigation[]>();
 
-        result.rows.forEach((row) => {
+        result.rows.forEach((row: any) => {
           const investigation: Investigation = {
             id: row.id,
             name: row.name,

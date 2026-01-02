@@ -63,7 +63,7 @@ export class MissionGuardrailService {
         if (!gr.check(context)) {
           violations.push(`Guardrail violation: ${gr.description}`);
         }
-      } catch (e) {
+      } catch (e: any) {
         // Fail closed
         violations.push(`Guardrail check failed for ${gr.id}`);
       }

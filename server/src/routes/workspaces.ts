@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
   try {
     const workspaces = await workspaceService.getWorkspaces(tenantId, userId);
     res.json(workspaces);
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error);
     res.status(500).json({ error: 'Failed to fetch workspaces' });
   }
@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
   try {
     const workspace = await workspaceService.createWorkspace(tenantId, userId, name, config || {});
     res.json(workspace);
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error);
     res.status(500).json({ error: 'Failed to create workspace' });
   }
@@ -58,7 +58,7 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Workspace not found' });
     }
     res.json(workspace);
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error);
     res.status(500).json({ error: 'Failed to update workspace' });
   }
@@ -79,7 +79,7 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Workspace not found' });
     }
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error);
     res.status(500).json({ error: 'Failed to delete workspace' });
   }

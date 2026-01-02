@@ -185,7 +185,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
         cacheHit: false,
         optimizationApplied: optimizations,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.emit('queryError', {
         queryHash,
         error: error.message,
@@ -360,7 +360,7 @@ export class Neo4jQueryOptimizer extends EventEmitter {
       if (now - view.lastRefresh > refreshIntervalMs) {
         try {
           await this.refreshMaterializedView(name, view);
-        } catch (error) {
+        } catch (error: any) {
           logger.error(`Failed to refresh materialized view ${name}:`, error);
         }
       }

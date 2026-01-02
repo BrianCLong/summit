@@ -101,7 +101,7 @@ export abstract class BaseConnector extends EventEmitter {
         latencyMs: latency,
         timestamp: new Date()
       };
-    } catch (err) {
+    } catch (err: any) {
       return {
         status: 'unhealthy',
         error: err instanceof Error ? err.message : 'Unknown error',

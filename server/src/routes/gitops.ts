@@ -21,7 +21,7 @@ router.get('/runbooks/:family/:name/versions', async (req, res) => {
       `SELECT version FROM runbook_versions WHERE family=$1 AND name=$2 ORDER BY created_at DESC`,
       [family, name],
     );
-    res.json(rows.map((r) => r.version));
+    res.json(rows.map((r: any) => r.version));
   } catch (e: any) {
     res.status(500).json({ error: e?.message || 'failed' });
   }

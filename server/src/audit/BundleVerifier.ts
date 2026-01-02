@@ -66,7 +66,7 @@ export class BundleVerifier {
              });
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       valid = false;
       checks.push({
         name: 'manifest_integrity',

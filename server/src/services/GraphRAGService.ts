@@ -234,13 +234,13 @@ export class GraphRAGService {
             serviceLogger.debug(
               `Cached GraphRAG response. Response Cache Key: ${responseCacheKey}`,
             );
-          } catch (error) {
+          } catch (error: any) {
             serviceLogger.warn(`Redis response cache write failed. Error: ${error}`);
           }
         }
 
         return response;
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.error(
           {
             investigationId: validated.investigationId,
@@ -283,7 +283,7 @@ export class GraphRAGService {
           await this.redis.expire(cacheKey, ttl);
           return { ...JSON.parse(cached), ttl };
         }
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.warn(`Redis cache read failed. Error: ${error}`);
       }
     }
@@ -305,7 +305,7 @@ export class GraphRAGService {
         serviceLogger.debug(
           `Cached subgraph. Cache Key: ${cacheKey}, Hash: ${subgraphHash}`,
         );
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.warn(`Redis cache write failed. Error: ${error}`);
       }
     }
@@ -328,7 +328,7 @@ export class GraphRAGService {
         Math.round(this.config.cacheTTL * Math.log2(count + 1)),
       );
       return ttl;
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.warn(`Redis frequency tracking failed. Error: ${error}`);
       return this.config.cacheTTL;
     }
@@ -445,7 +445,7 @@ export class GraphRAGService {
       let parsedResponse: unknown;
       try {
         parsedResponse = JSON.parse(rawResponse);
-      } catch (error) {
+      } catch (error: any) {
         throw new Error('LLM returned invalid JSON');
       }
 
@@ -459,7 +459,7 @@ export class GraphRAGService {
 
     try {
       return await callLLMAndValidate(request.temperature || 0);
-    } catch (error) {
+    } catch (error: any) {
       if (
         error instanceof z.ZodError ||
         (error instanceof Error &&
@@ -514,7 +514,7 @@ export class GraphRAGService {
 
     const relationshipContext = context.relationships
       .map(
-        (r) =>
+        (r: any) =>
           `Relationship ${r.id}: ${r.fromEntityId} --[${r.type}]--> ${r.toEntityId}`,
       )
       .join('\n');
@@ -571,7 +571,7 @@ Respond with JSON only:`;
     whyPaths: WhyPath[],
     context: SubgraphContext,
   ): void {
-    const availableRelIds = new Set(context.relationships.map((r) => r.id));
+    const availableRelIds = new Set(context.relationships.map((r: any) => r.id));
     const invalidPaths = whyPaths.filter(
       (path) => !availableRelIds.has(path.relId),
     );
@@ -611,7 +611,7 @@ Respond with JSON only:`;
       strategy,
     });
 
-    return ranked.map((r) => ({
+    return ranked.map((r: any) => ({
       ...r.path,
       supportScore: r.score,
       score_breakdown: r.score_breakdown,
@@ -627,7 +627,7 @@ Respond with JSON only:`;
   }): string {
     const content = JSON.stringify({
       entities: subgraph.entities.map((e) => e.id).sort(),
-      relationships: subgraph.relationships.map((r) => r.id).sort(),
+      relationships: subgraph.relationships.map((r: any) => r.id).sort(),
     });
     return createHash('sha256').update(content).digest('hex').substring(0, 16);
   }
@@ -682,7 +682,7 @@ Respond with JSON only:`;
       try {
         await this.redis.ping();
         cacheStatus = 'healthy';
-      } catch (error) {
+      } catch (error: any) {
         cacheStatus = 'unhealthy';
       }
     }

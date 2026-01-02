@@ -219,7 +219,7 @@ async function safeMutation<TInput, TOutput>(
       data: result,
       auditLogId,
     };
-  } catch (error) {
+  } catch (error: any) {
     // Error audit log
     if (auditLogId) {
       await createAuditLog(
@@ -617,7 +617,7 @@ export const IntelGraphSafeMutations = {
             successfullyCreated: created.length,
             skipped: batch.entities.length - created.length,
           };
-        } catch (error) {
+        } catch (error: any) {
           await tx.rollback();
           throw error;
         } finally {

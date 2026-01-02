@@ -285,7 +285,7 @@ class SIEMService {
           .filter((p) => p.enabled)
           .map((p) => p.name),
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize SIEM providers', {
         component: 'SIEMService',
         error: error.message,
@@ -486,7 +486,7 @@ class SIEMService {
           eventCount: batch.events.length,
         });
       });
-    } catch (error) {
+    } catch (error: any) {
       batch.status = 'failed';
       batch.error = error.message;
 
@@ -916,7 +916,7 @@ class SIEMService {
 
       await this.sendBatch(batch);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('SIEM provider test failed', {
         component: 'SIEMService',
         providerId,

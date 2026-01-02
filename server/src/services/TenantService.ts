@@ -186,7 +186,7 @@ export class TenantService {
 
       return tenant;
 
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to create tenant:', error);
       throw error;
@@ -265,7 +265,7 @@ export class TenantService {
 
       await client.query('COMMIT');
       return tenant;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to update tenant settings', error);
       throw error;
@@ -325,7 +325,7 @@ export class TenantService {
 
       await client.query('COMMIT');
       return tenant;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to disable tenant', error);
       throw error;
@@ -347,7 +347,7 @@ export class TenantService {
     };
   }
 
-  private mapRowToTenant(row: any): Tenant {
+  private mapRowToTenant(row): Tenant {
     return {
       id: row.id,
       name: row.name,

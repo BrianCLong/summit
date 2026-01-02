@@ -266,7 +266,7 @@ export class IntelGraphTracing {
       const result = await operation();
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       span.setStatus({
         code: SpanStatusCode.ERROR,

@@ -42,7 +42,7 @@ const tagPolicySchema = z.object({
  * @param {express.Response} res - The Express response object.
  * @param {express.NextFunction} next - The next middleware function.
  */
-const intelGraphServiceMiddleware = (req, res, next) => {
+const intelGraphServiceMiddleware = (req: any, res: any, next: any) => {
   req.intelGraphService = IntelGraphService.getInstance();
   next();
 };
@@ -73,14 +73,14 @@ router.use(ensureAuthenticated, tenantContext, intelGraphServiceMiddleware);
  *       '401':
  *         description: Unauthorized.
  */
-router.post('/entities', async (req, res, next) => {
+router.post('/entities', async (req: any, res: any, next: any) => {
   try {
     const { name, description } = createEntitySchema.parse(req.body);
-    const owner = req.user.id;
-    const tenantId = req.user.tenantId;
+    const owner = req.user!.id;
+    const tenantId = req.user!.tenantId;
     const entity = await req.intelGraphService.createEntity({ name, description }, owner, tenantId);
     res.status(201).json(entity);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -107,11 +107,11 @@ router.post('/entities', async (req, res, next) => {
 router.post('/claims', async (req, res, next) => {
   try {
     const { statement, confidence, entityId } = createClaimSchema.parse(req.body);
-    const owner = req.user.id;
-    const tenantId = req.user.tenantId;
+    const owner = req.user!.id;
+    const tenantId = req.user!.tenantId;
     const claim = await req.intelGraphService.createClaim({ statement, confidence, entityId }, owner, tenantId);
     res.status(201).json(claim);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -136,15 +136,15 @@ router.post('/claims', async (req, res, next) => {
  *         description: The specified parent Claim was not found.
  */
 router.post('/evidence', async (req, res, next) => {
-    try {
-        const { claimId, sourceURI, hash, content } = attachEvidenceSchema.parse(req.body);
-        const owner = req.user.id;
-        const tenantId = req.user.tenantId;
-        const evidence = await req.intelGraphService.attachEvidence({ claimId, sourceURI, hash, content }, owner, tenantId);
-        res.status(201).json(evidence);
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const { claimId, sourceURI, hash, content } = attachEvidenceSchema.parse(req.body);
+    const owner = req.user!.id;
+    const tenantId = req.user!.tenantId;
+    const evidence = await req.intelGraphService.attachEvidence({ claimId, sourceURI, hash, content }, owner, tenantId);
+    res.status(201).json(evidence);
+  } catch (error: any) {
+    next(error);
+  }
 });
 
 /**
@@ -167,15 +167,15 @@ router.post('/evidence', async (req, res, next) => {
  *         description: The specified target node was not found.
  */
 router.post('/policies', async (req, res, next) => {
-    try {
-        const { targetNodeId, label, sensitivity } = tagPolicySchema.parse(req.body);
-        const owner = req.user.id;
-        const tenantId = req.user.tenantId;
-        const policy = await req.intelGraphService.tagPolicy({ label, sensitivity }, targetNodeId, owner, tenantId);
-        res.status(201).json(policy);
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const { targetNodeId, label, sensitivity } = tagPolicySchema.parse(req.body);
+    const owner = req.user!.id;
+    const tenantId = req.user!.tenantId;
+    const policy = await req.intelGraphService.tagPolicy({ label, sensitivity }, targetNodeId, owner, tenantId);
+    res.status(201).json(policy);
+  } catch (error: any) {
+    next(error);
+  }
 });
 
 /**
@@ -200,14 +200,14 @@ router.post('/policies', async (req, res, next) => {
  *         description: The specified Decision was not found.
  */
 router.get('/decisions/:id/provenance', async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const tenantId = req.user.tenantId;
-        const provenance = await req.intelGraphService.getDecisionProvenance(id, tenantId);
-        res.status(200).json(provenance);
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const { id } = req.params;
+    const tenantId = req.user!.tenantId;
+    const provenance = await req.intelGraphService.getDecisionProvenance(id, tenantId);
+    res.status(200).json(provenance);
+  } catch (error: any) {
+    next(error);
+  }
 });
 
 /**
@@ -232,14 +232,14 @@ router.get('/decisions/:id/provenance', async (req, res, next) => {
  *         description: The specified Entity was not found.
  */
 router.get('/entities/:id/claims', async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const tenantId = req.user.tenantId;
-        const entityClaims = await req.intelGraphService.getEntityClaims(id, tenantId);
-        res.status(200).json(entityClaims);
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const { id } = req.params;
+    const tenantId = req.user!.tenantId;
+    const entityClaims = await req.intelGraphService.getEntityClaims(id, tenantId);
+    res.status(200).json(entityClaims);
+  } catch (error: any) {
+    next(error);
+  }
 });
 
 export default router;

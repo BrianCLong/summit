@@ -35,7 +35,7 @@ caseBundleRouter.post('/export', async (req, res) => {
       bundlePath: result.bundlePath,
       archivePath: result.archivePath,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ err: error }, 'Failed to export case bundle');
     return res.status(500).json({ error: (error as Error).message });
   }
@@ -63,7 +63,7 @@ caseBundleRouter.post('/import', async (req, res) => {
       mappingPath: result.mappingPath,
       bundlePath: result.bundlePath,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ err: error }, 'Failed to import case bundle');
     return res.status(500).json({ error: (error as Error).message });
   }

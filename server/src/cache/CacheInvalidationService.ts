@@ -140,7 +140,7 @@ export class CacheInvalidationService extends EventEmitter {
         this.stats.received++;
         await this.processEvent(event);
         this.stats.processed++;
-      } catch (error) {
+      } catch (error: any) {
         this.stats.errors++;
         logger.error({ error, channel, message }, 'Failed to process invalidation event');
       }
@@ -271,7 +271,7 @@ export class CacheInvalidationService extends EventEmitter {
     for (const handler of handlers) {
       try {
         await handler(event);
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, event }, 'Handler error for invalidation event');
       }
     }
@@ -281,7 +281,7 @@ export class CacheInvalidationService extends EventEmitter {
     for (const handler of allHandlers) {
       try {
         await handler(event);
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, event }, 'Handler error for invalidation event');
       }
     }
@@ -322,7 +322,7 @@ export class CacheInvalidationService extends EventEmitter {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Event published'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.stats.errors++;
       logger.error({ error, event }, 'Failed to publish invalidation event');
       return createDataEnvelope(false, {
@@ -386,7 +386,7 @@ export class CacheInvalidationService extends EventEmitter {
       this.stats.published += batch.length;
       this.stats.batches++;
       logger.debug({ count: batch.length }, 'Flushed invalidation batch');
-    } catch (error) {
+    } catch (error: any) {
       this.stats.errors += batch.length;
       logger.error({ error, count: batch.length }, 'Failed to flush invalidation batch');
     }

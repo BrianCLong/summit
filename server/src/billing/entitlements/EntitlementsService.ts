@@ -133,7 +133,7 @@ export class EntitlementsService implements EntitlementsInterface {
 
       await client.query('COMMIT');
       return entitlement;
-    } catch (err) {
+    } catch (err: any) {
       await client.query('ROLLBACK');
       throw err;
     } finally {

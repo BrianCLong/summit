@@ -59,7 +59,7 @@ export class SecretManager {
             },
             actorRole: 'system' // or passed in context
         });
-    } catch (err) {
+    } catch (err: any) {
         // Don't fail secret retrieval if audit fails, but log error
         logger.error(`Failed to audit secret access for ${key}: ${err}`);
     }

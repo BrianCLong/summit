@@ -75,7 +75,7 @@ export class FinOpsRollupService {
       [tenantId, startDate.toISOString().slice(0, 10)],
     );
 
-    const trend = rows.map((row) => ({
+    const trend = rows.map((row: any) => ({
       usageDate: row.usage_date,
       totalCostUsd: Number(row.total_cost_usd || 0),
       computeCostUsd: Number(row.compute_cost_usd || 0),
@@ -89,7 +89,7 @@ export class FinOpsRollupService {
     }));
 
     const totals = trend.reduce(
-      (acc, point) => {
+      (acc: any, point: any) => {
         acc.totalCostUsd += point.totalCostUsd;
         acc.computeCostUsd += point.computeCostUsd;
         acc.storageCostUsd += point.storageCostUsd;

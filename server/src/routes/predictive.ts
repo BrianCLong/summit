@@ -17,7 +17,7 @@ router.get('/forecast/:signal', async (req: Request, res: Response) => {
 
     const result = await predictiveThreatService.forecastSignal(signal, horizon);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching forecast:', error);
     // Handle known errors (like missing signal) with 404 or 400
     if (error instanceof Error && error.message.includes('No historical data')) {
@@ -49,7 +49,7 @@ router.post('/simulate', async (req: Request, res: Response) => {
       impactFactor
     });
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error running simulation:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }

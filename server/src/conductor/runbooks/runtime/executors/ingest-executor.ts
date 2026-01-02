@@ -209,7 +209,7 @@ export class IngestStepExecutor extends BaseStepExecutor {
           },
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       return this.failure(
         error instanceof Error ? error.message : 'Failed to ingest indicators'
       );

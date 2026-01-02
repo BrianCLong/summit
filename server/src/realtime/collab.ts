@@ -17,7 +17,7 @@ export async function initRealtime(httpServer: HttpServer) {
       const pub = new Redis(url);
       const sub = pub.duplicate();
       io.adapter(createAdapter(pub as any, sub as any));
-    } catch (err) {
+    } catch (err: any) {
       console.warn('Redis adapter disabled', err);
     }
   }

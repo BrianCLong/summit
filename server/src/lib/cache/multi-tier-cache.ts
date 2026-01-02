@@ -144,12 +144,12 @@ function createRedisClient(): RedisClient | null {
     client.on('connect', () =>
       logger.info('Redis client connected for multi-tier cache.'),
     );
-    client.on('error', (err) =>
+    client.on('error', (err: any) =>
       logger.error({ err }, 'Redis cache client error.'),
     );
 
     return client;
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ error }, 'Redis unavailable, using in-memory cache only.');
     return null;
   }
@@ -241,7 +241,7 @@ export class MultiTierCache {
       await this.redis.setex(namespacedKey, ttlSeconds, JSON.stringify(payload));
       await this.indexTags(namespacedKey, resolvedTags, ttlSeconds);
       await this.publishInvalidation({ type: 'key', keys: [namespacedKey] });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, key: namespacedKey }, 'Failed to set key in cache');
     }
   }
@@ -286,7 +286,7 @@ export class MultiTierCache {
       await this.redis.del(namespacedKey);
       await this.cleanupTagIndexes(namespacedKey, tags);
       await this.publishInvalidation({ type: 'key', keys: [namespacedKey] });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, key: namespacedKey }, 'Failed to invalidate key in cache');
     }
   }
@@ -305,7 +305,7 @@ export class MultiTierCache {
       }
       await this.redis.del(tagKey);
       await this.publishInvalidation({ type: 'tag', tag, keys });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, tag }, 'Failed to invalidate tag cache');
     }
   }
@@ -391,7 +391,7 @@ export class MultiTierCache {
 
       this.trackTags(key, payload.tags);
       return payload;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, key }, 'Failed to read from cache');
       return null;
     }
@@ -405,7 +405,7 @@ export class MultiTierCache {
       if (!raw) return this.keyTags.get(key);
       const payload = JSON.parse(raw) as CachePayload<unknown>;
       return payload.tags;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error, key }, 'Unable to read tags for key');
       return this.keyTags.get(key);
     }
@@ -455,7 +455,7 @@ export class MultiTierCache {
     try {
       const members = await this.redis.smembers(tagKey);
       return members.filter(Boolean);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error, tagKey }, 'Failed to read tag index');
       return [];
     }
@@ -466,7 +466,7 @@ export class MultiTierCache {
 
     try {
       await this.redis.publish(INVALIDATION_CHANNEL, JSON.stringify(message));
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error, message }, 'Failed to publish invalidation');
     }
   }
@@ -484,7 +484,7 @@ export class MultiTierCache {
         } else if (payload.type === 'tag') {
           payload.keys.forEach((key) => this.evictLocal(key));
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({ err: error, message }, 'Failed to process invalidation');
       }
     });

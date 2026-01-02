@@ -63,7 +63,7 @@ export class MemeTrackingService {
         propagationRate: similarMemes.length * 1.5, // Mock rate
         origin: sourceId
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error tracking meme', error);
       throw error;
     }

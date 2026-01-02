@@ -97,7 +97,7 @@ async function fetchContracts(tenantId: string, schemaId: SchemaId): Promise<Con
          WHERE tenant_id = $1 AND requirements->>'schemaId' = $2`,
         [tenantId, schemaId]
     );
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
         id: row.id,
         tenantId: row.tenant_id,
         dataset: row.dataset,
@@ -128,7 +128,7 @@ function enforceSpecificContract(contract: Contract, data: any) {
     if (contract.requirements.residency && contract.requirements.residency.length > 0) {
         const currentRegion = process.env.REGION || 'us-east';
         if (!contract.requirements.residency.includes(currentRegion)) {
-             handleViolation(contract, `Data residency violation: ${currentRegion} not in [${contract.requirements.residency.join(',')}]`);
+            handleViolation(contract, `Data residency violation: ${currentRegion} not in [${contract.requirements.residency.join(',')}]`);
         }
     }
 }

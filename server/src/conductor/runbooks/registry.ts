@@ -196,7 +196,7 @@ class RunbookSigningService {
         runbook.signature.signature,
         'hex',
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Runbook signature verification failed:', error);
       return false;
     }
@@ -367,7 +367,7 @@ class ApprovalWorkflowEngine {
             ? 'Runbook execution rejected'
             : 'Approval recorded, waiting for additional approvers',
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Approval processing error:', error);
       return {
         success: false,
@@ -476,7 +476,7 @@ export class RunbookRegistry {
     );
 
       return signedRunbook.signature.hash;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Runbook registration failed:', error);
       prometheusConductorMetrics.recordOperationalEvent(
       'runbook_registration_error',
@@ -518,7 +518,7 @@ export class RunbookRegistry {
       }
 
       return runbook;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Runbook retrieval error:', error);
       return null;
     }
@@ -593,7 +593,7 @@ export class RunbookRegistry {
     try {
       const data = await this.redis.get(`execution:${executionId}`);
       return data ? JSON.parse(data) : null;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Execution retrieval error:', error);
       return null;
     }
@@ -653,7 +653,7 @@ export class RunbookRegistry {
       }
 
       return runbooks;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Runbook listing error:', error);
       return [];
     }

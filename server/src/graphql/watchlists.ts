@@ -75,7 +75,7 @@ export const resolvers = {
       return watchlist;
     },
     upsertRule: (_: unknown, { input }: { input: any }): Rule => {
-      const existing = rules.find((r) => r.id === input.id);
+      const existing = rules.find((r: any) => r.id === input.id);
       if (existing) {
         Object.assign(existing, input);
         return existing;

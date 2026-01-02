@@ -234,7 +234,7 @@ export class MigrationFramework extends EventEmitter {
 
           this.emit('migrationCompleted', execution);
           return execution;
-        } catch (error) {
+        } catch (error: any) {
           execution.status = 'failed';
           execution.error = (error as Error).message;
           execution.completedAt = new Date();
@@ -306,7 +306,7 @@ export class MigrationFramework extends EventEmitter {
         if (migration.settings.pauseBetweenBatches && i < steps.length - 1) {
           await this.sleep(migration.settings.pauseBetweenBatches);
         }
-      } catch (error) {
+      } catch (error: any) {
         // Retry logic
         const maxRetries = migration.settings.maxRetries || 3;
         let retryCount = 0;
@@ -396,7 +396,7 @@ export class MigrationFramework extends EventEmitter {
             execution_time_ms: Date.now() - startTime,
             records_processed: execution.metrics.recordsProcessed,
           });
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -529,7 +529,7 @@ export class MigrationFramework extends EventEmitter {
       try {
         const fn = new Function('context', step.content);
         await fn(context);
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(`JavaScript step failed: ${(error as Error).message}`);
       }
     }
@@ -612,7 +612,7 @@ export class MigrationFramework extends EventEmitter {
             }
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         if (validation.critical) {
           throw new Error(
             `Critical validation '${validation.name}' failed: ${(error as Error).message}`,
@@ -686,7 +686,7 @@ export class MigrationFramework extends EventEmitter {
             phase: 'rollback',
             result: 'success',
           });
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;

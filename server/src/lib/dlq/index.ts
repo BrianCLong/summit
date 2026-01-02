@@ -58,7 +58,7 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
       await pool.query(query, values);
       this.emit('enqueued', { id, ...message });
       return id;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, queue: this.queueName }, 'Failed to enqueue DLQ message');
       throw error;
     }
@@ -82,7 +82,7 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
 
     try {
       const result = await pool.query(query, [this.queueName, count]);
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         id: row.id,
         payload: row.payload, // pg auto-parses json
         error: row.error,
@@ -90,7 +90,7 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
         metadata: row.metadata,
         timestamp: new Date(row.created_at).getTime(),
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { err: error, queue: this.queueName },
         'Failed to dequeue DLQ messages',
@@ -105,7 +105,7 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
     try {
       await pool.query('DELETE FROM dlq_messages WHERE id = $1', [messageId]);
       this.emit('acked', messageId);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, messageId }, 'Failed to ack DLQ message');
       throw error;
     }
@@ -120,7 +120,7 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
         [messageId],
       );
       this.emit('nacked', messageId);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, messageId }, 'Failed to nack DLQ message');
       throw error;
     }
@@ -134,7 +134,7 @@ export class PostgresDLQ extends EventEmitter implements DeadLetterQueue {
         [this.queueName],
       );
       return parseInt(result.rows[0].count, 10);
-    } catch (error) {
+    } catch (error: any) {
       return 0;
     }
   }

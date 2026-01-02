@@ -164,7 +164,7 @@ export class VerifiableSyncLog {
       });
 
       return finalEntry;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record sync operation', { error, nodeId });
       throw error;
     }
@@ -238,7 +238,7 @@ export class VerifiableSyncLog {
       );
 
       return batch;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record sync batch', { error, nodeId });
       throw error;
     }
@@ -289,7 +289,7 @@ export class VerifiableSyncLog {
         checks,
         errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Entry verification failed', { error, entryId });
       return {
         valid: false,
@@ -357,7 +357,7 @@ export class VerifiableSyncLog {
         checks,
         errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Batch verification failed', { error, batchId });
       return {
         valid: false,
@@ -406,7 +406,7 @@ export class VerifiableSyncLog {
 
     const result = await this.pool.query(query, params);
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       entryId: row.entry_id,
       nodeId: row.node_id,
       timestamp: row.timestamp,
@@ -559,7 +559,7 @@ export class VerifiableSyncLog {
 
       const verification = await dualNotary.verifyNotarizedRoot(notarized);
       return verification.hsmVerification;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Signature verification failed', { error });
       return false;
     }
@@ -587,7 +587,7 @@ export class VerifiableSyncLog {
 
       const verification = await dualNotary.verifyNotarizedRoot(notarized);
       return verification.tsaVerification;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Timestamp verification failed', { error });
       return false;
     }
@@ -606,7 +606,7 @@ export class VerifiableSyncLog {
 
       const verification = await dualNotary.verifyNotarizedRoot(notarized);
       return verification.hsmVerification;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Batch signature verification failed', { error });
       return false;
     }
@@ -627,7 +627,7 @@ export class VerifiableSyncLog {
 
       const verification = await dualNotary.verifyNotarizedRoot(notarized);
       return verification.tsaVerification;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Batch timestamp verification failed', { error });
       return false;
     }
