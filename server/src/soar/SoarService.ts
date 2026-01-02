@@ -77,7 +77,7 @@ export class SoarService {
     // Asynchronously execute the run
     // In production this should be a job queue
     this.engine.executeRun(id).catch(err => {
-        serviceLogger.error({ runId: id, err }, 'Async execution failed');
+      serviceLogger.error({ runId: id, err }, 'Async execution failed');
     });
 
     return this.mapRun(rows[0]);
@@ -87,52 +87,52 @@ export class SoarService {
    * List runs for a playbook or case
    */
   async listRuns(tenantId: string, filters: { playbookId?: string, caseId?: string }): Promise<PlaybookRun[]> {
-      let query = `SELECT * FROM maestro.playbook_runs WHERE tenant_id = $1`;
-      const params: any[] = [tenantId];
+    let query = `SELECT * FROM maestro.playbook_runs WHERE tenant_id = $1`;
+    const params: any[] = [tenantId];
 
-      if (filters.playbookId) {
-          query += ` AND playbook_id = $${params.push(filters.playbookId)}`;
-      }
-      if (filters.caseId) {
-          query += ` AND case_id = $${params.push(filters.caseId)}`;
-      }
+    if (filters.playbookId) {
+      query += ` AND playbook_id = $${params.push(filters.playbookId)}`;
+    }
+    if (filters.caseId) {
+      query += ` AND case_id = $${params.push(filters.caseId)}`;
+    }
 
-      query += ` ORDER BY started_at DESC LIMIT 50`;
+    query += ` ORDER BY started_at DESC LIMIT 50`;
 
-      const { rows } = await this.pg.query(query, params);
-      return rows.map(this.mapRun);
+    const { rows } = await this.pg.query(query, params);
+    return rows.map(this.mapRun);
   }
 
   private mapPlaybook(row: any): Playbook {
     return {
-        id: row.id,
-        tenantId: row.tenant_id,
-        name: row.name,
-        description: row.description,
-        workflow: row.workflow,
-        triggers: row.triggers || [],
-        isActive: row.is_active,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-        createdBy: row.created_by,
-        metadata: row.metadata || {}
+      id: row.id,
+      tenantId: row.tenant_id,
+      name: row.name,
+      description: row.description,
+      workflow: row.workflow,
+      triggers: row.triggers || [],
+      isActive: row.is_active,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      createdBy: row.created_by,
+      metadata: row.metadata || {}
     };
   }
 
   private mapRun(row: any): PlaybookRun {
-      return {
-          id: row.id,
-          tenantId: row.tenant_id,
-          playbookId: row.playbook_id,
-          caseId: row.case_id,
-          status: row.status,
-          context: row.context || {},
-          stepsState: row.steps_state || [],
-          result: row.result,
-          startedAt: row.started_at,
-          completedAt: row.completed_at,
-          error: row.error,
-          triggeredBy: row.triggered_by
-      };
+    return {
+      id: row.id,
+      tenantId: row.tenant_id,
+      playbookId: row.playbook_id,
+      caseId: row.case_id,
+      status: row.status,
+      context: row.context || {},
+      stepsState: row.steps_state || [],
+      result: row.result,
+      startedAt: row.started_at,
+      completedAt: row.completed_at,
+      error: row.error,
+      triggeredBy: row.triggered_by
+    };
   }
 }

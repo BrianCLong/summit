@@ -53,7 +53,7 @@ const sdk = new NodeSDK({
 try {
   await sdk.start();
   console.log('OpenTelemetry SDK started successfully');
-} catch (error) {
+} catch (error: any) {
   console.error('Error starting OpenTelemetry SDK:', error);
 }
 
@@ -61,7 +61,7 @@ export async function stopOTEL() {
   try {
     await sdk.shutdown();
     console.log('OpenTelemetry SDK shut down successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error shutting down OpenTelemetry SDK:', error);
   }
 }

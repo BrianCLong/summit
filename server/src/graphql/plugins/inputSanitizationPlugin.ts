@@ -66,7 +66,7 @@ export function createInputSanitizationPlugin(
           try {
             // Process variables in place
             sanitizeVariables(request.variables, finalOptions, 0);
-          } catch (error) {
+          } catch (error: any) {
             logger.warn(
               {
                 error: error instanceof Error ? error.message : String(error),

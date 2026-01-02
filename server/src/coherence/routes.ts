@@ -118,7 +118,7 @@ export function createCoherenceRoutes(
       };
 
       res.json(health);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Health check failed', { error });
       res.status(500).json({
         status: 'unhealthy',
@@ -148,7 +148,7 @@ export function createCoherenceRoutes(
         });
 
         res.status(201).json(result);
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof z.ZodError) {
           logger.warn('Invalid signal ingestion request', {
             errors: error.errors,
@@ -207,7 +207,7 @@ export function createCoherenceRoutes(
             );
             results.push({ success: true, signalId: result.signalId });
             successCount++;
-          } catch (error) {
+          } catch (error: any) {
             results.push({
               success: false,
               error:
@@ -236,7 +236,7 @@ export function createCoherenceRoutes(
           },
           results,
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Batch signal ingestion failed', { error });
         res.status(500).json({
           success: false,
@@ -271,7 +271,7 @@ export function createCoherenceRoutes(
         });
 
         res.json(result);
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof z.ZodError) {
           logger.warn('Invalid analysis request', { errors: error.errors });
           return res.status(400).json({
@@ -302,7 +302,7 @@ export function createCoherenceRoutes(
       const status = await coherenceService.getCoherenceStatus(tenantId);
 
       res.json(status);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get coherence status', {
         error,
         tenantId: req.params.tenantId,
@@ -328,7 +328,7 @@ export function createCoherenceRoutes(
         success: true,
         message: 'Configuration updated successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         logger.warn('Invalid configuration request', { errors: error.errors });
         return res.status(400).json({
@@ -364,7 +364,7 @@ export function createCoherenceRoutes(
       });
 
       res.status(201).json(mission);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         logger.warn('Invalid mission creation request', {
           errors: error.errors,
@@ -414,7 +414,7 @@ export function createCoherenceRoutes(
           count: missions.length,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get missions', {
         error,
         tenantId: req.params.tenantId,
@@ -468,7 +468,7 @@ export function createCoherenceRoutes(
         count: fingerprints.length,
         options,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get activity fingerprints', {
         error,
         tenantId: req.params.tenantId,
@@ -522,7 +522,7 @@ export function createCoherenceRoutes(
         count: impacts.length,
         options,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get narrative impacts', {
         error,
         tenantId: req.params.tenantId,
@@ -551,7 +551,7 @@ export function createCoherenceRoutes(
           .assessMissionHealth(tenantId, missionId);
 
         res.json(health);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to assess mission health', {
           error,
           tenantId: req.params.tenantId,
@@ -592,7 +592,7 @@ export function createCoherenceRoutes(
             success: true,
             simulation: result,
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Simulation failed', { error });
           res.status(500).json({
             error: 'Simulation failed',
@@ -615,7 +615,7 @@ export function createCoherenceRoutes(
               0,
             ),
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to get subscription counts', { error });
           res.status(500).json({
             error: 'Failed to get subscription counts',

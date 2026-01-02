@@ -175,7 +175,7 @@ export class EmailService {
 
         return result;
       }
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         recipientEmail: this.extractPrimaryRecipient(message),
@@ -242,7 +242,7 @@ export class EmailService {
 
       // Send email
       return await this.sendEmail(message, options);
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         recipientEmail: typeof recipientEmail === 'string' ? recipientEmail : (recipientEmail as any)[0]?.email || 'unknown',

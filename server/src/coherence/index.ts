@@ -116,7 +116,7 @@ export class CoherenceEcosystem {
           'GraphQL Subscriptions',
         ],
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize Coherence Ecosystem', { error });
       throw new Error(
         `Coherence Ecosystem initialization failed: ${error.message}`,
@@ -243,7 +243,7 @@ export class CoherenceEcosystem {
       } else if (components.subscriptionManager.status !== 'healthy') {
         overallStatus = 'degraded';
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Health check failed', { error });
       overallStatus = 'unhealthy';
       components.error = { message: error.message };
@@ -280,7 +280,7 @@ export class CoherenceEcosystem {
       this.isInitialized = false;
 
       logger.info('V24 Global Coherence Ecosystem shutdown complete');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error during ecosystem shutdown', { error });
       throw error;
     }
@@ -293,7 +293,7 @@ export class CoherenceEcosystem {
     const session = this.neo4j.getSession();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         // Create constraints for unique identifiers
         await tx.run(`
           CREATE CONSTRAINT tenant_id_unique IF NOT EXISTS

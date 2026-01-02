@@ -175,7 +175,7 @@ export class GlassBoxRunService {
       }, 'Created glass-box run');
 
       return run;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to create glass-box run');
       throw error;
     }
@@ -473,7 +473,7 @@ export class GlassBoxRunService {
     ]);
 
     return {
-      runs: dataResult.rows.map(row => this.rowToRun(row)),
+      runs: dataResult.rows.map((row: any) => this.rowToRun(row)),
       total: parseInt(countResult.rows[0].count),
     };
   }
@@ -547,7 +547,7 @@ export class GlassBoxRunService {
     `;
 
     const result = await this.pool.query(query, [runId]);
-    return result.rows.map(row => this.rowToRun(row));
+    return result.rows.map((row: any) => this.rowToRun(row));
   }
 
   /**

@@ -731,7 +731,7 @@ export class InvestigationWorkflowService extends EventEmitter {
       // Try to load from cache
       investigation = await cacheService.get(
         `investigation:${investigationId}`,
-      );
+      ) as any;
       if (investigation) {
         this.investigations.set(investigationId, investigation);
       }

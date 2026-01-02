@@ -222,7 +222,7 @@ export class AdvancedAuditSystem extends EventEmitter {
     }
 
     // Initialize schema
-    this.initializeSchema().catch((err) => {
+    this.initializeSchema().catch((err: any) => {
       this.logger.error(
         { error: err.message },
         'Failed to initialize audit schema',
@@ -231,7 +231,7 @@ export class AdvancedAuditSystem extends EventEmitter {
 
     // Start periodic flush
     this.flushInterval = setInterval(() => {
-      this.flushEventBuffer().catch((err) => {
+      this.flushEventBuffer().catch((err: any) => {
         this.logger.error(
           { error: err.message },
           'Failed to flush audit events',
@@ -245,7 +245,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       process.env.NODE_ENV !== 'test';
     if (scheduleRetention) {
       this.retentionInterval = setInterval(() => {
-        this.pruneExpiredEvents().catch((err) => {
+        this.pruneExpiredEvents().catch((err: any) => {
           this.logger.error(
             { error: err.message },
             'Failed to prune audit events by retention policy',

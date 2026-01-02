@@ -113,7 +113,7 @@ export function loadPalettesFromFile(filePath?: string): void {
   try {
     const data = JSON.parse(fs.readFileSync(absolutePath, 'utf-8')) as ReasoningPalette[];
     data.forEach(registerPalette);
-  } catch (err) {
+  } catch (err: any) {
     console.warn('Failed to load palettes from config', err);
   }
 }
@@ -131,7 +131,7 @@ export function resolvePaletteRuntimeConfig(): PaletteRuntimeConfig {
   if (allowListConfig) {
     try {
       tenantAllowList = JSON.parse(allowListConfig);
-    } catch (err) {
+    } catch (err: any) {
       console.warn('Failed to parse tenant allowlist for palettes', err);
     }
   }

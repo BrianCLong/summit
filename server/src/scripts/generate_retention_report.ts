@@ -33,7 +33,7 @@ async function generateReport() {
 
     fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
     logger.info(`Retention audit report generated at ${outputPath}`);
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error);
     process.exit(1);
   } finally {

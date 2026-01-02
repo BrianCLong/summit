@@ -33,7 +33,7 @@ export class VaultSecretManager implements SecretManager {
             return content.trim();
         }
         return "mock-secret-value";
-    } catch (e) {
+    } catch (e: any) {
         throw new Error(`Failed to fetch secret ${key}: ${e}`);
     }
   }

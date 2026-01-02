@@ -200,7 +200,7 @@ export class RTBFOrchestrator {
         { requestId: request.id },
         'RTBF request validated successfully',
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         { error, requestId: request.id },
         'RTBF request validation failed',
@@ -344,7 +344,7 @@ export class RTBFOrchestrator {
         { requestId: request.id, jobCount: jobs.length },
         'RTBF request execution completed',
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         { error, requestId: request.id },
         'RTBF request execution failed',
@@ -643,7 +643,7 @@ export class RTBFOrchestrator {
         job.execution.startedAt.getTime();
 
       this.logger.info({ jobId: job.id }, 'RTBF job completed');
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({ error, jobId: job.id }, 'RTBF job failed');
       job.state = 'failed';
       job.execution.failedAt = new Date();
@@ -695,7 +695,7 @@ export class RTBFOrchestrator {
         `SELECT id FROM ${safeTable} WHERE ${safeFilterColumn} = $1`,
         [resolvedFilterValue],
       );
-      const recordIds = result.rows.map((r) => r.id);
+      const recordIds = result.rows.map((r: any) => r.id);
 
       // Perform redaction
       const redactionResults = await this.redactionEngine.redactPostgresRecords(

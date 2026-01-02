@@ -140,7 +140,7 @@ export async function runSchemaDiffAnalysis() {
       success: true,
       diff,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Schema diff analysis failed:', error);
     throw error;
   }

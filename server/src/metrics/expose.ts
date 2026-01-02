@@ -23,14 +23,14 @@ async function getMerged(): Promise<Registry> {
   }
   try {
     cachedMerged = Registry.merge([defaultRegistry, legacy]);
-  } catch (e) {
+  } catch (e: any) {
     console.warn(
       '[metrics] Registry.merge failed, serving defaultRegistry only:',
       (e as Error).message,
     );
     cachedMerged = defaultRegistry;
   }
-  return cachedMerged;
+  return cachedMerged!;
 }
 
 export async function metricsText(): Promise<string> {

@@ -202,7 +202,7 @@ async function validateAccessPurpose(
       requiresWarrant: purposeConfig.requires_warrant,
       requiresApproval: purposeConfig.requires_approval,
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error: error.message, purpose }, 'Failed to validate access purpose');
     return {
       valid: false,
@@ -287,7 +287,7 @@ export function createGovernanceMiddleware(
       }, 'Governance context extracted');
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   };
@@ -347,7 +347,7 @@ export function createWarrantValidationMiddleware(
       }, 'Warrant validated successfully');
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   };

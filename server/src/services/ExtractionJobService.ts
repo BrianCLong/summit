@@ -224,7 +224,7 @@ export class ExtractionJobService {
         `Started extraction job: ${jobId}, methods: ${input.extractionMethods.join(', ')}`,
       );
       return job;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to start extraction job:`, error);
       throw error;
     }
@@ -241,7 +241,7 @@ export class ExtractionJobService {
       return result.rows.length > 0
         ? this.mapRowToExtractionJob(result.rows[0])
         : null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to get extraction job ${id}:`, error);
       throw error;
     }
@@ -281,8 +281,8 @@ export class ExtractionJobService {
       }
 
       const result = await this.db.query(query, values);
-      return result.rows.map((row) => this.mapRowToExtractionJob(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.mapRowToExtractionJob(row));
+    } catch (error: any) {
       logger.error(
         `Failed to get extraction jobs for investigation ${investigationId}:`,
         error,
@@ -325,7 +325,7 @@ export class ExtractionJobService {
 
       logger.info(`Cancelled extraction job: ${id}`);
       return this.mapRowToExtractionJob(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to cancel extraction job ${id}:`, error);
       throw error;
     }
@@ -373,7 +373,7 @@ export class ExtractionJobService {
 
       logger.info(`Retried extraction job: ${id}`);
       return this.mapRowToExtractionJob(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to retry extraction job ${id}:`, error);
       throw error;
     }
@@ -490,7 +490,7 @@ export class ExtractionJobService {
       logger.info(
         `Completed extraction job: ${jobId}, extracted: ${savedCount} entities, duration: ${totalDuration}ms`,
       );
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 
@@ -663,7 +663,7 @@ export class ExtractionJobService {
               entities.length || 0,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Extraction method ${method} failed:`, error);
       throw error;
     }
@@ -713,7 +713,7 @@ export class ExtractionJobService {
       }
 
       return entities;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('OCR extraction failed:', error);
       throw new Error(`OCR extraction failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -764,7 +764,7 @@ export class ExtractionJobService {
       }
 
       return entities;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Object detection failed:', error);
       throw new Error(`Object detection failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -964,7 +964,7 @@ export class ExtractionJobService {
 
       try {
         textContent = fs.readFileSync(filePath, 'utf8');
-      } catch (error) {
+      } catch (error: any) {
         reject(new Error(`Failed to read text file: ${error instanceof Error ? error.message : String(error)}`));
         return;
       }
@@ -1096,7 +1096,7 @@ export class ExtractionJobService {
 
         await this.db.query(query, values);
         savedCount++;
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(`Failed to save entity: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
@@ -1166,7 +1166,7 @@ export class ExtractionJobService {
       logger.debug(`Extraction job progress: ${jobId}, progress: ${data}%`);
     });
 
-    this.extractionWorker.on('completed', (job) => {
+    this.extractionWorker.on('completed', (job: any) => {
       logger.info(`Worker completed job: ${job.id}`);
     });
 
@@ -1256,7 +1256,7 @@ export class ExtractionJobService {
   /**
    * Map database row to ExtractionJob object
    */
-  private mapRowToExtractionJob(row: any): ExtractionJob {
+  private mapRowToExtractionJob(row): ExtractionJob {
     return {
       id: row.id,
       investigationId: row.investigation_id,

@@ -123,9 +123,9 @@ const loadMigrationFiles = (migrationsDir: string) => {
 
   return fs
     .readdirSync(migrationsDir)
-    .filter((file) => file.endsWith('.up.sql'))
+    .filter((file: any) => file.endsWith('.up.sql'))
     .sort()
-    .map((file) => path.join(migrationsDir, file));
+    .map((file: any) => path.join(migrationsDir, file));
 };
 
 export const buildMigrationRiskReport = (
@@ -134,7 +134,7 @@ export const buildMigrationRiskReport = (
   const migrationsDir = options.migrationsDir || DEFAULT_MANAGED_MIGRATIONS_DIR;
   const migrationPaths = loadMigrationFiles(migrationsDir);
 
-  const migrations = migrationPaths.map((migrationPath) => {
+  const migrations = migrationPaths.map((migrationPath: any) => {
     const name = path.basename(migrationPath, '.up.sql');
     const sql = fs.readFileSync(migrationPath, 'utf8');
     const findings = scanSqlForRisks(sql);
@@ -146,9 +146,9 @@ export const buildMigrationRiskReport = (
     };
   });
 
-  const riskyMigrations = migrations.filter((migration) => migration.findings.length > 0);
+  const riskyMigrations = migrations.filter((migration: any) => migration.findings.length > 0);
   const findingsCount = riskyMigrations.reduce(
-    (count, migration) => count + migration.findings.length,
+    (count: any, migration: any) => count + migration.findings.length,
     0,
   );
 

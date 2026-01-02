@@ -253,7 +253,7 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
         );
 
         return result;
-      } catch (error) {
+      } catch (error: any) {
         const duration = Date.now() - startTime;
 
         if (

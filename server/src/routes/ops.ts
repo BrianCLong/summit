@@ -29,7 +29,7 @@ router.post('/maintenance', async (req, res) => {
         // Run asynchronously to avoid timeout
         runMaintenance().catch(err => logger.error('Async maintenance failed', err));
         res.json({ message: 'Maintenance task started' });
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Failed to trigger maintenance', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -116,7 +116,7 @@ router.post('/backup/:type', async (req, res) => {
                 return res.status(400).json({ error: 'Invalid backup type. Use postgres, neo4j, or redis.' });
         }
         res.json({ message: 'Backup completed', path: result });
-    } catch (error) {
+    } catch (error: any) {
         logger.error(`Failed to backup ${type}`, error);
         res.status(500).json({ error: `Backup failed: ${(error as Error).message}` });
     }
@@ -140,7 +140,7 @@ router.post('/dr/drill', async (req, res) => {
         } else {
             res.status(500).json({ error: 'DR Drill failed' });
         }
-    } catch (error) {
+    } catch (error: any) {
         logger.error('DR drill error', error);
         res.status(500).json({ error: 'DR Drill execution error' });
     }
@@ -154,7 +154,7 @@ router.get('/dr/status', async (req, res) => {
     try {
         const status = await drService.getStatus();
         res.json(status);
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ error: 'Failed to get DR status' });
     }
 });
@@ -180,7 +180,7 @@ router.post('/evidence/verify', async (req, res) => {
         });
 
         return res.json({ ok: true, ...result });
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Failed to run evidence integrity verification', error);
         return res.status(500).json({ ok: false, error: 'Failed to verify evidence integrity' });
     }

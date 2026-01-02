@@ -260,7 +260,7 @@ export async function withTimeout<T>(
     const result = await Promise.race([operation, timeoutPromise]);
     clearTimeout(timeoutId!);
     return result;
-  } catch (error) {
+  } catch (error: any) {
     clearTimeout(timeoutId!);
     throw error;
   }

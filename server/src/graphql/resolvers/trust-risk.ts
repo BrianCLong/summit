@@ -53,11 +53,11 @@ export const trustRiskResolvers = {
       ).listRecentSignals(tenantId, undefined, Math.min(limit ?? 50, 100));
       return rows
         .filter(
-          (r) =>
+          (r: any) =>
             (!kind || r.kind === kind) &&
             (!severity || r.severity === severity),
         )
-        .map((r) => ({
+        .map((r: any) => ({
           id: r.id,
           tenantId: r.tenant_id,
           kind: r.kind,
@@ -79,7 +79,7 @@ export const trustRiskResolvers = {
         offset,
       });
       return {
-        items: page.items.map((r) => ({
+        items: page.items.map((r: any) => ({
           id: r.id,
           tenantId: r.tenant_id,
           kind: r.kind,
@@ -96,7 +96,7 @@ export const trustRiskResolvers = {
     async trustScoresPage(_: any, { tenantId, limit, offset }: any) {
       const page = await listTrustScores(tenantId, limit, offset);
       return {
-        items: page.items.map((ts) => ({
+        items: page.items.map((ts: any) => ({
           subjectId: ts.subject_id,
           score: Number(ts.score),
           reasons: ts.reasons || [],

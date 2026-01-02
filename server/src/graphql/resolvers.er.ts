@@ -45,7 +45,7 @@ export const erResolvers: IResolvers = {
 
       try {
         const result = await pool.query(query, params);
-        return result.rows.map((row) => ({
+        return result.rows.map((row: any) => ({
           id: row.id,
           entityA: row.entity_a_id,
           entityB: row.entity_b_id,
@@ -63,7 +63,7 @@ export const erResolvers: IResolvers = {
           updatedAt: row.updated_at,
           createdBy: row.created_by,
         }));
-      } catch (error) {
+      } catch (error: any) {
         log.error(
           { error: error.message },
           'Failed to fetch pending merge decisions',
@@ -104,7 +104,7 @@ export const erResolvers: IResolvers = {
           updatedAt: row.updated_at,
           createdBy: row.created_by,
         };
-      } catch (error) {
+      } catch (error: any) {
         log.error(
           { error: error.message, id },
           'Failed to fetch merge decision',
@@ -153,7 +153,7 @@ export const erResolvers: IResolvers = {
 
         const result = await pool.query(query, params);
 
-        return result.rows.map((row) => ({
+        return result.rows.map((row: any) => ({
           entityType: row.entity_type,
           totalDecisions: row.total_decisions,
           mergeDecisions: row.merge_decisions,
@@ -168,7 +168,7 @@ export const erResolvers: IResolvers = {
           modelVersion: row.model_version,
           lastUpdated: row.last_updated,
         }));
-      } catch (error) {
+      } catch (error: any) {
         log.error(
           { error: error.message, filter },
           'Failed to fetch ER precision metrics',
@@ -201,7 +201,7 @@ export const erResolvers: IResolvers = {
           daysEvaluated: data.days_evaluated,
           evaluatedAt: new Date(data.evaluated_at),
         };
-      } catch (error) {
+      } catch (error: any) {
         log.error(
           { error: error.message, entityType, daysBack },
           'Failed to check ER threshold',
@@ -236,7 +236,7 @@ export const erResolvers: IResolvers = {
       try {
         const result = await pool.query(query, params);
 
-        return result.rows.map((row) => ({
+        return result.rows.map((row: any) => ({
           id: row.id.toString(),
           prNumber: row.pr_number,
           commitSha: row.commit_sha,
@@ -247,7 +247,7 @@ export const erResolvers: IResolvers = {
           threshold: parseFloat(row.threshold),
           createdAt: row.created_at,
         }));
-      } catch (error) {
+      } catch (error: any) {
         log.error({ error: error.message }, 'Failed to fetch CI metrics');
         throw new Error('Failed to fetch CI metrics');
       }
@@ -258,7 +258,7 @@ export const erResolvers: IResolvers = {
       { entityA, entityB, entityType = 'PERSON' },
       context,
     ) =>
-      tracer.startActiveSpan('er.resolve_entities', async (span) => {
+      tracer.startActiveSpan('er.resolve_entities', async (span: any) => {
         span.setAttributes({
           'er.entity_type': entityType,
           'er.operation': 'resolve_entities',
@@ -338,7 +338,7 @@ export const erResolvers: IResolvers = {
             updatedAt: null,
             createdBy: context.user?.id || 'system',
           };
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error);
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -357,7 +357,7 @@ export const erResolvers: IResolvers = {
 
   Mutation: {
     decideMerge: async (_, { input }, context) =>
-      tracer.startActiveSpan('er.decide_merge', async (span) => {
+      tracer.startActiveSpan('er.decide_merge', async (span: any) => {
         span.setAttributes({
           'er.entity_type': input.entityType,
           'er.operation': 'decide_merge',
@@ -466,7 +466,7 @@ export const erResolvers: IResolvers = {
             updatedAt: null,
             createdBy: context.user?.id || 'system',
           };
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error);
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -527,7 +527,7 @@ export const erResolvers: IResolvers = {
           threshold: parseFloat(row.threshold),
           createdAt: row.created_at,
         };
-      } catch (error) {
+      } catch (error: any) {
         log.error({ error: error.message }, 'Failed to record CI metric');
         throw new Error('Failed to record CI metric');
       }
@@ -542,7 +542,7 @@ export const erResolvers: IResolvers = {
           reason,
           userContext: { userId: context.user?.id || 'system' },
         });
-      } catch (error) {
+      } catch (error: any) {
         log.error({ error: error.message, mergeId }, 'Failed to rollback merge');
         throw new Error('Failed to rollback merge: ' + error.message);
       } finally {

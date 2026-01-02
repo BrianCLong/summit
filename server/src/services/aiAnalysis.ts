@@ -169,7 +169,7 @@ export class AIAnalysisService {
           (a, b) => b.confidence - a.confidence,
         ),
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`AI Analysis failed. Error: ${(error as Error).message}`);
       return { entities: [], relationships: [] };
     }

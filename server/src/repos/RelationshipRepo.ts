@@ -136,7 +136,7 @@ export class RelationshipRepo {
       }
 
       return this.mapRow(relationship);
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -183,7 +183,7 @@ export class RelationshipRepo {
         await client.query('ROLLBACK');
         return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -253,7 +253,7 @@ export class RelationshipRepo {
 
     // Deduplicate in case same relationship appears in both results
     const uniqueRows = Array.from(
-      new Map(rows.map((row) => [row.id, row])).values(),
+      new Map(rows.map((row: any) => [row.id, row])).values(),
     );
 
     return uniqueRows.map(this.mapRow);
@@ -355,7 +355,7 @@ export class RelationshipRepo {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `MATCH (src:Entity {id: $srcId}), (dst:Entity {id: $dstId})
            MERGE (src)-[r:REL {id: $id}]->(dst)
@@ -379,7 +379,7 @@ export class RelationshipRepo {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `MATCH ()-[r:REL {id: $id}]-()
            DELETE r`,

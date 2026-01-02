@@ -160,7 +160,7 @@ export class ContentSigningService extends EventEmitter {
 
       this.initialized = true;
       logger.info('ContentSigningService initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize ContentSigningService');
       throw error;
     }
@@ -333,7 +333,7 @@ export class ContentSigningService extends EventEmitter {
         approvalStatus,
         distributionResults,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to sign asset');
       throw error;
     }
@@ -473,7 +473,7 @@ export class ContentSigningService extends EventEmitter {
         asset: updatedAsset,
         propagationResults,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to revoke asset');
       throw error;
     }
@@ -548,7 +548,7 @@ export class ContentSigningService extends EventEmitter {
     );
 
     return {
-      assets: dataResult.rows.map(row => this.mapRowToAsset(row)),
+      assets: dataResult.rows.map((row: any) => this.mapRowToAsset(row)),
       total: parseInt(countResult.rows[0].count),
     };
   }
@@ -608,7 +608,7 @@ export class ContentSigningService extends EventEmitter {
         errors,
         asset,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         valid: false,
         errors: [`Verification error: ${(error as Error).message}`],
@@ -882,7 +882,7 @@ export class ContentSigningService extends EventEmitter {
       try {
         const url = await this.distributeToChannel(asset, channel);
         results.push({ channel, success: true, url });
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, channel, assetId: asset.id }, 'Failed to distribute to channel');
         results.push({
           channel,
@@ -951,7 +951,7 @@ export class ContentSigningService extends EventEmitter {
           assetId: asset.id,
           status: [status],
         });
-      } catch (error) {
+      } catch (error: any) {
         status.status = 'failed';
         status.error = (error as Error).message;
         logger.error({

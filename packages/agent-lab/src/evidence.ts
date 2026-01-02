@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { BoundedContent, ContentBoundary } from './contentBoundary';
+import { JudgeScores } from './judge';
 import { PolicyDecision } from './policy';
 
 export interface EvidenceArtifact {
@@ -132,7 +133,7 @@ export class EvidenceStore {
     return reportPath;
   }
 
-  writeJudge(judge: Record<string, unknown>, markdown: string) {
+  writeJudge(judge: JudgeScores, markdown: string) {
     const jsonPath = path.join(this.runPath, 'judge.json');
     const mdPath = path.join(this.runPath, 'judge.md');
     fs.writeFileSync(jsonPath, this.stable(judge));

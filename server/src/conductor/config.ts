@@ -275,7 +275,7 @@ export async function initializeConductorSystem(): Promise<{
     console.log('Conductor system initialized successfully');
 
     return { graphOpsServer, filesServer };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to initialize Conductor system:', error);
 
     // Cleanup on failure
@@ -316,7 +316,7 @@ export async function shutdownConductorSystem(servers: {
     }
 
     console.log('Conductor system shutdown complete');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error during Conductor shutdown:', error);
   }
 }

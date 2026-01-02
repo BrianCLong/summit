@@ -41,7 +41,7 @@ export async function verifyStartupDependencies(options: ReadinessOptions = {}) 
   try {
     await initializeNeo4jDriver();
     await getNeo4jDriver().verifyConnectivity();
-  } catch (error) {
+  } catch (error: any) {
     const message = error instanceof Error ? error.message : 'Unknown Neo4j error';
     failures.push(`neo4j: ${message}`);
     logger.error({ error }, 'Neo4j readiness check failed');
@@ -50,7 +50,7 @@ export async function verifyStartupDependencies(options: ReadinessOptions = {}) 
   try {
     const pool = getPostgresPool();
     await pool.query('SELECT 1');
-  } catch (error) {
+  } catch (error: any) {
     const message = error instanceof Error ? error.message : 'Unknown Postgres error';
     failures.push(`postgres: ${message}`);
     logger.error({ error }, 'Postgres readiness check failed');
@@ -60,7 +60,7 @@ export async function verifyStartupDependencies(options: ReadinessOptions = {}) 
     try {
       const redis = getRedisClient();
       await redis.ping();
-    } catch (error) {
+    } catch (error: any) {
       const message = error instanceof Error ? error.message : 'Unknown Redis error';
       failures.push(`redis: ${message}`);
       logger.error({ error }, 'Redis readiness check failed');

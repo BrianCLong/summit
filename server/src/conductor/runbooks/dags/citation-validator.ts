@@ -223,7 +223,7 @@ export class CitationValidator {
       // Validate URL format
       try {
         new URL(citation.url);
-      } catch (e) {
+      } catch (e: any) {
         errors.push(`Invalid URL format: ${citation.url}`);
       }
     }

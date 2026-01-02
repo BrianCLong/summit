@@ -164,7 +164,7 @@ export class AutoRemediationHooks extends EventEmitter {
       ],
       handler: async (action, context) => {
         const recentActions = context.previousResults.filter(
-          (r) => Date.now() - r.timestamp.getTime() < 60000 // Last minute
+          (r: any) => Date.now() - r.timestamp.getTime() < 60000 // Last minute
         );
 
         if (recentActions.length >= 10) {
@@ -264,7 +264,7 @@ export class AutoRemediationHooks extends EventEmitter {
             },
             rollbackAvailable: true,
           };
-        } catch (error) {
+        } catch (error: any) {
           return {
             success: false,
             message: `Failed to block IP: ${(error as Error).message}`,
@@ -568,7 +568,7 @@ export class AutoRemediationHooks extends EventEmitter {
           if (correlation) {
             correlations.push(correlation);
           }
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('CTI query failed', {
             source: name,
             ioc: ioc.value,
@@ -622,7 +622,7 @@ export class AutoRemediationHooks extends EventEmitter {
           if (data) {
             osintData.push(data);
           }
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('OSINT query failed', {
             source: name,
             ioc: ioc.value,
@@ -864,7 +864,7 @@ export class AutoRemediationHooks extends EventEmitter {
 
         // Run post-hooks
         await this.runHooks('post', action, context);
-      } catch (error) {
+      } catch (error: any) {
         action.status = 'failed';
         const errorResult: RemediationResult = {
           success: false,
@@ -891,8 +891,8 @@ export class AutoRemediationHooks extends EventEmitter {
     }
 
     // Update plan status
-    const allSuccessful = results.every((r) => r.success);
-    const anySuccessful = results.some((r) => r.success);
+    const allSuccessful = results.every((r: any) => r.success);
+    const anySuccessful = results.some((r: any) => r.success);
 
     plan.status = allSuccessful
       ? 'completed'
@@ -988,7 +988,7 @@ export class AutoRemediationHooks extends EventEmitter {
           const result = await executor.rollback(action, action.target);
           action.status = 'rolled_back';
           results.push(result);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Rollback failed', {
             actionId: action.id,
             error: (error as Error).message,

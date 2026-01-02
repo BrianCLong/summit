@@ -53,7 +53,7 @@ export class AdversaryAgentService {
           try {
             const data = JSON.parse(output);
             resolve(data);
-          } catch (err) {
+          } catch (err: any) {
             reject(err);
           }
         } else {
@@ -61,7 +61,7 @@ export class AdversaryAgentService {
         }
       });
 
-      proc.on('error', (err) => reject(err));
+      proc.on('error', (err: any) => reject(err));
     });
   }
 }

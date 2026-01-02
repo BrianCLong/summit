@@ -68,7 +68,7 @@ export function withPolicy(action: string, resolver: any) {
       throw new GraphQLError('Forbidden', {
         extensions: {
           code: 'FORBIDDEN',
-          reason: decision.reason || 'policy_denied',
+          reason: (decision as any).reason || 'policy_denied',
         },
       });
     }

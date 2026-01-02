@@ -32,7 +32,7 @@ export class QuietExitService {
 
       // Force exit immediately after cleanup, bypassing standard graceful shutdown if needed,
       // but usually this is called *during* shutdown.
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to execute Quiet Exit completely', error);
       // Even if it fails, we try to exit
     }

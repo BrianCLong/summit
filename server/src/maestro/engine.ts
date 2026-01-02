@@ -31,7 +31,7 @@ export class MaestroEngine {
     this.queueEvents = new QueueEvents('maestro_v2', { connection: deps.redisConnection });
 
     // Initialize generic worker
-    this.worker = new Worker('maestro_v2', async (job) => {
+    this.worker = new Worker('maestro_v2', async (job: any) => {
       const { taskId, runId, tenantId } = job.data;
       return this.processTask(taskId, runId, tenantId);
     }, { connection: deps.redisConnection, concurrency: 5 });
@@ -75,18 +75,18 @@ export class MaestroEngine {
       // Ideally we'd return a new run pointer to the old data, but for now we return the old run.
       // We need to map the row to MaestroRun interface
       const row = dupRes.rows[0];
-       return {
-          id: row.id,
-          tenantId: row.tenant_id,
-          templateId: row.template_id,
-          templateVersion: row.template_version,
-          createdByPrincipalId: row.created_by_principal_id,
-          status: row.status,
-          input: row.input,
-          startedAt: row.started_at,
-          completedAt: row.completed_at,
-          metadata: row.metadata || {}
-       };
+      return {
+        id: row.id,
+        tenantId: row.tenant_id,
+        templateId: row.template_id,
+        templateVersion: row.template_version,
+        createdByPrincipalId: row.created_by_principal_id,
+        status: row.status,
+        input: row.input,
+        startedAt: row.started_at,
+        completedAt: row.completed_at,
+        metadata: row.metadata || {}
+      };
     }
 
     // 1. Fetch Template
@@ -139,7 +139,7 @@ export class MaestroEngine {
       }
 
       await client.query('COMMIT');
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {
@@ -279,7 +279,7 @@ export class MaestroEngine {
           tenantId: dependentRow.tenant_id
         });
 
-         await this.db.query(
+        await this.db.query(
           `UPDATE maestro_tasks SET status = 'queued' WHERE id = $1`,
           [dependentRow.id]
         );
@@ -309,7 +309,7 @@ export class MaestroEngine {
 
     if (parseInt(res.rows[0].count) === 0) {
       // All tasks terminal. Check for failures.
-       const failRes = await this.db.query(
+      const failRes = await this.db.query(
         `SELECT count(*) as count FROM maestro_tasks WHERE run_id = $1 AND status = 'failed'`,
         [runId]
       );
@@ -326,11 +326,11 @@ export class MaestroEngine {
   }
 
   private setupEventListeners() {
-    this.queueEvents.on('completed', ({ jobId }) => {
+    this.queueEvents.on('completed', ({ jobId }: any) => {
       logger.debug(`Job ${jobId} completed`);
     });
 
-    this.queueEvents.on('failed', ({ jobId, failedReason }) => {
+    this.queueEvents.on('failed', ({ jobId, failedReason }: any) => {
       logger.error(`Job ${jobId} failed: ${failedReason}`);
     });
   }

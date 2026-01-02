@@ -17,7 +17,7 @@ router.post('/ingest', async (req, res, next) => {
         source: req.body.source || 'api'
     });
     res.json({ success: true, eventId: event.id });
-  } catch (err) {
+  } catch (err: any) {
     next(err);
   }
 });

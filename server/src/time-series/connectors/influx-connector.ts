@@ -27,7 +27,7 @@ function toLineProtocol(point: TimeSeriesPoint) {
 function toFluxFilter(tags?: Tags) {
   if (!tags) return '';
   return Object.entries(tags)
-    .map(([key, value]) => `  |> filter(fn: (r) => r["${key}"] == "${value}")`)
+    .map(([key, value]) => `  |> filter(fn: (r: any) => r["${key}"] == "${value}")`)
     .join('\n');
 }
 
@@ -111,14 +111,14 @@ export class InfluxConnector implements TimeSeriesConnector {
 
   private buildFluxQuery(params: QueryRangeParams, aggregation?: AggregationParams['window']) {
     const fields = params.fields?.length ? params.fields : ['*'];
-    const fluxFields = fields.map((field) => `  |> filter(fn: (r) => r._field == "${field}")`).join('\n');
+    const fluxFields = fields.map((field) => `  |> filter(fn: (r: any) => r._field == "${field}")`).join('\n');
     const filters = toFluxFilter(params.tags);
     const window = aggregation ? `${fluxAggregation(aggregation)}\n` : '';
 
     return [
       `from(bucket: "${this.config.bucket}")`,
       `  |> range(start: ${params.start.toISOString()}, stop: ${params.end.toISOString()})`,
-      `  |> filter(fn: (r) => r._measurement == "${params.measurement}")`,
+      `  |> filter(fn: (r: any) => r._measurement == "${params.measurement}")`,
       fluxFields,
       filters,
       window,

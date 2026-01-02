@@ -29,17 +29,17 @@ export function makePubSub() {
     redisClient = publisher;
 
     // Error handling
-    publisher.on('error', (err) => {
+    publisher.on('error', (err: any) => {
       console.error('Redis Publisher Error:', err);
     });
 
-    subscriber.on('error', (err) => {
+    subscriber.on('error', (err: any) => {
       console.error('Redis Subscriber Error:', err);
     });
 
     console.log('Using Redis PubSub for subscriptions');
     return new RedisPubSub({ publisher, subscriber });
-  } catch (error) {
+  } catch (error: any) {
     console.error(
       'Failed to connect to Redis, falling back to in-memory PubSub:',
       error,
@@ -56,7 +56,7 @@ export const redis = {
     try {
       const result = await redisClient.ping();
       return result === 'PONG';
-    } catch (error) {
+    } catch (error: any) {
       console.error('Redis health check failed:', error);
       return false;
     }
@@ -75,7 +75,7 @@ export const redis = {
     try {
       await redisClient.setex(key, ttlSeconds, value);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Redis setWithTTL failed:', error);
       return false;
     }
@@ -90,7 +90,7 @@ export const redis = {
     try {
       const result = await redisClient.set(key, value, 'EX', ttlSeconds, 'NX');
       return result === 'OK';
-    } catch (error) {
+    } catch (error: any) {
       console.error('Redis setWithTTLIfNotExists failed:', error);
       return false;
     }
@@ -101,7 +101,7 @@ export const redis = {
     try {
       await redisClient.setex(key, ttlSeconds, value);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Redis setex failed:', error);
       return false;
     }
@@ -111,7 +111,7 @@ export const redis = {
     if (!redisClient) return null;
     try {
       return await redisClient.get(key);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Redis get failed:', error);
       return null;
     }

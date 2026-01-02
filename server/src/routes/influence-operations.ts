@@ -16,7 +16,7 @@ router.get('/detect/:campaignId', async (req, res, next) => {
     const service = InfluenceOperationsService.getInstance();
     const result = await service.detectInfluenceOperations(req.params.campaignId);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -30,7 +30,7 @@ router.get('/narrative/:id/timeline', async (req, res, next) => {
     const service = InfluenceOperationsService.getInstance();
     const result = await service.getNarrativeTimeline(req.params.id);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -44,7 +44,7 @@ router.get('/narrative/:id/network', async (req, res, next) => {
     const service = InfluenceOperationsService.getInstance();
     const result = await service.getInfluenceNetwork(req.params.id);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

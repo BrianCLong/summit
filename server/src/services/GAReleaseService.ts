@@ -143,7 +143,7 @@ export class GAReleaseService {
         success: true,
         path: path.join(process.cwd(), 'sbom.json'),
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         error:
@@ -197,9 +197,9 @@ export class GAReleaseService {
         message: 'API endpoints operational',
       });
 
-      const success = results.every((r) => r.status === 'pass');
+      const success = results.every((r: any) => r.status === 'pass');
       return { success, results };
-    } catch (error) {
+    } catch (error: any) {
       results.push({
         component: 'preflight-execution',
         status: 'fail',

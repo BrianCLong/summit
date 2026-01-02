@@ -124,7 +124,7 @@ export class StoreStage implements PipelineStage {
       }
 
       await client.query('COMMIT');
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {

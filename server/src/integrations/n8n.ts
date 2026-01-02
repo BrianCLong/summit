@@ -31,7 +31,7 @@ export async function triggerN8nFlow(
       actor_id: ctx.userId || 'system',
       metadata: { flowKey, runId: ctx.runId, request: body },
     });
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'provenance record failed for N8N_TRIGGER');
   }
 
@@ -51,7 +51,7 @@ export async function triggerN8nFlow(
         data: res.data,
       },
     });
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'provenance record failed for N8N_TRIGGER_RESULT');
   }
 

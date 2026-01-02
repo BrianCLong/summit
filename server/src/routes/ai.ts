@@ -105,7 +105,7 @@ const extractionEngine = new ExtractionEngine(
 // WAR-GAMED SIMULATION - Worker to process video analysis jobs
 const videoAnalysisWorker = new Worker(
   'videoAnalysisQueue',
-  async (job) => {
+  async (job: any) => {
     const { jobId, mediaPath, mediaType, extractionMethods, options } =
       job.data as ExtractionRequest;
     logger.info(`Processing video analysis job: ${jobId}`);
@@ -135,11 +135,11 @@ const videoAnalysisWorker = new Worker(
 );
 
 // WAR-GAMED SIMULATION - Handle worker events
-videoAnalysisWorker.on('completed', (job) => {
+videoAnalysisWorker.on('completed', (job: any) => {
   logger.info(`Job ${job.id} has completed!`);
 });
 
-videoAnalysisWorker.on('failed', (job, err) => {
+videoAnalysisWorker.on('failed', (job: any, err: any) => {
   logger.error(`Job ${job?.id} has failed with error ${err.message}`);
 });
 
@@ -289,7 +289,7 @@ router.post(
           executionTime: responseTime,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error in link prediction: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -369,12 +369,12 @@ router.post(
         metadata: {
           model: 'scaffold-sentiment-v1',
           executionTime: responseTime,
-          analyzedFields: sentimentResult.field_sentiments
-            ? Object.keys(sentimentResult.field_sentiments).length
+          analyzedFields: (sentimentResult as any).field_sentiments
+            ? Object.keys((sentimentResult as any).field_sentiments).length
             : 1,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error in sentiment analysis: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -453,7 +453,7 @@ router.post(
           generatedAt: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error in AI summary generation: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -514,7 +514,7 @@ router.get('/models/status', async (req: AuthenticatedRequest, res: Response) =>
         lastChecked: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       `Error checking model status: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
@@ -583,7 +583,7 @@ router.get('/capabilities', async (req: AuthenticatedRequest, res: Response) => 
       version: '1.0.0-scaffold',
       lastUpdated: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       `Error retrieving capabilities: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
@@ -664,7 +664,7 @@ router.post(
         message:
           'Video analysis job submitted successfully. Use /api/ai/job-status/:jobId to track progress.',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error submitting video analysis job: ${error instanceof Error ? error.message : String(error)}`,
         error,
@@ -736,7 +736,7 @@ router.get('/job-status/:jobId', async (req: AuthenticatedRequest, res: Response
         ? new Date(job.finishedOn).toISOString()
         : undefined,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       `Error getting job status for ${jobId}: ${error instanceof Error ? error.message : String(error)}`,
       error,
@@ -852,7 +852,7 @@ router.post(
         success: true,
         message: 'Feedback received successfully and queued for processing',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing feedback: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -925,7 +925,7 @@ router.post(
         originalPrediction: { deceptionScore },
       });
       res.status(200).json({ success: true, message: 'Feedback received' });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing deception feedback: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -1139,7 +1139,7 @@ router.post('/adversary/generate', async (req: AuthenticatedRequest, res: Respon
       persistence,
     });
     res.json({ ttps: chain });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });

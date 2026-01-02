@@ -69,7 +69,7 @@ export class RenewalService {
                     await this.handleRenewalNotice(client, row, days);
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             logger.error('Error processing renewals:', error);
             throw error;
         } finally {

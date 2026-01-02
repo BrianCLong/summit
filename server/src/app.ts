@@ -361,7 +361,7 @@ export const createApp = async () => {
     try {
       const status = await advancedRateLimiter.getStatus(req.params.userId);
       res.json(status);
-    } catch (err) {
+    } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rate limit status' });
     }
   });
@@ -544,7 +544,7 @@ export const createApp = async () => {
           currentPage: Math.floor(Number(skip) / Number(limit)) + 1,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       appLogger.error(
         `Error in search/evidence: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

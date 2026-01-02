@@ -175,7 +175,7 @@ export class JDBCConnector extends EventEmitter {
           type: this.config.type,
           host: this.config.host,
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException?.(error as Error);
         span.setStatus?.({ message: (error as Error).message });
         this.emit('error', { tenantId: this.tenantId, error });
@@ -301,7 +301,7 @@ export class JDBCConnector extends EventEmitter {
         });
 
         return result;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException?.(error as Error);
         span.setStatus?.({ message: (error as Error).message });
         jdbcOperations.inc({
@@ -394,7 +394,7 @@ export class JDBCConnector extends EventEmitter {
         } else {
           throw new Error('Unsupported database type for streaming');
         }
-      } catch (error) {
+      } catch (error: any) {
         span.recordException?.(error as Error);
         throw error;
       }
@@ -511,7 +511,7 @@ export class JDBCConnector extends EventEmitter {
             );
             affectedRows.push(result.rowCount);
             totalRows += result.rowCount;
-          } catch (error) {
+          } catch (error: any) {
             affectedRows.push(0);
             errors.push({ index: i, error: (error as Error).message });
           }
@@ -553,7 +553,7 @@ export class JDBCConnector extends EventEmitter {
         });
 
         return result;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException?.(error as Error);
         span.setStatus?.({ message: (error as Error).message });
         jdbcOperations.inc({
@@ -585,7 +585,7 @@ export class JDBCConnector extends EventEmitter {
             schemaName || this.config.database,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         span.recordException?.(error as Error);
         span.setStatus?.({ message: (error as Error).message });
         throw error;
@@ -643,13 +643,13 @@ export class JDBCConnector extends EventEmitter {
     ]);
 
     return {
-      tables: tablesResult.rows.map((row) => ({
+      tables: tablesResult.rows.map((row: any) => ({
         name: row.table_name,
         schema: row.table_schema,
         type: row.table_type === 'BASE TABLE' ? 'TABLE' : 'VIEW',
         comment: row.comment,
       })),
-      columns: columnsResult.rows.map((row) => ({
+      columns: columnsResult.rows.map((row: any) => ({
         table: row.table_name,
         name: row.column_name,
         type: row.data_type,
@@ -658,7 +658,7 @@ export class JDBCConnector extends EventEmitter {
         isPrimaryKey: row.is_primary_key,
         isForeignKey: row.is_foreign_key,
       })),
-      indexes: indexesResult.rows.map((row) => ({
+      indexes: indexesResult.rows.map((row: any) => ({
         table: row.table_name,
         name: row.index_name,
         columns: row.columns,
@@ -705,13 +705,13 @@ export class JDBCConnector extends EventEmitter {
     ]);
 
     return {
-      tables: tablesResult.rows.map((row) => ({
+      tables: tablesResult.rows.map((row: any) => ({
         name: row.table_name,
         schema: row.table_schema,
         type: row.table_type === 'BASE TABLE' ? 'TABLE' : 'VIEW',
         comment: row.comment,
       })),
-      columns: columnsResult.rows.map((row) => ({
+      columns: columnsResult.rows.map((row: any) => ({
         table: row.table_name,
         name: row.column_name,
         type: row.data_type,
@@ -720,7 +720,7 @@ export class JDBCConnector extends EventEmitter {
         isPrimaryKey: row.is_primary_key,
         isForeignKey: row.is_foreign_key,
       })),
-      indexes: indexesResult.rows.map((row) => ({
+      indexes: indexesResult.rows.map((row: any) => ({
         table: row.table_name,
         name: row.index_name,
         columns: row.columns.split(','),
@@ -792,7 +792,7 @@ export class JDBCConnector extends EventEmitter {
         connected: true,
         latency: Date.now() - startTime,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         connected: false,
         latency: Date.now() - startTime,

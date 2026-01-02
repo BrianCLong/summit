@@ -38,7 +38,7 @@ export class FileBillingAdapter implements BillingAdapter {
 
       fs.writeFileSync(filePath, csv);
       logger.info({ tenantId: report.tenantId, filePath }, 'Usage report exported to file');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, tenantId: report.tenantId }, 'Failed to export usage report to file');
       throw error;
     }
@@ -60,11 +60,11 @@ export class FileBillingAdapter implements BillingAdapter {
       const lines = content.trim().split('\n');
       if (lines.length < 2) return null;
 
-      const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
-      const values = lines[1].split(',').map(v => v.replace(/"/g, ''));
+      const headers = lines[0].split(',').map((h: any) => h.trim().replace(/"/g, ''));
+      const values = lines[1].split(',').map((v: string) => v.replace(/"/g, ''));
 
       const report: Record<string, string> = {};
-      headers.forEach((h, i) => {
+      headers.forEach((h: string, i: number) => {
         report[h] = values[i];
       });
 
@@ -80,7 +80,7 @@ export class FileBillingAdapter implements BillingAdapter {
         quotaOverrides: report.quotaOverrides,
         signature: report.signature
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error, tenantId }, 'Failed to read billed usage');
       return null;
     }

@@ -64,7 +64,7 @@ router.get('/runs', async (req: Request, res: Response) => {
     const result = await service.listRuns(tenantId, filter, requesterId);
 
     return res.status(result.success ? 200 : 500).json(result);
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       data: null,
@@ -106,7 +106,7 @@ router.get('/runs/:runId', async (req: Request, res: Response) => {
     const result = await service.getRun(runId, tenantId, requesterId);
 
     return res.status(result.success ? 200 : 404).json(result);
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       data: null,
@@ -149,7 +149,7 @@ router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
     const result = await service.getLineage(runId, tenantId, depth);
 
     return res.status(result.success ? 200 : 500).json(result);
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       data: null,
@@ -206,7 +206,7 @@ router.get('/compare', async (req: Request, res: Response) => {
     const result = await service.compareRuns(runA, runB, tenantId);
 
     return res.status(result.success ? 200 : 404).json(result);
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       data: null,
@@ -247,7 +247,7 @@ router.get('/runs/:runId/verify', async (req: Request, res: Response) => {
     const result = await service.verifyLinkage(runId, tenantId);
 
     return res.status(result.success ? 200 : 500).json(result);
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       data: null,

@@ -204,10 +204,10 @@ export class AuditChainVerifier {
     timestamp: number;
   } {
     const records = this.loadRecordRange(fromRecordId, toRecordId);
-    const chains = records.map((r) => this.loadChainLink(r.id)).filter(Boolean);
+    const chains = records.map((r: any) => this.loadChainLink(r.id)).filter(Boolean);
 
     // Create merkle-like proof structure
-    const recordHashes = records.map((r) => this.hashAuditRecord(r));
+    const recordHashes = records.map((r: any) => this.hashAuditRecord(r));
     const chainHashes = chains.map((c) => c!.currentHash);
 
     const proofData = {
@@ -223,7 +223,7 @@ export class AuditChainVerifier {
 
     return {
       proof,
-      records: records.map((r) => r.id),
+      records: records.map((r: any) => r.id),
       timestamp: proofData.timestamp,
     };
   }
@@ -237,9 +237,9 @@ export class AuditChainVerifier {
     toRecordId: string,
   ): boolean {
     const records = this.loadRecordRange(fromRecordId, toRecordId);
-    const chains = records.map((r) => this.loadChainLink(r.id)).filter(Boolean);
+    const chains = records.map((r: any) => this.loadChainLink(r.id)).filter(Boolean);
 
-    const recordHashes = records.map((r) => this.hashAuditRecord(r));
+    const recordHashes = records.map((r: any) => this.hashAuditRecord(r));
     const chainHashes = chains.map((c) => c!.currentHash);
 
     const proofData = {
@@ -269,7 +269,7 @@ export class AuditChainVerifier {
   } {
     const allRecords = this.loadAllRecords();
     const filteredRecords = allRecords.filter(
-      (r) => r.timestamp >= fromTimestamp && r.timestamp <= toTimestamp,
+      (r: any) => r.timestamp >= fromTimestamp && r.timestamp <= toTimestamp,
     );
 
     const integrityReport = {
@@ -277,7 +277,7 @@ export class AuditChainVerifier {
       // Override with filtered data
       totalRecords: filteredRecords.length,
       verifiedRecords: filteredRecords.filter(
-        (r) => this.verifyRecord(r.id).isValid,
+        (r: any) => this.verifyRecord(r.id).isValid,
       ).length,
     } as any;
 
@@ -386,7 +386,7 @@ export class AuditChainVerifier {
     if (existsSync(indexPath)) {
       try {
         index = JSON.parse(readFileSync(indexPath, 'utf8'));
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Failed to read audit index, creating new one');
       }
     }
@@ -412,7 +412,7 @@ export class AuditChainVerifier {
 
     try {
       return JSON.parse(readFileSync(recordPath, 'utf8'));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to load audit record ${recordId}:`, error);
       return null;
     }
@@ -426,7 +426,7 @@ export class AuditChainVerifier {
 
     try {
       return JSON.parse(readFileSync(chainPath, 'utf8'));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to load chain link ${recordId}:`, error);
       return null;
     }
@@ -443,7 +443,7 @@ export class AuditChainVerifier {
       return index
         .map((entry: any) => this.loadRecord(entry.id))
         .filter(Boolean);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load audit index:', error);
       return [];
     }
@@ -460,7 +460,7 @@ export class AuditChainVerifier {
       return index
         .map((entry: any) => this.loadChainLink(entry.id))
         .filter(Boolean);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load chain index:', error);
       return [];
     }
@@ -471,8 +471,8 @@ export class AuditChainVerifier {
     toRecordId: string,
   ): AuditRecord[] {
     const allRecords = this.loadAllRecords();
-    const fromIndex = allRecords.findIndex((r) => r.id === fromRecordId);
-    const toIndex = allRecords.findIndex((r) => r.id === toRecordId);
+    const fromIndex = allRecords.findIndex((r: any) => r.id === fromRecordId);
+    const toIndex = allRecords.findIndex((r: any) => r.id === toRecordId);
 
     if (fromIndex === -1 || toIndex === -1) {
       return [];

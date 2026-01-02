@@ -18,7 +18,7 @@ describe('RetentionService', () => {
 
     afterEach(() => {
         if (fs.existsSync(TEST_LOG_DIR)) {
-             try { fs.rmSync(TEST_LOG_DIR, { recursive: true, force: true }); } catch (e) {}
+             try { fs.rmSync(TEST_LOG_DIR, { recursive: true, force: true }); } catch (e: any) {}
         }
     });
 

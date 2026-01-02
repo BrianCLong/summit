@@ -13,7 +13,7 @@ router.post('/start', async (req: AuthenticatedRequest, res: Response) => {
 
     const streamId = await graphStreamer.startStream(query, params, config);
     res.json({ streamId, streamUrl: `/api/stream/${streamId}` });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -31,15 +31,15 @@ router.get('/:streamId', async (req: AuthenticatedRequest, res: Response) => {
   const sub = redis.duplicate();
   await sub.subscribe(channel);
 
-  sub.on('message', (chan, message) => {
+  sub.on('message', (chan: any, message: any) => {
     if (chan === channel) {
       res.write(`data: ${message}\n\n`);
 
       const parsed = JSON.parse(message);
       if (parsed.type === 'complete' || parsed.type === 'error') {
-          sub.unsubscribe();
-          sub.quit();
-          res.end();
+        sub.unsubscribe();
+        sub.quit();
+        res.end();
       }
     }
   });

@@ -51,14 +51,14 @@ export async function runDoctorChecks(options?: DoctorOptions): Promise<{ result
 
     if (value) {
       results.push({
-        id: `env-${requirement.env.toLowerCase()}`,
+        id: `env-${String(requirement.env).toLowerCase()}`,
         label: `${requirement.label} (${requirement.env})`,
         status: 'PASS',
         details: `Resolved from ${source}.`,
       });
     } else {
       results.push({
-        id: `env-${requirement.env.toLowerCase()}`,
+        id: `env-${String(requirement.env).toLowerCase()}`,
         label: `${requirement.label} (${requirement.env})`,
         status: 'FAIL',
         details: `${requirement.env} is not set and no saved ${requirement.configKey} value was found.`,

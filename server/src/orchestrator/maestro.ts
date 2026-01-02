@@ -48,7 +48,7 @@ class MaestroOrchestrator {
 
   async enqueueTask(task: AgentTask): Promise<string> {
     const tracer = getTracer();
-    return tracer.withSpan('maestro.enqueueTask', async (span) => {
+    return tracer.withSpan('maestro.enqueueTask', async (span: any) => {
       span.setAttribute('maestro.task.kind', task.kind);
       span.setAttribute('maestro.task.repo', task.repo);
       span.setAttribute('maestro.task.budget', task.budgetUSD);
@@ -87,7 +87,7 @@ class MaestroOrchestrator {
         });
 
         return job.id!;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({
           code: SpanStatusCode.ERROR,
@@ -100,7 +100,7 @@ class MaestroOrchestrator {
 
   async enqueueTaskChain(tasks: AgentTask[]): Promise<string[]> {
     const tracer = getTracer();
-    return tracer.withSpan('maestro.enqueueTaskChain', async (span) => {
+    return tracer.withSpan('maestro.enqueueTaskChain', async (span: any) => {
       span.setAttribute('maestro.chain.length', tasks.length);
       const taskIds: string[] = [];
 
@@ -179,7 +179,7 @@ class MaestroOrchestrator {
   ) {
     return async (job: Job<T>): Promise<TaskResult> => {
       const tracer = getTracer();
-      return tracer.withSpan(`maestro.agent.${agentName}`, async (span) => {
+      return tracer.withSpan(`maestro.agent.${agentName}`, async (span: any) => {
         span.setAttribute('maestro.agent.name', agentName);
         span.setAttribute('maestro.job.id', job.id || 'unknown');
         span.setAttribute('maestro.task.kind', job.data.kind);
@@ -249,7 +249,7 @@ class MaestroOrchestrator {
 
   private async waitForDependencies(dependencies: string[]): Promise<void> {
     const tracer = getTracer();
-    return tracer.withSpan('maestro.waitForDependencies', async (span) => {
+    return tracer.withSpan('maestro.waitForDependencies', async (span: any) => {
       span.setAttribute('maestro.dependencies.count', dependencies.length);
 
       // Simple dependency waiting - in production would use more sophisticated coordination
@@ -263,7 +263,7 @@ class MaestroOrchestrator {
         );
 
         const allComplete = jobs.every(
-          (job) =>
+          (job: any) =>
             job &&
             (job.finishedOn !== undefined || job.failedReason !== undefined),
         );

@@ -211,7 +211,7 @@ export class OutboxNeo4jSync {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `MERGE (e:Entity {id: $id})
            ON CREATE SET e.createdAt = timestamp()
@@ -242,7 +242,7 @@ export class OutboxNeo4jSync {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `MATCH (e:Entity {id: $id})
            DETACH DELETE e`,
@@ -278,7 +278,7 @@ export class OutboxNeo4jSync {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         // First ensure both entities exist in Neo4j
         await tx.run(
           `MERGE (src:Entity {id: $srcId})
@@ -318,7 +318,7 @@ export class OutboxNeo4jSync {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `MATCH ()-[r:REL {id: $id}]-()
            DELETE r`,

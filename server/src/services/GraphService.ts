@@ -138,7 +138,7 @@ export class Neo4jGraphService implements GraphService {
     }
 
     const result = await runCypher<{ entity: any }>(cypher, params);
-    return result.map((r) => ({
+    return result.map((r: any) => ({
         ...r.entity,
         attributes: unflattenAttributes(r.entity),
         metadata: typeof r.entity.metadata === 'string' ? JSON.parse(r.entity.metadata) : r.entity.metadata || {}
@@ -199,7 +199,7 @@ export class Neo4jGraphService implements GraphService {
     }
 
     const result = await runCypher<{ edge: any }>(cypher, params);
-    return result.map((r) => ({
+    return result.map((r: any) => ({
         ...r.edge,
         attributes: unflattenAttributes(r.edge),
         metadata: typeof r.edge.metadata === 'string' ? JSON.parse(r.edge.metadata) : r.edge.metadata || {}

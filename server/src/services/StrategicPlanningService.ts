@@ -1034,10 +1034,10 @@ export class StrategicPlanningService extends EventEmitter {
       );
     }
 
-    const criticalRisks = plan.risks.filter((r) => r.riskLevel === 'CRITICAL');
+    const criticalRisks = plan.risks.filter((r: any) => r.riskLevel === 'CRITICAL');
     if (criticalRisks.length > 0) {
       recommendations.push(
-        `Address critical risks immediately: ${criticalRisks.map((r) => r.name).join(', ')}`,
+        `Address critical risks immediately: ${criticalRisks.map((r: any) => r.name).join(', ')}`,
       );
     }
 

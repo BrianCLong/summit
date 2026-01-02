@@ -84,13 +84,13 @@ class IdempotencyManager {
 
   private createDefaultRedisClient(): Redis {
     const client = new (Redis as any)(process.env.REDIS_URL || 'redis://localhost:6379', {
-      reconnectOnError: (err) => {
+      reconnectOnError: (err: any) => {
         logger.error('Redis client error in idempotency middleware', {
           error: err,
         });
         return true;
       },
-      retryStrategy: (times) => Math.min(times * 50, 500),
+      retryStrategy: (times: number) => Math.min(times * 50, 500),
     });
 
     return client;
@@ -262,7 +262,7 @@ class IdempotencyManager {
       });
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Idempotency middleware error', {
         error,
         idempotencyKey: req.get('Idempotency-Key'),
@@ -282,9 +282,10 @@ class IdempotencyManager {
     redisKey: string,
   ): void {
     const originalSend = res.json;
+    const self = this;
     let responseCaptured = false;
 
-    res.json = function (body: any) {
+    res.json = function (this: Response, body: any) {
       if (!responseCaptured) {
         responseCaptured = true;
 
@@ -300,11 +301,11 @@ class IdempotencyManager {
             responseBody: JSON.stringify(body),
           };
 
-          this.redis
+          self.redis
             .set(redisKey, JSON.stringify(record), {
-              PX: this.options.ttlMs,
+              PX: self.options.ttlMs,
             })
-            .catch((error) => {
+            .catch((error: any) => {
               logger.error('Failed to cache idempotency response', {
                 error,
                 redisKey,
@@ -314,7 +315,7 @@ class IdempotencyManager {
       }
 
       return originalSend.call(this, body);
-    }.bind(this);
+    };
   }
 
   /**
@@ -352,7 +353,7 @@ class IdempotencyManager {
 
       logger.info('Idempotency cleanup completed', { deletedCount });
       return deletedCount;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Idempotency cleanup failed', { error });
       return 0;
     }
@@ -402,7 +403,7 @@ class IdempotencyManager {
         completedKeys,
         errorRate: 0, // TODO: Track error rate in metrics
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get idempotency stats', { error });
       return { activeKeys: -1, completedKeys: -1, errorRate: -1 };
     }

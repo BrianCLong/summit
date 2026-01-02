@@ -74,7 +74,7 @@ sub.on('pmessage', (_pattern: string, channel: string, message: string): void =>
                 io.of('/realtime').to(`metric:${metric}`).emit('metric_update', data);
             }
         }
-    } catch (e) {
+    } catch (e: any) {
         logger.error({ error: e }, 'Error broadcasting metric update');
     }
 });
@@ -87,7 +87,7 @@ sub.on('message', (channel: string, message: string): void => {
             if (io) {
                 io.of('/realtime').to('alerts').emit('alert', alert);
             }
-        } catch (e) {
+        } catch (e: any) {
             logger.error({ error: e }, 'Error broadcasting alert');
         }
     }

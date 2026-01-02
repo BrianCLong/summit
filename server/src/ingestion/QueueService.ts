@@ -38,7 +38,7 @@ export class QueueService {
         }
     }, { connection, concurrency: 5 }); // Process 5 jobs concurrently
 
-    this.worker.on('completed', (job) => {
+    this.worker.on('completed', (job: any) => {
       logger.info({ jobId: job.id }, 'Job completed');
     });
 

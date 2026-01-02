@@ -241,7 +241,7 @@ export class ProvenanceIntegration {
       transformType: options.job.operation.type,
       algorithm: 'rtbf-orchestrator-v1',
       algorithmVersion: '1.0.0',
-      inputs: options.recordsBefore.map((r) => r.id),
+      inputs: options.recordsBefore.map((r: any) => r.id),
       parameters: {
         requestId: options.job.requestId,
         jobId: options.job.id,
@@ -398,7 +398,7 @@ export class ProvenanceIntegration {
         params,
       );
 
-      return result.rows.map((row) => this.rowToTombstone(row));
+      return result.rows.map((row: any) => this.rowToTombstone(row));
     } catch (error: any) {
       if (error.code === '42P01') {
         this.logger.debug('Provenance tombstones table does not exist');
@@ -595,7 +595,7 @@ export class ProvenanceIntegration {
   /**
    * Convert database row to tombstone object
    */
-  private rowToTombstone(row: any): ProvenanceTombstone {
+  private rowToTombstone(row): ProvenanceTombstone {
     return {
       id: row.id,
       resourceType: row.resource_type,

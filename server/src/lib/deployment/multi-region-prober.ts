@@ -58,7 +58,7 @@ export class MultiRegionProber {
         latencyMs: duration,
         lastChecked: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - start;
       const errorMessage =
         error instanceof Error ? error.message : String(error);

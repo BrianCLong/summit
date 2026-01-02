@@ -35,7 +35,7 @@ export function countOpenAITokens(model: string, text: string): number {
     // Use gpt-tokenizer for accurate OpenAI counts
     const { encode } = require('gpt-tokenizer');
     return encode(text, model).length;
-  } catch (error) {
+  } catch (error: any) {
     // Fallback estimation: ~4 chars per token
     return Math.max(1, Math.round(text.length / 4));
   }

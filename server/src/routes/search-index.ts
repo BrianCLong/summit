@@ -16,7 +16,7 @@ router.post('/query', async (req, res) => {
 
     const results = SearchIndexService.getInstance().search(input);
     res.json({ results });
-  } catch (err) {
+  } catch (err: any) {
     logger.error('Search query failed', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -28,7 +28,7 @@ router.post('/reindex', async (req, res) => {
         const { caseId } = req.body;
         await SearchIndexService.getInstance().reindex(caseId);
         res.json({ status: 'Reindexing started' });
-    } catch (err) {
+    } catch (err: any) {
         logger.error('Reindex failed', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }

@@ -22,4 +22,5 @@ const pinoLogger = (pino as any)({
 });
 
 export const logger = pinoLogger;
+export type Logger = typeof pinoLogger;
 export default pinoLogger;

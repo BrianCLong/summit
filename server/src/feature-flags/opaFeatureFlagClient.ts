@@ -53,7 +53,7 @@ export class OPAFeatureFlagClient {
         context: input.context,
         opa: raw,
       });
-    } catch (error) {
+    } catch (error: any) {
       reason = 'opa-error';
       this.audit('feature_flag_error', {
         evaluationId,
@@ -117,7 +117,7 @@ export class OPAFeatureFlagClient {
         reason,
         context: input.context,
       });
-    } catch (error) {
+    } catch (error: any) {
       reason = 'opa-error';
       killSwitchGauge.labels({ module }).set(0);
       this.audit('kill_switch_error', {

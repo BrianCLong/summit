@@ -154,7 +154,7 @@ export class SentimentAnalysisService {
         tokenCount: result.tokens.length,
         wordCount: this.tokenizer.tokenize(text).length,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error analyzing sentiment:', error);
       throw error;
     }
@@ -208,7 +208,7 @@ export class SentimentAnalysisService {
         emotionalWords: [...new Set(emotionalWords)], // Remove duplicates
         emotionalIntensity: tokens.length > 0 ? emotionalWords.length / tokens.length : 0,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error extracting emotional indicators:', error);
       throw error;
     }

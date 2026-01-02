@@ -141,7 +141,7 @@ export class SagaRepository {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Saga created'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, sagaId: instance.id }, 'Failed to create saga instance');
       throw error;
     } finally {
@@ -252,7 +252,7 @@ export class SagaRepository {
         params
       );
 
-      const instances = result.rows.map(row => this.rowToInstance(row));
+      const instances = result.rows.map((row: any) => this.rowToInstance(row));
 
       return createDataEnvelope(instances, {
         source: 'SagaRepository',
@@ -290,7 +290,7 @@ export class SagaRepository {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Step updated'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, sagaId: id }, 'Failed to update saga step');
       return createDataEnvelope(false, {
         source: 'SagaRepository',
@@ -332,7 +332,7 @@ export class SagaRepository {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Status updated'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (err) {
+    } catch (err: any) {
       logger.error({ error: err, sagaId: id }, 'Failed to update saga status');
       return createDataEnvelope(false, {
         source: 'SagaRepository',
@@ -383,7 +383,7 @@ export class SagaRepository {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Compensation data stored'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, sagaId: id }, 'Failed to store compensation data');
       return createDataEnvelope(false, {
         source: 'SagaRepository',
@@ -471,7 +471,7 @@ export class SagaRepository {
         this.config.cacheTTLSeconds,
         JSON.stringify(instance)
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error, sagaId: instance.id }, 'Failed to cache saga instance');
     }
   }
@@ -482,7 +482,7 @@ export class SagaRepository {
     try {
       const cached = await this.redis.get(`saga:${id}`);
       return cached ? JSON.parse(cached) : null;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error, sagaId: id }, 'Failed to get cached saga instance');
       return null;
     }
@@ -493,7 +493,7 @@ export class SagaRepository {
 
     try {
       await this.redis.del(`saga:${id}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error, sagaId: id }, 'Failed to invalidate saga cache');
     }
   }

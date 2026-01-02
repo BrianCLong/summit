@@ -18,7 +18,7 @@ router.get('/', authenticateToken, async (req, res) => {
     // The service.listFlags() calls provider.listFlags()
     const flags = await service.listFlags();
     res.json(flags);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching feature flags', error);
     res.status(500).json({ error: 'Failed to fetch feature flags' });
   }
@@ -33,7 +33,7 @@ router.get('/:key', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Flag not found' });
     }
     res.json(flag);
-  } catch (error) {
+  } catch (error: any) {
     logger.error(`Error fetching flag ${req.params.key}`, error);
     res.status(500).json({ error: 'Failed to fetch flag' });
   }
@@ -77,7 +77,7 @@ router.post('/', ensureAdmin, async (req, res) => {
     }
 
     res.json({ success: true, key });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error upserting feature flag', error);
     res.status(500).json({ error: 'Failed to upsert feature flag' });
   }
@@ -99,7 +99,7 @@ router.delete('/:key', ensureAdmin, async (req, res) => {
     }
 
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error deleting feature flag', error);
     res.status(500).json({ error: 'Failed to delete feature flag' });
   }
@@ -120,7 +120,7 @@ router.post('/evaluate', async (req, res) => {
     const service = getFeatureFlagService();
     const flags = await service.getAllFlags(context);
     res.json(flags);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error evaluating flags', error);
     res.status(500).json({ error: 'Failed to evaluate flags' });
   }

@@ -7,7 +7,7 @@ export function otelApolloPlugin() {
       return {
         async executionDidStart() {
           return {
-            willResolveField({ info }) {
+            willResolveField({ info }: { info: any }) {
               const span = tracer.startSpan(
                 `resolver ${info.parentType.name}.${info.fieldName}`,
               );

@@ -196,7 +196,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
             false,
           );
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Cache middleware error:', error);
         next();
       }
@@ -618,7 +618,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
     try {
       return JSON.parse(cached);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to parse cached response', { cacheKey });
       await this.redis.del(`${this.CACHE_PREFIX}${cacheKey}`);
       return null;
@@ -651,7 +651,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
           await this.redis.expire(`cache:tags:${tag}`, ttl + 3600); // Tags expire 1 hour after cache
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to cache response', {
         cacheKey,
         error: error.message,
@@ -702,7 +702,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
         // Execute request handler to get fresh data
         // This is simplified - real implementation would depend on your routing framework
         logger.info('Background revalidation started', { cacheKey });
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Background revalidation failed', {
           cacheKey,
           error: error.message,
@@ -816,7 +816,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
       for (const group of groupedRequests) {
         await this.executeBatchGroup(group);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Batch execution failed', {
         batchKey,
         error: error.message,
@@ -885,7 +885,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
         // Simulate API call
         const result = await this.simulateApiCall(request);
         request.resolve(result);
-      } catch (error) {
+      } catch (error: any) {
         request.reject(error);
       }
     }
@@ -1105,7 +1105,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
           );
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Cache optimization failed:', error);
     }
   }
@@ -1153,7 +1153,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
         totalEntries: keys.length,
         memoryUsage: 'N/A', // Would need Redis MEMORY command
       };
-    } catch (error) {
+    } catch (error: any) {
       return { available: false, error: error.message };
     }
   }

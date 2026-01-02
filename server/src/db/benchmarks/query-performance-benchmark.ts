@@ -179,7 +179,7 @@ async function generateSampleData(): Promise<void> {
 
     await client.query('COMMIT');
     console.log('✅ Sample data generated successfully\n');
-  } catch (error) {
+  } catch (error: any) {
     await client.query('ROLLBACK');
     console.error('❌ Failed to generate sample data:', error);
     throw error;
@@ -406,7 +406,7 @@ async function main() {
     await cleanupSampleData();
 
     console.log('✅ Benchmark complete!\n');
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Benchmark failed:', error);
     process.exit(1);
   } finally {

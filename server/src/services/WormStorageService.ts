@@ -20,7 +20,7 @@ export class WormStorageService {
   private async ensureStorageDirectory() {
     try {
       await fs.mkdir(WORM_STORAGE_PATH, { recursive: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create WORM storage directory:', error);
     }
   }

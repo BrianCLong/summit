@@ -132,7 +132,7 @@ export interface EvidenceStorageConfig {
 //     });
 
 //     return finalMetadata;
-//   } catch (error) {
+//   } catch (error: any) {
 //     prometheusConductorMetrics.recordOperationalEvent('evidence_store_upload_error', { success: false });
 //     logger.error('Failed to store evidence', {
 //       evidenceId: metadata.evidenceId,
@@ -212,7 +212,7 @@ export interface EvidenceStorageConfig {
 //       data: evidenceData,
 //       metadata,
 //     };
-//   } catch (error) {
+//   } catch (error: any) {
 //     prometheusConductorMetrics.recordOperationalEvent('evidence_store_download_error', { success: false });
 //     logger.error('Failed to retrieve evidence', {
 //       evidenceId,
@@ -267,7 +267,7 @@ export interface EvidenceStorageConfig {
 //       evidence: evidence.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
 //       continuationToken: response.NextContinuationToken,
 //     };
-//   } catch (error) {
+//   } catch (error: any) {
 //     logger.error('Failed to list evidence', { filters, error: error.message });
 //     throw error;
 //   }
@@ -293,7 +293,7 @@ export interface EvidenceStorageConfig {
 //       holdId,
 //       evidenceCount: evidenceIds.length,
 //     });
-//   } catch (error) {
+//   } catch (error: any) {
 //     logger.error('Failed to apply legal hold', {
 //       tenantId,
 //       holdId,

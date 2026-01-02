@@ -35,7 +35,7 @@ export function createRedisConnection(): IORedis {
     },
   });
 
-  connection.on('error', (err) => {
+  connection.on('error', (err: any) => {
     logger.error('Redis connection error', { error: err.message });
   });
 
@@ -148,7 +148,7 @@ class QueueRegistry {
     });
 
     // Worker event handlers
-    worker.on('completed', (job) => {
+    worker.on('completed', (job: any) => {
       logger.info(`Job completed: ${job.id} in queue ${name}`, {
         queue: name,
         jobId: job.id,
@@ -168,7 +168,7 @@ class QueueRegistry {
       });
     });
 
-    worker.on('error', (err) => {
+    worker.on('error', (err: any) => {
       logger.error(`Worker error in queue ${name}`, {
         queue: name,
         error: err.message,

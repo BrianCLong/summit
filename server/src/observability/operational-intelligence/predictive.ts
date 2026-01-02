@@ -48,7 +48,7 @@ export class AnomalyPredictor {
     const stddev = Math.sqrt(variance);
     const distance = stddev ? Math.abs(metric.value - ema) / stddev : 0;
     const probability = Math.min(1, distance / this.tolerance);
-    const isLikelyAnomaly = distance >= this.tolerance || (metric.expected?.p95 && metric.value > metric.expected.p95);
+    const isLikelyAnomaly = distance >= this.tolerance || (!!metric.expected?.p95 && metric.value > metric.expected.p95);
 
     this.state[key] = {
       ema,

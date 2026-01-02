@@ -60,7 +60,7 @@ export async function initializeNeo4jDriver(): Promise<void> {
 
       // Notify ready callbacks
       await Promise.all(readyCallbacks.map(cb => cb({ reason: 'driver_initialized' })));
-    } catch (error) {
+    } catch (error: any) {
       neo4jConnectivityUp.set(0);
       if (REQUIRE_REAL_DBS) {
         logger.error('Neo4j connectivity required but failed.', error);

@@ -77,7 +77,7 @@ export class SagaCoordinator {
       try {
         await action.execute();
         this.executedActions.push(action);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Saga action failed, starting compensation...', error);
         await this.compensate();
         return false;
@@ -90,7 +90,7 @@ export class SagaCoordinator {
     for (const action of this.executedActions.reverse()) {
       try {
         await action.compensate();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Saga compensation action failed:', error);
         // In a real system, this would require manual intervention.
       }

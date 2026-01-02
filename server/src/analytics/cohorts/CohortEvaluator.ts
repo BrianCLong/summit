@@ -57,7 +57,7 @@ export class CohortEvaluator {
                         const current = aggregates.get(key) || 0;
                         aggregates.set(key, current + 1);
                     }
-                } catch (e) {
+                } catch (e: any) {
                     // ignore malformed lines
                 }
             }
