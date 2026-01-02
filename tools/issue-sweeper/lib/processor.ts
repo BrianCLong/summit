@@ -1,30 +1,60 @@
 /**
- * Core issue processing logic
+ * Core issue processing logic with automated fixing
  */
 
 import { GitHubIssue, LedgerEntry, ProcessingResult, SolvedStatus } from './types.js';
 import { GitHubClient } from './github.js';
-import { classifyIssue, extractKeywords } from './classifier.js';
+import { classifyIssue } from './classifier.js';
 import { searchForEvidence } from './evidence.js';
+import { attemptFix, commitFix } from './fixer.js';
+import { createPullRequest, linkPRToIssue, findExistingPR, getCurrentBranch, switchToMainBranch } from './pr-automation.js';
+import { runQuickVerification } from './verifier.js';
+
+export interface ProcessingOptions {
+  autoFix?: boolean;
+  autoPR?: boolean;
+  skipVerification?: boolean;
+}
 
 /**
- * Process a single issue through the decision pipeline
+ * Process a single issue through the decision pipeline with automated fixing
  */
 export async function processIssue(
   issue: GitHubIssue,
-  githubClient: GitHubClient
+  githubClient: GitHubClient,
+  options: ProcessingOptions = {}
 ): Promise<ProcessingResult> {
+  const { autoFix = false, autoPR = false, skipVerification = false } = options;
+
   console.log(`\n📋 Processing issue #${issue.number}: ${issue.title}`);
 
   // Step 1: Classify the issue
   const classification = classifyIssue(issue);
   console.log(`   Classification: ${classification}`);
 
-  // Step 2: Search for evidence of resolution
+  // Step 2: Check if PR already exists
+  const existingPR = await findExistingPR(issue.number);
+  if (existingPR) {
+    console.log(`   ✅ PR already exists: ${existingPR}`);
+    return {
+      issue,
+      classification,
+      solved_status: 'already_solved',
+      evidence: {
+        prs: [existingPR],
+        notes: 'PR already exists for this issue',
+      },
+      actions: ['found_existing_pr'],
+      pr_url: existingPR,
+    };
+  }
+
+  // Step 3: Search for evidence of resolution
   const { isSolved, evidence } = await searchForEvidence(issue, githubClient);
 
   let solved_status: SolvedStatus;
   const actions: string[] = [];
+  let pr_url: string | undefined;
 
   if (isSolved) {
     solved_status = 'already_solved';
@@ -51,7 +81,7 @@ export async function processIssue(
       }
     }
   } else {
-    // Determine if we should attempt to fix or block
+    // Issue is not solved - attempt to fix it
     if (classification === 'question') {
       solved_status = 'blocked';
       evidence.notes = 'Requires clarification from reporter.';
@@ -60,11 +90,96 @@ export async function processIssue(
       solved_status = 'blocked';
       evidence.notes = 'Security issue requires careful review and responsible disclosure.';
       console.log(`   🔐 Blocked: Security issue requires manual review`);
+    } else if (autoFix) {
+      // Attempt automated fix
+      console.log(`   🤖 Attempting automated fix...`);
+
+      const currentBranch = getCurrentBranch();
+
+      try {
+        const fixResult = await attemptFix(issue, classification);
+
+        if (fixResult.success && fixResult.changes.length > 0) {
+          console.log(`   ✅ Fix applied successfully`);
+          evidence.notes = `Automated fix applied: ${fixResult.changes.join(', ')}`;
+          evidence.files = fixResult.changes;
+
+          // Verify the fix
+          let verificationPassed = true;
+          if (!skipVerification) {
+            const verifyResult = await runQuickVerification();
+            verificationPassed = verifyResult.passed;
+            evidence.verification_command = 'pnpm typecheck && pnpm lint';
+          }
+
+          if (verificationPassed) {
+            // Commit the fix
+            commitFix(issue, fixResult.changes);
+            actions.push('committed_fix');
+
+            // Create PR if enabled
+            if (autoPR && fixResult.branch_name) {
+              try {
+                pr_url = await createPullRequest({
+                  branchName: fixResult.branch_name,
+                  issue,
+                  changes: fixResult.changes,
+                  verificationCommand: fixResult.verification_command,
+                });
+
+                evidence.prs = [pr_url];
+                actions.push('created_pr');
+                solved_status = 'solved_in_this_run';
+
+                // Link PR to issue
+                await linkPRToIssue(issue.number, pr_url);
+                actions.push('linked_pr_to_issue');
+              } catch (error) {
+                console.warn(`   ⚠️  Failed to create PR: ${error}`);
+                solved_status = 'not_solved';
+                evidence.notes += ` (PR creation failed: ${error})`;
+              }
+            } else {
+              solved_status = 'solved_in_this_run';
+              evidence.notes += ' (committed but PR not created)';
+            }
+
+            // Switch back to original branch
+            switchToMainBranch(currentBranch);
+          } else {
+            console.log(`   ❌ Verification failed after fix`);
+            solved_status = 'not_solved';
+            evidence.notes = 'Fix applied but verification failed';
+            actions.push('fix_failed_verification');
+
+            // Switch back and clean up
+            switchToMainBranch(currentBranch);
+          }
+        } else {
+          console.log(`   ⚠️  No automated fix available: ${fixResult.error}`);
+          solved_status = 'not_solved';
+          evidence.notes = fixResult.error || 'No automated fix available';
+
+          // Switch back to original branch
+          switchToMainBranch(currentBranch);
+        }
+      } catch (error) {
+        console.error(`   ❌ Error during fix attempt: ${error}`);
+        solved_status = 'not_solved';
+        evidence.notes = `Fix attempt failed: ${error}`;
+
+        // Ensure we switch back to original branch
+        try {
+          switchToMainBranch(currentBranch);
+        } catch {
+          // Ignore errors during cleanup
+        }
+      }
     } else {
-      // For now, mark as not_solved - actual fixing logic would go here
+      // Auto-fix not enabled
       solved_status = 'not_solved';
-      evidence.notes = 'Identified as actionable but not yet fixed in this run.';
-      console.log(`   📝 Not solved: Requires implementation`);
+      evidence.notes = 'Identified as actionable but auto-fix not enabled.';
+      console.log(`   📝 Not solved: Auto-fix disabled`);
     }
   }
 
@@ -74,6 +189,7 @@ export async function processIssue(
     solved_status,
     evidence,
     actions,
+    pr_url,
   };
 }
 
@@ -119,6 +235,7 @@ export function resultToLedgerEntry(result: ProcessingResult): LedgerEntry {
     solved_status: result.solved_status,
     evidence: result.evidence,
     actions_taken: result.actions,
+    verification: result.evidence.verification_command,
     processed_at: new Date().toISOString(),
   };
 }

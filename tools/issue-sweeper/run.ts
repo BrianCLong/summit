@@ -23,6 +23,9 @@ const options = {
   batchSize: parseInt(args.find((a) => a.startsWith('--batch-size='))?.split('=')[1] || '50'),
   maxBatches: parseInt(args.find((a) => a.startsWith('--max-batches='))?.split('=')[1] || '0'),
   dryRun: args.includes('--dry-run'),
+  autoFix: args.includes('--auto-fix'),
+  autoPR: args.includes('--auto-pr'),
+  skipVerification: args.includes('--skip-verification'),
 };
 
 console.log(`
@@ -34,6 +37,9 @@ Configuration:
   - Batch Size: ${options.batchSize}
   - Max Batches: ${options.maxBatches || 'unlimited'}
   - Dry Run: ${options.dryRun}
+  - Auto-Fix: ${options.autoFix}
+  - Auto-PR: ${options.autoPR}
+  - Skip Verification: ${options.skipVerification}
 
 `);
 
@@ -78,7 +84,11 @@ async function main() {
       // Process each issue in the batch
       for (const issue of issues) {
         try {
-          const result = await processIssue(issue, githubClient);
+          const result = await processIssue(issue, githubClient, {
+            autoFix: options.autoFix,
+            autoPR: options.autoPR,
+            skipVerification: options.skipVerification,
+          });
 
           if (!options.dryRun) {
             // Save to ledger
