@@ -177,7 +177,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error analyzing psychological threats:', error);
       throw error;
     }
@@ -222,7 +222,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         personalizedTraining,
         progressTracking,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error building user resilience:', error);
       throw error;
     }
@@ -328,7 +328,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         protectiveMeasures,
         monitoringActions,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error deploying protective response:', error);
       throw error;
     }
@@ -405,7 +405,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         relatedThreats,
         threatCampaignId,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error attributing threat source:', error);
       throw error;
     }
@@ -488,7 +488,7 @@ export class PsyOpsDefenseEngine extends EventEmitter {
         await this.updateThreatSignatures();
         await this.refineMlModels();
         await this.optimizeDefensiveStrategies();
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error('Error in continuous learning:', error);
       }
     }, 3600000); // Every hour

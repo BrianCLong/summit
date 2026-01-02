@@ -66,7 +66,7 @@ export class DeceptionService {
       });
       logger.info(`Deployed honeypot ${id} for tenant ${tenantId}`);
       return id;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error deploying honeypot:', error);
       throw error;
     }
@@ -116,7 +116,7 @@ export class DeceptionService {
       );
 
       return interactionId;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error logging interaction:', error);
       throw error;
     }
@@ -182,7 +182,7 @@ export class DeceptionService {
         firstSeen,
         lastSeen
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error profiling attacker:', error);
       throw error;
     }
@@ -234,7 +234,7 @@ export class DeceptionService {
         severity
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error generating threat intelligence:', error);
       throw error;
     }

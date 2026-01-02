@@ -18,7 +18,7 @@ export class BackupManager {
       try {
         const results = await this.backupService.runAllBackups();
         logger.info({ results }, 'Scheduled backups completed');
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Scheduled backup execution failed', error);
       }
     });

@@ -70,7 +70,7 @@ export class ThreatIntelligenceFusionService {
       `, { sourceId, targetId, props });
 
       logger.info(`Created relationship: ${sourceId} -[${type}]-> ${targetId}`);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Failed to create relationship', e);
       throw e;
     } finally {

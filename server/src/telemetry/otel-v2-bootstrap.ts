@@ -21,7 +21,7 @@ export function initializeOTelV2(): void {
   try {
     logger.info('OTel v2 disabled (no-op).');
     sdk.start();
-  } catch (error) {
+  } catch (error: any) {
     logger.warn('Failed to initialize OTel v2 (no-op path)', { error: (error as Error).message });
   }
 }

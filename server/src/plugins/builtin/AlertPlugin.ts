@@ -419,7 +419,7 @@ export class AlertPlugin implements Plugin {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(alert),
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error }, 'Failed to send webhook notification');
       }
     }

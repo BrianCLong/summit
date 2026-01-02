@@ -54,7 +54,7 @@ export class MaestroScheduler {
           // Placeholder for DB recovery logic
           // In a real implementation, we would query runsRepo for status='queued'
           // and re-enqueue them.
-      } catch (err) {
+      } catch (err: any) {
           logger.error({ err }, 'Failed to recover pending runs');
       }
   }
@@ -118,7 +118,7 @@ export class MaestroScheduler {
             break;
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Error processing scheduler queue');
     } finally {
       this.isProcessing = false;

@@ -73,7 +73,7 @@ const redactPayloadForLogging = async (
   try {
     const policy = redactionService.createRedactionPolicy(['pii', 'financial', 'sensitive']);
     return await redactionService.redactObject(payload, policy, tenantId, { source: 'pii-guard' });
-  } catch (error) {
+  } catch (error: any) {
     appLogger.warn({ err: error }, 'PII guard redaction failed; continuing without payload preview');
     return undefined;
   }

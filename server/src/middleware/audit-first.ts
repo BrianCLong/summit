@@ -115,7 +115,7 @@ export function auditFirstMiddleware(
         { path: req.path, method: req.method, tenantId, userId },
         'Sensitive operation stamped in Provenance Ledger'
       );
-    } catch (error) {
+    } catch (error: any) {
       middlewareLogger.error(
         { error: (error as Error).message, path: req.path },
         'Failed to stamp audit event in middleware'

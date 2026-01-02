@@ -45,7 +45,7 @@ describe('Tenant Boundary Leak Simulation Engine', () => {
               }
 
               res.json([{ id: '1', tenantId: userContext.user.tenantId }]);
-          } catch (e) {
+          } catch (e: any) {
               res.status(403).json({ error: e.message });
           }
       });

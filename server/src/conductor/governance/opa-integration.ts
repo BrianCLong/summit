@@ -133,7 +133,7 @@ class OpaPolicyEngine {
       );
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       console.error('OPA policy evaluation failed:', error);
 
       prometheusConductorMetrics.recordOperationalEvent(
@@ -197,7 +197,7 @@ class OpaPolicyEngine {
       );
 
       return response.data.result || null;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to load tenant config for ${tenantId}:`, error);
       return null;
     }
@@ -216,17 +216,17 @@ class OpaPolicyEngine {
       tags: result.tags || [],
       auditLog: result.audit_log
         ? {
-            logLevel: result.audit_log.level || 'info',
-            message: result.audit_log.message || 'Policy evaluation',
-            metadata: result.audit_log.metadata || {},
-          }
+          logLevel: result.audit_log.level || 'info',
+          message: result.audit_log.message || 'Policy evaluation',
+          metadata: result.audit_log.metadata || {},
+        }
         : undefined,
       dataFilters: result.data_filters
         ? {
-            tenantScope: result.data_filters.tenant_scope || [],
-            fieldMask: result.data_filters.field_mask || [],
-            rowLevelFilters: result.data_filters.row_level_filters || {},
-          }
+          tenantScope: result.data_filters.tenant_scope || [],
+          fieldMask: result.data_filters.field_mask || [],
+          rowLevelFilters: result.data_filters.row_level_filters || {},
+        }
         : undefined,
     };
   }
@@ -309,7 +309,7 @@ export class TagPropagationSystem {
         `Tags propagated from ${sourceResourceId} to ${targetResourceId}:`,
         Array.from(targetTags),
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Tag propagation failed:', error);
       prometheusConductorMetrics.recordOperationalEvent(
         'tag_propagation_error',
@@ -445,7 +445,7 @@ export class TenantIsolationMiddleware {
         }
 
         next();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Tenant isolation middleware error:', error);
 
         return res.status(500).json({
@@ -472,7 +472,8 @@ export class TenantIsolationMiddleware {
               const fieldMask =
                 requestContext.request.http.policyDecision.dataFilters
                   .fieldMask;
-              requestContext.response.body = this.applyFieldMask(
+              const self = this as any;
+              requestContext.response.body = self.applyFieldMask(
                 requestContext.response.body,
                 fieldMask,
               );

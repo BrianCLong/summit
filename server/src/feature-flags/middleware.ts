@@ -91,7 +91,7 @@ export async function exposeFeatureFlags(req: Request, res: Response): Promise<v
         environment: context.environment,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       error: 'Failed to fetch feature flags',
     });

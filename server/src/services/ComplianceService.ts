@@ -21,11 +21,11 @@ export interface ComplianceFramework {
   enabled: boolean;
   requirements: ComplianceRequirement[];
   assessmentFrequency:
-    | 'daily'
-    | 'weekly'
-    | 'monthly'
-    | 'quarterly'
-    | 'annually';
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'quarterly'
+  | 'annually';
   lastAssessment?: Date;
   nextAssessment: Date;
   status: 'compliant' | 'non-compliant' | 'pending' | 'unknown';
@@ -491,7 +491,7 @@ class ComplianceService {
             nextCheck: new Date(Date.now() + 24 * 60 * 60 * 1000),
             automatedCheck: true
           },
-           {
+          {
             id: 'rev-002',
             frameworkId: 'revenue-ops',
             category: 'Access Control',
@@ -522,7 +522,7 @@ class ComplianceService {
         frameworkCount: this.frameworks.size,
         frameworks: Array.from(this.frameworks.keys()),
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize compliance frameworks', {
         component: 'ComplianceService',
         error: error.message,
@@ -633,7 +633,7 @@ class ComplianceService {
 
         return report;
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Compliance assessment failed', {
         component: 'ComplianceService',
         frameworkId,
@@ -673,7 +673,7 @@ class ComplianceService {
         default:
           return await this.assessGenericRequirement(requirement);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Requirement assessment failed', {
         component: 'ComplianceService',
         requirementId: requirement.id,
@@ -1187,11 +1187,11 @@ class ComplianceService {
       }];
 
       const status = result.status === 'pass' ? 'compliant' :
-                     result.score > 90 ? 'partial' : 'non-compliant';
+        result.score > 90 ? 'partial' : 'non-compliant';
 
       return { status, findings, recommendations, evidence };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to run CIS benchmark assessment', { error });
       throw error;
     }
@@ -1251,11 +1251,11 @@ class ComplianceService {
       }];
 
       const status = result.status === 'pass' ? 'compliant' :
-                     result.score > 90 ? 'partial' : 'non-compliant';
+        result.score > 90 ? 'partial' : 'non-compliant';
 
       return { status, findings, recommendations, evidence };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to run NSA benchmark assessment', { error });
       throw error;
     }
@@ -1330,8 +1330,8 @@ class ComplianceService {
       findings.length === 0
         ? 'compliant'
         : findings.some(
-              (f) => f.severity === 'high' || f.severity === 'critical',
-            )
+          (f) => f.severity === 'high' || f.severity === 'critical',
+        )
           ? 'non-compliant'
           : 'partial';
 
@@ -1361,7 +1361,7 @@ class ComplianceService {
         `${this.cachePrefix}report:${reportId}`,
       );
       return cached ? JSON.parse(cached) : null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to retrieve compliance report', {
         component: 'ComplianceService',
         reportId,
@@ -1381,7 +1381,7 @@ class ComplianceService {
 
       // Use SET with EX for TTL to match client and mock implementations
       await getRedisClient().set(cacheKey, JSON.stringify(report), 'EX', ttl);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to cache compliance report', {
         component: 'ComplianceService',
         reportId: report.id,
@@ -1431,7 +1431,7 @@ class ComplianceService {
             status: 'open',
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to load recent findings', {
           component: 'ComplianceService',
           frameworkId: framework.id,

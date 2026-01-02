@@ -21,7 +21,7 @@ const batchUsers = async (userIds: readonly string[]): Promise<(User | Error)[]>
     const userMap = new Map(result.rows.map(u => [u.id, u]));
 
     return userIds.map(id => userMap.get(id) || new Error(`User not found: ${id}`));
-  } catch (err) {
+  } catch (err: any) {
     return userIds.map(() => err as Error);
   }
 };
@@ -48,7 +48,7 @@ const batchEntities = async (entityIds: readonly string[]): Promise<(any | Error
         });
 
         return entityIds.map(id => entityMap.get(id) || new Error(`Entity not found: ${id}`));
-    } catch (err) {
+    } catch (err: any) {
         return entityIds.map(() => err as Error);
     } finally {
         await session.close();

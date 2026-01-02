@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class DataCatalogService {
   private static instance: DataCatalogService;
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): DataCatalogService {
     if (!DataCatalogService.instance) {

@@ -86,7 +86,7 @@ export class ModelServingService {
                 { instances: [inputs] }
             );
             return response.data;
-        } catch (error) {
+        } catch (error: any) {
             logger.error({ error, model: name }, 'External inference failed, falling back to mock');
             // Fallback to mock if configured, or rethrow
             if (!process.env.ENABLE_ML_FALLBACK) throw error;

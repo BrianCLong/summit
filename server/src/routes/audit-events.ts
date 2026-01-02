@@ -61,7 +61,7 @@ router.get('/audit-events', async (req, res) => {
       limit: query.limit,
       events,
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error(
       { error: (error as Error).message },
       'Failed to query audit events',

@@ -145,7 +145,7 @@ async function executeSandboxValidation(
         if (code === 0) {
           try {
             resolve(JSON.parse(stdout));
-          } catch (e) {
+          } catch (e: any) {
             reject(new Error(`Failed to parse sandbox output: ${e.message}`));
           }
         } else {
@@ -159,7 +159,7 @@ async function executeSandboxValidation(
     });
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Sandbox validation error:', error);
     throw new ApolloError('Sandbox validation failed', 'SANDBOX_ERROR');
   }
@@ -190,7 +190,7 @@ async function executeQuantumReasoning(
       resultQuality: solutionQuality,
       executionTime: reasoningTime,
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Quantum reasoning error:', error);
     throw new ApolloError('Quantum reasoning failed', 'QUANTUM_ERROR');
   }
@@ -234,7 +234,7 @@ export const transcendentResolvers = {
             lastSafetyCheck: new Date().toISOString(),
           },
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('TranscendentStatus query error:', error);
         throw new ApolloError(
           'Failed to get transcendent status',
@@ -260,7 +260,7 @@ export const transcendentResolvers = {
 
         // Return mock proposals for now - would integrate with database
         return [];
-      } catch (error) {
+      } catch (error: any) {
         logger.error('EvolutionProposals query error:', error);
         throw new ApolloError(
           'Failed to get evolution proposals',
@@ -319,14 +319,14 @@ export const transcendentResolvers = {
           audit: `Transcendent intelligence enabled for ${tenant} at level ${config.transcendenceLevel}`,
           transcendentEffects,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('EnableTranscendentIntelligence error:', error);
         throw error instanceof ApolloError
           ? error
           : new ApolloError(
-              'Failed to enable transcendent intelligence',
-              'MUTATION_ERROR',
-            );
+            'Failed to enable transcendent intelligence',
+            'MUTATION_ERROR',
+          );
       }
     },
 
@@ -363,14 +363,14 @@ export const transcendentResolvers = {
             evolutionTriggered: config.evolutionRate > 0.5,
           },
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ConfigureControllerV3 error:', error);
         throw error instanceof ApolloError
           ? error
           : new ApolloError(
-              'Failed to configure Controller v3',
-              'MUTATION_ERROR',
-            );
+            'Failed to configure Controller v3',
+            'MUTATION_ERROR',
+          );
       }
     },
 
@@ -440,7 +440,7 @@ export const transcendentResolvers = {
         };
 
         return evolutionProposal;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ProposeEvolution error:', error);
         throw error instanceof ApolloError
           ? error
@@ -466,14 +466,14 @@ export const transcendentResolvers = {
         const result = await executeQuantumReasoning(problem, tenant);
 
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ExecuteQuantumReasoning error:', error);
         throw error instanceof ApolloError
           ? error
           : new ApolloError(
-              'Failed to execute quantum reasoning',
-              'MUTATION_ERROR',
-            );
+            'Failed to execute quantum reasoning',
+            'MUTATION_ERROR',
+          );
       }
     },
 
@@ -507,14 +507,14 @@ export const transcendentResolvers = {
           correlationStrength: config.entanglementStrength,
           createdAt: new Date().toISOString(),
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('CreateQuantumKnowledgeNetwork error:', error);
         throw error instanceof ApolloError
           ? error
           : new ApolloError(
-              'Failed to create quantum knowledge network',
-              'MUTATION_ERROR',
-            );
+            'Failed to create quantum knowledge network',
+            'MUTATION_ERROR',
+          );
       }
     },
 
@@ -542,7 +542,7 @@ export const transcendentResolvers = {
         };
 
         const action =
-          containmentActions[containmentType] || 'Unknown containment action';
+          (containmentActions as any)[containmentType] || 'Unknown containment action';
 
         return {
           ok: true,
@@ -554,14 +554,14 @@ export const transcendentResolvers = {
             evolutionTriggered: false,
           },
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('EmergencyContainment error:', error);
         throw error instanceof ApolloError
           ? error
           : new ApolloError(
-              'Failed to execute emergency containment',
-              'MUTATION_ERROR',
-            );
+            'Failed to execute emergency containment',
+            'MUTATION_ERROR',
+          );
       }
     },
   },

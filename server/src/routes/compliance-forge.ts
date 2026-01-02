@@ -28,7 +28,7 @@ router.post('/scan', async (req, res) => {
             artifact,
             overallStatus: artifact.status
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Compliance scan error:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }

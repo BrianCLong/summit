@@ -101,7 +101,7 @@ export interface IReceiver {
  * Abstract base class with common receiver functionality
  */
 export abstract class BaseReceiver implements IReceiver {
-  protected config: ReceiverConfig;
+  protected config!: ReceiverConfig;
   protected metrics: ReceiverMetrics;
   protected initialized: boolean = false;
 
@@ -170,7 +170,7 @@ export abstract class BaseReceiver implements IReceiver {
           this.metrics.totalFailed++;
           this.metrics.lastFailureAt = new Date();
         }
-      } catch (error) {
+      } catch (error: any) {
         results.push({
           success: false,
           recipientId: recipient,
@@ -236,17 +236,17 @@ export abstract class BaseReceiver implements IReceiver {
       maxDelayMs: 30000,
     };
 
-    let lastError: Error;
+    let lastError: Error = new Error('Unknown error');
     for (let attempt = 0; attempt < retryPolicy.maxAttempts; attempt++) {
       try {
         return await operation();
-      } catch (error) {
+      } catch (error: any) {
         lastError = error as Error;
 
         if (attempt < retryPolicy.maxAttempts - 1) {
           const delay = Math.min(
             retryPolicy.initialDelayMs *
-              Math.pow(retryPolicy.backoffMultiplier, attempt),
+            Math.pow(retryPolicy.backoffMultiplier, attempt),
             retryPolicy.maxDelayMs,
           );
           await this.sleep(delay);

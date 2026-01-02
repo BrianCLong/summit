@@ -887,7 +887,7 @@ export class AdaptiveRouter extends EventEmitter {
       }
 
       console.log('Restored bandit state from Redis');
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Failed to load persisted bandit state:', error.message);
     }
   }

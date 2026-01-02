@@ -29,7 +29,7 @@ export class DocxExporter implements ReportExporter {
           ),
         }),
         ...dataRows.map(
-          (row) =>
+          (row: any) =>
             new TableRow({
               children: headers.map((header) =>
                 new TableCell({

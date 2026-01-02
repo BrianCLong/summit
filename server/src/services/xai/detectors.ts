@@ -132,7 +132,7 @@ export class DetectorService {
       });
 
       return summary;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Detection run failed',
         trace_id: traceId,
@@ -192,7 +192,7 @@ export class DetectorService {
         detection_count: detections.length,
         processing_time_ms: detectionTime,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: `${type} detection failed`,
         trace_id: traceId,
@@ -394,7 +394,7 @@ export class DetectorService {
             });
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.debug({
           message: 'Behavioral analysis failed for entity',
           entity_id: entityId,
@@ -515,7 +515,7 @@ export class DetectorService {
           key_explanations: explanation.explanations.slice(0, 3), // Top 3
           model_version: explanation.model_version,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({
           message: 'Failed to generate XAI explanation for detection',
           detection_id: detection.detection_id,
@@ -675,7 +675,7 @@ export class DetectorService {
             confidence: detection.confidence,
             severity: detection.severity,
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error({
             message: 'Failed to record detection event',
             detection_id: detection.detection_id,

@@ -328,8 +328,8 @@ export class NotificationHub extends EventEmitter {
       const latency = Date.now() - startTime;
       this.updateAverageLatency(latency);
 
-      const successCount = results.filter((r) => r.success).length;
-      const failureCount = results.filter((r) => !r.success).length;
+      const successCount = results.filter((r: any) => r.success).length;
+      const failureCount = results.filter((r: any) => !r.success).length;
 
       this.metrics.totalNotifications += results.length;
       this.metrics.totalDelivered += successCount;
@@ -344,7 +344,7 @@ export class NotificationHub extends EventEmitter {
 
       this.emit('notification:completed', job);
       return job;
-    } catch (error) {
+    } catch (error: any) {
       job.status = 'failed';
       job.error = (error as Error).message;
       job.processedAt = new Date();
@@ -623,7 +623,7 @@ export class NotificationHub extends EventEmitter {
         continue;
       }
 
-      const addresses = channelRecipients.map((r) => r.address);
+      const addresses = channelRecipients.map((r: any) => r.address);
       try {
         const deliveryResults = await receiver.send(event, addresses);
 
@@ -644,7 +644,7 @@ export class NotificationHub extends EventEmitter {
             this.incrementChannelMetric(channelName, 'failed');
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Error sending to channel ${channelName}:`, error);
         for (const recipient of channelRecipients) {
           results.push({

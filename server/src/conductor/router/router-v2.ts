@@ -223,7 +223,7 @@ export class AdaptiveExpertRouter extends EventEmitter {
       this.emit('route:decision', { query, response, context: banditContext });
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Routing error:', error);
       prometheusConductorMetrics.recordOperationalEvent(
         'router_v2_error',

@@ -34,7 +34,7 @@ export const evaluateCohort = (req: Request, res: Response) => {
     try {
         const result = evaluator.evaluate(cohort);
         res.json(result);
-    } catch (e) {
+    } catch (e: any) {
         res.status(500).json({ error: (e as Error).message });
     }
 };

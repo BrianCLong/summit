@@ -108,7 +108,7 @@ export class MultiBackendRepository<TConfig = Record<string, any>>
         if (cached) {
           return cached;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Cache read failed:', error);
       }
     }
@@ -151,7 +151,7 @@ export class MultiBackendRepository<TConfig = Record<string, any>>
         if (cached) {
           return cached;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Cache read failed:', error);
       }
     }
@@ -312,7 +312,7 @@ export class MultiBackendRepository<TConfig = Record<string, any>>
 
     try {
       return await fn(activeRepo);
-    } catch (error) {
+    } catch (error: any) {
       console.error(`${operation} failed on ${this.activePrimary}:`, error);
 
       // Try failover if enabled and fallback exists
@@ -371,7 +371,7 @@ export class MultiBackendRepository<TConfig = Record<string, any>>
             await this.failoverToFallback();
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Health check error:', error);
       }
     }, this.healthCheckInterval);
@@ -406,7 +406,7 @@ export class MultiBackendRepository<TConfig = Record<string, any>>
       if (!previousHealth || previousHealth.healthy !== healthy) {
         this.events.emit('health:changed', health);
       }
-    } catch (error) {
+    } catch (error: any) {
       const health: BackendHealth = {
         name,
         healthy: false,

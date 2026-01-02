@@ -98,7 +98,7 @@ async function analyzeSlowQueries() {
             ORDER BY elapsedTimeMillis DESC LIMIT 10
         `);
 
-        const slowQueries = result.records.map(r => ({
+        const slowQueries = result.records.map((r: any) => ({
             queryId: r.get('queryId'),
             query: r.get('query'),
             elapsedTimeMillis: r.get('elapsedTimeMillis')
@@ -114,7 +114,7 @@ async function analyzeSlowQueries() {
             logger.info('No slow queries currently running > 1000ms');
         }
 
-    } catch (err) {
+    } catch (err: any) {
         logger.warn('Could not list running queries (requires admin/enterprise privileges): ' + err.message);
     }
 
@@ -150,7 +150,7 @@ async function analyzeSlowQueries() {
           hasFullScan,
           planType: plan ? plan.operatorType : 'Unknown',
         });
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err, query: q.cypher }, 'Failed to profile query');
       }
     }
@@ -207,7 +207,7 @@ async function analyzeSlowQueries() {
       try {
         const profiled = await profileJourney(session, journey.name, journey.cypher, journey.params);
         journeyProfiles.push(profiled);
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err, journey: journey.name }, 'Failed to PROFILE journey');
       }
     }
@@ -226,7 +226,7 @@ async function analyzeSlowQueries() {
           : undefined;
         labelStats.push({ label, count: numericCount, advice });
       });
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to collect label cardinality stats');
     }
 
@@ -245,7 +245,7 @@ async function analyzeSlowQueries() {
 
     logger.info('Analysis complete. Report saved.');
 
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error during analysis', error);
   } finally {
     await session.close();

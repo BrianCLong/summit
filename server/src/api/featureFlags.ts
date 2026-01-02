@@ -1,0 +1,209 @@
+// server/src/api/featureFlags.ts
+import express, { Request, Response, Router } from 'express';
+import { FeatureFlagService } from '../featureFlags/FeatureFlagService';
+import { ConfigService } from '../featureFlags/ConfigService';
+import { EvaluationContext } from '../featureFlags/types';
+
+export interface FeatureFlagApiDependencies {
+  featureFlagService: FeatureFlagService;
+  configService: ConfigService;
+}
+
+export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Router => {
+  const router = express.Router();
+
+  // Get all feature flags for the current user/context
+  router.get('/', async (req: Request, res: Response) => {
+    try {
+      // Extract context from request
+      const context: EvaluationContext = {
+        userId: req.query.userId as string || req.user?.id,
+        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
+        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+      };
+
+      // Get all flags with their evaluation status
+      const flags = await deps.featureFlagService.getAllFlagsWithContext(context);
+
+      // Also get relevant configuration values
+      const configs = await deps.configService.getAllConfig();
+
+      // Combine into a response
+      const response = {
+        flags: Object.entries(flags).map(([key, enabled]) => ({
+          key,
+          enabled,
+          value: enabled, // Simplified for now - in a real system you'd include actual values
+          lastUpdated: new Date().toISOString()
+        })),
+        configs,
+        timestamp: new Date().toISOString()
+      };
+
+      res.json(response);
+    } catch (error: any) {
+      console.error('Error fetching feature flags:', error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
+
+  // Get a specific feature flag evaluation
+  router.get('/:flagKey', async (req: Request, res: Response) => {
+    try {
+      const { flagKey } = req.params;
+
+      // Extract context from request
+      const context: EvaluationContext = {
+        userId: req.query.userId as string || req.user?.id,
+        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
+        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+      };
+
+      // Get the flag evaluation
+      const enabled = await deps.featureFlagService.isEnabled(flagKey, context);
+      const variant = await deps.featureFlagService.getVariant(flagKey, context);
+
+      res.json({
+        key: flagKey,
+        enabled,
+        value: variant !== null ? variant : enabled,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Error fetching feature flag ${req.params.flagKey}:`, error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
+
+  // Admin API: Create a new feature flag (requires admin privileges)
+  router.post('/', async (req: Request, res: Response) => {
+    try {
+      const { key, enabled = false, description, rolloutPercentage, targetUsers, targetGroups, conditions } = req.body;
+
+      // TODO: Add authentication and authorization check here
+      // if (!req.user.isAdmin) {
+      //   return res.status(403).json({ error: 'Admin access required' });
+      // }
+
+      // Create the feature flag object
+      const newFlag = {
+        key,
+        enabled,
+        type: 'boolean', // Default type
+        description: description || '',
+        createdBy: req.user?.id || 'system',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        rolloutPercentage: rolloutPercentage || undefined,
+        targetUsers: targetUsers || undefined,
+        targetGroups: targetGroups || undefined,
+        conditions: conditions || undefined,
+        tags: req.body.tags || [],
+        environment: [process.env.NODE_ENV || 'development']
+      };
+
+      // TODO: Actually implement the createFlag method in the service
+      // await deps.featureFlagService.createFlag(newFlag);
+
+      res.status(201).json({
+        key,
+        enabled,
+        message: 'Feature flag created successfully'
+      });
+    } catch (error: any) {
+      console.error('Error creating feature flag:', error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
+
+  // Admin API: Update a feature flag (requires admin privileges)
+  router.put('/:flagKey', async (req: Request, res: Response) => {
+    try {
+      const { flagKey } = req.params;
+      const updateData = req.body;
+
+      // TODO: Add authentication and authorization check here
+
+      // Update the flag
+      // await deps.featureFlagService.updateFlag(flagKey, updateData);
+
+      res.json({
+        key: flagKey,
+        updated: true,
+        message: 'Feature flag updated successfully',
+        changes: Object.keys(updateData)
+      });
+    } catch (error: any) {
+      console.error(`Error updating feature flag ${req.params.flagKey}:`, error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
+
+  // Admin API: Delete a feature flag (requires admin privileges)
+  router.delete('/:flagKey', async (req: Request, res: Response) => {
+    try {
+      const { flagKey } = req.params;
+
+      // TODO: Add authentication and authorization check here
+
+      // Delete the flag
+      // await deps.featureFlagService.deleteFlag(flagKey);
+
+      res.json({
+        key: flagKey,
+        deleted: true,
+        message: 'Feature flag deleted successfully'
+      });
+    } catch (error: any) {
+      console.error(`Error deleting feature flag ${req.params.flagKey}:`, error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
+
+  // Get configuration values
+  router.get('/config/:key', async (req: Request, res: Response) => {
+    try {
+      const { key } = req.params;
+      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+
+      const value = await deps.configService.getConfig(key, environment);
+
+      res.json({
+        key,
+        value,
+        environment,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error(`Error fetching config ${req.params.key}:`, error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
+
+  // Get multiple configuration values
+  router.post('/config/batch', async (req: Request, res: Response) => {
+    try {
+      const { keys } = req.body;
+      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+
+      if (!Array.isArray(keys)) {
+        return res.status(400).json({ error: 'Keys must be an array' });
+      }
+
+      const configs = await deps.configService.getMultipleConfig(keys, environment);
+
+      res.json({
+        configs,
+        environment,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error('Error fetching multiple configs:', error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
+
+  return router;
+};
+
+// Export types for consistency

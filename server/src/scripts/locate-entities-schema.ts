@@ -45,7 +45,7 @@ async function locateSchema() {
       console.table(keys.rows);
     }
 
-  } catch (err) {
+  } catch (err: any) {
     logger.error('Failed to introspect schema', err);
   } finally {
     await closePostgresPool();

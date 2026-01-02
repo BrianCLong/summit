@@ -90,7 +90,7 @@ class OpenTelemetryService {
       logger.info(
         `OpenTelemetry initialized. Service: ${this.config.serviceName}, Env: ${this.config.environment}`,
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Failed to initialize OpenTelemetry: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -132,7 +132,7 @@ class OpenTelemetryService {
         const result = await fn(span);
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-      } catch (err) {
+      } catch (err: any) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: err instanceof Error ? err.message : String(err),

@@ -60,7 +60,7 @@ export const checkQuotaMiddleware = (metric: keyof QuotaConfig, cost: number = 1
       }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Error in quota middleware');
       next(); // Fail open to avoid blocking due to system error
     }

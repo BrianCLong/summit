@@ -293,7 +293,7 @@ describe('Maestro Integration Tests', () => {
 
       const responses = await Promise.allSettled(promises);
       const successfulResponses = responses.filter(
-        (r) => r.status === 'fulfilled',
+        (r: any) => r.status === 'fulfilled',
       ).length;
 
       // Should handle most requests successfully

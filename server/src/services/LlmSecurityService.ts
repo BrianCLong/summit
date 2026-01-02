@@ -85,7 +85,7 @@ export class LlmSecurityService {
 
       return { allowed: true, redactedPrompt: finalPrompt };
 
-    } catch (e) {
+    } catch (e: any) {
       logger.error('DLP scan error during LLM pre-flight', e);
       // Fail closed
       return { allowed: false, redactedPrompt: '', reason: 'Security check failed' };

@@ -119,7 +119,7 @@ export const notificationResolvers = {
       const result = await db.query(query, params);
 
       const hasNextPage = result.rows.length > first;
-      const edges = result.rows.slice(0, first).map((row) => ({
+      const edges = result.rows.slice(0, first).map((row: any) => ({
         cursor: row.id,
         node: row,
       }));
@@ -232,13 +232,13 @@ export const notificationResolvers = {
         totalFailed: parseInt(overallResult.rows[0].total_failed, 10),
         totalThrottled: parseInt(overallResult.rows[0].total_throttled, 10),
         unreadCount: parseInt(overallResult.rows[0].unread_count, 10),
-        byChannel: channelResult.rows.map((row) => ({
+        byChannel: channelResult.rows.map((row: any) => ({
           channel: row.channel.toUpperCase(),
           sent: parseInt(row.sent, 10),
           delivered: parseInt(row.delivered, 10),
           failed: parseInt(row.failed, 10),
         })),
-        bySeverity: severityResult.rows.map((row) => ({
+        bySeverity: severityResult.rows.map((row: any) => ({
           severity: row.severity.toUpperCase(),
           count: parseInt(row.count, 10),
         })),

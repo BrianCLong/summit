@@ -44,7 +44,7 @@ class SlidingWindowLimiter {
         return await this.checkWithRedis(key, limit, now, windowStart, scope);
       }
       return this.checkInMemory(key, limit, now, windowStart, scope);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error, key, scope }, 'Redis sliding window failed, falling back to memory');
       return this.checkInMemory(key, limit, now, windowStart, scope);
     }

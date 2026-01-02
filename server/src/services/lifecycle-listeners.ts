@@ -45,7 +45,7 @@ export async function handleRunEvent(event: RunEvent) {
         );
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Failed to handle run event for ${event.runId}:`, error);
   }
 }
@@ -79,7 +79,7 @@ export async function handleDeploymentEvent(event: DeploymentEvent) {
         );
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error(
       `Failed to handle deployment event for ${event.deploymentId}:`,
       error,
@@ -106,7 +106,7 @@ export class LifecycleManager {
     for (const listener of this.runListeners) {
       try {
         await listener(event);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Run event listener error:', error);
       }
     }
@@ -116,7 +116,7 @@ export class LifecycleManager {
     for (const listener of this.deploymentListeners) {
       try {
         await listener(event);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Deployment event listener error:', error);
       }
     }

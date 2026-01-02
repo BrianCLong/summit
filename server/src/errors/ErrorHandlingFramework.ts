@@ -800,7 +800,7 @@ export async function withRetry<T>(
   while (attempt <= finalConfig.maxRetries) {
     try {
       return await operation();
-    } catch (error) {
+    } catch (error: any) {
       lastError = error as Error;
       const appError = error instanceof AppError ? error : null;
 
@@ -846,7 +846,7 @@ export async function withFallback<T>(
 ): Promise<T> {
   try {
     return await primary();
-  } catch (error) {
+  } catch (error: any) {
     if (options.onFallback) {
       options.onFallback(error as Error);
     }

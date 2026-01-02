@@ -140,7 +140,7 @@ export class QueryResultCache {
       this.recordHit('result', tenantId);
       this.recordLatency('result', 'hit', tenantId, started);
       return { ...parsed, tier: 'flash' };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Failed to parse flash cache entry, treating as miss');
       this.recordMiss('result', tenantId);
       this.recordLatency('result', 'miss', tenantId, started);
@@ -166,7 +166,7 @@ export class QueryResultCache {
         JSON.stringify(value),
       );
       recSet('query-signature', 'result-flash', tenantId);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Unable to write query cache entry to flash tier');
     }
   }
@@ -190,7 +190,7 @@ export class QueryResultCache {
         JSON.stringify(trimmed),
       );
       recSet('query-signature', 'streaming-flash', tenantId);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Unable to write streaming cache entry to flash tier');
     }
   }
@@ -234,7 +234,7 @@ export class QueryResultCache {
       this.recordHit('streaming', tenantId);
       this.recordLatency('streaming', 'hit', tenantId, started);
       return { rows: parsed, tier: 'flash' };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Failed to parse streaming cache entry, treating as miss');
       this.recordMiss('streaming', tenantId);
       this.recordLatency('streaming', 'miss', tenantId, started);

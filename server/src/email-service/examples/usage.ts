@@ -288,7 +288,7 @@ export async function sendCampaignEmail(recipients: string[]) {
     delayBetweenBatches: 1000,
   });
 
-  console.log(`Campaign sent: ${results.filter((r) => r.success).length} successful, ${results.filter((r) => !r.success).length} failed`);
+  console.log(`Campaign sent: ${results.filter((r: any) => r.success).length} successful, ${results.filter((r: any) => !r.success).length} failed`);
 
   return results;
 }

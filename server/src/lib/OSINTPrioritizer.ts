@@ -49,8 +49,8 @@ export class OSINTPrioritizationService {
         tenantId,
       });
 
-      return result.records.map((r) => r.get('id'));
-    } catch (error) {
+      return result.records.map((r: any) => r.get('id'));
+    } catch (error: any) {
       logger.error('Failed to identify OSINT targets', error);
       return [];
     } finally {

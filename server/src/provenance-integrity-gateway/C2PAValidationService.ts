@@ -145,7 +145,7 @@ export class C2PAValidationService extends EventEmitter {
         const fingerprint = cert.fingerprint256;
         this.trustAnchors.set(fingerprint, cert);
         logger.info({ fingerprint, subject: cert.subject }, 'Loaded trust anchor');
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, anchor: anchor.substring(0, 50) }, 'Failed to load trust anchor');
       }
     }
@@ -160,7 +160,7 @@ export class C2PAValidationService extends EventEmitter {
       const fingerprint = cert.fingerprint256;
       this.trustAnchors.set(fingerprint, cert);
       logger.info({ fingerprint }, 'Added trust anchor');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to add trust anchor');
       throw error;
     }
@@ -346,7 +346,7 @@ export class C2PAValidationService extends EventEmitter {
       }, 'C2PA validation complete');
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, verificationId }, 'C2PA validation failed');
 
       messages.push({
@@ -627,7 +627,7 @@ export class C2PAValidationService extends EventEmitter {
         signature,
         validationStatus: undefined, // Will be filled during validation
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to parse C2PA manifest from JUMBF');
       return undefined;
     }
@@ -840,7 +840,7 @@ export class C2PAValidationService extends EventEmitter {
 
       const signatureBuffer = Buffer.from(signature.value, 'base64');
       return verify.verify(publicKey, signatureBuffer);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Signature validation error');
       return false;
     }
@@ -953,7 +953,7 @@ export class C2PAValidationService extends EventEmitter {
           revoked: false,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Certificate chain validation error');
       return {
         valid: false,
@@ -1018,7 +1018,7 @@ export class C2PAValidationService extends EventEmitter {
       // OCSP check would go here
       // For now, assume not revoked
       return { revoked: false };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'OCSP check failed');
       return { revoked: false };
     }
@@ -1423,7 +1423,7 @@ export class C2PAValidationService extends EventEmitter {
           await fs.unlink(filePath);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Failed to cleanup cache directory');
     }
   }

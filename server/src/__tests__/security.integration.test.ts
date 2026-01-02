@@ -23,7 +23,7 @@ describe('Security middleware integration', () => {
               : callback(new Error('Origin not allowed'));
           },
           credentials: true,
-        })(req, res, (err) => {
+        })(req, res, (err: any) => {
           if (err) return res.status(403).json({ error: err.message });
           next();
         }),

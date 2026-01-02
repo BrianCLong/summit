@@ -113,7 +113,7 @@ export class IntelligenceAnalysisService {
             });
             const parsed = JSON.parse(llmResult);
             return { ...heuristicResult, ...parsed, source: 'llm' };
-        } catch (e) {
+        } catch (e: any) {
             // Fallback
         }
     }

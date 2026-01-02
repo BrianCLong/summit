@@ -31,7 +31,7 @@ export const sovereignResolvers = {
         const status =
           await sovereignSafeguardsService.getSovereignSafeguardsStatus(tenant);
         return status;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('SovereignSafeguardsStatus query error:', error);
         throw new ApolloError(
           'Failed to get sovereign safeguards status',
@@ -57,7 +57,7 @@ export const sovereignResolvers = {
         const status =
           await sovereignSafeguardsService.getSovereignSafeguardsStatus(tenant);
         return status.independentVerification;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('IndependentVerificationStatus query error:', error);
         throw new ApolloError(
           'Failed to get independent verification status',
@@ -83,7 +83,7 @@ export const sovereignResolvers = {
         const status =
           await sovereignSafeguardsService.getSovereignSafeguardsStatus(tenant);
         return status.containmentReadiness;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ContainmentReadiness query error:', error);
         throw new ApolloError(
           'Failed to get containment readiness',
@@ -109,7 +109,7 @@ export const sovereignResolvers = {
         const status =
           await sovereignSafeguardsService.getSovereignSafeguardsStatus(tenant);
         return status.lawfulInteroperability;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('LawfulInteroperabilityStatus query error:', error);
         throw new ApolloError(
           'Failed to get lawful interoperability status',
@@ -135,7 +135,7 @@ export const sovereignResolvers = {
         const status =
           await sovereignSafeguardsService.getSovereignSafeguardsStatus(tenant);
         return status.reversibleAutonomy;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ReversibleAutonomyStatus query error:', error);
         throw new ApolloError(
           'Failed to get reversible autonomy status',
@@ -189,7 +189,7 @@ export const sovereignResolvers = {
           ],
           activeReports: [],
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ComplianceMonitoring query error:', error);
         throw new ApolloError(
           'Failed to get compliance monitoring data',
@@ -228,7 +228,7 @@ export const sovereignResolvers = {
             conditions: ['Data minimization required', 'Regular audit reports'],
           },
         ];
-      } catch (error) {
+      } catch (error: any) {
         logger.error('CrossBorderApprovals query error:', error);
         throw new ApolloError(
           'Failed to get cross-border approvals',
@@ -269,7 +269,7 @@ export const sovereignResolvers = {
             signature: 'ed25519:abc123...',
           },
         ];
-      } catch (error) {
+      } catch (error: any) {
         logger.error('SovereignAuditTrail query error:', error);
         throw new ApolloError(
           'Failed to get sovereign audit trail',
@@ -309,7 +309,7 @@ export const sovereignResolvers = {
           });
 
         return request;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('RequestIndependentVerification error:', error);
         throw error instanceof ApolloError
           ? error
@@ -341,7 +341,7 @@ export const sovereignResolvers = {
             config,
           );
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ConfigureSovereignSafeguards error:', error);
         throw error instanceof ApolloError
           ? error
@@ -373,7 +373,7 @@ export const sovereignResolvers = {
             testType,
           );
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('TestContainmentReadiness error:', error);
         throw error instanceof ApolloError
           ? error
@@ -411,7 +411,7 @@ export const sovereignResolvers = {
             operationType,
           );
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('VerifyLawfulInteroperability error:', error);
         throw error instanceof ApolloError
           ? error
@@ -443,7 +443,7 @@ export const sovereignResolvers = {
             config,
           );
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ConfigureReversibleAutonomy error:', error);
         throw error instanceof ApolloError
           ? error
@@ -481,7 +481,7 @@ export const sovereignResolvers = {
             reason,
           );
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('EmergencySovereignContainment error:', error);
         throw error instanceof ApolloError
           ? error
@@ -517,7 +517,7 @@ export const sovereignResolvers = {
           ok: true,
           audit: `Sovereign operation ${operationId} rolled back for tenant ${tenant}: ${rollbackReason}`,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('SovereignOperationRollback error:', error);
         throw error instanceof ApolloError
           ? error
@@ -553,7 +553,7 @@ export const sovereignResolvers = {
           ok: true,
           audit: `Human override activated for sovereign autonomy in tenant ${tenant}: ${overrideReason} (Level: ${emergencyLevel})`,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('HumanOverrideSovereignAutonomy error:', error);
         throw error instanceof ApolloError
           ? error
@@ -585,7 +585,7 @@ export const sovereignResolvers = {
             request,
           );
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('RequestCrossBorderApproval error:', error);
         throw error instanceof ApolloError
           ? error
@@ -621,7 +621,7 @@ export const sovereignResolvers = {
           ok: true,
           audit: `Jurisdiction compliance report submitted for ${jurisdiction} in tenant ${tenant}`,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('SubmitJurisdictionCompliance error:', error);
         throw error instanceof ApolloError
           ? error
@@ -669,7 +669,7 @@ export const sovereignResolvers = {
           ],
           submittedAt: new Date().toISOString(),
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('RequestTranscendentApproval error:', error);
         throw error instanceof ApolloError
           ? error
@@ -700,7 +700,7 @@ export const sovereignResolvers = {
           ok: true,
           audit: `Transcendent safeguards configured for tenant ${tenant}`,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error('ConfigureTranscendentSafeguards error:', error);
         throw error instanceof ApolloError
           ? error

@@ -55,7 +55,7 @@ export class IndexingService {
       }
 
       await client.query('COMMIT');
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {
@@ -73,7 +73,7 @@ export class IndexingService {
     try {
       if (this.useBatchWrites) {
         if (data.entities.length > 0) {
-          await session.executeWrite((tx) =>
+          await session.executeWrite((tx: any) =>
             tx.run(
               `UNWIND $entities AS entity
                MERGE (e:Entity {id: entity.id, tenantId: entity.tenantId})
@@ -92,7 +92,7 @@ export class IndexingService {
         }
 
         if (data.edges.length > 0) {
-          await session.executeWrite((tx) =>
+          await session.executeWrite((tx: any) =>
             tx.run(
               `UNWIND $edges AS edge
                MATCH (from:Entity {id: edge.fromId, tenantId: edge.tenantId})
@@ -131,7 +131,7 @@ export class IndexingService {
           );
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       // Log but don't fail the whole batch if graph sync fails (dual-write problem)
       // Ideally use an event bus for reliable eventual consistency
       console.error('Failed to sync to Neo4j', e);
@@ -144,7 +144,7 @@ export class IndexingService {
     try {
       await client.query('SET CONSTRAINTS ALL DEFERRED');
       ctx.logger?.debug?.('Deferred constraints for batch ingest');
-    } catch (error) {
+    } catch (error: any) {
       ctx.logger?.debug?.({ error }, 'Unable to defer constraints (continuing with immediate checks)');
     }
   }

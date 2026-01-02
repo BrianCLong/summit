@@ -335,7 +335,7 @@ export class AdaptiveLearningSystem {
         latency: performance.actualLatency,
         success: outcome.success,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record learning point', {
         error: error.message,
         modelId,
@@ -417,7 +417,7 @@ export class AdaptiveLearningSystem {
       modelId,
       taskType,
       recommendationCount: recommendations.length,
-      highPriority: recommendations.filter((r) => r.priority === 'high').length,
+      highPriority: recommendations.filter((r: any) => r.priority === 'high').length,
     });
 
     return recommendations.slice(0, 10); // Top 10 recommendations
@@ -466,7 +466,7 @@ export class AdaptiveLearningSystem {
       );
 
       return prediction;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Model effectiveness prediction failed', {
         error: error.message,
         modelId,
@@ -543,7 +543,7 @@ export class AdaptiveLearningSystem {
         conceptDriftDetected: conceptDrift.detected,
         currentPerformance: profile.learningCurve.currentPerformance,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Adaptive learning failed', {
         error: error.message,
         modelId,
@@ -905,7 +905,7 @@ export class AdaptiveLearningSystem {
     setInterval(async () => {
       try {
         await this.performPeriodicLearning();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Continuous learning error', { error: error.message });
       }
     }, this.UPDATE_FREQUENCY_HOURS * 3600000);

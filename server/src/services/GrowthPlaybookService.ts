@@ -77,7 +77,7 @@ export class GrowthPlaybookService {
       // Parse JSON from response (handle potential markdown code blocks)
       const cleanJson = content.replace(/```json\n?|\n?```/g, '');
       return JSON.parse(cleanJson) as Playbook;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating playbook:', error);
       throw new Error('Failed to generate growth playbook');
     }

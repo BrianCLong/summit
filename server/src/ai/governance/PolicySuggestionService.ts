@@ -213,7 +213,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
       }, 'Policy suggestions generated');
 
       return limitedSuggestions;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, context }, 'Failed to generate policy suggestions');
       throw new PolicySuggestionError(
         'GENERATION_FAILED',
@@ -479,7 +479,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
           context,
         });
         if (suggestion) suggestions.push(suggestion);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({ gap, error }, 'Failed to generate gap suggestion');
       }
     }
@@ -501,7 +501,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
           context,
         });
         if (suggestion) suggestions.push(suggestion);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({ error }, 'Failed to generate conflict resolution suggestion');
       }
     }
@@ -526,7 +526,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
             context,
           });
           if (suggestion) suggestions.push(suggestion);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn({ pattern, error }, 'Failed to generate usage-based suggestion');
         }
       }
@@ -633,7 +633,7 @@ export class PolicySuggestionService implements IPolicySuggestionService {
         provenance: this.enhanceProvenance(llmResponse.provenance, id, input),
       };
 
-    } catch (error) {
+    } catch (error: any) {
       // Fallback to rule-based generation if LLM fails
       logger.warn({ error, type: input.type }, 'LLM generation failed, using fallback');
       return this.generateFallbackSuggestion(input, id, now, expiresAt);

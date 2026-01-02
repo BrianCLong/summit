@@ -220,7 +220,7 @@ export class SlowQueryKiller {
         durationMs: duration,
         msg: 'Slow query killed successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         queryId,
         database: queryInfo.database,
@@ -257,7 +257,7 @@ export class SlowQueryKiller {
           msg: 'PostgreSQL query not found in pg_stat_activity',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         queryId: queryInfo.id,
         error: (error as Error).message,
@@ -301,7 +301,7 @@ export class SlowQueryKiller {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         queryId: queryInfo.id,
         error: (error as Error).message,
@@ -344,7 +344,7 @@ export class SlowQueryKiller {
       );
 
       return result.rows;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error: (error as Error).message,
         msg: 'Error fetching PostgreSQL slow queries',

@@ -41,7 +41,7 @@ export class MCPRequestSigner {
     try {
       this.privateKey = readFileSync(config.privateKeyPath, 'utf8');
       this.publicKey = readFileSync(config.publicKeyPath, 'utf8');
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to load signing keys: ${error.message}`);
     }
   }

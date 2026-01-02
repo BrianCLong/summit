@@ -116,7 +116,7 @@ export class CostAnomalyDetectionService {
       `);
 
       logger.info('Cost anomaly detection database initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize anomaly detection database');
       throw error;
     }
@@ -145,7 +145,7 @@ export class CostAnomalyDetectionService {
         { count: this.budgetThresholds.size },
         'Budget thresholds loaded',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to load budget thresholds');
     }
   }
@@ -180,7 +180,7 @@ export class CostAnomalyDetectionService {
       this.budgetThresholds.set(key, threshold);
 
       logger.info({ threshold }, 'Budget threshold set');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, threshold }, 'Failed to set budget threshold');
       throw error;
     }
@@ -301,7 +301,7 @@ export class CostAnomalyDetectionService {
       }
 
       return alerts;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, dimension, dimensionValue }, 'Failed to check budget compliance');
       return [];
     }
@@ -343,9 +343,9 @@ export class CostAnomalyDetectionService {
       }
 
       // Calculate baseline and standard deviation
-      const costs = result.rows.map((r) => parseFloat(r.daily_cost));
-      const mean = costs.reduce((a, b) => a + b, 0) / costs.length;
-      const variance = costs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / costs.length;
+      const costs = result.rows.map((r: any) => parseFloat(r.daily_cost));
+      const mean = costs.reduce((a: any, b: any) => a + b, 0) / costs.length;
+      const variance = costs.reduce((a: any, b: any) => a + Math.pow(b - mean, 2), 0) / costs.length;
       const stdDev = Math.sqrt(variance);
 
       // Check today's cost against baseline
@@ -400,7 +400,7 @@ export class CostAnomalyDetectionService {
       }
 
       return alerts;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, dimension, dimensionValue }, 'Failed to detect anomalies');
       return [];
     }
@@ -454,7 +454,7 @@ export class CostAnomalyDetectionService {
       }
 
       return alerts;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to detect waste');
       return [];
     }
@@ -536,7 +536,7 @@ export class CostAnomalyDetectionService {
 
       // TODO: Send notifications (email, Slack, PagerDuty, etc.)
       await this.sendAlertNotification(alert);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, alert }, 'Failed to save alert');
     }
   }
@@ -564,7 +564,7 @@ export class CostAnomalyDetectionService {
            calculated_at = NOW()`,
         [dimension, dimensionValue, baseline, stdDev, sampleCount],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to update anomaly baseline');
     }
   }
@@ -594,7 +594,7 @@ export class CostAnomalyDetectionService {
 
         // Check for waste
         await this.detectWaste();
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error }, 'Failed to run periodic cost checks');
       }
     }, 15 * 60 * 1000);
@@ -632,7 +632,7 @@ export class CostAnomalyDetectionService {
 
       const result = await this.db.read(query, params);
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         id: row.id.toString(),
         alertType: row.alert_type,
         severity: row.severity,
@@ -647,7 +647,7 @@ export class CostAnomalyDetectionService {
         timestamp: row.created_at,
         metadata: row.metadata,
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to get recent alerts');
       return [];
     }

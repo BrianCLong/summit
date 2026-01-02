@@ -244,7 +244,7 @@ export const enhancedSanitization = (
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error(`Error in sanitization middleware: ${error}`);
     next(error);
   }

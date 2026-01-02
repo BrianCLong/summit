@@ -70,7 +70,7 @@ async function resolveDeployedVersion(): Promise<string | undefined> {
     const pkgPath = path.resolve('package.json');
     const pkg = JSON.parse(await fs.readFile(pkgPath, 'utf8'));
     return typeof pkg.version === 'string' ? pkg.version : undefined;
-  } catch (error) {
+  } catch (error: any) {
     return undefined;
   }
 }
@@ -156,7 +156,7 @@ async function collectJsonlSlice({
         if (!matchesTenant(parsed, tenantId)) continue;
         filtered.push(JSON.stringify(parsed));
         count += 1;
-      } catch (error) {
+      } catch (error: any) {
         warnings.push(`parse_error:${source}`);
       }
     }

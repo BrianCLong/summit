@@ -109,7 +109,7 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
     // Set tenant context for RLS
     // Use set_config with is_local=false to set for session duration (until release)
     await pgClient.query("SELECT set_config('app.tenant_id', $1, false)", [tenantId]);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to initialize Postgres client for request context', error);
     if (pgClient) pgClient.release();
     pgClient = undefined;
@@ -351,7 +351,7 @@ export function createHealthCheck(server: ApolloServer<GraphQLContext>) {
           errors: body.singleResult?.errors || (body.kind === 'single' ? body.singleResult?.errors : []),
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       res.status(503).json({
         status: 'unhealthy',
         service: 'apollo-v5-graphql',

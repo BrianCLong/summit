@@ -7,14 +7,14 @@ interface SemanticSLO {
   name: string;
   description: string;
   metricType:
-    | 'accuracy'
-    | 'relevance'
-    | 'coherence'
-    | 'toxicity'
-    | 'bias'
-    | 'hallucination'
-    | 'latency'
-    | 'cost';
+  | 'accuracy'
+  | 'relevance'
+  | 'coherence'
+  | 'toxicity'
+  | 'bias'
+  | 'hallucination'
+  | 'latency'
+  | 'cost';
   threshold: number;
   operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
   timeWindow: number; // minutes
@@ -225,7 +225,7 @@ export class QualityEvaluationPlatform {
       // Run all requested evaluations
       const metrics: Record<string, number> = {};
       const evaluationPromises = validatedRequest.evaluationTypes.map(
-        async (evalType) => {
+        async (evalType: string) => {
           if (this.evaluators.has(evalType)) {
             const evaluator = this.evaluators.get(evalType);
             const score = await evaluator.evaluate(
@@ -835,7 +835,7 @@ export class QualityEvaluationPlatform {
       [tenantId],
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       description: row.description,
@@ -919,7 +919,7 @@ export class QualityEvaluationPlatform {
     if (results.length === 0) return 1.0;
 
     const compliantResults = results.filter(
-      (r) => r.sloViolations.length === 0,
+      (r: any) => r.sloViolations.length === 0,
     );
     return compliantResults.length / results.length;
   }
@@ -1131,7 +1131,7 @@ export class QualityEvaluationPlatform {
 
     if (recentResults.rows.length < 3) return false;
 
-    const scores = recentResults.rows.map((row) => row.overall_score);
+    const scores = recentResults.rows.map((row: any) => row.overall_score);
     const trend = this.calculateTrend(scores);
 
     return trend < -0.05; // Significant downward trend

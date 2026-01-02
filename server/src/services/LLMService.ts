@@ -66,7 +66,7 @@ export class LLMService {
    * Execute a completion request
    */
   async complete(prompt: string, options: CompletionOptions = {}): Promise<string> {
-    return tracer.trace('llm.complete', async (span) => {
+    return tracer.trace('llm.complete', async (span: any) => {
       const startTime = Date.now();
       const provider = options.provider || this.config.defaultProvider;
       const model = options.model || this.config.defaultModel;
@@ -108,7 +108,7 @@ export class LLMService {
         }
 
         return response.text;
-      } catch (error) {
+      } catch (error: any) {
         this.metrics.errorCount++;
         // Record failure latency/count if needed
         if (prometheusMetrics.llmRequestDuration) {
@@ -132,7 +132,7 @@ export class LLMService {
    * Chat completion (multi-turn)
    */
   async chat(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
-    return tracer.trace('llm.chat', async (span) => {
+    return tracer.trace('llm.chat', async (span: any) => {
       const startTime = Date.now();
       const provider = options.provider || this.config.defaultProvider;
       const model = options.model || this.config.defaultModel;
@@ -170,7 +170,7 @@ export class LLMService {
 
         return text;
 
-      } catch (error) {
+      } catch (error: any) {
         this.metrics.errorCount++;
         if (prometheusMetrics.llmRequestDuration) {
           prometheusMetrics.llmRequestDuration.observe({

@@ -45,7 +45,7 @@ export class ModelAbuseWatch {
   private saveState() {
     try {
       fs.writeFileSync(this.persistencePath, JSON.stringify(this.abuseCounts));
-    } catch (e) {
+    } catch (e: any) {
       log.error(e, 'Failed to persist abuse state');
     }
   }
@@ -56,7 +56,7 @@ export class ModelAbuseWatch {
         const data = fs.readFileSync(this.persistencePath, 'utf-8');
         this.abuseCounts = JSON.parse(data);
       }
-    } catch (e) {
+    } catch (e: any) {
       log.error(e, 'Failed to load abuse state');
     }
   }

@@ -24,7 +24,7 @@ function loadPolicy(): FlowPolicy {
         : ['deploy/', 'db/'],
       allowedFlows: Array.isArray(j.allowedFlows) ? j.allowedFlows : [],
     };
-  } catch (e) {
+  } catch (e: any) {
     logger.warn('n8n-flows.json not found; using defaults');
     return {
       allowedPrefixes: ['integration/'],
@@ -82,7 +82,7 @@ export async function checkN8nTriggerAllowed(params: {
     );
     const result = resp.data?.result || {};
     return { allow: !!result.allow, reason: result.reason || 'opa' };
-  } catch (e) {
+  } catch (e: any) {
     logger.warn({ err: e }, 'OPA evaluation failed; default deny');
     return { allow: false, reason: 'opa evaluation failed' };
   }

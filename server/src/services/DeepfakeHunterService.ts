@@ -110,7 +110,7 @@ export class DeepfakeHunterService extends EventEmitter {
               translated: response,
               detectedLanguage: sourceLang
           };
-      } catch (e) {
+      } catch (e: any) {
           logger.error('[DeepfakeHunter] Translation failed', e);
           return { original: content, translated: content, detectedLanguage: sourceLang };
       }
@@ -134,7 +134,7 @@ export class DeepfakeHunterService extends EventEmitter {
           } catch {
              return { isPropaganda: false, confidence: 0.5 };
           }
-      } catch (e) {
+      } catch (e: any) {
           return { isPropaganda: false, confidence: 0 };
       }
   }

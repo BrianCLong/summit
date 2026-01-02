@@ -14,7 +14,7 @@ export interface BundleEntry {
 }
 
 export class PlaybookRunBundleExporter {
-  constructor(private pg: Pool) {}
+  constructor(private pg: Pool) { }
 
   async buildBundleEntries(
     tenantId: string,

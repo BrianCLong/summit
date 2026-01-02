@@ -27,12 +27,12 @@ export class MaestroTelemetry {
    * Wraps a function execution in a span.
    */
   public async trace<T>(name: string, attributes: Record<string, unknown>, fn: () => Promise<T>): Promise<T> {
-    return this.tracer.startActiveSpan(name, { attributes }, async (span) => {
+    return this.tracer.startActiveSpan(name, { attributes }, async (span: any) => {
       try {
         const result = await fn();
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-      } catch (err) {
+      } catch (err: any) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: err instanceof Error ? err.message : String(err),

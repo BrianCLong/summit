@@ -78,7 +78,7 @@ export class ReviewQueueService {
             `SELECT * FROM ml_review_queues WHERE tenant_id = $1 ORDER BY created_at DESC`,
             [tenantId]
         );
-        return result.rows.map(row => this.mapQueueRow(row));
+        return result.rows.map((row: any) => this.mapQueueRow(row));
     }
 
     async enqueueItem(queueId: string, tenantId: string, data: any, confidence: number): Promise<ReviewItem> {
@@ -115,7 +115,7 @@ export class ReviewQueueService {
             [queueId, tenantId, candidateLimit]
         );
 
-        const items = result.rows.map(row => this.mapItemRow(row));
+        const items = result.rows.map((row: any) => this.mapItemRow(row));
 
         // Apply Priority Sampler
         return this.sampleItems(items, limit);
@@ -160,46 +160,46 @@ export class ReviewQueueService {
         const selectedIndices = new Set<number>();
 
         while (selectedIndices.size < k && selectedIndices.size < items.length) {
-             let r = Math.random();
-             let cumulative = 0;
-             let selected = -1;
+            let r = Math.random();
+            let cumulative = 0;
+            let selected = -1;
 
-             // Re-calculate total for remaining items to ensure prob sums to 1
-             let currentTotal = 0;
-             for (let i = 0; i < indices.length; i++) {
-                 if (!selectedIndices.has(i)) {
-                     currentTotal += scores[i];
-                 }
-             }
+            // Re-calculate total for remaining items to ensure prob sums to 1
+            let currentTotal = 0;
+            for (let i = 0; i < indices.length; i++) {
+                if (!selectedIndices.has(i)) {
+                    currentTotal += scores[i];
+                }
+            }
 
-             if (currentTotal === 0) {
-                 // Remaining have 0 score, pick random
-                 const remaining = indices.filter(i => !selectedIndices.has(i));
-                 selected = remaining[Math.floor(Math.random() * remaining.length)];
-             } else {
-                 for (let i = 0; i < indices.length; i++) {
-                     if (selectedIndices.has(i)) continue;
+            if (currentTotal === 0) {
+                // Remaining have 0 score, pick random
+                const remaining = indices.filter(i => !selectedIndices.has(i));
+                selected = remaining[Math.floor(Math.random() * remaining.length)];
+            } else {
+                for (let i = 0; i < indices.length; i++) {
+                    if (selectedIndices.has(i)) continue;
 
-                     const normalizedProb = scores[i] / currentTotal;
-                     cumulative += normalizedProb;
-                     if (r <= cumulative) {
-                         selected = i;
-                         break;
-                     }
-                 }
-             }
+                    const normalizedProb = scores[i] / currentTotal;
+                    cumulative += normalizedProb;
+                    if (r <= cumulative) {
+                        selected = i;
+                        break;
+                    }
+                }
+            }
 
-             if (selected !== -1) {
-                 selectedIndices.add(selected);
-             } else {
-                 // Fallback if rounding errors prevent selection
-                 const remaining = indices.filter(i => !selectedIndices.has(i));
-                 if (remaining.length > 0) {
-                     selectedIndices.add(remaining[0]);
-                 } else {
-                     break;
-                 }
-             }
+            if (selected !== -1) {
+                selectedIndices.add(selected);
+            } else {
+                // Fallback if rounding errors prevent selection
+                const remaining = indices.filter(i => !selectedIndices.has(i));
+                if (remaining.length > 0) {
+                    selectedIndices.add(remaining[0]);
+                } else {
+                    break;
+                }
+            }
         }
 
         return Array.from(selectedIndices).map(idx => items[idx]);
@@ -248,10 +248,10 @@ export class ReviewQueueService {
                 );
 
                 if (updateResult.rowCount === 0) {
-                     // In batch mode, we skip failed items or could collect errors.
-                     // For now, skipping to avoid partial failure blocking the rest,
-                     // but logging would be good.
-                     continue;
+                    // In batch mode, we skip failed items or could collect errors.
+                    // For now, skipping to avoid partial failure blocking the rest,
+                    // but logging would be good.
+                    continue;
                 }
 
                 // Log decision

@@ -125,7 +125,7 @@ export class WorkflowEngine {
 
       logger.info({ workflowId: definition.id, runId: context.runId }, 'Workflow completed');
       return context.steps;
-    } catch (error) {
+    } catch (error: any) {
        // Record DAG (Workflow) Metrics
        if (metrics.maestroDagExecutionDurationSeconds) {
         metrics.maestroDagExecutionDurationSeconds.observe(

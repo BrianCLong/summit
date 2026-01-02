@@ -33,7 +33,7 @@ describe('ReportRequestValidator', () => {
 
       try {
         ReportRequestValidator.validate(request, mockInvestigationSummaryTemplate);
-      } catch (error) {
+      } catch (error: any) {
         expect(error).toBeInstanceOf(ValidationError);
         expect((error as ValidationError).field).toBe('templateId');
         expect((error as ValidationError).code).toBe('REQUIRED');
@@ -59,7 +59,7 @@ describe('ReportRequestValidator', () => {
 
       try {
         ReportRequestValidator.validate(request, mockInvestigationSummaryTemplate);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('investigationId');
         expect((error as ValidationError).message).toContain('investigationId');
       }
@@ -79,7 +79,7 @@ describe('ReportRequestValidator', () => {
 
       try {
         ReportRequestValidator.validate(request, mockInvestigationSummaryTemplate);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('summaryLevel');
         expect((error as ValidationError).code).toBe('INVALID_ENUM');
       }
@@ -98,7 +98,7 @@ describe('ReportRequestValidator', () => {
 
       try {
         ReportRequestValidator.validate(request, mockInvestigationSummaryTemplate);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).code).toBe('INVALID_TYPE');
       }
     });
@@ -114,7 +114,7 @@ describe('ReportRequestValidator', () => {
 
       try {
         ReportRequestValidator.validate(request, mockInvestigationSummaryTemplate);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('format');
         expect((error as ValidationError).code).toBe('INVALID_FORMAT');
       }

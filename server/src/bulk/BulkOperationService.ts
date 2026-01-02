@@ -20,7 +20,7 @@ export class BulkOperationService {
       if (!this.pgPool) {
           try {
             this.pgPool = getPostgresPool();
-          } catch (e) {
+          } catch (e: any) {
             // Ignore failure to load pool here
           }
       }
@@ -118,7 +118,7 @@ export class BulkOperationService {
                   message: row.result_message
               });
           }
-      } catch (e) {
+      } catch (e: any) {
           serviceLogger.warn({ error: e }, 'Failed to check idempotency ledger');
       }
       return results;
@@ -169,7 +169,7 @@ export class BulkOperationService {
                ON CONFLICT (request_id, item_id) DO NOTHING`,
               [requestIds, itemIds, keys, tenantIds, ops, statuses, codes, messages]
           );
-      } catch (e) {
+      } catch (e: any) {
           serviceLogger.warn({ error: e }, 'Failed to record results to ledger');
       }
   }

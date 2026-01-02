@@ -36,11 +36,11 @@ export class NotificationQueue {
       }
     }, { connection: workerConnection });
 
-    this.worker.on('completed', (job) => {
+    this.worker.on('completed', (job: any) => {
       logger.info({ jobId: job.id }, 'Notification job completed');
     });
 
-    this.worker.on('failed', (job, err) => {
+    this.worker.on('failed', (job: any, err: any) => {
       logger.error({ jobId: job?.id, error: err.message }, 'Notification job failed');
     });
   }

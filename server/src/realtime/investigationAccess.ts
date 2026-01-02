@@ -36,11 +36,11 @@ try {
       password: redisPassword,
     });
   }
-  redis?.on('error', (err) => {
+  redis?.on('error', (err: any) => {
     logger.warn({ err }, 'Redis unavailable for investigation access; using memory');
     redis = null;
   });
-} catch (err) {
+} catch (err: any) {
   logger.warn({ err }, 'Failed to init Redis for investigation access');
   redis = null;
 }
@@ -84,7 +84,7 @@ export async function setMemberRole(
   if (redis) {
     try {
       await redis.hset(memberKey(investigationId), userId, role);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to persist member role to Redis');
     }
   }
@@ -99,7 +99,7 @@ export async function removeMember(
   if (redis) {
     try {
       await redis.hdel(memberKey(investigationId), userId);
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to remove member from Redis');
     }
   }
@@ -115,7 +115,7 @@ export async function getMembers(
       for (const [userId, value] of Object.entries(raw)) {
         map.set(userId, value as InvestigationRole);
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to fetch members from Redis');
     }
   }
@@ -140,7 +140,7 @@ export async function getMemberRole(
         role = raw as InvestigationRole;
         map.set(userId, role);
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ err }, 'Failed to load member role from Redis');
     }
   }

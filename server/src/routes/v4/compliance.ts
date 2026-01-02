@@ -148,7 +148,7 @@ router.use(async (_req, _res, next) => {
   try {
     await initializeServices();
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Failed to initialize compliance services');
     next(error);
   }

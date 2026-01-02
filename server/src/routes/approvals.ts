@@ -56,7 +56,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       });
 
       res.status(201).json(approval);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   });
@@ -73,7 +73,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
         : approvals.filter((item) => item.requester_id === userId);
 
       res.json(visible);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   });
@@ -85,7 +85,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
         return res.status(404).json({ error: 'Approval not found' });
       }
       res.json(approval);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   });
@@ -131,7 +131,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       );
 
       res.json({ approval, actionResult });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   });
@@ -164,7 +164,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       );
 
       res.json({ approval });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   });

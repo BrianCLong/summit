@@ -236,7 +236,7 @@ export class RedisStateManager extends EventEmitter {
       });
 
       return snapshot;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to save state', { error, appId, tenantId });
       this.emit('save_error', { error, appId, tenantId });
       throw error;
@@ -333,7 +333,7 @@ export class RedisStateManager extends EventEmitter {
       });
 
       return snapshot;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load state', { error, appId, tenantId, stateId });
       this.emit('load_error', { error, appId, tenantId, stateId });
       throw error;
@@ -383,7 +383,7 @@ export class RedisStateManager extends EventEmitter {
           };
 
           snapshots.push(snapshot);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to process state in query', { error, key });
         }
       }
@@ -401,7 +401,7 @@ export class RedisStateManager extends EventEmitter {
       });
 
       return results;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('State query failed', { error, query });
       throw error;
     }
@@ -430,7 +430,7 @@ export class RedisStateManager extends EventEmitter {
       }
 
       return deleted;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to delete state', {
         error,
         appId,
@@ -472,7 +472,7 @@ export class RedisStateManager extends EventEmitter {
           await this.deleteState(state.appId, state.tenantId, state.id);
           removedCount++;
           spaceSaved += size;
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to delete old state during compaction', {
             error,
             stateId: state.id,
@@ -495,7 +495,7 @@ export class RedisStateManager extends EventEmitter {
       logger.info('State compaction completed', result);
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('State compaction failed', { error });
       this.emit('compaction_error', { error });
       throw error;
@@ -541,7 +541,7 @@ export class RedisStateManager extends EventEmitter {
           retentionDays: this.config.retentionDays,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get statistics', { error });
       throw error;
     }
@@ -597,7 +597,7 @@ export class RedisStateManager extends EventEmitter {
         data: encrypted,
         authTag: encodeBuffer(authTag, 'hex'),
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Encryption failed', { error });
       throw new Error('Failed to encrypt state data');
     }
@@ -615,7 +615,7 @@ export class RedisStateManager extends EventEmitter {
       decrypted += decipher.final('utf8');
 
       return decrypted;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Decryption failed', { error });
       throw new Error('Failed to decrypt state data');
     }
@@ -628,7 +628,7 @@ export class RedisStateManager extends EventEmitter {
       const hash = crypto.createHash('sha256');
       hash.update(serialized);
       return hash.digest('hex');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Merkle root generation failed', { error });
       return '';
     }
@@ -750,7 +750,7 @@ export class RedisStateManager extends EventEmitter {
     // Perform final compaction
     try {
       await this.performCompaction();
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Final compaction failed during shutdown', { error });
     }
 

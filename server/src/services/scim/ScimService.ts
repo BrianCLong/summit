@@ -347,7 +347,7 @@ export class ScimService {
 
             // Re-fetch to return complete object
             return (await this.getGroup(tenantId, groupId))!;
-        } catch (e) {
+        } catch (e: any) {
             await client.query('ROLLBACK');
             throw e;
         } finally {
@@ -383,7 +383,7 @@ export class ScimService {
 
              await client.query('COMMIT');
              return (await this.getGroup(tenantId, groupId))!;
-        } catch (e) {
+        } catch (e: any) {
              await client.query('ROLLBACK');
              throw e;
         } finally {
@@ -468,7 +468,7 @@ export class ScimService {
 
             await client.query('COMMIT');
             return (await this.getGroup(tenantId, groupId))!;
-        } catch (e) {
+        } catch (e: any) {
             await client.query('ROLLBACK');
             throw e;
         } finally {

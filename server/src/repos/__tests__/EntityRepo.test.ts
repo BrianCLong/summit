@@ -544,7 +544,7 @@ describe('EntityRepo', () => {
       const results = await entityRepo.batchByIds(ids, tenantId);
 
       expect(results).toHaveLength(3);
-      expect(results.every((r) => r !== null)).toBe(true);
+      expect(results.every((r: any) => r !== null)).toBe(true);
       expect(mockPgPool.query).toHaveBeenCalledWith(
         expect.stringContaining('AND tenant_id = $2'),
         [ids, tenantId],

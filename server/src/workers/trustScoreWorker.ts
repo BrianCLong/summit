@@ -19,7 +19,7 @@ export function startTrustWorker() {
       for (const s of subjects) {
         try {
           await recomputeTrustForTenant(t, s);
-        } catch (e) {
+        } catch (e: any) {
           console.warn('trust worker error', e);
         }
       }

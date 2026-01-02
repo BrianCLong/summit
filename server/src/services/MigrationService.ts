@@ -43,7 +43,7 @@ export async function mapCsvToGraph(
   return new Promise((resolve, reject) => {
     Papa.parse(csvText, {
       header: true,
-      complete: (results) => {
+      complete: (results: any) => {
         const rows = results.data as Record<string, any>[];
         const out: MigrationResult = {
           entities: [],

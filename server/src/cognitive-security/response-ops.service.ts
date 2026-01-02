@@ -1478,7 +1478,7 @@ Format as a professional advisory document.
           organization: this.config.organizationName,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         details: {

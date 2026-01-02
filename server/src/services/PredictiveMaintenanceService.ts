@@ -140,7 +140,7 @@ export class PredictiveMaintenanceService {
         const history = await getSensorHistory(asset.id);
         const prediction = await this.predictFailure(asset, history);
         predictions.push(prediction);
-      } catch (error) {
+      } catch (error: any) {
         logger.error(`Failed to predict for asset ${asset.id}:`, {
           error: error instanceof Error ? error.message : String(error)
         });
@@ -233,7 +233,7 @@ export class PredictiveMaintenanceService {
 
     // Sensor data quality factor (0-25 points)
     const recentReadings = sensorReadings.filter(
-      (r) => Date.now() - r.timestamp.getTime() < 86400000
+      (r: any) => Date.now() - r.timestamp.getTime() < 86400000
     );
     const avgQuality = recentReadings.length
       ? recentReadings.reduce(
@@ -379,12 +379,12 @@ export class PredictiveMaintenanceService {
     readings: SensorReading[]
   ): Record<string, number> {
     const recentReadings = readings.filter(
-      (r) => Date.now() - r.timestamp.getTime() < 30 * 24 * 60 * 60 * 1000
+      (r: any) => Date.now() - r.timestamp.getTime() < 30 * 24 * 60 * 60 * 1000
     );
 
     const numericValues = recentReadings
-      .filter((r) => typeof r.value === 'number')
-      .map((r) => r.value as number);
+      .filter((r: any) => typeof r.value === 'number')
+      .map((r: any) => r.value as number);
 
     const mean = numericValues.length
       ? numericValues.reduce((a, b) => a + b, 0) / numericValues.length

@@ -45,7 +45,7 @@ function loadManifest(paths: string[]): Map<string, string> {
         },
         'Persisted GraphQL allowlist loaded',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         {
           manifestPath,

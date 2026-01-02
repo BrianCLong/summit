@@ -20,7 +20,7 @@ export async function installStep(name: string, version: string) {
       throw new Error('signature verification failed');
     try {
       await exec('oras', ['pull', ref, '-o', pluginsDir]);
-    } catch (e) {
+    } catch (e: any) {
       throw new Error(`oras pull failed: ${String((e as Error).message || e)}`);
     }
   }

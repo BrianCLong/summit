@@ -74,7 +74,7 @@ export class RetrievalService implements IRetrievalService {
         });
       }
 
-    } catch (err) {
+    } catch (err: any) {
       logger.error(`Retrieval search failed: ${err}`);
       // Return empty results rather than blowing up, but log error
     }
@@ -109,7 +109,7 @@ export class RetrievalService implements IRetrievalService {
           createdAt: new Date().toISOString(),
           version: 'v1'
         });
-      } catch (err) {
+      } catch (err: any) {
         logger.error(`Failed to generate/store embedding for ${object.id}: ${err}`);
       }
     }

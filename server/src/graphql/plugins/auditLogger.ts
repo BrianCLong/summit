@@ -108,7 +108,7 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
             },
             complianceRelevant: true, // Mutations are usually relevant
           });
-        } catch (error) {
+        } catch (error: any) {
           if (process.env.NODE_ENV !== 'test') {
              console.error('Failed to log to Advanced Audit System', error);
           }
@@ -129,7 +129,7 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
               correlationId,
             },
           });
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to stamp GraphQL mutation to Provenance Ledger', error);
         }
 

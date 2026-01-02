@@ -331,7 +331,7 @@ export class CaseBundleService {
 
     const done = new Promise<void>((resolve, reject) => {
       output.on('close', () => resolve());
-      archive.on('error', (err) => reject(err));
+      archive.on('error', (err: any) => reject(err));
     });
 
     archive.pipe(output);

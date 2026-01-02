@@ -245,7 +245,7 @@ rewardRouter.post('/reward', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Reward processing error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -316,7 +316,7 @@ rewardRouter.post('/reward/batch', async (req, res) => {
           rewardValue,
           message: 'Processed successfully',
         };
-      } catch (error) {
+      } catch (error: any) {
         errorCount++;
         return {
           index,
@@ -364,7 +364,7 @@ rewardRouter.post('/reward/batch', async (req, res) => {
       results,
       processingTime: Date.now() - startTime,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Batch reward processing error:', error);
 
     res.status(500).json({
@@ -387,7 +387,7 @@ rewardRouter.get('/metrics', async (req, res) => {
       metrics,
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Metrics retrieval error:', error);
 
     res.status(500).json({
@@ -419,7 +419,7 @@ rewardRouter.get('/arms/:armId/stats', async (req, res) => {
       statistics: armStats,
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Arm statistics error:', error);
 
     res.status(500).json({
@@ -453,7 +453,7 @@ rewardRouter.post('/reset', async (req, res) => {
       message: 'Bandit state reset successfully',
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Bandit reset error:', error);
 
     res.status(500).json({
@@ -491,7 +491,7 @@ rewardRouter.post('/shadow/:decisionId', async (req, res) => {
       message: 'Shadow decision recorded',
       decisionId,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Shadow decision error:', error);
 
     res.status(500).json({
@@ -534,7 +534,7 @@ rewardRouter.post('/ab-test/:testId/result', async (req, res) => {
       variant,
       rewardValue,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('A/B test result error:', error);
 
     res.status(500).json({

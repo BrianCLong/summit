@@ -121,7 +121,7 @@ export class CognitiveMapperService {
       let nodesReached = 0;
       let maxDepth = 0;
 
-      result.records.forEach(record => {
+      result.records.forEach((record: any) => {
         const nodeId = record.get('nodeId');
         const strength = record.get('finalStrength');
         const hops = record.get('hops').toNumber();
@@ -143,7 +143,7 @@ export class CognitiveMapperService {
         influenceMap
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error simulating propagation:', error);
       throw error;
     } finally {
@@ -196,7 +196,7 @@ export class CognitiveMapperService {
 
       const result = await session.run(query, { investigationId, tenantId });
 
-      return result.records.map(record => ({
+      return result.records.map((record: any) => ({
         nodeId: record.get('nodeId'),
         label: record.get('label'),
         amplificationScore: record.get('amplificationScore'),
@@ -204,7 +204,7 @@ export class CognitiveMapperService {
         centrality: record.get('degree').toNumber() // Using degree as proxy for centrality here
       }));
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error detecting amplifiers:', error);
       throw error;
     } finally {
@@ -273,7 +273,7 @@ export class CognitiveMapperService {
         timeStep: timeSteps
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error forecasting opinion shift:', error);
       throw error;
     } finally {

@@ -40,7 +40,7 @@ export function registerMaestroHandlers(io: Server, socket: MaestroSocket) {
       await socket.join(room);
       socket.emit('maestro:subscribed', { type: 'run', runId });
       logger.debug({ userId, runId }, 'Subscribed to run updates');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ userId, runId, error }, 'Failed to subscribe to run');
       socket.emit('maestro:error', { code: 'SUBSCRIPTION_FAILED', message: 'Failed to subscribe to run' });
     }
@@ -63,7 +63,7 @@ export function registerMaestroHandlers(io: Server, socket: MaestroSocket) {
       await socket.join(room);
       socket.emit('maestro:subscribed', { type: 'logs', runId });
       logger.debug({ userId, runId }, 'Subscribed to log stream');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ userId, runId, error }, 'Failed to subscribe to logs');
       socket.emit('maestro:error', { code: 'SUBSCRIPTION_FAILED', message: 'Failed to subscribe to logs' });
     }

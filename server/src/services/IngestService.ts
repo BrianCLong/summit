@@ -55,7 +55,7 @@ export class IngestService {
    * Ingest entities and relationships with full provenance tracking
    */
   async ingest(input: IngestInput): Promise<IngestResult> {
-    return getTracer().withSpan('IngestService.ingest', async (span) => {
+    return getTracer().withSpan('IngestService.ingest', async (span: any) => {
       span.setAttribute('ingest.tenant_id', input.tenantId);
       span.setAttribute('ingest.source_type', input.sourceType);
       span.setAttribute('ingest.entity_count', input.entities.length);
@@ -132,7 +132,7 @@ export class IngestService {
                   });
                   entitiesCreated++;
                 }
-              } catch (error) {
+              } catch (error: any) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
                 ingestLogger.warn({ error, entityInput }, 'Failed to ingest entity');
@@ -185,7 +185,7 @@ export class IngestService {
                 });
                 relationshipsCreated++;
               }
-            } catch (error) {
+            } catch (error: any) {
               const errorMessage = error instanceof Error ? error.message : String(error);
               errors.push(
                 `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`,
@@ -244,7 +244,7 @@ export class IngestService {
               userId: input.userId,
             },
           });
-        } catch (err) {
+        } catch (err: any) {
           ingestLogger.warn({ err, provenanceId }, 'Failed to emit ingest metering');
         }
 
@@ -257,7 +257,7 @@ export class IngestService {
           errors,
           provenanceId,
         };
-      } catch (error) {
+      } catch (error: any) {
         await client.query('ROLLBACK');
         throw error;
       } finally {

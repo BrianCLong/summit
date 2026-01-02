@@ -151,7 +151,7 @@ export class CircuitBreakerStateStore {
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'State retrieved'),
         classification: DataClassification.INTERNAL,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, name }, 'Failed to get circuit state');
 
       // Return default state on error
@@ -339,7 +339,7 @@ export class CircuitBreakerStateStore {
         this.localState.set(name, state);
         return state;
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, name }, 'Failed to load circuit state from Redis');
     }
 
@@ -355,7 +355,7 @@ export class CircuitBreakerStateStore {
     try {
       await this.redis.setex(key, ttlSeconds, JSON.stringify(state));
       this.localState.set(name, state);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, name }, 'Failed to save circuit state to Redis');
       // Still update local state
       this.localState.set(name, state);
@@ -390,7 +390,7 @@ export class CircuitBreakerStateStore {
     for (const name of this.configs.keys()) {
       try {
         await this.loadState(name);
-      } catch (error) {
+      } catch (error: any) {
         // Ignore sync errors
       }
     }

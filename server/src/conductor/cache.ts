@@ -77,19 +77,19 @@ export class ConductorCache {
   private normalizeKey(key: string): string {
     // 1. If key is JSON-like, parse and sort keys
     try {
-        if (key.trim().startsWith('{') || key.trim().startsWith('[')) {
-            const obj = JSON.parse(key);
-            // Canonical JSON stringify
-            const canonical = JSON.stringify(obj, Object.keys(obj).sort());
-            return createHash('sha256').update(canonical).digest('hex');
-        }
+      if (key.trim().startsWith('{') || key.trim().startsWith('[')) {
+        const obj = JSON.parse(key);
+        // Canonical JSON stringify
+        const canonical = JSON.stringify(obj, Object.keys(obj).sort());
+        return createHash('sha256').update(canonical).digest('hex');
+      }
     } catch {
-        // Not JSON
+      // Not JSON
     }
 
     // 2. If it's a long string, hash it
     if (key.length > 256) {
-         return createHash('sha256').update(key).digest('hex');
+      return createHash('sha256').update(key).digest('hex');
     }
 
     return key;
@@ -129,6 +129,7 @@ export class ConductorCache {
     //   recMiss('redis+s3', 'get', tenant);
     //   return null;
     // }
+    return null;
   }
 
   async write(

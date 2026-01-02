@@ -148,7 +148,7 @@ export const resolvers = {
         }
 
         return entity;
-      } catch (error) {
+      } catch (error: any) {
         telemetry.subsystems.api.errors.add(1);
         logger.error({ err: error, resolver: 'entityById' }, 'Error resolving entityById');
         if (error instanceof GraphQLError) throw error;
@@ -271,7 +271,7 @@ export const resolvers = {
               }
             });
         }, 30); // Cache search for 30s
-      } catch (error) {
+      } catch (error: any) {
         telemetry.subsystems.api.errors.add(1);
         logger.error({ err: error, resolver: 'searchEntities' }, 'Error in searchEntities');
         throw new UserFacingError('Search failed', 500, context.requestId || 'unknown');
@@ -342,7 +342,7 @@ export const resolvers = {
               }
            });
         }, 60); // Cache paths for 60s
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ err: error, resolver: 'pathBetween' }, 'Error in pathBetween');
         if (error instanceof GraphQLError) throw error;
         throw new UserFacingError('Failed to calculate path', 500, context.requestId);
@@ -446,7 +446,7 @@ export const resolvers = {
             }
           });
         }, 120); // Cache graph for 2 minutes
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ err: error, resolver: 'entityGraph' }, 'Error in entityGraph');
         throw new UserFacingError('Failed to fetch entity graph', 500, context.requestId);
       } finally {
@@ -487,7 +487,7 @@ export const resolvers = {
             ),
           },
         };
-      } catch (error) {
+      } catch (error: any) {
         return {
           status: 'unhealthy',
           timestamp: new Date(),
@@ -607,7 +607,7 @@ export const resolvers = {
             await session.close();
           }
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ err: error, resolver: 'createClaim' }, 'Error creating claim');
         if (error instanceof GraphQLError) throw error;
         throw new UserFacingError('Failed to create claim', 500, context.requestId);
@@ -698,7 +698,7 @@ export const resolvers = {
             await session.close();
           }
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ err: error, resolver: 'createEvidence' }, 'Error creating evidence');
         if (error instanceof GraphQLError) throw error;
         throw new UserFacingError('Failed to create evidence', 500, context.requestId);
@@ -856,7 +856,7 @@ export const resolvers = {
             await session.close();
           }
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ err: error, resolver: 'createDecision' }, 'Error creating decision');
         if (error instanceof GraphQLError) throw error;
         throw new UserFacingError('Failed to create decision', 500, context.requestId);
@@ -1239,7 +1239,7 @@ export const resolvers = {
         },
       );
 
-      return result.records.map((r) => {
+      return result.records.map((r: any) => {
         const node = r.get('c').properties;
         return {
           ...node,
@@ -1282,7 +1282,7 @@ export const resolvers = {
         },
       );
 
-      return result.records.map((r) => {
+      return result.records.map((r: any) => {
         const node = r.get('e').properties;
         return {
           ...node,
@@ -1329,7 +1329,7 @@ export const resolvers = {
         },
       );
 
-      return result.records.map((r) => {
+      return result.records.map((r: any) => {
         const node = r.get('d').properties;
         return {
           ...node,

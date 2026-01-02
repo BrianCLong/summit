@@ -209,7 +209,7 @@ export class IncidentAutoReweighter extends EventEmitter {
         count: this.activeReweights.size,
         component: 'IncidentAutoReweighter',
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({
         message: 'Failed to load active reweights',
         error: error instanceof Error ? error.message : String(error),
@@ -274,7 +274,7 @@ export class IncidentAutoReweighter extends EventEmitter {
       // Check for existing active reweight for this app
       const existingKey = `${incident.tenantId}:${incident.appId}`;
       const existingReweight = Array.from(this.activeReweights.values()).find(
-        (r) =>
+        (r: any) =>
           r.tenantId === incident.tenantId &&
           r.appId === incident.appId &&
           r.status === 'active',
@@ -356,7 +356,7 @@ export class IncidentAutoReweighter extends EventEmitter {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({
         message: 'Failed to process incident for auto-reweight',
         error: error instanceof Error ? error.message : String(error),
@@ -395,7 +395,7 @@ export class IncidentAutoReweighter extends EventEmitter {
         weights: state.weights || {},
         timestamp: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({
         message: 'Failed to get current app settings',
         error: error instanceof Error ? error.message : String(error),
@@ -471,7 +471,7 @@ export class IncidentAutoReweighter extends EventEmitter {
       );
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({
         message: 'Failed to apply reweight settings',
         error: error instanceof Error ? error.message : String(error),
@@ -619,7 +619,7 @@ export class IncidentAutoReweighter extends EventEmitter {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({
         message: 'Failed to restore original settings',
         error: error instanceof Error ? error.message : String(error),
@@ -637,7 +637,7 @@ export class IncidentAutoReweighter extends EventEmitter {
    */
   async manualRestore(tenantId: string, appId: string): Promise<boolean> {
     const reweight = Array.from(this.activeReweights.values()).find(
-      (r) =>
+      (r: any) =>
         r.tenantId === tenantId && r.appId === appId && r.status === 'active',
     );
 

@@ -131,7 +131,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
     });
 
     span.end();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Error fetching finops dashboard');
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -146,7 +146,7 @@ router.get('/recommendations', async (req: Request, res: Response) => {
   try {
     const opportunities = await costOptimizer.identifyOptimizationOpportunities(tenantId);
     res.json({ opportunities });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Error identifying optimization opportunities');
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -169,7 +169,7 @@ router.post('/recommendations/:id/execute', async (req: Request, res: Response) 
 
     const result = await costOptimizer.executeOptimizations([opportunity]);
     res.json(result[0]);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Error executing optimization');
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -183,7 +183,7 @@ router.get('/policies', async (req: Request, res: Response) => {
     try {
         const policies = await policyService.getPolicies(tenantId);
         res.json({ policies });
-    } catch (error) {
+    } catch (error: any) {
         logger.error({ error }, 'Error fetching policies');
         res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -204,7 +204,7 @@ router.post('/policies', async (req: Request, res: Response) => {
     try {
         await policyService.savePolicy(tenantId, policy);
         res.json({ success: true, policy });
-    } catch (error) {
+    } catch (error: any) {
         logger.error({ error }, 'Error saving policy');
         res.status(500).json({ error: 'Internal Server Error' });
     }

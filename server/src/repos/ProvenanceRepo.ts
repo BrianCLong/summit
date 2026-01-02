@@ -10,7 +10,7 @@ export type ProvenanceFilter = {
 };
 
 export class ProvenanceRepo {
-  constructor(private pg: Pool) {}
+  constructor(private pg: Pool) { }
 
   private buildWhere(
     scope: 'incident' | 'investigation',

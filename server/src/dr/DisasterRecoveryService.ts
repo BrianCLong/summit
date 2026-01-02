@@ -33,7 +33,7 @@ export class DisasterRecoveryService {
           const dates = await fs.readdir(backupDir);
           // In a real scenario, we would also check S3 with ListObjects
           return dates.sort().reverse(); // Newest first
-      } catch (e) {
+      } catch (e: any) {
           logger.warn(`Could not list backups for ${type}`, e);
           return [];
       }
@@ -72,7 +72,7 @@ export class DisasterRecoveryService {
         await this.recordDrillResult(true, Date.now() - startTime);
         logger.info(`DR Drill for ${target} completed successfully.`);
         return true;
-    } catch (error) {
+    } catch (error: any) {
         logger.error(`DR Drill for ${target} failed`, error);
         await this.recordDrillResult(false, Date.now() - startTime, (error as Error).message);
         return false;
@@ -98,7 +98,7 @@ export class DisasterRecoveryService {
            // Cleanup
            try {
                await client.query(`DROP DATABASE IF EXISTS "${tempDbName}"`);
-           } catch (e) {
+           } catch (e: any) {
                logger.warn(`Failed to drop temp DB ${tempDbName}`, e);
            }
            client.release();
@@ -121,7 +121,7 @@ export class DisasterRecoveryService {
       // Persist to Redis for visibility
       try {
         await this.redis.set('dr:last_drill', JSON.stringify(result));
-      } catch (e) {
+      } catch (e: any) {
           logger.error('Failed to record drill result to Redis', e);
       }
   }
@@ -137,7 +137,7 @@ export class DisasterRecoveryService {
             activeAlerts: [], // Implement alert check
             systemHealth: 'healthy'
         };
-      } catch (e) {
+      } catch (e: any) {
           logger.error('Failed to get status from Redis', e);
           return {
               lastDrill: null,
