@@ -24,6 +24,18 @@
     "esm": true
   },
   "include": ["src/**/*"],
+  "files": [
+    "src/federal/dual-notary.ts",
+    "src/services/llmBreaker.ts",
+    "src/services/reporting/types/Report.ts",
+    "src/services/reporting/types/Template.ts",
+    "src/services/reporting/types/index.ts",
+    "src/services/theming/theme-types.ts",
+    "src/tests/fixtures/reporting/mock-templates.ts",
+    "src/tests/fixtures/reporting/test-helpers.ts",
+    "src/tests/plugin/__fixtures__/analytics.json",
+    "src/tests/pluginService.test.js"
+  ],
   "exclude": [
     "node_modules",
     "dist",
