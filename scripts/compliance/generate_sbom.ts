@@ -34,4 +34,5 @@ const generateSBOM = () => {
   console.log(`SBOM generated at ${outputPath}`);
 };
 
+// Execute generation
 generateSBOM();
