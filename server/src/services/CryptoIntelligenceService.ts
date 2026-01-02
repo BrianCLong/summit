@@ -91,7 +91,7 @@ export class CryptoIntelligenceService extends BaseService {
         LIMIT 10
       `;
       const result = await session.run(query, { address });
-      const related = result.records.map(r => r.get('relatedAddress'));
+      const related = result.records.map((r: any) => r.get('relatedAddress'));
 
       // If no data in graph, return mock
       if (related.length === 0) {

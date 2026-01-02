@@ -122,7 +122,7 @@ router.get('/admin/ga/signals', async (_req, res) => {
         },
         status: config.status
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -140,7 +140,7 @@ router.post('/admin/ga/config', express.json(), async (req, res) => {
       await GAEnrollmentService.updateConfig(updates);
 
       res.json({ ok: true, config: await GAEnrollmentService.getConfig() });
-  } catch (error) {
+  } catch (error: any) {
       res.status(500).json({ ok: false, error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -305,7 +305,7 @@ router.get('/admin/opa/validate', async (_req, res) => {
         .json({ ok: false, message: 'OPA_BASE_URL not set' });
     const health = await axios
       .get(`${base}/health`, { timeout: 3000 })
-      .then((r) => r.status);
+      .then((r: any) => r.status);
     // Optional test eval against our n8n trigger package
     let evalOk = false;
     let evalReason = '';

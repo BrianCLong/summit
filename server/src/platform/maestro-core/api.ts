@@ -14,7 +14,7 @@ export class MaestroAPI {
       try {
         const task = await this.scheduler.scheduleTask(req.body);
         res.status(201).json(task);
-      } catch (error) {
+      } catch (error: any) {
         res.status(500).json({ error: (error as Error).message });
       }
     });
@@ -27,7 +27,7 @@ export class MaestroAPI {
            return;
         }
         res.json(task);
-      } catch (error) {
+      } catch (error: any) {
         res.status(500).json({ error: (error as Error).message });
       }
     });

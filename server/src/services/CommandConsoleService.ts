@@ -143,7 +143,7 @@ export class CommandConsoleService {
         missing,
         details,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         overall: 'unknown',
         lastRun: new Date().toISOString(),

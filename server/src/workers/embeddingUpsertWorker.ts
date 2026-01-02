@@ -122,7 +122,7 @@ export class EmbeddingUpsertWorker {
         model: this.config.embeddingModel,
         dimension: this.config.embeddingDimension,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to start embedding worker', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
@@ -139,7 +139,7 @@ export class EmbeddingUpsertWorker {
         await this.worker.close();
         logger.info('Embedding upsert worker stopped');
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error stopping embedding worker', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
@@ -171,7 +171,7 @@ export class EmbeddingUpsertWorker {
         entityId: data.entityId,
         type: data.type,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to queue embedding job', {
         entityId: data.entityId,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -239,7 +239,7 @@ export class EmbeddingUpsertWorker {
             'embedding.dimension': embedding.length,
             'embedding.model': this.config.embeddingModel,
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Embedding processing failed', {
             jobId: job.id,
             entityId,
@@ -352,7 +352,7 @@ export class EmbeddingUpsertWorker {
       logger.info('HNSW index and table structure verified', {
         dimension: this.config.embeddingDimension,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to ensure HNSW index', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
@@ -400,7 +400,7 @@ export class EmbeddingUpsertWorker {
         concurrency: this.config.concurrency,
         health: this.worker ? 'healthy' : 'unhealthy',
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get worker stats', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
@@ -457,7 +457,7 @@ export class EmbeddingUpsertWorker {
         investigationId,
         entitiesQueued: result.rows.length,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Embedding backfill failed', {
         investigationId,
         error: error instanceof Error ? error.message : 'Unknown error',

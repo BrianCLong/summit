@@ -39,7 +39,7 @@ export abstract class BaseService<TConfig extends BaseServiceConfig = BaseServic
    * Standardized error logging helper.
    */
   protected logError(message: string, error: unknown, context: Record<string, any> = {}) {
-    const errObj = error instanceof Error ? { message: error.message, stack: error.stack, ...error } : { message: String(error) };
+    const errObj = error instanceof Error ? { stack: error.stack, ...error } : { message: String(error) };
     this.logger.error({ err: errObj, ...context }, message);
   }
 }

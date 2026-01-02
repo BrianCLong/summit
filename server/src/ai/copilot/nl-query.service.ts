@@ -274,7 +274,7 @@ export class NLQueryService {
       );
 
       return preview;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           queryId,
@@ -318,7 +318,7 @@ export class NLQueryService {
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { error: error instanceof Error ? error.message : 'Unknown error' },
         'LLM generation failed',

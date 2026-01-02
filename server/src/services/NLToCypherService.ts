@@ -263,11 +263,11 @@ export class NLToCypherService {
       ]);
 
       const entityTypes = entityResult.records.map(
-        (r) => `${r.get('entityType')} (${r.get('count')} entities)`
+        (r: any) => `${r.get('entityType')} (${r.get('count')} entities)`
       );
 
       const relTypes = relResult.records.map(
-        (r) => `${r.get('relType')} (${r.get('count')} relationships)`
+        (r: any) => `${r.get('relType')} (${r.get('count')} relationships)`
       );
 
       return `
@@ -327,7 +327,7 @@ Respond with JSON containing:
         cypher: parsed.cypher,
         explanation: parsed.explanation,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, response }, 'Failed to parse LLM response');
       throw new Error('Failed to generate valid Cypher query');
     }
@@ -414,7 +414,7 @@ Respond with JSON containing:
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error, cypher }, 'Failed to EXPLAIN query');
       errors.push('Query syntax invalid or cannot be explained');
     }

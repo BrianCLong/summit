@@ -233,7 +233,7 @@ describe('NLQueryService', () => {
 
       if (result.refinements && result.refinements.length > 0) {
         const limitSuggestion = result.refinements.find(
-          (r) => r.reason.toLowerCase().includes('limit'),
+          (r: any) => r.reason.toLowerCase().includes('limit'),
         );
         expect(limitSuggestion).toBeDefined();
       }
@@ -247,7 +247,7 @@ describe('NLQueryService', () => {
 
       if (result.refinements && result.refinements.length > 0) {
         const pathSuggestion = result.refinements.find(
-          (r) =>
+          (r: any) =>
             r.reason.toLowerCase().includes('depth') ||
             r.reason.toLowerCase().includes('path'),
         );

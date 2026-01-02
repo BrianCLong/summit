@@ -23,7 +23,7 @@ export async function startOtel(): Promise<void> {
     const tracer = initializeTracing();
     await tracer.initialize();
     logger.info('OpenTelemetry SDK started successfully.');
-  } catch (error) {
+  } catch (error: any) {
     logger.warn('Failed to start OpenTelemetry SDK', {
       error: (error as Error).message,
     });

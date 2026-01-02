@@ -51,7 +51,7 @@ export class SplunkSIEMSink implements SIEMSink {
         })
        });
        return true;
-    } catch (error) {
+    } catch (error: any) {
       return false;
     }
   }

@@ -114,7 +114,7 @@ router.post(
       });
 
       res.status(201).json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -141,7 +141,7 @@ router.post(
       const result = await experimentationService.startExperiment(experimentId);
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -176,7 +176,7 @@ router.get(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -204,7 +204,7 @@ router.post(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -232,7 +232,7 @@ router.post(
       );
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -260,7 +260,7 @@ router.get(
       const result = await experimentationService.getResults(experimentId);
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -296,7 +296,7 @@ router.post(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -327,7 +327,7 @@ router.post(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }

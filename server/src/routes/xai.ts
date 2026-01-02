@@ -94,7 +94,7 @@ router.post(
         },
         message: 'XAI explanation generated successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'XAI explanation generation failed',
         error: error instanceof Error ? error.message : String(error),
@@ -144,7 +144,7 @@ router.get(
           message: 'Available XAI model versions',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Model card retrieval failed',
         error: error instanceof Error ? error.message : String(error),
@@ -237,7 +237,7 @@ router.post(
         detection_summary: detectionSummary,
         message: `Detection analysis completed: ${detectionSummary.total_detections} detections found`,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Detection analysis failed',
         error: error instanceof Error ? error.message : String(error),
@@ -282,7 +282,7 @@ router.post(
         success: true,
         message: 'XAI explanation cache cleared successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Cache clear operation failed',
         error: error instanceof Error ? error.message : String(error),
@@ -312,7 +312,7 @@ router.get(
         timestamp: new Date().toISOString(),
         message: 'XAI cache statistics retrieved',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Cache statistics retrieval failed',
         error: error instanceof Error ? error.message : String(error),
@@ -382,7 +382,7 @@ router.post(
               cached: explanation.cached,
             },
           });
-        } catch (error) {
+        } catch (error: any) {
           results.push({
             index: i,
             success: false,
@@ -397,7 +397,7 @@ router.post(
         message: 'Batch XAI explanation completed',
         user_id: user.id,
         batch_size: requests.length,
-        successful_explanations: results.filter((r) => r.success).length,
+        successful_explanations: results.filter((r: any) => r.success).length,
         processing_time_ms: processingTime,
       });
 
@@ -406,13 +406,13 @@ router.post(
         batch_results: results,
         summary: {
           total_requests: requests.length,
-          successful: results.filter((r) => r.success).length,
-          failed: results.filter((r) => !r.success).length,
+          successful: results.filter((r: any) => r.success).length,
+          failed: results.filter((r: any) => !r.success).length,
           processing_time_ms: processingTime,
         },
         message: 'Batch XAI explanation completed',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Batch XAI explanation failed',
         error: error instanceof Error ? error.message : String(error),
@@ -448,7 +448,7 @@ router.get('/health', async (req, res) => {
       cache_stats: cacheStats,
       available_models: ['ga-core-1.0'],
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       service: 'graph-xai',

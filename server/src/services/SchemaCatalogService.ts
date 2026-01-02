@@ -49,7 +49,7 @@ export class SchemaCatalogService {
       const data = await fs.readFile(this.storagePath, 'utf-8');
       this.currentSchema = JSON.parse(data);
       logger.info(`Loaded schema version ${this.currentSchema?.version}`);
-    } catch (error) {
+    } catch (error: any) {
       const err = error instanceof Error ? error : new Error(String(error));
       if ('code' in err && (err as NodeJS.ErrnoException).code !== 'ENOENT') {
         logger.error({ err }, 'Failed to load schema catalog');
@@ -64,7 +64,7 @@ export class SchemaCatalogService {
       await fs.mkdir(this.storageDir, { recursive: true });
       await fs.writeFile(this.storagePath, JSON.stringify(schema, null, 2));
       logger.info(`Saved schema version ${schema.version}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error }, 'Failed to save schema catalog');
       throw error;
     }

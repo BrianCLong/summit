@@ -70,7 +70,7 @@ export class FileMeterStore {
               }
 
               calculatedLastHash = expectedHash;
-          } catch (e) {
+          } catch (e: any) {
               return { valid: false, brokenAtLine: i + 1 };
           }
       }
@@ -94,7 +94,7 @@ export class FileTenantUsageRepository extends TenantUsageDailyRepository {
         const rows: TenantUsageDailyRow[] = JSON.parse(data);
         super.saveAll(rows);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load metering rollups', err);
     }
   }

@@ -55,7 +55,7 @@ export class SavedQueryService {
             );
             CREATE INDEX IF NOT EXISTS idx_saved_queries_tenant_user ON saved_queries(tenant_id, created_by);
           `);
-      } catch (err) {
+      } catch (err: any) {
           logger.error({ err }, 'Failed to ensure saved_queries schema');
       } finally {
           client.release();

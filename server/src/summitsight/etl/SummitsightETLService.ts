@@ -24,7 +24,7 @@ export class SummitsightETLService {
       // Basic normalization or validation could happen here
       if (!data.tenant_id) throw new Error("Tenant ID required for ingestion");
       await this.dataService.recordRun(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to ingest run:', error);
       // In prod, send to DLQ
     }
@@ -36,7 +36,7 @@ export class SummitsightETLService {
   async ingestTask(data: FactTask): Promise<void> {
     try {
       await this.dataService.recordTask(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to ingest task:', error);
     }
   }
@@ -51,7 +51,7 @@ export class SummitsightETLService {
         data.risk_score = this.calculateRiskScore(data.severity);
       }
       await this.dataService.recordSecurityEvent(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to ingest security event:', error);
     }
   }
@@ -62,7 +62,7 @@ export class SummitsightETLService {
   async ingestOpsMetric(data: FactOps): Promise<void> {
     try {
       await this.dataService.recordOpsMetric(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to ingest ops metric:', error);
     }
   }

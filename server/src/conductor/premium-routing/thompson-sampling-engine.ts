@@ -209,7 +209,7 @@ export class ThompsonSamplingEngine {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const selectionTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
@@ -321,7 +321,7 @@ export class ThompsonSamplingEngine {
         costEfficiency: arm.costEfficiency,
         sessionId,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to update Thompson sampling arm', {
         error: error.message,
         modelId,

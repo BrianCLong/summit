@@ -24,7 +24,7 @@ describe('event_store partitioning', () => {
         })
         .withExposedPorts(5432)
         .start();
-    } catch (error) {
+    } catch (error: any) {
       runtimeAvailable = false;
       console.warn(
         'Skipping partitioning integration tests: container runtime unavailable',
@@ -105,7 +105,7 @@ describe('event_store partitioning', () => {
     expect(legacyCount.rows[0].count).toBe('1');
     expect(partitionCount.rows[0].count).toBe('1');
     expect(
-      partitions.rows.some((r) =>
+      partitions.rows.some((r: any) =>
         (r.relname as string).startsWith('event_store_tenant_'),
       ),
     ).toBe(true);
@@ -135,7 +135,7 @@ describe('event_store partitioning', () => {
     );
 
     const planText = explain.rows
-      .map((r) => r['QUERY PLAN'] as string)
+      .map((r: any) => r['QUERY PLAN'] as string)
       .join('\n');
 
     expect(planText).toMatch(/event_store_tenant_/);

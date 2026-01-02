@@ -56,7 +56,7 @@ router.get(
           disabled: policies.filter((p) => !p.enabled).length,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Failed to list DLP policies', {
         component: 'DLPRoutes',
@@ -91,7 +91,7 @@ router.get(
         success: true,
         data: policy,
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof AppError) {
         throw error;
       }
@@ -156,7 +156,7 @@ router.post(
         message: 'DLP policy created successfully',
         data: { id: policyData.name.toLowerCase().replace(/\s+/g, '-') },
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof AppError) {
         throw error;
       }
@@ -223,7 +223,7 @@ router.put(
         success: true,
         message: 'DLP policy updated successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof AppError) {
         throw error;
       }
@@ -275,7 +275,7 @@ router.delete(
         success: true,
         message: 'DLP policy deleted successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof AppError) {
         throw error;
       }
@@ -334,7 +334,7 @@ router.post(
         message: `DLP policy ${!policy.enabled ? 'enabled' : 'disabled'} successfully`,
         data: { enabled: !policy.enabled },
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof AppError) {
         throw error;
       }
@@ -400,12 +400,12 @@ router.post(
           })),
           summary: {
             totalViolations: scanResults.length,
-            highSeverityViolations: scanResults.filter((r) =>
+            highSeverityViolations: scanResults.filter((r: any) =>
               r.recommendedActions.some(
                 (a) => a.severity === 'high' || a.severity === 'critical',
               ),
             ).length,
-            wouldBlock: scanResults.some((r) =>
+            wouldBlock: scanResults.some((r: any) =>
               r.recommendedActions.some((a) => a.type === 'block'),
             ),
           },
@@ -421,7 +421,7 @@ router.post(
       });
 
       res.json(response);
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Manual DLP scan failed', {
         component: 'DLPRoutes',
@@ -486,7 +486,7 @@ router.get(
         success: true,
         data: mockMetrics,
       });
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       logger.error('Failed to get DLP metrics', {
         component: 'DLPRoutes',

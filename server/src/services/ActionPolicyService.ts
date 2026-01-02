@@ -65,7 +65,7 @@ function resolvePolicyVersion(request: PreflightRequest): string | undefined {
   try {
     const resolved = policyBundleStore.resolve();
     return resolved.versionId;
-  } catch (error) {
+  } catch (error: any) {
     logger.warn(
       { error: error instanceof Error ? error.message : String(error) },
       'Falling back to request-supplied policy version',
@@ -169,7 +169,7 @@ class PolicyDecisionStore {
 
     try {
       parsed = JSON.parse(row.reason || '{}');
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         {
           error: error instanceof Error ? error.message : String(error),
@@ -356,7 +356,7 @@ export class ActionPolicyService {
       );
 
       return response.data?.result || { allow: false, obligations: [] };
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           error: error instanceof Error ? error.message : String(error),

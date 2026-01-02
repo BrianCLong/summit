@@ -29,7 +29,7 @@ router.get('/forecast/:entityId/activity', async (req, res, next) => {
     );
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -62,7 +62,7 @@ router.get('/forecast/:entityId/metric', async (req, res, next) => {
     );
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

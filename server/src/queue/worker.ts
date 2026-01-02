@@ -45,7 +45,7 @@ export class WorkerManager {
       ...options,
     });
 
-    worker.on('completed', (job) => {
+    worker.on('completed', (job: any) => {
       logger.info(`Worker ${queueName} completed job ${job.id}`);
     });
 

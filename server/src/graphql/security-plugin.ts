@@ -75,7 +75,7 @@ export function createGraphQLSecurityPlugin(
               'query_validation',
               true,
             );
-          } catch (error) {
+          } catch (error: any) {
             // Record security event
             prometheusConductorMetrics.recordSecurityEvent(
               'query_blocked',

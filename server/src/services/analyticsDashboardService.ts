@@ -31,11 +31,11 @@ interface AnalyticsReport {
   name: string;
   description: string;
   category:
-    | 'threat'
-    | 'investigation'
-    | 'performance'
-    | 'collaboration'
-    | 'security';
+  | 'threat'
+  | 'investigation'
+  | 'performance'
+  | 'collaboration'
+  | 'security';
   widgets: string[];
   schedule: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'monthly';
   recipients: string[];
@@ -198,7 +198,7 @@ export class AnalyticsDashboardService extends EventEmitter {
         widgets: this.widgets.size,
         charts: this.charts.size,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('[ANALYTICS] Data refresh error:', error);
       this.emit('refresh-error', error);
     }
@@ -607,7 +607,7 @@ export class AnalyticsDashboardService extends EventEmitter {
         generatedAt: new Date(),
         category: report.category,
       },
-      widgets: [],
+      widgets: [] as any[],
       summary: {},
     };
 

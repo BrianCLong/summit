@@ -50,7 +50,7 @@ export async function initDeps(): Promise<void> {
     ]);
 
     console.log('[DEPS] All dependencies initialized successfully');
-  } catch (error) {
+  } catch (error: any) {
     console.error('[DEPS] Failed to initialize dependencies:', error);
     throw error;
   }

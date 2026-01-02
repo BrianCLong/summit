@@ -22,7 +22,7 @@ export const canonicalResolvers = {
       if (typeof obj.policyLabels === 'string') {
         try {
           return JSON.parse(obj.policyLabels);
-        } catch (e) {
+        } catch (e: any) {
           return {};
         }
       }

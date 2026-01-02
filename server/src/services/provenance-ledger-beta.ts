@@ -98,7 +98,7 @@ export class ProvenanceLedgerBetaService {
         created_at: now,
         updated_at: now,
       } as License;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to create license',
         error: error instanceof Error ? error.message : String(error),
@@ -178,7 +178,7 @@ export class ProvenanceLedgerBetaService {
         metadata: input.metadata || {},
         ...input,
       } as Source;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to register source',
         error: error instanceof Error ? error.message : String(error),
@@ -266,7 +266,7 @@ export class ProvenanceLedgerBetaService {
         created_at: now,
         ...input,
       } as Transform;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to register transform',
         error: error instanceof Error ? error.message : String(error),
@@ -361,7 +361,7 @@ export class ProvenanceLedgerBetaService {
         metadata: input.metadata || {},
         ...input,
       } as Evidence;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to register evidence',
         error: error instanceof Error ? error.message : String(error),
@@ -445,12 +445,12 @@ export class ProvenanceLedgerBetaService {
         content_hash,
         extracted_at: now,
         created_at: now,
-        evidence_ids: input.evidence_ids,
+        // evidence_ids: input.evidence_ids,
         contradicts: input.contradicts || [],
         corroborates: input.corroborates || [],
         ...input,
       } as Claim;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to register claim',
         error: error instanceof Error ? error.message : String(error),
@@ -522,7 +522,7 @@ export class ProvenanceLedgerBetaService {
       params,
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       ...row,
       evidence_ids: Array.isArray(row.evidence_hashes)
         ? row.evidence_hashes
@@ -596,7 +596,7 @@ export class ProvenanceLedgerBetaService {
         created_at: now,
         ...input,
       } as ClaimEvidenceLink;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to create claim-evidence link',
         error: error instanceof Error ? error.message : String(error),
@@ -645,7 +645,7 @@ export class ProvenanceLedgerBetaService {
       }
 
       return result.rows[0].content_hash;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to get last audit hash',
         error: error instanceof Error ? error.message : String(error),
@@ -816,7 +816,7 @@ export class ProvenanceLedgerBetaService {
         brokenAt,
         errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to verify audit chain',
         error: error instanceof Error ? error.message : String(error),
@@ -844,7 +844,7 @@ export class ProvenanceLedgerBetaService {
         item_id: itemId,
         item_type: 'claim',
         claim,
-        source,
+        source: source || undefined,
         transforms,
         evidence: evidence.filter((e) => e !== null) as Evidence[],
         licenses: licenses.filter((l) => l !== null) as License[],
@@ -1047,7 +1047,7 @@ export class ProvenanceLedgerBetaService {
       });
 
       return manifest;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to create export manifest',
         error: error instanceof Error ? error.message : String(error),

@@ -114,7 +114,7 @@ router.get('/metrics', async (req, res) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     prometheusConductorMetrics?.servingMetricsRequests?.inc({
       status: 'error',
       backend: (req.query.backend as string) || 'all',
@@ -232,7 +232,7 @@ router.get('/backends', async (req, res) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Backend info fetch error:', error);
     res.status(500).json({
       error: 'Failed to fetch backend information',
@@ -267,7 +267,7 @@ router.get('/spans', async (req, res) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Serving spans fetch error:', error);
     res.status(500).json({
       error: 'Failed to fetch serving spans',

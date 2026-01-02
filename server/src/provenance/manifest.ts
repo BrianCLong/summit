@@ -30,7 +30,7 @@ export interface ProvenanceManifest {
 
 export async function generateManifest(targetId: string, purpose: string, inputs: any[]): Promise<ProvenanceManifest> {
   const tracer = trace.getTracer('provenance');
-  return tracer.startActiveSpan('export.manifest.write', async (span) => {
+  return tracer.startActiveSpan('export.manifest.write', async (span: any) => {
 
     // 1. Get Policies & Compile
     const policies = policyStore.getActivePoliciesForTarget(targetId);

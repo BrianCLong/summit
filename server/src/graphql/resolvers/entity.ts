@@ -35,7 +35,7 @@ const entityResolvers = {
         // Use DataLoader for batched entity fetching
         const entity = await context.loaders.entityLoader.load(id);
         return entity;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, id }, 'Error fetching entity by ID');
         // Fallback to mock data if database connection fails
         logger.warn('Falling back to mock entity data');
@@ -107,7 +107,7 @@ const entityResolvers = {
                 };
               });
 
-            } catch (err) {
+            } catch (err: any) {
               // Fallback if index doesn't exist or other error
               logger.warn({ err }, 'Fulltext search failed, falling back to legacy CONTAINS search');
 
@@ -133,7 +133,7 @@ const entityResolvers = {
               updatedAt: entity.properties.updatedAt,
             };
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error(
             { error, type, q, limit, offset },
             'Error fetching entities',
@@ -224,7 +224,7 @@ const entityResolvers = {
 
           const pgResult = await pgClient.query(pgQuery, pgQueryParams);
 
-          const entityIds = pgResult.rows.map((row) => row.entity_id);
+          const entityIds = pgResult.rows.map((row: any) => row.entity_id);
 
           if (entityIds.length === 0) {
             return [];
@@ -251,7 +251,7 @@ const entityResolvers = {
 
           // Filter out any errors (entities not found)
           return entities.filter((entity) => !(entity instanceof Error));
-        } catch (error) {
+        } catch (error: any) {
           logger.error(
             { error, query, filters },
             'Error performing semantic search with filters',
@@ -325,7 +325,7 @@ const entityResolvers = {
         }).catch(err => logger.error({ err }, 'Failed to append audit log'));
 
         return entity;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, input }, 'Error creating entity');
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to create entity: ${message}`);
@@ -424,7 +424,7 @@ const entityResolvers = {
         }).catch(err => logger.error({ err }, 'Failed to append audit log'));
 
         return entity;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, id, input }, 'Error updating entity');
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to update entity: ${message}`);
@@ -468,7 +468,7 @@ const entityResolvers = {
         }).catch(err => logger.error({ err }, 'Failed to append audit log'));
 
         return true;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, id }, 'Error deleting entity');
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to delete entity: ${message}`);
@@ -507,7 +507,7 @@ const entityResolvers = {
             `ML service did not return completed entities: ${response.data.status}`,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, text }, 'Error linking entities');
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to link entities: ${message}`);
@@ -581,7 +581,7 @@ const entityResolvers = {
             `ML service did not return completed relationships: ${response.data.status}`,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           { error, text, entities },
           'Error extracting relationships',

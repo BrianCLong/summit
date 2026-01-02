@@ -7,6 +7,8 @@ declare namespace Express {
       tenant_id?: string;
       role: string;
       email?: string;
+      groups?: string[];
+      attributes?: Record<string, unknown>;
     };
   }
 }

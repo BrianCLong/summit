@@ -112,7 +112,7 @@ export async function runWarmers(
         results.push({ name: warmer.name, ok: true, reason });
         cacheHits.labels('warm', warmer.name, 'system').inc();
         cacheSets.labels('warm', warmer.name, 'system').inc();
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           { err: error, warmer: warmer.name },
           'Cache warmer failed',

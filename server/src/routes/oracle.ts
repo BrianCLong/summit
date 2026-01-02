@@ -42,7 +42,7 @@ router.post('/run-simulation', async (req, res, next) => {
     }
     const simulationRun = await oracleService.runCausalLoop(params);
     res.status(202).json(simulationRun);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -79,7 +79,7 @@ router.get('/timeline/:runId', async (req, res, next) => {
     } else {
       res.status(404).json({ message: `Simulation run with ID ${runId} not found.` });
     }
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

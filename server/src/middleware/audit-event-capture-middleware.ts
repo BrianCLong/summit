@@ -101,6 +101,7 @@ export class AuditEventCaptureMiddleware {
    * Apollo Server plugin for mutation auditing
    */
   createApolloPlugin() {
+    const self = this;
     return {
       async requestDidStart() {
         return {
@@ -137,7 +138,7 @@ export class AuditEventCaptureMiddleware {
                 const mutationName = selection.name.value;
 
                 // Skip excluded mutations
-                if (this.excludedMutations.has(mutationName)) {
+                if (self.excludedMutations.has(mutationName)) {
                   continue;
                 }
 
@@ -145,7 +146,7 @@ export class AuditEventCaptureMiddleware {
                 const args: Record<string, any> = {};
                 if (selection.arguments) {
                   for (const arg of selection.arguments) {
-                    args[arg.name.value] = this.extractArgumentValue(
+                    args[arg.name.value] = self.extractArgumentValue(
                       arg.value,
                       requestContext.request.variables || {},
                     );
@@ -156,7 +157,7 @@ export class AuditEventCaptureMiddleware {
                 const result = requestContext.response?.data?.[mutationName];
 
                 // Capture the mutation as an event
-                await this.captureMutationEvent({
+                await self.captureMutationEvent({
                   mutationName,
                   operationType: 'mutation',
                   args,
@@ -193,7 +194,7 @@ export class AuditEventCaptureMiddleware {
             if (chunk) {
               try {
                 responseData = JSON.parse(chunk.toString());
-              } catch (e) {
+              } catch (e: any) {
                 // Not JSON, skip
               }
             }
@@ -219,7 +220,7 @@ export class AuditEventCaptureMiddleware {
               },
               'GraphQL mutation captured',
             );
-          } catch (error) {
+          } catch (error: any) {
             middlewareLogger.error(
               { error: (error as Error).message },
               'Failed to capture mutation in middleware',
@@ -277,9 +278,9 @@ export class AuditEventCaptureMiddleware {
           success: !mutation.error,
           error: mutation.error
             ? {
-                message: mutation.error.message,
-                stack: mutation.error.stack,
-              }
+              message: mutation.error.message,
+              stack: mutation.error.stack,
+            }
             : undefined,
           oldValues,
           newValues,
@@ -313,7 +314,7 @@ export class AuditEventCaptureMiddleware {
         },
         'Mutation captured as domain event',
       );
-    } catch (error) {
+    } catch (error: any) {
       // Log error but don't fail the mutation
       middlewareLogger.error(
         {
@@ -400,7 +401,7 @@ export class AuditEventCaptureMiddleware {
     if (mutation.mutationName.startsWith('update')) {
       if (mutation.args.input) {
         newValues = { ...mutation.args.input };
-        delete newValues.id; // Remove ID from changes
+        if (newValues) delete newValues.id; // Remove ID from change
       }
 
       // If the result includes both old and new values, use them

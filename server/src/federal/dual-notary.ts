@@ -68,7 +68,7 @@ export class DualNotaryService {
     try {
       this.pkcs11Ctx = initPKCS11();
       console.log('✅ Dual notary HSM initialized');
-    } catch (error) {
+    } catch (error: any) {
       console.error('HSM initialization failed for notary service:', error);
       if (this.config.hsmEnabled) {
         throw error;
@@ -258,7 +258,7 @@ export class DualNotaryService {
           notarized.hsmSignature = await this.signRootWithHSM(rootHex);
           notarized.notarizedBy.push('HSM');
           notarized.verification.hsmValid = true;
-        } catch (error) {
+        } catch (error: any) {
           console.error('HSM notarization failed:', error);
           // Continue with TSA if HSM fails
         }
@@ -270,7 +270,7 @@ export class DualNotaryService {
           notarized.tsaResponse = await this.getTimestampFromTSA(rootHex);
           notarized.notarizedBy.push('TSA');
           notarized.verification.tsaValid = true;
-        } catch (error) {
+        } catch (error: any) {
           console.error('TSA notarization failed:', error);
           // TSA failure is not critical if HSM succeeded
         }
@@ -463,7 +463,7 @@ export class DualNotaryService {
         if (this.pkcs11Ctx) {
           hsmHealthy = true;
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn('HSM health check failed:', error);
       }
     }
@@ -475,7 +475,7 @@ export class DualNotaryService {
         const testCmd = `curl -s --max-time 5 --head "${this.config.tsa.url}"`;
         await execAsync(testCmd);
         tsaHealthy = true;
-      } catch (error) {
+      } catch (error: any) {
         console.warn('TSA health check failed:', error);
       }
     }
@@ -510,7 +510,7 @@ export class DualNotaryService {
       try {
         finalizePKCS11(this.pkcs11Ctx);
         this.pkcs11Ctx = null;
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Failed to cleanup PKCS#11 context:', error);
       }
     }

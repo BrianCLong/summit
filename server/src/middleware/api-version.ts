@@ -37,7 +37,7 @@ function loadVersionRegistry(): VersionRegistry | null {
       const content = fs.readFileSync(registryPath, 'utf-8');
       return JSON.parse(content);
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ error }, 'Failed to load version registry, using defaults');
   }
   return null;

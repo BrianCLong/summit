@@ -56,7 +56,7 @@ export class CircuitBreaker extends EventEmitter {
       const result = await fn();
       this.onSuccess();
       return result;
-    } catch (error) {
+    } catch (error: any) {
       this.onFailure();
       throw error;
     }
@@ -256,7 +256,7 @@ export async function retryWithBackoff<T>(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
-    } catch (error) {
+    } catch (error: any) {
       lastError = error;
 
       if (attempt === maxRetries || !shouldRetry(error)) {

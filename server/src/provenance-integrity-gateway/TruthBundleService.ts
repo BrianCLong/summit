@@ -148,7 +148,7 @@ export class TruthBundleService extends EventEmitter {
 
       this.initialized = true;
       logger.info('TruthBundleService initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize TruthBundleService');
       throw error;
     }
@@ -340,7 +340,7 @@ export class TruthBundleService extends EventEmitter {
         bundle,
         analysisResults,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to generate truth bundle');
       throw error;
     }
@@ -418,7 +418,7 @@ export class TruthBundleService extends EventEmitter {
     );
 
     return {
-      bundles: dataResult.rows.map(row => this.mapRowToBundle(row)),
+      bundles: dataResult.rows.map((row: any) => this.mapRowToBundle(row)),
       total: parseInt(countResult.rows[0].count),
     };
   }
@@ -836,7 +836,7 @@ export class TruthBundleService extends EventEmitter {
           tenantId
         );
         entries.push(...platformEntries);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({ error, platform: platform.name }, 'Failed to query monitoring platform');
       }
     }

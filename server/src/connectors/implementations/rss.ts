@@ -57,7 +57,7 @@ export class RSSConnector extends BaseConnector {
               stream.push(this.wrapEvent({ raw: response.data }));
               this.metrics.recordsProcessed++;
               stream.push(null);
-          } catch (err) {
+          } catch (err: any) {
               stream.destroy(err as Error);
               this.metrics.errors++;
           }

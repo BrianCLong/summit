@@ -195,7 +195,7 @@ export class StixSigningService {
         metadata: valid ? signature.metadata : undefined,
         verifiedAt,
       };
-    } catch (error) {
+    } catch (error: any) {
       errors.push(`Verification error: ${(error as Error).message}`);
       return {
         valid: false,

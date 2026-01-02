@@ -113,7 +113,7 @@ router.post('/siem', async (req: Request, res: Response) => {
       success: result.success,
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       errors: [
@@ -198,7 +198,7 @@ router.post('/json', async (req: Request, res: Response) => {
       },
       runs,
     });
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       errors: [
@@ -307,7 +307,7 @@ router.post('/csv', async (req: Request, res: Response) => {
     );
 
     return res.status(200).send(csv);
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       success: false,
       errors: [

@@ -90,7 +90,7 @@ export class SnsMessageBroker implements MessageBroker {
             );
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error polling SQS:', error);
         await new Promise((resolve) => setTimeout(resolve, 5000)); // Backoff
       }

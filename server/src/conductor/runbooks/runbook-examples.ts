@@ -302,7 +302,7 @@ export async function runAllExamples() {
     await executeR3Example();
 
     console.log('\n=== All Examples Completed Successfully ===\n');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error running examples:', error);
     throw error;
   }

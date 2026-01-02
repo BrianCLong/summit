@@ -113,7 +113,7 @@ export class SOARConnectorV1Service {
             ticketData = await this.createJiraIssue(alertData, operationId);
           }
           break;
-        } catch (error) {
+        } catch (error: any) {
           attempt++;
           if (attempt >= this.RETRY_ATTEMPTS) {
             throw error;
@@ -157,7 +157,7 @@ export class SOARConnectorV1Service {
       await this.scheduleStatusSync(ticketLink.id);
 
       return ticketLink as TicketLink;
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Failed to create incident ticket', {
         alertId,
@@ -201,7 +201,7 @@ export class SOARConnectorV1Service {
         externalId: ticketLink.external_id,
         system: ticketLink.external_system,
       });
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Failed to update ticket', {
         ticketLinkId,
@@ -303,7 +303,7 @@ export class SOARConnectorV1Service {
       return (await this.prisma.containmentAction.findUnique({
         where: { id: actionId },
       })) as ContainmentAction;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Host quarantine failed', {
         actionId,
         hostIdentifier,
@@ -432,7 +432,7 @@ export class SOARConnectorV1Service {
       return (await this.prisma.containmentAction.findUnique({
         where: { id: actionId },
       })) as ContainmentAction;
-    } catch (error) {
+    } catch (error: any) {
       const executionTime = Date.now() - startTime;
 
       this.logger.error('Account disable failed', {
@@ -521,7 +521,7 @@ export class SOARConnectorV1Service {
       return (await this.prisma.containmentAction.findUnique({
         where: { id: actionId },
       })) as ContainmentAction;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Hash block failed', {
         actionId,
         fileHash,
@@ -585,7 +585,7 @@ export class SOARConnectorV1Service {
         target: action.target,
         initiatedBy,
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Containment rollback failed', {
         actionId,
         error: error.message,

@@ -178,7 +178,7 @@ router.use(async (_req, _res, next) => {
   try {
     await initializeServices();
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Failed to initialize AI governance services');
     next(error);
   }
@@ -250,7 +250,7 @@ router.post(
       }, 'Policy suggestions generated');
 
       res.json(wrapResponse(suggestions, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'generateSuggestions');
     }
   }
@@ -301,7 +301,7 @@ router.get(
       });
 
       res.json(wrapResponse(result, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'listSuggestions');
     }
   }
@@ -344,7 +344,7 @@ router.get(
       }
 
       res.json(wrapResponse(suggestion, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'getSuggestion');
     }
   }
@@ -409,7 +409,7 @@ router.post(
       }, 'Suggestion reviewed');
 
       res.json(wrapResponse(suggestion, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'reviewSuggestion');
     }
   }
@@ -447,7 +447,7 @@ router.post(
       }, 'Suggestion implemented');
 
       res.json(wrapResponse(result, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'implementSuggestion');
     }
   }
@@ -474,7 +474,7 @@ router.get(
       const statistics = await policySuggestionService!.getStatistics(tenantId);
 
       res.json(wrapResponse(statistics, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'getStatistics');
     }
   }
@@ -541,7 +541,7 @@ router.post(
       }, 'Verdict explained');
 
       res.json(wrapResponse(explanation, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'explainVerdict');
     }
   }
@@ -607,7 +607,7 @@ router.post(
       }, 'Batch verdicts explained');
 
       res.json(wrapResponse(explanations, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'batchExplain');
     }
   }
@@ -685,7 +685,7 @@ router.post(
       }, 'Anomalies detected');
 
       res.json(wrapResponse(anomalies, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'detectAnomalies');
     }
   }
@@ -756,7 +756,7 @@ router.get(
         anomalies: paginated,
         total: filteredAnomalies.length,
       }, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'listAnomalies');
     }
   }
@@ -799,7 +799,7 @@ router.get(
       }
 
       res.json(wrapResponse(anomaly, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'getAnomaly');
     }
   }
@@ -858,7 +858,7 @@ router.patch(
       }, 'Anomaly status updated');
 
       res.json(wrapResponse(anomaly, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'updateAnomalyStatus');
     }
   }
@@ -922,7 +922,7 @@ router.post(
       }, 'Anomaly resolved');
 
       res.json(wrapResponse(anomaly, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'resolveAnomaly');
     }
   }
@@ -970,7 +970,7 @@ router.get(
       });
 
       res.json(wrapResponse(trends, req));
-    } catch (error) {
+    } catch (error: any) {
       handleError(error, res, 'getAnomalyTrends');
     }
   }
@@ -1004,7 +1004,7 @@ router.get('/health', async (_req: Request, res: Response) => {
     };
 
     res.json(status);
-  } catch (error) {
+  } catch (error: any) {
     res.status(503).json({
       status: 'unhealthy',
       error: error instanceof Error ? error.message : 'Unknown error',

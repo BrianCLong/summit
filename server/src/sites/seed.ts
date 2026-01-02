@@ -28,7 +28,7 @@ async function seed() {
       [r.name, r.region, r.residency, r.pubkey, r.bandwidth],
     );
   }
-  console.log('seeded sites:', rows.map((r) => r.name).join(', '));
+  console.log('seeded sites:', rows.map((r: any) => r.name).join(', '));
 }
 
 seed()

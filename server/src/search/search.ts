@@ -47,7 +47,7 @@ export async function searchAll(input: SearchInput) {
         // If we got good results, return them (possibly expanding graph later)
         if (caseResults.length > 0 || docResults.length > 0) {
           // Map to expected format
-          const rows: any[] = caseResults.map((r) => ({
+          const rows: any[] = caseResults.map((r: any) => ({
             id: r.id,
             title: r.title,
             status: r.status,
@@ -56,20 +56,20 @@ export async function searchAll(input: SearchInput) {
           }));
 
           // Append docs with path as ID
-          docResults.forEach(d => {
-              rows.push({
-                  id: d.path,
-                  title: d.title,
-                  status: 'published',
-                  created_at: new Date(),
-                  type: 'doc',
-                  metadata: d.metadata
-              });
+          docResults.forEach((d: any) => {
+            rows.push({
+              id: d.path,
+              title: d.title,
+              status: 'published',
+              created_at: new Date(),
+              type: 'doc',
+              metadata: d.metadata
+            });
           });
 
           return expandGraph(rows, input.graphExpand);
         }
-      } catch (e) {
+      } catch (e: any) {
         console.warn('Semantic search failed, falling back to keyword search', e);
       }
     }
@@ -130,11 +130,11 @@ async function expandGraph(rows: any[], expand: boolean | undefined) {
         RETURN c.id as id, collect({ ioc: i.value, type: i.type })[0..20] as iocs`,
       { ids },
     );
-    graph = res.records.map((r) => ({
+    graph = res.records.map((r: any) => ({
       id: r.get('id'),
       iocs: r.get('iocs'),
     }));
-  } catch (e) {
+  } catch (e: any) {
     console.error("Graph expansion failed", e);
   } finally {
     await session.close();

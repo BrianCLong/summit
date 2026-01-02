@@ -39,7 +39,7 @@ router.post('/tickets', express.json(), async (req, res) => {
 
     const ticket = await createTicket(input);
     res.status(201).json(ticket);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating ticket:', error);
     res.status(500).json({ error: 'Failed to create ticket' });
   }
@@ -71,7 +71,7 @@ router.get('/tickets', async (req, res) => {
         offset: options.offset,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error listing tickets:', error);
     res.status(500).json({ error: 'Failed to list tickets' });
   }
@@ -85,7 +85,7 @@ router.get('/tickets/:id', async (req, res) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
     res.json(ticket);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting ticket:', error);
     res.status(500).json({ error: 'Failed to get ticket' });
   }
@@ -110,7 +110,7 @@ router.patch('/tickets/:id', express.json(), async (req, res) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
     res.json(ticket);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating ticket:', error);
     res.status(500).json({ error: 'Failed to update ticket' });
   }
@@ -124,7 +124,7 @@ router.delete('/tickets/:id', async (req, res) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
     res.status(204).send();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting ticket:', error);
     res.status(500).json({ error: 'Failed to delete ticket' });
   }
@@ -145,7 +145,7 @@ router.post('/tickets/:id/comments', express.json(), async (req, res) => {
       isInternal: isInternal || false,
     });
     res.status(201).json(comment);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error adding comment:', error);
     res.status(500).json({ error: 'Failed to add comment' });
   }
@@ -157,7 +157,7 @@ router.get('/tickets/:id/comments', async (req, res) => {
     const includeDeleted = req.query.includeDeleted === 'true';
     const comments = await getComments(req.params.id, { includeDeleted });
     res.json(comments);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting comments:', error);
     res.status(500).json({ error: 'Failed to get comments' });
   }
@@ -199,7 +199,7 @@ router.post('/tickets/:ticketId/comments/:commentId/delete', express.json(), asy
 
     const deleted = await softDeleteComment(comment.id, actorId, req.body.reason);
     res.json({ status: 'deleted', comment: deleted });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting comment:', error);
     res.status(500).json({ error: 'Failed to delete comment' });
   }
@@ -224,7 +224,7 @@ router.post('/tickets/:ticketId/comments/:commentId/restore', express.json(), as
 
     const restored = await restoreComment(comment.id, actorId);
     res.json({ status: 'restored', comment: restored });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error restoring comment:', error);
     res.status(500).json({ error: 'Failed to restore comment' });
   }

@@ -167,7 +167,7 @@ Format: { "questions": ["Q1", "Q2", ...] }
     try {
         const parsed = JSON.parse(response);
         return VerificationQuestionSchema.parse(parsed).questions;
-    } catch (e) {
+    } catch (e: any) {
         logger.error({ error: e, response }, 'Failed to parse verification questions');
         return [];
     }
@@ -189,7 +189,7 @@ Format: { "questions": ["Q1", "Q2", ...] }
                   citations: res.citations.entityIds,
                   confidence: res.confidence
               };
-          } catch (e) {
+          } catch (e: any) {
               logger.warn({ question: q, error: e }, 'Verification query failed');
               return null;
           }
@@ -248,7 +248,7 @@ Return valid JSON:
         try {
             const parsed = JSON.parse(response);
             return RevisionSchema.parse(parsed);
-        } catch (e) {
+        } catch (e: any) {
             logger.error({ error: e, response }, 'Failed to parse revision');
             return {
                 originalAnswer,

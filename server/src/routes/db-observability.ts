@@ -59,7 +59,7 @@ export function buildDbObservabilityRouter(service = new DbObservabilityService(
         feature: 'DB_OBSERVABILITY_V2',
         data: snapshot,
       });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   });

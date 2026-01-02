@@ -49,7 +49,7 @@ router.post('/ingest', async (req, res, next) => {
     } else {
       res.status(200).json({ message: 'Sample processed, no match found.' });
     }
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -74,7 +74,7 @@ router.get('/confirmations', async (req, res, next) => {
   try {
     const confirmations = await echelon2Service.getAllConfirmations();
     res.json(confirmations);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -107,7 +107,7 @@ router.get('/confirmations/:targetId', async (req, res, next) => {
     const { targetId } = req.params;
     const confirmations = await echelon2Service.getConfirmationsForTarget(targetId);
     res.json(confirmations);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

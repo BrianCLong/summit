@@ -77,7 +77,7 @@ export class PipelineOrchestrator {
       for (const stage of stages) {
         try {
           currentBatch = await stage.process(ctx, currentBatch);
-        } catch (err) {
+        } catch (err: any) {
             ctx.logger.error({ err, stage: stage.name }, 'Stage failed');
             // Logic to send to DLQ would go here
             throw err;

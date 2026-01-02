@@ -212,7 +212,7 @@ export class CachedMetadataService {
       }
 
       return types;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, tenantId }, 'Failed to fetch entity types');
       // Return empty array on error - graceful degradation
       return [];
@@ -262,7 +262,7 @@ export class CachedMetadataService {
       }
 
       return types;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, tenantId }, 'Failed to fetch relationship types');
       return [];
     }

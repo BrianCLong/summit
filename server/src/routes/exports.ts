@@ -26,7 +26,7 @@ router.post('/sign-manifest', async (req, res) => {
       algorithm: 'hmac-sha256',
       manifest: { tenant, filters, timestamp }
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to sign manifest' });
   }
 });
@@ -49,7 +49,7 @@ router.post('/exports/:id/verify-watermark', async (req, res) => {
     });
 
     return res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
 });

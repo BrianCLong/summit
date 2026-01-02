@@ -32,7 +32,7 @@ router.get('/analysts', async (req, res, next) => {
   try {
     const analysts = await phantomLimbService.getOnlineAnalysts();
     res.json(analysts);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -67,7 +67,7 @@ router.post('/reconstitute', async (req, res, next) => {
     }
     const newGhost = await phantomLimbService.reconstituteCognition(artifacts);
     res.status(201).json(newGhost);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -116,7 +116,7 @@ router.post('/query/:ghostId', async (req, res, next) => {
     }
     const response = await phantomLimbService.queryDigitalGhost(ghostId, query);
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

@@ -141,7 +141,7 @@ router.post('/route', async (req, res) => {
         strategy: routingResponse.strategy,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Router API error', { error, body: req.body });
     prometheusConductorMetrics.recordOperationalEvent(
       'router_api_error',
@@ -198,7 +198,7 @@ router.post('/reward', async (req, res) => {
       signal,
       value,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Reward API error', { error, body: req.body });
 
     res.status(500).json({
@@ -225,7 +225,7 @@ router.get('/health', async (req, res) => {
     };
 
     res.json(health);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Router health check error', { error });
     res.status(500).json({
       status: 'unhealthy',

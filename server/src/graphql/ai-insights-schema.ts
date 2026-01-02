@@ -271,7 +271,7 @@ export const aiInsightsResolvers = {
           };
 
           return await aiClient.calculateEntityScore(aiEntity);
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Failed to calculate AI score for entity:', error);
           return 0.5; // Fallback score
         }
@@ -421,7 +421,7 @@ export const aiInsightsResolvers = {
             modelVersion: 'mvp-0.1.0',
             processingTime,
           };
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Failed to get AI insights:', error);
           return {
             entityScore: 0.5,
@@ -478,7 +478,7 @@ export const aiInsightsResolvers = {
 
           const scores = await aiClient.scoreLinks(entityPairs);
           return scores.length > 0 ? scores[0].score : null;
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Failed to calculate AI score for edge:', error);
           return null;
         }
@@ -597,7 +597,7 @@ export const aiInsightsResolvers = {
             uptime: (health as any).uptime_seconds || 0,
             lastHealthCheck: new Date().toISOString(),
           };
-        } catch (error) {
+        } catch (error: any) {
           console.error('❌ Failed to get AI service health:', error);
           return {
             status: 'error',

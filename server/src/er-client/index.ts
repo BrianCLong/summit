@@ -255,7 +255,7 @@ export class ERClient {
       }
 
       return response.json();
-    } catch (error) {
+    } catch (error: any) {
       clearTimeout(timeoutId);
       if (error instanceof Error) {
         if (error.name === 'AbortError') {

@@ -13,7 +13,7 @@ router.get('/plan', async (req, res) => {
     try {
         const plan = await service.getPlan(tenantId);
         res.json(plan);
-    } catch (e) {
+    } catch (e: any) {
         res.status(500).json({ error: (e as Error).message });
     }
 });
@@ -25,7 +25,7 @@ router.post('/plan', async (req, res) => {
     try {
         await service.updatePlan(tenantId, planId);
         res.json({ success: true });
-    } catch (e) {
+    } catch (e: any) {
         res.status(500).json({ error: (e as Error).message });
     }
 });
@@ -37,7 +37,7 @@ router.post('/residency', async (req, res) => {
     try {
         const request = await service.requestResidencyChange(tenantId, region, reason);
         res.json(request);
-    } catch (e) {
+    } catch (e: any) {
          res.status(500).json({ error: (e as Error).message });
     }
 });
@@ -48,7 +48,7 @@ router.get('/residency', async (req, res) => {
      try {
         const requests = await service.getResidencyRequests(tenantId);
         res.json(requests);
-    } catch (e) {
+    } catch (e: any) {
          res.status(500).json({ error: (e as Error).message });
     }
 });

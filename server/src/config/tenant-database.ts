@@ -28,7 +28,7 @@ function loadConfigs(): void {
     const raw = fs.readFileSync(configPath, 'utf-8');
     configs = JSON.parse(raw);
     version++;
-  } catch (err) {
+  } catch (err: any) {
     configs = {};
   }
 }

@@ -48,7 +48,7 @@ export interface WebhookPayload {
 }
 
 export class WebhookReceiver extends BaseReceiver {
-  private webhookConfig: WebhookReceiverConfig;
+  private webhookConfig!: WebhookReceiverConfig;
 
   constructor() {
     super('webhook', 'Webhook Notifications');
@@ -94,7 +94,7 @@ export class WebhookReceiver extends BaseReceiver {
           method: this.webhookConfig.method,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         recipientId: recipient,

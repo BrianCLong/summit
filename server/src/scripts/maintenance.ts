@@ -16,7 +16,7 @@ async function runMaintenance() {
         try {
             await partitionManager.maintainPartitions(['audit_logs', 'metrics']);
             logger.info('Partition maintenance complete.');
-        } catch (e) {
+        } catch (e: any) {
             logger.warn({ error: e }, 'Partition maintenance failed (likely DB connection issue in dev)');
         }
 
@@ -29,7 +29,7 @@ async function runMaintenance() {
             await backupService.ensureBackupDir('neo4j');
             await backupService.ensureBackupDir('redis');
             logger.info('Backup directory verification complete.');
-        } catch (e) {
+        } catch (e: any) {
             logger.error({ error: e }, 'Backup verification failed');
             throw e;
         }
@@ -42,7 +42,7 @@ async function runMaintenance() {
         logger.info({ memoryUsage }, 'Maintenance memory check');
 
         logger.info('System maintenance completed successfully.');
-    } catch (error) {
+    } catch (error: any) {
         logger.error('System maintenance failed', error);
         process.exit(1);
     }

@@ -176,7 +176,7 @@ export class HashTreeBuilder {
       if (rebuiltRoot.hash !== tree.root) {
         errors.push('Merkle root mismatch - tree has been tampered with');
       }
-    } catch (error) {
+    } catch (error: any) {
       errors.push(`Tree verification failed: ${error}`);
     }
 

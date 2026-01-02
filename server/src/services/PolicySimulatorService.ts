@@ -236,7 +236,7 @@ export class PolicySimulatorService {
           : `Some rules failed - defaulting to ALLOW`,
         result: allRulesMatch ? 'passed' : 'failed',
         details: {
-          matchedCount: matchedRules.filter((r) => r.matched).length,
+          matchedCount: matchedRules.filter((r: any) => r.matched).length,
           totalRules: request.policy.rules.length,
         },
       });
@@ -270,7 +270,7 @@ export class PolicySimulatorService {
           evaluator: 'PolicySimulatorService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error simulating policy:', error);
       throw error;
     }
@@ -331,7 +331,7 @@ export class PolicySimulatorService {
           evaluator: 'PolicySimulatorService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error in batch simulation:', error);
       throw error;
     }
@@ -425,7 +425,7 @@ export class PolicySimulatorService {
           evaluator: 'PolicySimulatorService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error analyzing impact:', error);
       throw error;
     }
@@ -508,14 +508,14 @@ export class PolicySimulatorService {
   }
 
   private calculatePolicyDiff(before: Policy, after: Policy): PolicyDiff {
-    const beforeRuleKeys = new Set(before.rules.map((r) => `${r.field}:${r.operator}`));
-    const afterRuleKeys = new Set(after.rules.map((r) => `${r.field}:${r.operator}`));
+    const beforeRuleKeys = new Set(before.rules.map((r: any) => `${r.field}:${r.operator}`));
+    const afterRuleKeys = new Set(after.rules.map((r: any) => `${r.field}:${r.operator}`));
 
     const addedRules = after.rules.filter(
-      (r) => !beforeRuleKeys.has(`${r.field}:${r.operator}`)
+      (r: any) => !beforeRuleKeys.has(`${r.field}:${r.operator}`)
     );
     const removedRules = before.rules.filter(
-      (r) => !afterRuleKeys.has(`${r.field}:${r.operator}`)
+      (r: any) => !afterRuleKeys.has(`${r.field}:${r.operator}`)
     );
 
     const modifiedRules: { before: PolicyRule; after: PolicyRule }[] = [];
@@ -523,7 +523,7 @@ export class PolicySimulatorService {
       const key = `${afterRule.field}:${afterRule.operator}`;
       if (beforeRuleKeys.has(key)) {
         const beforeRule = before.rules.find(
-          (r) => `${r.field}:${r.operator}` === key
+          (r: any) => `${r.field}:${r.operator}` === key
         );
         if (beforeRule && JSON.stringify(beforeRule.value) !== JSON.stringify(afterRule.value)) {
           modifiedRules.push({ before: beforeRule, after: afterRule });

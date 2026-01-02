@@ -763,7 +763,7 @@ export class DataResidencyService {
       rootKey,
       randomBytes(16),
     );
-    let encryptedDataKey = keyEncryptionKey.update(dataKey, null, 'base64');
+    let encryptedDataKey = keyEncryptionKey.update(dataKey, undefined, 'base64');
     encryptedDataKey += keyEncryptionKey.final('base64');
 
     return {
@@ -815,7 +815,7 @@ export class DataResidencyService {
     const dataKey = randomBytes(32);
 
     const cipher = createCipheriv('aes-256-gcm', rootKey, randomBytes(16));
-    let encryptedDataKey = cipher.update(dataKey, null, 'base64');
+    let encryptedDataKey = cipher.update(dataKey, undefined, 'base64');
     encryptedDataKey += cipher.final('base64');
 
     return {
@@ -852,7 +852,7 @@ export class DataResidencyService {
         default:
           throw new Error('Unsupported KMS provider');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('KMS connectivity test failed:', error);
       return false;
     }
@@ -1055,7 +1055,7 @@ export class DataResidencyService {
 
     return {
       encryptionRate: total > 0 ? (encrypted / total) * 100 : 100,
-      classificationBreakdown: stats.rows.reduce((acc, row) => {
+      classificationBreakdown: stats.rows.reduce((acc: any, row: any) => {
         acc[row.classification_level] = {
           count: parseInt(row.count),
           complianceRate: parseFloat(row.compliance_rate) * 100,

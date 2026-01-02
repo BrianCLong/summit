@@ -53,7 +53,7 @@ const verifyGitHubSignature = (req: any, res: any, next: any) => {
     ) {
       return res.status(401).json({ error: 'Invalid signature' });
     }
-  } catch (error) {
+  } catch (error: any) {
     return res.status(401).json({ error: 'Invalid signature format' });
   }
 
@@ -110,7 +110,7 @@ const validate = (schema: any) => (req: any, res: any, next: any) => {
   try {
     req.body = schema.parse(req.body);
     next();
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ error: 'Invalid input', details: error });
   }
 };
@@ -424,7 +424,7 @@ router.post(
   body('pull_request').optional().isObject(),
   body('issue').optional().isObject(),
   async (req, res) => {
-    return tracer.trace('webhook.receive', async (span) => {
+    return tracer.trace('webhook.receive', async (span: any) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: 'Validation failed' });
@@ -586,7 +586,7 @@ router.post(
       }
 
       res.status(200).json({ status: 'processed' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Jira webhook error:', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }
@@ -668,7 +668,7 @@ router.post(
       }
 
       res.status(200).json({ status: 'processed' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Lifecycle webhook error:', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }

@@ -287,7 +287,7 @@ export async function withConductorSpan<T>(
     const result = await operation(span);
     span.setStatus({ code: SpanStatusCode.OK });
     return result;
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof Error) {
       span.recordException(error);
       span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });

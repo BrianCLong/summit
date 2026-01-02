@@ -75,39 +75,39 @@ export const provenanceResolvers = {
 
 // Helper function to query DB directly since getEntries doesn't support resourceId yet
 async function getEntityLineageFromDb(
-    tenantId: string,
-    resourceId: string,
-    limit = 50,
-    offset = 0,
-    order = 'DESC'
+  tenantId: string,
+  resourceId: string,
+  limit = 50,
+  offset = 0,
+  order = 'DESC'
 ) {
-    const query = `
+  const query = `
         SELECT * FROM provenance_ledger_v2
         WHERE tenant_id = $1 AND resource_id = $2
         ORDER BY sequence_number ${order === 'ASC' ? 'ASC' : 'DESC'}
         LIMIT $3 OFFSET $4
     `;
 
-    const result = await pool.query(query, [tenantId, resourceId, limit, offset]);
+  const result = await pool.query(query, [tenantId, resourceId, limit, offset]);
 
-    // We need to map the rows to match the GraphQL schema
-    return result.rows.map(row => ({
-        id: row.id,
-        tenantId: row.tenant_id,
-        sequenceNumber: row.sequence_number,
-        previousHash: row.previous_hash,
-        currentHash: row.current_hash,
-        timestamp: row.timestamp,
-        actionType: row.action_type,
-        resourceType: row.resource_type,
-        resourceId: row.resource_id,
-        actorId: row.actor_id,
-        actorType: row.actor_type,
-        payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload,
-        metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
-        signature: row.signature,
-        // witness and attribution are stored in metadata in our implementation
-        witness: (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata)?.witness,
-        attribution: (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata)?.attribution
-    }));
+  // We need to map the rows to match the GraphQL schema
+  return result.rows.map((row: any) => ({
+    id: row.id,
+    tenantId: row.tenant_id,
+    sequenceNumber: row.sequence_number,
+    previousHash: row.previous_hash,
+    currentHash: row.current_hash,
+    timestamp: row.timestamp,
+    actionType: row.action_type,
+    resourceType: row.resource_type,
+    resourceId: row.resource_id,
+    actorId: row.actor_id,
+    actorType: row.actor_type,
+    payload: typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload,
+    metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+    signature: row.signature,
+    // witness and attribution are stored in metadata in our implementation
+    witness: (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata)?.witness,
+    attribution: (typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata)?.attribution
+  }));
 }

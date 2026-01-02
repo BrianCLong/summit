@@ -33,7 +33,7 @@ router.post('/prioritize', async (req, res) => {
     // e.g. narrative_prioritization_score
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error in narrative prioritization endpoint:', error);
     res.status(500).json({ error: 'Internal server error' });
   }

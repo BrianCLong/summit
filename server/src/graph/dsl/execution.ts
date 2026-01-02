@@ -26,7 +26,7 @@ export function parseDSL(json: string): DSLQuery {
     if (!parsed.start) throw new Error('Query must have a start clause');
     validateDSL(parsed);
     return parsed as DSLQuery;
-  } catch (e) {
+  } catch (e: any) {
     throw new Error(`Invalid DSL JSON: ${e.message}`);
   }
 }

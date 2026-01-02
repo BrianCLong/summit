@@ -54,7 +54,7 @@ async function getRedisInfo(): Promise<RedisInfo> {
         ? Number(parsed.connected_clients)
         : undefined,
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       connected: true,
       mode: config.redis.useCluster ? 'cluster' : 'single',

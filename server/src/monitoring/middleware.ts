@@ -159,7 +159,7 @@ export function trackDbQuery<T>(database: string, operation: string, queryFuncti
     let status = 'success';
     const tracer = getTracer();
 
-    return tracer.withSpan(`db.${database}.${operation}`, async (span) => {
+    return tracer.withSpan(`db.${database}.${operation}`, async (span: any) => {
       span.setAttributes({
         'db.system': database,
         'db.operation': operation,
@@ -168,7 +168,7 @@ export function trackDbQuery<T>(database: string, operation: string, queryFuncti
       try {
         const result = await queryFunction(...args);
         return result;
-      } catch (error) {
+      } catch (error: any) {
         status = 'error';
         throw error;
       } finally {
@@ -195,7 +195,7 @@ export function trackAiJob<T>(jobType: string, jobFunction: (...args: any[]) => 
     let status = 'success';
     const tracer = getTracer();
 
-    return tracer.withSpan(`ai.job.${jobType}`, async (span) => {
+    return tracer.withSpan(`ai.job.${jobType}`, async (span: any) => {
       span.setAttributes({
         'ai.job.type': jobType,
       });
@@ -209,7 +209,7 @@ export function trackAiJob<T>(jobType: string, jobFunction: (...args: any[]) => 
       try {
         const result = await jobFunction(...args);
         return result;
-      } catch (error) {
+      } catch (error: any) {
         status = 'error';
         throw error;
       } finally {
@@ -241,7 +241,7 @@ export function trackGraphOperation<T>(operation: string, investigationId: strin
     const start = Date.now();
     const tracer = getTracer();
 
-    return tracer.withSpan(`graph.operation.${operation}`, async (span) => {
+    return tracer.withSpan(`graph.operation.${operation}`, async (span: any) => {
       span.setAttributes({
         'graph.operation': operation,
         'graph.investigation_id': investigationId,

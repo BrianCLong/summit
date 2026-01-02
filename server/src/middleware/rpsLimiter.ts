@@ -6,7 +6,7 @@ const WINDOW_SIZE_MS = 1000; // 1 second
 const MAX_REQUESTS_PER_WINDOW = 100; // 100 RPS
 
 export function rpsLimiter(req: Request, res: Response, next: NextFunction) {
-  const ip = req.ip; // Or tenantId for adaptive limiting
+  const ip = req.ip || 'unknown'; // Or tenantId for adaptive limiting
   const now = Date.now();
 
   if (!requestCounts.has(ip)) {

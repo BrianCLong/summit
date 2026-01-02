@@ -97,7 +97,7 @@ export interface RetentionPolicy {
 // ============================================================================
 
 export class GDPRComplianceService {
-  constructor(private pg: Pool) {}
+  constructor(private pg: Pool) { }
 
   // ==========================================================================
   // DATA SUBJECT REQUESTS (GDPR Articles 15-21)
@@ -157,7 +157,7 @@ export class GDPRComplianceService {
       );
 
       return createdRequest;
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message, request },
         'Failed to create data subject request',
@@ -460,7 +460,7 @@ export class GDPRComplianceService {
       );
 
       return { deletionId };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message, deletion },
         'Failed to log data deletion',

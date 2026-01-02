@@ -858,7 +858,7 @@ const crudResolvers = {
 
         await tx.commit();
         await pgClient.query('COMMIT');
-      } catch (err) {
+      } catch (err: any) {
         await tx.rollback();
         await pgClient.query('ROLLBACK');
         throw err;
@@ -1217,7 +1217,7 @@ const crudResolvers = {
 
         await tx.commit();
         await pgClient.query('COMMIT');
-      } catch (err) {
+      } catch (err: any) {
         await tx.rollback();
         await pgClient.query('ROLLBACK');
         throw err;

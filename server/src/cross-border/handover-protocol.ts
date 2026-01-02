@@ -134,7 +134,7 @@ export class HandoverProtocol extends EventEmitter {
 
       this.emit('handoverComplete', { session, response });
       return response;
-    } catch (error) {
+    } catch (error: any) {
       await this.updateSessionState(session.id, 'failed');
       this.recordHandover(session, 'failed');
       throw error;

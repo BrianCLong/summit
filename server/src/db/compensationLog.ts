@@ -15,11 +15,11 @@ export interface CompensationEntry {
   entityType: string;
   entityId?: string;
   compensationType:
-    | 'DELETE'
-    | 'CREATE'
-    | 'UPDATE'
-    | 'RELATIONSHIP_DELETE'
-    | 'RELATIONSHIP_CREATE';
+  | 'DELETE'
+  | 'CREATE'
+  | 'UPDATE'
+  | 'RELATIONSHIP_DELETE'
+  | 'RELATIONSHIP_CREATE';
   compensationData: any;
   executedAt?: string;
   success?: boolean;
@@ -88,7 +88,7 @@ export class CompensationManager {
         status: 'STARTED',
       });
 
-      const result = await session.executeWrite(async (tx) => {
+      const result = await session.executeWrite(async (tx: any) => {
         const safeContext = new SafeMutationContext(tx, context, this);
 
         try {
@@ -98,7 +98,7 @@ export class CompensationManager {
           await this.logCompensators(correlationId, context.compensators);
 
           return mutationResult;
-        } catch (error) {
+        } catch (error: any) {
           // Execute compensations in reverse order
           await this.executeCompensations(tx, context.compensators.reverse());
           throw error;
@@ -113,7 +113,7 @@ export class CompensationManager {
         compensationId: correlationId,
         rollback: () => this.manualRollback(correlationId),
       };
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
@@ -143,7 +143,7 @@ export class CompensationManager {
     const session = this.driver.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         // Get compensation entries
         const compensators = await this.getCompensators(correlationId);
 
@@ -158,7 +158,7 @@ export class CompensationManager {
       });
 
       logger.info('Manual rollback completed', { correlationId });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Manual rollback failed', {
         correlationId,
         error: error instanceof Error ? error.message : String(error),
@@ -281,7 +281,7 @@ export class CompensationManager {
         { correlationId },
       );
 
-      return result.records.map((record) => {
+      return result.records.map((record: any) => {
         const comp = record.get('c').properties;
         return {
           id: comp.id,
@@ -319,7 +319,7 @@ export class CompensationManager {
           entityType: comp.entityType,
           entityId: comp.entityId,
         });
-      } catch (error) {
+      } catch (error: any) {
         comp.success = false;
         comp.error = error instanceof Error ? error.message : String(error);
 
@@ -472,7 +472,7 @@ export class CompensationManager {
         params,
       );
 
-      return result.records.map((record) => ({
+      return result.records.map((record: any) => ({
         ...record.get('log').properties,
         compensators: record.get('compensators').map((c: any) => c.properties),
       }));
@@ -490,7 +490,7 @@ export class SafeMutationContext {
     public tx: Transaction,
     public context: MutationContext,
     private manager: CompensationManager,
-  ) {}
+  ) { }
 
   /**
    * Register a compensation for entity creation

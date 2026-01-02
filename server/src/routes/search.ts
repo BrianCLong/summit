@@ -28,7 +28,7 @@ router.post('/', ensureAuthenticated, async (req: Request, res: Response) => {
 
     const results = await searchService.searchCases(q, filters, limit);
     res.json(results);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Advanced search failed');
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -48,7 +48,7 @@ router.get('/autocomplete', ensureAuthenticated, async (req: Request, res: Respo
 
     const suggestions = await searchService.getAutocomplete(q, Number(limit));
     res.json(suggestions);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Autocomplete failed');
     res.status(500).json({ error: 'Internal server error' });
   }

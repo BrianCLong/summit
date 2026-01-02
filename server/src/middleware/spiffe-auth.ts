@@ -67,7 +67,7 @@ export class SpiffeAuthService {
       this.startSVIDRefresh();
 
       console.log('SPIFFE authentication initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to initialize SPIFFE authentication:', error);
 
       if (this.config.requireVerification) {
@@ -188,7 +188,7 @@ export class SpiffeAuthService {
       this.localSVID = svid;
 
       return svid;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch SVID:', error);
       throw new Error('SVID fetch failed');
     }
@@ -206,7 +206,7 @@ export class SpiffeAuthService {
         try {
           const response = JSON.parse(data);
           resolve(response);
-        } catch (error) {
+        } catch (error: any) {
           reject(new Error('Invalid JSON response from SPIRE Agent'));
         }
       });
@@ -312,7 +312,7 @@ export class SpiffeAuthService {
         await this.fetchSVID();
         console.log('SVID refreshed successfully');
         this.startSVIDRefresh(); // Schedule next refresh
-      } catch (error) {
+      } catch (error: any) {
         console.error('SVID refresh failed:', error);
         // Retry in 1 minute
         this.svidRefreshTimer = setTimeout(
@@ -440,7 +440,7 @@ export class SpiffeAuthService {
       await socketConnected();
       socket.end();
       agentConnected = true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('SPIRE Agent connection failed:', error);
     }
 

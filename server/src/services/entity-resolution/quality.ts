@@ -50,7 +50,7 @@ export class DataQualityService {
             });
         }
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error calculating data quality metrics:', error);
     } finally {
         await session.close();

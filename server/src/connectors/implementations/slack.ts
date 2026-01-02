@@ -61,7 +61,7 @@ export class SlackConnector extends BaseConnector {
                   }
               }
               stream.push(null);
-          } catch (err) {
+          } catch (err: any) {
               stream.destroy(err as Error);
               this.metrics.errors++;
           }

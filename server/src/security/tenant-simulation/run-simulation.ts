@@ -54,7 +54,7 @@ const runSimulation = async (): Promise<void> => {
                         { validateOwnership: true }
                     );
                     errors.push(`Iteration ${i}: Failed to block cross-tenant access from ${sourceTenant} to ${targetTenant}`);
-                 } catch (e) {
+                 } catch (e: any) {
                      // Expected behavior: Access denied
                  }
              } else {
@@ -67,7 +67,7 @@ const runSimulation = async (): Promise<void> => {
                         { validateOwnership: true }
                     );
              }
-        } catch (e) {
+        } catch (e: any) {
             if (targetTenant === sourceTenant) {
                 errors.push(`Iteration ${i}: Failed valid access for ${sourceTenant}`);
             }

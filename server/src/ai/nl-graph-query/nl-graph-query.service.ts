@@ -157,7 +157,7 @@ export class NlGraphQueryService {
       );
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           queryId,

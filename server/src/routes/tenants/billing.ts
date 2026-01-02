@@ -52,7 +52,7 @@ router.get(
       }
 
       return res.json({ success: true, data: report });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to export tenant billing report');
       return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }

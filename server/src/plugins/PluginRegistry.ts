@@ -147,7 +147,7 @@ export class PluginRegistry {
           evaluator: 'PluginRegistry',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId: manifest.id }, 'Failed to register plugin');
       throw error;
     }
@@ -209,7 +209,7 @@ export class PluginRegistry {
           evaluator: 'PluginRegistry',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId }, 'Failed to get plugin');
       throw error;
     }
@@ -268,7 +268,7 @@ export class PluginRegistry {
         params
       );
 
-      const plugins: PluginRegistration[] = result.rows.map((row) => ({
+      const plugins: PluginRegistration[] = result.rows.map((row: any) => ({
         id: row.id,
         manifest: row.manifest,
         status: row.status,
@@ -293,7 +293,7 @@ export class PluginRegistry {
           evaluator: 'PluginRegistry',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to list plugins');
       throw error;
     }
@@ -334,7 +334,7 @@ export class PluginRegistry {
           evaluator: 'PluginRegistry',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId }, 'Failed to update plugin status');
       throw error;
     }
@@ -366,7 +366,7 @@ export class PluginRegistry {
           evaluator: 'PluginRegistry',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId }, 'Failed to unregister plugin');
       throw error;
     }
@@ -427,7 +427,7 @@ export class PluginRegistry {
           evaluator: 'PluginRegistry',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId, tenantId }, 'Failed to get tenant config');
       throw error;
     }
@@ -466,7 +466,7 @@ export class PluginRegistry {
           evaluator: 'PluginRegistry',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginId, tenantId }, 'Failed to save tenant config');
       throw error;
     }

@@ -39,7 +39,7 @@ router.post('/decisions', ensurePolicy('create', 'decision'), requireStepUp, asy
     );
 
     res.status(201).json({ receipt });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
     }
@@ -53,7 +53,7 @@ router.post('/claims', ensurePolicy('create', 'claim'), async (req: Authenticate
     const body = claimSchema.parse(req.body);
     const claimId = await intelGraphService.createClaim(body);
     res.status(201).json({ claimId });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
     }
@@ -69,7 +69,7 @@ router.get('/decisions/:id', async (req: AuthenticatedRequest, res: Response) =>
             return res.status(404).json({ error: 'Decision not found' });
         }
         res.json(result);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error getting decision:', error);
         res.status(500).json({ error: 'Internal server error' });
     }

@@ -95,7 +95,7 @@ const authResolvers = {
             }
             : null,
         };
-      } catch (error) {
+      } catch (error: any) {
         return { valid: false, user: null };
       }
     },

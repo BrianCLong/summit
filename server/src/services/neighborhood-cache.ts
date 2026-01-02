@@ -53,14 +53,14 @@ export class NeighborhoodCache {
                 await this.set(tenantId, investigationId, entityId, 2, graph);
               }
             }
-          } catch (err) {
+          } catch (err: any) {
             console.error('Neighborhood cache prewarm failed', err);
           } finally {
             await session.close();
           }
         });
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.error(
           'node-cron not available, skipping neighborhood prewarm',
           err,

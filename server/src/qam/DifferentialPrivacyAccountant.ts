@@ -237,7 +237,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       });
 
       return privacyLoss;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to consume privacy budget', { error, query });
       this.emit('consumption_error', { error, query });
       throw error;
@@ -264,7 +264,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
         default:
           throw new Error(`Unknown composition method: ${method}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Composition calculation failed', {
         error,
         method,
@@ -724,7 +724,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
           method,
         );
         effectiveness[method] = composition.effectiveness;
-      } catch (error) {
+      } catch (error: any) {
         effectiveness[method] = 1.0;
       }
     }

@@ -136,7 +136,7 @@ export class FunnelService {
                     const uid = e.scopeHash;
                     if (!map.has(uid)) map.set(uid, []);
                     map.get(uid)!.push(e);
-                } catch (err) { }
+                } catch (err: any) { }
             }
         }
         return map;

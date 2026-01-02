@@ -298,7 +298,7 @@ export class CasePolicyEngine implements ICasePolicyEngine {
         { auditRequired: this.shouldAudit(operation) }
       );
 
-    } catch (error) {
+    } catch (error: any) {
       // Fail secure: deny on error
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return this.deny(

@@ -92,7 +92,7 @@ export class PredictiveThreatService extends EventEmitter {
         // Just run forecast to update metrics as side effect
         await this.forecastSignal(signal, horizon);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to update predictive metrics', error);
     }
   }

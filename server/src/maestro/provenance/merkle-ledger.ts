@@ -226,7 +226,7 @@ export class ProvenanceLedger {
 
     if (rows.length === 0) return;
 
-    const evidenceList: Evidence[] = rows.map((row) => ({
+    const evidenceList: Evidence[] = rows.map((row: any) => ({
       id: row.id,
       runId: row.run_id,
       artifactType: row.artifact_type,
@@ -280,7 +280,7 @@ export class ProvenanceLedger {
         [runId],
       );
 
-      const manifest: Evidence[] = evidenceRows.map((row) => ({
+      const manifest: Evidence[] = evidenceRows.map((row: any) => ({
         id: row.id,
         runId: row.run_id,
         artifactType: row.artifact_type,
@@ -473,7 +473,7 @@ export class ProvenanceLedger {
     );
 
     return {
-      claims: claimsRows.map((row) => ({
+      claims: claimsRows.map((row: any) => ({
         id: row.id,
         runId: row.run_id,
         statement: row.statement,
@@ -482,7 +482,7 @@ export class ProvenanceLedger {
         source: row.source,
         timestamp: row.timestamp,
       })),
-      contradictions: contradictionsRows.map((row) => ({
+      contradictions: contradictionsRows.map((row: any) => ({
         id: row.id,
         claimA: row.claim_a,
         claimB: row.claim_b,

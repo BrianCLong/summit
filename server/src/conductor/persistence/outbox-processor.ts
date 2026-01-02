@@ -190,7 +190,7 @@ export class OutboxProcessor extends EventEmitter {
       );
 
       return eventId;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to publish event to outbox', {
         error: error.message,
@@ -276,7 +276,7 @@ export class OutboxProcessor extends EventEmitter {
           { instance_id: this.instanceId },
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error in outbox processing batch', {
         error: error.message,
         instanceId: this.instanceId,
@@ -328,7 +328,7 @@ export class OutboxProcessor extends EventEmitter {
         [this.config.batchSize],
       );
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         ...row,
         event_data:
           typeof row.event_data === 'string'
@@ -387,7 +387,7 @@ export class OutboxProcessor extends EventEmitter {
       );
 
       this.emit('eventProcessed', event);
-    } catch (error) {
+    } catch (error: any) {
       await this.handleProcessingError(client, event, error);
     } finally {
       client.release();
@@ -505,7 +505,7 @@ export class OutboxProcessor extends EventEmitter {
         'outbox_event_dead_lettered',
         { event_type: event.event_type, reason: reason.substring(0, 50) },
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to mark event as dead letter', {
         eventId: event.id,
@@ -534,7 +534,7 @@ export class OutboxProcessor extends EventEmitter {
       );
 
       return result === 'OK';
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to acquire distributed lock', {
         error: error.message,
       });
@@ -559,7 +559,7 @@ export class OutboxProcessor extends EventEmitter {
       `;
 
       await this.redis.eval(script, 1, lockKey, lockValue);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to release distributed lock', {
         error: error.message,
       });
@@ -577,7 +577,7 @@ export class OutboxProcessor extends EventEmitter {
     this.processingTimer = setTimeout(async () => {
       try {
         await this.processEvents();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Unexpected error in processing cycle', {
           error: error.message,
           instanceId: this.instanceId,

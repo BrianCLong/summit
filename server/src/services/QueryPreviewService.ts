@@ -207,7 +207,7 @@ export class QueryPreviewService {
       }, 'Created query preview');
 
       return preview;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to create query preview');
       metrics.queryPreviewErrorsTotal.inc({ language: input.language || 'cypher' });
       throw error;
@@ -626,7 +626,7 @@ export class QueryPreviewService {
         streamingChannel: streamTopic,
         streamedBatches: streamTopic ? streamedBatches : undefined,
       };
-    } catch (error) {
+    } catch (error: any) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
 
       metrics.queryPreviewExecutionsTotal.inc({
@@ -706,9 +706,9 @@ export class QueryPreviewService {
         { investigationId }
       );
 
-      const labels = result.records.map(r => r.get('label'));
+      const labels = result.records.map((r: any) => r.get('label'));
 
-      return `Investigation graph schema:\nNode labels: ${labels.filter(l => l !== 'Entity').join(', ')}\nRelationship types: ${labels.filter(l => !l.match(/^[A-Z]/)).join(', ')}`;
+      return `Investigation graph schema:\nNode labels: ${labels.filter((l: any) => l !== 'Entity').join(', ')}\nRelationship types: ${labels.filter((l: any) => !l.match(/^[A-Z]/)).join(', ')}`;
     } finally {
       await session.close();
     }
@@ -887,7 +887,7 @@ export class QueryPreviewService {
         timeout: options.timeout,
       });
 
-      const mapped = result.records.map(record => record.toObject());
+      const mapped = result.records.map((record: any) => record.toObject());
       const hasMore = mapped.length > limit;
       const records = hasMore ? mapped.slice(0, limit) : mapped;
       const nextCursor = hasMore ? skip + limit : undefined;

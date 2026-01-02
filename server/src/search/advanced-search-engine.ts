@@ -104,7 +104,7 @@ class InMemorySearchStore {
   private savedSearches = new Map<string, SavedSearch>();
   private history: SearchHistoryEntry[] = [];
 
-  constructor(private embedder: Embedder) {}
+  constructor(private embedder: Embedder) { }
 
   indexDocuments(documents: SearchDocument[]) {
     documents.forEach((doc) => {
@@ -182,7 +182,7 @@ export class AdvancedSearchEngine {
     const dslTokens = query.dsl ? parseDsl(query.dsl) : [];
     const matches = documents
       .map((doc) => this.scoreDocument(doc, tokens, query, dslTokens))
-      .filter((hit): hit is SearchHit => hit.score > 0)
+      .filter((hit): hit is SearchHit => !!hit && hit.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, sanitizedLimit);
 
