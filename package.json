@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
-    "verify": "tsx scripts/verify.ts",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
@@ -85,7 +85,6 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },
   "keywords": [
@@ -149,8 +148,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.50.1",
-    "uuid": "^13.0.0",
-    "zod": "^4.2.1"
+    "uuid": "^13.0.0"
   },
   "lint-staged": {
     "server/**/*.{ts,js}": [
@@ -212,7 +210,8 @@
     "redis": "^5.8.1",
     "supertest": "^7.1.4",
     "ws": "^8.18.3",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zod": "^4.3.4"
   },
   "private": true,
   "workspaces": [
