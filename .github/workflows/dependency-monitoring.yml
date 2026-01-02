@@ -1,0 +1,52 @@
+name: Dependency Monitoring (Snyk + Dependabot)
+on:
+  schedule:
+    - cron: "0 0 * * *" # Daily at midnight
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  snyk-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+
+      - name: Run Snyk to check for vulnerabilities
+        continue-on-error: true # Don't block build on vulnerability discovery initially, but upload SARIF
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif --all-projects
+
+      - name: Upload result to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+
+      - name: License Compliance Check
+        # Using a simple script or tool like `license-checker`
+        run: npx license-checker --summary --failOn GPL
