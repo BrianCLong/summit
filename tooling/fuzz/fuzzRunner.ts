@@ -9,14 +9,19 @@ export type FuzzTarget = {
   timeoutMs?: number;
 };
 
+export type FuzzFailure = {
+  iteration: number;
+  error: string;
+  artifactPath: string;
+  inputSample: string;
+  seed: number;
+};
+
 export type FuzzResult = {
   name: string;
   iterations: number;
-  failures: Array<{
-    iteration: number;
-    error: string;
-    artifactPath: string;
-  }>;
+  seed: number;
+  failures: FuzzFailure[];
 };
 
 type RNG = () => number;
@@ -33,34 +38,16 @@ function mulberry32(seed: number): RNG {
 }
 
 function mutateSeed(seed: string, rng: RNG): string {
-  const buffer = Buffer.from(seed);
-  if (buffer.length === 0) {
-    return seed;
-  }
-
-  const operations = [
-    () => {
-      const idx = Math.floor(rng() * buffer.length);
-      buffer[idx] = (buffer[idx] + Math.floor(rng() * 32)) % 256;
-    },
-    () => {
-      const idx = Math.floor(rng() * buffer.length);
-      buffer[idx] = 0;
-    },
-    () => {
-      buffer.reverse();
-    },
-    () => {
-      const idx = Math.floor(rng() * buffer.length);
-      const len = Math.max(1, Math.floor(rng() * 4));
-      const slice = buffer.subarray(idx, Math.min(buffer.length, idx + len));
-      return Buffer.concat([buffer.subarray(0, idx), slice, buffer.subarray(idx)]);
-    },
+  const operations: Array<(value: string) => string> = [
+    (value) => value,
+    (value) => value.trim(),
+    (value) => value.replace(/\s+/g, ' '),
+    (value) => value.split(/\r?\n/).reverse().join('\n'),
+    (value) => `${value}\n`,
   ];
 
   const op = operations[Math.floor(rng() * operations.length)];
-  const mutated = op() ?? buffer;
-  return (mutated instanceof Buffer ? mutated : buffer).toString();
+  return op(seed);
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, name: string): Promise<T> {
@@ -76,14 +63,22 @@ function ensureArtifactDir() {
   fs.mkdirSync(ARTIFACT_ROOT, { recursive: true });
 }
 
-function persistArtifact(target: string, iteration: number, input: string): string {
+function persistArtifact(
+  target: string,
+  iteration: number,
+  seed: number,
+  failureIndex: number,
+  input: string,
+): string {
   ensureArtifactDir();
-  const filePath = path.join(
-    ARTIFACT_ROOT,
-    `${target}-iteration-${iteration}-${Date.now()}.txt`,
-  );
+  const fileName = `${target}-seed-${seed}-iter-${iteration}-fail-${failureIndex}.txt`;
+  const filePath = path.join(ARTIFACT_ROOT, fileName);
   fs.writeFileSync(filePath, input, 'utf8');
   return filePath;
+}
+
+function toSample(input: string): string {
+  return input.length > 512 ? `${input.slice(0, 512)}…` : input;
 }
 
 export async function runFuzzTargets(targets: FuzzTarget[], seed = 1337): Promise<FuzzResult[]> {
@@ -102,16 +97,24 @@ export async function runFuzzTargets(targets: FuzzTarget[], seed = 1337): Promis
       try {
         await withTimeout(Promise.resolve(target.handler(mutated)), timeoutMs, target.name);
       } catch (error) {
-        const artifactPath = persistArtifact(target.name, i, mutated);
+        const artifactPath = persistArtifact(
+          target.name,
+          i,
+          seed,
+          failures.length,
+          mutated,
+        );
         failures.push({
           iteration: i,
           error: error instanceof Error ? error.message : String(error),
           artifactPath,
+          inputSample: toSample(mutated),
+          seed,
         });
       }
     }
 
-    results.push({ name: target.name, iterations, failures });
+    results.push({ name: target.name, iterations, seed, failures });
   }
 
   return results;
@@ -120,12 +123,15 @@ export async function runFuzzTargets(targets: FuzzTarget[], seed = 1337): Promis
 export function summarize(results: FuzzResult[]): string {
   return results
     .map((result) => {
-      const summary = `${result.name}: ${result.iterations} iterations, ${result.failures.length} failures`;
+      const summary = `${result.name} (seed ${result.seed}): ${result.iterations} iterations, ${result.failures.length} failures`;
       if (result.failures.length === 0) {
         return summary;
       }
       const detail = result.failures
-        .map((failure) => `  - #${failure.iteration}: ${failure.error} (artifact: ${failure.artifactPath})`)
+        .map(
+          (failure) =>
+            `  - #${failure.iteration}: ${failure.error} (artifact: ${failure.artifactPath})`,
+        )
         .join('\n');
       return `${summary}\n${detail}`;
     })

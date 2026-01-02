@@ -37,6 +37,9 @@ describe('fuzz harness', () => {
     expect(fs.existsSync(failure.artifactPath)).toBe(true);
     const persisted = fs.readFileSync(failure.artifactPath, 'utf8');
     expect(persisted.includes('boom')).toBe(true);
+    expect(failure.inputSample).toContain('boom');
+    expect(failure.seed).toBe(7);
+    expect(failure.artifactPath).toContain('seed-7');
   });
 
   it('halts handlers that hang', async () => {
