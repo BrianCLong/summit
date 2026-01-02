@@ -1,0 +1,201 @@
+name: Issue Sweeper - Automated Issue Resolution
+
+on:
+  # Run daily at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'Number of issues per batch'
+        required: false
+        default: '25'
+      max_batches:
+        description: 'Maximum number of batches (0 = unlimited)'
+        required: false
+        default: '5'
+      auto_fix:
+        description: 'Enable automated fixes'
+        required: false
+        type: boolean
+        default: true
+      auto_pr:
+        description: 'Create PRs for fixes'
+        required: false
+        type: boolean
+        default: true
+      dry_run:
+        description: 'Dry run (no actual changes)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2 hour timeout
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git operations
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "issue-sweeper[bot]"
+          git config --global user.email "issue-sweeper[bot]@users.noreply.github.com"
+
+      - name: Run Issue Sweeper
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BATCH_SIZE="${{ github.event.inputs.batch_size || '25' }}"
+          MAX_BATCHES="${{ github.event.inputs.max_batches || '5' }}"
+          AUTO_FIX="${{ github.event.inputs.auto_fix || 'true' }}"
+          AUTO_PR="${{ github.event.inputs.auto_pr || 'true' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+
+          CMD="npx tsx tools/issue-sweeper/run.ts --batch-size=$BATCH_SIZE --max-batches=$MAX_BATCHES"
+
+          if [ "$AUTO_FIX" = "true" ]; then
+            CMD="$CMD --auto-fix"
+          fi
+
+          if [ "$AUTO_PR" = "true" ]; then
+            CMD="$CMD --auto-pr"
+          fi
+
+          if [ "$DRY_RUN" = "true" ]; then
+            CMD="$CMD --dry-run"
+          fi
+
+          echo "Running: $CMD"
+          $CMD
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sweeper-reports-${{ github.run_id }}
+          path: |
+            tools/issue-sweeper/STATE.json
+            tools/issue-sweeper/LEDGER.ndjson
+            tools/issue-sweeper/REPORT.md
+            tools/issue-sweeper/METRICS.json
+            tools/issue-sweeper/ROLLBACK.log
+          retention-days: 30
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          echo "## Issue Sweeper Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f tools/issue-sweeper/STATE.json ]; then
+            echo "### Statistics" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            cat tools/issue-sweeper/STATE.json | jq '.stats' >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            echo "### Progress" >> $GITHUB_STEP_SUMMARY
+            TOTAL=$(cat tools/issue-sweeper/STATE.json | jq '.total_processed')
+            CURSOR=$(cat tools/issue-sweeper/STATE.json | jq '.cursor')
+            echo "- **Total Processed:** $TOTAL" >> $GITHUB_STEP_SUMMARY
+            echo "- **Current Page:** $CURSOR" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f tools/issue-sweeper/REPORT.md ]; then
+            echo "### Full Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat tools/issue-sweeper/REPORT.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Post Results Comment (on manual trigger)
+        if: github.event_name == 'workflow_dispatch' && success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            if (!fs.existsSync('tools/issue-sweeper/STATE.json')) {
+              return;
+            }
+
+            const state = JSON.parse(fs.readFileSync('tools/issue-sweeper/STATE.json', 'utf8'));
+
+            const body = `## 🤖 Issue Sweeper Run Completed
+
+            **Run ID:** ${{ github.run_id }}
+            **Triggered by:** @${{ github.actor }}
+
+            ### Results
+            - **Total Processed:** ${state.total_processed}
+            - **Already Solved:** ${state.stats.already_solved}
+            - **Solved in This Run:** ${state.stats.solved_in_this_run}
+            - **Not Solved:** ${state.stats.not_solved}
+            - **Blocked:** ${state.stats.blocked}
+            - **Failures:** ${state.failures.length}
+
+            ### PRs Created
+            ${state.open_prs.length > 0 ? state.open_prs.map(pr => `- ${pr}`).join('\n') : 'None'}
+
+            [View Full Report](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            // Comment on the triggering issue if available
+            // Otherwise, create a discussion or skip
+
+      - name: Handle Failures
+        if: failure()
+        run: |
+          echo "::error::Issue Sweeper run failed"
+
+          if [ -f tools/issue-sweeper/STATE.json ]; then
+            echo "Failures:" >> $GITHUB_STEP_SUMMARY
+            cat tools/issue-sweeper/STATE.json | jq '.failures' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Return to main branch if on an issue branch
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [[ $CURRENT_BRANCH == issue/* ]]; then
+            git checkout main || git checkout master
+          fi
+
+          # Clean up old backup branches (older than 7 days)
+          git branch | grep backup/ | while read branch; do
+            COMMIT_DATE=$(git log -1 --format=%ci $branch 2>/dev/null || echo "")
+            if [ -n "$COMMIT_DATE" ]; then
+              DAYS_OLD=$(( ($(date +%s) - $(date -d "$COMMIT_DATE" +%s)) / 86400 ))
+              if [ $DAYS_OLD -gt 7 ]; then
+                git branch -D $branch || true
+              fi
+            fi
+          done
