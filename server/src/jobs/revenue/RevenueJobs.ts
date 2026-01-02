@@ -8,18 +8,18 @@ export const JOB_QUEUE_PARTNER_PAYOUTS = 'process-partner-payouts';
 
 export async function registerRevenueJobs(boss: any) {
     // Renewals Job
-    await boss.work(JOB_QUEUE_RENEWALS, async (job) => {
+    await boss.work(JOB_QUEUE_RENEWALS, async (job: any) => {
         logger.info(`[Job] Processing renewals job ${job.id}`);
         try {
             await RenewalService.processRenewals();
-        } catch (error) {
+        } catch (error: any) {
             logger.error(`[Job] Renewal processing failed: ${error}`);
             throw error;
         }
     });
 
     // Partner Payouts Job
-    await boss.work(JOB_QUEUE_PARTNER_PAYOUTS, async (job) => {
+    await boss.work(JOB_QUEUE_PARTNER_PAYOUTS, async (job: any) => {
         logger.info(`[Job] Processing partner payouts job ${job.id}`);
         try {
             let { periodStart, periodEnd } = job.data || {};
@@ -35,7 +35,7 @@ export async function registerRevenueJobs(boss: any) {
             }
 
             await PartnerPayoutService.generatePayoutReports(new Date(periodStart), new Date(periodEnd));
-        } catch (error) {
+        } catch (error: any) {
             logger.error(`[Job] Partner payouts failed: ${error}`);
             throw error;
         }

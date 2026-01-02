@@ -125,7 +125,7 @@ export class KeyHygieneManager {
 
       logger.info('Signing key generated', { keyId, fingerprint, algorithm });
       return signingKey;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate signing key', {
         error: error.message,
         keyId,
@@ -203,7 +203,7 @@ export class KeyHygieneManager {
         signedBy,
       });
       return runbookSignature;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to sign runbook', {
         error: error.message,
         runbookId,
@@ -323,7 +323,7 @@ export class KeyHygieneManager {
       });
 
       return integrity;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Runbook verification failed', {
         error: error.message,
         runbookId,
@@ -384,7 +384,7 @@ export class KeyHygieneManager {
         newKeyId,
         rotationId,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Key rotation failed', { error: error.message, reason });
       throw error;
     }
@@ -488,7 +488,7 @@ export class KeyHygieneManager {
 
       logger.info('Key hygiene audit completed', auditResult);
       return auditResult;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Key hygiene audit failed', { error: error.message });
       throw error;
     }
@@ -788,7 +788,7 @@ export class KeyHygieneManager {
       client.release();
 
       return result.rows[0]?.content || null;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Could not retrieve runbook content', { runbookId, version });
       return null;
     }

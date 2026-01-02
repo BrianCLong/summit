@@ -122,7 +122,7 @@ export default class SemanticSearchService {
       status: undefined,
     }, limit);
 
-    return results.map(r => ({
+    return results.map((r: any) => ({
       id: r.id,
       text: r.title,
       score: r.score,
@@ -225,7 +225,7 @@ export default class SemanticSearchService {
       } finally {
         client.release();
       }
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error({ err }, "Semantic search failed");
       return [];
     }
@@ -250,13 +250,13 @@ export default class SemanticSearchService {
       `;
 
       const res = await pool.query(sql, [vectorStr, limit]);
-      return res.rows.map(r => ({
+      return res.rows.map((r: any) => ({
         path: r.path,
         title: r.title,
         metadata: r.metadata,
         similarity: parseFloat(r.similarity)
       }));
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error({ err }, "Doc search failed");
       return [];
     }

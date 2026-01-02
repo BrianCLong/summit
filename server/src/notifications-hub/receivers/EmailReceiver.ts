@@ -55,7 +55,7 @@ export interface EmailMessage {
 }
 
 export class EmailReceiver extends BaseReceiver {
-  private emailConfig: EmailReceiverConfig;
+  private emailConfig!: EmailReceiverConfig;
 
   constructor() {
     super('email', 'Email Notifications');
@@ -100,7 +100,7 @@ export class EmailReceiver extends BaseReceiver {
           subject: emailMessage.subject,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         recipientId: recipient,
@@ -317,7 +317,7 @@ export class EmailReceiver extends BaseReceiver {
     try {
       // In production, verify SMTP connection or email service API
       return true;
-    } catch (error) {
+    } catch (error: any) {
       return false;
     }
   }

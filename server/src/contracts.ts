@@ -18,9 +18,9 @@ export async function validateArtifact(
   return ok
     ? { ok: true as const, errors: [] as string[] }
     : {
-        ok: false as const,
-        errors: (validate.errors || []).map(
-          (e) => `${e.instancePath} ${e.message}`,
-        ),
-      };
+      ok: false as const,
+      errors: (validate.errors || []).map(
+        (e: any) => `${e.instancePath} ${e.message}`,
+      ),
+    };
 }

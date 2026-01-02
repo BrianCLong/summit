@@ -634,7 +634,7 @@ export class ComplianceMonitoringService {
           for (const row of rows) {
             await this.runComplianceChecks(row.tenant_id);
           }
-        } catch (error) {
+        } catch (error: any) {
           serviceLogger.error(
             { error: (error as Error).message },
             'Failed to run periodic compliance checks',

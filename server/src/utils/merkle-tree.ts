@@ -316,7 +316,7 @@ export function verifyMerkleRoot(items: any[], expectedRoot: string): boolean {
   try {
     const actualRoot = buildMerkleRoot(items);
     return actualRoot === expectedRoot;
-  } catch (error) {
+  } catch (error: any) {
     return false;
   }
 }

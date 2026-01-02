@@ -170,7 +170,7 @@ export class OPAClient {
       );
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
       logger.error(
         {
@@ -190,7 +190,7 @@ export class OPAClient {
     try {
       const response = await this.client.post(`/v1/data/${query}`, { input });
       return response.data.result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ query, error }, 'OPA query evaluation failed');
       throw error;
     }
@@ -214,7 +214,7 @@ export class OPAClient {
         input,
       );
       return result === true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { userId, tenantId, resource, action, error },
         'Data access check failed',
@@ -361,7 +361,7 @@ export class OPAClient {
         healthy: true,
         response_time_ms: Date.now() - startTime,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         response_time_ms: Date.now() - startTime,

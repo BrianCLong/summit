@@ -213,7 +213,7 @@ export class CoherenceService {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Coherence analysis failed', {
         error,
         tenantId,
@@ -264,7 +264,7 @@ export class CoherenceService {
         signalId: ingestResult.signalId,
         triggeredAnalysis,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Signal ingestion failed', { error, tenantId, signalData });
       throw error;
     }
@@ -300,7 +300,7 @@ export class CoherenceService {
         recentAlerts,
         systemHealth,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get coherence status', { error, tenantId });
       return {
         currentScore: 0,
@@ -370,7 +370,7 @@ export class CoherenceService {
       logger.info('Periodic analysis initialized', {
         tenantCount: tenants.length,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize periodic analysis', { error });
     }
   }
@@ -389,7 +389,7 @@ export class CoherenceService {
           await this.analyzeCoherence(tenantId, {
             includeRealTimeAnalysis: true,
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Periodic analysis failed', { error, tenantId });
         }
       },
@@ -434,7 +434,7 @@ export class CoherenceService {
         whereClause = "WHERE s.ts >= datetime() - duration('P1D')";
       }
 
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
@@ -931,7 +931,7 @@ export class CoherenceService {
     // Store in Neo4j for historical analysis
     const session = this.neo4j.getSession();
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})
@@ -974,7 +974,7 @@ export class CoherenceService {
   private async getActiveTenants(): Promise<string[]> {
     const session = this.neo4j.getSession();
     try {
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return await tx.run(`
           MATCH (t:Tenant)
           WHERE EXISTS((t)-[:EMITS]->(:Signal))
@@ -1048,7 +1048,7 @@ export class CoherenceService {
           lastCheck: new Date().toISOString(),
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         status: 'error',
         message: 'Unable to perform health check',

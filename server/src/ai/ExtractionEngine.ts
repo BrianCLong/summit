@@ -86,7 +86,7 @@ export class ExtractionEngine {
       try {
         await fsPromises.access(resolvedPath);
         logger.warn(`Access denied to file outside allowed paths: ${resolvedPath}`);
-      } catch (e) {
+      } catch (e: any) {
         // File doesn't exist or no access, which is also fine to reject
       }
       throw new Error(`Access denied: Media path is not in an allowed directory.`);

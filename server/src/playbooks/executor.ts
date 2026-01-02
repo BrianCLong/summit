@@ -54,7 +54,7 @@ export class PlaybookExecutor {
           finishedAt,
           output,
         });
-      } catch (error) {
+      } catch (error: any) {
         const finishedAt = new Date().toISOString();
         const message = error instanceof Error ? error.message : 'Unknown error';
         results.push({

@@ -99,7 +99,7 @@ export class StrategicPlanningService {
       logger.info({ goalId: id, title: goal.title }, 'Strategic goal created');
 
       return goal;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to create strategic goal');
       throw error;
     } finally {
@@ -134,7 +134,7 @@ export class StrategicPlanningService {
       logger.info({ goalId: updated.id }, 'Strategic goal updated');
 
       return updated;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to update strategic goal');
       throw error;
     } finally {
@@ -265,7 +265,7 @@ export class StrategicPlanningService {
       await this.recalculateGoalProgress(validated.goalId);
 
       return objective;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to create strategic objective');
       throw error;
     } finally {
@@ -576,7 +576,7 @@ export class StrategicPlanningService {
       await this.recalculateObjectiveProgress(validated.objectiveId);
 
       return initiative;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to create initiative');
       throw error;
     } finally {

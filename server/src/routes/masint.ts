@@ -26,7 +26,7 @@ router.post('/ingest', ensureAuthenticated, async (req, res) => {
 
     const result = await masintService.processSignal(validation.data);
     res.status(200).json(result);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error processing MASINT signal:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -47,7 +47,7 @@ router.get('/analysis/:id', ensureAuthenticated, async (req, res) => {
     }
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, id }, 'Error retrieving analysis');
     res.status(500).json({ error: 'Internal Server Error' });
   }

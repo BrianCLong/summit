@@ -528,7 +528,7 @@ export class FederatedAttributionEngine extends EventEmitter {
             connectorId: connector.id,
             result,
           });
-        } catch (error) {
+        } catch (error: any) {
           this.emit('connectorError', { connectorId: connector.id, error });
         }
       },

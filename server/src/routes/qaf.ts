@@ -18,7 +18,7 @@ router.post('/spawn', async (req, res) => {
     }
     const identity = await factory.spawnAgent(config);
     res.json(identity);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to spawn agent' });
   }
 });

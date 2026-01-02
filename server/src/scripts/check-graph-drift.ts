@@ -23,7 +23,7 @@ const run = async () => {
     );
     logger.info('Check completed successfully.');
     process.exit(0);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Graph consistency check failed or drift detected.', error);
     process.exit(1);
   } finally {

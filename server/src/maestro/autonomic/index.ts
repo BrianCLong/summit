@@ -86,7 +86,7 @@ export class AutonomicLayer {
                 }
             }
         }
-    } catch (err) {
+    } catch (err: any) {
         console.error('[AutonomicLayer] Error in control loop cycle:', err);
     }
   }

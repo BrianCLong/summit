@@ -145,7 +145,7 @@ export class WorkflowExecutor extends EventEmitter {
         activeExecutions: this.activeExecutions.size,
         scheduledWorkflows: this.scheduleIntervals.size,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to initialize workflow executor', {
         error: error.message,
       });
@@ -171,7 +171,7 @@ export class WorkflowExecutor extends EventEmitter {
             version: workflow.version,
             taskCount: workflow.tasks.length,
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error('❌ Failed to load workflow file', {
             file: filePath,
             error: error.message,
@@ -183,7 +183,7 @@ export class WorkflowExecutor extends EventEmitter {
         count: this.workflows.size,
         workflows: Array.from(this.workflows.keys()),
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to load workflow definitions', {
         error: error.message,
       });
@@ -213,7 +213,7 @@ export class WorkflowExecutor extends EventEmitter {
           files.push(fullPath);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       // Directory might not exist, that's ok
       logger.debug('📁 Directory not found or inaccessible', {
         dir,
@@ -457,7 +457,7 @@ export class WorkflowExecutor extends EventEmitter {
           failedTasks: execution.failed_tasks.length,
         },
       );
-    } catch (error) {
+    } catch (error: any) {
       execution.status = 'failed';
       execution.error = error.message;
       execution.completed_at = new Date();
@@ -572,7 +572,7 @@ export class WorkflowExecutor extends EventEmitter {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       taskExecution.status = 'failed';
       taskExecution.completed_at = new Date();
       taskExecution.duration_ms = taskExecution.started_at
@@ -714,7 +714,7 @@ export class WorkflowExecutor extends EventEmitter {
           executionId: execution.id,
         });
         // Implement success actions (metrics, notifications, etc.)
-      } catch (error) {
+      } catch (error: any) {
         logger.error('❌ Success action failed', {
           type: action.type,
           error: error.message,
@@ -740,7 +740,7 @@ export class WorkflowExecutor extends EventEmitter {
           executionId: execution.id,
         });
         // Implement failure actions (alerts, cleanup, etc.)
-      } catch (error) {
+      } catch (error: any) {
         logger.error('❌ Failure action failed', {
           type: action.type,
           error: error.message,
@@ -765,7 +765,7 @@ export class WorkflowExecutor extends EventEmitter {
             const interval = setInterval(async () => {
               try {
                 await this.executeWorkflow(workflowName, 'schedule');
-              } catch (error) {
+              } catch (error: any) {
                 logger.error('❌ Scheduled workflow execution failed', {
                   workflow: workflowName,
                   error: error.message,
@@ -831,7 +831,7 @@ export class WorkflowExecutor extends EventEmitter {
         execution.completed_at = new Date(execution.completed_at);
 
       return execution;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to parse execution data', {
         executionId,
         error: error.message,
@@ -885,7 +885,7 @@ export class WorkflowExecutor extends EventEmitter {
     for (const executionId of activeIds) {
       try {
         await this.cancelExecution(executionId);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('⚠️ Failed to cancel execution during shutdown', {
           executionId,
           error: error.message,

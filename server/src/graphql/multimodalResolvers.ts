@@ -693,7 +693,7 @@ export const multimodalResolvers = {
             context.user.id,
           );
           results.push(result);
-        } catch (error) {
+        } catch (error: any) {
           context.logger.error('Batch upload error:', error);
           // Continue with other uploads
         }
@@ -727,7 +727,7 @@ export const multimodalResolvers = {
             context.user.id,
           );
           jobs.push(job);
-        } catch (error) {
+        } catch (error: any) {
           context.logger.error('Batch extraction error:', error);
           // Continue with other extractions
         }

@@ -459,7 +459,7 @@ describe('Performance Benchmarks', () => {
     const requests = Array(5).fill(null).map(() => createTestRequest());
 
     const startTime = Date.now();
-    const responses = await Promise.all(requests.map((r) => service.query(r)));
+    const responses = await Promise.all(requests.map((r: any) => service.query(r)));
     const totalTime = Date.now() - startTime;
 
     expect(responses).toHaveLength(5);

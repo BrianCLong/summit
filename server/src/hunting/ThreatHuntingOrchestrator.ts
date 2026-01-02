@@ -101,7 +101,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
       logger.info('Threat Hunting Orchestrator initialized', {
         templatesLoaded: this.templateEngine.getAllTemplates().length,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize orchestrator', {
         error: (error as Error).message,
       });
@@ -344,7 +344,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
 
           execution.metrics.remediationActionsExecuted = results.length;
           execution.metrics.remediationSuccessRate =
-            results.filter((r) => r.success).length / results.length;
+            results.filter((r: any) => r.success).length / results.length;
         }
       }
 
@@ -372,7 +372,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
         findings: execution.enrichedFindings.length,
         precision: execution.metrics.precisionEstimate,
       });
-    } catch (error) {
+    } catch (error: any) {
       context.status = 'failed';
       execution.endTime = Date.now();
       throw error;
@@ -423,7 +423,7 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
                 cacheHits: 0,
               },
             } as QueryExecutionResult;
-          } catch (error) {
+          } catch (error: any) {
             return {
               queryId: query.id,
               hypothesisId: query.hypothesisId,

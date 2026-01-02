@@ -20,7 +20,7 @@ router.get('/metrics', async (req, res) => {
   try {
     res.set('Content-Type', gaCoreMetrics.getMetricsRegistry().contentType);
     res.end(await gaCoreMetrics.getMetricsRegistry().metrics());
-  } catch (error) {
+  } catch (error: any) {
     log.error({ error: error.message }, 'Failed to serve Prometheus metrics');
     res.status(500).json({ error: 'Failed to generate metrics' });
   }
@@ -33,7 +33,7 @@ router.get('/status', async (req, res) => {
   try {
     const status = await gaCoreMetrics.getCurrentStatus();
     res.json(status);
-  } catch (error) {
+  } catch (error: any) {
     log.error({ error: error.message }, 'Failed to get GA Core status');
     res.status(500).json({ error: 'Failed to get status' });
   }
@@ -102,7 +102,7 @@ router.get('/gates', async (req, res) => {
     `);
 
     const gates = [
-      ...erMetrics.rows.map((row) => ({
+      ...erMetrics.rows.map((row: any) => ({
         name: `ER_PRECISION_${row.entity_type}`,
         description: `Entity Resolution ${row.entity_type} precision`,
         currentValue: parseFloat(row.precision),
@@ -134,7 +134,7 @@ router.get('/gates', async (req, res) => {
         threshold: 0.95,
         status:
           parseFloat(exportMetrics.rows[0]?.metrics?.integrity_rate || '0') >=
-          0.95
+            0.95
             ? 'PASS'
             : 'FAIL',
         category: 'Export & Provenance',
@@ -172,7 +172,7 @@ router.get('/gates', async (req, res) => {
       gates,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     log.error({ error: error.message }, 'Failed to get GA Core gates');
     res.status(500).json({ error: 'Failed to get gates' });
   }
@@ -240,7 +240,7 @@ router.get('/trends/:metric', async (req, res) => {
       data: result.rows,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     log.error(
       { error: error.message, metric: req.params.metric },
       'Failed to get metric trends',
@@ -255,7 +255,7 @@ router.get('/trends/:metric', async (req, res) => {
 router.get('/er-ops/precision-recall', async (req, res) => {
   return tracer.startActiveSpan(
     'ga_core_metrics.er_ops.precision_recall',
-    async (span) => {
+    async (span: any) => {
       try {
         const { days = 30, modelType = 'entity_resolution' } = req.query;
         const pool = getPostgresPool();
@@ -295,7 +295,7 @@ router.get('/er-ops/precision-recall', async (req, res) => {
           data: result.rows,
           timestamp: new Date().toISOString(),
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error);
         span.setStatus({
           code: SpanStatusCode.ERROR,
@@ -319,7 +319,7 @@ router.get('/er-ops/precision-recall', async (req, res) => {
 router.get('/er-ops/rollbacks', async (req, res) => {
   return tracer.startActiveSpan(
     'ga_core_metrics.er_ops.rollbacks',
-    async (span) => {
+    async (span: any) => {
       try {
         const { days = 30 } = req.query;
         const pool = getPostgresPool();
@@ -355,7 +355,7 @@ router.get('/er-ops/rollbacks', async (req, res) => {
           data: result.rows,
           timestamp: new Date().toISOString(),
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error);
         span.setStatus({
           code: SpanStatusCode.ERROR,
@@ -376,7 +376,7 @@ router.get('/er-ops/rollbacks', async (req, res) => {
 router.get('/er-ops/conflicts', async (req, res) => {
   return tracer.startActiveSpan(
     'ga_core_metrics.er_ops.conflicts',
-    async (span) => {
+    async (span: any) => {
       try {
         const { days = 30 } = req.query;
         const pool = getPostgresPool();
@@ -410,7 +410,7 @@ router.get('/er-ops/conflicts', async (req, res) => {
           data: result.rows,
           timestamp: new Date().toISOString(),
         });
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error);
         span.setStatus({
           code: SpanStatusCode.ERROR,
@@ -502,16 +502,16 @@ router.get('/dashboard', async (req, res) => {
       timestamp: new Date().toISOString(),
       entityResolution: {
         personPrecision:
-          erMetrics.rows.find((r) => r.entity_type === 'PERSON')?.precision ||
+          erMetrics.rows.find((r: any) => r.entity_type === 'PERSON')?.precision ||
           1.0,
         orgPrecision:
-          erMetrics.rows.find((r) => r.entity_type === 'ORG')?.precision || 1.0,
+          erMetrics.rows.find((r: any) => r.entity_type === 'ORG')?.precision || 1.0,
         totalDecisions: erMetrics.rows.reduce(
-          (sum, r) => sum + parseInt(r.total_decisions || '0'),
+          (sum: any, r: any) => sum + parseInt(r.total_decisions || '0'),
           0,
         ),
         reviewsRequired: erMetrics.rows.reduce(
-          (sum, r) => sum + parseInt(r.reviews_required || '0'),
+          (sum: any, r: any) => sum + parseInt(r.reviews_required || '0'),
           0,
         ),
       },
@@ -541,7 +541,7 @@ router.get('/dashboard', async (req, res) => {
         successRate:
           copilotMetrics.rows[0]?.total_queries > 0
             ? copilotMetrics.rows[0].successful_queries /
-              copilotMetrics.rows[0].total_queries
+            copilotMetrics.rows[0].total_queries
             : 0,
         avgConfidence: parseFloat(
           copilotMetrics.rows[0]?.avg_confidence || '0',
@@ -557,7 +557,7 @@ router.get('/dashboard', async (req, res) => {
     };
 
     res.json(dashboard);
-  } catch (error) {
+  } catch (error: any) {
     log.error({ error: error.message }, 'Failed to get dashboard data');
     res.status(500).json({ error: 'Failed to get dashboard data' });
   }

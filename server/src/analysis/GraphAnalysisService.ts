@@ -92,7 +92,7 @@ export class GraphAnalysisService {
       await session.close();
       return { nodes, edges };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error loading graph slice', { error, tenantId });
       throw error;
     }

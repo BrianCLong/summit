@@ -20,7 +20,7 @@ describe('QueryIntentPolicyMapper', () => {
     let correctIntent = 0;
     let correctPolicyAction = 0;
 
-    rows.forEach((row) => {
+    rows.forEach((row: any) => {
       const verdict = mapper.evaluate(row.query, row.context ?? {});
 
       if (verdict.intent === row.expectedIntent) {

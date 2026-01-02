@@ -172,7 +172,7 @@ export class DeepfakeDetectionService extends EventEmitter {
 
       this.initialized = true;
       logger.info('DeepfakeDetectionService initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize DeepfakeDetectionService');
       throw error;
     }
@@ -294,7 +294,7 @@ export class DeepfakeDetectionService extends EventEmitter {
       }, 'Deepfake detection complete');
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, filename }, 'Deepfake detection failed');
 
       return {
@@ -457,7 +457,7 @@ export class DeepfakeDetectionService extends EventEmitter {
       }, 'Impersonation detection complete');
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Impersonation detection failed');
 
       return {
@@ -1273,7 +1273,7 @@ export class DeepfakeDetectionService extends EventEmitter {
           await fs.unlink(filePath);
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Failed to cleanup cache');
     }
   }

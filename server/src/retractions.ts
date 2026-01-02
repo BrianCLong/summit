@@ -48,7 +48,7 @@ export async function processRetractionsOnce() {
       retractionsDuration.observe(ageSec);
       const slaSec = Number(process.env.RETRACTION_SLA_SECONDS || 72 * 3600);
       if (ageSec > slaSec) retractionsSlaBreaches.inc();
-    } catch (e) {
+    } catch (e: any) {
       await pg.query(`UPDATE retraction SET status='FAILED' WHERE id=$1`, [
         r.id,
       ]);

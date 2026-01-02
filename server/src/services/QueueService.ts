@@ -32,7 +32,7 @@ export function startQueueMetrics(): () => void {
             intelgraphJobQueueDepth.set({ queue_name: 'social:ingest', status: 'waiting' }, counts.waiting);
             intelgraphJobQueueDepth.set({ queue_name: 'social:ingest', status: 'active' }, counts.active);
             intelgraphJobQueueDepth.set({ queue_name: 'social:ingest', status: 'failed' }, counts.failed);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to collect queue metrics:', error);
         }
     }, 15000);

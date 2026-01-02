@@ -123,7 +123,7 @@ export interface EncryptionAudit {
 // ============================================================================
 
 export class HIPAAComplianceService {
-  constructor(private pg: Pool) {}
+  constructor(private pg: Pool) { }
 
   // ==========================================================================
   // PHI ACCESS LOGGING (164.312(b))
@@ -230,7 +230,7 @@ export class HIPAAComplianceService {
       }
 
       return { accessId };
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error(
         { error: (error as Error).message, access },
         'Failed to log PHI access',
@@ -363,7 +363,7 @@ export class HIPAAComplianceService {
       complianceRate:
         parseInt(row.total_accesses || '0', 10) > 0
           ? parseInt(row.compliant_accesses || '0', 10) /
-            parseInt(row.total_accesses || '0', 10)
+          parseInt(row.total_accesses || '0', 10)
           : 1.0,
     };
   }

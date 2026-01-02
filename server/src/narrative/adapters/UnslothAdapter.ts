@@ -132,7 +132,7 @@ Provide a text response with the following sections:
 
       const data = await response.json();
       return data.choices?.[0]?.message?.content || 'No content generated.';
-    } catch (error) {
+    } catch (error: any) {
       // In a real implementation, we might want to log this better
       throw new Error(`Failed to call Unsloth inference server: ${(error as Error).message}`);
     }

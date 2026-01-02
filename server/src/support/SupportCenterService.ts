@@ -558,7 +558,7 @@ export class SupportCenterService {
 
     // Find escalation rule
     const rule = this.config.escalationRules.find(
-      (r) => r.priority === ticket.priority && r.type === ticket.type
+      (r: any) => r.priority === ticket.priority && r.type === ticket.type
     );
 
     if (rule) {
@@ -783,7 +783,7 @@ export class SupportCenterService {
           ticketId: ticket.id,
           provider: integration.provider,
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to sync ticket to external system', {
           ticketId: ticket.id,
           provider: integration.provider,
@@ -887,7 +887,7 @@ export class SupportCenterService {
         }
 
         logger.info('Loaded knowledge base articles', { count: this.articles.size });
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Could not load articles from database', { error });
       }
     }

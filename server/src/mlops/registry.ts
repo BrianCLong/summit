@@ -119,7 +119,7 @@ export class ModelRegistry {
                  createdBy: prodEntry.actorId
              };
         }
-    } catch (e) {
+    } catch (e: any) {
         logger.error({ error: e }, 'Failed to resolve production model version');
     }
     return null;

@@ -15,7 +15,7 @@ router.get('/reports', async (req, res) => {
     // Fetch cached reports which are updated by the background worker
     const reports = await store.getReports();
     res.json(reports);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -37,7 +37,7 @@ router.post('/check/:investigationId', async (req, res) => {
     // Real-time check for specific investigation is allowed
     const report = await service.checkInvestigation(investigationId, tenantId);
     res.json(report);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -61,7 +61,7 @@ router.post('/repair/:investigationId', async (req, res) => {
     // Optionally update cache, but better to let worker do it or do partial update
     // For now, we just return the result.
     res.json(report);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });

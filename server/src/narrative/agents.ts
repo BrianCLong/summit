@@ -158,7 +158,7 @@ export class LLMAgent extends SimulationAgent {
         // If the LLM is just summarizing, we interpret the summary as "intent"
         return this.createEvent('political', `LLM Action based on: ${response.substring(0, 50)}...`, state);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("LLM Agent failed to decide action", error);
         return null;
     }

@@ -45,7 +45,7 @@ async function batchLoadUsers(
 
     // Create a map of id -> user
     const userMap = new Map<string, User>();
-    result.rows.forEach((row) => {
+    result.rows.forEach((row: any) => {
       const user: User = {
         id: row.id,
         email: row.email,
@@ -76,7 +76,7 @@ async function batchLoadUsers(
       }
       return user;
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, ids }, 'Error in user batch loader');
     return ids.map(() => error as Error);
   } finally {
@@ -124,7 +124,7 @@ export function createUserByEmailLoader(
         );
 
         const userMap = new Map<string, User>();
-        result.rows.forEach((row) => {
+        result.rows.forEach((row: any) => {
           const user: User = {
             id: row.id,
             email: row.email,

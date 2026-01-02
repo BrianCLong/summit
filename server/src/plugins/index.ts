@@ -19,15 +19,15 @@ export function registerBuiltins() {
   try {
     const { shodanIpLookup } = require('./shodan');
     register(shodanIpLookup.name, shodanIpLookup);
-  } catch {}
+  } catch { }
   try {
     const { vtHashLookup } = require('./virustotal');
     register(vtHashLookup.name, vtHashLookup);
-  } catch {}
+  } catch { }
   try {
     const { csQuery } = require('./crowdstrike');
     register(csQuery.name, csQuery);
-  } catch {}
+  } catch { }
 }
 
 export interface PluginDependencies {
@@ -50,23 +50,23 @@ let pluginErrors: any;
 let otelService: any;
 
 async function loadDependencies() {
-    if (!RedisCache) {
-        const redisModule = await import('../cache/redis.js');
-        RedisCache = redisModule.RedisService;
-    }
-    if (!vaultReadKvV2) {
-        const vaultModule = await import('../vault/helpers.js');
-        vaultReadKvV2 = vaultModule.vaultReadKvV2;
-    }
-    if (!pluginInvocations) {
-        const metricsModule = await import('../metrics/pluginMetrics.js');
-        pluginInvocations = metricsModule.pluginInvocations;
-        pluginErrors = metricsModule.pluginErrors;
-    }
-    if (!otelService) {
-        const otelModule = await import('../middleware/observability/otel-tracing.js');
-        otelService = otelModule.otelService;
-    }
+  if (!RedisCache) {
+    const redisModule = await import('../cache/redis.js');
+    RedisCache = redisModule.RedisService;
+  }
+  if (!vaultReadKvV2) {
+    const vaultModule = await import('../vault/helpers.js');
+    vaultReadKvV2 = vaultModule.vaultReadKvV2;
+  }
+  if (!pluginInvocations) {
+    const metricsModule = await import('../metrics/pluginMetrics.js');
+    pluginInvocations = metricsModule.pluginInvocations;
+    pluginErrors = metricsModule.pluginErrors;
+  }
+  if (!otelService) {
+    const otelModule = await import('../middleware/observability/otel-tracing.js');
+    otelService = otelModule.otelService;
+  }
 }
 
 export async function runPlugin(
@@ -80,17 +80,17 @@ export async function runPlugin(
   const deps = opts?.dependencies || {};
 
   // Initialize default dependencies if not provided
-  let cacheClient;
+  let cacheClient: any;
   if (!deps.cache) {
-      await loadDependencies();
-      cacheClient = new RedisCache();
+    await loadDependencies();
+    cacheClient = new RedisCache();
   }
 
   const cache = deps.cache || {
-      get: async (k: string) => (await cacheClient.get(k)) as any,
-      set: async (k: string, v: any, ttl?: number) => {
-        await cacheClient.set(k, v, Math.max(1, Number(ttl || 300)));
-      },
+    get: async (k: string) => (await cacheClient.get(k)) as any,
+    set: async (k: string, v: any, ttl?: number) => {
+      await cacheClient.set(k, v, Math.max(1, Number(ttl || 300)));
+    },
   };
 
   if (!deps.vault) await loadDependencies();
@@ -98,8 +98,8 @@ export async function runPlugin(
 
   if (!deps.metrics) await loadDependencies();
   const metrics = deps.metrics || {
-      invocations: pluginInvocations,
-      errors: pluginErrors
+    invocations: pluginInvocations,
+    errors: pluginErrors
   };
 
   if (!deps.tracer) await loadDependencies();
@@ -150,9 +150,9 @@ export async function runPlugin(
       // Ideally internal legacy plugins also run via runtime but we kept legacy path for now.
 
       const ctx: PluginContext = {
-          vault: baseContext.vault,
-          cache: baseContext.cache,
-          logger: baseContext.logger,
+        vault: baseContext.vault,
+        cache: baseContext.cache,
+        logger: baseContext.logger,
       };
 
       const res = await p.run(inputs, ctx);
@@ -164,7 +164,7 @@ export async function runPlugin(
   } catch (e: any) {
     // Audit Execution Failure
     if (MarketplaceService.getInstance().getPlugin(idOrName)) {
-        MarketplaceService.getInstance().audit(idOrName, 'PLUGIN_EXECUTION_FAILURE', { tenant, error: e.message });
+      MarketplaceService.getInstance().audit(idOrName, 'PLUGIN_EXECUTION_FAILURE', { tenant, error: e.message });
     }
 
     metrics.invocations.labels(idOrName, 'error', tenant).inc();

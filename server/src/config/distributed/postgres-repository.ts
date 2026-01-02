@@ -105,7 +105,7 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
       `);
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -171,7 +171,7 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
       );
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -228,7 +228,7 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
       [configId],
     );
 
-    return result.rows.map((row) => this.mapRowToConfigVersion(row));
+    return result.rows.map((row: any) => this.mapRowToConfigVersion(row));
   }
 
   async recordAppliedState(
@@ -290,7 +290,7 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
       [configId],
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       version: row.version,
       actor: row.actor,
       timestamp: new Date(row.timestamp),
@@ -308,7 +308,7 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
       ORDER BY config_id
     `);
 
-    return result.rows.map((row) => row.config_id);
+    return result.rows.map((row: any) => row.config_id);
   }
 
   /**
@@ -332,7 +332,7 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
       );
 
       await client.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -370,7 +370,7 @@ export class PostgresConfigRepository<TConfig = Record<string, any>>
     try {
       const result = await this.pool.query('SELECT 1');
       return result.rows.length === 1;
-    } catch (error) {
+    } catch (error: any) {
       return false;
     }
   }

@@ -178,7 +178,7 @@ export class SLATracker {
         id, case_id, sla_type, target_hours, due_at, breached_at`,
     );
 
-    const events: SLABreachEvent[] = rows.map((row) => {
+    const events: SLABreachEvent[] = rows.map((row: any) => {
       const breachDurationHours =
         (new Date().getTime() - new Date(row.due_at).getTime()) / (1000 * 60 * 60);
 
@@ -222,7 +222,7 @@ export class SLATracker {
         id, case_id, sla_type, target_hours, due_at, at_risk_threshold_hours`,
     );
 
-    const events: SLAAtRiskEvent[] = rows.map((row) => {
+    const events: SLAAtRiskEvent[] = rows.map((row: any) => {
       const hoursRemaining =
         (new Date(row.due_at).getTime() - new Date().getTime()) / (1000 * 60 * 60);
 
@@ -351,7 +351,7 @@ export class SLATracker {
   /**
    * Map database row to domain object
    */
-  private mapRow(row: any): CaseSLA {
+  private mapRow(row): CaseSLA {
     return {
       id: row.id,
       caseId: row.case_id,

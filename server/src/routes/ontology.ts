@@ -86,7 +86,7 @@ router.post('/schema', asyncHandler(async (req: Request, res: Response) => {
         if (allowed !== true) {
             return res.status(403).json({ error: 'Policy denied schema creation' });
         }
-    } catch (e) {
+    } catch (e: any) {
          console.error('OPA check failed', e);
          // Fail closed
          return res.status(500).json({ error: 'Policy check failed' });
@@ -132,7 +132,7 @@ router.post('/schema/:id/approve', asyncHandler(async (req: Request, res: Respon
         if (allowed !== true) {
             return res.status(403).json({ error: 'Policy denied schema approval' });
         }
-    } catch (e) {
+    } catch (e: any) {
          console.error('OPA check failed', e);
          // Fail closed
          return res.status(500).json({ error: 'Policy check failed' });

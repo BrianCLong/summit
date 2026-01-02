@@ -356,7 +356,7 @@ export async function executeInjection(
       governanceVerdict: createVerdict(GovernanceResult.FLAG, `Chaos injected: ${experiment.type}`),
       classification: DataClassification.INTERNAL,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(
       {
         error,

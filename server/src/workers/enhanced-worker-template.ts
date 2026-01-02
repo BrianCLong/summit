@@ -119,7 +119,7 @@ export class EnhancedWorker {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
 
@@ -142,7 +142,7 @@ export class EnhancedWorker {
   }
 
   private setupEventHandlers(): void {
-    this.worker.on('completed', (job) => {
+    this.worker.on('completed', (job: any) => {
       this.logger.info('Job completed', { jobId: job.id });
     });
 
@@ -153,7 +153,7 @@ export class EnhancedWorker {
       });
     });
 
-    this.worker.on('error', (err) => {
+    this.worker.on('error', (err: any) => {
       this.logger.error('Worker error', { error: err.message });
     });
 
@@ -191,7 +191,7 @@ export class EnhancedWorker {
           failed: failed.length,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         stats: {

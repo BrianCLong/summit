@@ -10,7 +10,7 @@ export const PolicyGatePlugin: ApolloServerPlugin = {
     return {
       async didResolveOperation(ctx) {
         const tracer = trace.getTracer('policy-gate');
-        return await tracer.startActiveSpan('policy.evaluate', async (span) => {
+        return await tracer.startActiveSpan('policy.evaluate', async (span: any) => {
           try {
             // 1. Identify Context
             // Using a dummy case ID from headers or context for now, or falling back to default
@@ -71,7 +71,7 @@ export const PolicyGatePlugin: ApolloServerPlugin = {
             }
 
             span.end();
-          } catch (e) {
+          } catch (e: any) {
             span.recordException(e as Error);
             span.end();
             throw e;

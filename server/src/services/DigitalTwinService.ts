@@ -219,7 +219,7 @@ export class DigitalTwinService {
       asset.updatedAt = new Date();
 
       return asset;
-    } catch (error) {
+    } catch (error: any) {
       asset.syncState = TwinSyncState.ERROR;
       throw error;
     }
@@ -298,7 +298,7 @@ export class DigitalTwinService {
 
     // Calculate based on data quality and recency
     const recentReadings = readings.filter(
-      (r) => Date.now() - r.timestamp.getTime() < 3600000 // Last hour
+      (r: any) => Date.now() - r.timestamp.getTime() < 3600000 // Last hour
     );
 
     if (recentReadings.length === 0) {

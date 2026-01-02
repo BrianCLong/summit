@@ -42,7 +42,7 @@ export async function processEmail(job: Job<EmailJobData>): Promise<void> {
       jobId: job.id,
       to: data.to,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(`Failed to send email: ${job.id}`, {
       jobId: job.id,
       to: data.to,

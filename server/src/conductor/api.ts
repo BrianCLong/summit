@@ -17,7 +17,7 @@ router.get('/v1/approvals', async (_req, res) => {
        WHERE e.kind = 'approval.created' AND s.status = 'BLOCKED'
        ORDER BY e.ts DESC LIMIT 200`,
     );
-    const items = rows.map((r) => ({
+    const items = rows.map((r: any) => ({
       runId: r.run_id,
       stepId: r.step_id,
       createdAt: r.created_at,

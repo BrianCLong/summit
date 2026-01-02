@@ -74,7 +74,7 @@ class QuotaConfigService {
       const data = await fs.readFile(this.storagePath, 'utf-8');
       this.state = JSON.parse(data);
       logger.info('Loaded quota configuration');
-    } catch (error) {
+    } catch (error: any) {
       const err = error as { code?: string };
       if (err.code !== 'ENOENT') {
         logger.error({ err: error }, 'Failed to load quota config, using defaults');
@@ -89,7 +89,7 @@ class QuotaConfigService {
     try {
       await fs.mkdir(path.dirname(this.storagePath), { recursive: true });
       await fs.writeFile(this.storagePath, JSON.stringify(this.state, null, 2));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error }, 'Failed to save quota config');
     }
   }

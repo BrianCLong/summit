@@ -42,12 +42,12 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
 
   // --- Runs ---
 
-  router.post('/runs', ensureAuthenticated, asyncHandler(async (req, res) => {
+  router.post('/runs', ensureAuthenticated, asyncHandler(async (req: any, res: any) => {
     const start = process.hrtime();
-    const tenantId = req.user.tenantId;
+    const tenantId = req.user!.tenantId;
 
     const { templateId, input } = req.body;
-    const principalId = req.user.id;
+    const principalId = req.user!.id;
 
     if (!templateId) {
       recordEndpointResult({
@@ -74,9 +74,9 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
     res.status(201).json(run);
   }));
 
-  router.get('/runs/:runId', ensureAuthenticated, asyncHandler(async (req, res) => {
+  router.get('/runs/:runId', ensureAuthenticated, asyncHandler(async (req: any, res: any) => {
     const { runId } = req.params;
-    const tenantId = req.user.tenantId;
+    const tenantId = req.user!.tenantId;
 
     const result = await db.query(
       `SELECT * FROM maestro_runs WHERE id = $1 AND tenant_id = $2`,
@@ -87,8 +87,8 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
     res.json(result.rows[0]);
   }));
 
-  router.get('/runs', ensureAuthenticated, asyncHandler(async (req, res) => {
-    const tenantId = req.user.tenantId;
+  router.get('/runs', ensureAuthenticated, asyncHandler(async (req: any, res: any) => {
+    const tenantId = req.user!.tenantId;
     const { templateId, status, limit = 20 } = req.query;
 
     let query = `SELECT * FROM maestro_runs WHERE tenant_id = $1`;
@@ -113,8 +113,8 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
 
   // --- Templates ---
 
-  router.get('/templates', ensureAuthenticated, asyncHandler(async (req, res) => {
-    const tenantId = req.user.tenantId;
+  router.get('/templates', ensureAuthenticated, asyncHandler(async (req: any, res: any) => {
+    const tenantId = req.user!.tenantId;
     const result = await db.query(
       `SELECT * FROM maestro_templates WHERE tenant_id = $1 ORDER BY created_at DESC`,
       [tenantId]
@@ -122,8 +122,8 @@ export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
     res.json(result.rows);
   }));
 
-  router.post('/templates', ensureAuthenticated, asyncHandler(async (req, res) => {
-    const tenantId = req.user.tenantId;
+  router.post('/templates', ensureAuthenticated, asyncHandler(async (req: any, res: any) => {
+    const tenantId = req.user!.tenantId;
     const template: MaestroTemplate = {
       ...req.body,
       id: req.body.id || crypto.randomUUID(),

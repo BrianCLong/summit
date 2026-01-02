@@ -215,7 +215,7 @@ export class OrchestrationService {
           provenanceHash: finalResult.provenanceHash,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       const totalTime = Date.now() - startTime;
 
       // Record failure metrics
@@ -353,7 +353,7 @@ export class OrchestrationService {
           synthesisMethod: `${webResult.synthesisMethod}+premium_${routingDecision.selectedModel.name}`,
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Premium synthesis failed, using web-only result', {
         error: error.message,
         webResultConfidence: webResult.confidence,

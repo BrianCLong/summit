@@ -124,7 +124,7 @@ export class BudgetLadderController {
       });
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Budget evaluation failed', {
         error: error.message,
         tenantId: request.tenantId,
@@ -378,7 +378,7 @@ export class BudgetLadderController {
         stage,
         utilization,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to send budget notification', {
         error: error.message,
         tenantId,

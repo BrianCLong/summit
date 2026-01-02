@@ -242,7 +242,7 @@ export class EvidenceAccessService {
       }
 
       return { valid: true, payload };
-    } catch (error) {
+    } catch (error: any) {
       return { valid: false, reason: 'invalid_json' };
     }
   }
@@ -425,7 +425,7 @@ export class EvidenceAccessService {
         userAgent: context.userAgent,
         requestId: context.requestId,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         {
           error: error.message,

@@ -156,7 +156,7 @@ export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
                 policies: violations.map((v) => v.policyId),
               });
             }
-          } catch (error) {
+          } catch (error: any) {
             if (error instanceof GraphQLError) {
               throw error;
             }
@@ -246,7 +246,7 @@ export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
                 tenantId: context.tenantId,
               });
             }
-          } catch (error) {
+          } catch (error: any) {
             logger.error(
               'GraphQL DLP plugin error during response processing',
               {

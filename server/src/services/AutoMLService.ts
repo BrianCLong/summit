@@ -69,7 +69,7 @@ export class AutoMLService {
     if (!fs.existsSync(this.storageDir)) {
       try {
         fs.mkdirSync(this.storageDir, { recursive: true });
-      } catch (err) {
+      } catch (err: any) {
         // Fallback for environments where we can't write to ./data
         this.storageDir = '/tmp/automl';
         fs.mkdirSync(this.storageDir, { recursive: true });
@@ -90,7 +90,7 @@ export class AutoMLService {
         const data = JSON.parse(fs.readFileSync(this.jobsFile, 'utf-8'));
         this.jobs = new Map(data.map((j: TrainingJob) => [j.id, j]));
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load AutoML state:', error);
       this.initializeDefaultModels();
     }
@@ -100,7 +100,7 @@ export class AutoMLService {
     try {
       fs.writeFileSync(this.modelsFile, JSON.stringify(Array.from(this.models.values()), null, 2));
       fs.writeFileSync(this.jobsFile, JSON.stringify(Array.from(this.jobs.values()), null, 2));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save AutoML state:', error);
     }
   }

@@ -118,7 +118,7 @@ export class PricingConfigurationService {
                 [cap.tenantId, cap.capAmount, cap.action, cap.thresholdPercent]
             );
             await client.query('COMMIT');
-        } catch (e) {
+        } catch (e: any) {
             await client.query('ROLLBACK');
             throw e;
         } finally {

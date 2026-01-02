@@ -61,7 +61,7 @@ async function fileExists(target: string): Promise<boolean> {
   try {
     await fs.access(target);
     return true;
-  } catch (error) {
+  } catch (error: any) {
     return false;
   }
 }

@@ -76,7 +76,7 @@ export class TenantDatabase {
           );
           return JSON.parse(cached);
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           `Cache read failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -108,7 +108,7 @@ export class TenantDatabase {
           logger.debug(
             `Cached result for tenant ${tenantContext.tenantId}: ${cacheKey}`,
           );
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(
             `Cache write failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
           );
@@ -116,7 +116,7 @@ export class TenantDatabase {
       }
 
       return records;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Neo4j query failed for tenant ${tenantContext.tenantId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -156,7 +156,7 @@ export class TenantDatabase {
           );
           return JSON.parse(cached);
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           `Cache read failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -187,7 +187,7 @@ export class TenantDatabase {
           logger.debug(
             `Cached result for tenant ${tenantContext.tenantId}: ${cacheKey}`,
           );
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(
             `Cache write failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
           );
@@ -195,7 +195,7 @@ export class TenantDatabase {
       }
 
       return result.rows;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `PostgreSQL query failed for tenant ${tenantContext.tenantId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -232,7 +232,7 @@ export class TenantDatabase {
         return JSON.parse(cached);
       }
       return null;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Cache read failed for tenant ${tenantContext.tenantId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -266,7 +266,7 @@ export class TenantDatabase {
         `Cached data for tenant ${tenantContext.tenantId}: ${tenantKey}`,
       );
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Cache write failed for tenant ${tenantContext.tenantId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -302,7 +302,7 @@ export class TenantDatabase {
         return deleted;
       }
       return 0;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Cache invalidation failed for tenant ${tenantContext.tenantId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -369,7 +369,7 @@ export class TenantDatabase {
           results.push(result.rows);
         }
         await client.query('COMMIT');
-      } catch (error) {
+      } catch (error: any) {
         await client.query('ROLLBACK');
         throw error;
       } finally {

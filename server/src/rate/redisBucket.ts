@@ -188,7 +188,7 @@ export class RedisBucket {
 
       this.connected = true;
       logger.info('RedisBucket initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize RedisBucket:', error);
       throw error;
     }
@@ -242,7 +242,7 @@ export class RedisBucket {
           lastRefill,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to take tokens from bucket:', {
         tenant,
         operation,
@@ -327,7 +327,7 @@ export class RedisBucket {
         results,
         remaining,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to take tokens in batch:', {
         tenant,
         requests,
@@ -377,7 +377,7 @@ export class RedisBucket {
         lastRefill,
         nextRefill: lastRefill + refillIntervalMs,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get bucket status:', {
         tenant,
         operation,
@@ -415,7 +415,7 @@ export class RedisBucket {
       await this.client.expire(key, 3600);
 
       logger.info('Bucket reset successfully', { tenant, operation, capacity });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to reset bucket:', { tenant, operation, error });
     }
   }
@@ -443,7 +443,7 @@ export class RedisBucket {
         activeBuckets: keys.length, // Simplified - could check TTL
         memoryUsage,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get global stats:', error);
       return {
         totalBuckets: 0,
@@ -479,7 +479,7 @@ export class RedisBucket {
         cleaned,
       });
       return cleaned;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to cleanup expired buckets:', error);
       return 0;
     }
@@ -560,7 +560,7 @@ export function createBucketMiddleware(config: {
       res.setHeader('X-RateLimit-Remaining', result.remaining);
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Rate limiting middleware error:', error);
       // Fail open - allow request if rate limiting fails
       next();

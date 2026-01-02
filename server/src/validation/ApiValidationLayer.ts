@@ -390,7 +390,7 @@ function formatZodErrors(error: z.ZodError): Array<{
   code: string;
   value?: unknown;
 }> {
-  return error.issues.map((err) => ({
+  return error.issues.map((err: any) => ({
     field: err.path.join('.') || 'root',
     message: err.message,
     code: err.code,
@@ -413,7 +413,7 @@ export function validate<T>(
 
     const result = schema.parse(sanitizedData);
     return { success: true, data: result };
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return {
         success: false,

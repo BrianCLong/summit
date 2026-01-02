@@ -64,7 +64,7 @@ export class OPAClient {
         estimated_cost: response.result?.estimated_cost,
         reason: response.result?.reason,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('OPA policy evaluation failed:', error);
 
       // Fail secure - deny by default if OPA is unavailable
@@ -259,7 +259,7 @@ export class OPAClient {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch (error: any) {
       clearTimeout(timeoutId);
       throw error;
     }

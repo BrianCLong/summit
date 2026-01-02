@@ -48,13 +48,13 @@ export class RetrievalService {
            FROM chunks
            WHERE tenant_id = $1 AND text ILIKE $2
            LIMIT $3`,
-           [tenantId, `%${query}%`, limit]
+          [tenantId, `%${query}%`, limit]
         );
         chunks = keywordRes.rows;
       }
 
       // Map to Chunk type
-      const mappedChunks: Chunk[] = chunks.map(r => ({
+      const mappedChunks: Chunk[] = chunks.map((r: any) => ({
         id: r.id,
         tenantId,
         documentId: r.document_id,
@@ -69,29 +69,29 @@ export class RetrievalService {
       let entities: Entity[] = [];
 
       if (docIds.length > 0) {
-         const entityRes = await client.query(
-            `SELECT unnest(entity_ids) as entity_id FROM documents WHERE id = ANY($1) AND tenant_id = $2`,
-            [docIds, tenantId]
-         );
+        const entityRes = await client.query(
+          `SELECT unnest(entity_ids) as entity_id FROM documents WHERE id = ANY($1) AND tenant_id = $2`,
+          [docIds, tenantId]
+        );
 
-         const entityIds = entityRes.rows.map(r => r.entity_id);
-         if (entityIds.length > 0) {
-           const entitiesDetails = await client.query(
-             `SELECT * FROM entities WHERE id = ANY($1) AND tenant_id = $2`,
-             [entityIds, tenantId]
-           );
-           entities = entitiesDetails.rows.map(r => ({
-             id: r.id,
-             tenantId: r.tenant_id,
-             kind: r.kind,
-             externalRefs: r.external_refs,
-             labels: r.labels,
-             properties: r.properties,
-             createdAt: r.created_at,
-             updatedAt: r.updated_at,
-             sourceIds: r.source_ids
-           }));
-         }
+        const entityIds = entityRes.rows.map((r: any) => r.entity_id);
+        if (entityIds.length > 0) {
+          const entitiesDetails = await client.query(
+            `SELECT * FROM entities WHERE id = ANY($1) AND tenant_id = $2`,
+            [entityIds, tenantId]
+          );
+          entities = entitiesDetails.rows.map((r: any) => ({
+            id: r.id,
+            tenantId: r.tenant_id,
+            kind: r.kind,
+            externalRefs: r.external_refs,
+            labels: r.labels,
+            properties: r.properties,
+            createdAt: r.created_at,
+            updatedAt: r.updated_at,
+            sourceIds: r.source_ids
+          }));
+        }
       }
 
       return { chunks: mappedChunks, entities };

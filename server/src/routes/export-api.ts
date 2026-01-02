@@ -303,7 +303,7 @@ router.post('/export', async (req: AuthenticatedRequest, res: Response) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ requestId, error }, 'Export request failed');
 
     if (error instanceof z.ZodError) {
@@ -464,7 +464,7 @@ router.post('/export/simulate', async (req: AuthenticatedRequest, res: Response)
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ requestId, error }, 'Export simulation failed');
 
     if (error instanceof z.ZodError) {

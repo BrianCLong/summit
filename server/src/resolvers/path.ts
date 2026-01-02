@@ -22,8 +22,8 @@ export const resolvers = {
   Query: {
     shortestPathPolicyAware: async (
       _: any,
-      { from, to, excludeLabels },
-      ctx,
+      { from, to, excludeLabels }: { from: any; to: any; excludeLabels: any },
+      ctx: any,
     ) => {
       const cypher = `
         MATCH (a {id:$from}), (b {id:$to})

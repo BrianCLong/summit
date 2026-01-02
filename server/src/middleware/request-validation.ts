@@ -173,7 +173,7 @@ export function createRequestValidationMiddleware(
       });
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, path: req.path, ip: req.ip }, 'Request validation error');
       return res.status(500).json({
         error: 'Internal server error during request validation',

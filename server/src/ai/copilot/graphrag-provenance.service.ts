@@ -244,7 +244,7 @@ export class GraphRAGProvenanceService {
       );
 
       return answer;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           answerId,
@@ -404,7 +404,7 @@ export class GraphRAGProvenanceService {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         { error: error instanceof Error ? error.message : 'Unknown' },
         'Failed to fetch evidence',
@@ -453,7 +453,7 @@ export class GraphRAGProvenanceService {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         { error: error instanceof Error ? error.message : 'Unknown' },
         'Failed to fetch claims',
@@ -497,7 +497,7 @@ export class GraphRAGProvenanceService {
 
       // Validate cited IDs exist in context
       const validEntityIds = new Set(context.entities.map((e) => e.id));
-      const validRelIds = new Set(context.relationships.map((r) => r.id));
+      const validRelIds = new Set(context.relationships.map((r: any) => r.id));
       const validEvidenceIds = new Set(context.evidence.map((e) => e.id));
       const validClaimIds = new Set(context.claims.map((c) => c.id));
 
@@ -538,7 +538,7 @@ export class GraphRAGProvenanceService {
         citedClaimIds,
         reasoningPaths,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { error: error instanceof Error ? error.message : 'Unknown' },
         'Failed to parse LLM response',
@@ -574,7 +574,7 @@ export class GraphRAGProvenanceService {
     // Build relationship context
     const relationshipContext = context.relationships
       .slice(0, 50)
-      .map((r) => `Relationship [${r.id}]: ${r.sourceId} --[${r.type}]--> ${r.targetId}`)
+      .map((r: any) => `Relationship [${r.id}]: ${r.sourceId} --[${r.type}]--> ${r.targetId}`)
       .join('\n');
 
     // Build evidence context
@@ -748,7 +748,7 @@ Respond with JSON only:`;
   ): WhyPath[] {
     return reasoningPaths.map((path) => {
       const rel = context.relationships.find(
-        (r) => r.id === path.relationshipId,
+        (r: any) => r.id === path.relationshipId,
       );
 
       return {
@@ -898,7 +898,7 @@ Respond with JSON only:`;
     const crypto = require('crypto');
     const content = JSON.stringify({
       entities: entities.map((e) => e.id).sort(),
-      relationships: relationships.map((r) => r.id).sort(),
+      relationships: relationships.map((r: any) => r.id).sort(),
     });
     return crypto.createHash('sha256').update(content).digest('hex').substring(0, 16);
   }
@@ -920,7 +920,7 @@ Respond with JSON only:`;
       await session.run('RETURN 1');
       await session.close();
       neo4jHealthy = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Neo4j health check failed');
     }
 
@@ -928,7 +928,7 @@ Respond with JSON only:`;
     try {
       const response = await fetch(`${this.provLedgerUrl}/health`);
       provLedgerHealthy = response.ok;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Prov-ledger health check failed');
     }
 

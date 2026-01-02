@@ -83,7 +83,7 @@ export async function selectorMinimizationMiddleware(
     await trackQueryScope(context, info, tracking, args);
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
     // Log error but still track metrics
     logger.error('Error in GraphQL resolver', {
       operation: info.fieldName,
@@ -92,7 +92,7 @@ export async function selectorMinimizationMiddleware(
 
     // Track failed query
     tracking.executionTimeMs = Date.now() - startTime;
-    await trackQueryScope(context, info, tracking, args).catch((err) =>
+    await trackQueryScope(context, info, tracking, args).catch((err: any) =>
       logger.error('Failed to track failed query', { err })
     );
 
@@ -256,7 +256,7 @@ async function trackQueryScope(
 
   try {
     await selectorMinimizationService.trackQueryScope(metrics);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to track query scope', {
       error,
       queryName: metrics.queryName,

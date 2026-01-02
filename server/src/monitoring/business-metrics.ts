@@ -9,44 +9,44 @@ export class BusinessMetricsCollector {
   private registry: Registry;
 
   // Active Users Metrics
-  private activeUsersGauge: Gauge;
-  private userSessionsGauge: Gauge;
-  private userLoginCounter: Counter;
+  private activeUsersGauge!: Gauge;
+  private userSessionsGauge!: Gauge;
+  private userLoginCounter!: Counter;
 
   // API Request Metrics
-  private apiRequestsCounter: Counter;
-  private apiRequestsByTenantCounter: Counter;
-  private apiRequestDuration: Histogram;
+  private apiRequestsCounter!: Counter;
+  private apiRequestsByTenantCounter!: Counter;
+  private apiRequestDuration!: Histogram;
 
   // Graph Analysis Metrics
-  private graphJobsQueuedGauge: Gauge;
-  private graphJobsCompletedCounter: Counter;
-  private graphJobsFailedCounter: Counter;
-  private graphAnalysisDuration: Histogram;
+  private graphJobsQueuedGauge!: Gauge;
+  private graphJobsCompletedCounter!: Counter;
+  private graphJobsFailedCounter!: Counter;
+  private graphAnalysisDuration!: Histogram;
 
   // Data Ingestion Metrics
-  private dataIngestionRateGauge: Gauge;
-  private dataIngestionBytesCounter: Counter;
-  private dataIngestionRecordsCounter: Counter;
-  private dataIngestionErrorsCounter: Counter;
+  private dataIngestionRateGauge!: Gauge;
+  private dataIngestionBytesCounter!: Counter;
+  private dataIngestionRecordsCounter!: Counter;
+  private dataIngestionErrorsCounter!: Counter;
 
   // Entity & Relationship Metrics
-  private totalEntitiesGauge: Gauge;
-  private totalRelationshipsGauge: Gauge;
-  private entitiesCreatedCounter: Counter;
-  private relationshipsCreatedCounter: Counter;
+  private totalEntitiesGauge!: Gauge;
+  private totalRelationshipsGauge!: Gauge;
+  private entitiesCreatedCounter!: Counter;
+  private relationshipsCreatedCounter!: Counter;
 
   // Investigation Metrics
-  private activeInvestigationsGauge: Gauge;
-  private investigationsCreatedCounter: Counter;
-  private investigationsCompletedCounter: Counter;
-  private investigationDuration: Histogram;
+  private activeInvestigationsGauge!: Gauge;
+  private investigationsCreatedCounter!: Counter;
+  private investigationsCompletedCounter!: Counter;
+  private investigationDuration!: Histogram;
 
   // Export Metrics
-  private exportsStartedCounter: Counter;
-  private exportsCompletedCounter: Counter;
-  private exportsFailedCounter: Counter;
-  private exportDuration: Histogram;
+  private exportsStartedCounter!: Counter;
+  private exportsCompletedCounter!: Counter;
+  private exportsFailedCounter!: Counter;
+  private exportDuration!: Histogram;
 
   constructor(registry: Registry) {
     this.registry = registry;
@@ -522,7 +522,7 @@ export class BusinessMetricsCollector {
       // this.setGraphJobsQueued(queuedJobs, jobType, tenantId);
 
       // Add your metric collection logic here
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error collecting business metrics:', error);
     }
   }

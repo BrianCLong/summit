@@ -247,7 +247,7 @@ export class MonitoringObservabilityService extends EventEmitter {
           health: updatedHealth,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[MONITORING] Health check error:', error);
     }
   }

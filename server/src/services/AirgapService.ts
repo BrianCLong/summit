@@ -92,7 +92,7 @@ export class AirgapService {
         status: 'verified'
       };
 
-    } catch (error) {
+    } catch (error: any) {
       log.error({ importId, error: error.message }, 'Airgap import failed');
       // Cleanup
       rmSync(workDir, { recursive: true, force: true });

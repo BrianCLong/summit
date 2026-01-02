@@ -39,7 +39,7 @@ export class ParallelExecutor {
                     } finally {
                         await taskSession.close();
                     }
-                } catch (err) {
+                } catch (err: any) {
                     return {
                         key,
                         status: 'rejected' as const,

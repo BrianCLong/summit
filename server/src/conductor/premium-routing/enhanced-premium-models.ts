@@ -381,7 +381,7 @@ export class EnhancedPremiumModelRegistry {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const processingTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(

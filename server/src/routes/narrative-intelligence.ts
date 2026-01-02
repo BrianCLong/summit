@@ -20,7 +20,7 @@ router.post('/narrative/:id/detect', ensureAuthenticated, async (req: Request, r
         const narrativeId = req.params.id;
         const snapshot = await narrativeService.takeSnapshot(narrativeId);
         res.json(snapshot);
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error in narrative detection', error);
         res.status(500).json({ error: 'Detection failed' });
     }
@@ -32,7 +32,7 @@ router.get('/narrative/:id/evolution', ensureAuthenticated, async (req: Request,
         const history = await narrativeService.getNarrativeEvolution(req.params.id);
         const trends = await narrativeService.detectTrends(req.params.id);
         res.json({ history, trends });
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error fetching narrative evolution', error);
         res.status(500).json({ error: 'Failed to fetch history' });
     }
@@ -44,7 +44,7 @@ router.get('/narrative/:id/graph', ensureAuthenticated, async (req: Request, res
         // Expose graph centrality and communities
         const network = await influenceService.getInfluenceNetwork(req.params.id);
         res.json(network);
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error fetching graph network', error);
         res.status(500).json({ error: 'Failed to fetch network' });
     }
@@ -62,7 +62,7 @@ router.post('/analyze/sentiment', ensureAuthenticated, async (req: Request, res:
         const stance = topic ? sentimentService.analyzeStance(text, topic) : null;
 
         res.json({ sentiment, emotion, toxicity, stance });
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error analyzing sentiment', error);
         res.status(500).json({ error: 'Analysis failed' });
     }
@@ -78,7 +78,7 @@ router.post('/cib/detect', ensureAuthenticated, async (req: Request, res: Respon
 
         const result = await cibService.detectCIB(entityIds || [], telemetryMap, textsMap);
         res.json(result);
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error detecting CIB', error);
         res.status(500).json({ error: 'CIB detection failed' });
     }

@@ -75,7 +75,7 @@ export class EvidenceFusionService extends EventEmitter {
        } catch {
            return { raw: response };
        }
-    } catch (e) {
+    } catch (e: any) {
       logger.error('[EvidenceFusion] Timeline synthesis failed', e instanceof Error ? e.message : String(e));
       throw e;
     }
@@ -110,7 +110,7 @@ export class EvidenceFusionService extends EventEmitter {
             logger.warn('[EvidenceFusion] Failed to parse hypotheses JSON');
             return [];
         }
-    } catch (e) {
+    } catch (e: any) {
         logger.error('[EvidenceFusion] Hypothesis generation failed', e instanceof Error ? e.message : String(e));
         throw e;
     }

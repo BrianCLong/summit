@@ -58,7 +58,7 @@ export const tenant = (options: TenantMiddlewareOptions = {}) => {
       res.setHeader('X-Tenant-Environment', context.environment);
       res.setHeader('X-Tenant-Privilege-Tier', context.privilegeTier);
       return next();
-    } catch (error) {
+    } catch (error: any) {
       const err = error as TenantContextError;
       const status = err.status || 401;
 

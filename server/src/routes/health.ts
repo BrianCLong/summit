@@ -192,7 +192,7 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
     const neo4j = (await import('../db/neo4jConnection.js')).default;
     await neo4j.getDriver().verifyConnectivity();
     health.services.neo4j = 'healthy';
-  } catch (error) {
+  } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
     health.services.neo4j = 'unhealthy';
     health.status = 'degraded';
@@ -210,7 +210,7 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
     const pool = getPostgresPool();
     await pool.query('SELECT 1');
     health.services.postgres = 'healthy';
-  } catch (error) {
+  } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
     health.services.postgres = 'unhealthy';
     health.status = 'degraded';
@@ -228,7 +228,7 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
     const redis = getRedisClient();
     await redis.ping();
     health.services.redis = 'healthy';
-  } catch (error) {
+  } catch (error: any) {
     const errorMsg = error instanceof Error ? error.message : 'Connection failed';
     health.services.redis = 'unhealthy';
     health.status = 'degraded';
@@ -283,7 +283,7 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
         errorCount: errors.length,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ error }, 'Failed to append audit trail event for health check');
   }
 
@@ -324,7 +324,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
   try {
     const neo4j = (await import('../db/neo4jConnection.js')).default;
     await neo4j.getDriver().verifyConnectivity();
-  } catch (error) {
+  } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`Neo4j: ${msg}`);
     logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
@@ -334,7 +334,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
     const { getPostgresPool } = await import('../db/postgres.js');
     const pool = getPostgresPool();
     await pool.query('SELECT 1');
-  } catch (error) {
+  } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`PostgreSQL: ${msg}`);
     logger.warn({ error }, 'Readiness check failed: PostgreSQL unavailable');
@@ -344,7 +344,7 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
     const { getRedisClient } = await import('../db/redis.js');
     const redis = getRedisClient();
     await redis.ping();
-  } catch (error) {
+  } catch (error: any) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     failures.push(`Redis: ${msg}`);
     logger.warn({ error }, 'Readiness check failed: Redis unavailable');

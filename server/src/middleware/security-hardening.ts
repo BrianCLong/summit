@@ -46,7 +46,7 @@ export function securityHardening(req: Request, res: Response, next: NextFunctio
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, path: req.path }, 'Error in security hardening middleware');
     // Fail closed
     res.status(500).json({ error: 'Internal security check failed' });

@@ -70,7 +70,7 @@ export class SIEMExportService {
         default:
           throw new Error(`Unsupported SIEM provider: ${config.provider}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'SIEM export failed',
         provider: config.provider,
@@ -133,7 +133,7 @@ export class SIEMExportService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Splunk export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }
@@ -183,7 +183,7 @@ export class SIEMExportService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Datadog export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }
@@ -243,7 +243,7 @@ export class SIEMExportService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Elasticsearch export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }
@@ -285,7 +285,7 @@ export class SIEMExportService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Sumo Logic export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }
@@ -333,7 +333,7 @@ export class SIEMExportService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Custom export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }
@@ -433,7 +433,7 @@ export class SIEMExportService {
     }
 
     const totalExported = results.reduce((sum, r) => sum + r.exported_count, 0);
-    const allSuccess = results.every((r) => r.success);
+    const allSuccess = results.every((r: any) => r.success);
 
     return {
       success: allSuccess,
@@ -441,7 +441,7 @@ export class SIEMExportService {
       provider: config.provider,
       export_id: uuidv4(),
       timestamp: new Date().toISOString(),
-      errors: results.flatMap((r) => r.errors || []),
+      errors: results.flatMap((r: any) => r.errors || []),
     };
   }
 }

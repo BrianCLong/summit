@@ -195,7 +195,7 @@ export class EdgeFleetService extends EventEmitter {
                 details
             }
         );
-      } catch (e) {
+      } catch (e: any) {
           logger.error('Failed to log to ledger', e instanceof Error ? e.message : String(e));
       }
   }

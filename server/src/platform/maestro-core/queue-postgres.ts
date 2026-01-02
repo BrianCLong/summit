@@ -2,7 +2,7 @@ import { Task, TaskQueue, TaskPriority } from './types.js';
 import pg from 'pg';
 
 export class PostgresTaskQueue implements TaskQueue {
-  constructor(private pool: pg.Pool) {}
+  constructor(private pool: pg.Pool) { }
 
   async enqueue(taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'attemptCount' | 'status'>): Promise<Task> {
     const query = `

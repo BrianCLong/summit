@@ -38,7 +38,7 @@ router.post('/licenses', async (req: Request, res: Response) => {
       success: true,
       data: license,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to create license',
       error: error instanceof Error ? error.message : String(error),
@@ -70,7 +70,7 @@ router.get('/licenses/:id', async (req: Request, res: Response) => {
       success: true,
       data: license,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to get license',
       error: error instanceof Error ? error.message : String(error),
@@ -100,7 +100,7 @@ router.post('/sources', async (req: Request, res: Response) => {
       success: true,
       data: source,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to register source',
       error: error instanceof Error ? error.message : String(error),
@@ -132,7 +132,7 @@ router.get('/sources/:id', async (req: Request, res: Response) => {
       success: true,
       data: source,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to get source',
       error: error instanceof Error ? error.message : String(error),
@@ -162,7 +162,7 @@ router.post('/transforms', async (req: Request, res: Response) => {
       success: true,
       data: transform,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to register transform',
       error: error instanceof Error ? error.message : String(error),
@@ -195,7 +195,7 @@ router.get('/transforms/:id', async (req: Request, res: Response) => {
       success: true,
       data: transform,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to get transform',
       error: error instanceof Error ? error.message : String(error),
@@ -225,7 +225,7 @@ router.post('/evidence', async (req: Request, res: Response) => {
       success: true,
       data: evidence,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to register evidence',
       error: error instanceof Error ? error.message : String(error),
@@ -258,7 +258,7 @@ router.get('/evidence/:id', async (req: Request, res: Response) => {
       success: true,
       data: evidence,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to get evidence',
       error: error instanceof Error ? error.message : String(error),
@@ -288,7 +288,7 @@ router.post('/claims', async (req: Request, res: Response) => {
       success: true,
       data: claim,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to register claim',
       error: error instanceof Error ? error.message : String(error),
@@ -335,7 +335,7 @@ router.get('/claims/:id', async (req: Request, res: Response) => {
       success: true,
       data: claim,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to get claim',
       error: error instanceof Error ? error.message : String(error),
@@ -374,7 +374,7 @@ router.get('/claims', async (req: Request, res: Response) => {
       data: claims,
       count: claims.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to query claims',
       error: error instanceof Error ? error.message : String(error),
@@ -406,7 +406,7 @@ router.post(
         success: true,
         data: link,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to link claim to evidence',
         error: error instanceof Error ? error.message : String(error),
@@ -440,7 +440,7 @@ router.get(
         data: links,
         count: links.length,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to get claim evidence links',
         error: error instanceof Error ? error.message : String(error),
@@ -474,7 +474,7 @@ router.get(
         data: links,
         count: links.length,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to get evidence claim links',
         error: error instanceof Error ? error.message : String(error),
@@ -507,7 +507,7 @@ router.get('/chain/:itemId', async (req: Request, res: Response) => {
       success: true,
       data: chain,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to get provenance chain',
       error: error instanceof Error ? error.message : String(error),
@@ -538,7 +538,7 @@ router.post('/export', async (req: Request, res: Response) => {
       success: true,
       data: manifest,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to create export manifest',
       error: error instanceof Error ? error.message : String(error),
@@ -568,7 +568,7 @@ router.get(
         success: true,
         data: report,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to verify manifest',
         error: error instanceof Error ? error.message : String(error),
@@ -621,7 +621,7 @@ router.post('/ingest', async (req: Request, res: Response) => {
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to ingest document',
       error: error instanceof Error ? error.message : String(error),
@@ -656,7 +656,7 @@ router.post('/audit/verify', async (req: Request, res: Response) => {
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({
       message: 'Failed to verify audit chain',
       error: error instanceof Error ? error.message : String(error),

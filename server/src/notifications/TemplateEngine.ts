@@ -27,7 +27,7 @@ export class TemplateEngine {
     try {
       const compiled = _.template(template);
       return compiled(data);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ templateId, error }, 'Error rendering template');
       return template; // Return raw template on error? Or empty string?
     }

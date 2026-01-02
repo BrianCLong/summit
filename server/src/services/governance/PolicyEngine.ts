@@ -82,7 +82,7 @@ export class PolicyEngine {
       // Mock OPA call using fetch if available or just return allowed for now in prototype
       // const response = await fetch(this.opaUrl, { ... })
       return { allowed: true };
-    } catch (e) {
+    } catch (e: any) {
       logger.warn('OPA connection failed, failing closed', e);
       return { allowed: false, reason: 'Policy server unavailable' };
     }

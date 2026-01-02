@@ -178,7 +178,7 @@ export class StixBundleFactory {
 
     const session = this.deps.neo4j.session();
     try {
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return tx.run(
           `
           MATCH (source:Entity)-[r]->(target:Entity)

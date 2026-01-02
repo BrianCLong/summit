@@ -394,14 +394,14 @@ async function initialize() {
   try {
     await postgresPool.query('SELECT 1');
     console.log('✓ PostgreSQL connected');
-  } catch (error) {
+  } catch (error: any) {
     console.error('✗ PostgreSQL connection failed:', error);
   }
 
   try {
     await neo4jDriver.verifyConnectivity();
     console.log('✓ Neo4j connected');
-  } catch (error) {
+  } catch (error: any) {
     console.error('✗ Neo4j connection failed:', error);
   }
 
@@ -409,7 +409,7 @@ async function initialize() {
   try {
     await metadataStore.initialize();
     console.log('✓ Metadata store initialized');
-  } catch (error) {
+  } catch (error: any) {
     console.error('✗ Metadata store initialization failed:', error);
   }
 

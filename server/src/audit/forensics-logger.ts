@@ -220,7 +220,7 @@ export class ForensicsLogger extends EventEmitter {
         maxLength: this.config.maxStreamLength,
         chainHashing: this.config.enableChainHashing,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize forensics logger', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -251,7 +251,7 @@ export class ForensicsLogger extends EventEmitter {
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to load last hash, starting new chain', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -328,7 +328,7 @@ export class ForensicsLogger extends EventEmitter {
     try {
       await pipeline.exec();
       logger.debug('Flushed forensics events', { count: events.length });
-    } catch (error) {
+    } catch (error: any) {
       // Re-queue failed events
       this.pendingEvents.unshift(...events);
       logger.error('Failed to flush forensics events', {
@@ -758,7 +758,7 @@ export class ForensicsLogger extends EventEmitter {
           pendingEvents: this.pendingEvents.length,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         status: 'unhealthy',
         details: {

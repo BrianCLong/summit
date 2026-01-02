@@ -73,7 +73,7 @@ export class BackupService {
               await new Promise(r => setTimeout(r, 500));
               logger.info('Simulated S3 upload complete.');
           }
-      } catch (error) {
+      } catch (error: any) {
           logger.error('Failed to upload to S3', error);
           throw error;
       }
@@ -91,7 +91,7 @@ export class BackupService {
 
           logger.info(`Backup verification successful for ${filepath}`);
           return true;
-      } catch (error) {
+      } catch (error: any) {
           logger.error(`Backup verification failed for ${filepath}`, error);
           return false;
       }
@@ -136,7 +136,7 @@ export class BackupService {
       await this.recordBackupMeta('postgres', finalPath, stats.size);
 
       return finalPath;
-    } catch (error) {
+    } catch (error: any) {
       backupMetrics.incrementCounter('ops_total', { type: 'postgres', status: 'failure' });
       logger.error('PostgreSQL backup failed', error);
       throw error;
@@ -187,7 +187,7 @@ export class BackupService {
 
           await new Promise<void>((resolve, reject) => {
               fileStream.on('finish', () => resolve());
-              fileStream.on('error', (err) => reject(err));
+              fileStream.on('error', (err: any) => reject(err));
           });
 
       } finally {
@@ -209,7 +209,7 @@ export class BackupService {
       await this.recordBackupMeta('neo4j', finalPath, stats.size);
 
       return finalPath;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Neo4j backup failed', error);
       throw error;
     }
@@ -249,7 +249,7 @@ export class BackupService {
        await this.recordBackupMeta('redis', filepath, 0);
 
        return filepath;
-     } catch (error) {
+     } catch (error: any) {
        logger.error('Redis backup failed', error);
        throw error;
      }
@@ -277,17 +277,17 @@ export class BackupService {
 
      try {
         results.postgres = await this.backupPostgres({ compress: true, uploadToS3 });
-     } catch (e) {
+     } catch (e: any) {
         results.postgres = `Failed: ${e}`;
      }
      try {
         results.neo4j = await this.backupNeo4j({ compress: true, uploadToS3 });
-     } catch (e) {
+     } catch (e: any) {
         results.neo4j = `Failed: ${e}`;
      }
      try {
         results.redis = await this.backupRedis({ uploadToS3 });
-     } catch (e) {
+     } catch (e: any) {
         results.redis = `Failed: ${e}`;
      }
      return results;

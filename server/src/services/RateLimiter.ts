@@ -90,7 +90,7 @@ export class RateLimiter {
         reset,
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error }, 'Rate limiting error');
       // Fail open
       return {

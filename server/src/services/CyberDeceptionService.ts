@@ -127,7 +127,7 @@ export class CyberDeceptionService extends EventEmitter {
       }
 
       logger.info(`Rehydrated ${this.honeypots.size} honeypots and ${this.honeyTokens.size} tokens from ledger.`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error rehydrating deception state:', error);
     }
   }

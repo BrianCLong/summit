@@ -156,7 +156,7 @@ export class CaseOverviewCacheRepo {
       [limit],
     );
 
-    return rows.map((row) => ({ caseId: row.case_id, tenantId: row.tenant_id }));
+    return rows.map((row: any) => ({ caseId: row.case_id, tenantId: row.tenant_id }));
   }
 
   async listAllCases(limit = 500): Promise<{ caseId: string; tenantId: string }[]> {
@@ -164,7 +164,7 @@ export class CaseOverviewCacheRepo {
       `SELECT id, tenant_id FROM maestro.cases ORDER BY created_at DESC LIMIT $1`,
       [limit],
     );
-    return rows.map((row) => ({ caseId: row.id, tenantId: row.tenant_id }));
+    return rows.map((row: any) => ({ caseId: row.id, tenantId: row.tenant_id }));
   }
 
   private mapRow(row: CaseOverviewCacheRow): CaseOverviewSnapshot {

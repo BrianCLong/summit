@@ -53,7 +53,7 @@ function updateFlagGauges(flags: FeatureFlags) {
     featureFlagEnabledGauge.labels('PRICE_AWARE_FAIL_OPEN').set(
       flags.PRICE_AWARE_FAIL_OPEN ? 1 : 0,
     );
-  } catch (error) {
+  } catch (error: any) {
     logger.warn('Failed to publish feature flag gauges', {
       error: (error as Error).message,
     });

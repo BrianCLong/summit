@@ -105,7 +105,7 @@ export class HumintService {
           tenantId: source.tenantId
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       // Compensating transaction: Delete the Postgres record if Neo4j fails
       await this.pool.query('DELETE FROM humint_sources WHERE id = $1', [source.id]);
       throw error;
@@ -281,7 +281,7 @@ export class HumintService {
     // For MVP, we'll assume the Target is a generic 'Entity' or 'Person'
     const session = this.neo4j.session();
     try {
-        // Simple merge for the target entity for now
+      // Simple merge for the target entity for now
       await session.run(
         `
         MATCH (s:HumintSource {id: $sourceId, tenantId: $tenantId})
@@ -306,7 +306,7 @@ export class HumintService {
         `,
         { sourceId, tenantId }
       );
-      return result.records.map(record => ({
+      return result.records.map((record: any) => ({
         target: record.get('target'),
         relationship: record.get('relationship'),
         notes: record.get('notes')

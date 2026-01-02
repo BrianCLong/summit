@@ -28,7 +28,7 @@ async function loadSessionSecret(): Promise<string> {
             return secretFromVault;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({ error }, 'Vault unavailable for session secret; falling back to env');
       }
 
@@ -75,7 +75,7 @@ export async function secureSession(req: Request, res: Response, next: NextFunct
 
     if (!sessionId) {
       sessionId = crypto.randomUUID();
-      const signed = signSession(sessionId, secret);
+      const signed = signSession(sessionId!, secret);
       res.cookie(SESSION_COOKIE_NAME, signed, {
         httpOnly: true,
         sameSite: 'strict',
@@ -88,7 +88,7 @@ export async function secureSession(req: Request, res: Response, next: NextFunct
     (req as any).sessionId = sessionId;
     res.locals.sessionId = sessionId;
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error }, 'Unable to establish secure session');
     res.status(500).json({ error: 'Secure session initialization failed' });
   }

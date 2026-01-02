@@ -45,7 +45,7 @@ export class KafkaConsumerWrapper {
         await this.consumer.connect();
         this.isConnected = true;
         this.logger.info('Connected to Kafka Consumer');
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error('Failed to connect to Kafka Consumer', error);
         throw error;
       }
@@ -81,7 +81,7 @@ export class KafkaConsumerWrapper {
             }
           }
           await handler(payload);
-        } catch (error) {
+        } catch (error: any) {
           this.logger.error(`Error processing message from topic ${topic}`, error);
 
           if (this.dlqProducer && this.dlqTopic && message.value) {

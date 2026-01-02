@@ -281,11 +281,11 @@ export class SupernodeQueryOptimizer {
       pagination:
         strategy === 'paginated' || strategy === 'sampled'
           ? {
-              limit,
-              offset: 0,
-              hasMore: true,
-              totalEstimate: estimatedCost,
-            }
+            limit,
+            offset: 0,
+            hasMore: true,
+            totalEstimate: estimatedCost,
+          }
           : undefined,
     };
   }
@@ -511,7 +511,7 @@ export class SupernodeQueryOptimizer {
         { entityId, offset, limit, tenantId }
       );
 
-      const neighbors = result.records.slice(0, limit).map(record => ({
+      const neighbors = result.records.slice(0, limit).map((record: any) => ({
         id: record.get('id'),
         type: record.get('type'),
         label: record.get('label'),
@@ -549,7 +549,7 @@ export class SupernodeQueryOptimizer {
         { threshold: this.config.supernodeThreshold, topN }
       );
 
-      const entityIds = result.records.map(r => r.get('entityId'));
+      const entityIds = result.records.map((r: any) => r.get('entityId'));
       let processed = 0;
 
       for (const entityId of entityIds) {

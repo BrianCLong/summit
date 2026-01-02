@@ -79,7 +79,7 @@ export class OmbudsService {
         CREATE INDEX IF NOT EXISTS idx_ombuds_decisions_case ON ombuds_decisions(case_id);
         CREATE INDEX IF NOT EXISTS idx_ombuds_decisions_tags ON ombuds_decisions USING GIN(tags);
       `);
-    } catch (e) {
+    } catch (e: any) {
       // In tests/sandbox where DB might be missing, log and ignore?
       // But for production this is critical.
       logger.warn({ error: e }, "Could not initialize DB schema for OmbudsService");
@@ -121,7 +121,7 @@ export class OmbudsService {
         decision.redactionNotes, decision.tags, decision.status,
         decision.createdAt, decision.updatedAt, decision.decidedBy
       ]);
-    } catch (e) {
+    } catch (e: any) {
       logger.error({ error: e }, "Failed to persist decision to DB");
       // Fallback or throw? Ideally throw. But for now, if DB is down, maybe we just rely on Ledger (which also uses DB but might be different pool/retry logic)
       // I'll throw to be safe as per "Persistence" requirement.
@@ -155,7 +155,7 @@ export class OmbudsService {
           classification: ['internal', 'confidential']
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, decisionId: decision.decisionId }, 'Failed to append ombuds decision to provenance ledger');
       // We don't block the operation for MVP if ledger fails (e.g. DB issue)
     }
@@ -188,7 +188,7 @@ export class OmbudsService {
     return res.rows.map(row => this.mapRowToDecision(row));
   }
 
-  private mapRowToDecision(row: any): OmbudsDecision {
+  private mapRowToDecision(row): OmbudsDecision {
     return {
       decisionId: row.decision_id,
       tenantId: row.tenant_id,

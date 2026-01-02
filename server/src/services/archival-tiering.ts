@@ -143,7 +143,7 @@ export class ArchivalTieringService {
     }
 
     // Run immediately, then on interval
-    this.runArchivalCycle().catch((err) =>
+    this.runArchivalCycle().catch((err: any) =>
       logger.error('Error in initial archival cycle', err)
     );
 
@@ -177,7 +177,7 @@ export class ArchivalTieringService {
     for (const rule of this.config.archivalRules) {
       try {
         await this.executeArchivalRule(rule);
-      } catch (error) {
+      } catch (error: any) {
         logger.error({
           rule: rule.name,
           error: (error as Error).message,
@@ -350,7 +350,7 @@ export class ArchivalTieringService {
       });
 
       return job;
-    } catch (error) {
+    } catch (error: any) {
       job.status = 'failed';
       job.error = (error as Error).message;
       job.endTime = new Date();
@@ -498,7 +498,7 @@ export class ArchivalTieringService {
 
     // Build INSERT statement
     const columns = Object.keys(data[0]);
-    const values = data.map((row) => columns.map((col) => row[col]));
+    const values = data.map((row: any) => columns.map((col) => row[col]));
 
     // Batch insert (simplified - production would use proper batch insertion)
     for (const rowValues of values) {

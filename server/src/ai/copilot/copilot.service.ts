@@ -351,7 +351,7 @@ export class CopilotService {
           governanceVerdict,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       const executionTime = Date.now() - startTime;
       logger.error(
         {
@@ -492,7 +492,7 @@ export class CopilotService {
           governanceVerdict,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         {
           requestId,

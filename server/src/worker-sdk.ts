@@ -51,7 +51,7 @@ export async function runTaskLoop(
     try {
       const res = await handler(lease, { signal: ctrl.signal });
       await client.ackTask(lease.id, res.checkpoint, res.artifacts);
-    } catch (e) {
+    } catch (e: any) {
       const retryable = isRetryable(e);
       await client.nackTask(lease.id, retryable, String(e)); // Convert error to string
     } finally {

@@ -17,7 +17,7 @@ export function scheduleCaseOverviewCacheRefresh(
         { refreshed, cronExpression, batchSize },
         'Refreshed stale case overview cache entries',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to refresh case overview cache');
     }
   });

@@ -118,7 +118,7 @@ export class TenantLimitEnforcer {
           privilegeTier: context.privilegeTier,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         { tenantId: context.tenantId, action, error },
         'Failed to append provenance entry for limit event',

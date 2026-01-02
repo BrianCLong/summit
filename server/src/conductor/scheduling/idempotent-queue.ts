@@ -117,7 +117,7 @@ export class IdempotentQueue {
       });
 
       return { success: true, id: queueItem.id };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to enqueue item', {
         error: error.message,
         queueName: this.queueName,
@@ -170,7 +170,7 @@ export class IdempotentQueue {
       });
 
       return queueItem;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to dequeue item', {
         error: error.message,
         queueName: this.queueName,
@@ -212,7 +212,7 @@ export class IdempotentQueue {
         workerId,
       });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to complete item', { error: error.message, itemId });
       return false;
     }
@@ -250,7 +250,7 @@ export class IdempotentQueue {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to requeue item', {
         error: error.message,
         itemId: item.id,
@@ -298,7 +298,7 @@ export class IdempotentQueue {
       }
 
       return { depth, oldestItemAge, quarantinedCount, activeLeases };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get queue health metrics', {
         error: error.message,
       });
@@ -338,7 +338,7 @@ export class IdempotentQueue {
           }
           // retry_later would need additional logic
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Poison pill rule error', {
           rule: rule.name,
           error: error.message,

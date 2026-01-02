@@ -163,7 +163,7 @@ export class AuditTimelineRollupService {
       WHERE table_schema = 'public' AND table_name = 'audit_events'
     `,
     );
-    const names = new Set(rows.map((row) => row.column_name));
+    const names = new Set(rows.map((row: any) => row.column_name));
 
     const timestampColumn = names.has('timestamp')
       ? '"timestamp"'
@@ -444,7 +444,7 @@ export class AuditTimelineRollupService {
       values,
     );
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       bucketStart: new Date(row.bucket_start),
       bucketEnd: new Date(row.bucket_end),
       tenantId: row.tenant_id,
@@ -520,7 +520,7 @@ export class AuditTimelineRollupService {
         values,
       );
 
-      return rows.map((row) => ({
+      return rows.map((row: any) => ({
         bucketStart: new Date(row.bucket_start),
         bucketEnd: new Date(row.bucket_end),
         tenantId: row.tenant_id,

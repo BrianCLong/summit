@@ -158,7 +158,7 @@ export class SmartCityConnector {
       endpoint.lastSync = new Date();
 
       return { success: true, latency };
-    } catch (error) {
+    } catch (error: any) {
       endpoint.status = 'ERROR';
       return { success: false, latency: -1 };
     }
@@ -170,7 +170,7 @@ export class SmartCityConnector {
    * @returns Processed sensor readings
    */
   async ingestIoTData(payload: IoTSensorPayload): Promise<SensorReading[]> {
-    const readings: SensorReading[] = payload.readings.map((r) => ({
+    const readings: SensorReading[] = payload.readings.map((r: any) => ({
       sensorId: payload.deviceId,
       timestamp: new Date(payload.timestamp),
       value: r.value,
@@ -349,7 +349,7 @@ export class SmartCityConnector {
       endpoint.status = 'ACTIVE';
 
       return { records };
-    } catch (error) {
+    } catch (error: any) {
       endpoint.status = 'ERROR';
       throw error;
     }

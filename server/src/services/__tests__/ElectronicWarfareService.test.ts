@@ -80,7 +80,7 @@ describe('ElectronicWarfareService', () => {
             status: 'COMPLETED'
         }));
         done();
-      } catch (error) {
+      } catch (error: any) {
         done(error);
       }
     }, 1100);

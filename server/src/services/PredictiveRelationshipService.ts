@@ -116,7 +116,7 @@ export class PredictiveRelationshipService {
         if (!targetEmbedding && generateMissingEmbeddings) {
           try {
             targetEmbedding = await this.generateAndStoreEmbedding(targetProps.id, targetProps);
-          } catch (e) {
+          } catch (e: any) {
             logger.warn(`Failed to generate embedding for candidate ${targetProps.id}`, e);
             continue;
           }
@@ -162,7 +162,7 @@ export class PredictiveRelationshipService {
 
       return predictions.sort((a, b) => b.confidence - a.confidence).slice(0, limit);
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error predicting relationships:', error);
       throw error;
     } finally {
@@ -203,7 +203,7 @@ export class PredictiveRelationshipService {
       }
 
       return embedding;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to generate/store embedding for ${entityId}`, error);
       throw error;
     }
