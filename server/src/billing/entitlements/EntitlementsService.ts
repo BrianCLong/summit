@@ -121,7 +121,7 @@ export class EntitlementsService implements EntitlementsInterface {
           entityType: 'Entitlement',
           artifactKey,
           source,
-          sourceId
+          sourceId: sourceId ?? undefined
         },
         metadata: {
           tenantId,
