@@ -1,13 +1,15 @@
 import { CypherSandbox } from '../../../server/src/middleware/cypher-sandbox';
+import { getFuzzConfig, logFuzzRun } from './config';
 import { baseScenarios, buildCorpus } from './corpus';
 
 describe('graph guardrail fuzzing', () => {
-  const iterations = parseInt(process.env.GRAPH_GUARDRAIL_FUZZ_ITERATIONS || '80', 10);
-  const seed = parseInt(process.env.GRAPH_GUARDRAIL_FUZZ_SEED || '7331', 10);
+  const config = getFuzzConfig();
+
+  logFuzzRun(config, config.iterations);
 
   it('blocks unsafe patterns and allows safe reads with coverage by reason code', () => {
     const sandbox = new CypherSandbox();
-    const corpus = buildCorpus(seed, iterations);
+    const corpus = buildCorpus(config.seed, config.iterations);
 
     const coverage = new Map<string, number>();
 
