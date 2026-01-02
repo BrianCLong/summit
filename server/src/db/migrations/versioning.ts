@@ -299,7 +299,7 @@ export class MigrationManager {
           timer();
           this.migrationTotalCounter.inc({ status: 'success' });
           this.migrationStatusGauge.set(1);
-        } catch (error) {
+        } catch (error: any) {
           if (useTransaction) {
             await client.query('ROLLBACK');
           }
@@ -347,7 +347,7 @@ export class MigrationManager {
           );
           await client.query('COMMIT');
           timer();
-        } catch (error) {
+        } catch (error: any) {
           await client.query('ROLLBACK');
           throw error;
         }
@@ -402,7 +402,7 @@ export class MigrationManager {
             [seed.name, Date.now() - start],
           );
           await client.query('COMMIT');
-        } catch (error) {
+        } catch (error: any) {
           await client.query('ROLLBACK');
           throw error;
         }

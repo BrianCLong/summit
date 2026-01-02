@@ -32,7 +32,7 @@ router.post('/resolve-batch', async (req, res) => {
 
     const decisions = await erService.resolveBatch(enrichedEntities);
     res.json({ decisions });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Batch resolution error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -48,7 +48,7 @@ router.get('/quality/metrics', async (req, res) => {
 
     const metrics = await dqService.getQualityMetrics(tenantId);
     res.json({ metrics });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Quality metrics error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -85,7 +85,7 @@ router.get('/guardrails/status', async (req, res) => {
       ...guardrails,
       latestOverride,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Guardrail status error:', error);
     res.status(500).json({ error: 'Failed to fetch guardrail status' });
   }
@@ -101,7 +101,7 @@ router.post('/guardrails/preflight', async (req, res) => {
       tenantId: (req as any).user?.tenantId,
     });
     res.json(guardrails);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Guardrail preflight error:', error);
     res.status(500).json({ error: 'Failed to run guardrail preflight' });
   }

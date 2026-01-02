@@ -11,7 +11,7 @@ class AnomalyDetector {
     if (!this.metricData.has(metricName)) {
       this.metricData.set(metricName, []);
     }
-    const data = this.metricData.get(metricName);
+    const data = this.metricData.get(metricName)!;
 
     if (this.metricBaselines.has(metricName)) {
       this.detectAnomalies(metricName, value);
@@ -29,7 +29,7 @@ class AnomalyDetector {
     const mean = data.reduce((a, b) => a + b, 0) / data.length;
     const std = Math.sqrt(
       data.map((x) => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) /
-        data.length,
+      data.length,
     );
 
     const existingBaseline = this.metricBaselines.get(metricName);

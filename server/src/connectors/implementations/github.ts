@@ -62,7 +62,7 @@ export class GitHubConnector extends BaseConnector {
                   this.metrics.recordsProcessed++;
               }
               stream.push(null);
-          } catch (err) {
+          } catch (err: any) {
               stream.destroy(err as Error);
               this.metrics.errors++;
           }

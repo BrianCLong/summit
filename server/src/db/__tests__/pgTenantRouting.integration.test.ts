@@ -100,7 +100,7 @@ describe('pg router integration', () => {
     expect(mockPools[1]?.connect).toHaveBeenCalled();
     expect(executed).toContain('SELECT 1');
     expect(result).toEqual({ ok: true });
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`integration test failed: ${String(error)}`);
     }
   });

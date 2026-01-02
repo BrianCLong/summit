@@ -100,7 +100,7 @@ export class LLMDrivenNarrativeGenerator implements NarrativeGenerator {
         risks: this.extractLines(response, /risk:/i),
         opportunities: this.extractLines(response, /opportunity:/i),
       };
-    } catch (error) {
+    } catch (error: any) {
       const fallbackResult = await this.fallback.generate(state, recentEvents);
       return {
         ...fallbackResult,

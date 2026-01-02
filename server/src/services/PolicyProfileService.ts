@@ -202,7 +202,7 @@ export class PolicyProfileService {
       await client.query('COMMIT');
       logger.info(`Applied policy profile '${profileId}' to tenant ${tenantId}`);
 
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to apply policy profile', error);
       throw error;

@@ -120,7 +120,7 @@ class AgentRegistry {
     return res.rows.map(this.mapRowToPolicy);
   }
 
-  private mapRowToAgent(row: any): AgentIdentity {
+  private mapRowToAgent(row): AgentIdentity {
     return {
       id: row.id,
       tenantId: row.tenant_id,
@@ -136,7 +136,7 @@ class AgentRegistry {
     };
   }
 
-  private mapRowToPolicy(row: any): AgentPolicy {
+  private mapRowToPolicy(row): AgentPolicy {
     return {
       id: row.id,
       agentId: row.agent_id,

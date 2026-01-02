@@ -18,7 +18,7 @@ router.post('/backups', (req, res) => {
     // In a real app, validation would be stricter
     const target = service.addTarget(req.body);
     res.status(201).json(target);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });

@@ -314,7 +314,7 @@ export abstract class BaseConnector extends EventEmitter {
   private async applyRateLimiting(): Promise<void> {
     // Simple rate limiting implementation
     // Production version would use a more sophisticated approach
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       if (this.config.rateLimiting) {
         const delay = 1000 / this.config.rateLimiting.maxRequestsPerSecond;
         setTimeout(resolve, delay);
@@ -573,7 +573,9 @@ export class ConnectorRegistry extends EventEmitter {
 
     const connector = new ConnectorClass(config);
     connector.validate();
-    (options.operations ?? []).forEach((operation) => connector.addOperation(operation));
+    if ('addOperation' in connector && typeof connector.addOperation === 'function') {
+      (options.operations ?? []).forEach((operation) => (connector as any).addOperation(operation));
+    }
 
     this.connectors.set(config.id, connector);
     this.emit('connector.registered', config);

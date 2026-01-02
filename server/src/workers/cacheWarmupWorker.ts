@@ -42,7 +42,7 @@ function resolveRedisConnection(): Redis | null {
       enableReadyCheck: true,
       maxRetriesPerRequest: 2,
     });
-    queueConnection.on('error', (err) => {
+    queueConnection.on('error', (err: any) => {
       logger.warn({ err }, 'Cache warmup Redis connection error');
     });
   }
@@ -139,7 +139,7 @@ export async function startCacheWarmupWorker(): Promise<void> {
       removeOnFail: { count: 50 },
     });
 
-    worker.on('completed', (job) => {
+    worker.on('completed', (job: any) => {
       logger.debug({ jobId: job.id, name: job.name }, 'Cache warmup job completed');
     });
 
@@ -148,7 +148,7 @@ export async function startCacheWarmupWorker(): Promise<void> {
     });
 
     logger.info('Cache warmup worker started');
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ err: error }, 'Failed to start cache warmup worker');
   }
 }
@@ -188,7 +188,7 @@ export async function enqueueCacheWarmup(job: Partial<CacheWarmupJob>): Promise<
         timeout: JOB_TTL_MS,
       },
     );
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ err: error }, 'Failed to enqueue cache warmup job');
   }
 }

@@ -108,7 +108,7 @@ export class OpenAIGraphRagLlmAdapter implements GraphRagLlmAdapter {
       }
 
       return this.parseAndValidateResponse(content, context);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'LLM generation failed',
         error: error instanceof Error ? error.message : String(error),

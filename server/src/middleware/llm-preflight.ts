@@ -121,7 +121,7 @@ export async function enforceTokenBudget(
     );
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Token budget enforcement error:', error);
 
     // Don't block requests on token counting errors, but log them
@@ -182,7 +182,7 @@ export async function truncatePromptIfNeeded(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Prompt truncation error:', error);
     next();
   }
@@ -246,7 +246,7 @@ export async function enforceTokenBudgetWithTracking(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Enhanced token budget enforcement error:', error);
     next();
   }

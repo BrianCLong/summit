@@ -64,7 +64,7 @@ class AgentROITracker {
     return totals;
   }
 
-  private mapRowToMetric(row: any): AgentROIMetric {
+  private mapRowToMetric(row): AgentROIMetric {
     return {
       id: row.id,
       agentId: row.agent_id,

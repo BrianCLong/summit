@@ -55,7 +55,7 @@ export async function refreshPricing(
     skippedPools += invalid.length + providerInvalid;
 
     const { rows } = await pool.query<{ id: string }>('SELECT id FROM pool_registry');
-    const knownPools = new Set<string>(rows.map((r) => r.id));
+    const knownPools = new Set<string>(rows.map((r: any) => r.id));
 
     const entries: Array<[string, PricingSignal]> = [];
     for (const [poolId, signal] of Object.entries(signals)) {

@@ -67,7 +67,7 @@ export class IntelGraphService {
       const result = await fn(session);
       intelGraphOperationsCounter.inc({ method: methodName, status: 'success' });
       return result;
-    } catch (error) {
+    } catch (error: any) {
       intelGraphOperationsCounter.inc({ method: methodName, status: 'error' });
       if (error instanceof AppError) {
         throw error; // Re-throw known application errors

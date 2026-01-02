@@ -63,7 +63,7 @@ export class HttpSourceConnector extends BaseSourceConnector {
         records,
         nextCursor: nextCursor || null,
       };
-    } catch (err) {
+    } catch (err: any) {
       this.handleError(ctx, err);
       throw err;
     }

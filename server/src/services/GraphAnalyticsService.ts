@@ -69,35 +69,35 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
           const edges: Edge[] = [];
 
           path.segments.forEach((seg: any) => {
-             const startNode = seg.start.properties;
-             const endNode = seg.end.properties;
-             const rel = seg.relationship.properties;
+            const startNode = seg.start.properties;
+            const endNode = seg.end.properties;
+            const rel = seg.relationship.properties;
 
-             const mapNode = (n: any) : Entity => ({
-                 ...n,
-                 attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
-                 metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
-             });
+            const mapNode = (n: any): Entity => ({
+              ...n,
+              attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
+              metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
+            });
 
-             const mapEdge = (r: any, fromId: string, toId: string, type: string) : Edge => ({
-                 ...r,
-                 fromEntityId: fromId,
-                 toEntityId: toId,
-                 type: type,
-                 attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
-                 metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
-             });
+            const mapEdge = (r: any, fromId: string, toId: string, type: string): Edge => ({
+              ...r,
+              fromEntityId: fromId,
+              toEntityId: toId,
+              type: type,
+              attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
+              metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
+            });
 
-             if (!nodes.find(n => n.id === startNode.id)) nodes.push(mapNode(startNode));
-             if (!nodes.find(n => n.id === endNode.id)) nodes.push(mapNode(endNode));
-             if (!edges.find(e => e.id === rel.id)) edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));
+            if (!nodes.find(n => n.id === startNode.id)) nodes.push(mapNode(startNode));
+            if (!nodes.find(n => n.id === endNode.id)) nodes.push(mapNode(endNode));
+            if (!edges.find(e => e.id === rel.id)) edges.push(mapEdge(rel, startNode.id, endNode.id, seg.relationship.type));
           });
 
           return { nodes, edges, cost: path.length };
         } finally {
           await session.close();
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Error finding shortest path', { error, params });
         throw error;
       }
@@ -135,20 +135,20 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
       const row = result[0];
 
       const mapEntity = (n: any): Entity => ({
-          ...n,
-           attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
-           metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
+        ...n,
+        attributes: typeof n.attributes === 'string' ? JSON.parse(n.attributes) : n.attributes || {},
+        metadata: typeof n.metadata === 'string' ? JSON.parse(n.metadata) : n.metadata || {}
       });
 
       const mapEdge = (r: any): Edge => ({
-          ...r,
-           attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
-           metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
+        ...r,
+        attributes: typeof r.attributes === 'string' ? JSON.parse(r.attributes) : r.attributes || {},
+        metadata: typeof r.metadata === 'string' ? JSON.parse(r.metadata) : r.metadata || {}
       });
 
       return {
-          nodes: row.nodes.map(mapEntity),
-          edges: row.edges.map(mapEdge)
+        nodes: row.nodes.map(mapEntity),
+        edges: row.edges.map(mapEdge)
       };
     }, 60 * 10); // 10 min cache
   }
@@ -162,7 +162,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
 
     // MVP: Degree Centrality via Cypher
     if (algorithm === 'degree') {
-       const cypher = `
+      const cypher = `
          MATCH (n:Entity {tenantId: $tenantId})
          WHERE 1=1 ${this.buildScopeConstraints(scope)}
          OPTIONAL MATCH (n)-[r]-()
@@ -170,24 +170,24 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
          ORDER BY score DESC
          LIMIT 100
        `;
-       const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
-           tenantId,
-           investigationId: scope.investigationId,
-           collectionId: scope.collectionId
-       });
+      const result = await this.deps.runCypher<{ entityId: string, score: number }>(cypher, {
+        tenantId,
+        investigationId: scope.investigationId,
+        collectionId: scope.collectionId
+      });
 
-       return result.map((r, i) => ({
-           entityId: r.entityId,
-           score: Number(r.score),
-           rank: i + 1
-       }));
+      return result.map((r, i) => ({
+        entityId: r.entityId,
+        score: Number(r.score),
+        rank: i + 1
+      }));
     }
 
     if (algorithm === 'pageRank') {
-       // Optimization: Avoid unbounded neighborhood expansion.
-       // We use a simplified iterative approach restricted to the top connected nodes to avoid O(N^2) blowup.
+      // Optimization: Avoid unbounded neighborhood expansion.
+      // We use a simplified iterative approach restricted to the top connected nodes to avoid O(N^2) blowup.
 
-       const cypher = `
+      const cypher = `
          MATCH (n:Entity {tenantId: $tenantId})
          WHERE 1=1 ${this.buildScopeConstraints(scope)}
          // First, get degree to filter top candidates for influence check
@@ -209,22 +209,22 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
          LIMIT 100
        `;
 
-       try {
-           const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
-               tenantId,
-               investigationId: scope.investigationId,
-               collectionId: scope.collectionId
-           });
+      try {
+        const result = await this.deps.runCypher<{ entityId: string, score: number }>(cypher, {
+          tenantId,
+          investigationId: scope.investigationId,
+          collectionId: scope.collectionId
+        });
 
-           return result.map((r, i) => ({
-               entityId: r.entityId,
-               score: Number(r.score),
-               rank: i + 1
-           }));
-       } catch (e) {
-           logger.warn('PageRank calculation failed, falling back to degree', e);
-           return this.centrality({ ...params, algorithm: 'degree' });
-       }
+        return result.map((r, i) => ({
+          entityId: r.entityId,
+          score: Number(r.score),
+          rank: i + 1
+        }));
+      } catch (e: any) {
+        logger.warn('PageRank calculation failed, falling back to degree', e);
+        return this.centrality({ ...params, algorithm: 'degree' });
+      }
     }
 
     // Betweenness and Eigenvector require GDS or heavy computation.
@@ -237,20 +237,20 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
     scope: GraphScope;
     algorithm?: 'wcc' | 'louvain' | 'labelPropagation';
   }): Promise<CommunityResult[]> {
-     const { tenantId, scope, algorithm = 'wcc' } = params;
+    const { tenantId, scope, algorithm = 'wcc' } = params;
 
-     // MVP: Weakly Connected Components (via simple traversal)
-     // Finding connected components in pure Cypher for a scope.
-     // This constructs a list of node IDs for each component.
+    // MVP: Weakly Connected Components (via simple traversal)
+    // Finding connected components in pure Cypher for a scope.
+    // This constructs a list of node IDs for each component.
 
-     if (algorithm === 'wcc' || algorithm === 'louvain' || algorithm === 'labelPropagation') {
-        // Label Propagation / Community Detection via Cypher Heuristic
-        // Without GDS, we use a simple "Shared Neighbor Clustering" approach.
-        // Two nodes are in the same community if they share > X neighbors.
+    if (algorithm === 'wcc' || algorithm === 'louvain' || algorithm === 'labelPropagation') {
+      // Label Propagation / Community Detection via Cypher Heuristic
+      // Without GDS, we use a simple "Shared Neighbor Clustering" approach.
+      // Two nodes are in the same community if they share > X neighbors.
 
-        // Optimization: Avoid O(N^2) Cartesian product.
-        // We match actual relationships in the graph first.
-        const cypher = `
+      // Optimization: Avoid O(N^2) Cartesian product.
+      // We match actual relationships in the graph first.
+      const cypher = `
             MATCH (n1:Entity {tenantId: $tenantId})
             WHERE 1=1 ${this.buildScopeConstraints(scope, 'n1')}
             MATCH (n1)-[]-(n2:Entity {tenantId: $tenantId})
@@ -271,52 +271,52 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
             LIMIT 200
         `;
 
-        // Note: This returns pairs, not full communities.
-        // We will perform a simple client-side aggregation to form clusters.
+      // Note: This returns pairs, not full communities.
+      // We will perform a simple client-side aggregation to form clusters.
 
-        try {
-            const result = await this.deps.runCypher<{id1: string, id2: string, weight: number}>(cypher, {
-                tenantId,
-                investigationId: scope.investigationId,
-                collectionId: scope.collectionId
-            });
+      try {
+        const result = await this.deps.runCypher<{ id1: string, id2: string, weight: number }>(cypher, {
+          tenantId,
+          investigationId: scope.investigationId,
+          collectionId: scope.collectionId
+        });
 
-            // Simple Union-Find to group into communities
-            const parent = new Map<string, string>();
-            const find = (id: string): string => {
-                if (!parent.has(id)) parent.set(id, id);
-                if (parent.get(id) !== id) parent.set(id, find(parent.get(id)!));
-                return parent.get(id)!;
-            };
-            const union = (id1: string, id2: string) => {
-                const root1 = find(id1);
-                const root2 = find(id2);
-                if (root1 !== root2) parent.set(root1, root2);
-            };
+        // Simple Union-Find to group into communities
+        const parent = new Map<string, string>();
+        const find = (id: string): string => {
+          if (!parent.has(id)) parent.set(id, id);
+          if (parent.get(id) !== id) parent.set(id, find(parent.get(id)!));
+          return parent.get(id)!;
+        };
+        const union = (id1: string, id2: string) => {
+          const root1 = find(id1);
+          const root2 = find(id2);
+          if (root1 !== root2) parent.set(root1, root2);
+        };
 
-            result.forEach(r => union(r.id1, r.id2));
+        result.forEach(r => union(r.id1, r.id2));
 
-            // Group by root
-            const clusters = new Map<string, string[]>();
-            parent.forEach((_, id) => {
-                const root = find(id);
-                if (!clusters.has(root)) clusters.set(root, []);
-                clusters.get(root)?.push(id);
-            });
+        // Group by root
+        const clusters = new Map<string, string[]>();
+        parent.forEach((_, id) => {
+          const root = find(id);
+          if (!clusters.has(root)) clusters.set(root, []);
+          clusters.get(root)?.push(id);
+        });
 
-            return Array.from(clusters.entries()).map(([root, members]) => ({
-                communityId: root,
-                entityIds: members,
-                size: members.length
-            }));
+        return Array.from(clusters.entries()).map(([root, members]) => ({
+          communityId: root,
+          entityIds: members,
+          size: members.length
+        }));
 
-        } catch (e) {
-            logger.warn('Community detection failed', e);
-            return [];
-        }
-     }
+      } catch (e: any) {
+        logger.warn('Community detection failed', e);
+        return [];
+      }
+    }
 
-     return [];
+    return [];
   }
 
   async detectAnomalies(params: {
@@ -327,7 +327,7 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
     const { tenantId, scope, kind = 'degree' } = params;
 
     if (kind === 'degree') {
-        const cypher = `
+      const cypher = `
             MATCH (n:Entity {tenantId: $tenantId})
             WHERE 1=1 ${this.buildScopeConstraints(scope)}
             OPTIONAL MATCH (n)-[r]-()
@@ -341,18 +341,18 @@ export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
             LIMIT 50
         `;
 
-        const result = await this.deps.runCypher<{entityId: string, score: number}>(cypher, {
-             tenantId,
-             investigationId: scope.investigationId,
-             collectionId: scope.collectionId
-        });
+      const result = await this.deps.runCypher<{ entityId: string, score: number }>(cypher, {
+        tenantId,
+        investigationId: scope.investigationId,
+        collectionId: scope.collectionId
+      });
 
-        return result.map(r => ({
-            entityId: r.entityId,
-            score: Number(r.score),
-            kind: 'degree',
-            reason: `Degree ${r.score} is significantly higher than average.`
-        }));
+      return result.map(r => ({
+        entityId: r.entityId,
+        score: Number(r.score),
+        kind: 'degree',
+        reason: `Degree ${r.score} is significantly higher than average.`
+      }));
     }
 
     return [];

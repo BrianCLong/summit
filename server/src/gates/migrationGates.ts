@@ -240,7 +240,7 @@ export class MigrationGatesSystem extends EventEmitter {
                 { gate_type: gate.type, check_type: condition.type },
                 (Date.now() - conditionStart) / 1000,
               );
-            } catch (error) {
+            } catch (error: any) {
               execution.conditionResults.push({
                 conditionId: condition.id,
                 result: 'error',
@@ -299,7 +299,7 @@ export class MigrationGatesSystem extends EventEmitter {
 
           this.emit('gateExecuted', execution);
           return execution;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -397,7 +397,7 @@ export class MigrationGatesSystem extends EventEmitter {
         message,
         executionTime: Date.now() - startTime,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         conditionId: condition.id,
         result: 'error',
@@ -494,7 +494,7 @@ export class MigrationGatesSystem extends EventEmitter {
             });
             break;
         }
-      } catch (error) {
+      } catch (error: any) {
         results.push({
           service,
           healthy: false,
@@ -503,8 +503,8 @@ export class MigrationGatesSystem extends EventEmitter {
       }
     }
 
-    const allHealthy = results.every((r) => r.healthy);
-    const healthyCount = results.filter((r) => r.healthy).length;
+    const allHealthy = results.every((r: any) => r.healthy);
+    const healthyCount = results.filter((r: any) => r.healthy).length;
 
     return {
       healthy: allHealthy,
@@ -552,7 +552,7 @@ export class MigrationGatesSystem extends EventEmitter {
           approvedAt: new Date(parsed.approvedAt),
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking manual approval:', error);
     }
 
@@ -581,7 +581,7 @@ export class MigrationGatesSystem extends EventEmitter {
           url: dep.url,
           responseTime: Math.floor(Math.random() * 200),
         });
-      } catch (error) {
+      } catch (error: any) {
         results.push({
           name: dep.name,
           healthy: false,
@@ -590,7 +590,7 @@ export class MigrationGatesSystem extends EventEmitter {
       }
     }
 
-    const healthyCount = results.filter((r) => r.healthy).length;
+    const healthyCount = results.filter((r: any) => r.healthy).length;
 
     return {
       allHealthy: healthyCount === results.length,
@@ -623,7 +623,7 @@ export class MigrationGatesSystem extends EventEmitter {
       try {
         await this.executeAction(action, execution);
         execution.actionsTriggered.push(action.id);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to execute action ${action.id}:`, error);
       }
     }
@@ -685,7 +685,7 @@ export class MigrationGatesSystem extends EventEmitter {
         reason,
         triggeredAt: new Date(),
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Failed to rollback migration ${migrationId}:`, error);
     }
   }
@@ -704,7 +704,7 @@ export class MigrationGatesSystem extends EventEmitter {
       ]);
 
       return { healthy: true, latency: Date.now() - start };
-    } catch (error) {
+    } catch (error: any) {
       return { healthy: false, error: (error as Error).message };
     }
   }
@@ -718,7 +718,7 @@ export class MigrationGatesSystem extends EventEmitter {
       const start = Date.now();
       await redis.ping();
       return { healthy: true, latency: Date.now() - start };
-    } catch (error) {
+    } catch (error: any) {
       return { healthy: false, error: (error as Error).message };
     }
   }
@@ -901,7 +901,7 @@ export class MigrationGatesSystem extends EventEmitter {
     this.monitoringInterval = setInterval(async () => {
       try {
         await this.checkContinuousConditions();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Continuous monitoring error:', error);
       }
     }, 30000); // Check every 30 seconds

@@ -27,7 +27,7 @@ export class InAppProvider implements NotificationProvider {
         message: content,
       });
       notificationId = record.id;
-    } catch (err) {
+    } catch (err: any) {
       logger.error({ err, userId }, 'Failed to persist in-app notification');
       // Continue to emit event even if persistence fails?
       // Maybe, but reliability is key. Let's assume we want best effort.

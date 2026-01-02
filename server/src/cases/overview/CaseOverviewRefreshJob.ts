@@ -27,7 +27,7 @@ export class CaseOverviewRefreshJob {
       try {
         await this.service.refresh(candidate.caseId, candidate.tenantId);
         refreshed += 1;
-      } catch (error) {
+      } catch (error: any) {
         refreshLogger.warn(
           { error: (error as Error).message, caseId: candidate.caseId, tenantId: candidate.tenantId },
           'Failed to refresh case overview cache entry',

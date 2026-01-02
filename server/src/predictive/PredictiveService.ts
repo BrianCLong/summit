@@ -58,9 +58,9 @@ export class PredictiveService {
     // 3. Apply Delta
     // We create a new snapshot structure (copy) to ensure immutability
     const scenarioSnapshot: GraphSnapshot = {
-        nodes: [...baseSnapshot.nodes, ...req.injectedNodes],
-        edges: [...baseSnapshot.edges, ...req.injectedEdges],
-        metadata: { ...baseSnapshot.metadata, timestamp: Date.now() }
+      nodes: [...baseSnapshot.nodes, ...req.injectedNodes],
+      edges: [...baseSnapshot.edges, ...req.injectedEdges],
+      metadata: { ...baseSnapshot.metadata, timestamp: Date.now() }
     };
 
     // 4. Create Scenario Engine & Compute
@@ -71,9 +71,9 @@ export class PredictiveService {
     // Centrality diff is complex (map vs map).
     const centralityDelta: Record<string, number> = {};
     Object.keys(scenarioMetrics.centrality).forEach(k => {
-        const base = baselineMetrics.centrality[k] || 0;
-        const scen = scenarioMetrics.centrality[k];
-        if (scen !== base) centralityDelta[k] = scen - base;
+      const base = baselineMetrics.centrality[k] || 0;
+      const scen = scenarioMetrics.centrality[k];
+      if (scen !== base) centralityDelta[k] = scen - base;
     });
 
     return {
@@ -104,8 +104,8 @@ export class PredictiveService {
     const now = Date.now();
     let val = 10;
     for (let i = 29; i >= 0; i--) {
-        val = val + (Math.random() - 0.4); // Random walk with slight drift
-        res.push({ timestamp: now - i * 86400000, value: val });
+      val = val + (Math.random() - 0.4); // Random walk with slight drift
+      res.push({ timestamp: now - i * 86400000, value: val });
     }
     return res;
   }
@@ -136,12 +136,12 @@ export class PredictiveService {
 
     const session = this.driver?.session();
     if (!session) {
-        // Fallback for tests/mocks if driver is not initialized
-        return { nodes: [], edges: [], metadata: { timestamp: Date.now() } };
+      // Fallback for tests/mocks if driver is not initialized
+      return { nodes: [], edges: [], metadata: { timestamp: Date.now() } };
     }
 
     try {
-        const result = await session.run(`
+      const result = await session.run(`
             MATCH (n)
             WHERE n.investigation_id = $invId
             OPTIONAL MATCH (n)-[r]-(m)
@@ -149,79 +149,79 @@ export class PredictiveService {
             RETURN n, r, m
         `, { invId: investigationId });
 
-        const nodesMap = new Map<string, Node>();
-        const edgesMap = new Map<string, Edge>();
+      const nodesMap = new Map<string, Node>();
+      const edgesMap = new Map<string, Edge>();
 
-        result.records.forEach(rec => {
-            const n = rec.get('n');
-            if (n) {
-                nodesMap.set(n.properties.id, {
-                    id: n.properties.id,
-                    label: n.labels[0],
-                    properties: n.properties
-                });
-            }
+      result.records.forEach((rec: any) => {
+        const n = rec.get('n');
+        if (n) {
+          nodesMap.set(n.properties.id, {
+            id: n.properties.id,
+            label: n.labels[0],
+            properties: n.properties
+          });
+        }
 
-            const m = rec.get('m');
-            if (m) {
-                nodesMap.set(m.properties.id, {
-                    id: m.properties.id,
-                    label: m.labels[0],
-                    properties: m.properties
-                });
-            }
+        const m = rec.get('m');
+        if (m) {
+          nodesMap.set(m.properties.id, {
+            id: m.properties.id,
+            label: m.labels[0],
+            properties: m.properties
+          });
+        }
 
-            const r = rec.get('r');
-            if (r) {
-                // Try to resolve source/target using properties first (GraphStore convention)
-                let sourceId = r.properties.fromId || r.properties.sourceId;
-                let targetId = r.properties.toId || r.properties.targetId;
+        const r = rec.get('r');
+        if (r) {
+          // Try to resolve source/target using properties first (GraphStore convention)
+          let sourceId = r.properties.fromId || r.properties.sourceId;
+          let targetId = r.properties.toId || r.properties.targetId;
 
-                // Fallback: Use relationship direction relative to nodes n and m in the result record
-                // Neo4j driver returns startNodeElementId/endNodeElementId (v5) or start/end (v4)
-                // We map these internal IDs to our application IDs
-                if (!sourceId || !targetId) {
-                    const startNodeId = r.startNodeElementId || r.start;
-                    const endNodeId = r.endNodeElementId || r.end;
+          // Fallback: Use relationship direction relative to nodes n and m in the result record
+          // Neo4j driver returns startNodeElementId/endNodeElementId (v5) or start/end (v4)
+          // We map these internal IDs to our application IDs
+          if (!sourceId || !targetId) {
+            const startNodeId = r.startNodeElementId || r.start;
+            const endNodeId = r.endNodeElementId || r.end;
 
-                    // Helper to finding node prop ID from internal ID
-                    // n and m are Nodes from the record which contain both internal and prop IDs
-                    // However, start/end might match n or m.
-                    const nInternal = n?.elementId || n?.identity;
-                    const mInternal = m?.elementId || m?.identity;
+            // Helper to finding node prop ID from internal ID
+            // n and m are Nodes from the record which contain both internal and prop IDs
+            // However, start/end might match n or m.
+            const nInternal = n?.elementId || n?.identity;
+            const mInternal = m?.elementId || m?.identity;
 
-                    if (n && nInternal === startNodeId) sourceId = n.properties.id;
-                    else if (m && mInternal === startNodeId) sourceId = m.properties.id;
+            if (n && nInternal === startNodeId) sourceId = n.properties.id;
+            else if (m && mInternal === startNodeId) sourceId = m.properties.id;
 
-                    if (n && nInternal === endNodeId) targetId = n.properties.id;
-                    else if (m && mInternal === endNodeId) targetId = m.properties.id;
-                }
+            if (n && nInternal === endNodeId) targetId = n.properties.id;
+            else if (m && mInternal === endNodeId) targetId = m.properties.id;
+          }
 
-                if (sourceId && targetId) {
-                   edgesMap.set(r.properties.id, {
-                        id: r.properties.id,
-                        source: sourceId,
-                        target: targetId,
-                        type: r.type,
-                        properties: r.properties
-                    });
-                }
-            }
-        });
+          if (sourceId && targetId) {
+            edgesMap.set(r.properties.id, {
+              id: r.properties.id,
+              source: sourceId,
+              target: targetId,
+              type: r.type,
+              properties: r.properties
+            });
+          }
+        }
+      });
 
-        // Better Edge Handling using internal IDs map if needed,
-        // but for now assume properties are populated as per GraphStore.ts
+      // Better Edge Handling using internal IDs map if needed,
+      // but for now assume properties are populated as per GraphStore.ts
 
-        return {
-            nodes: Array.from(nodesMap.values()),
-            edges: Array.from(edgesMap.values()), // Fix edge source/target in real imp
-            metadata: { timestamp: Date.now(), investigationId }
-        };
-    } catch (e) {
-        console.error("Failed to fetch graph snapshot", e);
-        return { nodes: [], edges: [], metadata: { timestamp: Date.now() } };
+      return {
+        nodes: Array.from(nodesMap.values()),
+        edges: Array.from(edgesMap.values()), // Fix edge source/target in real imp
+        metadata: { timestamp: Date.now(), investigationId }
+      };
+    } catch (e: any) {
+      console.error("Failed to fetch graph snapshot", e);
+      return { nodes: [], edges: [], metadata: { timestamp: Date.now() } };
     } finally {
-        await session.close();
+      await session.close();
     }
   }
 }

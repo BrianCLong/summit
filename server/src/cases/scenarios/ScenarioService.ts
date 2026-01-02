@@ -42,7 +42,7 @@ class ScenarioService extends EventEmitter {
       id: scenarioId,
       investigationId,
       name,
-      description,
+      description: description || undefined,
       baseStateSnapshot: {
         entities: [...investigation.entities],
         relationships: [...investigation.relationships],
@@ -134,9 +134,9 @@ class ScenarioService extends EventEmitter {
    */
   resolveState(
     scenarioId: string,
-    baseEntities: Array<{ id: string; [key: string]: unknown }>,
-    baseRelationships: Array<{ id: string; source: string; target: string; [key: string]: unknown }>,
-    baseTimeline: Array<{ id: string; [key: string]: unknown }>
+    baseEntities: Array<{ id: string;[key: string]: unknown }>,
+    baseRelationships: Array<{ id: string; source: string; target: string;[key: string]: unknown }>,
+    baseTimeline: Array<{ id: string;[key: string]: unknown }>
   ): ScenarioResult {
     const scenario = this.scenarios.get(scenarioId);
     if (!scenario) {
@@ -153,7 +153,7 @@ class ScenarioService extends EventEmitter {
       switch (mod.type) {
         case 'ADD_ENTITY':
           // mod.targetId is guaranteed to be set by addModification for ADD_* types
-          entities.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId });
+          entities.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId! });
           break;
         case 'REMOVE_ENTITY':
           entities = entities.filter(e => e.id !== mod.targetId);
@@ -167,13 +167,13 @@ class ScenarioService extends EventEmitter {
           }
           break;
         case 'ADD_RELATIONSHIP':
-          relationships.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId } as { id: string; source: string; target: string; [key: string]: unknown });
+          relationships.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId } as { id: string; source: string; target: string;[key: string]: unknown });
           break;
         case 'REMOVE_RELATIONSHIP':
           relationships = relationships.filter(r => r.id !== mod.targetId);
           break;
         case 'ADD_EVENT':
-          timeline.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId });
+          timeline.push({ ...(mod.data as Record<string, unknown>), id: mod.targetId! });
           break;
         case 'REMOVE_EVENT':
           timeline = timeline.filter(t => t.id !== mod.targetId);

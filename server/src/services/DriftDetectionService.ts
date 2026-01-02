@@ -80,7 +80,7 @@ export class DriftDetectionService {
                 } else {
                     this.knownFileHashes.set(filePath, hash);
                 }
-            } catch (err) {
+            } catch (err: any) {
                 logger.warn({ filePath, error: err }, 'Failed to check code drift for file');
             }
         }

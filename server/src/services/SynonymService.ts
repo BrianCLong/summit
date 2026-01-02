@@ -41,7 +41,7 @@ export class SynonymService {
       } else {
         logger.warn(`Synonym file not found at ${configPath}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       const error = err instanceof Error ? err : new Error(String(err));
       logger.error({ err: error }, 'Failed to load synonyms');
     }

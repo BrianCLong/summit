@@ -92,7 +92,7 @@ export function createSIEMMiddleware(
         try {
           // Process response
           processResponse(req, res, config);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('SIEM middleware response processing error', {
             component: 'SIEMMiddleware',
             error: error.message,
@@ -104,7 +104,7 @@ export function createSIEMMiddleware(
       };
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('SIEM middleware error', {
         component: 'SIEMMiddleware',
         error: error.message,
@@ -147,7 +147,7 @@ export function siemAuthMiddleware(
             }
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('SIEM auth middleware error', {
           component: 'SIEMMiddleware',
           error: error.message,

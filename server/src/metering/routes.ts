@@ -66,7 +66,7 @@ meteringRouter.get('/summary', ensureAuthenticated, async (req, res) => {
       effectiveQuotas: limits,
       usage: usage
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -84,7 +84,7 @@ meteringRouter.post('/quotas', ensureAuthenticated, ensureAdmin, async (req, res
     await quotaManager.setQuotaOverride(tenantId, config);
 
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -101,7 +101,7 @@ meteringRouter.post('/plans/assign', ensureAuthenticated, ensureAdmin, async (re
 
     await planService.setPlanForTenant(tenantId, planId);
     res.json({ success: true, message: `Plan ${planId} assigned to ${tenantId}` });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });

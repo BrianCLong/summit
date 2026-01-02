@@ -31,7 +31,7 @@ export abstract class StreamProcessor {
         if (result) {
           await this.producer.send(this.destTopic, [result]);
         }
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error('Error processing message', error);
         throw error;
       }

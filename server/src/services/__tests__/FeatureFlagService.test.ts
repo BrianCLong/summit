@@ -117,7 +117,7 @@ describe('FeatureFlagService', () => {
     // Clean up
     try {
       unlinkSync(testConfigPath);
-    } catch (error) {
+    } catch (error: any) {
       // Ignore if file doesn't exist
     }
 
@@ -327,7 +327,7 @@ describe('FeatureFlagService', () => {
 
       // Verify that rollout returns boolean values and is deterministic
       // Note: actual distribution depends on hash function implementation
-      expect(results.every((r) => typeof r === 'boolean')).toBe(true);
+      expect(results.every((r: any) => typeof r === 'boolean')).toBe(true);
       // At minimum, rollout should be consistent (not random)
       const result1 = await service.isEnabled('test-gradual-rollout', { ...testUser, key: 'user-0' }, false);
       const result2 = await service.isEnabled('test-gradual-rollout', { ...testUser, key: 'user-0' }, false);
@@ -640,7 +640,7 @@ describe('FeatureFlagService', () => {
       const results = await Promise.all(promises);
 
       // All results should be consistent
-      expect(results.every((r) => r === results[0])).toBe(true);
+      expect(results.every((r: any) => r === results[0])).toBe(true);
     });
   });
 });

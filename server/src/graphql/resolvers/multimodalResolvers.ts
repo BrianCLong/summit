@@ -202,7 +202,7 @@ export const multimodalResolvers = {
           `Uploaded media source: ${mediaSource.id}, type: ${mediaSource.mediaType}`,
         );
         return mediaSource;
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to upload media source:', error);
         throw error;
       }
@@ -229,7 +229,7 @@ export const multimodalResolvers = {
       // Delete associated file if it exists
       try {
         await context.mediaUploadService.deleteMedia(mediaSource.filename);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           `Failed to delete media file ${mediaSource.filename}:`,
           error,
@@ -450,7 +450,7 @@ export const multimodalResolvers = {
               'MULTIMODAL_ENTITY_VERIFIED',
             ),
           );
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`Failed to verify entity ${entityId}:`, error);
         }
       }
@@ -474,7 +474,7 @@ export const multimodalResolvers = {
               entityId,
             );
           if (deleted) deletedCount++;
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`Failed to delete entity ${entityId}:`, error);
         }
       }

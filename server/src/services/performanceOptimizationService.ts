@@ -292,7 +292,7 @@ export class PerformanceOptimizationService extends EventEmitter {
         // Refresh cache entry
         this.emit('cache-prefetch', { strategy: strategy.id, key });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('[PERFORMANCE] Cache prefetch error:', error);
     }
   }
@@ -421,7 +421,7 @@ export class PerformanceOptimizationService extends EventEmitter {
         const cacheKey = `warmup:${Buffer.from(query).toString('base64')}`;
         await this.cache.set(cacheKey, 'warmed', 3600);
         this.emit('cache-warmed', { query, cacheKey });
-      } catch (error) {
+      } catch (error: any) {
         console.error('[PERFORMANCE] Cache warming error:', error);
       }
     }
@@ -457,7 +457,7 @@ export class PerformanceOptimizationService extends EventEmitter {
           strategy: strategy.id,
           itemsCompressed: compressed,
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('[PERFORMANCE] Data compression error:', error);
       }
     }

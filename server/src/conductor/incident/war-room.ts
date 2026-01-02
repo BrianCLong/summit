@@ -34,12 +34,12 @@ export interface WarRoomParticipant {
 export interface WarRoomEvent {
   id: string;
   type:
-    | 'message'
-    | 'action'
-    | 'status_update'
-    | 'decision'
-    | 'escalation'
-    | 'system';
+  | 'message'
+  | 'action'
+  | 'status_update'
+  | 'decision'
+  | 'escalation'
+  | 'system';
   timestamp: number;
   userId?: string;
   content: string;
@@ -98,15 +98,15 @@ export type WarRoomPermission =
 
 export interface WarRoomMessage {
   type:
-    | 'join'
-    | 'leave'
-    | 'message'
-    | 'status_update'
-    | 'artifact_upload'
-    | 'decision_made'
-    | 'action_assigned'
-    | 'runbook_executed'
-    | 'escalation';
+  | 'join'
+  | 'leave'
+  | 'message'
+  | 'status_update'
+  | 'artifact_upload'
+  | 'decision_made'
+  | 'action_assigned'
+  | 'runbook_executed'
+  | 'escalation';
   sessionId: string;
   data: any;
   timestamp: number;
@@ -579,7 +579,7 @@ export class WarRoomCoordinator extends EventEmitter {
         try {
           const message = JSON.parse(data.toString());
           await this.handleWebSocketMessage(sessionId, userId, message, ws);
-        } catch (error) {
+        } catch (error: any) {
           ws.send(JSON.stringify({ error: 'Invalid message format' }));
         }
       });
@@ -592,18 +592,18 @@ export class WarRoomCoordinator extends EventEmitter {
   private setupRedisSubscriptions(): void {
     const subscriber = this.redis.duplicate();
 
-    subscriber.subscribe('war_room:*', (err) => {
+    subscriber.subscribe('war_room:*', (err: any) => {
       if (err) {
         console.error('Redis subscription error:', err);
       }
     });
 
-    subscriber.on('message', (channel, message) => {
+    subscriber.on('message', (channel: any, message: any) => {
       try {
         const data = JSON.parse(message);
         const sessionId = channel.split(':')[1];
         this.broadcastToSession(sessionId, data);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Redis message processing error:', error);
       }
     });

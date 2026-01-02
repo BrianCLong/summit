@@ -55,7 +55,7 @@ class DashboardSimulationService {
            ns.to('dashboard:main').emit('dashboard:graph_update', graphUpdates);
         }
 
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error in dashboard simulation');
       }
     }, 2000); // Update every 2 seconds

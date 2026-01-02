@@ -604,7 +604,7 @@ export class ProductIncrementRepo {
       }
 
       return false;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -1236,7 +1236,7 @@ export class ProductIncrementRepo {
     };
 
     const incrementsMap = new Map(
-      rows.map((row) => [row.id, this.mapIncrementRow(row)]),
+      rows.map((row: any) => [row.id, this.mapIncrementRow(row)]),
     );
 
     return ids.map((id) => incrementsMap.get(id) || null);

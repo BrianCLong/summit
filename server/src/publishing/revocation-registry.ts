@@ -412,7 +412,7 @@ export class DistributedRevocationChecker {
         // const registry = new RevocationRegistry({...config});
         // await registry.importRevocationList(list);
         // this.addRegistry(registry);
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Failed to fetch revocation list from ${url}:`, error);
       }
     }

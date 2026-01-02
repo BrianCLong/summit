@@ -101,7 +101,7 @@ export class CanaryEscalationManager {
    * Setup worker event handlers
    */
   private setupEventHandlers(): void {
-    // this.worker.on('completed', (job) => {
+    // this.worker.on('completed', (job: any) => {
     //   this.stats.lastRun = new Date();
     //   logger.info('Canary escalation job completed', {
     //     jobId: job.id,
@@ -183,7 +183,7 @@ export class CanaryEscalationManager {
           } else {
             this.stats.escalationsFailed++;
           }
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Error escalating tenant', {
             tenantId: candidate.tenantId,
             error: error instanceof Error ? error.message : String(error),
@@ -203,8 +203,8 @@ export class CanaryEscalationManager {
       }
 
       // Log summary
-      const successful = results.filter((r) => r.success);
-      const failed = results.filter((r) => !r.success);
+      const successful = results.filter((r: any) => r.success);
+      const failed = results.filter((r: any) => !r.success);
 
       logger.info('Canary escalation check completed', {
         totalCandidates: candidates.length,
@@ -212,7 +212,7 @@ export class CanaryEscalationManager {
         successful: successful.length,
         failed: failed.length,
         dryRun,
-        results: successful.map((r) => ({
+        results: successful.map((r: any) => ({
           tenant: r.tenantId,
           newDaily: r.newDailyLimit,
           newMonthly: r.newMonthlyLimit,
@@ -226,7 +226,7 @@ export class CanaryEscalationManager {
         'system',
         'canary_escalation',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Canary escalation check failed', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -309,7 +309,7 @@ export class CanaryEscalationManager {
             `Only ${cleanDays} clean days (need ${this.config.cleanDaysRequired})`,
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         blockingReasons.push(`Failed to check Prometheus metrics: ${error}`);
       }
     } else {
@@ -473,7 +473,7 @@ export class CanaryEscalationManager {
 
       result.success = true;
       return result;
-    } catch (error) {
+    } catch (error: any) {
       result.error = error instanceof Error ? error.message : String(error);
       return result;
     }

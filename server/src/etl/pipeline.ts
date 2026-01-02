@@ -47,7 +47,7 @@ export class ETLPipeline extends EventEmitter {
             for await (const event of stream) {
                 await this.processEvent(event as IngestionEvent);
             }
-        } catch (err) {
+        } catch (err: any) {
             this.emit('error', err);
             throw err;
         } finally {
@@ -93,7 +93,7 @@ export class ETLPipeline extends EventEmitter {
 
             this.emit('eventProcessed', event.id);
 
-        } catch (err) {
+        } catch (err: any) {
             this.emit('eventError', { eventId: event.id, error: err });
             // Should we stop or continue? configured policy.
             // For now log and continue

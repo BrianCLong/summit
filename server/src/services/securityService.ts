@@ -574,7 +574,7 @@ export class SecurityService extends EventEmitter {
       this.sessions.set(session.id, session);
 
       return { user, session };
-    } catch (error) {
+    } catch (error: any) {
       return null;
     }
   }

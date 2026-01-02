@@ -27,11 +27,11 @@ export interface IndependentVerificationRequest {
 
 export interface ContainmentTestConfig {
   testType:
-    | 'EMERGENCY_STOP'
-    | 'ROLLBACK_TEST'
-    | 'ISOLATION_TEST'
-    | 'HUMAN_OVERRIDE_TEST'
-    | 'FULL_CONTAINMENT_DRILL';
+  | 'EMERGENCY_STOP'
+  | 'ROLLBACK_TEST'
+  | 'ISOLATION_TEST'
+  | 'HUMAN_OVERRIDE_TEST'
+  | 'FULL_CONTAINMENT_DRILL';
   tenant: string;
 }
 
@@ -140,7 +140,7 @@ export class SovereignSafeguardsService {
         reversibleAutonomy,
         lastUpdated: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get sovereign safeguards status:', error);
       throw error;
     }
@@ -175,7 +175,7 @@ export class SovereignSafeguardsService {
         audit: `Sovereign safeguards configured for tenant ${tenant}`,
         configuration: config,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to configure sovereign safeguards:', error);
       throw error;
     }
@@ -221,7 +221,7 @@ export class SovereignSafeguardsService {
       }, 5000); // 5 second delay for simulation
 
       return verificationRequest;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to request independent verification:', error);
       throw error;
     }
@@ -258,7 +258,7 @@ export class SovereignSafeguardsService {
       this.updateContainmentStatus(tenant, result);
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to test containment readiness:', error);
       throw error;
     }
@@ -293,7 +293,7 @@ export class SovereignSafeguardsService {
         validUntil: complianceResult.validUntil,
         verifiedAt: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to verify lawful interoperability:', error);
       throw error;
     }
@@ -326,7 +326,7 @@ export class SovereignSafeguardsService {
         audit: `Reversible autonomy configured for tenant ${tenant}`,
         configuration: config,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to configure reversible autonomy:', error);
       throw error;
     }
@@ -365,7 +365,7 @@ export class SovereignSafeguardsService {
         audit: `Emergency sovereign containment executed: ${containmentType} for tenant ${tenant}`,
         containmentResult,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to execute emergency sovereign containment:', error);
       throw error;
     }
@@ -406,7 +406,7 @@ export class SovereignSafeguardsService {
       };
 
       return approvalRequest;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to request cross-border approval:', error);
       throw error;
     }
@@ -556,7 +556,7 @@ export class SovereignSafeguardsService {
       },
     };
 
-    return testResults[testType] || testResults['EMERGENCY_STOP'];
+    return (testResults as any)[testType] || testResults['EMERGENCY_STOP'];
   }
 
   private async simulateComplianceCheck(
@@ -570,17 +570,17 @@ export class SovereignSafeguardsService {
       issues: compliant
         ? []
         : [
-            {
-              issueId: randomUUID(),
-              severity: 'MEDIUM',
-              description: `Data residency requirement not met for ${jurisdiction}`,
-              regulation: 'GDPR Article 44',
-              remediation: 'Implement data localization measures',
-              deadline: new Date(
-                Date.now() + 30 * 24 * 60 * 60 * 1000,
-              ).toISOString(),
-            },
-          ],
+          {
+            issueId: randomUUID(),
+            severity: 'MEDIUM',
+            description: `Data residency requirement not met for ${jurisdiction}`,
+            regulation: 'GDPR Article 44',
+            remediation: 'Implement data localization measures',
+            deadline: new Date(
+              Date.now() + 30 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+          },
+        ],
       recommendations: ['Implement enhanced data sovereignty controls'],
       validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
     };
@@ -690,7 +690,7 @@ export class SovereignSafeguardsService {
     return {
       containmentType,
       action:
-        containmentActions[containmentType] || 'Unknown containment action',
+        (containmentActions as any)[containmentType] || 'Unknown containment action',
       executedAt: new Date().toISOString(),
       success: true,
     };

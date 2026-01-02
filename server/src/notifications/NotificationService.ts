@@ -105,7 +105,7 @@ export class NotificationService {
         // Mark processed notifications as read
         await Promise.all(unread.map(n => this.repo.markAsRead(n.id, userId)));
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.error({ err, userId }, 'Failed to process digest');
       return false;
     }
@@ -130,7 +130,7 @@ export class NotificationService {
             }
           });
         }
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ userId, err }, 'Error fetching preferences, defaulting to IN_APP');
       }
 

@@ -75,13 +75,13 @@ export const startKafkaConsumer = async () => {
           console.log(
             `Kafka Consumer: Successfully triggered simulation for scenario: ${newScenario.id}`,
           );
-        } catch (error) {
+        } catch (error: any) {
           console.error('Kafka Consumer: Error triggering simulation:', error);
         }
       },
     });
     console.log(`Kafka Consumer: Started listening on topic ${KAFKA_TOPIC}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Kafka Consumer: Failed to start:', error);
     if (consumer) {
       await consumer.disconnect();

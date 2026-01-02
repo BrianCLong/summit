@@ -475,7 +475,7 @@ export class LearningToRankRouter {
          VALUES ($1, $2, $3, now())`,
         [tenantId, modelId, JSON.stringify(features)],
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to log routing decision:', error);
     }
   }
@@ -493,14 +493,14 @@ export class LearningToRankRouter {
         [tenantId, limit],
       );
 
-      return rows.map((row) => {
+      return rows.map((row: any) => {
         const model = this.models.get(row.selected_model);
         return {
           provider: model?.provider || 'unknown',
           model: row.selected_model,
         };
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to get recent selections:', error);
       return [];
     }
@@ -624,7 +624,7 @@ export class LearningToRankRouter {
          weights = $1, updated_at = now()`,
         [weightsJson],
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save weights:', error);
     }
   }

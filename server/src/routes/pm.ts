@@ -47,7 +47,7 @@ router.post(
         await upsertTickets([mapped]);
       }
       return res.json({ ok: true, upserted: mapped ? 1 : 0 });
-    } catch (e) {
+    } catch (e: any) {
       logger.error({ err: e }, 'github webhook error');
       return res.status(500).json({ error: 'internal' });
     }
@@ -77,7 +77,7 @@ router.post(
         await upsertTickets([mapped]);
       }
       return res.json({ ok: true, upserted: mapped ? 1 : 0 });
-    } catch (e) {
+    } catch (e: any) {
       logger.error({ err: e }, 'jira webhook error');
       return res.status(500).json({ error: 'internal' });
     }
@@ -98,7 +98,7 @@ router.get('/tickets', async (req, res) => {
     };
     const items = await listTickets(limit, offset, filters);
     return res.json({ items, total: items.length, limit, offset });
-  } catch (e) {
+  } catch (e: any) {
     return res.status(500).json({ error: 'internal' });
   }
 });

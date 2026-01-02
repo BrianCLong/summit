@@ -20,7 +20,7 @@ router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const definitions = await dataService.getKPIDefinitions(req.query.category as string);
     res.json(definitions);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -30,7 +30,7 @@ router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Res
     const tenantId = (req as any).user?.tenantId; // Assuming auth middleware attaches user
     const status = await kpiEngine.getKPIStatus(req.params.id, tenantId);
     res.json(status);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -40,7 +40,7 @@ router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Re
     const tenantId = (req as any).user?.tenantId;
     const values = await dataService.getKPIValues(req.params.id, tenantId, 'daily', 30);
     res.json(values);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -71,7 +71,7 @@ router.get('/exec-dashboard/:role', ensureAuthenticated, async (req: Request, re
     const dashboardData = await Promise.all(kpisOfInterest.map(id => kpiEngine.getKPIStatus(id, tenantId)));
     res.json({ role, metrics: dashboardData });
 
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -95,7 +95,7 @@ router.get('/warroom', ensureAuthenticated, async (req: Request, res: Response) 
         risks: riskData
     });
 
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -107,7 +107,7 @@ router.get('/forecast/:kpiId', ensureAuthenticated, async (req: Request, res: Re
     const tenantId = (req as any).user?.tenantId;
     const forecast = await forecastingEngine.generateForecast(req.params.kpiId, tenantId);
     res.json(forecast);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -123,7 +123,7 @@ router.get('/correlation', ensureAuthenticated, async (req: Request, res: Respon
 
     const result = await correlationEngine.correlateKPIs(kpiA as string, kpiB as string, tenantId);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });

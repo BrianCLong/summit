@@ -116,7 +116,7 @@ export class NarrativeImpactModel {
       });
 
       return enhancedImpacts;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to analyze narrative impact', { error, tenantId });
       throw error;
     }
@@ -160,7 +160,7 @@ export class NarrativeImpactModel {
           params.endTime = timeRange.end;
         }
 
-        const result = await session.executeRead(async (tx) => {
+        const result = await session.executeRead(async (tx: any) => {
           return await tx.run(
             `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_NARRATIVE]->(ni:NarrativeImpact)
@@ -205,7 +205,7 @@ export class NarrativeImpactModel {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get narrative impacts', {
         error,
         tenantId,
@@ -220,7 +220,7 @@ export class NarrativeImpactModel {
 
     try {
       // Get narrative threads from graph analysis
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:HAS_NARRATIVE]->(ni:NarrativeImpact)
@@ -317,7 +317,7 @@ export class NarrativeImpactModel {
         confidence,
         riskFactors,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to predict narrative evolution', {
         error,
         tenantId,
@@ -627,7 +627,7 @@ export class NarrativeImpactModel {
 
     const session = this.neo4j.getSession();
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         for (const impact of impacts) {
           await tx.run(
             `

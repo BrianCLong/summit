@@ -53,7 +53,7 @@ export class DefensivePsyOpsService extends EventEmitter {
       const { getPostgresPool } = await import('../config/database.js');
       this.db = getPostgresPool() as unknown as Pool;
       return this.db;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to load database config module', error);
       throw new Error('Database not initialized');
     }
@@ -73,7 +73,7 @@ export class DefensivePsyOpsService extends EventEmitter {
                original_event_type: event.type,
                ...event.data
           });
-        } catch (err) {
+        } catch (err: any) {
           this.logger.error('Error processing Red Team event', err);
         }
       }
@@ -110,7 +110,7 @@ export class DefensivePsyOpsService extends EventEmitter {
       }
 
       return null;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error detecting psychological threats:', error);
       return null;
     }

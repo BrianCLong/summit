@@ -172,7 +172,7 @@ export class RedisRateLimiter {
       }
 
       return rateLimitResult;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Rate limit check failed', {
         domain,
         tenantId,
@@ -225,7 +225,7 @@ export class RedisRateLimiter {
           now + (config.capacity - currentTokens) / config.refillRate,
         ),
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get bucket status', {
         domain,
         tenantId,
@@ -279,7 +279,7 @@ export class RedisRateLimiter {
         try {
           const config = JSON.parse(configStr);
           this.domainConfigs.set(domain, config);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to parse domain config', {
             domain,
             error: error.message,
@@ -290,7 +290,7 @@ export class RedisRateLimiter {
       logger.info('Loaded domain rate limit configs', {
         count: this.domainConfigs.size,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load domain configs', { error: error.message });
     }
   }
@@ -343,7 +343,7 @@ export class RedisRateLimiter {
         activeDomains,
         avgTokensRemaining: bucketCount > 0 ? totalTokens / bucketCount : 0,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get rate limit stats', { error: error.message });
       return { totalBuckets: 0, activeDomains: 0, avgTokensRemaining: 0 };
     }

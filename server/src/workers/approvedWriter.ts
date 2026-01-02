@@ -73,7 +73,7 @@ export async function startApprovedWriter(db: any, neo4j: any) {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in approved writer:', error);
     }
   }, 2500);

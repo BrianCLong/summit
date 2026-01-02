@@ -58,7 +58,7 @@ export class SigIntRepository {
       await this.syncEmitterToGraph(emitter);
 
       await client.query('COMMIT');
-    } catch (err) {
+    } catch (err: any) {
       await client.query('ROLLBACK');
       telemetry.subsystems.database.errors.add(1);
       throw err;
@@ -111,7 +111,7 @@ export class SigIntRepository {
       // Sync Signal Event to Graph
       await this.syncSignalToGraph(signal);
 
-    } catch (err) {
+    } catch (err: any) {
       telemetry.subsystems.database.errors.add(1);
       throw err;
     }
@@ -153,7 +153,7 @@ export class SigIntRepository {
         lastSeen: emitter.lastSeen.toISOString(),
         threatLevel: 'UNKNOWN' // Could be refined
       });
-    } catch (e) {
+    } catch (e: any) {
       // Log but don't fail the transaction if Graph is down (Soft dependency)
       console.warn('Neo4j sync failed for emitter', e);
     } finally {
@@ -187,7 +187,7 @@ export class SigIntRepository {
          lat: signal.geolocation?.latitude,
          lon: signal.geolocation?.longitude
        });
-     } catch (e) {
+     } catch (e: any) {
        console.warn('Neo4j sync failed for signal', e);
      } finally {
        await session.close();
@@ -196,7 +196,7 @@ export class SigIntRepository {
 
   // --- Mappers ---
 
-  private mapRowToEmitter(row: any): Emitter {
+  private mapRowToEmitter(row): Emitter {
     return {
       id: row.id,
       name: row.name,
@@ -209,7 +209,7 @@ export class SigIntRepository {
     };
   }
 
-  private mapRowToSignal(row: any): Signal {
+  private mapRowToSignal(row): Signal {
     return {
       id: row.id,
       emitterId: row.emitter_id,

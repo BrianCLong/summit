@@ -25,7 +25,7 @@ export async function outboxPublishLoop() {
       );
       if (!rows.length) {
         await client.query('COMMIT');
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r: any) => setTimeout(r, 500));
         continue;
       }
       const batches: Record<string, any[]> = {};
@@ -41,13 +41,13 @@ export async function outboxPublishLoop() {
           messages,
         })),
       });
-      const ids = rows.map((r) => r.id);
+      const ids = rows.map((r: any) => r.id);
       await client.query(
         `UPDATE outbox SET sent_at = now() WHERE id = ANY($1::bigint[])`,
         [ids],
       );
       await client.query('COMMIT');
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
     } finally {
       client.release();

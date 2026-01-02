@@ -45,7 +45,7 @@ router.post('/events', async (req: AuthenticatedRequest, res: Response) => {
         }).catch(err => console.error(err));
 
         res.status(201).json(event);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Ingestion error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }

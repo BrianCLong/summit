@@ -264,7 +264,7 @@ export class StrategicPlanRepo {
       }
 
       return false;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -363,7 +363,7 @@ export class StrategicPlanRepo {
       params,
     );
 
-    const plans = rows.map((row) => this.mapPlanRow(row));
+    const plans = rows.map((row: any) => this.mapPlanRow(row));
 
     return { data: plans, total };
   }
@@ -384,7 +384,7 @@ export class StrategicPlanRepo {
 
     const { rows } = await this.pg.query(query, params);
     const plansMap = new Map(
-      rows.map((row) => [row.id, this.mapPlanRow(row)]),
+      rows.map((row: any) => [row.id, this.mapPlanRow(row)]),
     );
 
     return ids.map((id) => plansMap.get(id) || null);
@@ -508,7 +508,7 @@ export class StrategicPlanRepo {
     );
 
     return Promise.all(
-      rows.map(async (row) => {
+      rows.map(async (row: any) => {
         const objective = this.mapObjectiveRow(row);
         objective.milestones = await this.getMilestones(objective.id, 'objective');
         objective.keyResults = await this.getKeyResults(objective.id);
@@ -579,7 +579,7 @@ export class StrategicPlanRepo {
       [objectiveId],
     );
 
-    return rows.map((row) => this.mapKeyResultRow(row));
+    return rows.map((row: any) => this.mapKeyResultRow(row));
   }
 
   async updateKeyResultProgress(
@@ -715,7 +715,7 @@ export class StrategicPlanRepo {
     );
 
     return Promise.all(
-      rows.map(async (row) => {
+      rows.map(async (row: any) => {
         const initiative = this.mapInitiativeRow(row);
         initiative.milestones = await this.getMilestones(initiative.id, 'initiative');
         initiative.deliverables = await this.getDeliverables(initiative.id);
@@ -776,7 +776,7 @@ export class StrategicPlanRepo {
       [initiativeId],
     );
 
-    return rows.map((row) => this.mapDeliverableRow(row));
+    return rows.map((row: any) => this.mapDeliverableRow(row));
   }
 
   async updateDeliverableStatus(
@@ -835,7 +835,7 @@ export class StrategicPlanRepo {
       [parentId, parentType],
     );
 
-    return rows.map((row) => this.mapMilestoneRow(row));
+    return rows.map((row: any) => this.mapMilestoneRow(row));
   }
 
   async updateMilestoneStatus(
@@ -977,7 +977,7 @@ export class StrategicPlanRepo {
     );
 
     return Promise.all(
-      rows.map(async (row) => {
+      rows.map(async (row: any) => {
         const risk = this.mapRiskRow(row);
         risk.mitigationStrategies = await this.getMitigationStrategies(risk.id);
         return risk;
@@ -1013,7 +1013,7 @@ export class StrategicPlanRepo {
       [riskId],
     );
 
-    return rows.map((row) => this.mapMitigationRow(row));
+    return rows.map((row: any) => this.mapMitigationRow(row));
   }
 
   // ============================================================================
@@ -1051,7 +1051,7 @@ export class StrategicPlanRepo {
       [planId],
     );
 
-    return rows.map((row) => this.mapStakeholderRow(row));
+    return rows.map((row: any) => this.mapStakeholderRow(row));
   }
 
   async removeStakeholder(planId: string, userId: string): Promise<boolean> {
@@ -1097,7 +1097,7 @@ export class StrategicPlanRepo {
       [planId],
     );
 
-    return rows.map((row) => this.mapResourceRow(row));
+    return rows.map((row: any) => this.mapResourceRow(row));
   }
 
   async updateResourceUsage(
@@ -1149,7 +1149,7 @@ export class StrategicPlanRepo {
       [planId],
     );
 
-    return rows.map((row) => this.mapKPIRow(row));
+    return rows.map((row: any) => this.mapKPIRow(row));
   }
 
   async updateKPIValue(
@@ -1229,7 +1229,7 @@ export class StrategicPlanRepo {
       [planId, limit],
     );
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       id: row.id,
       entityType: row.entity_type,
       entityId: row.entity_id,

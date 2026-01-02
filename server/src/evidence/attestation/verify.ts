@@ -44,7 +44,7 @@ export async function verifyManifest(manifest: Record<string, any>, signature: s
 
           const isVerified = verify(null, Buffer.from(payload), key, rawSignature);
           return isVerified;
-      } catch (err) {
+      } catch (err: any) {
           console.warn('Verification error:', err);
           return false;
       }

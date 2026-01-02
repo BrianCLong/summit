@@ -29,7 +29,7 @@ export class DLQService {
         ]
       );
       ctx.logger.error({ stage, reason, pipeline: ctx.pipelineKey }, 'Record sent to DLQ');
-    } catch (e) {
+    } catch (e: any) {
       ctx.logger.error({ error: e }, 'Failed to write to DLQ');
     } finally {
       client.release();

@@ -626,7 +626,7 @@ export class CaseWorkflowService {
     for (const handler of handlers) {
       try {
         await handler(event);
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.error(
           {
             error,

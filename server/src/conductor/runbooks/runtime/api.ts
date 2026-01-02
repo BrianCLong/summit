@@ -170,7 +170,7 @@ runtimeApiRouter.post('/runbooks/:runbookId/execute', async (req: Request, res: 
       message: 'Execution started',
       processingTime: Date.now() - startTime,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Execution start error:', error);
     res.status(500).json({
       success: false,
@@ -210,7 +210,7 @@ runtimeApiRouter.get('/executions/:executionId', async (req: Request, res: Respo
       success: true,
       execution: formatExecutionResponse(execution),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Execution retrieval error:', error);
     res.status(500).json({
       success: false,
@@ -270,7 +270,7 @@ runtimeApiRouter.post('/executions/:executionId/control', async (req: Request, r
       message: `Execution ${action.toLowerCase()}${action === 'PAUSE' ? 'd' : action === 'RESUME' ? 'd' : 'led'}`,
       processingTime: Date.now() - startTime,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Execution control error:', error);
     res.status(500).json({
       success: false,
@@ -315,7 +315,7 @@ runtimeApiRouter.get('/executions/:executionId/logs', async (req: Request, res: 
       logs: logs.map(formatLogEntry),
       total: logs.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Logs retrieval error:', error);
     res.status(500).json({
       success: false,
@@ -358,7 +358,7 @@ runtimeApiRouter.get('/executions/:executionId/logs/verify', async (req: Request
       executionId,
       chainIntegrity: verification,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chain verification error:', error);
     res.status(500).json({
       success: false,
@@ -387,7 +387,7 @@ runtimeApiRouter.get('/runbooks', async (req: Request, res: Response) => {
         },
       ],
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook listing error:', error);
     res.status(500).json({
       success: false,
@@ -426,7 +426,7 @@ runtimeApiRouter.get('/runbooks/:runbookId', async (req: Request, res: Response)
         message: 'Runbook not found',
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook retrieval error:', error);
     res.status(500).json({
       success: false,

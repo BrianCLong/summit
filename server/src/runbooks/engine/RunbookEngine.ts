@@ -113,7 +113,7 @@ export class RunbookEngine extends EventEmitter {
           await this.executeStep(step, context);
           executedSteps.add(step.id);
           pendingSteps.delete(step.id);
-        } catch (err) {
+        } catch (err: any) {
           throw err;
         }
       }));

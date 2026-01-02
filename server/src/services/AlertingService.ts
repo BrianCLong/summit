@@ -78,7 +78,7 @@ class AlertingService {
   constructor() {
       try {
         this.redis = getRedisClient();
-      } catch (e) {
+      } catch (e: any) {
         logger.error({ error: e instanceof Error ? e.message : String(e) }, "Failed to get redis client in AlertingService");
       }
       // For demonstration, a default rule is added. In a real application,

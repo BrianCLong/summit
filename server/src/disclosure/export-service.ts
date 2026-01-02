@@ -67,8 +67,8 @@ const DEFAULT_ARTIFACTS: ExportArtifact[] = [
 
 const requestSchema = z.object({
   tenantId: z.string().min(1),
-  startTime: z.string().transform((value) => new Date(value)),
-  endTime: z.string().transform((value) => new Date(value)),
+  startTime: z.string().transform((value: any) => new Date(value)),
+  endTime: z.string().transform((value: any) => new Date(value)),
   artifacts: z
     .array(z.enum(['audit-trail', 'sbom', 'attestations', 'policy-reports']))
     .optional(),
@@ -172,8 +172,8 @@ export class DisclosureExportService {
 
   listJobsForTenant(tenantId: string): DisclosureExportJob[] {
     return Array.from(this.jobs.values())
-      .filter((job) => job.tenantId === tenantId)
-      .map((job) => this.publicJob(job));
+      .filter((job: any) => job.tenantId === tenantId)
+      .map((job: any) => this.publicJob(job));
   }
 
   getJob(jobId: string): DisclosureExportJob | undefined {
@@ -594,7 +594,7 @@ export class DisclosureExportService {
       count: attestations.length,
       hash,
       warnings,
-      attestations: attestations.map((row) => row.attestation),
+      attestations: attestations.map((row: any) => row.attestation),
     };
   }
 

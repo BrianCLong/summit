@@ -7,7 +7,7 @@ import { randomUUID } from 'crypto';
 import { createHash } from 'crypto';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
-import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+import { trace, context, SpanStatusCode, Span } from '@opentelemetry/api';
 import { Logger } from 'pino';
 import { z } from 'zod';
 
@@ -118,15 +118,17 @@ export class EnhancedAutonomousOrchestrator {
 
     // Monitor kill switch from Redis
     this.redis.subscribe('orchestrator:killswitch');
-    this.redis.on('message', (channel, message) => {
-      if (channel === 'orchestrator:killswitch') {
-        this.killSwitchEnabled = message === '1';
-        this.logger.warn(
-          { killSwitchEnabled: this.killSwitchEnabled },
-          'Kill switch toggled',
-        );
-      }
-    });
+    this.redis.on('message', this.logSecurityReview.bind(this));
+  }
+
+  private async logSecurityReview(channel: any, message: any) {
+    if (channel === 'orchestrator:killswitch') {
+      this.killSwitchEnabled = message === '1';
+      this.logger.warn(
+        { killSwitchEnabled: this.killSwitchEnabled },
+        'Kill switch toggled',
+      );
+    }
   }
 
   /**
@@ -135,7 +137,7 @@ export class EnhancedAutonomousOrchestrator {
   async createRun(config: RunConfig): Promise<string> {
     return this.tracer.startActiveSpan(
       'orchestrator.createRun',
-      async (span) => {
+      async (span: Span) => {
         try {
           // Validate configuration
           const validation = RunConfigSchema.safeParse(config);
@@ -212,7 +214,7 @@ export class EnhancedAutonomousOrchestrator {
 
           span.setStatus({ code: SpanStatusCode.OK });
           return runId;
-        } catch (error) {
+        } catch (error: any) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
             message: error.message,
@@ -230,62 +232,60 @@ export class EnhancedAutonomousOrchestrator {
     runId: string,
     correlationId: string,
   ): Promise<void> {
-    return this.tracer.startActiveSpan(
-      'orchestrator.planning',
-      async (span) => {
-        span.setAttributes({ runId, correlationId });
+    return this.tracer.startActiveSpan('orchestration_plan', async (span: any) => {
+      span.setAttributes({ runId, correlationId });
 
-        try {
-          // Update run status
-          await this.updateRunStatus(runId, 'planning');
+      try {
+        // Update run status
+        await this.updateRunStatus(runId, 'planning');
 
-          // Get run details
-          const run = await this.getRun(runId);
-          if (!run) throw new Error('Run not found');
+        // Get run details
+        const run = await this.getRun(runId);
+        if (!run) throw new Error('Run not found');
 
-          // Generate execution plan
-          const tasks = await this.generateTasks(run);
+        // Generate execution plan
+        const tasks = await this.generateTasks(run);
 
-          // Store tasks with idempotency keys
-          for (const task of tasks) {
-            await this.createTask(task);
-          }
-
-          await this.updateRunStatus(runId, 'planned');
-          await this.logEvent(
-            runId,
-            null,
-            correlationId,
-            'planning_completed',
-            'info',
-            `Generated ${tasks.length} tasks`,
-            { taskCount: tasks.length },
-          );
-
-          // Auto-apply if autonomy level allows
-          if (run.autonomy >= 3 && run.mode === 'APPLY') {
-            await this.startExecution(runId, correlationId);
-          }
-
-          span.setStatus({ code: SpanStatusCode.OK });
-        } catch (error) {
-          await this.updateRunStatus(runId, 'failed');
-          await this.logEvent(
-            runId,
-            null,
-            correlationId,
-            'planning_failed',
-            'error',
-            'Planning failed',
-            { error: error.message },
-          );
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: error.message,
-          });
-          throw error;
+        // Store tasks with idempotency keys
+        for (const task of tasks) {
+          await this.createTask(task);
         }
-      },
+
+        await this.updateRunStatus(runId, 'planned');
+        await this.logEvent(
+          runId,
+          null,
+          correlationId,
+          'planning_completed',
+          'info',
+          `Generated ${tasks.length} tasks`,
+          { taskCount: tasks.length },
+        );
+
+        // Auto-apply if autonomy level allows
+        if (run.autonomy >= 3 && run.mode === 'APPLY') {
+          await this.startExecution(runId, correlationId);
+        }
+
+        span.setStatus({ code: SpanStatusCode.OK });
+      } catch (error: any) {
+        await this.updateRunStatus(runId, 'failed');
+        await this.logEvent(
+          runId,
+          null,
+          correlationId,
+          'planning_failed',
+          'error',
+          'Planning failed',
+          { error: error.message },
+        );
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error.message,
+        });
+        throw error;
+      }
+    },
     );
   }
 
@@ -296,49 +296,47 @@ export class EnhancedAutonomousOrchestrator {
     runId: string,
     correlationId: string,
   ): Promise<void> {
-    return this.tracer.startActiveSpan(
-      'orchestrator.execution',
-      async (span) => {
-        span.setAttributes({ runId, correlationId });
+    return this.tracer.startActiveSpan('task_execute', async (span: any) => {
+      span.setAttributes({ runId, correlationId });
 
-        try {
-          await this.updateRunStatus(runId, 'applying');
+      try {
+        await this.updateRunStatus(runId, 'applying');
 
-          // Get pending tasks
-          const tasks = await this.getPendingTasks(runId);
+        // Get pending tasks
+        const tasks = await this.getPendingTasks(runId);
 
-          // Execute tasks in dependency order with parallelism
-          await this.executeTasksInOrder(tasks, correlationId);
+        // Execute tasks in dependency order with parallelism
+        await this.executeTasksInOrder(tasks, correlationId);
 
-          await this.updateRunStatus(runId, 'completed');
-          await this.logEvent(
-            runId,
-            null,
-            correlationId,
-            'execution_completed',
-            'info',
-            'All tasks completed successfully',
-          );
+        await this.updateRunStatus(runId, 'completed');
+        await this.logEvent(
+          runId,
+          null,
+          correlationId,
+          'execution_completed',
+          'info',
+          'All tasks completed successfully',
+        );
 
-          span.setStatus({ code: SpanStatusCode.OK });
-        } catch (error) {
-          await this.updateRunStatus(runId, 'failed');
-          await this.logEvent(
-            runId,
-            null,
-            correlationId,
-            'execution_failed',
-            'error',
-            'Execution failed',
-            { error: error.message },
-          );
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: error.message,
-          });
-          throw error;
-        }
-      },
+        span.setStatus({ code: SpanStatusCode.OK });
+      } catch (error: any) {
+        await this.updateRunStatus(runId, 'failed');
+        await this.logEvent(
+          runId,
+          null,
+          correlationId,
+          'execution_failed',
+          'error',
+          'Execution failed',
+          { error: error.message },
+        );
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error.message,
+        });
+        throw error;
+      }
+    },
     );
   }
 
@@ -348,7 +346,7 @@ export class EnhancedAutonomousOrchestrator {
   private async executeTask(task: Task, correlationId: string): Promise<any> {
     return this.tracer.startActiveSpan(
       'orchestrator.executeTask',
-      async (span) => {
+      async (span: Span) => {
         span.setAttributes({
           taskId: task.id,
           taskType: task.type,
@@ -478,7 +476,7 @@ export class EnhancedAutonomousOrchestrator {
 
           span.setStatus({ code: SpanStatusCode.OK });
           return outcome;
-        } catch (error) {
+        } catch (error: any) {
           // Record failure
           await this.db.query(
             `
@@ -650,7 +648,7 @@ export class EnhancedAutonomousOrchestrator {
       [runId, 'pending'],
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       runId: row.run_id,
       type: row.type,

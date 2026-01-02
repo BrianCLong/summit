@@ -58,7 +58,7 @@ export class AutomationExecutor {
         await this.performAction(action);
         this.logger.info({ action }, 'Action executed successfully');
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         this.logger.error({ action, error }, 'Action execution failed');
         // 4. Rollback (Simulated)
         await this.rollback(action);

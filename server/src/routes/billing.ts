@@ -18,11 +18,11 @@ const previewSchema = z.object({
 router.get('/usage/preview', ensureAuthenticated, async (req, res, next) => {
   try {
     const { start, end } = previewSchema.parse(req.query);
-    const tenantId = req.user.tenantId;
+    const tenantId = req.user!.tenantId;
 
     if (!tenantId) {
-        res.status(401).json({ error: 'Tenant context required' });
-        return;
+      res.status(401).json({ error: 'Tenant context required' });
+      return;
     }
 
     const preview = await meteringService.getUsagePreview(
@@ -32,7 +32,7 @@ router.get('/usage/preview', ensureAuthenticated, async (req, res, next) => {
     );
 
     res.json(preview);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

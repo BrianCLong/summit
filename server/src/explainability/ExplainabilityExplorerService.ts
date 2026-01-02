@@ -143,7 +143,7 @@ export class ExplainabilityExplorerService {
           version: SCHEMA_VERSION,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to list explainable runs',
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -227,7 +227,7 @@ export class ExplainabilityExplorerService {
           version: SCHEMA_VERSION,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to retrieve explainable run',
         run_id: runId,
@@ -348,7 +348,7 @@ export class ExplainabilityExplorerService {
           version: SCHEMA_VERSION,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to traverse lineage',
         run_id: runId,
@@ -440,7 +440,7 @@ export class ExplainabilityExplorerService {
           version: SCHEMA_VERSION,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         success: false,
         data: null,
@@ -505,7 +505,7 @@ export class ExplainabilityExplorerService {
           const provenanceService = ProvenanceLedgerBetaService.getInstance();
           // TODO: Call provenanceService.getProvenanceChain() or similar
           checks.provenance_chain_valid = true;
-        } catch (err) {
+        } catch (err: any) {
           checks.provenance_chain_valid = false;
           issues.push('Provenance chain validation failed');
         }
@@ -551,7 +551,7 @@ export class ExplainabilityExplorerService {
           version: SCHEMA_VERSION,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to verify linkage',
         run_id: runId,
@@ -674,7 +674,7 @@ export class ExplainabilityExplorerService {
         confidence: parseFloat(row.confidence),
         supporting_evidence_count: row.supporting_evidence_count || 0,
       }));
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ message: 'Failed to fetch claims', run_id: runId, error: err });
       return [];
     }
@@ -693,7 +693,7 @@ export class ExplainabilityExplorerService {
         classification: row.classification,
         integrity_hash: row.integrity_hash,
       }));
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ message: 'Failed to fetch evidence', run_id: runId, error: err });
       return [];
     }
@@ -712,7 +712,7 @@ export class ExplainabilityExplorerService {
         license: row.license,
         retrieved_at: row.retrieved_at?.toISOString() || new Date().toISOString(),
       }));
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ message: 'Failed to fetch sources', run_id: runId, error: err });
       return [];
     }
@@ -730,7 +730,7 @@ export class ExplainabilityExplorerService {
         transform_type: row.transform_type,
         parent_transform_id: row.parent_transform_id,
       }));
-    } catch (err) {
+    } catch (err: any) {
       logger.warn({ message: 'Failed to fetch transforms', run_id: runId, error: err });
       return [];
     }

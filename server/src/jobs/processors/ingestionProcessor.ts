@@ -42,7 +42,7 @@ export const ingestionProcessor = async (job: Job) => {
          CALL apoc.create.addLabels(n, [e.type]) YIELD node
          RETURN count(node)
       `, { entities, tenantId });
-   } catch (error) {
+   } catch (error: any) {
       logger.error('Neo4j write failed', error);
       throw error;
    } finally {
@@ -73,7 +73,7 @@ export const ingestionProcessor = async (job: Job) => {
        } finally {
          client.release();
        }
-     } catch (err) {
+     } catch (err: any) {
        logger.error({ jobId: job.id, error: err }, 'RAG ingestion flow failed');
        // Non-blocking for now
      }
@@ -89,7 +89,7 @@ export const ingestionProcessor = async (job: Job) => {
           INSERT INTO provenance_records (id, tenant_id, source_type, source_id, user_id, entity_count, metadata)
           VALUES ($1, $2, 'file', $3, 'system', $4, $5)
        `, [`prov-${Date.now()}`, tenantId, path, entities.length, JSON.stringify(metadata)]);
-   } catch (err) {
+   } catch (err: any) {
        logger.error('Failed to write provenance record', err);
        // Non-blocking for now
    } finally {
@@ -105,7 +105,7 @@ export const ingestionProcessor = async (job: Job) => {
                status: 'COMPLETED'
            }
        });
-   } catch (e) {
+   } catch (e: any) {
        logger.warn('Failed to publish subscription', e);
    }
 

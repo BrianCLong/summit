@@ -80,7 +80,7 @@ export class IncidentManager {
       const { stdout: status } = await execPromise('git status --porcelain');
 
       fs.writeFileSync(path.join(dir, 'git_info.txt'), `Commit: ${commit.trim()}\n\nStatus:\n${status}`);
-    } catch (e) {
+    } catch (e: any) {
       fs.writeFileSync(path.join(dir, 'git_info_error.txt'), `Failed to capture git info: ${e}`);
     }
   }
@@ -90,7 +90,7 @@ export class IncidentManager {
       // Basic ps command, works on Linux/Mac
       const { stdout } = await execPromise('ps aux --sort=-pcpu | head -n 20');
       fs.writeFileSync(path.join(dir, 'process_list.txt'), stdout);
-    } catch (e) {
+    } catch (e: any) {
        fs.writeFileSync(path.join(dir, 'process_list_error.txt'), `Failed to capture process list: ${e}`);
     }
   }

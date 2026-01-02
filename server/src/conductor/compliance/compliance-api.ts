@@ -64,7 +64,7 @@ complianceRouter.post('/assessments/run', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Assessment execution error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -110,7 +110,7 @@ complianceRouter.get('/assessments/:assessmentId', async (req, res) => {
       success: true,
       assessment,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Assessment retrieval error:', error);
 
     res.status(500).json({
@@ -150,7 +150,7 @@ complianceRouter.get('/assessments', async (req, res) => {
       assessments,
       total: assessments.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Assessment listing error:', error);
 
     res.status(500).json({
@@ -181,7 +181,7 @@ complianceRouter.get('/dashboard', async (req, res) => {
       dashboard,
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Dashboard retrieval error:', error);
 
     res.status(500).json({
@@ -263,7 +263,7 @@ complianceRouter.get('/frameworks', async (req, res) => {
       frameworks,
       total: frameworks.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Frameworks listing error:', error);
 
     res.status(500).json({
@@ -320,7 +320,7 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Finding update error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -430,7 +430,7 @@ complianceRouter.post('/reports/generate', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Report generation error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -508,7 +508,7 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Schedule creation error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -583,7 +583,7 @@ complianceRouter.get('/metrics', async (req, res) => {
       metrics,
       timestamp: Date.now(),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Metrics retrieval error:', error);
 
     res.status(500).json({

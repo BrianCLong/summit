@@ -29,7 +29,7 @@ export function mountLiveNamespace(io: Server): void {
       socket.data.user = user;
       socket.join(workspaceId);
       next();
-    } catch (err) {
+    } catch (err: any) {
       next(new Error('UNAUTHORIZED'));
     }
   });

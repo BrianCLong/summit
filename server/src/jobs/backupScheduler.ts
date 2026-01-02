@@ -27,7 +27,7 @@ async function runBackup() {
     logger.info('Triggering scheduled backup...');
     await BackupService.getInstance().performFullBackup();
     logger.info('Scheduled backup finished successfully.');
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Scheduled backup failed', error);
   }
 }

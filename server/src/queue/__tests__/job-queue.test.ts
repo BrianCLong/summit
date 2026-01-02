@@ -39,11 +39,11 @@ jest.mock('bullmq', () => {
     name: string;
     jobs: Map<string, MockJob<T>> = new Map();
     getJobCounts = jest.fn(async () => ({
-      waiting: [...this.jobs.values()].filter((job) => job.state !== 'failed').length,
+      waiting: [...this.jobs.values()].filter((job: any) => job.state !== 'failed').length,
       active: 0,
-      completed: [...this.jobs.values()].filter((job) => job.state === 'completed').length,
-      failed: [...this.jobs.values()].filter((job) => job.state === 'failed').length,
-      delayed: [...this.jobs.values()].filter((job) => Boolean(job.opts.delay)).length,
+      completed: [...this.jobs.values()].filter((job: any) => job.state === 'completed').length,
+      failed: [...this.jobs.values()].filter((job: any) => job.state === 'failed').length,
+      delayed: [...this.jobs.values()].filter((job: any) => Boolean(job.opts.delay)).length,
     }));
     add = jest.fn(async (jobName: string, data: T, opts: MockJobOpts = {}) => {
       const job: MockJob<T> = {
@@ -71,7 +71,7 @@ jest.mock('bullmq', () => {
     }
 
     async getWaitingCount() {
-      return [...this.jobs.values()].filter((job) => job.state !== 'failed').length;
+      return [...this.jobs.values()].filter((job: any) => job.state !== 'failed').length;
     }
 
     async getActiveCount() {
@@ -83,11 +83,11 @@ jest.mock('bullmq', () => {
     }
 
     async getFailedCount() {
-      return [...this.jobs.values()].filter((job) => job.state === 'failed').length;
+      return [...this.jobs.values()].filter((job: any) => job.state === 'failed').length;
     }
 
     async getDelayedCount() {
-      return [...this.jobs.values()].filter((job) => Boolean(job.opts.delay)).length;
+      return [...this.jobs.values()].filter((job: any) => Boolean(job.opts.delay)).length;
     }
 
     async pause() {}
@@ -222,7 +222,7 @@ describe('JobQueue', () => {
   it('waits for schedulers to be ready and exposes metrics and job details', async () => {
     const queue = new JobQueue<{ task: string }>({ name: 'metrics-queue' });
 
-    await queue.start(async (job) => {
+    await queue.start(async (job: any) => {
       job.progress = 50;
       (job as any).returnvalue = 'done';
       job.state = 'completed';

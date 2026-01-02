@@ -304,7 +304,7 @@ export class CIBudgetService extends EventEmitter {
       }
 
       logger.info('Loaded tenant CI budgets', { count: budgets.rows.length });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load tenant CI budgets', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -491,7 +491,7 @@ export class CIBudgetService extends EventEmitter {
               utilizationPercent: maxUtilization,
             },
           };
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to check pipeline execution', {
             tenantId: request.tenantId,
             error: error instanceof Error ? error.message : String(error),
@@ -785,7 +785,7 @@ export class CIBudgetService extends EventEmitter {
 
       // Update tenant budget usage
       await this.updateTenantUsage(tenantId, execution);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record pipeline usage', {
         tenantId,
         error: error instanceof Error ? error.message : String(error),
@@ -929,7 +929,7 @@ export class CIBudgetService extends EventEmitter {
     for (const tenantId of this.tenantBudgets.keys()) {
       try {
         await this.refreshTenantUsage(tenantId);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to refresh tenant usage', {
           tenantId,
           error: error instanceof Error ? error.message : String(error),
@@ -986,7 +986,7 @@ export class CIBudgetService extends EventEmitter {
     for (const [tenantId, budget] of this.tenantBudgets.entries()) {
       try {
         await this.checkBudgetLimits(tenantId, budget);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to check budget limits', {
           tenantId,
           error: error instanceof Error ? error.message : String(error),
@@ -1116,7 +1116,7 @@ export class CIBudgetService extends EventEmitter {
       `,
         [tenantId, period, threshold, utilization],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to store budget alert', {
         tenantId,
         error: error instanceof Error ? error.message : String(error),
@@ -1140,7 +1140,7 @@ export class CIBudgetService extends EventEmitter {
       `,
         [tenantId, JSON.stringify(budget)],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to save budget config', {
         tenantId,
         error: error instanceof Error ? error.message : String(error),

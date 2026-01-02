@@ -34,7 +34,7 @@ class KafkaMessageParser {
   parseMessage(raw: Buffer): Record<string, unknown> {
     try {
       return JSON.parse(raw.toString());
-    } catch (error) {
+    } catch (error: any) {
       return { text: raw.toString(), error: (error as Error).message };
     }
   }

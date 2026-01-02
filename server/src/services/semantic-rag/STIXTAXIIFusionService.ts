@@ -150,7 +150,7 @@ export class STIXTAXIIFusionService {
       return (data.collections || []).map((c: any) =>
         TAXIICollectionSchema.parse(c),
       );
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.error({ error }, 'Failed to discover TAXII collections');
       throw error;
     }
@@ -208,7 +208,7 @@ export class STIXTAXIIFusionService {
         for (const obj of envelope.objects) {
           try {
             allObjects.push(STIXObjectSchema.parse(obj));
-          } catch (e) {
+          } catch (e: any) {
             logger.warn({ stixId: obj.id }, 'Invalid STIX object skipped');
           }
         }
@@ -219,7 +219,7 @@ export class STIXTAXIIFusionService {
         } else {
           hasMore = false;
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error }, 'Failed to fetch TAXII collection');
         throw error;
       }

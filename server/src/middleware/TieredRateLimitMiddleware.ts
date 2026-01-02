@@ -154,7 +154,7 @@ export class AdvancedRateLimiter {
       host: config.redis.host,
       port: config.redis.port,
       password: config.redis.password,
-      retryStrategy: (times) => Math.min(times * 50, 2000),
+      retryStrategy: (times: number) => Math.min(times * 50, 2000),
     });
 
     this.keyPrefix = config.redis.keyPrefix || 'rl:';
@@ -169,7 +169,7 @@ export class AdvancedRateLimiter {
       lua: TOKEN_BUCKET_SCRIPT,
     });
 
-    this.redis.on('error', (err) => {
+    this.redis.on('error', (err: any) => {
       logger.error({ err }, 'Redis connection error');
     });
 
@@ -205,19 +205,19 @@ export class AdvancedRateLimiter {
 
         // Check Daily Cost Quota
         if (this.costTracking) {
-             const costResult = await this.checkCostQuota(userId, limits.costLimit, cost);
-             if (!costResult.allowed) {
-                 res.set('X-RateLimit-Quota-Remaining', '0');
-                 const retryAfterSeconds = Math.ceil((costResult.reset - Date.now()) / 1000);
-                 res.set('Retry-After', retryAfterSeconds.toString());
-                 res.status(429).json({
-                     error: 'Daily quota exceeded',
-                     limit: limits.costLimit,
-                     resetTime: costResult.reset
-                 });
-                 return;
-             }
-             res.set('X-RateLimit-Quota-Remaining', costResult.remaining.toString());
+          const costResult = await this.checkCostQuota(userId, limits.costLimit, cost);
+          if (!costResult.allowed) {
+            res.set('X-RateLimit-Quota-Remaining', '0');
+            const retryAfterSeconds = Math.ceil((costResult.reset - Date.now()) / 1000);
+            res.set('Retry-After', retryAfterSeconds.toString());
+            res.status(429).json({
+              error: 'Daily quota exceeded',
+              limit: limits.costLimit,
+              resetTime: costResult.reset
+            });
+            return;
+          }
+          res.set('X-RateLimit-Quota-Remaining', costResult.remaining.toString());
         }
 
         // Token Bucket Check (Rate Limit)
@@ -244,7 +244,7 @@ export class AdvancedRateLimiter {
             // Re-check after waiting
             const retryResult = await this.checkTokenBucket(userId, tier, cost);
             if (!retryResult.allowed) {
-               res.status(429).json({
+              res.status(429).json({
                 error: 'Rate limit exceeded after wait',
                 retryAfter: Math.ceil(retryResult.retryAfter / 1000),
               });
@@ -274,7 +274,7 @@ export class AdvancedRateLimiter {
         });
 
         next();
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error }, 'Rate limiting error, failing open');
         next();
       }
@@ -314,25 +314,25 @@ export class AdvancedRateLimiter {
   }
 
   private async checkCostQuota(
-      userId: string,
-      limit: number,
-      estimatedCost: number
+    userId: string,
+    limit: number,
+    estimatedCost: number
   ): Promise<{ allowed: boolean; remaining: number; reset: number }> {
-      const key = `${this.keyPrefix}cost:${userId}:daily`;
-      const currentCostStr = await this.redis.get(key);
-      const currentCost = currentCostStr ? parseFloat(currentCostStr) : 0;
+    const key = `${this.keyPrefix}cost:${userId}:daily`;
+    const currentCostStr = await this.redis.get(key);
+    const currentCost = currentCostStr ? parseFloat(currentCostStr) : 0;
 
-      const allowed = (currentCost + estimatedCost) <= limit;
+    const allowed = (currentCost + estimatedCost) <= limit;
 
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
 
-      return {
-          allowed,
-          remaining: Math.max(0, limit - currentCost),
-          reset: tomorrow.getTime()
-      };
+    return {
+      allowed,
+      remaining: Math.max(0, limit - currentCost),
+      reset: tomorrow.getTime()
+    };
   }
 
   private getLimits(tier: RateLimitTier): TierLimits {
@@ -385,12 +385,12 @@ export class AdvancedRateLimiter {
 
   private startAdaptiveMonitoring() {
     setInterval(() => {
-        const mem = process.memoryUsage();
-        const heapUsed = mem.heapUsed / mem.heapTotal;
-        if (heapUsed > this.heapThreshold) {
-            logger.warn({ heapUsed }, 'High memory pressure, potential shedding needed');
-            // Could decrement global capacity multiplier here
-        }
+      const mem = process.memoryUsage();
+      const heapUsed = mem.heapUsed / mem.heapTotal;
+      if (heapUsed > this.heapThreshold) {
+        logger.warn({ heapUsed }, 'High memory pressure, potential shedding needed');
+        // Could decrement global capacity multiplier here
+      }
     }, 30000);
   }
 
@@ -406,10 +406,10 @@ export class AdvancedRateLimiter {
     const cost = await this.redis.get(costKey);
 
     return {
-        userId,
-        tokens: tokens ? parseFloat(tokens) : null,
-        lastRefill: lastRefill ? parseInt(lastRefill) : null,
-        dailyCost: cost ? parseFloat(cost) : 0
+      userId,
+      tokens: tokens ? parseFloat(tokens) : null,
+      lastRefill: lastRefill ? parseInt(lastRefill) : null,
+      dailyCost: cost ? parseFloat(cost) : 0
     };
   }
 }

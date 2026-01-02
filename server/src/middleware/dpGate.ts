@@ -106,7 +106,7 @@ export const dpGate = (config: DPConfig) => {
       };
 
       next();
-    } catch (err) {
+    } catch (err: any) {
       next(err);
     }
   };

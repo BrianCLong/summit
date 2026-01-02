@@ -170,7 +170,7 @@ export async function reserveCapacity(
       startAt: reservation.startAt.toISOString(),
       endAt: reservation.endAt.toISOString(),
     };
-  } catch (error) {
+  } catch (error: any) {
     capacityReservationsCounter.inc({ action: 'reserve', status: 'error' });
     logger.error('❌ Failed to reserve capacity', {
       tenantId,
@@ -210,7 +210,7 @@ export async function releaseReservation(
     });
 
     return released;
-  } catch (error) {
+  } catch (error: any) {
     capacityReservationsCounter.inc({ action: 'release', status: 'error' });
     logger.error('❌ Failed to release capacity reservation', {
       reservationId,

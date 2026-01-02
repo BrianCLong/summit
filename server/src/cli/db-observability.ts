@@ -73,7 +73,7 @@ Flags:
   console.log(JSON.stringify(snapshot, null, 2));
 }
 
-main().catch((err) => {
+main().catch((err: any) => {
   console.error(err);
   process.exit(1);
 });

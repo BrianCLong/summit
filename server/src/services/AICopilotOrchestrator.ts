@@ -417,7 +417,7 @@ export class AICopilotOrchestrator {
       checks.queryPreview = !!this.queryPreviewService;
       checks.provenance = true; // ProvLedgerClient availability
       checks.redaction = true; // RedactionService availability
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Health check failed');
     }
 

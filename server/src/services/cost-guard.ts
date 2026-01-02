@@ -433,7 +433,7 @@ export function costGuardMiddleware() {
       req.estimatedCost = costCheck.estimatedCost;
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         { error, tenantId, operation },
         'Cost guard middleware error',
@@ -463,7 +463,7 @@ export function costRecordingMiddleware() {
 
         try {
           await costGuard.recordActualCost(context);
-        } catch (error) {
+        } catch (error: any) {
           logger.error({ error, context }, 'Failed to record cost');
         }
       }

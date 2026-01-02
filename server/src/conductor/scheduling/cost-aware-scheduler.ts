@@ -587,7 +587,7 @@ export class CostAwareScheduler {
         },
         reason: `Scheduled in ${queueName} queue`,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Scheduling error:', error);
 
       return {

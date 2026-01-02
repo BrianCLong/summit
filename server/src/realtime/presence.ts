@@ -69,7 +69,7 @@ export function registerPresenceHandlers(socket: Socket): void {
           serviceId: 'realtime',
         },
       );
-    } catch (err) {
+    } catch (err: any) {
       logger.warn(
         { err: (err as Error).message, actionType },
         'Failed to emit presence audit event',

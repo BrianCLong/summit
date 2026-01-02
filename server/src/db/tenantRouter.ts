@@ -162,7 +162,7 @@ class TenantRouter {
 
       this.tenantToPartition.set(tenantId, partitionKey);
       return partitionKey;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         { tenantId, partitionKey, err: error },
         'Tenant routing map not available; continuing without partition mapping',
@@ -197,7 +197,7 @@ class TenantRouter {
     tenantMap: { tenant_id: string; partition_key: string }[] = [],
   ): void {
     this.partitions.clear();
-    partitions.forEach((row) => this.partitions.set(row.partition_key, row));
+    partitions.forEach((row: any) => this.partitions.set(row.partition_key, row));
     tenantMap.forEach(({ tenant_id, partition_key }) =>
       this.tenantToPartition.set(tenant_id, partition_key),
     );
@@ -290,7 +290,7 @@ class TenantRouter {
       );
 
       this.lastLoadedAt = Date.now();
-    } catch (error) {
+    } catch (error: any) {
       logger.debug(
         { err: error },
         'Tenant routing tables unavailable; using default partition',

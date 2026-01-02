@@ -118,7 +118,7 @@ export class SecurityIncidentPipeline {
 
       return await this.getIncident(incidentId);
 
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Failed to process security event ${event.id}`, { error: errorMessage, stack: errorStack });
@@ -170,7 +170,7 @@ export class SecurityIncidentPipeline {
       // Mocking the query to audit system as it might not have search capabilities exposed yet
       // In production: return this.auditSystem.queryLogs({ actor: event.actorId, timeRange: [startTime, endTime] });
       return [`log-id-1-${event.id}`, `log-id-2-${event.id}`];
-    } catch (e) {
+    } catch (e: any) {
       const errorMessage = e instanceof Error ? e.message : String(e);
       this.logger.error('Log capture failed', errorMessage);
       return [];
@@ -222,7 +222,7 @@ export class SecurityIncidentPipeline {
       // await this.storage.upload(dumpPath, JSON.stringify(result.records));
 
       return dumpPath;
-    } catch (e) {
+    } catch (e: any) {
       const errorMessage = e instanceof Error ? e.message : String(e);
       this.logger.error('Graph dump failed', errorMessage);
       return null;

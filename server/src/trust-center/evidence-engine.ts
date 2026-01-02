@@ -300,7 +300,7 @@ export class EvidenceEngine {
         contentHash: createHash('sha256').update(contentStr).digest('hex'),
         contentSize: contentStr.length,
         redactionApplied: true,
-        redactionRules: rules.map((r) => r.category),
+        redactionRules: rules.map((r: any) => r.category),
       };
     });
   }

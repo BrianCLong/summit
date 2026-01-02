@@ -122,7 +122,7 @@ export class ThreatDetectionEngine {
             );
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Threat detection rule ${ruleId} failed:`, error);
       }
     }
@@ -155,7 +155,7 @@ export class ThreatDetectionEngine {
     try {
       const profileData = await this.redis.get(`threat:profile:${userId}`);
       return profileData ? JSON.parse(profileData) : null;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load user profile:', error);
       return null;
     }
@@ -600,7 +600,7 @@ export function threatDetectionMiddleware() {
       // Add analysis to request context
       req.threatAnalysis = analysis;
       next();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Threat detection middleware error:', error);
       next(); // Continue on error to avoid breaking the application
     }

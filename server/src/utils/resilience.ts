@@ -57,7 +57,7 @@ export async function withTimeout<T>(
         clearTimeout(timer);
         resolve(result);
       },
-      (err) => {
+      (err: any) => {
         clearTimeout(timer);
         reject(err);
       }
@@ -98,7 +98,7 @@ export class RetryPolicy {
           logger.warn(
             `Retry attempt ${attempt}/${this.options.maxAttempts} for '${operationName}' in ${delay}ms. Error: ${error.message}`
           );
-          await new Promise((r) => setTimeout(r, delay));
+          await new Promise((r: any) => setTimeout(r, delay));
         }
       }
     }

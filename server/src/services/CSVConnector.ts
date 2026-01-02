@@ -143,7 +143,7 @@ export class CSVConnector {
         provenanceId: result.provenanceId,
         hashManifest,
       };
-    } catch (error) {
+    } catch (error: any) {
       csvLogger.error({ filePath, error }, 'CSV ingest failed');
       throw error;
     }
@@ -157,7 +157,7 @@ export class CSVConnector {
       const content = await readFile(mappingPath, 'utf-8');
       const mapping = loadYaml(content) as MappingConfig;
       return mapping;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to load mapping: ${error}`);
     }
   }
@@ -328,7 +328,7 @@ export class CSVConnector {
                 });
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             csvLogger.warn({ record, error }, 'Failed to parse record');
           }
         }

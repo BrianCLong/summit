@@ -82,7 +82,7 @@ router.post(
     const schemaValid = validateDsl(spec);
     const schemaErrors = schemaValid
       ? []
-      : (validateDsl.errors || []).map((err) => ({
+      : (validateDsl.errors || []).map((err: any) => ({
           path: err.instancePath || err.schemaPath,
           message: err.message,
         }));
