@@ -70,7 +70,7 @@ export class ApprovalService {
 
             this.logger.info({ id, action: action.type, tenantId: action.tenantId }, 'Approval requested');
             return id;
-        } catch (error) {
+        } catch (error: any) {
             this.logger.error({ error, action }, 'Failed to create approval request');
             throw error;
         }
@@ -87,7 +87,7 @@ export class ApprovalService {
             [tenantId]
         );
 
-        return result.rows.map(row => ({
+        return result.rows.map((row: { id: string; action_type: string; payload: unknown; tenant_id: string; reason: string; status: string; requested_at: Date; expires_at: Date }) => ({
             id: row.id,
             action: {
                 type: row.action_type,

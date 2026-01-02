@@ -1106,7 +1106,7 @@ export class GovernanceService {
           appealSlaHours: this.config.appealReviewSlaHours,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         details: {

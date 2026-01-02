@@ -113,7 +113,7 @@ const userResolvers = {
         await cache.set(cacheKey, user, cfg.CACHE_TTL_DEFAULT);
 
         return user;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ userId: id, error }, 'Failed to fetch user');
         throw new GraphQLError('Failed to fetch user', {
           extensions: { code: 'USER_FETCH_FAILED' },
@@ -157,8 +157,8 @@ const userResolvers = {
           'Fetched users list'
         );
 
-        return result.rows.map((row) => formatUser(row as DatabaseUser));
-      } catch (error) {
+        return result.rows.map((row: any) => formatUser(row as DatabaseUser));
+      } catch (error: any) {
         if (error instanceof GraphQLError) {
           throw error;
         }
@@ -231,7 +231,7 @@ const userResolvers = {
         );
 
         return user;
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof GraphQLError) {
           throw error;
         }
@@ -307,7 +307,7 @@ const userResolvers = {
         logger.info({ userId: id }, 'User updated via GraphQL');
 
         return user;
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof GraphQLError) {
           throw error;
         }
@@ -366,7 +366,7 @@ const userResolvers = {
         logger.info({ userId: id }, 'User deleted (soft) via GraphQL');
 
         return true;
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof GraphQLError) {
           throw error;
         }
@@ -425,7 +425,7 @@ const userResolvers = {
         logger.info({ userId }, 'User preferences updated via GraphQL');
 
         return user;
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof GraphQLError) {
           throw error;
         }

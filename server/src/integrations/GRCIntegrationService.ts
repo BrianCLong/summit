@@ -72,7 +72,7 @@ export class GRCIntegrationService {
         default:
           throw new Error(`Unsupported GRC provider: ${config.provider}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'GRC export failed',
         provider: config.provider,
@@ -143,7 +143,7 @@ export class GRCIntegrationService {
         if (result.result?.sys_id) {
           ticketIds.push(result.result.sys_id);
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({
           message: 'Failed to export run to ServiceNow',
           run_id: run.run_id,
@@ -221,7 +221,7 @@ export class GRCIntegrationService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Archer export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }
@@ -274,7 +274,7 @@ export class GRCIntegrationService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`LogicGate export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }
@@ -312,7 +312,7 @@ export class GRCIntegrationService {
           },
           body: JSON.stringify(record),
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({
           message: 'Failed to export run to Onspring',
           run_id: run.run_id,
@@ -385,7 +385,7 @@ export class GRCIntegrationService {
         export_id: exportId,
         timestamp,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Custom GRC export error: ${error instanceof Error ? error.message : 'Unknown'}`);
     }
   }

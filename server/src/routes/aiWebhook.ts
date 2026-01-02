@@ -28,7 +28,7 @@ function verifySignature(body: Buffer, sig: string): boolean {
       return false;
     }
     return crypto.timingSafeEqual(digestBuffer, sigBuffer);
-  } catch (error) {
+  } catch (error: any) {
     return false;
   }
 }
@@ -88,7 +88,7 @@ router.post('/ai/webhook', webhookRateLimit, async (req, res) => {
       meta: { jobId: job_id, kind, count: insights.length },
     });
     res.json({ ok: true });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error processing AI webhook', error);
     return res.status(500).json({ error: 'Internal server error' });
   }

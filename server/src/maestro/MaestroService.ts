@@ -146,7 +146,7 @@ export class MaestroService {
     try {
       const data = await fs.readFile(DB_PATH, 'utf-8');
       this.dbCache = JSON.parse(data);
-    } catch (err) {
+    } catch (err: any) {
       this.dbCache = { ...DEFAULT_DB }; // Clone defaults
       await this.saveDB();
     }
@@ -157,7 +157,7 @@ export class MaestroService {
     if (!this.dbCache) return;
     try {
       await fs.writeFile(DB_PATH, JSON.stringify(this.dbCache, null, 2));
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save Maestro DB:', err);
     }
   }
@@ -167,7 +167,7 @@ export class MaestroService {
   async getHealthSnapshot(tenantId: string): Promise<HealthSnapshot> {
     const runs = await runsRepo.list(tenantId, 100);
     const recentFailures = runs.filter(
-      (r) => r.status === 'failed' && new Date(r.created_at).getTime() > Date.now() - 3600000,
+      (r: any) => r.status === 'failed' && new Date(r.created_at).getTime() > Date.now() - 3600000,
     ).length;
 
     let overallScore = 100;
@@ -198,9 +198,9 @@ export class MaestroService {
 
   async getDashboardStats(tenantId: string) {
     const runs = await runsRepo.list(tenantId, 1000);
-    const activeRuns = runs.filter((r) => r.status === 'running').length;
-    const completedRuns = runs.filter((r) => r.status === 'succeeded').length;
-    const failedRuns = runs.filter((r) => r.status === 'failed').length;
+    const activeRuns = runs.filter((r: any) => r.status === 'running').length;
+    const completedRuns = runs.filter((r: any) => r.status === 'succeeded').length;
+    const failedRuns = runs.filter((r: any) => r.status === 'failed').length;
 
     return {
       activeRuns,

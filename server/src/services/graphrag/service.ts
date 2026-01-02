@@ -170,7 +170,7 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
       });
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'GraphRAG request failed',
         requestId,
@@ -344,7 +344,7 @@ export class EvidenceFirstGraphRagService implements IGraphRagService {
       });
 
       await this.auditLog.append(record);
-    } catch (error) {
+    } catch (error: any) {
       // Don't fail the request if audit logging fails
       logger.error({
         message: 'Failed to log audit record',

@@ -59,7 +59,7 @@ const relationshipResolvers = {
           payload: relationship,
         });
         return relationship;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, input }, 'Error creating relationship');
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to create relationship: ${message}`);
@@ -144,7 +144,7 @@ const relationshipResolvers = {
           payload: relationship,
         });
         return relationship;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, id, input }, 'Error updating relationship');
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to update relationship: ${message}`);
@@ -173,7 +173,7 @@ const relationshipResolvers = {
           payload: id,
         });
         return true;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, id }, 'Error deleting relationship');
         const message = error instanceof Error ? error.message : 'Unknown error';
         throw new Error(`Failed to delete relationship: ${message}`);

@@ -58,7 +58,7 @@ router.get('/status', async (req: Request, res: Response, next: NextFunction) =>
                 uptime.last24h = currentUptime; // Use current probe uptime as a proxy for now
             }
         }
-    } catch (e) {
+    } catch (e: any) {
         // Ignore errors and use fallback
     }
 
@@ -72,14 +72,14 @@ router.get('/status', async (req: Request, res: Response, next: NextFunction) =>
           WHERE created_at > now() - interval '30 days'
         `);
         incidentCount = parseInt(incidentRows[0]?.count || '0', 10);
-    } catch (e) {
+    } catch (e: any) {
         // Table might not exist yet
         incidentCount = 0;
     }
 
     const status = {
       overallStatus: 'operational',
-      certifications: certRows.map((row) => ({
+      certifications: certRows.map((row: any) => ({
         framework: row.framework,
         name: getFrameworkName(row.framework),
         status: row.status,
@@ -110,7 +110,7 @@ router.get('/status', async (req: Request, res: Response, next: NextFunction) =>
     };
 
     res.json(status);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -141,7 +141,7 @@ router.get('/certifications', async (req: Request, res: Response, next: NextFunc
     const { rows } = await pool.query(query, params);
 
     res.json({
-      certifications: rows.map((row) => ({
+      certifications: rows.map((row: any) => ({
         framework: row.framework,
         name: getFrameworkName(row.framework),
         status: row.status,
@@ -151,7 +151,7 @@ router.get('/certifications', async (req: Request, res: Response, next: NextFunc
         certificateUrl: row.certificate_url,
       })),
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -196,7 +196,7 @@ router.get('/slo', async (req: Request, res: Response, next: NextFunction) => {
     };
 
     res.json(sloMetrics);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -220,7 +220,7 @@ router.get('/packs', async (req: Request, res: Response, next: NextFunction) => 
     const packs = await regulatoryPackService.listPacks(frameworkList);
 
     res.json({ packs });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -240,7 +240,7 @@ router.get('/packs/:packId', async (req: Request, res: Response, next: NextFunct
     }
 
     res.json(pack);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -264,7 +264,7 @@ router.get('/packs/:packId/controls', async (req: Request, res: Response, next: 
       framework: pack.framework,
       controls: pack.controls,
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -294,7 +294,7 @@ router.get('/controls', async (req: Request, res: Response, next: NextFunction) 
         evidenceSourceCount: c.evidenceSources.length,
       })),
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -314,7 +314,7 @@ router.get('/controls/:controlId', async (req: Request, res: Response, next: Nex
     }
 
     res.json(control);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -353,7 +353,7 @@ router.get('/controls/:controlId/evidence', async (req: Request, res: Response, 
       evidenceSnapshots: redactedSnapshots,
       collectedAt: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -399,7 +399,7 @@ router.post('/evidence/request', async (req: Request, res: Response, next: NextF
       expiresAt: request.expiresAt,
       message: 'Evidence request created and processing',
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -435,7 +435,7 @@ router.get('/evidence/request/:requestId', async (req: Request, res: Response, n
       expiresAt: row.expires_at?.toISOString(),
       errorMessage: row.error_message,
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -497,7 +497,7 @@ router.get('/evidence/packages/:packageId', async (req: Request, res: Response, 
     };
 
     res.json(pkg);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -522,7 +522,7 @@ router.post('/reports/generate', async (req: Request, res: Response, next: NextF
     );
 
     res.json(report);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -547,7 +547,7 @@ router.get('/reports/:reportId', async (req: Request, res: Response, next: NextF
     }
 
     res.json(rows[0].report_data);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -564,7 +564,7 @@ router.get('/controls/:controlId/assess', async (req: Request, res: Response, ne
     const assessment = await regulatoryPackService.assessControl(controlId, tenantId);
 
     res.json(assessment);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -594,7 +594,7 @@ router.get('/questionnaire/caiq', async (req: Request, res: Response, next: Next
       generatedAt: new Date().toISOString(),
       responses: caiqResponses,
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -653,7 +653,7 @@ router.get('/export/oscal', async (req: Request, res: Response, next: NextFuncti
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename="oscal-catalog-${framework}.json"`);
     res.json(oscalCatalog);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

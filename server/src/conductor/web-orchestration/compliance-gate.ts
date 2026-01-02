@@ -158,7 +158,7 @@ export class ComplianceGate {
       );
 
       return complianceResult;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Compliance validation failed', {
         error: error.message,
         url,
@@ -506,7 +506,7 @@ export class ComplianceGate {
       await this.redis.setex(`robots:${domain}`, 86400, JSON.stringify(policy));
 
       return policy;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to fetch robots.txt', {
         domain,
         error: error.message,
@@ -631,7 +631,7 @@ export class ComplianceGate {
         tosEntries: this.tosCompliance.size,
         licenseEntries: this.licenseInfo.size,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load compliance data', { error: error.message });
     }
   }

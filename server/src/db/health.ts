@@ -72,7 +72,7 @@ async function getPostgresHealth(): Promise<DependencyHealthReport['services']['
   try {
     const pool = getPostgresPool();
     pools = await pool.healthCheck();
-  } catch (error) {
+  } catch (error: any) {
     lastError = (error as Error).message;
     status = 'unhealthy';
     return { status, pools, lastError };

@@ -101,7 +101,7 @@ export class QuotaService {
         softThresholdTriggered
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error checking quota', { error, input });
       // Fail open
       this.metrics.incrementCounter('checks_total', { kind, result: 'error_allowed' });

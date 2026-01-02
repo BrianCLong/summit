@@ -140,7 +140,7 @@ export class FinOpsObservabilityService {
           ORDER BY amount DESC
         `);
         tenantSpend = Object.fromEntries(
-          tenantRows.map((row) => [row.tenant_id, parseFloat(row.amount)]),
+          tenantRows.map((row: any) => [row.tenant_id, parseFloat(row.amount)]),
         );
       }
 
@@ -194,11 +194,11 @@ export class FinOpsObservabilityService {
         projectedMonthlySpend,
         budgetRemaining,
         spendByProvider: Object.fromEntries(
-          providerRows.map((row) => [row.provider, parseFloat(row.amount)]),
+          providerRows.map((row: any) => [row.provider, parseFloat(row.amount)]),
         ),
         spendByTenant: tenantSpend,
         costPerRun,
-        costTrend: trendRows.map((row) => ({
+        costTrend: trendRows.map((row: any) => ({
           date: row.date,
           amount: parseFloat(row.amount),
         })),
@@ -272,7 +272,7 @@ export class FinOpsObservabilityService {
         throughputRps: parseFloat(throughputData.avg_throughput || 0),
         errorRate: parseFloat(errorData.error_rate || 0),
         successRate: Math.max(0, 100 - parseFloat(errorData.error_rate || 0)),
-        latencyHeatmap: heatmapRows.map((row) => ({
+        latencyHeatmap: heatmapRows.map((row: any) => ({
           timestamp: row.timestamp,
           latency: parseFloat(row.latency),
           count: parseInt(row.count),
@@ -429,7 +429,7 @@ export class FinOpsObservabilityService {
       `);
 
       return {
-        slowQueries: slowQueryRows.map((row) => ({
+        slowQueries: slowQueryRows.map((row: any) => ({
           query: row.query_preview + '...',
           avgLatency: parseFloat(row.avg_latency),
           count: parseInt(row.count),

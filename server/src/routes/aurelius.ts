@@ -24,7 +24,7 @@ router.post('/ingest/external', async (req: AuthenticatedRequest, res: Response)
       req.user?.tenantId
     );
     res.json(result);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -38,7 +38,7 @@ router.post('/prior-art/search', async (req: AuthenticatedRequest, res: Response
       req.user?.tenantId
     );
     res.json(result);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -47,7 +47,7 @@ router.post('/prior-art/cluster', async (req: AuthenticatedRequest, res: Respons
   try {
     await PriorArtService.getInstance().clusterPatents(req.user?.tenantId);
     res.json({ status: 'Clustering started' });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -62,7 +62,7 @@ router.post('/invention/generate', async (req: AuthenticatedRequest, res: Respon
       req.user?.tenantId
     );
     res.json(result);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -74,7 +74,7 @@ router.get('/competitors/market-map', async (req: AuthenticatedRequest, res: Res
       req.user?.tenantId
     );
     res.json(result);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -89,7 +89,7 @@ router.post('/foresight/simulate', async (req: AuthenticatedRequest, res: Respon
       req.user?.tenantId
     );
     res.json(result);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
@@ -98,7 +98,7 @@ router.post('/foresight/opportunities', async (req: AuthenticatedRequest, res: R
     try {
         await ForesightService.getInstance().generateOpportunities(req.user?.tenantId);
         res.json({ status: 'Opportunity mapping started' });
-    } catch (err) {
+    } catch (err: any) {
         res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
     }
 });

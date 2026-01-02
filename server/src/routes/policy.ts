@@ -21,7 +21,7 @@ policyRouter.post('/simulate', ensureAuthenticated, async (req, res) => {
     const result = simulatePolicyDecision(bundle, input, context);
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ error: 'Invalid input', details: error.errors });
     } else {

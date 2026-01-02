@@ -336,7 +336,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             // Integration: Project to Canonical Graph (Best-effort async)
             CanonicalGraphService.getInstance()
               .projectEntry(completeEntry)
-              .catch((err) => {
+              .catch((err: any) => {
                 console.error('Failed to project entry to Canonical Graph', {
                   entryId: completeEntry.id,
                   error: err
@@ -364,13 +364,13 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             });
 
             return completeEntry;
-          } catch (error) {
+          } catch (error: any) {
             await client.query('ROLLBACK');
             throw error;
           } finally {
             client.release();
           }
-        } catch (error) {
+        } catch (error: any) {
           span.recordException?.(error as Error);
           span.setStatus?.({ message: (error as Error).message });
           throw error;
@@ -506,13 +506,13 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
             this.emit('batchAppended', results);
             return results;
-          } catch (error) {
+          } catch (error: any) {
             await client.query('ROLLBACK');
             throw error;
           } finally {
             client.release();
           }
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -671,7 +671,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
           this.emit('chainVerified', { tenantId, verification });
           return verification;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -708,7 +708,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
           this.emit('rootsSigned', roots);
           return roots;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -755,7 +755,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       range.start_seq,
       range.end_seq,
     ]);
-    const hashes = entriesResult.rows.map((row) => row.current_hash);
+    const hashes = entriesResult.rows.map((row: any) => row.current_hash);
     const rootHash = this.computeMerkleRoot(hashes);
 
     // Sign the root hash using cosign
@@ -804,7 +804,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         JSON.stringify(root, null, 2)
       );
       console.log(`Archived provenance root to WORM storage: ${location}`);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to archive root to WORM storage', e);
       // We don't fail the operation, but we log the error
     }
@@ -860,7 +860,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
           },
         );
         return JSON.stringify(bundle);
-      } catch (error) {
+      } catch (error: any) {
         console.warn(
           'Crypto pipeline signing failed, falling back to cosign/HMAC:',
           error,
@@ -881,7 +881,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       require('fs').unlinkSync(tempFile);
 
       return signature.trim();
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Cosign signing failed, using fallback signature:', error);
       // Fallback to HMAC signature
       return crypto
@@ -909,7 +909,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             return true;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         if (signature.trim().startsWith('{')) {
           console.warn(
             'Failed to verify cryptographic pipeline signature, falling back:',
@@ -936,7 +936,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       require('fs').unlinkSync(tempSig);
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Cosign verification failed, trying fallback:', error);
 
       // Fallback to HMAC verification
@@ -953,10 +953,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     const result = await this.pool.query(
       'SELECT DISTINCT tenant_id FROM provenance_ledger_v2 ORDER BY tenant_id',
     );
-    return result.rows.map((row) => row.tenant_id);
+    return result.rows.map((row: any) => row.tenant_id);
   }
 
-  private mapRowToEntry(row: any): ProvenanceEntry {
+  private mapRowToEntry(row): ProvenanceEntry {
     return {
       id: row.id,
       tenantId: row.tenant_id,
@@ -1034,7 +1034,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         rootCount: roots.length,
         roots,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Daily root signing failed:', error);
       this.emit('dailySigningFailed', { error, timestamp: new Date() });
     }
@@ -1107,7 +1107,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     `;
 
     const result = await this.pool.query(query, params);
-    return result.rows.map((row) => this.mapRowToEntry(row));
+    return result.rows.map((row: any) => this.mapRowToEntry(row));
   }
 
   async generateExportManifest(
@@ -1184,7 +1184,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
        ORDER BY end_sequence ASC`,
       [tenantId],
     );
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       tenantId: row.tenant_id,
       rootHash: row.root_hash,

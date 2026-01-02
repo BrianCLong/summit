@@ -114,7 +114,7 @@ export class ReconcileManager {
    * Setup event listeners for monitoring
    */
   // private setupEventListeners(): void {
-  //   this.worker.on('completed', (job) => {
+  //   this.worker.on('completed', (job: any) => {
   //     this.stats.processed++;
   //     this.stats.succeeded++;
   //     this.stats.lastProcessed = new Date();
@@ -174,7 +174,7 @@ export class ReconcileManager {
   //     });
 
   //     return ""; // job.id!;
-  //   } catch (error) {
+  //   } catch (error: any) {
   //     logger.error('Failed to enqueue reconciliation', { error, data });
   //     throw error;
   //   }
@@ -214,7 +214,7 @@ export class ReconcileManager {
   /**
    * Main reconciliation processor
    */
-  // private async processReconciliation(job: any): Promise<ReconcileResult> { // Changed Job to any
+  // private async processReconciliation(job): Promise<ReconcileResult> { // Changed Job to any
   //   const { ledgerId, tenantId, correlationId, provider, model, estimated, actual, originalPayload } = job.data;
 
   //   logger.debug('Processing reconciliation job', {
@@ -278,7 +278,7 @@ export class ReconcileManager {
   //       accuracyRatio
   //     };
 
-  //   } catch (error) {
+  //   } catch (error: any) {
   //     const errorMessage = error instanceof Error ? error.message : String(error);
 
   //     // Mark as failed in budget ledger
@@ -331,7 +331,7 @@ export class ReconcileManager {
           });
           return null;
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to fetch actual usage from provider', {
         provider,
         model,
@@ -369,7 +369,7 @@ export class ReconcileManager {
         completionTokens: result.completionTokens,
         totalUsd: result.totalUSD,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('OpenAI usage fallback failed', { error, correlationId });
       return null;
     }
@@ -401,7 +401,7 @@ export class ReconcileManager {
         completionTokens: result.completionTokens,
         totalUsd: result.totalUSD,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Anthropic usage fallback failed', { error, correlationId });
       return null;
     }
@@ -433,7 +433,7 @@ export class ReconcileManager {
         completionTokens: result.completionTokens,
         totalUsd: result.totalUSD,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Gemini usage fallback failed', { error, correlationId });
       return null;
     }
@@ -501,7 +501,7 @@ export class ReconcileManager {
   //     // await this.queue.clean(7 * 24 * 60 * 60 * 1000, 50, 'failed'); // 7d old failed jobs
 
   //     logger.info('Reconciliation queue cleanup completed');
-  //   } catch (error) {
+  //   } catch (error: any) {
   //     logger.error('Failed to clean reconciliation queue', { error });
   //   }
   // }
@@ -559,7 +559,7 @@ export function getReconcileManager(
 //   setInterval(async () => {
 //     try {
 //       await manager.cleanOldJobs();
-//     } catch (error) {
+//     } catch (error: any) {
 //       logger.error('Periodic reconciliation cleanup failed', { error });
 //     }
 //   }, 6 * 60 * 60 * 1000); // Every 6 hours

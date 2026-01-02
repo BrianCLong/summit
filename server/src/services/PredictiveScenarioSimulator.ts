@@ -77,7 +77,7 @@ export class PredictiveScenarioSimulator extends EventEmitter {
                     scenarios: (parsed.scenarios || parsed) as ScenarioResult['scenarios'], // Handle varied LLM output
                     generatedAt: new Date().toISOString()
                 };
-            } catch (e) {
+            } catch (e: any) {
                 logger.error('[PredictiveSimulator] JSON parse failed', {
                     error: e instanceof Error ? e.message : String(e)
                 });
@@ -94,7 +94,7 @@ export class PredictiveScenarioSimulator extends EventEmitter {
                     generatedAt: new Date().toISOString()
                 };
             }
-        } catch (e) {
+        } catch (e: any) {
             logger.error('[PredictiveSimulator] Simulation failed', {
                 error: e instanceof Error ? e.message : String(e)
             });

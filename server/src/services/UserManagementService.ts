@@ -272,7 +272,7 @@ export class UserManagementService {
         governanceVerdict: verdict,
         warnings: [],
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error listing users:', error);
       throw error;
     }
@@ -346,7 +346,7 @@ export class UserManagementService {
         governanceVerdict: verdict,
         warnings: [],
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting user:', error);
       throw error;
     }
@@ -472,7 +472,7 @@ export class UserManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error creating user:', error);
       throw error;
@@ -606,7 +606,7 @@ export class UserManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error updating user:', error);
       throw error;
@@ -739,7 +739,7 @@ export class UserManagementService {
           warnings: hardDelete ? ['User data permanently removed'] : [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error deleting user:', error);
       throw error;
@@ -827,7 +827,7 @@ export class UserManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error locking user:', error);
       throw error;
     }
@@ -910,7 +910,7 @@ export class UserManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error unlocking user:', error);
       throw error;
     }
@@ -967,7 +967,7 @@ export class UserManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error adding user to tenant:', error);
       throw error;
     }
@@ -1019,7 +1019,7 @@ export class UserManagementService {
           warnings: [],
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error removing user from tenant:', error);
       throw error;
     }

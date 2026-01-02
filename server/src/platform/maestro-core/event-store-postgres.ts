@@ -2,7 +2,7 @@ import { MaestroEvent, MaestroEventStore } from './types.js';
 import pg from 'pg';
 
 export class PostgresEventStore implements MaestroEventStore {
-  constructor(private pool: pg.Pool) {}
+  constructor(private pool: pg.Pool) { }
 
   async append(eventData: Omit<MaestroEvent, 'id' | 'timestamp'>): Promise<MaestroEvent> {
     const query = `
@@ -42,7 +42,7 @@ export class PostgresEventStore implements MaestroEventStore {
     query += ` ORDER BY timestamp DESC LIMIT 1000`; // Safety limit
 
     const res = await this.pool.query(query, values);
-    return res.rows.map(row => ({
+    return res.rows.map((row: any) => ({
       id: row.id,
       tenantId: row.tenant_id,
       type: row.type,

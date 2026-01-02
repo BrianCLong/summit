@@ -166,7 +166,7 @@ export class PipelineOrchestrator {
 
       logger.info({ pipeline: config.key }, 'Pipeline run completed');
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ pipeline: config.key, error }, 'Pipeline run failed');
       throw error;
     }

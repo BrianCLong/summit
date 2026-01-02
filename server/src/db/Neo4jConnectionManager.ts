@@ -114,7 +114,7 @@ export class Neo4jConnectionManager {
           logger.error({ error }, 'Failed to verify Neo4j connectivity');
           throw error;
         });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize Neo4j driver');
       throw error;
     }
@@ -178,7 +178,7 @@ export class Neo4jConnectionManager {
       ]);
 
       const duration = performance.now() - startTime;
-      const records = result.records.map((r) => r.toObject() as T);
+      const records = result.records.map((r: any) => r.toObject() as T);
 
       // Record stats
       this.recordQueryStats({
@@ -205,7 +205,7 @@ export class Neo4jConnectionManager {
       }
 
       return records;
-    } catch (error) {
+    } catch (error: any) {
       const duration = performance.now() - startTime;
 
       this.recordQueryStats({
@@ -293,7 +293,7 @@ export class Neo4jConnectionManager {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const duration = performance.now() - startTime;
 
       this.recordQueryStats({
@@ -338,7 +338,7 @@ export class Neo4jConnectionManager {
         await this.driver.verifyConnectivity();
         serverInfo = await this.driver.getServerInfo();
       }
-    } catch (error) {
+    } catch (error: any) {
       healthy = false;
       logger.error({ error }, 'Neo4j health check failed');
     }
@@ -489,7 +489,7 @@ export class Neo4jConnectionManager {
             'High number of slow Neo4j queries detected',
           );
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error }, 'Health check failed');
       }
     }, 30000); // Every 30 seconds

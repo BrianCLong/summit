@@ -94,7 +94,7 @@ export class CrossRegionSyncService extends EventEmitter {
             this.emit('merged', { key, newState: merged.value, originRegion });
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(`[${this.regionId}] Error handling sync message:`, err);
     }
   }

@@ -47,7 +47,7 @@ async function main() {
   console.log('\n--- End of Review ---');
 }
 
-main().catch((err) => {
+main().catch((err: any) => {
   console.error(err);
   process.exit(1);
 });

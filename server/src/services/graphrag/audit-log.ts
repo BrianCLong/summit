@@ -46,7 +46,7 @@ export class PostgresGraphRagAuditLog implements GraphRagAuditLog {
         userId: record.userId,
         caseId: record.caseId,
       });
-    } catch (error) {
+    } catch (error: any) {
       // Log error but don't fail the request
       logger.error({
         message: 'Failed to append GraphRAG audit record',
@@ -69,7 +69,7 @@ export class PostgresGraphRagAuditLog implements GraphRagAuditLog {
       );
 
       return result.rows.map(this.rowToRecord);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to get audit records by user',
         userId,
@@ -92,7 +92,7 @@ export class PostgresGraphRagAuditLog implements GraphRagAuditLog {
       );
 
       return result.rows.map(this.rowToRecord);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to get audit records by case',
         caseId,
@@ -139,14 +139,14 @@ export class InMemoryGraphRagAuditLog implements GraphRagAuditLog {
 
   async getByUser(userId: string, limit: number = 100): Promise<GraphRagAuditRecord[]> {
     return this.records
-      .filter((r) => r.userId === userId)
+      .filter((r: any) => r.userId === userId)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, limit);
   }
 
   async getByCase(caseId: string, limit: number = 100): Promise<GraphRagAuditRecord[]> {
     return this.records
-      .filter((r) => r.caseId === caseId)
+      .filter((r: any) => r.caseId === caseId)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, limit);
   }

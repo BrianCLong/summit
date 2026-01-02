@@ -81,13 +81,13 @@ export class PolicySimulator {
       const result: PolicySimulationResult = {
         totalRequests: accessLogs.length,
         currentPolicy: {
-          allowed: currentResults.filter((r) => r.allowed).length,
-          denied: currentResults.filter((r) => !r.allowed).length,
+          allowed: currentResults.filter((r: any) => r.allowed).length,
+          denied: currentResults.filter((r: any) => !r.allowed).length,
           denialReasons: this.aggregateDenialReasons(currentResults),
         },
         newPolicy: {
-          allowed: newResults.filter((r) => r.allowed).length,
-          denied: newResults.filter((r) => !r.allowed).length,
+          allowed: newResults.filter((r: any) => r.allowed).length,
+          denied: newResults.filter((r: any) => !r.allowed).length,
           denialReasons: this.aggregateDenialReasons(newResults),
         },
         impactSummary,
@@ -104,12 +104,9 @@ export class PolicySimulator {
       );
 
       return result;
-    } catch (error) {
-      logger.error('Policy simulation failed', {
-        error: error.message,
-        stack: error.stack,
-      });
-      throw error;
+    } catch (error: any) {
+      logger.error('Policy simulation failed:', error);
+      throw new Error(`Simulation failed: ${error.message}`);
     }
   }
 
@@ -193,7 +190,7 @@ export class PolicySimulator {
       });
 
       return { passed, failed, violations };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Tag propagation validation failed', {
         error: error.message,
         tenantId,
@@ -226,7 +223,7 @@ export class PolicySimulator {
       `;
 
       const result = await client.query(query, [sampleSize]);
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         timestamp: row.timestamp,
         actor: row.actor,
         tenant: row.tenant,
@@ -291,7 +288,7 @@ export class PolicySimulator {
           allowed: result?.allow || false,
           reason: result?.explanations || result?.deny_reason,
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Policy test failed for log entry', {
           error: error.message,
           log,

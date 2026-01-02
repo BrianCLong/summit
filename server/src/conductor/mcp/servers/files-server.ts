@@ -216,7 +216,7 @@ export class FilesServer {
                 `Method '${message.method}' not found`,
               );
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error processing message:', error);
           this.sendError(ws, 'unknown', -32700, 'Parse error');
         }
@@ -338,7 +338,7 @@ export class FilesServer {
         result,
       };
       ws.send(JSON.stringify(response));
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error executing tool ${name}:`, error);
       this.sendError(
         ws,
@@ -421,7 +421,7 @@ export class FilesServer {
         size: stats.size,
         modified: stats.mtime.toISOString(),
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to read file: ${error.message}`);
     }
   }
@@ -463,7 +463,7 @@ export class FilesServer {
         modified: stats.mtime.toISOString(),
         success: true,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to write file: ${error.message}`);
     }
   }
@@ -518,7 +518,7 @@ export class FilesServer {
         items: results,
         count: results.length,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to list directory: ${error.message}`);
     }
   }
@@ -543,7 +543,7 @@ export class FilesServer {
         owner: stats.uid,
         group: stats.gid,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to get file metadata: ${error.message}`);
     }
   }
@@ -569,7 +569,7 @@ export class FilesServer {
         deleted: true,
         type: stats.isDirectory() ? 'directory' : 'file',
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to delete: ${error.message}`);
     }
   }
@@ -589,7 +589,7 @@ export class FilesServer {
   private async validatePath(fullPath: string): Promise<void> {
     try {
       await fs.access(fullPath);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Path does not exist or is not accessible');
     }
   }
@@ -613,7 +613,7 @@ export class FilesServer {
       if (stats.size > this.config.maxFileSize) {
         throw new Error(`File size exceeds maximum allowed size`);
       }
-    } catch (error) {
+    } catch (error: any) {
       // File doesn't exist, which is fine for writes
     }
   }

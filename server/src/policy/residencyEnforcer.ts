@@ -200,7 +200,7 @@ export class ResidencyPolicyEnforcer {
           });
 
           return decision;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
 
@@ -467,7 +467,7 @@ export class ResidencyPolicyEnforcer {
       }
 
       return { valid: true, payload };
-    } catch (error) {
+    } catch (error: any) {
       return { valid: false, reason: 'Token parsing failed' };
     }
   }
@@ -548,16 +548,16 @@ export class ResidencyPolicyEnforcer {
   }
 
   private categorizeViolation(denialReasons: string[]): string {
-    if (denialReasons.some((r) => r.includes('sovereign'))) {
+    if (denialReasons.some((r: any) => r.includes('sovereign'))) {
       return 'sovereign_restriction';
     }
-    if (denialReasons.some((r) => r.includes('region'))) {
+    if (denialReasons.some((r: any) => r.includes('region'))) {
       return 'region_restriction';
     }
-    if (denialReasons.some((r) => r.includes('classification'))) {
+    if (denialReasons.some((r: any) => r.includes('classification'))) {
       return 'classification_restriction';
     }
-    if (denialReasons.some((r) => r.includes('rate limit'))) {
+    if (denialReasons.some((r: any) => r.includes('rate limit'))) {
       return 'rate_limit';
     }
     return 'other';
@@ -576,7 +576,7 @@ export class ResidencyPolicyEnforcer {
     try {
       const cached = await redis.get(key);
       return cached ? JSON.parse(cached) : null;
-    } catch (error) {
+    } catch (error: any) {
       return null; // Cache miss on error
     }
   }
@@ -588,7 +588,7 @@ export class ResidencyPolicyEnforcer {
   ): Promise<void> {
     try {
       await redis.setex(key, ttl, JSON.stringify(decision));
-    } catch (error) {
+    } catch (error: any) {
       // Ignore cache errors
     }
   }

@@ -264,7 +264,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
       this.pruneOldMetrics('system');
 
       return metrics;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to collect system metrics:', error);
       throw error;
     }
@@ -293,7 +293,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
       this.pruneOldMetrics('database');
 
       return metrics;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to collect database metrics:', error);
       throw error;
     }
@@ -343,7 +343,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
       this.pruneOldMetrics('application');
 
       return metrics;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to collect application metrics:', error);
       throw error;
     }
@@ -371,7 +371,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
           // Check if we should resolve any existing alerts
           await this.checkAlertResolution(rule);
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error(`Failed to process alert rule ${ruleId}:`, error);
       }
     }
@@ -425,7 +425,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
             `return ${rule.condition}`,
           );
           return conditionFunction(latestMetrics);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`Invalid alert condition: ${rule.condition}`, error);
           return false;
         }
@@ -456,7 +456,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
       try {
         await this.executeAutomatedAction(action, alert);
         alert.actions.push(action);
-      } catch (error) {
+      } catch (error: any) {
         logger.error(`Failed to execute automated action ${action}:`, error);
       }
     }
@@ -465,7 +465,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
     for (const channel of rule.channels) {
       try {
         await this.sendAlertNotification(channel, alert);
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           `Failed to send alert notification via ${channel}:`,
           error,
@@ -498,7 +498,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
 
         // Store SLO status for dashboard
         await this.storeSLOStatus(name, status);
-      } catch (error) {
+      } catch (error: any) {
         logger.error(`Failed to check SLO ${name}:`, error);
       }
     }
@@ -809,7 +809,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
           this.collectDatabaseMetrics(),
           this.collectApplicationMetrics(),
         ]);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Metrics collection failed:', error);
       }
     }, this.COLLECTION_INTERVAL_MS);
@@ -821,7 +821,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
         await this.updatePerformanceBaselines();
         await this.detectPerformanceRegressions();
         await this.analyzePerformanceTrends();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Performance analytics failed:', error);
       }
     }, this.ANALYTICS_INTERVAL_MS);
@@ -831,7 +831,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
     setInterval(async () => {
       try {
         await this.processAlerts();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Alert processing failed:', error);
       }
     }, this.COLLECTION_INTERVAL_MS);
@@ -841,7 +841,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
     setInterval(async () => {
       try {
         await this.checkSLOs();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('SLO monitoring failed:', error);
       }
     }, this.SLO_CHECK_INTERVAL_MS);
@@ -887,7 +887,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
         transactions: 1000,
         slowQueries: 2,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to collect Neo4j metrics:', error);
       return this.getDefaultNeo4jMetrics();
     }
@@ -935,7 +935,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
         deadlocks: 0, // Would query pg_stat_database
         slowQueries: 0, // Would be tracked separately
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to collect PostgreSQL metrics:', error);
       return this.getDefaultPostgresMetrics();
     }
@@ -966,7 +966,7 @@ export class PerformanceMonitoringSystem extends EventEmitter {
         commandsProcessed: parseInt(metrics.total_commands_processed || '0'),
         avgTtl: 3600, // Would calculate from key sampling
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to collect Redis metrics:', error);
       return this.getDefaultRedisMetrics();
     }

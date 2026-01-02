@@ -20,7 +20,7 @@ router.post(
   requireScope('mcp:invoke'),
   async (req, res) => {
     const tracer = trace.getTracer('maestro-mcp');
-    return tracer.startActiveSpan('mcp.invoke', async (span) => {
+    return tracer.startActiveSpan('mcp.invoke', async (span: any) => {
       const { server, tool, args } = req.body || {};
       if (!server || !tool) {
         span.setAttribute('error', true);
@@ -54,7 +54,7 @@ router.post(
               { server, tool, argsHash, resultHash },
             ] as any,
           );
-        } catch (e) {
+        } catch (e: any) {
           console.warn(
             'Audit log insert failed (non-fatal):',
             (e as any)?.message || e,

@@ -125,7 +125,7 @@ export class CacheInvalidationService extends EventEmitter {
 
       const duration = Date.now() - startTime;
       logger.info(`Entity cache invalidation complete for ${entityId} in ${duration}ms`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to invalidate entity caches for ${entityId}:`, error);
       throw error;
     }
@@ -188,7 +188,7 @@ export class CacheInvalidationService extends EventEmitter {
 
       const duration = Date.now() - startTime;
       logger.info(`Relationship cache invalidation complete for ${relationshipId} in ${duration}ms`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to invalidate relationship caches for ${relationshipId}:`, error);
       throw error;
     }
@@ -237,7 +237,7 @@ export class CacheInvalidationService extends EventEmitter {
 
       const duration = Date.now() - startTime;
       logger.info(`Investigation cache invalidation complete for ${investigationId} in ${duration}ms`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to invalidate investigation caches for ${investigationId}:`, error);
       throw error;
     }
@@ -261,7 +261,7 @@ export class CacheInvalidationService extends EventEmitter {
       }
 
       logger.debug(`Invalidated neighborhood caches for entity ${entityId}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Failed to invalidate neighborhood caches:`, error);
     }
   }
@@ -274,7 +274,7 @@ export class CacheInvalidationService extends EventEmitter {
       const pattern = `similarity:${tenantId}:${entityId}:*`;
       await this.cacheManager.deleteByPattern(pattern);
       logger.debug(`Invalidated similarity caches for entity ${entityId}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Failed to invalidate similarity caches:`, error);
     }
   }
@@ -288,7 +288,7 @@ export class CacheInvalidationService extends EventEmitter {
       // A more sophisticated approach would track entity-question associations
       await this.cacheManager.deleteByPattern(`graphrag:${tenantId}:*`);
       logger.debug(`Invalidated GraphRAG caches for entity ${entityId}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Failed to invalidate GraphRAG caches:`, error);
     }
   }
@@ -301,7 +301,7 @@ export class CacheInvalidationService extends EventEmitter {
       const key = `dl:${type}:${id}`;
       await this.cacheManager.delete('dataloader', key);
       logger.debug(`Invalidated DataLoader cache: ${key}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Failed to invalidate DataLoader cache:`, error);
     }
   }
@@ -344,7 +344,7 @@ export class CacheInvalidationService extends EventEmitter {
       logger.info(`Bulk invalidation complete: ${deletedCount} keys in ${duration}ms`);
 
       return deletedCount;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Bulk invalidation failed for pattern ${pattern}:`, error);
       throw error;
     }
@@ -364,7 +364,7 @@ export class CacheInvalidationService extends EventEmitter {
 
       const duration = Date.now() - startTime;
       logger.warn(`Full tenant cache invalidation complete in ${duration}ms`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Full tenant invalidation failed for ${tenantId}:`, error);
       throw error;
     }

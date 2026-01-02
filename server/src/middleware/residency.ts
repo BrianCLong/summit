@@ -38,7 +38,7 @@ export const residencyEnforcement = async (req: Request, res: Response, next: Ne
         });
 
         next();
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof ResidencyViolationError) {
             res.status(451).json({ // 451 Unavailable For Legal Reasons seems appropriate
                 error: 'ResidencyViolation',

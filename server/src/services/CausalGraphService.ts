@@ -145,7 +145,7 @@ export class CausalGraphService {
         edges: causalEdges
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error generating causal graph', error);
       throw error;
     } finally {

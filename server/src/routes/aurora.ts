@@ -31,7 +31,7 @@ router.get('/implants', async (req, res, next) => {
   try {
     const status = await auroraService.getImplantStatus();
     res.json(status);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -64,7 +64,7 @@ router.post('/handshake/:implantId', async (req, res, next) => {
     const { implantId } = req.params;
     const implant = await auroraService.neuralHandshake(implantId);
     res.json(implant);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -95,7 +95,7 @@ router.post('/cortex-overlay', async (req, res, next) => {
         }
         const confirmation = await auroraService.pushToCortex(overlayData);
         res.status(200).json(confirmation);
-    } catch (error) {
+    } catch (error: any) {
         next(error);
     }
 });

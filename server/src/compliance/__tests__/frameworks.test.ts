@@ -121,7 +121,7 @@ describe('Compliance Frameworks', () => {
 
     it('should have stable requirement IDs (contract snapshot)', () => {
       const requirements = service.getRequirements();
-      const reqIds = requirements.data.map((r) => r.id).sort();
+      const reqIds = requirements.data.map((r: any) => r.id).sort();
 
       expect(reqIds).toEqual([
         '1', '10', '11', '12', '2', '3', '4', '5', '6', '7', '8', '9',

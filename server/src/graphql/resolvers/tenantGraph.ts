@@ -116,7 +116,7 @@ export const tenantGraphResolvers = {
         });
 
         return mapEntityToGraphQL(entity);
-      } catch (error) {
+      } catch (error: any) {
         graphLogger.error({
           operation: 'entityById',
           error,
@@ -209,7 +209,7 @@ export const tenantGraphResolvers = {
         } finally {
           await session.close();
         }
-      } catch (error) {
+      } catch (error: any) {
         graphLogger.error({
           operation: 'searchEntities',
           error,
@@ -336,7 +336,7 @@ export const tenantGraphResolvers = {
         } finally {
           await session.close();
         }
-      } catch (error) {
+      } catch (error: any) {
         graphLogger.error({
           operation: 'neighbors',
           error,
@@ -364,7 +364,7 @@ export const tenantGraphResolvers = {
         );
 
         return chain;
-      } catch (error) {
+      } catch (error: any) {
         graphLogger.error({
           operation: 'provenance',
           error,
@@ -417,7 +417,7 @@ export const tenantGraphResolvers = {
           ...result,
           took,
         };
-      } catch (error) {
+      } catch (error: any) {
         graphLogger.error({
           operation: 'ingestData',
           error,

@@ -30,7 +30,7 @@ export class ResourceJanitor {
             if (result.rowCount > 0) {
                 logger.info(`Cleaned up ${result.rowCount} idle runs.`);
             }
-        } catch (error) {
+        } catch (error: any) {
             logger.error('Error cleaning idle workloads', error);
         }
     }

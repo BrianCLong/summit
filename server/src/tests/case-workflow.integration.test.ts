@@ -285,7 +285,7 @@ describe('Case Workflow Integration Tests', () => {
 
       expect(systemRoles.length).toBeGreaterThan(0);
 
-      const roleNames = systemRoles.map((r) => (r as any).name);
+      const roleNames = systemRoles.map((r: any) => (r as any).name);
       expect(roleNames).toContain('investigator');
       expect(roleNames).toContain('analyst');
       expect(roleNames).toContain('approver');

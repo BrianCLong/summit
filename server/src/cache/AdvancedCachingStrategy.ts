@@ -388,7 +388,7 @@ export class CacheManager extends EventEmitter {
             return entry.value;
           }
           this.metrics.l2Misses++;
-        } catch (error) {
+        } catch (error: any) {
           this.recordFailure();
           this.emit('error', { operation: 'get', key, error });
         }
@@ -396,7 +396,7 @@ export class CacheManager extends EventEmitter {
 
       this.updateLatency(startTime);
       return null;
-    } catch (error) {
+    } catch (error: any) {
       this.metrics.errors++;
       this.updateLatency(startTime);
       throw error;
@@ -445,14 +445,14 @@ export class CacheManager extends EventEmitter {
           }
 
           this.recordSuccess();
-        } catch (error) {
+        } catch (error: any) {
           this.recordFailure();
           this.emit('error', { operation: 'set', key, error });
         }
       }
 
       this.updateLatency(startTime);
-    } catch (error) {
+    } catch (error: any) {
       this.metrics.errors++;
       this.updateLatency(startTime);
       throw error;
@@ -497,7 +497,7 @@ export class CacheManager extends EventEmitter {
 
         // Publish invalidation event
         await this.publishInvalidation([key]);
-      } catch (error) {
+      } catch (error: any) {
         this.recordFailure();
         this.emit('error', { operation: 'delete', key, error });
       }
@@ -526,7 +526,7 @@ export class CacheManager extends EventEmitter {
         await this.redisClient.del(...fullKeys);
         this.recordSuccess();
         await this.publishInvalidation(keys);
-      } catch (error) {
+      } catch (error: any) {
         this.recordFailure();
         this.emit('error', { operation: 'deleteMany', keys, error });
       }
@@ -561,7 +561,7 @@ export class CacheManager extends EventEmitter {
         }
 
         this.recordSuccess();
-      } catch (error) {
+      } catch (error: any) {
         this.recordFailure();
         this.emit('error', { operation: 'invalidateByTag', tag, error });
       }
@@ -610,7 +610,7 @@ export class CacheManager extends EventEmitter {
         }
 
         this.recordSuccess();
-      } catch (error) {
+      } catch (error: any) {
         this.recordFailure();
         this.emit('error', { operation: 'invalidateByPattern', pattern, error });
       }
@@ -654,7 +654,7 @@ export class CacheManager extends EventEmitter {
         } while (cursor !== '0');
 
         this.recordSuccess();
-      } catch (error) {
+      } catch (error: any) {
         this.recordFailure();
         this.emit('error', { operation: 'clear', error });
       }
@@ -709,7 +709,7 @@ export class CacheManager extends EventEmitter {
       try {
         await pipeline.exec();
         this.recordSuccess();
-      } catch (error) {
+      } catch (error: any) {
         this.recordFailure();
         this.emit('error', { operation: 'warm', error });
       }
@@ -746,7 +746,7 @@ export class CacheManager extends EventEmitter {
         `${this.config.keyPrefix}invalidation`,
         JSON.stringify({ keys, timestamp: Date.now() })
       );
-    } catch (error) {
+    } catch (error: any) {
       this.emit('error', { operation: 'publishInvalidation', error });
     }
   }
@@ -767,7 +767,7 @@ export class CacheManager extends EventEmitter {
             this.l1Cache.delete(this.generateKey(key));
           }
           this.emit('cache:invalidated', { keys });
-        } catch (error) {
+        } catch (error: any) {
           this.emit('error', { operation: 'invalidationSubscription', error });
         }
       }

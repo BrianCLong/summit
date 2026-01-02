@@ -315,7 +315,19 @@
       "Bash(gh pr create:*)",
       "Bash(NODE_OPTIONS=\"--experimental-vm-modules\" npx jest:*)",
       "Bash(do echo \"=== PR $pr ===\")",
-      "Bash(gh run list:*)"
+      "Bash(gh run list:*)",
+      "Bash(gh api:*)",
+      "Bash(do echo \"Updating PR #$pr...\")",
+      "Bash(do echo \"PR #$pr:\")",
+      "Bash(npm ls:*)",
+      "Bash(npm audit:*)",
+      "Bash(do echo \"Reopening PR #$pr...\")",
+      "Bash(do echo \"Enabling auto-merge on PR #$pr...\")",
+      "Bash(do echo \"Approving PR #$pr...\")",
+      "Bash(do echo \"Triggering CI for PR #$pr...\")",
+      "Bash(gh workflow list:*)",
+      "Bash(while read id)",
+      "Bash(do gh run cancel $id)"
     ],
     "deny": [],
     "ask": []

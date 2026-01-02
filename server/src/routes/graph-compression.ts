@@ -26,7 +26,7 @@ router.post('/compress', (req, res) => {
     const compressed = graphCompressionService.compress({ nodes, links: sanitizedLinks });
 
     res.json(compressed);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Graph compression error:', error);
     res.status(500).json({ error: 'Failed to compress graph' });
   }

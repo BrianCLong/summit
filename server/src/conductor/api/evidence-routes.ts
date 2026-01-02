@@ -311,7 +311,7 @@ router.post('/export', async (req, res) => {
       downloadUrl: `/api/maestro/v1/evidence/${evidenceBundle.id}/download`,
       verifyUrl: `/api/maestro/v1/evidence/${evidenceBundle.id}/verify`,
     });
-  } catch (error) {
+  } catch (error: any) {
     const duration = Date.now() - startTime;
     metrics?.evidenceExportLatency?.observe(duration / 1000);
     metrics?.evidenceExportRequests?.inc({
@@ -372,7 +372,7 @@ router.get('/:evidenceId/download', async (req, res) => {
       status: 'success',
       format,
     });
-  } catch (error) {
+  } catch (error: any) {
     metrics?.evidenceDownloadRequests?.inc({
       status: 'error',
       format: req.query.format || 'json',
@@ -422,7 +422,7 @@ router.post('/:evidenceId/verify', async (req, res) => {
       verification,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     metrics?.evidenceVerificationRequests?.inc({
       status: 'error',
     });
@@ -477,7 +477,7 @@ router.get('/:evidenceId/artifacts', async (req, res) => {
       })),
       count: artifacts.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Artifacts fetch error:', error);
     res.status(500).json({
       error: 'Failed to fetch artifacts',
@@ -528,7 +528,7 @@ router.get('/:evidenceId/artifacts/:artifactId/download', async (req, res) => {
       // In production, fetch from blob storage
       res.json({ message: 'Artifact content not available in storage' });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Artifact download error:', error);
     res.status(500).json({
       error: 'Failed to download artifact',
@@ -811,7 +811,7 @@ async function verifyEvidenceBundle(
     verification.valid = Object.values(verification.checks).every(
       (check) => check === true,
     );
-  } catch (error) {
+  } catch (error: any) {
     verification.errors.push(`Verification error: ${error.message}`);
   }
 

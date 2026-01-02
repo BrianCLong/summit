@@ -60,7 +60,7 @@ export class ObjectDetectionEngine {
 
       this.isInitialized = true;
       logger.info('Object Detection Engine initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize Object Detection Engine:', error);
       throw error;
     }
@@ -123,7 +123,7 @@ export class ObjectDetectionEngine {
         `Object detection completed: ${detections.length} objects detected`,
       );
       return detections;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Object detection failed:', error);
       throw error;
     }
@@ -182,7 +182,7 @@ export class ObjectDetectionEngine {
         `Video object detection completed: ${results.length} frames processed`,
       );
       return results;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Video object detection failed:', error);
       throw error;
     }
@@ -422,7 +422,7 @@ export class ObjectDetectionEngine {
           detection.boundingBox,
         );
         detection.features = features;
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           `Failed to extract features for object ${detection.className}:`,
           error,
@@ -718,7 +718,7 @@ export class ObjectDetectionEngine {
 
       this.availableModels = models;
       logger.info(`Available models: ${this.availableModels.join(', ')}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load available models:', error);
       throw error;
     }

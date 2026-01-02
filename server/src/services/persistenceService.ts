@@ -278,7 +278,7 @@ class PersistenceService {
       relationships = Array.from(this.relationships.values());
       if (investigationId) {
         relationships = relationships.filter(
-          (r) => r.investigationId === investigationId,
+          (r: any) => r.investigationId === investigationId,
         );
       }
       await cacheService.set(cacheKey, relationships, 120); // Cache for 2 minutes

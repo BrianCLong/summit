@@ -95,7 +95,7 @@ export function createValidationMiddleware<T>(
       const validated = validateInput(schema, data);
       req.validated = validated;
       next();
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof GraphQLError) {
         res.status(400).json({
           error: error.message,

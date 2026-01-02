@@ -34,7 +34,7 @@ export class PostgresUsageMeteringService implements UsageMeteringService {
         { eventId: event.id, tenantId: event.tenantId },
         'Usage event recorded',
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         { err: error, eventId: event.id, tenantId: event.tenantId },
         'Failed to record usage event',
@@ -73,7 +73,7 @@ export class PostgresUsageMeteringService implements UsageMeteringService {
         { count: events.length },
         'Usage events batch recorded',
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         { err: error, count: events.length },
         'Failed to record usage events batch',
@@ -104,7 +104,7 @@ export class PostgresUsageMeteringService implements UsageMeteringService {
                 ON usage_events (tenant_id, dimension, occurred_at);
             `,
           );
-        } catch (error) {
+        } catch (error: any) {
           this.logger.error(
             { err: error },
             'Failed to ensure usage_events table exists',

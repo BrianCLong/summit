@@ -147,7 +147,7 @@ export class AgentRunner {
     (metrics as any).agentExecutionDuration?.observe({ tenant: tenantId, status: 'success' }, duration);
 
     return { finalAnswer, steps };
-    } catch (error) {
+    } catch (error: any) {
         const duration = (Date.now() - startTime) / 1000;
         logger.error({
             event: 'AgentExecutionFailed',

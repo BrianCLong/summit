@@ -49,7 +49,7 @@ export class VectorIndexManager {
         try {
             await session.run(query);
             logger.info(`Vector index ensured on shard ${shardId}`);
-        } catch (err) {
+        } catch (err: any) {
             logger.error(`Failed to create vector index on shard ${shardId}`, err);
             throw err;
         } finally {

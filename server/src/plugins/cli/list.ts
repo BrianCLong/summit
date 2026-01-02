@@ -24,7 +24,7 @@ export async function listPlugins(pluginsDir: string): Promise<void> {
           } else {
             plugins.push({ dir: entry.name, error: 'Invalid Manifest', details: result.errors });
           }
-        } catch (e) {
+        } catch (e: any) {
           plugins.push({ dir: entry.name, error: 'Read/Parse Error' });
         }
       }

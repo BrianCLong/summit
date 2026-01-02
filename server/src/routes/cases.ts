@@ -134,7 +134,7 @@ caseRouter.get('/:id/overview', async (req, res) => {
         legalBasis,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to get case overview');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -183,7 +183,7 @@ caseRouter.post('/', async (req, res) => {
     );
 
     res.status(201).json(caseRecord);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to create case');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -242,7 +242,7 @@ caseRouter.get('/:id', async (req, res) => {
     }
 
     res.json(caseRecord);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to get case');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -309,7 +309,7 @@ caseRouter.put('/:id', async (req, res) => {
     }
 
     res.json(caseRecord);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to update case');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -343,7 +343,7 @@ caseRouter.get('/', async (req, res) => {
     });
 
     res.json(cases);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to list cases');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -400,7 +400,7 @@ caseRouter.post('/:id/archive', async (req, res) => {
     }
 
     res.json(caseRecord);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to archive case');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -457,7 +457,7 @@ caseRouter.post('/:id/export', async (req, res) => {
     }
 
     res.json(caseRecord);
-  } catch (error) {
+  } catch (error: any) {
     // Handle specific user-facing errors
     if ((error as any).name === 'UserFacingError') {
       return res.status(400).json({ error: (error as Error).message });
@@ -496,7 +496,7 @@ caseRouter.post('/:id/release-criteria', async (req, res) => {
     await service.configure(id, tenantId, userId, config);
 
     res.status(200).json({ message: 'Release criteria configured' });
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to configure release criteria');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -522,7 +522,7 @@ caseRouter.get('/:id/release-criteria/status', async (req, res) => {
     const result = await service.evaluate(id, tenantId);
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to get release criteria status');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -604,7 +604,7 @@ caseRouter.post('/:id/comments', async (req, res) => {
     });
 
     res.status(201).json(comment);
-  } catch (error) {
+  } catch (error: any) {
     // Handle specific user-facing errors
     if ((error as any).name === 'UserFacingError') {
       return res.status(404).json({ error: (error as Error).message });
@@ -635,7 +635,7 @@ caseRouter.get('/:id/comments', async (req, res) => {
     const comments = await service.listComments(id, tenantId, limit, offset);
 
     res.json(comments);
-  } catch (error) {
+  } catch (error: any) {
     if ((error as any).name === 'UserFacingError') {
       return res.status(404).json({ error: (error as Error).message });
     }
@@ -678,7 +678,7 @@ caseRouter.post('/:id/evidence/event', async (req, res) => {
     });
 
     res.status(201).json(event);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to record custody event');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -697,7 +697,7 @@ caseRouter.get('/:id/evidence/:evidenceId/chain', async (req, res) => {
     const chain = await service.getChain(evidenceId);
 
     res.json(chain);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to get chain of custody');
     res.status(500).json({ error: (error as Error).message });
   }
@@ -786,7 +786,7 @@ caseRouter.post('/:id/report', async (req, res) => {
     );
 
     res.json(report);
-  } catch (error) {
+  } catch (error: any) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to generate report');
     res.status(500).json({ error: (error as Error).message });
   }

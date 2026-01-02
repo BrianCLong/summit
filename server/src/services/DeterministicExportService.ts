@@ -157,7 +157,7 @@ export class DeterministicExportService {
       );
 
       return { exportId, bundlePath, manifest };
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         {
           exportId,
@@ -224,7 +224,7 @@ export class DeterministicExportService {
 
         const actualSize = (await import('fs/promises'))
           .stat(filePath)
-          .then((s) => s.size);
+          .then((s: any) => s.size);
         if ((await actualSize) !== fileEntry.bytes) {
           verificationErrors.push(
             `File size mismatch for ${fileEntry.filename}: expected ${fileEntry.bytes}, got ${await actualSize}`,
@@ -252,7 +252,7 @@ export class DeterministicExportService {
       );
 
       return manifest;
-    } catch (error) {
+    } catch (error: any) {
       log.error(
         {
           bundlePath,
@@ -279,7 +279,7 @@ export class DeterministicExportService {
     `;
 
     const entitiesResult = await session.run(entitiesQuery, params);
-    const entities = entitiesResult.records.map((record) => {
+    const entities = entitiesResult.records.map((record: any) => {
       const entity = record.get('e').properties;
       return this.normalizeEntity(entity);
     });
@@ -294,7 +294,7 @@ export class DeterministicExportService {
     `;
 
     const relationshipsResult = await session.run(relationshipsQuery, params);
-    const relationships = relationshipsResult.records.map((record) => {
+    const relationships = relationshipsResult.records.map((record: any) => {
       const r = record.get('r');
       const a = record.get('a').properties;
       const b = record.get('b').properties;
@@ -671,7 +671,7 @@ export class DeterministicExportService {
           manifest.createdAt,
         ],
       );
-    } catch (error) {
+    } catch (error: any) {
       log.warn(
         {
           exportId: manifest.exportId,

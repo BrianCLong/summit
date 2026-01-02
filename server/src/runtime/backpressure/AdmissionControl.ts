@@ -45,7 +45,7 @@ export const admissionControl = async (req: Request, res: Response, next: NextFu
         retryAfter: result.waitMs ? Math.ceil(result.waitMs / 1000) : 5
       });
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Admission control error', err);
     res.status(500).send('Internal Server Error');
   }

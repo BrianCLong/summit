@@ -154,7 +154,7 @@ export class ThemeService {
     query += ` ORDER BY created_at DESC`;
 
     const result = await this.db.query(query, params);
-    return result.rows.map((row) => UIThemeSchema.parse(row));
+    return result.rows.map((row: any) => UIThemeSchema.parse(row));
   }
 
   /**

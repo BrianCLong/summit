@@ -38,7 +38,7 @@ export class ShardManager {
       this.drivers.set(config.id, driver);
       this.configs.set(config.id, config);
       logger.info(`Shard ${config.id} registered and connected.`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to connect to shard ${config.id}:`, error);
       // We might still register the config but mark it as down, or retry.
       // For now, fail hard or soft? Let's soft fail.
@@ -62,7 +62,7 @@ export class ShardManager {
       try {
         await driver.close();
         logger.info(`Shard ${id} closed.`);
-      } catch (err) {
+      } catch (err: any) {
         logger.error(`Error closing shard ${id}`, err);
       }
     }

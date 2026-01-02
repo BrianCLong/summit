@@ -7,7 +7,7 @@ const redisClient = new Redis(); // Assuming Redis is running and accessible
 redisClient.on('connect', () =>
   logger.info('Redis client connected for caching.'),
 );
-redisClient.on('error', (err) =>
+redisClient.on('error', (err: any) =>
   logger.error({ err }, 'Redis caching client error.'),
 );
 

@@ -179,7 +179,7 @@ export class AirGapService {
       console.log(
         `Loaded ${this.offlineRegistry.size} components from offline registry`,
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load offline registry:', error);
       // Initialize empty registry if none exists
       this.offlineRegistry = new Map();
@@ -194,7 +194,7 @@ export class AirGapService {
 
       // Validate manifest integrity
       await this.validateManifest(this.manifest);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load manifest:', error);
       this.manifest = null;
     }
@@ -269,7 +269,7 @@ export class AirGapService {
       console.log(
         `Loaded ${this.activeBreakGlass.size} active break-glass sessions`,
       );
-    } catch (error) {
+    } catch (error: any) {
       console.log('No existing break-glass sessions found');
     }
   }
@@ -406,7 +406,7 @@ export class AirGapService {
           ) {
             checks.sbom = true;
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error(
             `SBOM verification failed for ${component.name}:`,
             error,
@@ -441,7 +441,7 @@ export class AirGapService {
               break;
             }
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error(
             `Signature verification failed for ${component.name}:`,
             error,
@@ -465,7 +465,7 @@ export class AirGapService {
           .digest('hex');
 
         checks.hash = calculatedHash === component.sha256;
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Hash verification failed for ${component.name}:`, error);
       }
 
@@ -513,7 +513,7 @@ export class AirGapService {
       }
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Policy validation failed for ${component.name as string}:`, error);
       return false;
     }
@@ -561,7 +561,7 @@ export class AirGapService {
       await this.saveRegistryIndex();
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update application failed:', error);
       return false;
     }

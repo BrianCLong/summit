@@ -44,7 +44,7 @@ router.get('/centrality', async (req: Request, res: Response) => {
 
     const results = await calculateDegreeCentrality(tenantId);
     res.json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Graph Algorithm Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -62,7 +62,7 @@ router.get('/betweenness', async (req: Request, res: Response) => {
 
     const results = await calculateBetweenness(tenantId);
     res.json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Graph Algorithm Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -80,7 +80,7 @@ router.get('/communities', async (req: Request, res: Response) => {
 
     const results = await detectCommunities(tenantId);
     res.json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Graph Algorithm Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -99,7 +99,7 @@ router.post('/path', async (req: Request, res: Response) => {
     const { startNodeId, endNodeId } = ShortestPathSchema.parse(req.body);
     const result = await findShortestPath(tenantId, startNodeId, endNodeId);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Graph Algorithm Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -117,7 +117,7 @@ router.get('/influence/bots', async (req: Request, res: Response) => {
 
     const results = await InfluenceDetectionService.detectBots(tenantId);
     res.json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Influence Detection Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -136,7 +136,7 @@ router.get('/influence/coordinated', async (req: Request, res: Response) => {
     const { minutes } = TimeWindowSchema.parse(req.query);
     const results = await InfluenceDetectionService.detectCoordinatedBehavior(tenantId, minutes);
     res.json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Influence Detection Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -154,7 +154,7 @@ router.get('/influence/amplification', async (req: Request, res: Response) => {
 
     const results = await InfluenceDetectionService.identifyAmplificationNetworks(tenantId);
     res.json(results);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Influence Detection Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }

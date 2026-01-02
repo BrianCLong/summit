@@ -81,7 +81,7 @@ export function instrumentRedisClient(client: Redis, clientType: string = 'defau
       }
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       const duration = (Date.now() - startTime) / 1000;
       redisOperationDuration.observe({ operation: commandName, status: 'error' }, duration);
       redisCommandsTotal.inc({ command: commandName, status: 'error' });
@@ -130,7 +130,7 @@ export class InstrumentedRedisCache {
 
         redisOperationDuration.observe({ operation: 'get', status: 'success' }, duration);
         return value;
-      } catch (error) {
+      } catch (error: any) {
         const duration = (Date.now() - startTime) / 1000;
         redisOperationDuration.observe({ operation: 'get', status: 'error' }, duration);
         throw error;
@@ -151,7 +151,7 @@ export class InstrumentedRedisCache {
         const duration = (Date.now() - startTime) / 1000;
         redisOperationDuration.observe({ operation: 'set', status: 'success' }, duration);
         return result;
-      } catch (error) {
+      } catch (error: any) {
         const duration = (Date.now() - startTime) / 1000;
         redisOperationDuration.observe({ operation: 'set', status: 'error' }, duration);
         throw error;
@@ -169,7 +169,7 @@ export class InstrumentedRedisCache {
         const duration = (Date.now() - startTime) / 1000;
         redisOperationDuration.observe({ operation: 'del', status: 'success' }, duration);
         return result;
-      } catch (error) {
+      } catch (error: any) {
         const duration = (Date.now() - startTime) / 1000;
         redisOperationDuration.observe({ operation: 'del', status: 'error' }, duration);
         throw error;
@@ -187,7 +187,7 @@ export class InstrumentedRedisCache {
         const duration = (Date.now() - startTime) / 1000;
         redisOperationDuration.observe({ operation: 'exists', status: 'success' }, duration);
         return result;
-      } catch (error) {
+      } catch (error: any) {
         const duration = (Date.now() - startTime) / 1000;
         redisOperationDuration.observe({ operation: 'exists', status: 'error' }, duration);
         throw error;

@@ -22,7 +22,7 @@ export class SigningService {
     try {
       const publicKeyObject = createPublicKey(this.privateKey);
       this.publicKey = publicKeyObject.export({ type: 'spki', format: 'pem' }).toString();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Invalid SIGNING_PRIVATE_KEY. Please provide a valid PEM-formatted private key.');
     }
   }

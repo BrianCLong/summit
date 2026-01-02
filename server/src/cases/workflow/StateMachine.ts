@@ -156,7 +156,7 @@ export class WorkflowStateMachine {
         `SELECT name FROM maestro.case_roles WHERE id = ANY($1)`,
         [requiredRoleIds],
       );
-      const roleNames = rows.map((r) => r.name).join(', ');
+      const roleNames = rows.map((r: any) => r.name).join(', ');
 
       return {
         allowed: false,
@@ -471,7 +471,7 @@ export class WorkflowStateMachine {
         newStage: toStage,
         newStatus: targetStage.isTerminal ? 'closed' : currentCase.status,
       };
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       machineLogger.error({ error, caseId, toStage }, 'Stage transition failed');
       return {
@@ -497,7 +497,7 @@ export class WorkflowStateMachine {
          WHERE case_type = $1 AND is_initial = true`,
         [currentCase.caseType],
       );
-      return rows.map((r) => r.name);
+      return rows.map((r: any) => r.name);
     }
 
     // Get allowed transitions from current stage

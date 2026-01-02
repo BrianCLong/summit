@@ -80,7 +80,7 @@ export class IntentService {
     const session = driver.session();
     let result;
     try {
-      result = await session.executeWrite(async (tx) => {
+      result = await session.executeWrite(async (tx: any) => {
         if (intent.op === 'UPSERT_NODE') {
           // Simple generic node upsert
           const { labels, properties, keyField, keyValue } = intent.payload as any;

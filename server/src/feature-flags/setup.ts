@@ -132,7 +132,7 @@ export async function initializeFeatureFlags(): Promise<FeatureFlagService> {
     logger.info('Feature flag service initialized successfully');
 
     return featureFlagService;
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to initialize feature flag service', {
       error: (error as Error).message,
     });

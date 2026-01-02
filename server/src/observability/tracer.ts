@@ -124,7 +124,7 @@ export class IntelGraphTracer {
       await this.sdk.start();
       this.initialized = true;
       logger.info('OpenTelemetry tracing initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize tracing:', error as any);
       // Don't throw - allow service to start without tracing
     }
@@ -183,7 +183,7 @@ export class IntelGraphTracer {
       );
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       span.setStatus({
         code: SpanStatusCode.ERROR,
@@ -265,7 +265,7 @@ export class IntelGraphTracer {
   ): Promise<T> {
     return this.withSpan(
       `db.${database}.${operation}`,
-      async (span) => {
+      async (span: any) => {
         span.setAttributes({
           'db.system': database,
           'db.operation': operation,
@@ -285,7 +285,7 @@ export class IntelGraphTracer {
   ): Promise<T> {
     return this.withSpan(
       `cache.${operation}`,
-      async (span) => {
+      async (span: any) => {
         span.setAttributes({
           'cache.operation': operation,
           'cache.key': key,
@@ -307,7 +307,7 @@ export class IntelGraphTracer {
   ): Promise<T> {
     return this.withSpan(
       `${serviceName}.${methodName}`,
-      async (span) => {
+      async (span: any) => {
         span.setAttributes({
           'service.name': serviceName,
           'service.method': methodName,

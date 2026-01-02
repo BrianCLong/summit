@@ -187,7 +187,7 @@ export class ReplayLog {
               error: `Signature verification failed at entry ${i}`,
             };
           }
-        } catch (err) {
+        } catch (err: any) {
           return {
             valid: false,
             error: `Signature verification error at entry ${i}: ${err}`,

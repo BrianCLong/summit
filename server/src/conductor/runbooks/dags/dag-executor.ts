@@ -123,7 +123,7 @@ export class DAGExecutor {
                 `Node ${node.id} took ${duration}ms, expected ${node.estimatedDuration}ms (50% over benchmark)`,
               );
             }
-          } catch (error) {
+          } catch (error: any) {
             const err = error as Error;
             errors.push({ nodeId: node.id, error: err });
             this.replayLog.addNodeError(node.id, err);
@@ -132,7 +132,7 @@ export class DAGExecutor {
             if (node.rollback) {
               try {
                 await node.rollback(context);
-              } catch (rollbackError) {
+              } catch (rollbackError: any) {
                 console.error(`Rollback failed for node ${node.id}:`, rollbackError);
               }
             }
@@ -194,7 +194,7 @@ export class DAGExecutor {
         } else {
           return await node.execute(context);
         }
-      } catch (error) {
+      } catch (error: any) {
         lastError = error as Error;
 
         if (attempt < maxRetries) {

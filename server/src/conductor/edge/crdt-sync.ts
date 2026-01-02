@@ -473,7 +473,7 @@ export class CRDTSyncEngine {
       );
 
       return syncResponse;
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Sync with ${targetNodeId} failed:`, error);
       prometheusConductorMetrics.recordOperationalEvent(
       'crdt_sync_error',
@@ -494,7 +494,7 @@ export class CRDTSyncEngine {
     for (const operation of operations) {
       try {
         await this.applyRemoteOperation(operation);
-      } catch (error) {
+      } catch (error: any) {
         if (error instanceof ConflictError) {
           conflicts.push(error.conflictInfo);
         } else {

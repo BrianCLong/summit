@@ -92,7 +92,7 @@ router.get('/tenants/current', ensureAuthenticated, buildPrincipal, async (req: 
              return;
         }
         res.json(tenant);
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error getting current tenant', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }

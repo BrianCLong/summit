@@ -274,7 +274,7 @@ export class CryptoPipeline {
         default:
           throw new Error(`Unsupported verification algorithm ${algorithm}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Signature verification error', error);
       return false;
     }
@@ -316,7 +316,7 @@ export async function createDefaultCryptoPipeline(
   let parsed: EnvKeyDefinition[];
   try {
     parsed = JSON.parse(raw);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to parse CRYPTO_SIGNING_KEYS', error);
     return null;
   }

@@ -8,7 +8,7 @@ export class ManifestValidator {
     if (result.success) {
       return { success: true, data: result.data };
     } else {
-      const errors = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`);
+      const errors = result.error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`);
       return { success: false, errors };
     }
   }

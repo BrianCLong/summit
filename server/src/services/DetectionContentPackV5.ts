@@ -538,7 +538,7 @@ export class DetectionContentPackV5 {
             passed: result.passed,
             details: result.details,
           });
-        } catch (error) {
+        } catch (error: any) {
           failed++;
           results.push({
             ruleId: rule.id,

@@ -172,7 +172,7 @@ export class OptimizationManager {
       logger.info(
         '✅ IntelGraph Performance Optimization Suite initialized successfully',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to initialize optimization systems:', error);
       throw error;
     }
@@ -225,7 +225,7 @@ export class OptimizationManager {
 
             req.optimizedQuery = optimizedResult;
             next();
-          } catch (error) {
+          } catch (error: any) {
             logger.error('Neo4j query optimization failed:', error);
             next();
           }
@@ -274,7 +274,7 @@ export class OptimizationManager {
 
             req.optimizedQuery = optimizedResult;
             next();
-          } catch (error) {
+          } catch (error: any) {
             logger.error('PostgreSQL query optimization failed:', error);
             next();
           }
@@ -464,21 +464,21 @@ export class OptimizationManager {
     try {
       await this.neo4jOptimizer.clearCache();
       results.neo4j.success = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to clear Neo4j cache:', error);
     }
 
     try {
       await this.pgOptimizer.clearQueryCache();
       results.postgres.success = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to clear PostgreSQL cache:', error);
     }
 
     try {
       await this.gatewayOptimizer.clearAllCaches();
       results.apiGateway.success = true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to clear API Gateway cache:', error);
     }
 
@@ -573,7 +573,7 @@ export class OptimizationManager {
       if (neo4jStats.avgExecutionTime > 5000) {
         components.neo4jOptimizer = 'degraded';
       }
-    } catch (error) {
+    } catch (error: any) {
       components.neo4jOptimizer = 'critical';
       details.neo4j = { error: error.message };
     }
@@ -581,7 +581,7 @@ export class OptimizationManager {
     try {
       const pgStats = await this.pgOptimizer.getCacheStats();
       details.postgres = pgStats;
-    } catch (error) {
+    } catch (error: any) {
       components.pgOptimizer = 'critical';
       details.postgres = { error: error.message };
     }
@@ -589,7 +589,7 @@ export class OptimizationManager {
     try {
       const gatewayStats = await this.gatewayOptimizer.getPerformanceReport();
       details.gateway = gatewayStats;
-    } catch (error) {
+    } catch (error: any) {
       components.gatewayOptimizer = 'critical';
       details.gateway = { error: error.message };
     }
@@ -600,7 +600,7 @@ export class OptimizationManager {
         'system',
       );
       details.cost = costStats;
-    } catch (error) {
+    } catch (error: any) {
       components.costOptimizer = 'critical';
       details.cost = { error: error.message };
     }
@@ -611,7 +611,7 @@ export class OptimizationManager {
       if (dashboard.overview.systemHealth !== 'healthy') {
         components.monitoringSystem = dashboard.overview.systemHealth as any;
       }
-    } catch (error) {
+    } catch (error: any) {
       components.monitoringSystem = 'critical';
       details.monitoring = { error: error.message };
     }
@@ -718,7 +718,7 @@ export class OptimizationManager {
       }
 
       logger.info('✅ Initial optimization assessment completed');
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         '⚠️ Initial optimization assessment partially failed:',
         error,
@@ -861,7 +861,7 @@ export class OptimizationManager {
       // Close database connections would be handled by the database config
 
       logger.info('✅ Optimization systems shut down successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Error during optimization systems shutdown:', error);
       throw error;
     }

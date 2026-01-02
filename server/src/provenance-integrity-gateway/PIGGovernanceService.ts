@@ -155,7 +155,7 @@ export class PIGGovernanceService extends EventEmitter {
 
       this.initialized = true;
       logger.info('PIGGovernanceService initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize PIGGovernanceService');
       throw error;
     }
@@ -761,7 +761,7 @@ export class PIGGovernanceService extends EventEmitter {
     for (const tenantId of this.tenantConfigs.keys()) {
       try {
         await this.getRiskAssessment(tenantId);
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, tenantId }, 'Failed to update risk assessment');
       }
     }
@@ -1144,7 +1144,7 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       category: row.category,
       title: row.title,
@@ -1175,8 +1175,8 @@ export class PIGGovernanceService extends EventEmitter {
     );
 
     return {
-      totalEvents: result.rows.reduce((sum, row) => sum + parseInt(row.count), 0),
-      eventsByType: result.rows.reduce((acc, row) => {
+      totalEvents: result.rows.reduce((sum: any, row: any) => sum + parseInt(row.count), 0),
+      eventsByType: result.rows.reduce((acc: any, row: any) => {
         acc[row.action_type] = parseInt(row.count);
         return acc;
       }, {} as Record<string, number>),

@@ -27,7 +27,7 @@ router.post('/ingest', async (req: Request, res: Response) => {
     const validated = IngestSchema.parse(req.body);
     const result = await sigIntManager.processSignalEvent(validated);
     res.json({ success: true, signal: result });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'Invalid Input' });
   }
 });

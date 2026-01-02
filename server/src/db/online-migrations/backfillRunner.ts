@@ -52,7 +52,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 export class BackfillRunner<TRow, TCursor = string> {
-  constructor(private pool: MigrationPool) {}
+  constructor(private pool: MigrationPool) { }
 
   async pauseJob(migrationKey: string, jobName: string) {
     assertIdentifier(jobName, 'job');
@@ -175,7 +175,7 @@ export class BackfillRunner<TRow, TCursor = string> {
       await this.markFailed(options.migrationKey, options.jobName, error?.message);
       throw error;
     } finally {
-      client.release();
+      client.release?.();
     }
   }
 

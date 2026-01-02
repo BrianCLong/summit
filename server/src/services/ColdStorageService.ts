@@ -42,10 +42,10 @@ export class ColdStorageService {
         );
       } else {
         // Simulating upload delay
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r: any) => setTimeout(r, 500));
         logger.info('Simulated Cold Storage upload complete.');
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to upload to Cold Storage', error);
       throw error;
     }
@@ -88,7 +88,7 @@ export class ColdStorageService {
             // await client.query(`DROP TABLE ${partitionName}`);
         }
 
-    } catch (error) {
+    } catch (error: any) {
         logger.error(`Failed to archive partition ${partitionName}`, error);
         throw error;
     }

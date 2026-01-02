@@ -190,7 +190,7 @@ export abstract class BaseConnector {
           ),
           classification: DataClassification.INTERNAL,
         });
-      } catch (error) {
+      } catch (error: any) {
         lastError = error;
         const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -277,7 +277,7 @@ export abstract class BaseConnector {
       const result = await Promise.race([operation(), timeoutPromise]);
       clearTimeout(timeoutId!);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       clearTimeout(timeoutId!);
       throw error;
     }

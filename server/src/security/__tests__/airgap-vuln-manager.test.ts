@@ -415,7 +415,7 @@ describe('AirGapVulnManager', () => {
       const report = await manager.generateComplianceReport();
 
       // Should recommend addressing critical vulns
-      expect(report.recommendations.some((r) => r.toLowerCase().includes('critical'))).toBe(true);
+      expect(report.recommendations.some((r: any) => r.toLowerCase().includes('critical'))).toBe(true);
     });
   });
 

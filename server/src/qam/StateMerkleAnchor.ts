@@ -249,7 +249,7 @@ export class StateMerkleAnchor extends EventEmitter {
 
         return placeholderAnchor;
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to anchor state', { error, priority });
       this.emit('anchor_error', { error, priority });
       throw error;
@@ -377,7 +377,7 @@ export class StateMerkleAnchor extends EventEmitter {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('State integrity verification failed', { error, anchorId });
       this.emit('verification_error', { error, anchorId });
       throw error;
@@ -476,7 +476,7 @@ export class StateMerkleAnchor extends EventEmitter {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Batch anchoring failed', {
         error,
         pendingCount: this.pendingAnchors.size,
@@ -663,7 +663,7 @@ export class StateMerkleAnchor extends EventEmitter {
       }
 
       return computedHash === anchor.merkleRoot;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Merkle proof verification failed', {
         error,
         anchorId: anchor.id,
@@ -683,7 +683,7 @@ export class StateMerkleAnchor extends EventEmitter {
         blockHeight: result.blockHeight,
       });
       return result.txId;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Blockchain anchor submission failed', {
         error,
         merkleRoot,
@@ -738,7 +738,7 @@ export class StateMerkleAnchor extends EventEmitter {
       });
 
       return s3Location;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('S3 anchor submission failed', {
         error,
         anchorId,
@@ -809,7 +809,7 @@ export class StateMerkleAnchor extends EventEmitter {
           objectLockRetainUntilDate: headResult.ObjectLockRetainUntilDate,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('S3 object integrity verification failed', {
         error,
         s3Location,
@@ -835,7 +835,7 @@ export class StateMerkleAnchor extends EventEmitter {
         valid: !!transaction,
         confirmations: transaction.confirmations || 0,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Blockchain anchor verification failed', {
         error,
         transactionId,
@@ -918,7 +918,7 @@ export class StateMerkleAnchor extends EventEmitter {
       const transaction =
         await this.blockchainClient.getTransaction(transactionId);
       return transaction.blockHeight;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to get block height', { error, transactionId });
       return undefined;
     }
@@ -1074,7 +1074,7 @@ export class StateMerkleAnchor extends EventEmitter {
     if (this.pendingAnchors.size > 0) {
       try {
         await this.processBatchAnchors();
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to process final batch during shutdown', { error });
       }
     }

@@ -244,7 +244,7 @@ export class EvidenceProvenanceService {
 
       //   // Check if stored hash matches S3 metadata
       //   integrityValid = s3Metadata?.['integrity-hash'] === artifact.sha256_hash;
-      // } catch (error) {
+      // } catch (error: any) {
       //   integrityValid = false;
       // }
 

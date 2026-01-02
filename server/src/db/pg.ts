@@ -184,7 +184,7 @@ async function _executeQuery(
       });
 
       return returnMany ? result.rows : result.rows[0] || null;
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
       throw error;
@@ -281,7 +281,7 @@ export const pg = {
           'db.tenant_scoped': scopedQuery.wasScoped,
         });
         return result.rows;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
         throw error;
@@ -313,7 +313,7 @@ export const pg = {
 
         try {
           return await callback(scopedPg);
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -341,7 +341,7 @@ export const pg = {
       const result = await callback(tx);
       await client.query('COMMIT');
       return result;
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {
@@ -353,7 +353,7 @@ export const pg = {
     try {
       await pool.query('SELECT 1');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('PostgreSQL health check failed:', error);
       return false;
     }

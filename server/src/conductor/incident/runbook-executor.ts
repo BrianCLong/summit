@@ -228,7 +228,7 @@ export class RunbookExecutor extends EventEmitter {
         runbook,
       );
       this.emit('runbook:completed', execution);
-    } catch (error) {
+    } catch (error: any) {
       execution.status = 'failed';
       execution.endTime = Date.now();
       this.addLog(execution, 'error', `Runbook failed: ${error.message}`);
@@ -286,7 +286,7 @@ export class RunbookExecutor extends EventEmitter {
 
         this.addLog(execution, 'info', `Step completed: ${step.name}`);
         return true;
-      } catch (error) {
+      } catch (error: any) {
         stepExecution.error = error.message;
         this.addLog(
           execution,
@@ -505,7 +505,7 @@ export class RunbookExecutor extends EventEmitter {
           timestamp: Date.now(),
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Validation error: ${error.message}`);
     }
   }

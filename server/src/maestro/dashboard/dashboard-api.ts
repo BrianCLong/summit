@@ -39,10 +39,10 @@ router.get(
         0,
       );
       const successfulRuns =
-        runsStats.rows.find((row) => row.status === 'succeeded')?.count || 0;
+        runsStats.rows.find((row: any) => row.status === 'succeeded')?.count || 0;
       const successRate = totalRuns > 0 ? successfulRuns / totalRuns : 1.0;
       const avgDuration =
-        runsStats.rows.find((row) => row.status === 'succeeded')
+        runsStats.rows.find((row: any) => row.status === 'succeeded')
           ?.avg_duration || 180;
       const totalCost = runsStats.rows.reduce(
         (sum, row) => sum + parseFloat(row.total_cost || 0),
@@ -102,7 +102,7 @@ router.get(
       };
 
       res.json(summary);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching dashboard summary:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -127,7 +127,7 @@ router.get(
 
       const result = await pool.query(query);
 
-      const pipelines = result.rows.map((row) => ({
+      const pipelines = result.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         version: '1.0.0', // Could be derived from spec or separate versioning
@@ -137,7 +137,7 @@ router.get(
       }));
 
       res.json(pipelines);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching pipelines:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -185,7 +185,7 @@ router.get(
       };
 
       res.json(autonomyData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching autonomy data:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -226,7 +226,7 @@ router.put(
       };
 
       res.json(autonomyData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating autonomy:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -260,7 +260,7 @@ router.get('/recipes', requirePermission('recipe:read'), async (_req: Request, r
     ];
 
     res.json(recipes);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching recipes:', error);
     res.status(500).json({ error: 'Internal server error' });
   }

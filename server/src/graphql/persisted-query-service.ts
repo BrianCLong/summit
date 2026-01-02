@@ -58,7 +58,7 @@ export class PersistedQueryService {
 
       const result = await this.pool.query(query, params);
       return result.rows;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, tenantId }, 'Failed to list persisted queries');
       throw error;
     }
@@ -87,7 +87,7 @@ export class PersistedQueryService {
 
       logger.info({ hash, userId }, 'Upserted persisted query');
       return result.rows[0].id;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, hash }, 'Failed to upsert persisted query');
       throw error;
     }
@@ -103,7 +103,7 @@ export class PersistedQueryService {
         [id]
       );
       return (result.rowCount ?? 0) > 0;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, id }, 'Failed to delete persisted query');
       throw error;
     }
@@ -120,7 +120,7 @@ export class PersistedQueryService {
         [hash]
       );
       return result.rows[0]?.query || null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, hash }, 'Failed to get query by hash');
       return null;
     }

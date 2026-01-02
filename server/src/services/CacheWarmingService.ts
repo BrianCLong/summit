@@ -99,7 +99,7 @@ export class CacheWarmingService {
       logger.info('[CACHE WARM] Starting hourly neighborhood warming');
       try {
         await this.warmTopNeighborhoods();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('[CACHE WARM] Hourly neighborhood warming failed:', error);
       }
     });
@@ -109,7 +109,7 @@ export class CacheWarmingService {
       logger.info('[CACHE WARM] Starting daily GraphRAG warming');
       try {
         await this.warmCommonGraphRAGQuestions();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('[CACHE WARM] Daily GraphRAG warming failed:', error);
       }
     });
@@ -119,7 +119,7 @@ export class CacheWarmingService {
       logger.info('[CACHE WARM] Starting investigation metrics warming');
       try {
         await this.warmActiveInvestigationMetrics();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('[CACHE WARM] Metrics warming failed:', error);
       }
     });
@@ -129,7 +129,7 @@ export class CacheWarmingService {
       logger.info('[CACHE WARM] Starting cache cleanup');
       try {
         await this.cleanupExpiredEntries();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('[CACHE WARM] Cache cleanup failed:', error);
       }
     });
@@ -190,7 +190,7 @@ export class CacheWarmingService {
             session,
             inv.id,
             inv.tenantId,
-            this.config.neighborhoodTopN,
+            this.config.neighborhoodTopN || 10,
           );
 
           for (const { id: entityId, degree } of topEntities) {
@@ -216,7 +216,7 @@ export class CacheWarmingService {
               logger.debug(
                 `[CACHE WARM] Warmed neighborhood for entity ${entityId} (degree: ${degree})`,
               );
-            } catch (error) {
+            } catch (error: any) {
               logger.warn(
                 `[CACHE WARM] Failed to warm neighborhood for entity ${entityId}:`,
                 error,
@@ -276,7 +276,7 @@ export class CacheWarmingService {
 
           warmedCount++;
           logger.debug(`[CACHE WARM] Warmed GraphRAG: "${question}"`);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`[CACHE WARM] Failed to warm GraphRAG question:`, error);
         }
       }
@@ -310,7 +310,7 @@ export class CacheWarmingService {
 
         warmedCount++;
         logger.debug(`[CACHE WARM] Warmed metrics for investigation ${inv.id}`);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(`[CACHE WARM] Failed to warm metrics for ${inv.id}:`, error);
       }
     }
@@ -377,7 +377,7 @@ export class CacheWarmingService {
             inv.tenantId,
             300,
           );
-        } catch (err) {
+        } catch (err: any) {
           logger.warn({ err }, '[CACHE WARM] Shortest path warm failed');
         } finally {
           this.recordLatency('shortest-path', Date.now() - start);
@@ -410,7 +410,7 @@ export class CacheWarmingService {
           inv.tenantId,
           600,
         );
-      } catch (err) {
+      } catch (err: any) {
         logger.warn({ err }, '[CACHE WARM] Community cache warm failed');
       } finally {
         this.recordLatency('community-search', Date.now() - communityStart);
@@ -438,13 +438,13 @@ export class CacheWarmingService {
         { limit: this.config.maxInvestigationsToWarm },
       );
 
-      return result.records.map((record) => ({
+      return result.records.map((record: any) => ({
         id: record.get('id'),
         tenantId: record.get('tenantId'),
         name: record.get('name'),
         lastAccessedAt: record.get('lastAccessedAt'),
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error('[CACHE WARM] Failed to get active investigations:', error);
       return [];
     } finally {
@@ -623,7 +623,7 @@ export class CacheWarmingService {
       logger.info(
         `[CACHE WARM] Manual warming complete for ${investigationId} in ${duration}ms`,
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`[CACHE WARM] Manual warming failed for ${investigationId}:`, error);
       throw error;
     }

@@ -36,7 +36,7 @@ auditRouter.post('/verify-bundle', verificationLimiter, async (req: any, res: Re
   try {
     const report = await BundleVerifier.getInstance().verify(req.body);
     res.json(report);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Bundle verification failed', error);
     res.status(500).json({ error: 'Verification process failed' });
   }
@@ -61,7 +61,7 @@ auditRouter.get('/incidents/:id/audit-bundle.zip', async (req: AuthenticatedRequ
     `attachment; filename="incident-${id}-audit.zip"`,
   );
   const archive = archiver('zip', { zlib: { level: 9 } });
-  archive.on('error', (err) =>
+  archive.on('error', (err: any) =>
     res.status(500).end(`Archive error: ${err.message}`),
   );
   archive.pipe(res);
@@ -126,7 +126,7 @@ auditRouter.get('/investigations/:id/audit-bundle.zip', async (req: Authenticate
     `attachment; filename="investigation-${id}-audit.zip"`,
   );
   const archive = archiver('zip', { zlib: { level: 9 } });
-  archive.on('error', (err) =>
+  archive.on('error', (err: any) =>
     res.status(500).end(`Archive error: ${err.message}`),
   );
   archive.pipe(res);
@@ -217,7 +217,7 @@ auditRouter.get(
       });
 
       res.json({ data: events });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to query audit events', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -244,7 +244,7 @@ auditRouter.get(
       );
 
       res.json({ data: report });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate compliance report', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -266,7 +266,7 @@ auditRouter.get(
        );
 
        res.json({ data: result });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to verify integrity', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }

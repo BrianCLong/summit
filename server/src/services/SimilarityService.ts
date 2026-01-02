@@ -167,7 +167,7 @@ export class SimilarityService {
           totalResults: results.length,
           executionTime,
         };
-      } catch (error) {
+      } catch (error: any) {
         serviceLogger.error('Similarity search failed', {
           investigationId: query.investigationId,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -229,7 +229,7 @@ export class SimilarityService {
                 );
 
                 return [entityId, similarEntities] as const;
-              } catch (error) {
+              } catch (error: any) {
                 serviceLogger.warn(
                   'Failed to find similar entities for entity',
                   {
@@ -256,7 +256,7 @@ export class SimilarityService {
           });
 
           return results;
-        } catch (error) {
+        } catch (error: any) {
           serviceLogger.error('Bulk similarity search failed', {
             investigationId: query.investigationId,
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -371,12 +371,12 @@ export class SimilarityService {
 
       const result = await client.query(query, params);
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         entityId: row.entity_id,
         similarity: parseFloat(row.similarity),
         text: includeText ? row.text : undefined,
       }));
-    } catch (error) {
+    } catch (error: any) {
       status = 'error';
       throw error;
     } finally {
@@ -588,7 +588,7 @@ export class SimilarityService {
               [params.investigationId],
             );
 
-            entities = result.rows.map((row) => ({
+            entities = result.rows.map((row: any) => ({
               entityId: row.entity_id,
               embedding: this.parseVectorString(row.embedding),
               text: row.text,
@@ -727,7 +727,7 @@ export class SimilarityService {
           });
 
           return candidates;
-        } catch (error) {
+        } catch (error: any) {
           serviceLogger.error('Failed to find duplicate candidates', {
             investigationId: params.investigationId,
             error: error instanceof Error ? error.message : 'Unknown error',

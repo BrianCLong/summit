@@ -128,7 +128,7 @@ router.post(
         queue_position: ingestWorker.getQueueSize(),
         message: 'Message queued for streaming processing',
       });
-    } catch (error) {
+    } catch (error: any) {
       otelService.addSpanAttributes({
         'streaming.ingest_error': true,
         'streaming.error':
@@ -216,7 +216,7 @@ router.post(
             });
 
             messageIds.push(messageId);
-          } catch (error) {
+          } catch (error: any) {
             errors.push({
               index: i,
               error: error instanceof Error ? error.message : 'Unknown error',
@@ -252,7 +252,7 @@ router.post(
         queue_size: ingestWorker.getQueueSize(),
         message: `Batch processing queued: ${messageIds.length}/${messages.length} messages successfully queued`,
       });
-    } catch (error) {
+    } catch (error: any) {
       otelService.addSpanAttributes({
         'streaming.batch_error': true,
         'streaming.error':
@@ -294,7 +294,7 @@ router.get(
         timestamp: new Date().toISOString(),
         message: 'Streaming worker metrics retrieved',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to retrieve streaming metrics',
         error: error instanceof Error ? error.message : String(error),
@@ -349,7 +349,7 @@ router.post(
         queue_size_after: 0,
         message: 'Streaming queue cleared successfully',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Queue clear operation failed',
         error: error instanceof Error ? error.message : String(error),
@@ -469,7 +469,7 @@ router.get(
       req.on('close', () => {
         clearInterval(heartbeat);
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Streaming events setup failed',
         error: error instanceof Error ? error.message : String(error),
@@ -512,7 +512,7 @@ router.get('/health', async (req, res) => {
         otel_tracing: true,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(503).json({
       success: false,
       service: 'streaming-ingest',

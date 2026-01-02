@@ -56,7 +56,7 @@ class AIInferenceService {
         // await redis.del(resultKey);
         try {
           return JSON.parse(result);
-        } catch (e) {
+        } catch (e: any) {
           logger.error(`Failed to parse AI result for ${id}:`, e);
           throw new Error('Invalid response format from AI service');
         }

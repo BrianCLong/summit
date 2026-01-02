@@ -656,7 +656,7 @@ export class IntegrationManager {
 
   getPendingApprovals(tenantId: string): DataEnvelope<ApprovalRequest[]> {
     const requests = Array.from(this.approvalRequests.values()).filter(
-      (r) => r.tenantId === tenantId && r.status === 'pending'
+      (r: any) => r.tenantId === tenantId && r.status === 'pending'
     );
 
     return {

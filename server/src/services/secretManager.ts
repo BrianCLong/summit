@@ -8,7 +8,7 @@ async function readSecrets(): Promise<Record<string, Record<string, string>>> {
   try {
     const data = await fs.readFile(secretsFilePath, 'utf-8');
     return JSON.parse(data);
-  } catch (error) {
+  } catch (error: any) {
     // If the file doesn't exist, return a default structure
     if (error.code === 'ENOENT') {
       return {
