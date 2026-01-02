@@ -2,8 +2,14 @@ import { CypherSandbox } from '../../../server/src/middleware/cypher-sandbox';
 import { baseScenarios, buildCorpus } from './corpus';
 
 describe('graph guardrail fuzzing', () => {
-  const iterations = parseInt(process.env.GRAPH_GUARDRAIL_FUZZ_ITERATIONS || '80', 10);
-  const seed = parseInt(process.env.GRAPH_GUARDRAIL_FUZZ_SEED || '7331', 10);
+  const MAX_ITERATIONS = 200;
+  const iterations = Math.min(
+    Math.max(parseInt(process.env.GRAPH_GUARDRAIL_FUZZ_ITERATIONS || '80', 10), 1),
+    MAX_ITERATIONS,
+  );
+  const seed = Number.isInteger(Number(process.env.GRAPH_GUARDRAIL_FUZZ_SEED))
+    ? Number(process.env.GRAPH_GUARDRAIL_FUZZ_SEED)
+    : 7331;
 
   it('blocks unsafe patterns and allows safe reads with coverage by reason code', () => {
     const sandbox = new CypherSandbox();

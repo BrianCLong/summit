@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 export type FuzzTarget = {
   name: string;
@@ -22,6 +23,10 @@ export type FuzzResult = {
 type RNG = () => number;
 
 const ARTIFACT_ROOT = path.join(process.cwd(), 'artifacts', 'fuzz');
+const DEFAULT_ITERATIONS = 50;
+const MAX_ITERATIONS = 500;
+const DEFAULT_TIMEOUT_MS = 50;
+const MAX_TIMEOUT_MS = 250;
 
 function mulberry32(seed: number): RNG {
   return function rng() {
@@ -76,12 +81,14 @@ function ensureArtifactDir() {
   fs.mkdirSync(ARTIFACT_ROOT, { recursive: true });
 }
 
-function persistArtifact(target: string, iteration: number, input: string): string {
+function persistArtifact(target: string, iteration: number, input: string, seed: number): string {
   ensureArtifactDir();
-  const filePath = path.join(
-    ARTIFACT_ROOT,
-    `${target}-iteration-${iteration}-${Date.now()}.txt`,
-  );
+  const hashSuffix = crypto
+    .createHash('sha256')
+    .update(`${target}:${iteration}:${seed}:${input}`)
+    .digest('hex')
+    .slice(0, 12);
+  const filePath = path.join(ARTIFACT_ROOT, `${target}-iteration-${iteration}-${hashSuffix}.txt`);
   fs.writeFileSync(filePath, input, 'utf8');
   return filePath;
 }
@@ -91,8 +98,8 @@ export async function runFuzzTargets(targets: FuzzTarget[], seed = 1337): Promis
   const results: FuzzResult[] = [];
 
   for (const target of targets) {
-    const iterations = target.iterations ?? 50;
-    const timeoutMs = target.timeoutMs ?? 50;
+    const iterations = Math.max(1, Math.min(target.iterations ?? DEFAULT_ITERATIONS, MAX_ITERATIONS));
+    const timeoutMs = Math.max(1, Math.min(target.timeoutMs ?? DEFAULT_TIMEOUT_MS, MAX_TIMEOUT_MS));
     const failures: FuzzResult['failures'] = [];
 
     for (let i = 0; i < iterations; i += 1) {
@@ -102,7 +109,7 @@ export async function runFuzzTargets(targets: FuzzTarget[], seed = 1337): Promis
       try {
         await withTimeout(Promise.resolve(target.handler(mutated)), timeoutMs, target.name);
       } catch (error) {
-        const artifactPath = persistArtifact(target.name, i, mutated);
+        const artifactPath = persistArtifact(target.name, i, mutated, seed);
         failures.push({
           iteration: i,
           error: error instanceof Error ? error.message : String(error),

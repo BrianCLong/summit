@@ -1,62 +1,76 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "out/**"],
-      "inputs": [
-        "src/**",
-        "public/**",
-        "package.json",
-        "tsconfig.json",
-        "tsconfig.base.json",
-        "vite.config.ts",
-        "vite.config.js",
-        "index.html",
-        "codegen.yml"
-      ],
-      "env": ["NODE_ENV"]
-    },
-    "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"],
-      "inputs": [
-        "src/**",
-        "tests/**",
-        "__tests__/**",
-        "package.json",
-        "jest.config.*",
-        "tsconfig.json"
-      ],
-      "env": ["NODE_ENV", "CI"]
-    },
-    "test:integration": {
-      "dependsOn": ["build"],
-      "outputs": ["test-results/**", "junit.xml", "playwright-report/**"],
-      "cache": false,
-      "env": ["NODE_ENV", "CI"]
-    },
+  "globalEnv": ["NODE_ENV", "CI", "TZ"],
+  "globalDependencies": [
+    "turbo.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "tsconfig.build.json",
+    ".eslintrc.*",
+    "jest.config.*"
+  ],
+  "pipeline": {
     "lint": {
       "outputs": [],
       "cache": true,
       "inputs": [
-        "src/**",
-        "tests/**",
-        "__tests__/**",
-        ".eslintrc.*",
-        "tsconfig.json",
-        "package.json"
+        "{apps,packages,services,client,server,libs,tools}/**/*.{js,jsx,ts,tsx}",
+        "package.json",
+        "tsconfig*.json",
+        ".eslintrc.*"
       ]
     },
     "typecheck": {
       "outputs": [],
       "cache": true,
       "inputs": [
-        "src/**",
-        "types/**",
+        "{apps,packages,services,client,server,libs,tools}/**/*.{ts,tsx,js,jsx}",
         "package.json",
-        "tsconfig.json",
-        "tsconfig.base.json"
+        "tsconfig*.json"
+      ]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**", "out/**"],
+      "inputs": [
+        "{apps,packages,services,client,server,libs,tools}/src/**",
+        "{apps,packages,services,client,server,libs,tools}/public/**",
+        "{apps,packages,services,client,server,libs,tools}/package.json",
+        "{apps,packages,services,client,server,libs,tools}/tsconfig*.json",
+        "package.json",
+        "tsconfig*.json",
+        "vite.config.*",
+        "next.config.*",
+        "codegen.yml"
+      ],
+      "env": ["NODE_ENV"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**", "test-results/**", "junit.xml", "playwright-report/**"],
+      "inputs": [
+        "{apps,packages,services,client,server,libs,tools}/src/**",
+        "{apps,packages,services,client,server,libs,tools}/{tests,__tests__}/**",
+        "{apps,packages,services,client,server,libs,tools}/package.json",
+        "{apps,packages,services,client,server,libs,tools}/jest.config.*",
+        "package.json",
+        "tsconfig*.json"
+      ],
+      "env": ["NODE_ENV", "CI"],
+      "cache": true
+    },
+    "test:integration": {
+      "dependsOn": ["build"],
+      "outputs": ["test-results/**", "junit.xml", "playwright-report/**"],
+      "cache": false,
+      "env": ["NODE_ENV", "CI"],
+      "inputs": [
+        "{apps,packages,services,client,server,libs,tools}/src/**",
+        "{apps,packages,services,client,server,libs,tools}/tests/**",
+        "{apps,packages,services,client,server,libs,tools}/package.json",
+        "package.json"
       ]
     },
     "smoke": {
@@ -68,13 +82,5 @@
       "cache": false,
       "persistent": true
     }
-  },
-  "globalEnv": ["NODE_ENV", "CI"],
-  "globalDependencies": [
-    "tsconfig.json",
-    "tsconfig.base.json",
-    ".eslintrc.*",
-    "jest.config.*",
-    "pnpm-lock.yaml"
-  ]
+  }
 }
