@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+STATE.json
+LEDGER.ndjson
+REPORT.md
+ledger/
+.env
