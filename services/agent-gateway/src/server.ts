@@ -4,6 +4,33 @@
  * Main Express server for the Agent Gateway API
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'summit'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import express, { type Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -52,7 +79,7 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT || '5432'),
   database: process.env.DB_NAME || 'summit',
   user: process.env.DB_USER || 'summit',
-  password: process.env.DB_PASSWORD || 'summit',
+  password: requireSecret('DB_PASSWORD', process.env.DB_PASSWORD, 16),
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,

@@ -1,3 +1,30 @@
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 32): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'dev', 'signing-key'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import { createHash } from 'crypto';
 import { MigrationStatus, SandboxConfig, DeploymentArtifact } from '../types/index.js';
 import { createLogger } from '../utils/logger.js';
@@ -31,7 +58,7 @@ export class ProvLedgerClient {
 
   constructor(baseUrl?: string) {
     this.baseUrl = baseUrl || process.env.PROV_LEDGER_URL || 'http://prov-ledger:3000';
-    this.signingKey = process.env.PROV_SIGNING_KEY || 'dev-signing-key';
+    this.signingKey = requireSecret('PROV_SIGNING_KEY', process.env.PROV_SIGNING_KEY, 32);
   }
 
   /**

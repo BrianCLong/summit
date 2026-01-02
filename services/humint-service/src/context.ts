@@ -4,6 +4,33 @@
  * Provides shared dependencies and configuration for the HUMINT service.
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'dev', 'prod'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import neo4j, { Driver as Neo4jDriver, Session } from 'neo4j-driver';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
@@ -52,7 +79,7 @@ function loadConfig(): ServiceConfig {
       url: process.env.REDIS_URL || 'redis://localhost:6379',
     },
     auth: {
-      jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-prod',
+      jwtSecret: requireSecret('JWT_SECRET', process.env.JWT_SECRET, 32),
       issuer: process.env.JWT_ISSUER || 'intelgraph',
     },
   };
