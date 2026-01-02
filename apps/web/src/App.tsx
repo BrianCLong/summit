@@ -34,21 +34,35 @@ const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
 const FeatureFlagsPage = React.lazy(() => import('@/pages/admin/FeatureFlags'))
-const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
+const ConsistencyDashboard = React.lazy(() =>
+  import('@/pages/admin/ConsistencyDashboard').then(m => ({
+    default: m.ConsistencyDashboard,
+  }))
+)
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
-const InternalCommandDashboard = React.lazy(() => import('@/pages/internal/InternalCommandDashboard'))
+const InternalCommandDashboard = React.lazy(
+  () => import('@/pages/internal/InternalCommandDashboard')
+)
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
 const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
-const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
-const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
-const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
+const GeoIntPane = React.lazy(() =>
+  import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane }))
+)
+const NarrativeIntelligencePage = React.lazy(
+  () => import('@/pages/NarrativeIntelligencePage')
+)
+const MissionControlPage = React.lazy(
+  () => import('@/features/mission-control/MissionControlPage')
+)
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
-const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
+const MaestroDashboard = React.lazy(
+  () => import('@/pages/maestro/MaestroDashboard')
+)
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 
 // Workbench
@@ -65,20 +79,8 @@ import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
 
 function App() {
-  const [showPalette, setShowPalette] = React.useState(false);
-  const [showExplain, setShowExplain] = React.useState(false);
+  const [showExplain, setShowExplain] = React.useState(false)
   const demoModeEnabled = isDemoModeEnabled()
-
-  React.useEffect(()=>{
-    const onKey=(e:KeyboardEvent)=>{
-      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
-        e.preventDefault();
-        setShowPalette(true);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return ()=>window.removeEventListener('keydown', onKey);
-  },[]);
 
   return (
     <ApolloProvider client={apolloClient}>
@@ -90,135 +92,149 @@ function App() {
               <CommandStatusProvider>
                 <Router>
                   <ErrorBoundary>
-                  <React.Suspense
-                    fallback={
-                      <div className="flex h-screen items-center justify-center">
-                        <div className="text-center">
-                          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                          <p className="mt-4 text-sm text-muted-foreground">
-                            Loading...
-                          </p>
+                    <React.Suspense
+                      fallback={
+                        <div className="flex h-screen items-center justify-center">
+                          <div className="text-center">
+                            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                            <p className="mt-4 text-sm text-muted-foreground">
+                              Loading...
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    }
-                  >
-                    {/* Explain overlay stub */}
-                    {showPalette && (
-                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
-                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
-                             Explain this view
-                           </button>
-                         </div>
-                       </div>
-                    )}
-                    {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
+                      }
+                    >
+                      {showExplain && (
+                        <Explain
+                          facts={[
+                            'Linked via shared IP (1.2.3.4)',
+                            'Match score: 0.98',
+                          ]}
+                        />
+                      )}
 
-                    <Routes>
-                      {/* Auth routes */}
-                    <Route path="/signin" element={<SignInPage />} />
-                    <Route path="/signup" element={<SignupPage />} />
-                    <Route path="/verify-email" element={<VerifyEmailPage />} />
-                    <Route
-                      path="/access-denied"
-                      element={<AccessDeniedPage />}
-                    />
-                    <Route path="/maestro/*" element={<MaestroDashboard />} />
-                    <Route path="/trust" element={<TrustDashboard />} />
+                      <Routes>
+                        {/* Auth routes */}
+                        <Route path="/signin" element={<SignInPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
+                        <Route
+                          path="/verify-email"
+                          element={<VerifyEmailPage />}
+                        />
+                        <Route
+                          path="/access-denied"
+                          element={<AccessDeniedPage />}
+                        />
+                        <Route
+                          path="/maestro/*"
+                          element={<MaestroDashboard />}
+                        />
+                        <Route path="/trust" element={<TrustDashboard />} />
 
-                    {/* Workbench Route - intentionally outside main layout for focus mode, or inside if desired.
+                        {/* Workbench Route - intentionally outside main layout for focus mode, or inside if desired.
                         The prompts asked for a "shell", usually implying it might stand alone or take over.
                         I'll put it at /workbench. */}
-                    <Route path="/workbench" element={<WorkbenchShell />} />
+                        <Route path="/workbench" element={<WorkbenchShell />} />
 
-                    {/* Protected routes with layout */}
-                    <Route path="/" element={<Layout />}>
-                      <Route index element={<HomePage />} />
-                      <Route path="explore" element={<ExplorePage />} />
+                        {/* Protected routes with layout */}
+                        <Route path="/" element={<Layout />}>
+                          <Route index element={<HomePage />} />
+                          <Route path="explore" element={<ExplorePage />} />
 
-                      {/* Tri-Pane Analysis */}
-                      <Route
-                        path="analysis/tri-pane"
-                        element={<TriPanePage />}
-                      />
-                      <Route
-                        path="geoint"
-                        element={<GeoIntPane />}
-                      />
+                          {/* Tri-Pane Analysis */}
+                          <Route
+                            path="analysis/tri-pane"
+                            element={<TriPanePage />}
+                          />
+                          <Route path="geoint" element={<GeoIntPane />} />
 
-                      {/* Narrative Intelligence */}
-                      <Route
-                        path="analysis/narrative"
-                        element={<NarrativeIntelligencePage />}
-                      />
+                          {/* Narrative Intelligence */}
+                          <Route
+                            path="analysis/narrative"
+                            element={<NarrativeIntelligencePage />}
+                          />
 
-                      {/* Alerts */}
-                      <Route path="alerts" element={<AlertsPage />} />
-                      <Route path="alerts/:id" element={<AlertDetailPage />} />
+                          {/* Alerts */}
+                          <Route path="alerts" element={<AlertsPage />} />
+                          <Route
+                            path="alerts/:id"
+                            element={<AlertDetailPage />}
+                          />
 
-                      {/* Cases */}
-                      <Route path="cases" element={<CasesPage />} />
-                      <Route path="cases/:id" element={<CaseDetailPage />} />
+                          {/* Cases */}
+                          <Route path="cases" element={<CasesPage />} />
+                          <Route
+                            path="cases/:id"
+                            element={<CaseDetailPage />}
+                          />
 
-                      {/* Dashboards */}
-                      <Route
-                        path="dashboards/command-center"
-                        element={<CommandCenterDashboard />}
-                      />
-                      <Route
-                        path="dashboards/supply-chain"
-                        element={<SupplyChainDashboard />}
-                      />
-                      <Route
-                        path="dashboards/advanced"
-                        element={<AdvancedDashboardPage />}
-                      />
-                      <Route
-                        path="internal/command"
-                        element={<InternalCommandDashboard />}
-                      />
-                      <Route path="mission-control" element={<MissionControlPage />} />
+                          {/* Dashboards */}
+                          <Route
+                            path="dashboards/command-center"
+                            element={<CommandCenterDashboard />}
+                          />
+                          <Route
+                            path="dashboards/supply-chain"
+                            element={<SupplyChainDashboard />}
+                          />
+                          <Route
+                            path="dashboards/advanced"
+                            element={<AdvancedDashboardPage />}
+                          />
+                          <Route
+                            path="internal/command"
+                            element={<InternalCommandDashboard />}
+                          />
+                          <Route
+                            path="mission-control"
+                            element={<MissionControlPage />}
+                          />
 
-                      {/* Data & Models */}
-                      <Route
-                        path="data/sources"
-                        element={<DataSourcesPage />}
-                      />
-                      <Route path="models" element={<ModelsPage />} />
-                      <Route path="reports" element={<ReportsPage />} />
+                          {/* Data & Models */}
+                          <Route
+                            path="data/sources"
+                            element={<DataSourcesPage />}
+                          />
+                          <Route path="models" element={<ModelsPage />} />
+                          <Route path="reports" element={<ReportsPage />} />
 
-                      {/* Admin */}
-                      <Route path="admin/*" element={<AdminPage />} />
-                      <Route path="admin/consistency" element={<ConsistencyDashboard />} />
-                      <Route path="admin/feature-flags" element={<FeatureFlagsPage />} />
+                          {/* Admin */}
+                          <Route path="admin/*" element={<AdminPage />} />
+                          <Route
+                            path="admin/consistency"
+                            element={<ConsistencyDashboard />}
+                          />
+                          <Route
+                            path="admin/feature-flags"
+                            element={<FeatureFlagsPage />}
+                          />
 
-                      {/* Support */}
-                      <Route path="help" element={<HelpPage />} />
-                      <Route path="changelog" element={<ChangelogPage />} />
+                          {/* Support */}
+                          <Route path="help" element={<HelpPage />} />
+                          <Route path="changelog" element={<ChangelogPage />} />
 
-                      {/* Explicitly Gated Demo Routes */}
-                      <Route
-                        path="demo"
-                        element={
-                          demoModeEnabled ? (
-                            <DemoModeGate>
-                              <DemoControlPage />
-                            </DemoModeGate>
-                          ) : (
-                            <Navigate to="/" replace />
-                          )
-                        }
-                      />
-                      {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
+                          {/* Explicitly Gated Demo Routes */}
+                          <Route
+                            path="demo"
+                            element={
+                              demoModeEnabled ? (
+                                <DemoModeGate>
+                                  <DemoControlPage />
+                                </DemoModeGate>
+                              ) : (
+                                <Navigate to="/" replace />
+                              )
+                            }
+                          />
+                          {/* <Route path="onboarding" element={<OnboardingWizard />} /> */}
 
-                      {/* Catch all */}
-                      <Route path="*" element={<NotFound />} />
-                    </Route>
-                  </Routes>
-                  </React.Suspense>
-                </ErrorBoundary>
-              </Router>
+                          {/* Catch all */}
+                          <Route path="*" element={<NotFound />} />
+                        </Route>
+                      </Routes>
+                    </React.Suspense>
+                  </ErrorBoundary>
+                </Router>
               </CommandStatusProvider>
             </SearchProvider>
           </AuthProvider>

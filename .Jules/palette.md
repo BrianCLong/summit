@@ -20,3 +20,8 @@
 
 **Learning:** Even when assigned a focused task (e.g., UX), one may inherit a broken branch or be required to fix blocking architectural issues (e.g., API drift, Type mismatches) to land changes.
 **Action:** Be prepared to step outside the assigned persona to unblock the build.
+
+## 2025-10-29 - Conflicting Keyboard Shortcuts & cmdk Labeling
+
+**Learning:** Dual-binding global shortcuts (like `Cmd+K`) in different parts of the app (`App.tsx` vs `Context`) creates unpredictable UX. Also, `cmdk` components do not automatically inherit labels, requiring explicit `label` props on the root `Command` component for accessibility.
+**Action:** Centralize hotkey logic in Context/Providers and always verify screen reader announcements for Command Palettes by adding explicit labels.

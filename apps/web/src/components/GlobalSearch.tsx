@@ -25,7 +25,9 @@ export function GlobalSearch() {
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
-    if (!query.trim()) {return []}
+    if (!query.trim()) {
+      return []
+    }
     if (!query || !query.trim()) return []
 
     if (!isDemoMode) {
@@ -165,16 +167,25 @@ export function GlobalSearch() {
     }
   }
 
-  if (!isOpen) {return null}
+  if (!isOpen) {
+    return null
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
       <div className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl">
-        <Command className="rounded-lg border shadow-md bg-popover">
+        <Command
+          className="rounded-lg border shadow-md bg-popover"
+          label="Global Search"
+        >
           <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <Search
+              className="mr-2 h-4 w-4 shrink-0 opacity-50"
+              aria-hidden="true"
+            />
             <Command.Input
               placeholder="Search entities, investigations, alerts..."
+              aria-label="Search query"
               value={query}
               onValueChange={setQuery}
               className="flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
@@ -184,7 +195,8 @@ export function GlobalSearch() {
           <Command.List className="max-h-96 overflow-y-auto p-2">
             {!isDemoMode && (
               <div className="py-3 text-center text-xs text-muted-foreground">
-                Live search is unavailable until a backend connection is configured.
+                Live search is unavailable until a backend connection is
+                configured.
               </div>
             )}
             {loading && (
@@ -211,7 +223,9 @@ export function GlobalSearch() {
                 {['command', 'entity', 'investigation', 'alert', 'case'].map(
                   type => {
                     const typeResults = results.filter(r => r.type === type)
-                    if (typeResults.length === 0) {return null}
+                    if (typeResults.length === 0) {
+                      return null
+                    }
 
                     return (
                       <Command.Group
@@ -259,7 +273,10 @@ export function GlobalSearch() {
             )}
           </Command.List>
 
-          <div className="border-t px-3 py-2 text-xs text-muted-foreground">
+          <div
+            className="border-t px-3 py-2 text-xs text-muted-foreground"
+            aria-hidden="true"
+          >
             <div className="flex items-center justify-between">
               <span>Press Enter to select, Esc to close</span>
               <div className="flex items-center gap-1">

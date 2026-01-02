@@ -101,7 +101,7 @@ export default function CasesPage() {
 
   // Filter and sort cases
   const filteredCases = useMemo(() => {
-    let filtered = cases.filter(c => {
+    const filtered = cases.filter(c => {
       const matchesSearch =
         searchQuery === '' ||
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

@@ -213,7 +213,7 @@ export function ExplainThisViewPanel({
     const toTime = new Date(state.timeWindow.to).getTime()
 
     // Filter entities
-    let visibleEntities = entities.filter(entity => {
+    const visibleEntities = entities.filter(entity => {
       // Filter by entity types if specified
       if (
         state.filters.entityTypes &&
