@@ -73,7 +73,7 @@ export class PersistedQueriesMiddleware {
       logger.warn(`Persisted queries manifest not found`, { tenantId });
       this.manifests.set(tenantId, {});
       return {};
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to load persisted queries manifest`, {
         tenantId,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -102,7 +102,7 @@ export class PersistedQueriesMiddleware {
       // Production mode - enforce allowlist
       try {
         this.enforcePersistedQueries(req, res, next);
-      } catch (error) {
+      } catch (error: any) {
         logger.error(
           `Persisted query enforcement failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}, Path: ${req.path}`,
         );

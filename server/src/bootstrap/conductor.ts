@@ -97,7 +97,7 @@ export async function wireConductor(options: {
                 : 503;
 
           res.status(statusCode).json(health);
-        } catch (error) {
+        } catch (error: any) {
           conductorLogger.error('Health check failed:', error);
           res.status(503).json({
             status: 'fail',
@@ -123,7 +123,7 @@ export async function wireConductor(options: {
     });
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
     conductorLogger.error('Failed to wire Conductor system:', error);
 
     // Don't fail the entire server startup - allow graceful degradation

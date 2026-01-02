@@ -365,7 +365,7 @@ function createPool(
     application_name: `summit-${type}-${process.env.CURRENT_REGION || 'global'}`,
   });
 
-  pool.on('error', (err) => {
+  pool.on('error', (err: any) => {
     logger.error({ pool: name, err }, 'Unexpected PostgreSQL client error');
   });
 
@@ -491,7 +491,7 @@ function createManagedPool(
       const result = await callback(client);
       await client.query('COMMIT');
       return result;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -548,7 +548,7 @@ function createManagedPool(
            } finally {
                client.release();
            }
-        } catch (error) {
+        } catch (error: any) {
           snapshot.healthy = false;
           snapshot.lastError = (error as Error).message;
         }
@@ -650,7 +650,7 @@ async function executeManagedQuery({
 
     try {
       return await executeWithRetry(candidate, normalized, timeoutMs, label);
-    } catch (error) {
+    } catch (error: any) {
       lastError = error as Error;
 
       if (!isRetryableError(error)) {
@@ -679,7 +679,7 @@ async function executeWithRetry(
         } finally {
             client.release();
         }
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       wrapper.circuitBreaker.recordFailure(err);
 
@@ -779,7 +779,7 @@ async function withManagedClient<T>(
 
   try {
     await client.query('SET statement_timeout = $1', [timeoutMs]);
-  } catch (error) {
+  } catch (error: any) {
     clearTimeout(leakTimer);
     client.release(true); // Force release on setup error
     throw error;
@@ -796,7 +796,7 @@ async function withManagedClient<T>(
       try {
         await client.query('RESET statement_timeout');
         client.release();
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           { pool: poolWrapper.name, err: error },
           'Failed to reset statement timeout or release',

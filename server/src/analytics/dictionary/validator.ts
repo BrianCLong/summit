@@ -31,7 +31,7 @@ export class MetricValidator {
 
         try {
             metrics = yaml.load(content) as MetricDefinition[];
-        } catch (e) {
+        } catch (e: any) {
             return [`Invalid YAML: ${(e as Error).message}`];
         }
 

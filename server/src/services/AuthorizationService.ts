@@ -68,7 +68,7 @@ export interface AuthorizationService {
  * try {
  *   await authService.assertCan(userPrincipal, 'delete', resourceRef);
  *   // proceed with deletion
- * } catch (e) {
+ * } catch (e: any) {
  *   // handle authorization error
  * }
  * ```
@@ -173,7 +173,7 @@ export class AuthorizationServiceImpl implements AuthorizationService {
 
       return decision.allowed;
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Authorization check failed', error);
       return false;
     }

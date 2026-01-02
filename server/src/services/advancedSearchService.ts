@@ -565,7 +565,7 @@ export class AdvancedSearchService extends EventEmitter {
       this.emit('search-executed', { query, response });
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('[SEARCH] Search execution error:', error);
       throw error;
     }
@@ -860,22 +860,22 @@ export class AdvancedSearchService extends EventEmitter {
       buckets: [
         {
           key: '9-10',
-          count: results.filter((r) => r.score >= 9).length,
+          count: results.filter((r: any) => r.score >= 9).length,
           selected: false,
         },
         {
           key: '7-9',
-          count: results.filter((r) => r.score >= 7 && r.score < 9).length,
+          count: results.filter((r: any) => r.score >= 7 && r.score < 9).length,
           selected: false,
         },
         {
           key: '5-7',
-          count: results.filter((r) => r.score >= 5 && r.score < 7).length,
+          count: results.filter((r: any) => r.score >= 5 && r.score < 7).length,
           selected: false,
         },
         {
           key: '0-5',
-          count: results.filter((r) => r.score < 5).length,
+          count: results.filter((r: any) => r.score < 5).length,
           selected: false,
         },
       ],

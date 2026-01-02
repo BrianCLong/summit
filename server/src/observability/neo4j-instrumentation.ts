@@ -61,7 +61,7 @@ export function instrumentNeo4jDriver(driver: Driver): Driver {
 
       return tracer.withSpan(
         `db.neo4j.${operation}`,
-        async (span) => {
+        async (span: any) => {
           span.setAttributes({
             'db.system': 'neo4j',
             'db.operation': operation,
@@ -94,7 +94,7 @@ export function instrumentNeo4jDriver(driver: Driver): Driver {
             );
 
             return { ...result, records };
-          } catch (error) {
+          } catch (error: any) {
             const duration = Date.now() - startTime;
 
             neo4jQueryErrorsTotal.inc({ operation, label: 'error' });
@@ -140,7 +140,7 @@ function wrapTransactionMethods(session: Session, mode: string): void {
         const duration = (Date.now() - startTime) / 1000;
         neo4jTransactionDuration.observe({ mode: 'read' }, duration);
         return result;
-      } catch (error) {
+      } catch (error: any) {
         const duration = (Date.now() - startTime) / 1000;
         neo4jTransactionDuration.observe({ mode: 'read' }, duration);
         throw error;
@@ -159,7 +159,7 @@ function wrapTransactionMethods(session: Session, mode: string): void {
         const duration = (Date.now() - startTime) / 1000;
         neo4jTransactionDuration.observe({ mode: 'write' }, duration);
         return result;
-      } catch (error) {
+      } catch (error: any) {
         const duration = (Date.now() - startTime) / 1000;
         neo4jTransactionDuration.observe({ mode: 'write' }, duration);
         throw error;

@@ -61,7 +61,7 @@ export class DecisionAnalysisPipeline {
   constructor(
     private igService = IntelGraphService.getInstance(),
     private artifactService = maestroArtifactService
-  ) {}
+  ) { }
 
   /**
    * Executes the decision analysis workflow with status tracking and artifact persistence.
@@ -78,37 +78,37 @@ export class DecisionAnalysisPipeline {
       // Step 1: Fetch relevant claims from IntelGraph, gracefully handling errors.
       const claimsPromises = input.intelGraphEntityIds.map(async (id) => {
         try {
-            return await this.igService.getEntityClaims(id, input.tenantId);
-        } catch (error) {
-            console.warn(`Could not retrieve claims for entity ID ${id}: ${error.message}`);
-            return null;
+          return await this.igService.getEntityClaims(id, input.tenantId);
+        } catch (error: any) {
+          console.warn(`Could not retrieve claims for entity ID ${id}: ${error.message}`);
+          return null;
         }
-    });
+      });
 
-    const entityClaimsResults = await Promise.all(claimsPromises);
-    const allClaims = entityClaimsResults
+      const entityClaimsResults = await Promise.all(claimsPromises);
+      const allClaims = entityClaimsResults
         .filter(Boolean)
-        .flatMap(ec => ec.claims.map(c => c.claim).filter(Boolean));
+        .flatMap(ec => ec.claims.map((c: any) => c.claim).filter(Boolean));
 
-    // Step 2: Call the model service to propose a recommendation and rationale.
-    const modelContext = {
-      claims: allClaims,
-      constraints: input.constraints,
-    };
+      // Step 2: Call the model service to propose a recommendation and rationale.
+      const modelContext = {
+        claims: allClaims,
+        constraints: input.constraints,
+      };
       const { recommendation, rationale } = await modelService.analyze(input.question, modelContext);
 
       // Step 3: Write the final decision back to the IntelGraph.
       const decisionObject: Omit<Decision, keyof import('../../graph/schema').BaseNode> = {
-          question: input.question,
-          recommendation,
-          rationale,
+        question: input.question,
+        recommendation,
+        rationale,
       };
 
       const createdDecision = await this.igService.createDecision(
-          decisionObject,
-          allClaims.map(c => c.id),
-          input.ownerId,
-          input.tenantId
+        decisionObject,
+        allClaims.map(c => c.id),
+        input.ownerId,
+        input.tenantId
       );
 
       const endTime = Date.now();
@@ -140,9 +140,9 @@ export class DecisionAnalysisPipeline {
         referencedClaims: allClaims,
         artifacts,
       };
-    } catch (error) {
-        await this.artifactService.recordRunFailure(runId, error.message);
-        throw error; // Re-throw the error after recording it
+    } catch (error: any) {
+      await this.artifactService.recordRunFailure(runId, error.message);
+      throw error; // Re-throw the error after recording it
     }
   }
 }

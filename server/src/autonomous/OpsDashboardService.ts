@@ -23,7 +23,7 @@ export class OpsDashboardService {
         recentActions: actions,
         generatedAt: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({ tenantId, error }, 'Failed to get dashboard data');
       throw error;
     }

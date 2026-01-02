@@ -500,7 +500,7 @@ export async function getInvestigationCaseGraph(
         policyEvaluationTimeMs: policyEvaluationTime,
       },
     };
-  } catch (error) {
+  } catch (error: any) {
     // Log error for debugging
     logger.error({
       error: error.message,

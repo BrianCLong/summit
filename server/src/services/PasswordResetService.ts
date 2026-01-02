@@ -129,7 +129,7 @@ export class PasswordResetService {
       await this.sendPasswordResetEmail(email, user.first_name, token);
 
       return token;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to create password reset token',
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -218,7 +218,7 @@ export class PasswordResetService {
         userId: resetToken.user_id,
         email: resetToken.email,
       });
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error({
         message: 'Password reset failed',
@@ -301,7 +301,7 @@ export class PasswordResetService {
         message: 'Password changed successfully',
         userId,
       });
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error({
         message: 'Password change failed',
@@ -347,7 +347,7 @@ export class PasswordResetService {
       }
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to verify reset token',
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -419,7 +419,7 @@ export class PasswordResetService {
           data.userAgent,
         ]
       );
-    } catch (error) {
+    } catch (error: any) {
       // Don't fail the main operation if audit logging fails
       logger.error({
         message: 'Failed to log authentication event',

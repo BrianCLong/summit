@@ -153,7 +153,7 @@ export class ActionSandbox {
       await this.createSecurityProfiles();
 
       logger.info('ActionSandbox initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize ActionSandbox', {
         error: error.message,
       });
@@ -234,7 +234,7 @@ export class ActionSandbox {
       });
 
       return actionResult;
-    } catch (error) {
+    } catch (error: any) {
       const executionTime = Date.now() - startTime;
 
       logger.error('Sandboxed action execution failed', {
@@ -635,7 +635,7 @@ export class ActionSandbox {
             resourceUsage,
             securityEvents,
           });
-        } catch (error) {
+        } catch (error: any) {
           reject(error);
         }
       });
@@ -737,7 +737,7 @@ export class ActionSandbox {
             blocked: false,
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         // Container may not exist anymore
         clearInterval(monitoringInterval);
       }
@@ -785,7 +785,7 @@ export class ActionSandbox {
             cpuUsagePercent: parseFloat(stats.CPUPerc) || 0,
             networkBytes: this.parseNetworkUsage(stats.NetIO),
           });
-        } catch (error) {
+        } catch (error: any) {
           reject(error);
         }
       });
@@ -907,7 +907,7 @@ export class ActionSandbox {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to collect output files', {
         workspaceDir,
         error: error.message,
@@ -944,7 +944,7 @@ export class ActionSandbox {
           removeProcess.on('error', reject);
           setTimeout(resolve, 5000); // Timeout after 5 seconds
         });
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to remove container', {
           containerId,
           error: error.message,
@@ -954,13 +954,13 @@ export class ActionSandbox {
       // Remove workspace directory
       try {
         await fs.rm(workspaceDir, { recursive: true, force: true });
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to remove workspace', {
           workspaceDir,
           error: error.message,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Cleanup failed', {
         containerId,
         workspaceDir,
@@ -1053,7 +1053,7 @@ export class ActionSandbox {
 
         networkProcess.on('error', reject);
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to setup network policies', { error: error.message });
     }
   }
@@ -1122,7 +1122,7 @@ export class ActionSandbox {
           '/etc/docker/seccomp/sandbox-profile.json',
           JSON.stringify(seccompProfile, null, 2),
         );
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Failed to create seccomp profile', {
           error: error.message,
         });
@@ -1148,7 +1148,7 @@ export class ActionSandbox {
               process.kill('SIGKILL');
             }
           }, 5000);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to stop container', {
             containerId,
             error: error.message,

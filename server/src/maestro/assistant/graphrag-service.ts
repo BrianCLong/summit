@@ -205,7 +205,7 @@ export class GraphRAGAssistantService {
       });
 
       return [...retrievedNodes, ...structuredData];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Graph retrieval error:', error);
       return [];
     } finally {
@@ -323,7 +323,7 @@ export class GraphRAGAssistantService {
           [context.runId],
         );
         results.push(
-          ...rows.map((row) => ({
+          ...rows.map((row: any) => ({
             ...row,
             type: 'run_data',
             source: 'database',
@@ -341,7 +341,7 @@ export class GraphRAGAssistantService {
            ORDER BY ts DESC LIMIT 5`,
         );
         results.push(
-          ...rows.map((row) => ({
+          ...rows.map((row: any) => ({
             ...row,
             type: 'error_data',
             source: 'database',
@@ -361,7 +361,7 @@ export class GraphRAGAssistantService {
            ORDER BY created_at DESC LIMIT 3`,
         );
         results.push(
-          ...rows.map((row) => ({
+          ...rows.map((row: any) => ({
             ...row,
             type: 'router_data',
             source: 'database',
@@ -369,7 +369,7 @@ export class GraphRAGAssistantService {
           })),
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Structured data query error:', error);
     }
 
@@ -408,7 +408,7 @@ export class GraphRAGAssistantService {
       const llmContent = data.choices?.[0]?.message?.content || '';
 
       return this.parseStructuredResponse(llmContent, retrievedInfo);
-    } catch (error) {
+    } catch (error: any) {
       console.error('LLM generation error:', error);
       throw new Error('Failed to generate response');
     }
@@ -486,7 +486,7 @@ Always end responses in JSON format:
           actions: structured.actions || [],
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       // Fallback to plain text parsing
     }
 
@@ -557,7 +557,7 @@ Always end responses in JSON format:
           response.confidence,
         ],
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Assistant interaction logging failed:', error);
     }
   }

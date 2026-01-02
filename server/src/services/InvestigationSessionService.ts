@@ -51,7 +51,7 @@ export class InvestigationSessionService {
     try {
       const res = await pool.query(query, values);
       return this.mapRow(res.rows[0]);
-    } catch (err) {
+    } catch (err: any) {
       logger.error('Error creating investigation session', err);
       throw err;
     }
@@ -129,13 +129,13 @@ export class InvestigationSessionService {
       const res = await pool.query(query, values);
       if (res.rows.length === 0) return null;
       return this.mapRow(res.rows[0]);
-    } catch (err) {
+    } catch (err: any) {
       logger.error('Error updating investigation session', err);
       throw err;
     }
   }
 
-  private mapRow(row: any): InvestigationSession {
+  private mapRow(row): InvestigationSession {
     return {
       id: row.id,
       tenantId: row.tenant_id,

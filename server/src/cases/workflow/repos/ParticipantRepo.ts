@@ -142,7 +142,7 @@ export class ParticipantRepo {
       [caseId, userId],
     );
 
-    return rows.map((r) => r.role_id);
+    return rows.map((r: any) => r.role_id);
   }
 
   /**
@@ -174,7 +174,7 @@ export class ParticipantRepo {
     }
 
     const { rows } = await this.pg.query(query, params);
-    return rows.map((r) => r.case_id);
+    return rows.map((r: any) => r.case_id);
   }
 
   // ==================== ROLES ====================
@@ -256,7 +256,7 @@ export class ParticipantRepo {
     );
 
     const roleMap: Record<string, string> = {};
-    rows.forEach((r) => {
+    rows.forEach((r: any) => {
       roleMap[r.name] = r.id;
     });
 
@@ -339,7 +339,7 @@ export class ParticipantRepo {
 
   // ==================== MAPPERS ====================
 
-  private mapParticipantRow(row: any): CaseParticipant {
+  private mapParticipantRow(row): CaseParticipant {
     return {
       id: row.id,
       caseId: row.case_id,
@@ -354,7 +354,7 @@ export class ParticipantRepo {
     };
   }
 
-  private mapRoleRow(row: any): CaseRole {
+  private mapRoleRow(row): CaseRole {
     return {
       id: row.id,
       name: row.name,

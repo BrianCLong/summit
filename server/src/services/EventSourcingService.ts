@@ -105,7 +105,7 @@ export class EventSourcingService {
       if (rows[0]?.event_hash) {
         this.lastEventHash = rows[0].event_hash;
       }
-    } catch (error) {
+    } catch (error: any) {
       serviceLogger.warn(
         { error: (error as Error).message },
         'Failed to initialize last event hash',
@@ -239,7 +239,7 @@ export class EventSourcingService {
       }
 
       return storedEvent;
-    } catch (error) {
+    } catch (error: any) {
       if (manageTx) {
         await managedClient!.query('ROLLBACK');
       }
@@ -287,7 +287,7 @@ export class EventSourcingService {
       );
 
       return storedEvents;
-    } catch (error) {
+    } catch (error: any) {
       if (client) {
         await client.query('ROLLBACK');
       }

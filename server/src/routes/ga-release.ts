@@ -17,7 +17,7 @@ router.get('/info', async (req, res) => {
       data: releaseInfo,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       error: 'Failed to get release info',
@@ -39,7 +39,7 @@ router.get('/status', async (req, res) => {
       data: deploymentStatus,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       error: 'Failed to validate deployment',
@@ -72,7 +72,7 @@ router.post('/generate-sbom', async (req, res) => {
         message: result.error,
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       error: 'SBOM generation error',
@@ -97,7 +97,7 @@ router.post('/preflight', async (req, res) => {
       },
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       error: 'Preflight check failed',

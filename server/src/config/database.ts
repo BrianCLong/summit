@@ -36,7 +36,7 @@ async function connectNeo4j(): Promise<Neo4jDriver> {
 
   try {
     await initializeNeo4jDriver();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('❌ Failed to establish Neo4j connectivity:', error);
     if (config.requireRealDbs) {
       throw error;
@@ -77,7 +77,7 @@ async function runNeo4jMigrations(): Promise<void> {
     const { migrationManager } = await import('../db/migrations/index.js');
     await migrationManager.migrate();
     logger.info('Neo4j migrations completed successfully');
-  } catch (error) {
+  } catch (error: any) {
     logger.warn(
       'Migration system not available, falling back to legacy constraints',
     );
@@ -105,7 +105,7 @@ function registerNeo4jReadyHook(): void {
         if (reason === 'reconnected') {
           logger.info('Neo4j migrations reapplied after driver reconnection.');
         }
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to run Neo4j migrations after driver recovery:', error);
       }
     }
@@ -133,7 +133,7 @@ async function createNeo4jConstraints(): Promise<void> {
     for (const constraint of constraints) {
       try {
         await session.run(constraint);
-      } catch (error) {
+      } catch (error: any) {
         const err = error as Error;
         if (!err.message.includes('already exists')) {
           logger.warn(
@@ -158,7 +158,7 @@ async function createNeo4jConstraints(): Promise<void> {
     for (const index of indexes) {
       try {
         await session.run(index);
-      } catch (error) {
+      } catch (error: any) {
         const err = error as Error;
         if (!err.message.includes('already exists')) {
           logger.warn('Failed to create index:', index, err.message);
@@ -167,7 +167,7 @@ async function createNeo4jConstraints(): Promise<void> {
     }
 
     logger.info('Neo4j constraints and indexes created');
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to create Neo4j constraints:', error);
   } finally {
     await session.close();
@@ -191,7 +191,7 @@ async function connectPostgres(): Promise<ManagedPostgresPool> {
 
     logger.info('✅ Connected to PostgreSQL');
     return postgresPool;
-  } catch (error) {
+  } catch (error: any) {
     logger.error('❌ Failed to connect to PostgreSQL:', error);
     throw error;
   }
@@ -253,7 +253,7 @@ async function connectRedis(): Promise<Redis | null> {
 
     logger.info('✅ Connected to Redis');
     return redisClient;
-  } catch (error) {
+  } catch (error: any) {
     const err = error as Error;
     logger.error('❌ Failed to connect to Redis:', err.message);
     // Don't throw error to allow server to start without Redis if needed

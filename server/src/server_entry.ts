@@ -48,7 +48,7 @@ const startServer = async () => {
       const kafkaModule = await import('./realtime/kafkaConsumer.js');
       startKafkaConsumer = kafkaModule.startKafkaConsumer;
       stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Kafka not available - running in minimal mode');
     }
   }
@@ -65,7 +65,7 @@ const startServer = async () => {
         minVersion: 'TLSv1.3' as const, // Enforce TLS 1.3
       };
       httpServer = https.createServer(httpsOptions, app);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to load SSL certs: ${error}`);
       process.exit(1);
     }
@@ -125,7 +125,7 @@ const startServer = async () => {
         try {
           const { createSampleData } = await import('./utils/sampleData.js');
           await createSampleData();
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to create sample data, continuing without it');
         }
       }, 2000); // Wait 2 seconds for connections to be established
@@ -153,7 +153,7 @@ const startServer = async () => {
       closePostgresPool(),
       closeRedisClient(),
     ]);
-    httpServer.close((err) => {
+    httpServer.close((err: any) => {
       if (err) {
         logger.error(
           `Error during shutdown: ${err instanceof Error ? err.message : 'Unknown error'}`,

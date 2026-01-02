@@ -29,7 +29,7 @@ export interface AnalysisResult {
 export class MasintService {
   private static instance: MasintService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): MasintService {
     if (!MasintService.instance) {
@@ -54,7 +54,7 @@ export class MasintService {
         'INSERT INTO masint_signals (id, type, data, timestamp) VALUES ($1, $2, $3, $4)',
         [data.id, type, data, new Date(data.timestamp || new Date())]
       );
-    } catch (err) {
+    } catch (err: any) {
       logger.error({ err, id: data.id }, 'Failed to persist raw MASINT signal');
       // Continue processing even if persistence fails? strictly speaking, we should probably fail.
       // But for robustness in this demo, we'll log and proceed, or throw.
@@ -109,7 +109,7 @@ export class MasintService {
         'INSERT INTO masint_analysis (signal_id, result) VALUES ($1, $2)',
         [data.id, result]
       );
-    } catch (err) {
+    } catch (err: any) {
       logger.error({ err, id: data.id }, 'Failed to persist MASINT analysis');
     }
 
@@ -171,8 +171,8 @@ export class MasintService {
         lon
       ]);
 
-      res.rows.forEach(row => correlations.push(row.id));
-    } catch (err) {
+      res.rows.forEach((row: any) => correlations.push(row.id));
+    } catch (err: any) {
       logger.warn({ err }, 'Error finding correlations');
     }
 
@@ -313,7 +313,7 @@ export class MasintService {
       if (res.rows.length > 0) {
         return res.rows[0].result as AnalysisResult;
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.error({ err, signalId }, 'Error retrieving analysis');
     }
     return undefined;

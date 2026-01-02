@@ -177,7 +177,7 @@ export class YjsHandler {
         // ws.send accepts TypedArray in many implementations, but uWS might be strict.
         // The safest is to send the buffer.
         ws.send(message.buffer.slice(message.byteOffset, message.byteOffset + message.byteLength), true); // true = binary
-    } catch (e) {
+    } catch (e: any) {
         console.error('Failed to send message to client', e);
     }
   }

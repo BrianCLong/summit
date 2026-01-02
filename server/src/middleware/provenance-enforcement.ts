@@ -47,7 +47,7 @@ export const PROVENANCE_CHAIN_HEADER = 'X-Provenance-Chain';
  * Extended Express Request with provenance context
  */
 export interface ProvenanceRequest extends Request {
-  correlationId?: string;
+  correlationId: string;
   provenanceChain?: ProvenanceChain;
   envelope?: DataEnvelope;
   userId?: string;
@@ -101,7 +101,7 @@ export function correlationIdMiddleware(
     console.log(`[Provenance] Correlation ID established: ${correlationId}`);
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Provenance] Error in correlation ID middleware:', error);
     next(error);
   }
@@ -193,7 +193,7 @@ export function validateIngressProvenance(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Provenance] Error validating ingress provenance:', error);
     res.status(500).json({
       error: 'Internal server error during provenance validation',
@@ -263,7 +263,7 @@ export function provenanceEnforcementMiddleware(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Provenance] Error in provenance enforcement:', error);
     next(error);
   }
@@ -429,7 +429,7 @@ export function responseWrapperMiddleware(config?: {
       };
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       console.error('[Provenance] Error in response wrapper middleware:', error);
       next(error);
     }
@@ -537,7 +537,7 @@ export function auditProvenanceMiddleware(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Provenance] Error in audit middleware:', error);
     // Don't fail the request if audit logging fails
     next();

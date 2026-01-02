@@ -299,7 +299,7 @@ export class ImageProcessingPipeline {
         gps: decoded.gps,
         interoperability: decoded.interoperability,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error }, 'Failed to parse EXIF data');
       return undefined;
     }
@@ -322,7 +322,7 @@ export class ImageProcessingPipeline {
         ...result,
         processedAt: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ err: error }, 'Facial recognition hook failed');
       return undefined;
     }
@@ -365,7 +365,7 @@ export class ImageProcessingPipeline {
           gravity,
           opacity,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.warn({ err: error }, 'Watermark image not accessible');
       }
     }

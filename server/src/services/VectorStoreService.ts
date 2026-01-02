@@ -73,41 +73,41 @@ export class VectorStoreService {
 
     // 3. Transaction: Insert Document + Chunks atomically
     await pool.withTransaction(async (client) => {
-        // Insert Document
-        await client.query(
-          `INSERT INTO documents (id, tenant_id, source_id, title, content, metadata)
+      // Insert Document
+      await client.query(
+        `INSERT INTO documents (id, tenant_id, source_id, title, content, metadata)
            VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          documentId,
+          tenantId,
+          data.sourceId,
+          data.title,
+          data.content,
+          data.metadata || {},
+        ]
+      );
+
+      // Insert Chunks
+      for (let i = 0; i < chunks.length; i++) {
+        const chunkContent = chunks[i];
+        const embedding = chunkEmbeddings[i];
+        const vectorString = `[${embedding.join(',')}]`;
+
+        await client.query(
+          `INSERT INTO document_chunks (
+                  document_id, tenant_id, chunk_index, content, metadata, embedding
+               ) VALUES ($1, $2, $3, $4, $5, $6::vector)`,
           [
             documentId,
             tenantId,
-            data.sourceId,
-            data.title,
-            data.content,
-            data.metadata || {},
+            i,
+            chunkContent,
+            data.metadata || {}, // Inherit doc metadata + specific chunk meta if needed
+            vectorString,
           ]
         );
-
-        // Insert Chunks
-        for (let i = 0; i < chunks.length; i++) {
-            const chunkContent = chunks[i];
-            const embedding = chunkEmbeddings[i];
-            const vectorString = `[${embedding.join(',')}]`;
-
-            await client.query(
-              `INSERT INTO document_chunks (
-                  document_id, tenant_id, chunk_index, content, metadata, embedding
-               ) VALUES ($1, $2, $3, $4, $5, $6::vector)`,
-              [
-                documentId,
-                tenantId,
-                i,
-                chunkContent,
-                data.metadata || {}, // Inherit doc metadata + specific chunk meta if needed
-                vectorString,
-              ]
-            );
-            storedCount++;
-        }
+        storedCount++;
+      }
     });
 
     logger.info({ tenantId, documentId, chunkCount: storedCount }, 'Document ingested');
@@ -165,7 +165,7 @@ export class VectorStoreService {
     params.push(threshold, limit);
     const result = await pool.read(sql, params);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       documentId: row.document_id,
       tenantId: row.tenant_id,
@@ -180,12 +180,12 @@ export class VectorStoreService {
    * Delete Document
    */
   async deleteDocument(documentId: string, tenantId: string): Promise<boolean> {
-      const pool = getPostgresPool();
-      const result = await pool.write(
-          'DELETE FROM documents WHERE id = $1 AND tenant_id = $2',
-          [documentId, tenantId]
-      );
-      return (result.rowCount ?? 0) > 0;
+    const pool = getPostgresPool();
+    const result = await pool.write(
+      'DELETE FROM documents WHERE id = $1 AND tenant_id = $2',
+      [documentId, tenantId]
+    );
+    return (result.rowCount ?? 0) > 0;
   }
 
   /**
@@ -203,24 +203,24 @@ export class VectorStoreService {
     let currentChunk = '';
 
     for (const raw of rawChunks) {
-        if ((currentChunk.length + raw.length) < maxChars) {
-            currentChunk += (currentChunk ? '\n\n' : '') + raw;
-        } else {
-            if (currentChunk) chunks.push(currentChunk);
+      if ((currentChunk.length + raw.length) < maxChars) {
+        currentChunk += (currentChunk ? '\n\n' : '') + raw;
+      } else {
+        if (currentChunk) chunks.push(currentChunk);
 
-            // If raw itself is too big, hard split it
-            if (raw.length > maxChars) {
-                let start = 0;
-                while (start < raw.length) {
-                    const end = Math.min(start + maxChars, raw.length);
-                    chunks.push(raw.slice(start, end));
-                    start = end - overlap; // Simple overlap
-                }
-                currentChunk = '';
-            } else {
-                currentChunk = raw;
-            }
+        // If raw itself is too big, hard split it
+        if (raw.length > maxChars) {
+          let start = 0;
+          while (start < raw.length) {
+            const end = Math.min(start + maxChars, raw.length);
+            chunks.push(raw.slice(start, end));
+            start = end - overlap; // Simple overlap
+          }
+          currentChunk = '';
+        } else {
+          currentChunk = raw;
         }
+      }
     }
 
     if (currentChunk) chunks.push(currentChunk);

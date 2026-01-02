@@ -171,7 +171,7 @@ export class PolicyLifecycleService {
 
         await this.db.query('COMMIT');
         return res.rows[0];
-    } catch (error) {
+    } catch (error: any) {
         await this.db.query('ROLLBACK');
         throw error;
     }

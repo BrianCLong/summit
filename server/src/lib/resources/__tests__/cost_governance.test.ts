@@ -73,7 +73,7 @@ describe('Cost Governance & FinOps', () => {
         expect(payload.tenantId).toBe(tenantIdAlert);
         expect(payload.threshold).toBe(0.5);
         done();
-      } catch (error) {
+      } catch (error: any) {
         done(error);
       }
     });

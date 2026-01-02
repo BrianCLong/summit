@@ -22,7 +22,7 @@ export const setFlagHandler = async (req: any, res: any) => {
     }
 
     res.json({ success: true, name, value, message: 'Flag set successfully' });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error setting flag', error);
     res.status(500).json({ error: 'Failed to set flag' });
   }

@@ -21,7 +21,7 @@ router.get('/dashboard/:agentId', ensureAuthenticated, requirePermission('agent:
     try {
         const health = await agentControlPlane.getAgentHealth(req.params.agentId);
         res.json(health);
-    } catch (error) {
+    } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: 'Failed to fetch agent health', details: errorMessage });
     }
@@ -37,7 +37,7 @@ router.post('/verify/:agentId', ensureAuthenticated, async (req: AuthenticatedRe
         } else {
             res.status(403).json(result);
         }
-    } catch (error) {
+    } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: 'Verification failed', details: errorMessage });
     }
@@ -49,7 +49,7 @@ router.post('/roi/:agentId', ensureAuthenticated, async (req: AuthenticatedReque
         const data = MetricRecordSchema.parse(req.body);
         const metric = await agentROITracker.recordMetric(req.params.agentId, data.metricType, data.value, data.context);
         res.status(201).json(metric);
-    } catch (error) {
+    } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: 'Failed to record ROI metric', details: errorMessage });
     }
@@ -61,7 +61,7 @@ router.get('/roi/aggregate', ensureAuthenticated, requirePermission('roi:read'),
         const tenantId = (req.context as RequestContext).tenantId;
         const totals = await agentROITracker.getAggregatedROI(tenantId);
         res.json({ totals });
-    } catch (error) {
+    } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         res.status(500).json({ error: 'Failed to fetch ROI aggregates', details: errorMessage });
     }

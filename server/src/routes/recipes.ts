@@ -15,7 +15,7 @@ router.get('/recipes', (_req, res) => {
       (f) => f.endsWith('.yaml') || f.endsWith('.yml'),
     );
     res.json({ items });
-  } catch (e) {
+  } catch (e: any) {
     res.status(500).json({ error: 'failed to list recipes' });
   }
 });
@@ -61,7 +61,7 @@ router.post('/recipes/run', express.json(), async (req, res) => {
           .status(400)
           .json({ error: `Recipe loading error: ${recipe.__error}` });
       }
-    } catch (error) {
+    } catch (error: any) {
       return res
         .status(400)
         .json({ error: `Failed to load recipe '${name}': ${error.message}` });
@@ -112,7 +112,7 @@ router.post('/recipes/run', express.json(), async (req, res) => {
       recipe: validRecipeFile,
       inputs: validatedInputs,
     });
-  } catch (e) {
+  } catch (e: any) {
     console.error('Recipe execution error:', e);
     res.status(500).json({ error: 'failed to run recipe' });
   }

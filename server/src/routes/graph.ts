@@ -61,7 +61,7 @@ router.post('/entities/search', ensureAuthenticated, checkQuota, async (req: Aut
 
     const entities = await graphService.findEntities(tenantId, query);
     res.json({ data: entities });
-  } catch (err) {
+  } catch (err: any) {
     logger.error('Graph Entity Search Error', err);
     next(err);
   }
@@ -77,7 +77,7 @@ router.get('/entities/:id', ensureAuthenticated, async (req: AuthenticatedReques
        return;
     }
     res.json({ data: entity });
-  } catch (err) {
+  } catch (err: any) {
     next(err);
   }
 });
@@ -96,7 +96,7 @@ router.get('/entities/:id/neighbors', ensureAuthenticated, async (req: Authentic
     });
 
     res.json({ data: result });
-  } catch (err) {
+  } catch (err: any) {
     next(err);
   }
 });
@@ -134,7 +134,7 @@ router.post('/patterns/search', ensureAuthenticated, checkQuota, async (req: Aut
     });
 
     res.json({ data: results });
-  } catch (err) {
+  } catch (err: any) {
     logger.error('Graph Pattern Search Error', err);
     next(err);
   }
@@ -166,7 +166,7 @@ router.post('/analytics/shortest-path', ensureAuthenticated, checkQuota, async (
     });
 
     res.json({ data: result });
-  } catch (err) {
+  } catch (err: any) {
     next(err);
   }
 });
@@ -194,7 +194,7 @@ router.post('/analytics/centrality', ensureAuthenticated, checkQuota, async (req
     });
 
     res.json({ data: result });
-  } catch (err) {
+  } catch (err: any) {
     next(err);
   }
 });
@@ -222,7 +222,7 @@ router.post('/analytics/anomalies', ensureAuthenticated, checkQuota, async (req:
       });
 
       res.json({ data: result });
-    } catch (err) {
+    } catch (err: any) {
       next(err);
     }
   });
@@ -242,7 +242,7 @@ router.post('/sessions', ensureAuthenticated, async (req: AuthenticatedRequest, 
 
         const session = await sessionService.createSession(tenantId, name, userId, graphState, metadata);
         res.status(201).json({ data: session });
-    } catch (err) {
+    } catch (err: any) {
         next(err);
     }
 });
@@ -255,7 +255,7 @@ router.get('/sessions', ensureAuthenticated, async (req: AuthenticatedRequest, r
 
         const sessions = await sessionService.listSessions(tenantId, userId, limit);
         res.json({ data: sessions });
-    } catch (err) {
+    } catch (err: any) {
         next(err);
     }
 });
@@ -271,7 +271,7 @@ router.get('/sessions/:id', ensureAuthenticated, async (req: AuthenticatedReques
              return;
         }
         res.json({ data: session });
-    } catch (err) {
+    } catch (err: any) {
         next(err);
     }
 });
@@ -288,7 +288,7 @@ router.put('/sessions/:id', ensureAuthenticated, async (req: AuthenticatedReques
              return;
         }
         res.json({ data: session });
-    } catch (err) {
+    } catch (err: any) {
         next(err);
     }
 });

@@ -75,7 +75,7 @@ export class NarrativePrioritizationService {
         priority,
         timestamp: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error prioritizing narrative:', error);
       throw error;
     }
@@ -139,7 +139,7 @@ export class NarrativePrioritizationService {
         // Normalize (heuristic: typical scores might be 0-5, we want 0-1)
         return Math.min(score / 5, 1.0);
 
-    } catch (error) {
+    } catch (error: any) {
         this.logger.error('Error analyzing graph signal:', error);
         return 0.1; // Fallback
     } finally {

@@ -32,7 +32,7 @@ export const serviceAuthzMiddleware = async (
     } else {
       res.status(403).send('Forbidden');
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error);
     res.status(500).send('Internal Server Error');
   }

@@ -266,7 +266,7 @@ export class ExplorationGuardrails {
         try {
           const config: ExplorationConfig = JSON.parse(configStr);
           this.configs.set(key, config);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to parse exploration config', {
             key,
             error: error.message,
@@ -275,7 +275,7 @@ export class ExplorationGuardrails {
       }
 
       logger.info(`Loaded ${this.configs.size} exploration configurations`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load exploration configurations', {
         error: error.message,
       });
@@ -294,7 +294,7 @@ export class ExplorationGuardrails {
       if (stateStr) {
         try {
           state = JSON.parse(stateStr);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn('Failed to parse exploration state', { configKey });
         }
       }

@@ -47,7 +47,7 @@ router.post('/designate-threat', async (req: AuthenticatedRequest, res: Response
     }
     const log = await zeroDayService.designateExistentialThreat(threatAnalysis);
     res.status(201).json(log);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -95,7 +95,7 @@ router.post('/delegate-authority', async (req: AuthenticatedRequest, res: Respon
     }
     const log = await zeroDayService.delegateAutonomousAuthority(threatId, humanOperatorId);
     res.json(log);
-  } catch (error) {
+  } catch (error: any) {
     // 409 Conflict is more appropriate for a state-related rejection
     res.status(409).json({ message: error.message });
   }
@@ -133,7 +133,7 @@ router.get('/status/:threatId', async (req: AuthenticatedRequest, res: Response,
     } else {
       res.status(404).json({ message: `Kill chain log for threat ID ${threatId} not found.` });
     }
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

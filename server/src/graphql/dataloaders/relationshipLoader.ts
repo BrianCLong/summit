@@ -81,7 +81,7 @@ async function batchLoadRelationships(
       }
       return relationship;
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, ids }, 'Error in relationship batch loader');
     return ids.map(() => error as Error);
   } finally {

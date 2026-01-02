@@ -43,7 +43,7 @@ export class QueryCache {
       if (cached) {
         return CompressionUtils.decompressFromString(cached);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Cache read failed', error);
     }
     return null;
@@ -54,7 +54,7 @@ export class QueryCache {
       const redis = getRedisClient();
       const compressed = await CompressionUtils.compressToString(value);
       await redis.set(key, compressed, 'EX', ttl);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Cache write failed', error);
     }
   }

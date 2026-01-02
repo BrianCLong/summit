@@ -37,7 +37,7 @@ export class RollbackEngine {
   public async performRollback(options: RollbackOptions): Promise<boolean> {
     return this.tracer.startActiveSpan(
       'deployment.rollback',
-      async (span) => {
+      async (span: any) => {
         span.setAttributes({
           'deployment.service': options.serviceName,
           'deployment.rollback_reason': options.reason,
@@ -58,7 +58,7 @@ export class RollbackEngine {
           });
           span.setStatus({ code: SpanStatusCode.OK });
           console.log('Rollback completed successfully.');
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error);
           span.addEvent('deployment.rollback.completed', {
             success: false,

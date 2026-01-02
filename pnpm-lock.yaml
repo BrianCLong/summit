@@ -22123,6 +22123,34 @@ importers:
 
   tools/deps-drift: {}
 
+  tools/issue-sweeper:
+    dependencies:
+      undici:
+        specifier: ^6.19.2
+        version: 6.22.0
+      yargs:
+        specifier: ^17.7.2
+        version: 17.7.2
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.24
+        version: 20.19.27
+      '@types/sinon':
+        specifier: ^21.0.0
+        version: 21.0.0
+      '@types/yargs':
+        specifier: ^17.0.32
+        version: 17.0.35
+      sinon:
+        specifier: ^21.0.1
+        version: 21.0.1
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   tools/plugin-cli:
     dependencies:
       '@intelgraph/plugin-sdk':
@@ -31997,6 +32025,12 @@ packages:
   '@sinonjs/fake-timers@13.0.5':
     resolution: {integrity: sha512-36/hTbH2uaWuGVERyC6da9YwGWnzUZXuPro/F2LfsdOsLnCojz/iSH8MxUt/FD2S5XBSVPhmArFUXcpCQ2Hkiw==}
 
+  '@sinonjs/fake-timers@15.1.0':
+    resolution: {integrity: sha512-cqfapCxwTGsrR80FEgOoPsTonoefMBY7dnUEbQ+GRcved0jvkJLzvX6F4WtN+HBqbPX/SiFsIRUp+IrCW/2I2w==}
+
+  '@sinonjs/samsam@8.0.3':
+    resolution: {integrity: sha512-hw6HbX+GyVZzmaYNh82Ecj1vdGZrqVIn/keDTg63IgAwiQPO+xCz99uG6Woqgb4tM0mUiFENKZ4cqd7IX94AXQ==}
+
   '@slack/bolt@3.22.0':
     resolution: {integrity: sha512-iKDqGPEJDnrVwxSVlFW6OKTkijd7s4qLBeSufoBsTM0reTyfdp/5izIQVkxNfzjHi3o6qjdYbRXkYad5HBsBog==}
     engines: {node: '>=14.21.3', npm: '>=6.14.18'}
@@ -34673,6 +34707,9 @@ packages:
 
   '@types/shimmer@1.2.0':
     resolution: {integrity: sha512-UE7oxhQLLd9gub6JKIAhDq06T0F6FnztwMNRvYgjeQSBeMc1ZG/tA47EwfduvkuQS8apbkM/lpLpWsaCeYsXVg==}
+
+  '@types/sinon@21.0.0':
+    resolution: {integrity: sha512-+oHKZ0lTI+WVLxx1IbJDNmReQaIsQJjN2e7UUrJHEeByG7bFeKJYsv1E75JxTQ9QKJDp21bAa/0W2Xo4srsDnw==}
 
   '@types/sinonjs__fake-timers@8.1.1':
     resolution: {integrity: sha512-0kSuKjAS0TrGLJ0M/+8MaFkGsQhZpB6pxOmvS3K8FYI72K//YmdfoW9X2qPsAKh1mkwxGD5zib9s1FIFed6E8g==}
@@ -38821,6 +38858,10 @@ packages:
 
   diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
+    engines: {node: '>=0.3.1'}
+
+  diff@8.0.2:
+    resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
     engines: {node: '>=0.3.1'}
 
   diffie-hellman@5.0.3:
@@ -47827,6 +47868,9 @@ packages:
 
   single-user-cache@2.1.0:
     resolution: {integrity: sha512-Wmu+uIEkabMoQPpJTOYhEsE6h/XjnjIhtuB1+tynxeO/hQxwQD0hIDq/ad65P1Tw9wt9f5SKnUe+63m6TMB4Uw==}
+
+  sinon@21.0.1:
+    resolution: {integrity: sha512-Z0NVCW45W8Mg5oC/27/+fCqIHFnW8kpkFOq0j9XJIev4Ld0mKmERaZv5DMLAb9fGCevjKwaEeIQz5+MBXfZcDw==}
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -66310,6 +66354,15 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 3.0.1
 
+  '@sinonjs/fake-timers@15.1.0':
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+
+  '@sinonjs/samsam@8.0.3':
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+      type-detect: 4.1.0
+
   '@slack/bolt@3.22.0':
     dependencies:
       '@slack/logger': 4.0.0
@@ -71194,6 +71247,10 @@ snapshots:
       '@types/node': 20.19.27
 
   '@types/shimmer@1.2.0': {}
+
+  '@types/sinon@21.0.0':
+    dependencies:
+      '@types/sinonjs__fake-timers': 8.1.1
 
   '@types/sinonjs__fake-timers@8.1.1': {}
 
@@ -76780,6 +76837,8 @@ snapshots:
   diff@3.5.0: {}
 
   diff@4.0.2: {}
+
+  diff@8.0.2: {}
 
   diffie-hellman@5.0.3:
     dependencies:
@@ -89173,6 +89232,14 @@ snapshots:
   single-user-cache@2.1.0:
     dependencies:
       safe-stable-stringify: 2.5.0
+
+  sinon@21.0.1:
+    dependencies:
+      '@sinonjs/commons': 3.0.1
+      '@sinonjs/fake-timers': 15.1.0
+      '@sinonjs/samsam': 8.0.3
+      diff: 8.0.2
+      supports-color: 7.2.0
 
   sisteransi@1.0.5: {}
 

@@ -18,7 +18,7 @@ function formatJoiErrors(error: Joi.ValidationError) {
 }
 
 function formatZodErrors(error: z.ZodError) {
-  return error.errors.map((err) => `${err.path.join('.') || 'value'}: ${err.message}`);
+  return error.errors.map((err: any) => `${err.path.join('.') || 'value'}: ${err.message}`);
 }
 
 export function buildRequestValidator({
@@ -75,7 +75,7 @@ export function buildRequestValidator({
 
       (req as any)[target] = sanitized;
       next();
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ error: 'Request validation failed unexpectedly' });
     }
   };

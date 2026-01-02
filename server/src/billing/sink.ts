@@ -34,7 +34,7 @@ export class BillingAdapter {
           region: process.env.AWS_REGION || 'us-east-1',
           maxAttempts: 3 // AWS SDK built-in retries
         });
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err }, "Failed to initialize S3 client");
         this.enabled = false; // Disable if client fails
       }
@@ -104,7 +104,7 @@ export class BillingAdapter {
         logger.info({ tenant: record.tenant_id, key }, "Usage exported successfully");
         return `s3://${this.bucket}/${key}`;
 
-      } catch (err) {
+      } catch (err: any) {
         attempts++;
         logger.warn({ err, attempts, tenant: record.tenant_id }, "Failed to export usage, retrying...");
         if (attempts >= maxRetries) {

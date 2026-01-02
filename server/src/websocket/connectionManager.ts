@@ -305,7 +305,7 @@ export class ManagedConnection {
       if (typeof (this.ws as any).close === 'function') {
         (this.ws as any).close(code, reason);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.options.logger.warn?.(
         `Failed to close WebSocket ${this.context.id}: ${String(error)}`,
       );
@@ -502,7 +502,7 @@ export class ManagedConnection {
         ) {
           return false;
         }
-      } catch (error) {
+      } catch (error: any) {
         this.options.logger.warn?.(
           `Failed to read bufferedAmount for ${this.context.id}: ${String(error)}`,
         );
@@ -522,7 +522,7 @@ export class ManagedConnection {
           .observe(Math.max(0, Date.now() - meta.enqueuedAt));
       }
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.options.logger.error?.(
         `WebSocket send failed for ${this.context.id}: ${String(error)}`,
       );

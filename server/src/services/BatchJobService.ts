@@ -87,7 +87,7 @@ class BatchJobService {
       await registerRevenueJobs(this.boss);
 
       // Register worker for report generation
-      await this.boss.work(JOB_QUEUE_GENERATE_REPORT, async (job) => {
+      await this.boss.work(JOB_QUEUE_GENERATE_REPORT, async (job: any) => {
           console.log(`[PG-BOSS] Processing report job ${job.id} (${job.name})`);
           try {
               const { request, userId, reportName } = job.data;
@@ -101,7 +101,7 @@ class BatchJobService {
 
               await reportingService.generate(request, access);
               console.log(`[PG-BOSS] Report generated successfully for job ${job.id}`);
-          } catch (error) {
+          } catch (error: any) {
               console.error(`[PG-BOSS] Report generation failed for job ${job.id}:`, error);
               throw error;
           }

@@ -33,7 +33,7 @@ describe('TemplateValidator', () => {
 
       try {
         TemplateValidator.validateCustomTemplate(template);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('name');
         expect((error as ValidationError).code).toBe('REQUIRED');
       }
@@ -51,7 +51,7 @@ describe('TemplateValidator', () => {
 
       try {
         TemplateValidator.validateCustomTemplate(template);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('name');
         expect((error as ValidationError).code).toBe('MAX_LENGTH');
       }
@@ -69,7 +69,7 @@ describe('TemplateValidator', () => {
 
       try {
         TemplateValidator.validateCustomTemplate(template);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('sections');
         expect((error as ValidationError).code).toBe('REQUIRED');
       }
@@ -98,7 +98,7 @@ describe('TemplateValidator', () => {
 
       try {
         TemplateValidator.validateCustomTemplate(template);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('sections');
         expect((error as ValidationError).code).toBe('INVALID_FORMAT');
       }
@@ -117,7 +117,7 @@ describe('TemplateValidator', () => {
 
       try {
         TemplateValidator.validateCustomTemplate(template);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('exportFormats');
         expect((error as ValidationError).code).toBe('INVALID_FORMAT');
         expect((error as ValidationError).message).toContain('invalid_format');
@@ -153,7 +153,7 @@ describe('TemplateValidator', () => {
 
       try {
         TemplateValidator.validateCustomTemplate(template);
-      } catch (error) {
+      } catch (error: any) {
         expect((error as ValidationError).field).toBe('description');
         expect((error as ValidationError).code).toBe('MAX_LENGTH');
       }

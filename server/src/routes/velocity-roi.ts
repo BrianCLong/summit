@@ -28,7 +28,7 @@ router.get('/dashboard', (req, res) => {
                 projectedAnnualSavings: roi.savings * 52
             }
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Velocity dashboard error:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -47,7 +47,7 @@ router.post('/ingest', (req, res) => {
 
         tracker.addMetric({ ...metric, timestamp: Date.now() });
         res.status(201).json({ status: 'ingested' });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

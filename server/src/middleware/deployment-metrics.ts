@@ -30,27 +30,27 @@ export class DeploymentMetrics {
   private prefix: string;
 
   // Deployment metrics
-  private deploymentCounter: Counter;
-  private deploymentDuration: Histogram;
-  private deploymentStatus: Gauge;
+  private deploymentCounter!: Counter;
+  private deploymentDuration!: Histogram;
+  private deploymentStatus!: Gauge;
 
   // Feature flag metrics
-  private featureFlagEvaluations: Counter;
-  private featureFlagCacheHits: Counter;
-  private featureFlagCacheMisses: Counter;
+  private featureFlagEvaluations!: Counter;
+  private featureFlagCacheHits!: Counter;
+  private featureFlagCacheMisses!: Counter;
 
   // Health check metrics
-  private healthCheckDuration: Histogram;
-  private healthCheckStatus: Gauge;
+  private healthCheckDuration!: Histogram;
+  private healthCheckStatus!: Gauge;
 
   // Release metrics
-  private releaseCounter: Counter;
-  private rollbackCounter: Counter;
+  private releaseCounter!: Counter;
+  private rollbackCounter!: Counter;
 
   // API metrics
-  private requestDuration: Histogram;
-  private requestCounter: Counter;
-  private errorCounter: Counter;
+  private requestDuration!: Histogram;
+  private requestCounter!: Counter;
+  private errorCounter!: Counter;
 
   constructor(config: DeploymentMetricsConfig) {
     this.enabled = config.enabled;

@@ -35,7 +35,7 @@ export class PrometheusMetricProvider implements IMetricProvider {
         const value = await (tenantTotalCosts as any).get();
         const tenantValue = value.values.find((v: any) => v.labels.tenant_id === tenantId);
         return tenantValue ? tenantValue.value : 0;
-    } catch (e) {
+    } catch (e: any) {
         return 0;
     }
   }
@@ -45,7 +45,7 @@ export class PrometheusMetricProvider implements IMetricProvider {
         const value = await (tenantBudgetUtilization as any).get();
         const tenantValue = value.values.find((v: any) => v.labels.tenant_id === tenantId);
         return tenantValue ? tenantValue.value : 0;
-    } catch (e) {
+    } catch (e: any) {
         return 0;
     }
   }

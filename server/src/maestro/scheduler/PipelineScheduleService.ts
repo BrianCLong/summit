@@ -62,7 +62,7 @@ class PipelineScheduleService {
             if (io) {
               MaestroEvents.emitStatusChange(io, tenantId, run.id, 'queued');
             }
-          } catch (error) {
+          } catch (error: any) {
             logger.error(
               { error, pipelineId, tenantId },
               'Failed to enqueue scheduled pipeline run',
@@ -73,7 +73,7 @@ class PipelineScheduleService {
         true,
         schedule.timezone || 'UTC',
       );
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Invalid cron expression');
     }
 

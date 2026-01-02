@@ -68,7 +68,7 @@ export async function findRelationshipsByEntityIdOptimized(
   // Note: UNION ALL may return duplicates if same relationship appears in both
   // Deduplicate by ID if needed
   const uniqueRows = Array.from(
-    new Map(rows.map((row) => [row.id, row])).values(),
+    new Map(rows.map((row: any) => [row.id, row])).values(),
   );
 
   return uniqueRows;
@@ -221,7 +221,7 @@ export async function batchCreateEntitiesOptimized(
       count: inputs.length,
       userId,
     });
-  } catch (error) {
+  } catch (error: any) {
     await client.query('ROLLBACK');
     throw error;
   } finally {
@@ -342,7 +342,7 @@ export async function executeWithPerfMonitoring<T>(
     }
 
     return result as T;
-  } catch (error) {
+  } catch (error: any) {
     const duration = performance.now() - start;
     perfLogger.error({
       label,
@@ -390,7 +390,7 @@ export async function getSlowQueries(
     );
 
     return rows;
-  } catch (error) {
+  } catch (error: any) {
     // pg_stat_statements may not be installed
     perfLogger.warn(
       'pg_stat_statements not available, cannot query slow queries',
@@ -427,7 +427,7 @@ export async function getIndexUsageStats(
     [tableName],
   );
 
-  return rows.map((r) => ({
+  return rows.map((r: any) => ({
     indexName: r.index_name,
     timesUsed: parseInt(r.times_used || '0'),
     tuplesRead: parseInt(r.tuples_read || '0'),

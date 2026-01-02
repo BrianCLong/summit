@@ -371,7 +371,7 @@ export class AuthService {
         refreshToken,
         expiresIn: 24 * 60 * 60,
       };
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error registering user:', error);
       throw error;
@@ -422,7 +422,7 @@ export class AuthService {
         refreshToken,
         expiresIn: 24 * 60 * 60,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error logging in user via SSO:', error);
       (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'failure_sso' });
       throw error;
@@ -448,7 +448,7 @@ export class AuthService {
    * try {
    *   const auth = await authService.login('user@example.com', 'password123');
    *   // Store auth.token and auth.refreshToken securely
-   * } catch (error) {
+   * } catch (error: any) {
    *   console.error('Login failed:', error.message);
    * }
    * ```
@@ -496,7 +496,7 @@ export class AuthService {
         refreshToken,
         expiresIn: 24 * 60 * 60,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error logging in user:', error);
       (metrics as any).userLoginsTotal?.inc({ tenant_id: tenantId, result: 'failure' });
       throw error;
@@ -676,7 +676,7 @@ export class AuthService {
       });
 
       return newTokenPair;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error refreshing token:', error);
       return null;
     } finally {
@@ -706,7 +706,7 @@ export class AuthService {
 
       logger.info('Token successfully blacklisted');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error revoking token:', error);
       return false;
     }
@@ -750,7 +750,7 @@ export class AuthService {
 
       logger.info('User logged out successfully', { userId });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Error during logout:', error);
       return false;

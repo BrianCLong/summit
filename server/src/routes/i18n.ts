@@ -27,6 +27,7 @@ const requireFeatureFlag = (flagName: string) => {
   };
 };
 
+
 // Optional auth middleware - allows unauthenticated access
 const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
   const auth = req.headers.authorization || '';
@@ -80,7 +81,7 @@ const SetPreferencesSchema = z.object({
 });
 
 const FormatDateSchema = z.object({
-  date: z.string().transform((str) => new Date(str)),
+  date: z.string().transform((str: string) => new Date(str)),
   locale: z.string(),
   dateStyle: z.enum(['full', 'long', 'medium', 'short']).optional(),
   timeStyle: z.enum(['full', 'long', 'medium', 'short']).optional(),
@@ -109,7 +110,7 @@ router.get(
     try {
       const result = i18nService.getSupportedLocales();
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -134,7 +135,7 @@ router.get(
       }
 
       res.json({ data: config });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -170,7 +171,7 @@ router.get(
       );
 
       res.json({ data: result });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -197,7 +198,7 @@ router.get(
 
       const result = i18nService.translate(key, locale as any, namespace as any);
       res.json({ data: { key, locale, translation: result } });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -224,7 +225,7 @@ router.post(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -251,7 +252,7 @@ router.post(
       });
 
       res.json({ data: { formatted: result } });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -276,7 +277,7 @@ router.post(
 
       const result = i18nService.formatNumber(value, (locale || 'en-US') as any);
       res.json({ data: { formatted: result } });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -303,7 +304,7 @@ router.post(
       });
 
       res.json({ data: { formatted: result } });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -328,7 +329,7 @@ router.get(
       }
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -348,7 +349,7 @@ router.get(
       const result = i18nService.getComplianceForLocale(locale as any);
 
       res.json({ data: result });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -367,7 +368,7 @@ router.get(
       const { locale } = req.params;
       const result = await i18nService.getTranslationStatus(locale as any);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -389,7 +390,7 @@ router.put(
       await i18nService.setUserLocalePreferences(userId, tenantId, data);
 
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }
@@ -410,7 +411,7 @@ router.get(
       const result = await i18nService.getUserLocalePreferences(userId, tenantId);
 
       res.json({ data: result });
-    } catch (error) {
+    } catch (error: any) {
       next(error);
     }
   }

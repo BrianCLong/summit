@@ -45,7 +45,7 @@ export class CoherenceGraphQLResolvers {
       // Get current coherence score from materialized view
       const session = this.neo4j.getSession();
       try {
-        const result = await session.executeRead(async (tx) => {
+        const result = await session.executeRead(async (tx: any) => {
           return await tx.run(
             `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
@@ -108,7 +108,7 @@ export class CoherenceGraphQLResolvers {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get coherence score', {
         error,
         tenantId: req.params.tenantId,
@@ -155,7 +155,7 @@ export class CoherenceGraphQLResolvers {
           week: 'date(s.ts) - duration({days: s.ts.dayOfWeek - 1})',
         }[aggregation];
 
-        const result = await session.executeRead(async (tx) => {
+        const result = await session.executeRead(async (tx: any) => {
           return await tx.run(
             `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
@@ -220,7 +220,7 @@ export class CoherenceGraphQLResolvers {
       } finally {
         await session.close();
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           error: 'Invalid query parameters',
@@ -276,7 +276,7 @@ export class CoherenceGraphQLResolvers {
       };
 
       res.json(insights);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get coherence insights', {
         error,
         tenantId: req.params.tenantId,
@@ -358,7 +358,7 @@ export class CoherenceGraphQLResolvers {
     // Risk assessment based on coherence patterns
     const session = this.neo4j.getSession();
     try {
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
@@ -484,7 +484,7 @@ export class CoherenceGraphQLResolvers {
   private async assessDataQuality(tenantId: string): Promise<any> {
     const session = this.neo4j.getSession();
     try {
-      const result = await session.executeRead(async (tx) => {
+      const result = await session.executeRead(async (tx: any) => {
         return await tx.run(
           `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)

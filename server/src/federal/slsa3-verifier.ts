@@ -119,7 +119,7 @@ export class SLSA3Verifier {
             .digest('hex')
             .substring(0, 16);
           this.trustedKeyCache.set(keyId, keyObject);
-        } catch (error) {
+        } catch (error: any) {
           console.warn(`Failed to load trusted key ${keyPath}:`, error);
         }
       }
@@ -127,7 +127,7 @@ export class SLSA3Verifier {
       console.log(
         `✅ Loaded ${this.trustedKeyCache.size} trusted SLSA verification keys`,
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load trusted keys:', error);
     }
   }
@@ -146,7 +146,7 @@ export class SLSA3Verifier {
         .update(fileData)
         .digest('hex');
       return actualHex === expectedHex.toLowerCase();
-    } catch (error) {
+    } catch (error: any) {
       console.error(`SHA256 verification failed for ${filePath}:`, error);
       return false;
     }
@@ -198,7 +198,7 @@ export class SLSA3Verifier {
         if (age > this.config.maxAge * 1000) {
           errors.push(`Provenance too old: ${age / 1000 / 86400} days`);
         }
-      } catch (error) {
+      } catch (error: any) {
         errors.push('Invalid startedOn timestamp format');
       }
     }
@@ -210,7 +210,7 @@ export class SLSA3Verifier {
         if (finish <= start) {
           errors.push('Invalid build duration: finishedOn <= startedOn');
         }
-      } catch (error) {
+      } catch (error: any) {
         errors.push('Invalid timestamp format in metadata');
       }
     }
@@ -691,7 +691,7 @@ export class SLSA3Verifier {
     }));
 
     const levels = results
-      .map((r) => r.result.level)
+      .map((r: any) => r.result.level)
       .filter((l) => l !== 'SLSA_0');
     const minLevel = levels.length > 0 ? levels.sort()[0] : 'SLSA_0';
     const maxLevel = levels.length > 0 ? levels.sort().reverse()[0] : 'SLSA_0';
@@ -714,7 +714,7 @@ export class SLSA3Verifier {
       );
     }
 
-    if (!results.every((r) => r.result.checks.hermetic)) {
+    if (!results.every((r: any) => r.result.checks.hermetic)) {
       recommendations.push(
         'Ensure all builds are hermetic for improved supply chain security',
       );

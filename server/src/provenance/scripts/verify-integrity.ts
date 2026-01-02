@@ -20,7 +20,7 @@ const validEntry: Partial<ProvenanceEntry> = {
 try {
   validateInvariants(validEntry);
   console.log('  PASS: Valid entry accepted');
-} catch (e) {
+} catch (e: any) {
   console.error('  FAIL: Valid entry rejected', e);
   process.exit(1);
 }

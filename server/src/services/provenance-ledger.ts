@@ -150,7 +150,7 @@ export class ProvenanceLedgerService {
       });
 
       return id;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to record provenance entry',
         error: error instanceof Error ? error.message : String(error),
@@ -216,7 +216,7 @@ export class ProvenanceLedgerService {
       });
 
       return claim;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to register claim',
         error: error instanceof Error ? error.message : String(error),
@@ -273,7 +273,7 @@ export class ProvenanceLedgerService {
       });
 
       return manifest;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to create export manifest',
         error: error instanceof Error ? error.message : String(error),
@@ -389,7 +389,7 @@ export class ProvenanceLedgerService {
       });
 
       return disclosure_bundle;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to create disclosure bundle',
         error: error instanceof Error ? error.message : String(error),
@@ -439,7 +439,7 @@ export class ProvenanceLedgerService {
         valid: errors.length === 0,
         errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Provenance chain verification failed',
         error: error instanceof Error ? error.message : String(error),
@@ -465,7 +465,7 @@ export class ProvenanceLedgerService {
       entityIds,
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       parent_hash: row.parent_hash,
       content_hash: row.content_hash,
@@ -511,7 +511,7 @@ export class ProvenanceLedgerService {
       params,
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       parent_hash: row.parent_hash,
       content_hash: row.content_hash,

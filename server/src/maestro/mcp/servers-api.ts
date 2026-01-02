@@ -97,7 +97,7 @@ router.get('/servers', async (_req, res) => {
     const list = await mcpServersRepo.list();
     const safe = list.map(({ auth_token, ...rest }) => rest);
     res.json(safe);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to list MCP servers:', err);
     res.status(500).json({ error: 'failed to list servers' });
   }
@@ -110,7 +110,7 @@ router.get('/servers/:id', async (req, res) => {
     if (!rec) return res.status(404).json({ error: 'server not found' });
     const { auth_token, ...safe } = rec as any;
     res.json(safe);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to get MCP server:', err);
     res.status(500).json({ error: 'failed to get server' });
   }
@@ -161,7 +161,7 @@ router.delete('/servers/:id', requireAdminMCP, async (req, res) => {
     const ok = await mcpServersRepo.delete(req.params.id);
     if (!ok) return res.status(404).json({ error: 'server not found' });
     res.status(204).send();
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to delete MCP server:', err);
     res.status(500).json({ error: 'failed to delete server' });
   }
@@ -174,7 +174,7 @@ router.get('/servers/:id/health', async (req, res) => {
     if (!rec) return res.status(404).json({ error: 'server not found' });
     const healthy = await checkMCPHealth(rec.url, rec.auth_token || undefined);
     res.json({ id: rec.id, name: rec.name, url: rec.url, healthy });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Health check failed:', err);
     res.status(500).json({ error: 'health check failed' });
   }

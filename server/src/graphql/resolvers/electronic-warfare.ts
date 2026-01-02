@@ -16,21 +16,21 @@ const resolvers = {
   },
   Mutation: {
     ewRegisterAsset: (_: unknown, args: {
-        id: string;
-        name: string;
-        type: 'GROUND_STATION' | 'AIRCRAFT' | 'SATELLITE' | 'SHIP' | 'MANPACK';
-        lat: number;
-        lon: number;
-        capabilities: any[];
-        maxPower: number;
-        minFreq: number;
-        maxFreq: number;
+      id: string;
+      name: string;
+      type: 'GROUND_STATION' | 'AIRCRAFT' | 'SATELLITE' | 'SHIP' | 'MANPACK';
+      lat: number;
+      lon: number;
+      capabilities: any[];
+      maxPower: number;
+      minFreq: number;
+      maxFreq: number;
     }) => {
       const asset: EWAsset = {
         id: args.id,
         name: args.name,
         type: args.type,
-        location: { lat: args.lat, lon: args.lon },
+        location: { lat: args.lat, lon: args.lon || 0 },
         capabilities: args.capabilities,
         maxPower: args.maxPower,
         frequencyRange: [args.minFreq, args.maxFreq],
@@ -62,18 +62,18 @@ const resolvers = {
       try {
         EWService.stopJammer(args.missionId);
         return true;
-      } catch (e) {
+      } catch (e: any) {
         return false;
       }
     },
     ewSimulateSignalDetection: (_: unknown, args: {
-        frequency: number;
-        bandwidth: number;
-        power: number;
-        modulation: string;
-        type: any;
-        lat?: number;
-        lon?: number;
+      frequency: number;
+      bandwidth: number;
+      power: number;
+      modulation: string;
+      type: any;
+      lat?: number;
+      lon?: number;
     }) => {
       const signal: SpectrumSignal = {
         id: `SIG-${Date.now()}`,
@@ -82,7 +82,7 @@ const resolvers = {
         power: args.power,
         modulation: args.modulation,
         type: args.type,
-        location: args.lat ? { lat: args.lat, lon: args.lon } : undefined,
+        location: args.lat ? { lat: args.lat, lon: args.lon || 0 } : undefined,
         timestamp: new Date(),
       };
       EWService.detectSignal(signal);
@@ -95,7 +95,7 @@ const resolvers = {
       try {
         EWService.activateProtection(args.assetId, args.measure);
         return true;
-      } catch (e) {
+      } catch (e: any) {
         return false;
       }
     },

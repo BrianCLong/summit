@@ -527,10 +527,10 @@ export class StrategicAnalysisEngine {
 
   private updateRiskMatrix(assessment: RiskAssessment): void {
     assessment.riskMatrix = {
-      lowRisks: assessment.risks.filter((r) => r.riskScore < 2.5).map((r) => r.id),
-      mediumRisks: assessment.risks.filter((r) => r.riskScore >= 2.5 && r.riskScore < 5).map((r) => r.id),
-      highRisks: assessment.risks.filter((r) => r.riskScore >= 5 && r.riskScore < 7.5).map((r) => r.id),
-      criticalRisks: assessment.risks.filter((r) => r.riskScore >= 7.5).map((r) => r.id),
+      lowRisks: assessment.risks.filter((r: any) => r.riskScore < 2.5).map((r: any) => r.id),
+      mediumRisks: assessment.risks.filter((r: any) => r.riskScore >= 2.5 && r.riskScore < 5).map((r: any) => r.id),
+      highRisks: assessment.risks.filter((r: any) => r.riskScore >= 5 && r.riskScore < 7.5).map((r: any) => r.id),
+      criticalRisks: assessment.risks.filter((r: any) => r.riskScore >= 7.5).map((r: any) => r.id),
       heatmapData: this.generateHeatmapData(assessment.risks),
     };
   }
@@ -543,7 +543,7 @@ export class StrategicAnalysisEngine {
     for (const prob of probBuckets) {
       for (const impact of impactBuckets) {
         const cellRisks = risks.filter(
-          (r) =>
+          (r: any) =>
             r.probability <= prob &&
             r.probability > prob - 0.2 &&
             this.impactToNumeric(r.impact) === impact,
@@ -560,7 +560,7 @@ export class StrategicAnalysisEngine {
         heatmap.push({
           probability: prob,
           impact,
-          riskIds: cellRisks.map((r) => r.id),
+          riskIds: cellRisks.map((r: any) => r.id),
           color: colors[`${prob}-${impact}`] || '#9e9e9e',
         });
       }

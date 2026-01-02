@@ -52,7 +52,7 @@ incidentRouter.post('/incidents', async (req, res) => {
       status: 'created',
       message: 'Incident created and response initiated',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Incident creation error:', error);
     res.status(500).json({
       error: 'Failed to create incident',
@@ -80,7 +80,7 @@ incidentRouter.get('/incidents/:id', async (req, res) => {
 
     const incident = JSON.parse(incidentData);
     res.json(incident);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Incident retrieval error:', error);
     res.status(500).json({
       error: 'Failed to retrieve incident',
@@ -122,7 +122,7 @@ incidentRouter.get('/incidents', async (req, res) => {
       incidents,
       total: incidents.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Incident list error:', error);
     res.status(500).json({
       error: 'Failed to retrieve incidents',
@@ -157,7 +157,7 @@ incidentRouter.post('/runbooks/:id/execute', async (req, res) => {
       status: 'started',
       message: 'Runbook execution started',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook execution error:', error);
     res.status(500).json({
       error: 'Failed to execute runbook',
@@ -181,7 +181,7 @@ incidentRouter.get('/runbooks/executions/:id', async (req, res) => {
     }
 
     res.json(execution);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Execution retrieval error:', error);
     res.status(500).json({
       error: 'Failed to retrieve execution',
@@ -202,18 +202,18 @@ incidentRouter.get('/runbooks', async (req, res) => {
     let filtered = runbooks;
 
     if (category) {
-      filtered = filtered.filter((r) => r.category === category);
+      filtered = filtered.filter((r: any) => r.category === category);
     }
 
     if (severity) {
-      filtered = filtered.filter((r) => r.severity === severity);
+      filtered = filtered.filter((r: any) => r.severity === severity);
     }
 
     res.json({
       runbooks: filtered,
       total: filtered.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Runbook list error:', error);
     res.status(500).json({
       error: 'Failed to retrieve runbooks',
@@ -246,7 +246,7 @@ incidentRouter.post('/runbooks/executions/:id/:action', async (req, res) => {
           valid_actions: ['pause', 'abort'],
         });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Execution control error:', error);
     res.status(500).json({
       error: 'Failed to control execution',
@@ -288,7 +288,7 @@ incidentRouter.post('/war-rooms', async (req, res) => {
       warRoomUrl: `ws://localhost:8083?session=${sessionId}&user=${commander}`,
       status: 'created',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room creation error:', error);
     res.status(500).json({
       error: 'Failed to create war room',
@@ -312,7 +312,7 @@ incidentRouter.get('/war-rooms/:id', async (req, res) => {
     }
 
     res.json(session);
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room retrieval error:', error);
     res.status(500).json({
       error: 'Failed to retrieve war room',
@@ -331,7 +331,7 @@ incidentRouter.get('/war-rooms', async (req, res) => {
       warRooms: sessions,
       total: sessions.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room list error:', error);
     res.status(500).json({
       error: 'Failed to retrieve war rooms',
@@ -366,7 +366,7 @@ incidentRouter.post('/war-rooms/:id/join', async (req, res) => {
       message: 'Joined war room successfully',
       warRoomUrl: `ws://localhost:8083?session=${id}&user=${userId}`,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room join error:', error);
     res.status(500).json({
       error: 'Failed to join war room',
@@ -394,7 +394,7 @@ incidentRouter.post('/war-rooms/:id/messages', async (req, res) => {
     res.json({
       message: 'Message sent successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room message error:', error);
     res.status(500).json({
       error: 'Failed to send message',
@@ -429,7 +429,7 @@ incidentRouter.post('/war-rooms/:id/decisions', async (req, res) => {
       decisionId,
       message: 'Decision recorded successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room decision error:', error);
     res.status(500).json({
       error: 'Failed to make decision',
@@ -476,7 +476,7 @@ incidentRouter.post('/war-rooms/:id/actions', async (req, res) => {
       actionId,
       message: 'Action assigned successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room action error:', error);
     res.status(500).json({
       error: 'Failed to assign action',
@@ -508,7 +508,7 @@ incidentRouter.post('/war-rooms/:id/resolve', async (req, res) => {
     res.json({
       message: 'War room resolved successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room resolution error:', error);
     res.status(500).json({
       error: 'Failed to resolve war room',
@@ -543,7 +543,7 @@ incidentRouter.post('/war-rooms/:id/artifacts', async (req, res) => {
       artifactId,
       message: 'Artifact uploaded successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room artifact error:', error);
     res.status(500).json({
       error: 'Failed to upload artifact',
@@ -576,7 +576,7 @@ incidentRouter.post('/war-rooms/:id/escalate', async (req, res) => {
     res.json({
       message: 'Incident escalated successfully',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('War room escalation error:', error);
     res.status(500).json({
       error: 'Failed to escalate incident',

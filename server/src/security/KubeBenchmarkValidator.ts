@@ -42,7 +42,7 @@ export class KubeBenchmarkValidator {
       // Here we assume the CLI is available or we simulate it.
       const output = await this.executeCommand('kube-bench', ['--json']);
       return this.parseKubeBenchOutput(output);
-    } catch (error) {
+    } catch (error: any) {
       if ((error as any).code === 'ENOENT') {
         this.logger.warn('kube-bench not found, using simulated results for development');
         return this.getSimulatedCisResult();
@@ -60,7 +60,7 @@ export class KubeBenchmarkValidator {
     try {
       const output = await this.executeCommand('kubescape', ['scan', 'framework', 'nsa', '--format', 'json']);
       return this.parseKubescapeOutput(output);
-    } catch (error) {
+    } catch (error: any) {
       if ((error as any).code === 'ENOENT') {
         this.logger.warn('kubescape not found, using simulated results for development');
         return this.getSimulatedNsaResult();
@@ -98,7 +98,7 @@ export class KubeBenchmarkValidator {
         }
       });
 
-      child.on('error', (err) => {
+      child.on('error', (err: any) => {
         reject(err);
       });
     });
@@ -147,7 +147,7 @@ export class KubeBenchmarkValidator {
         rawOutput: data
       };
 
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error('Failed to parse kube-bench output', e);
       throw new Error('Invalid kube-bench output format');
     }
@@ -204,7 +204,7 @@ export class KubeBenchmarkValidator {
         items: items,
         rawOutput: data
       };
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error('Failed to parse kubescape output', e);
       throw new Error('Invalid kubescape output format');
     }

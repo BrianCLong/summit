@@ -16,12 +16,12 @@ type MinimalEnv = Pick<typeof cfg, 'CORS_ORIGIN' | 'NODE_ENV'>;
 
 export const buildCorsOptions = (env: MinimalEnv = cfg): CorsOptions => {
   const allowedOrigins = env.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
+    .map((origin: any) => origin.trim())
     .filter(Boolean);
   const isProd = env.NODE_ENV === 'production';
 
   return {
-    origin: (origin, callback) => {
+    origin: (origin: any, callback) => {
       if (!origin) return callback(null, true);
       if (!isProd) return callback(null, true);
       if (allowedOrigins.includes(origin)) {

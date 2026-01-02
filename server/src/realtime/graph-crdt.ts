@@ -77,7 +77,7 @@ export function initGraphSync(ns: Namespace): void {
       ioRef?.to(`graph:${graphId}`).emit('graph:op', { graphId, op });
     }
   });
-  sub.on('error', (err) => logger.error({ err }, 'Redis sub error'));
+  sub.on('error', (err: any) => logger.error({ err }, 'Redis sub error'));
 }
 
 interface RegisterOptions {

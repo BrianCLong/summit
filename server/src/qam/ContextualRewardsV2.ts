@@ -234,7 +234,7 @@ export class ContextualRewardsV2 extends EventEmitter {
       });
 
       return reward;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to process multi-objective reward', {
         error,
         executionId,
@@ -258,7 +258,7 @@ export class ContextualRewardsV2 extends EventEmitter {
         Date.now() - timeWindowHours * 60 * 60 * 1000,
       );
       const windowRewards = recentRewards.filter(
-        (r) => r.timestamp >= cutoffTime,
+        (r: any) => r.timestamp >= cutoffTime,
       );
 
       if (windowRewards.length === 0) {
@@ -305,7 +305,7 @@ export class ContextualRewardsV2 extends EventEmitter {
       });
 
       return delta;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to calculate Pareto-aware delta', {
         error,
         timeWindowHours,
@@ -538,7 +538,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     };
 
     // Calculate consistency score (lower variance = higher consistency)
-    const compositeScores = recent.map((r) => r.compositeScore);
+    const compositeScores = recent.map((r: any) => r.compositeScore);
     const mean = metrics.averageScores.composite;
     const variance =
       compositeScores.reduce(
@@ -585,7 +585,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     }
 
     // Extract Pareto front (rank 0 solutions)
-    const paretoSolutions = recentRewards.filter((r) => r.paretoRank === 0);
+    const paretoSolutions = recentRewards.filter((r: any) => r.paretoRank === 0);
 
     // Calculate hypervolume
     const hypervolume = this.calculateHypervolume(paretoSolutions);
@@ -751,7 +751,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     windowRewards: MultiObjectiveReward[],
   ): number {
     // Calculate improvement in Pareto front quality
-    const paretoSolutions = windowRewards.filter((r) => r.paretoRank === 0);
+    const paretoSolutions = windowRewards.filter((r: any) => r.paretoRank === 0);
     const avgComposite =
       paretoSolutions.reduce((sum, r) => sum + r.compositeScore, 0) /
       Math.max(1, paretoSolutions.length);
@@ -791,10 +791,10 @@ export class ContextualRewardsV2 extends EventEmitter {
     );
 
     const hv1 = this.calculateHypervolume(
-      firstHalf.filter((r) => r.paretoRank === 0),
+      firstHalf.filter((r: any) => r.paretoRank === 0),
     );
     const hv2 = this.calculateHypervolume(
-      secondHalf.filter((r) => r.paretoRank === 0),
+      secondHalf.filter((r: any) => r.paretoRank === 0),
     );
 
     return hv2 - hv1;
@@ -842,7 +842,7 @@ export class ContextualRewardsV2 extends EventEmitter {
 
   private getBestRoutes(): any[] {
     const routeMetrics = this.getRouteMetrics();
-    return routeMetrics.slice(0, 3).map((r) => ({
+    return routeMetrics.slice(0, 3).map((r: any) => ({
       route: r.route,
       provider: r.provider,
       score: r.averageScores.composite,
@@ -853,8 +853,8 @@ export class ContextualRewardsV2 extends EventEmitter {
   private getUnderperformingRoutes(): any[] {
     const routeMetrics = this.getRouteMetrics();
     return routeMetrics
-      .filter((r) => r.averageScores.composite < 0.6)
-      .map((r) => ({
+      .filter((r: any) => r.averageScores.composite < 0.6)
+      .map((r: any) => ({
         route: r.route,
         provider: r.provider,
         score: r.averageScores.composite,

@@ -28,7 +28,7 @@ export async function dailyCleanupProcessor(job: Job): Promise<void> {
     await optimizeDatabase();
 
     logger.info('Daily cleanup completed', { jobId: job.id });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Daily cleanup failed', {
       jobId: job.id,
       error: error instanceof Error ? error.message : String(error),
@@ -49,7 +49,7 @@ export async function hourlyAnalyticsProcessor(job: Job): Promise<void> {
     await generateReports();
 
     logger.info('Hourly analytics completed', { jobId: job.id });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Hourly analytics failed', {
       jobId: job.id,
       error: error instanceof Error ? error.message : String(error),
@@ -70,7 +70,7 @@ export async function weeklyReportProcessor(job: Job): Promise<void> {
     await sendReportEmails();
 
     logger.info('Weekly report completed', { jobId: job.id });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Weekly report failed', {
       jobId: job.id,
       error: error instanceof Error ? error.message : String(error),

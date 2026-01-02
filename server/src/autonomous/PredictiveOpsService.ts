@@ -43,7 +43,7 @@ export class PredictiveOpsService {
       // 3. Check Approval Queue Backlog
       // TODO: Implement queue backlog check once ApprovalService is ready
 
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({ tenantId, error }, 'Failed to check predictive signals');
     }
 
@@ -101,7 +101,7 @@ export class PredictiveOpsService {
             };
         }
 
-    } catch (error) {
+    } catch (error: any) {
         this.logger.warn({ tenantId, error }, 'Error checking capacity saturation');
     }
 

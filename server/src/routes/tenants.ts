@@ -96,7 +96,7 @@ router.post('/', ensureAuthenticated, ensurePolicy('create', 'tenant'), async (r
       data: tenant,
       receipt: buildReceipt('TENANT_CREATED', tenant.id, actorId),
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res.status(400).json({
         success: false,
@@ -150,7 +150,7 @@ router.get('/:id', ensureAuthenticated, async (req: Request, res: Response) => {
         }
 
         res.json({ success: true, data: tenant });
-    } catch (error) {
+    } catch (error: any) {
         logger.error('Error in GET /api/tenants/:id:', error);
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
@@ -172,7 +172,7 @@ router.get(
         data,
         receipt: buildReceipt('TENANT_SETTINGS_VIEWED', tenantId, authReq.user?.id || 'unknown'),
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error in GET /api/tenants/:id/settings:', error);
       if (error instanceof Error && error.message === 'Tenant not found') {
         return res.status(404).json({ success: false, error: error.message });
@@ -200,7 +200,7 @@ router.put(
         data: updated,
         receipt: buildReceipt('TENANT_SETTINGS_UPDATED', tenantId, actorId),
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
       }
@@ -231,7 +231,7 @@ router.post(
         data: updated,
         receipt: buildReceipt('TENANT_DISABLED', tenantId, actorId),
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
       }
@@ -262,7 +262,7 @@ router.get(
         data: events,
         receipt: buildReceipt('TENANT_AUDIT_VIEWED', tenantId, authReq.user?.id || 'unknown'),
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error in GET /api/tenants/:id/audit:', error);
       return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
@@ -289,7 +289,7 @@ router.get(
       );
 
       const archive = archiver('zip', { zlib: { level: 9 } });
-      archive.on('error', (err) => {
+      archive.on('error', (err: any) => {
         logger.error('Archive error', err);
         res.status(500).end(`Archive error: ${err.message}`);
       });
@@ -322,7 +322,7 @@ router.get(
       );
 
       await archive.finalize();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error in GET /api/tenants/:id/audit/export:', error);
       return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }

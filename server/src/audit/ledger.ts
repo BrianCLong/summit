@@ -170,7 +170,7 @@ export const verifyAuditLedgerChain = async ({
   let lastHash: string | undefined;
   const sinceTime = since ? new Date(since).getTime() : null;
 
-  lines.forEach((line, index) => {
+  lines.forEach((line: string, index: number) => {
     let entry: AuditLedgerEntry;
     try {
       entry = JSON.parse(line) as AuditLedgerEntry;

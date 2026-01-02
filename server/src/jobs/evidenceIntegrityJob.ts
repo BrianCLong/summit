@@ -21,7 +21,7 @@ export function startEvidenceIntegrityJob() {
         emitIncidents: process.env.EVIDENCE_INTEGRITY_INCIDENTS === 'true',
       });
       logger.info({ cronExpression, ...result }, 'Evidence integrity verification completed');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ err: error }, 'Evidence integrity verification job failed');
     }
   });

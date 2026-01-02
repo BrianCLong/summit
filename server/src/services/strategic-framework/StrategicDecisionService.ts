@@ -103,7 +103,7 @@ export class StrategicDecisionService {
       logger.info({ decisionId: id, title: decision.title }, 'Strategic decision created');
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, input }, 'Failed to create strategic decision');
       throw error;
     } finally {

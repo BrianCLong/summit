@@ -11,7 +11,7 @@ const stream = {
         try {
           const logEntry = JSON.parse(msg);
           correlationEngine.ingestLog(logEntry);
-        } catch (e) {
+        } catch (e: any) {
           // If parsing fails, ignore for correlation but still print
         }
     }

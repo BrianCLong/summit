@@ -44,7 +44,7 @@ export class SAMLProvider implements SSOProvider {
     }
 
     // Map attributes
-    const attributes = profile.attributes || {};
+    const attributes: any = profile.attributes || {};
     const firstName = attributes[this.config.attributeMap?.firstName || 'firstName'] ||
       attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'];
     const lastName = attributes[this.config.attributeMap?.lastName || 'lastName'] ||

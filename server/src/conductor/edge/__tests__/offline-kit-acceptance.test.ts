@@ -436,7 +436,7 @@ describe('Offline Kit - Acceptance Criteria', () => {
 
       // Recommendations should be actionable
       const hasClaimBasedRecommendation = simulation.recommendations.some(
-        (r) => r.includes('claim'),
+        (r: any) => r.includes('claim'),
       );
 
       console.log('✅ PASS: Policy simulation provided recommendations');

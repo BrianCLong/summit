@@ -44,7 +44,7 @@ router.post(
       );
 
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
@@ -69,7 +69,7 @@ router.post(
 
       const amplifiers = await service.detectAmplifiers(investigationId, tenantId);
       res.json({ amplifiers });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
@@ -94,7 +94,7 @@ router.post(
 
       const forecast = await service.forecastOpinionShift(nodeId, timeSteps, tenantId);
       res.json(forecast);
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }

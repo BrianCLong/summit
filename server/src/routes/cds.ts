@@ -45,7 +45,7 @@ router.post('/transfer', async (req, res) => {
     } else {
       res.status(403).json(result);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('CDS Transfer Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }

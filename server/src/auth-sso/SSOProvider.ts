@@ -106,7 +106,7 @@ export class OIDCProvider implements AuthSSOProvider {
         groups: decoded[mapping.groups],
         raw: decoded
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('SSO Token Exchange Error:', error);
       throw new Error('Failed to verify SSO callback');
     }
@@ -118,7 +118,7 @@ export class OIDCProvider implements AuthSSOProvider {
       const discoveryUrl = `${config.issuerUrl}/.well-known/openid-configuration`;
       const response = await axios.get(discoveryUrl);
       return response.status === 200 && !!response.data.authorization_endpoint;
-    } catch (error) {
+    } catch (error: any) {
       // Fallback: check if endpoints are explicitly provided
       return !!(config.authorizationUrl && config.tokenUrl);
     }

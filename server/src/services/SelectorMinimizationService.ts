@@ -170,7 +170,7 @@ export class SelectorMinimizationService {
     try {
       this.redis = await getRedisClient();
       this.postgres = getPostgresPool();
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Failed to initialize SelectorMinimizationService connections', { error: errorMessage });
       throw error;
@@ -219,7 +219,7 @@ export class SelectorMinimizationService {
         const metricId = await this.storeMetrics(metrics);
 
         // Update baselines asynchronously
-        this.updateBaseline(metrics).catch((err) =>
+        this.updateBaseline(metrics).catch((err: any) =>
           logger.error('Failed to update baseline', { err })
         );
 
@@ -254,7 +254,7 @@ export class SelectorMinimizationService {
           isAnomaly: metrics.isAnomaly,
         });
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to track query scope', { error, queryId: metrics.queryId });
       throw error;
     }
@@ -286,7 +286,7 @@ export class SelectorMinimizationService {
       }
 
       const genericReasons = ['test', 'debug', 'checking', 'n/a', 'none'];
-      if (genericReasons.some((r) => metrics.reasonForAccess!.toLowerCase().includes(r))) {
+      if (genericReasons.some((r: any) => metrics.reasonForAccess!.toLowerCase().includes(r))) {
         valid = false;
         validationErrors.push('Reason for access appears to be generic or placeholder');
       }
@@ -702,7 +702,7 @@ export class SelectorMinimizationService {
       // Invalidate cache
       const cacheKey = `${this.BASELINE_CACHE_PREFIX}${metrics.tenantId}:${metrics.queryHash}`;
       await this.redis.del(cacheKey);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to update baseline', { error, queryHash: metrics.queryHash });
       // Non-critical, don't throw
     }
@@ -751,7 +751,7 @@ export class SelectorMinimizationService {
           JSON.stringify(alert)
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to send alert notification', { error });
       // Non-critical, don't throw
     }

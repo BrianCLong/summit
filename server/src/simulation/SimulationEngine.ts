@@ -111,7 +111,7 @@ export class SimulationEngine {
       scenario.completedAt = new Date();
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       scenario.status = 'FAILED';
       throw error;
     }
@@ -400,8 +400,8 @@ export class SimulationEngine {
 
     // Identify bottlenecks
     const bottlenecks = roads
-      .filter((r) => (r.metadata.capacity || 1000) < 500)
-      .map((r) => r.id);
+      .filter((r: any) => (r.metadata.capacity || 1000) < 500)
+      .map((r: any) => r.id);
 
     return {
       timestamp: new Date(),

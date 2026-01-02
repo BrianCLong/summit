@@ -208,7 +208,7 @@ export class SIEMExportService {
 
     // Map to SecuritySignalExport format with redaction
     const signals = await Promise.all(
-      rows.map(row => this.mapToSecuritySignal(row, tenantId))
+      rows.map((row: any) => this.mapToSecuritySignal(row, tenantId))
     );
 
     // Generate next cursor

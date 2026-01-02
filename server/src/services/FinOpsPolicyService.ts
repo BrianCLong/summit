@@ -36,7 +36,7 @@ export class FinOpsPolicyService {
         enabled: row.enabled,
         rules: row.rules
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, tenantId }, 'Error fetching FinOps policies');
       return [];
     }
@@ -57,7 +57,7 @@ export class FinOpsPolicyService {
         { tenantId }
       );
       logger.info({ tenantId, policyId: policy.id }, 'FinOps policy saved');
-    } catch (error) {
+    } catch (error: any) {
         logger.error({ error, tenantId, policyId: policy.id }, 'Error saving FinOps policy');
         throw error;
     }
@@ -70,7 +70,7 @@ export class FinOpsPolicyService {
             [policyId, tenantId],
             { tenantId }
         );
-    } catch (error) {
+    } catch (error: any) {
         logger.error({ error, tenantId, policyId }, 'Error deleting FinOps policy');
         throw error;
     }

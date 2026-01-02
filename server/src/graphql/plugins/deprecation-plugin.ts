@@ -76,7 +76,7 @@ export function deprecationTrackingPlugin(
                 }, 'Deprecated field metric');
               }
             }
-          } catch (error) {
+          } catch (error: any) {
             logger.error({ error }, 'Error in deprecation tracking plugin');
           }
         }

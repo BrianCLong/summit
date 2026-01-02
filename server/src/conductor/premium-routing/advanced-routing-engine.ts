@@ -365,7 +365,7 @@ export class AdvancedRoutingEngine {
       });
 
       return analysis;
-    } catch (error) {
+    } catch (error: any) {
       const analysisTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(
@@ -547,7 +547,7 @@ export class AdvancedRoutingEngine {
       });
 
       return decision;
-    } catch (error) {
+    } catch (error: any) {
       const routingTime = Date.now() - startTime;
 
       prometheusConductorMetrics.recordOperationalEvent(

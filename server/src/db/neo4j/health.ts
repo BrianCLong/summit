@@ -11,7 +11,7 @@ export async function waitForNeo4j(
       await driver.verifyConnectivity();
       return true;
     } catch {
-      await new Promise((r) => setTimeout(r, delay));
+      await new Promise((r: any) => setTimeout(r, delay));
       delay = Math.min(delay * 2, 2000);
     }
   }

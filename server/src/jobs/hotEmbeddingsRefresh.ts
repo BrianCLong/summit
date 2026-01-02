@@ -47,7 +47,7 @@ export async function refreshTenantHotEmbeddings(): Promise<void> {
       },
       'refreshed hot embeddings MV',
     );
-  } catch (error) {
+  } catch (error: any) {
     vectorQueriesTotal
       .labels('hot-embeddings-refresh', ALL_TENANTS_LABEL, 'error')
       .inc();
@@ -63,7 +63,7 @@ export function startTenantHotEmbeddingsRefresh(intervalMs = REFRESH_INTERVAL_MS
   const runRefresh = async () => {
     try {
       await refreshTenantHotEmbeddings();
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         { error: error instanceof Error ? error.message : String(error) },
         'failed to refresh hot embeddings MV',
