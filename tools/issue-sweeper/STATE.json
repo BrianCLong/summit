@@ -1,0 +1,18 @@
+{
+  "cursor": 1,
+  "last_issue_number": 0,
+  "batch_size": 50,
+  "run_started_at": null,
+  "run_updated_at": null,
+  "open_prs": [],
+  "failures": [],
+  "total_processed": 0,
+  "stats": {
+    "already_solved": 0,
+    "solved_in_this_run": 0,
+    "not_solved": 0,
+    "blocked": 0,
+    "duplicate": 0,
+    "invalid": 0
+  }
+}
