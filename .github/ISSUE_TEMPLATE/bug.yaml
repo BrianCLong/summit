@@ -1,25 +1,24 @@
 name: Bug Report
 description: Report a bug in the application
-labels: [bug]
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
 body:
   - type: markdown
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
-  - type: input
-    id: contact
-    attributes:
-      label: Contact Details
-      description: How can we get in touch with you if we need more info?
-      placeholder: ex. email@example.com
-    validations:
-      required: false
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
       description: Tell us what you saw!
-      placeholder: Tell us what you saw!
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to see?
     validations:
       required: true
   - type: textarea
@@ -27,17 +26,26 @@ body:
     attributes:
       label: Reproduction Steps
       description: How can we reproduce the bug?
-      placeholder: 1. Go to '...'
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
     validations:
       required: true
   - type: dropdown
-    id: browser
+    id: environment
     attributes:
-      label: Browser
+      label: Environment
       options:
-        - Chrome
-        - Firefox
-        - Safari
-        - Edge
+        - Production
+        - Staging
+        - Development / Local
     validations:
       required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Screenshots
+      description: Paste any relevant logs or attach screenshots.
+    validations:
+      required: false

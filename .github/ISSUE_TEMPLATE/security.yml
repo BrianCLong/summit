@@ -1,0 +1,42 @@
+name: Security Issue
+description: Report a security vulnerability or compliance gap
+title: "[SECURITY] "
+labels: ["security", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Note:** If this is a critical vulnerability that could affect production systems, please report it via our Security Advisory process or email security@example.com immediately. Use this form for tracking, hardening tasks, or non-critical findings.
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability Description
+      description: Describe the security issue or gap.
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+        - Informational
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: What is the potential impact? (Data loss, access bypass, etc.)
+    validations:
+      required: true
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Proposed Mitigation
+      description: How should we fix this?
+    validations:
+      required: false
