@@ -94,7 +94,7 @@ export class TripwireMetricsService {
     try {
       this.redis = await getRedisClient();
       this.postgres = getPostgresPool();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize TripwireMetricsService connections', {
         error: error instanceof Error ? error.message : String(error)
       });
@@ -160,7 +160,7 @@ export class TripwireMetricsService {
 
         return metric;
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to calculate tripwire metrics', {
         error: error instanceof Error ? error.message : String(error),
         tenantId
@@ -229,7 +229,7 @@ export class TripwireMetricsService {
     for (const tenantId of tenants) {
       try {
         await this.calculateMetrics(tenantId, yesterday, 'daily');
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to calculate daily metrics for tenant', {
           error: error instanceof Error ? error.message : String(error),
           tenantId
@@ -514,7 +514,7 @@ export class TripwireMetricsService {
     `;
 
     const result = await this.postgres.query(query);
-    return result.rows.map((row) => row.tenant_id);
+    return result.rows.map((row: any) => row.tenant_id);
   }
 
   /**

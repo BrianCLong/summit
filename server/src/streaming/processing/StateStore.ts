@@ -41,7 +41,7 @@ export class RedisStateStore implements StateStore {
   async connect() {
     try {
       await this.redis.connect();
-    } catch (e) {
+    } catch (e: any) {
       this.logger.error('Failed to connect to Redis', e);
     }
   }

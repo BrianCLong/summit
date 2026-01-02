@@ -104,7 +104,7 @@ export class ResidencyGuard {
                 'residency.mode': config.residencyMode
             });
 
-        } catch (error) {
+        } catch (error: any) {
              otelService.addSpanAttributes({
                 'residency.status': 'violated',
                 'residency.error': error instanceof Error ? error.message : 'Unknown error'
@@ -186,7 +186,7 @@ export class ResidencyGuard {
                 [tenantId, region, operation]
             );
             return result.rows.length > 0;
-        } catch (e) {
+        } catch (e: any) {
             // Log real error unless it's just "table doesn't exist" during bootstrap
             const msg = e instanceof Error ? e.message : String(e);
             if (!msg.includes('relation "residency_exceptions" does not exist')) {

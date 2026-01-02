@@ -134,7 +134,7 @@ export class GraphRAGQueryService {
       if (promptConfig) {
         systemPromptOwner = promptConfig.meta.owner;
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.warn({ error: e }, 'Failed to load system prompt config for audit metadata');
     }
 
@@ -350,7 +350,7 @@ export class GraphRAGQueryService {
       }
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
 
       metrics.graphragQueryTotal.inc({
@@ -592,7 +592,7 @@ export class GraphRAGQueryService {
         confidence: row.confidence ? parseFloat(row.confidence) : undefined,
         sourceUrl: row.source_url,
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         entityIds,
@@ -655,7 +655,7 @@ export class GraphRAGQueryService {
       }
 
       return undefined;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         investigationId,

@@ -43,7 +43,7 @@ export class WargameResolver {
         limit: limit || 1000,
       });
       return result.records.map(
-        (record) => record.get('t').properties as SocialMediaTelemetry,
+        (record: any) => record.get('t').properties as SocialMediaTelemetry,
       );
     } finally {
       await session.close();
@@ -68,7 +68,7 @@ export class WargameResolver {
         'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_INTENT_ESTIMATE]->(i:AdversaryIntent) RETURN i';
       const result = await session.run(query, { scenarioId });
       return result.records.map(
-        (record) => record.get('i').properties as AdversaryIntentEstimate,
+        (record: any) => record.get('i').properties as AdversaryIntentEstimate,
       );
     } finally {
       await session.close();
@@ -93,7 +93,7 @@ export class WargameResolver {
         'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_HEATMAP_DATA]->(h:NarrativeHeatmap) RETURN h';
       const result = await session.run(query, { scenarioId });
       return result.records.map(
-        (record) => record.get('h').properties as NarrativeHeatmapData,
+        (record: any) => record.get('h').properties as NarrativeHeatmapData,
       );
     } finally {
       await session.close();
@@ -118,7 +118,7 @@ export class WargameResolver {
         'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_PLAYBOOK]->(p:StrategicPlaybook) RETURN p';
       const result = await session.run(query, { scenarioId });
       return result.records.map(
-        (record) => record.get('p').properties as StrategicResponsePlaybook,
+        (record: any) => record.get('p').properties as StrategicResponsePlaybook,
       );
     } finally {
       await session.close();
@@ -158,7 +158,7 @@ export class WargameResolver {
         'MATCH (s:CrisisScenario) RETURN s ORDER BY s.createdAt DESC';
       const result = await session.run(query);
       return result.records.map(
-        (record) => record.get('s').properties as CrisisScenario,
+        (record: any) => record.get('s').properties as CrisisScenario,
       );
     } finally {
       await session.close();

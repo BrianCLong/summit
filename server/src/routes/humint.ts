@@ -33,7 +33,7 @@ router.post('/sources', async (req: AuthenticatedRequest, res: Response) => {
       recruitedAt: data.recruitedAt ? new Date(data.recruitedAt) : undefined,
     });
     res.json(source);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -42,7 +42,7 @@ router.get('/sources', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const sources = await service.listSources(req.user!.tenantId);
     res.json(sources);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -52,7 +52,7 @@ router.get('/sources/:id', async (req: AuthenticatedRequest, res: Response) => {
     const source = await service.getSource(req.user!.tenantId, req.params.id);
     if (!source) return res.status(404).json({ error: 'Source not found' });
     res.json(source);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -71,7 +71,7 @@ router.post('/reports', async (req: AuthenticatedRequest, res: Response) => {
     const data = createReportSchema.parse(req.body);
     const report = await service.createReport(req.user!.tenantId, req.user!.id, data);
     res.json(report);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -81,7 +81,7 @@ router.get('/reports', async (req: AuthenticatedRequest, res: Response) => {
     const sourceId = req.query.sourceId as string | undefined;
     const reports = await service.listReports(req.user!.tenantId, sourceId);
     res.json(reports);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -95,7 +95,7 @@ router.patch('/reports/:id/status', async (req: AuthenticatedRequest, res: Respo
     const report = await service.updateReportStatus(req.user!.tenantId, req.params.id, status);
     if (!report) return res.status(404).json({ error: 'Report not found' });
     res.json(report);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -117,7 +117,7 @@ router.post('/debriefs', async (req: AuthenticatedRequest, res: Response) => {
       date: new Date(data.date),
     });
     res.json(debrief);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -139,7 +139,7 @@ router.post('/requirements', async (req: AuthenticatedRequest, res: Response) =>
       deadline: data.deadline ? new Date(data.deadline) : undefined,
     });
     res.json(reqItem);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -151,7 +151,7 @@ router.post('/sources/:id/relationships', async (req: AuthenticatedRequest, res:
     const { targetName, relationshipType, notes } = req.body;
     await service.addSourceRelationship(req.user!.tenantId, req.params.id, targetName, relationshipType, notes);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -160,7 +160,7 @@ router.get('/sources/:id/network', async (req: AuthenticatedRequest, res: Respon
   try {
     const network = await service.getSourceNetwork(req.user!.tenantId, req.params.id);
     res.json(network);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });
@@ -171,7 +171,7 @@ router.post('/sources/:id/screen', async (req: AuthenticatedRequest, res: Respon
   try {
     const result = await service.runCIScreening(req.user!.tenantId, req.params.id);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
 });

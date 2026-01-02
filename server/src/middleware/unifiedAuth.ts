@@ -36,7 +36,7 @@ export async function unifiedAuthMiddleware(
 
         // Verify access to requested tenant
         if (requestedTenantId) {
-          const membership = memberships.find(m => m.tenantId === requestedTenantId);
+          const membership = memberships.find((m: any) => m.tenantId === requestedTenantId);
           if (!membership) {
             return res.status(403).json({ error: 'Access denied to requested tenant' });
           }
@@ -44,12 +44,12 @@ export async function unifiedAuthMiddleware(
         }
 
         if (!effectiveTenantId) {
-           // Should not happen after migration backfill, but handle edge case
-           return res.status(401).json({ error: 'User has no tenant association' });
+          // Should not happen after migration backfill, but handle edge case
+          return res.status(401).json({ error: 'User has no tenant association' });
         }
 
         // Get roles for this tenant
-        const activeMembership = memberships.find(m => m.tenantId === effectiveTenantId);
+        const activeMembership = memberships.find((m: any) => m.tenantId === effectiveTenantId);
         // Fallback to user.role if no specific membership role (legacy compat)
         const roles = activeMembership ? (activeMembership.roles as RoleKey[]) : [user.role as RoleKey];
 
@@ -58,7 +58,7 @@ export async function unifiedAuthMiddleware(
           id: user.id,
           email: user.email,
           tenantId: effectiveTenantId,
-          tenantIds: memberships.map(m => m.tenantId),
+          tenantIds: memberships.map((m: any) => m.tenantId),
           roles: roles,
           scopes: [], // Will be expanded by RBAC logic later
           authMethod: 'jwt',
@@ -104,14 +104,14 @@ export async function unifiedAuthMiddleware(
 
         // Fallback: Env Var System Key (Transition/Recovery)
         if (!principal && process.env.SYSTEM_API_KEY && apiKey === process.env.SYSTEM_API_KEY) {
-             principal = {
-               id: 'system',
-               tenantId: requestedTenantId || 'global',
-               roles: ['system.internal', 'tenant.admin'],
-               scopes: ['*'],
-               authMethod: 'apiKey',
-               isSystem: true
-             };
+          principal = {
+            id: 'system',
+            tenantId: requestedTenantId || 'global',
+            roles: ['system.internal', 'tenant.admin'],
+            scopes: ['*'],
+            authMethod: 'apiKey',
+            isSystem: true
+          };
         }
       }
     }
@@ -129,7 +129,7 @@ export async function unifiedAuthMiddleware(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Auth Middleware Error:', error);
     return res.status(500).json({ error: 'Internal Authentication Error' });
   }
@@ -144,7 +144,7 @@ async function getUserTenants(userId: string) {
       [userId]
     );
     // Normalize keys
-    return res.rows.map(r => ({
+    return res.rows.map((r: any) => ({
       tenantId: r.tenant_id,
       roles: r.roles
     }));

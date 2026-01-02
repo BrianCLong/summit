@@ -25,7 +25,7 @@ const ensureTenant = (req: any, res: any, next: any) => {
 // --- Catalog Routes ---
 
 // Register an asset
-router.post('/catalog/assets', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.post('/catalog/assets', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const asset = await catalog.registerAsset({
             ...req.body,
@@ -38,7 +38,7 @@ router.post('/catalog/assets', ensureAuthenticated, ensureTenant, async (req, re
 });
 
 // Search assets
-router.get('/catalog/assets', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.get('/catalog/assets', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const query = req.query.q as string || '';
         const assets = await catalog.searchAssets(req.user.tenantId, query);
@@ -49,7 +49,7 @@ router.get('/catalog/assets', ensureAuthenticated, ensureTenant, async (req, res
 });
 
 // Get specific asset
-router.get('/catalog/assets/:id', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.get('/catalog/assets/:id', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const asset = await catalog.getAsset(req.params.id);
         if (!asset || asset.tenantId !== req.user.tenantId) {
@@ -64,7 +64,7 @@ router.get('/catalog/assets/:id', ensureAuthenticated, ensureTenant, async (req,
 // --- Quality Routes ---
 
 // Define a rule
-router.post('/quality/rules', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.post('/quality/rules', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const rule = await quality.defineRule({
             ...req.body,
@@ -77,7 +77,7 @@ router.post('/quality/rules', ensureAuthenticated, ensureTenant, async (req, res
 });
 
 // Run checks for an asset
-router.post('/quality/assets/:id/run-checks', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.post('/quality/assets/:id/run-checks', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         // Enforce tenant check via the service
         const results = await quality.runChecks(req.params.id, req.user.tenantId);
@@ -96,7 +96,7 @@ router.post('/quality/assets/:id/run-checks', ensureAuthenticated, ensureTenant,
 // --- Policy Routes ---
 
 // Create a policy
-router.post('/governance/policies', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.post('/governance/policies', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const newPolicy = await policy.createPolicy({
             ...req.body,
@@ -109,10 +109,10 @@ router.post('/governance/policies', ensureAuthenticated, ensureTenant, async (re
 });
 
 // Evaluate asset compliance
-router.get('/governance/assets/:id/compliance', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.get('/governance/assets/:id/compliance', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const asset = await catalog.getAsset(req.params.id);
-         if (!asset || asset.tenantId !== req.user.tenantId) {
+        if (!asset || asset.tenantId !== req.user.tenantId) {
             return res.status(404).json({ error: 'Asset not found' });
         }
 
@@ -125,7 +125,7 @@ router.get('/governance/assets/:id/compliance', ensureAuthenticated, ensureTenan
 
 // --- Lineage Routes ---
 
-router.get('/lineage/assets/:id', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.get('/lineage/assets/:id', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         // Verify tenant ownership of the requested asset first
         const asset = await catalog.getAsset(req.params.id);
@@ -141,7 +141,7 @@ router.get('/lineage/assets/:id', ensureAuthenticated, ensureTenant, async (req,
     }
 });
 
-router.post('/lineage/nodes', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.post('/lineage/nodes', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const node = await lineage.createNode({
             ...req.body,
@@ -153,7 +153,7 @@ router.post('/lineage/nodes', ensureAuthenticated, ensureTenant, async (req, res
     }
 });
 
-router.post('/lineage/edges', ensureAuthenticated, ensureTenant, async (req, res) => {
+router.post('/lineage/edges', ensureAuthenticated, ensureTenant, async (req: any, res: any) => {
     try {
         const edge = await lineage.createEdge({
             ...req.body,

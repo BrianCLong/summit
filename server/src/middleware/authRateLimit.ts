@@ -102,7 +102,7 @@ async function checkRateLimit(
       resetTime: now + (ttl > 0 ? ttl : config.windowMs),
       blocked: false,
     };
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Rate limit check failed:', error);
     // On error, allow the request
     return {
@@ -180,7 +180,7 @@ export async function recordFailedLogin(ip: string, email: string): Promise<void
       const blockDuration = Math.min(count * 60 * 1000, 3600000); // Max 1 hour
       await redis.set(blockKey, (Date.now() + blockDuration).toString(), 'PX', blockDuration);
     }
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to record failed login:', error);
   }
 }
@@ -196,7 +196,7 @@ export async function clearFailedLogins(ip: string, email: string): Promise<void
     const windowKey = `auth:login:${ip}:${email}`;
     const blockKey = `auth:login:${ip}:${email}:blocked`;
     await redis.del(windowKey, blockKey);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Failed to clear failed logins:', error);
   }
 }

@@ -14,7 +14,7 @@ router.get('/recommendations', async (req, res) => {
       data: recommendations,
       meta: stats
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to generate recommendations' });
   }
 });

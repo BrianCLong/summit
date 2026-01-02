@@ -206,7 +206,7 @@ export class SSOService {
           expiresIn: 24 * 60 * 60
       };
 
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {

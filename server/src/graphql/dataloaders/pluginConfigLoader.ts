@@ -96,7 +96,7 @@ async function batchLoadPluginConfigs(
       const keys = pluginIds.map((id) => `plugin-config:${tenantId}:${id}`);
       const cachedValues = await redis.mget(keys);
 
-      cachedValues.forEach((val, index) => {
+      cachedValues.forEach((val: any, index: any) => {
         if (val) {
           try {
             const config = JSON.parse(val);
@@ -111,7 +111,7 @@ async function batchLoadPluginConfigs(
           missingIds.push(pluginIds[index]);
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error }, 'Redis cache error in pluginConfigLoader');
       missingIds.push(...pluginIds.filter(id => !configMap.has(id)));
     }
@@ -204,7 +204,7 @@ async function batchLoadPluginConfigs(
         },
         'Plugin config batch load completed'
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, pluginIds: missingIds }, 'Error in plugin config batch loader');
     } finally {
       if (shouldRelease) {
@@ -287,7 +287,7 @@ async function batchLoadAllPluginConfigsForTenant(
     }
 
     return tenantIds.map((tenantId) => configsByTenant.get(tenantId) || []);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, tenantIds }, 'Error loading all plugin configs');
     return tenantIds.map(() => new Error('Failed to load plugin configs'));
   } finally {
@@ -369,7 +369,7 @@ async function batchLoadEnabledPlugins(
     }
 
     return tenantIds.map((tenantId) => configsByTenant.get(tenantId) || []);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, tenantIds }, 'Error loading enabled plugins');
     return tenantIds.map(() => new Error('Failed to load enabled plugins'));
   } finally {

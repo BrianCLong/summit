@@ -651,7 +651,7 @@ export class NegotiationRuntime extends EventEmitter {
       messageId: msg.messageId,
       role: msg.role,
       type: msg.type,
-      turn: msg.turn,
+      turn: msg.turn || 0,
       timestamp: msg.timestamp,
       summary: this.summarizeMessage(msg),
       sensitiveFieldsRedacted: ['evidence', 'terms'], // Example

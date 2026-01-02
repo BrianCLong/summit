@@ -600,7 +600,7 @@ export class WarrantService extends EventEmitter {
 
     if (expiredCount > 0) {
       this.logger.info({ expiredCount }, 'Expired old warrants');
-      this.emit('warrantsExpired', { count: expiredCount, warrantIds: result.rows.map(r => r.id) });
+      this.emit('warrantsExpired', { count: expiredCount, warrantIds: result.rows.map((r: any) => r.id) });
     }
 
     return expiredCount;

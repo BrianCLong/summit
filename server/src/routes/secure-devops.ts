@@ -18,7 +18,7 @@ router.post('/spawn', async (req, res) => {
 
         const result = await factory.spawnAgentSwarm(prId, content);
         res.json(result);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error spawning swarm:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }

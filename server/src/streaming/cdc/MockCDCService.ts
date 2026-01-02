@@ -54,7 +54,7 @@ export class MockCDCService {
     try {
       await this.producer.send(`cdc.${table}`, [event]);
       this.logger.info(`Simulated CDC event for ${table}: ${eventType} ${entityId}`);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to send simulated CDC event', error);
     }
   }

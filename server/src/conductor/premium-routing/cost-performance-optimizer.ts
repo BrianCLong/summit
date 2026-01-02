@@ -321,7 +321,7 @@ export class CostPerformanceOptimizer {
             expectedSavings += recommendation.expectedCostSaving;
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         results.push({
           recommendationId,
           success: false,
@@ -475,7 +475,7 @@ export class CostPerformanceOptimizer {
             quality_multiplier: pricingModel.qualityMultiplier.toFixed(2),
           },
         );
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to update dynamic pricing', {
           modelId,
           error: error.message,
@@ -494,7 +494,7 @@ export class CostPerformanceOptimizer {
         await this.checkQualityDegradation();
         await this.checkBudgetExceeded();
         await this.updateDynamicPricing();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Real-time monitoring error', { error: error.message });
       }
     }, 60000); // Every minute
@@ -507,7 +507,7 @@ export class CostPerformanceOptimizer {
     setInterval(async () => {
       try {
         await this.runAutomaticOptimization();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Optimization engine error', { error: error.message });
       }
     }, this.OPTIMIZATION_INTERVAL_MS);

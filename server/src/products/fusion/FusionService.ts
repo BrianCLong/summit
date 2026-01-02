@@ -112,7 +112,7 @@ export class FusionService {
       // 5. Save to Neo4j
       const session = this.neo4j.session();
       try {
-        await session.writeTransaction(async (tx) => {
+        await session.writeTransaction(async (tx: any) => {
           // Create MediaSource Node
           await tx.run(
             `MERGE (m:MediaSource {id: $id})
@@ -176,7 +176,7 @@ export class FusionService {
         vectorId: mediaSourceId
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Ingestion failed', error);
       await this.db.query(
         `UPDATE media_sources SET processing_status = 'FAILED' WHERE id = $1`,
@@ -245,7 +245,7 @@ export class FusionService {
         }
       }));
 
-    } catch (e) {
+    } catch (e: any) {
       logger.warn('Graph search failed (possibly missing index)', e);
     } finally {
       await session.close();
@@ -277,7 +277,7 @@ export class FusionService {
     let template = '';
     try {
         template = await readFile(join(process.cwd(), 'prompts/extraction.fusion@v1.yaml'), 'utf-8');
-    } catch (e) {
+    } catch (e: any) {
         logger.error('Failed to load prompt file', e);
         template = `Extract entities (Person, Org, Loc) from: {{text}}. Return JSON {entities:[], relationships:[]}`;
     }
@@ -286,7 +286,7 @@ export class FusionService {
     try {
       const doc = load(template) as any;
       promptTemplate = doc.template || template;
-    } catch (e) {
+    } catch (e: any) {
       logger.warn('Failed to parse prompt YAML, falling back to raw text', e);
       promptTemplate = template;
     }
@@ -304,7 +304,7 @@ export class FusionService {
 
     try {
         return JSON.parse(resultStr) as ExtractionResult;
-    } catch (e) {
+    } catch (e: any) {
         logger.error('Failed to parse LLM JSON', e);
         return { entities: [], relationships: [] };
     }

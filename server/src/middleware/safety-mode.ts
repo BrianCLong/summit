@@ -70,7 +70,7 @@ export async function safetyModeMiddleware(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ err: error, path: req.path }, 'Safety middleware error');
     next(error);
   }

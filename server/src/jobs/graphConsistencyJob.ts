@@ -17,7 +17,7 @@ export function scheduleWeeklyGraphConsistencyCheck(service: GraphConsistencySer
       logger.info('Graph consistency report generated', { report });
 
       // In a real system, we might email this report or store it in DB
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to run graph consistency check', { error });
     }
   });

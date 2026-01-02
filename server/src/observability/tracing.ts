@@ -7,7 +7,7 @@
  *
  * Usage:
  *   import { tracer } from '@/observability/tracing';
- *   const result = await tracer.trace('operation.name', async (span) => {
+ *   const result = await tracer.trace('operation.name', async (span: any) => {
  *     // Your operation here
  *     span.setAttribute('custom.attr', 'value');
  *     return result;
@@ -116,7 +116,7 @@ export class TracingService {
         jaegerEnabled: !!this.config.jaegerEndpoint,
         prometheusPort: this.config.prometheusPort,
       }, 'OpenTelemetry tracing initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize OpenTelemetry');
       this.config.enabled = false;
     }
@@ -126,7 +126,7 @@ export class TracingService {
    * Generic trace wrapper - wraps any async operation with tracing
    *
    * @example
-   * const result = await tracer.trace('database.query', async (span) => {
+   * const result = await tracer.trace('database.query', async (span: any) => {
    *   span.setAttribute('db.statement', query);
    *   return await db.query(query);
    * });
@@ -148,7 +148,7 @@ export class TracingService {
         const result = await operation(span);
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-      } catch (error) {
+      } catch (error: any) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: error instanceof Error ? error.message : 'Unknown error',
@@ -172,7 +172,7 @@ export class TracingService {
   ): Promise<T> {
     return this.trace(
       `db.${dbType}.${operation}`,
-      async (span) => {
+      async (span: any) => {
         span.setAttribute('db.system', dbType);
         span.setAttribute('db.operation', operation);
         if (query) {
@@ -195,7 +195,7 @@ export class TracingService {
   ): Promise<T> {
     return this.trace(
       `graphql.${operationName}`,
-      async (span) => {
+      async (span: any) => {
         span.setAttribute('graphql.operation.name', operationName);
         span.setAttribute('graphql.field.name', fieldName);
         if (contextData?.user?.id) {
@@ -217,7 +217,7 @@ export class TracingService {
   ): Promise<T> {
     return this.trace(
       `queue.${queueName}.${jobName}`,
-      async (span) => {
+      async (span: any) => {
         span.setAttribute('messaging.system', 'redis');
         span.setAttribute('messaging.destination', queueName);
         span.setAttribute('messaging.operation', 'process');
@@ -238,7 +238,7 @@ export class TracingService {
   ): Promise<T> {
     return this.trace(
       `http.${method.toLowerCase()}`,
-      async (span) => {
+      async (span: any) => {
         span.setAttribute('http.method', method);
         span.setAttribute('http.url', url);
         return await httpOperation();

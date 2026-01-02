@@ -180,7 +180,7 @@ export class LLMRouter {
           const result = await this.paletteVerifier.evaluate(candidates);
           selectedIndex = Math.min(Math.max(result.selectedIndex, 0), candidates.length - 1);
           scores = result.scores;
-        } catch (err) {
+        } catch (err: any) {
           console.warn('Palette verifier failed, defaulting to first candidate', err);
         }
       }

@@ -86,7 +86,7 @@ export class SSOService {
         user = res.rows[0];
       } else {
         // Create user
-         const insertQuery = `
+        const insertQuery = `
           INSERT INTO users (
             id, email, password_hash, first_name, last_name, role, is_active, tenant_id, created_at, updated_at
           ) VALUES (
@@ -94,7 +94,7 @@ export class SSOService {
           ) RETURNING *
         `;
         // Default role is VIEWER if not mapped
-        const role = ssoUser.roles.includes('ADMIN') ? 'ADMIN' : (ssoUser.roles.includes('ANALYST') ? 'ANALYST' : 'VIEWER');
+        const role = (ssoUser.roles || []).includes('ADMIN') ? 'ADMIN' : ((ssoUser.roles || []).includes('ANALYST') ? 'ANALYST' : 'VIEWER');
 
         const res = await client.query(insertQuery, [
           crypto.randomUUID(),
@@ -122,18 +122,18 @@ export class SSOService {
 
       return {
         user: {
-            id: user.id,
-            email: user.email,
-            firstName: user.first_name,
-            lastName: user.last_name,
-            role: user.role,
-            tenantId: user.tenant_id
+          id: user.id,
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          role: user.role,
+          tenantId: user.tenant_id
         },
         token,
         refreshToken
       };
 
-    } catch (e) {
+    } catch (e: any) {
       await client.query('ROLLBACK');
       throw e;
     } finally {

@@ -222,7 +222,7 @@ export class DisclosurePackager {
             name: `artifacts/${artifactPath.split('/').pop()}`,
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Could not add artifact ${artifactPath}: ${error}`);
       }
     }
@@ -304,7 +304,7 @@ export class DisclosurePackager {
       }
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Wallet verification failed:', error);
       return false;
     }

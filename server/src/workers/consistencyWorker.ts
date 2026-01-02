@@ -64,7 +64,7 @@ export const startConsistencyWorker = () => {
         }
 
         return { checked: reports.length, drifted: reports.filter(r => r.status === 'drifted').length };
-      } catch (err) {
+      } catch (err: any) {
         consistencyLogger.error(err, 'Consistency check failed');
         throw err;
       }
@@ -79,7 +79,7 @@ export const startConsistencyWorker = () => {
     },
   );
 
-  worker.on('completed', (job) => {
+  worker.on('completed', (job: any) => {
     consistencyLogger.info({ jobId: job.id, returnvalue: job.returnvalue }, 'Consistency check completed');
   });
 

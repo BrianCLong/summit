@@ -20,7 +20,7 @@ export const getFunnelReport = (req: Request, res: Response) => {
     try {
         const report = service.generateReport(id);
         res.json(report);
-    } catch (e) {
+    } catch (e: any) {
         res.status(404).json({ error: (e as Error).message });
     }
 };

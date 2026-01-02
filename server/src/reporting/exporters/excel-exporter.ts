@@ -11,7 +11,7 @@ export class ExcelExporter implements ReportExporter {
     const rows = normalizeTabularData(data);
     const headers = Object.keys(rows[0] || { value: 'value' });
     sheet.addRow(headers);
-    rows.forEach((row) => sheet.addRow(headers.map((key) => row[key] ?? '')));
+    rows.forEach((row: any) => sheet.addRow(headers.map((key) => row[key] ?? '')));
 
     if (options.watermark) {
       const watermarkSheet = workbook.addWorksheet('Watermark');

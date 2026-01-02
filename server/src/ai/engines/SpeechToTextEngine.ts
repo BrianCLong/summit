@@ -67,7 +67,7 @@ export class SpeechToTextEngine {
 
       this.isInitialized = true;
       logger.info('Speech-to-Text Engine initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize Speech-to-Text Engine:', error);
       throw error;
     }
@@ -141,7 +141,7 @@ export class SpeechToTextEngine {
         `Transcription completed: ${segments.length} segments, ${this.getTotalDuration(segments).toFixed(2)}s`,
       );
       return segments;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Transcription failed:', error);
       throw error;
     }
@@ -160,7 +160,7 @@ export class SpeechToTextEngine {
 
       // Transcribe extracted audio
       return await this.transcribe(audioPath, options);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Video transcription failed:', error);
       throw error;
     }
@@ -372,7 +372,7 @@ export class SpeechToTextEngine {
           segment.speaker = bestSpeaker;
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         'Speaker diarization failed, continuing without speaker labels:',
         error,
@@ -528,7 +528,7 @@ export class SpeechToTextEngine {
         segment.audioQuality = qualityMetrics.snr; // Signal-to-noise ratio
         segment.noiseLevel = qualityMetrics.noiseLevel;
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Audio quality analysis failed:', error);
     }
   }
@@ -709,7 +709,7 @@ export class SpeechToTextEngine {
 
       this.availableModels = models;
       logger.info(`Available models: ${this.availableModels.join(', ')}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load available models:', error);
       throw error;
     }

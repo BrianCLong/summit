@@ -27,7 +27,7 @@ router.get('/preferences', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const preferences = await notificationService.getPreferences(userId);
     res.json(preferences || {});
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).send('Error fetching preferences');
   }
 });
@@ -42,7 +42,7 @@ router.post('/preferences', async (req: AuthenticatedRequest, res: Response) => 
   try {
     await notificationService.savePreferences(userId, prefs);
     res.status(200).send('OK');
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).send('Error saving preferences');
   }
 });
@@ -63,7 +63,7 @@ router.post('/messages', async (req: AuthenticatedRequest, res: Response) => {
       content
     });
     res.json(message);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).send('Error sending message');
   }
 });
@@ -78,7 +78,7 @@ router.get('/messages/:otherUserId', async (req: AuthenticatedRequest, res: Resp
   try {
     const messages = await messagingService.getMessages(userId, otherUserId);
     res.json(messages);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).send('Error fetching messages');
   }
 });

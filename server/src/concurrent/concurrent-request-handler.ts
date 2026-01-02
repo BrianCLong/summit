@@ -190,7 +190,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
       );
 
       return request.id;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         {
           requestId: request.id,
@@ -269,7 +269,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
 
         // Process batch concurrently
         await this.processBatch(batch);
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error({ error: error.message }, 'Error in processing loop');
         await new Promise((resolve) => setTimeout(resolve, 1000)); // 1s backoff
       }
@@ -379,7 +379,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
         },
         'Request processed successfully',
       );
-    } catch (error) {
+    } catch (error: any) {
       const duration = Date.now() - startTime;
 
       // Create error result
@@ -509,7 +509,7 @@ export class ConcurrentRequestHandler extends EventEmitter {
       this.metrics.stop();
 
       this.logger.info('Graceful shutdown completed');
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         { error: error.message },
         'Error during graceful shutdown',
@@ -799,7 +799,7 @@ if (!isMainThread && parentPort) {
         });
 
         await redis.disconnect();
-      } catch (error) {
+      } catch (error: any) {
         const endTime = Date.now();
 
         parentPort!.postMessage({

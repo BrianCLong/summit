@@ -480,7 +480,7 @@ export class TenantSLOService extends EventEmitter {
           await this.checkSLOViolations(sloMetrics);
 
           return sloMetrics;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to calculate tenant SLO', {
             tenantId,
             period,
@@ -668,7 +668,7 @@ export class TenantSLOService extends EventEmitter {
           JSON.stringify(metrics),
         ],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to store SLO metrics', {
         tenantId: metrics.tenantId,
         error: error instanceof Error ? error.message : String(error),
@@ -1129,7 +1129,7 @@ export class TenantSLOService extends EventEmitter {
       `,
         [alert.id, alert.tenantId, JSON.stringify(alert)],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to store SLO alert', {
         alertId: alert.id,
         tenantId: alert.tenantId,
@@ -1172,7 +1172,7 @@ export class TenantSLOService extends EventEmitter {
           });
 
           return dashboard;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to generate tenant dashboard', {
             tenantId,
             error: error instanceof Error ? error.message : String(error),
@@ -1318,7 +1318,7 @@ export class TenantSLOService extends EventEmitter {
       `,
         [dashboard.dashboardId, dashboard.tenantId, JSON.stringify(dashboard)],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to store tenant dashboard', {
         dashboardId: dashboard.dashboardId,
         tenantId: dashboard.tenantId,
@@ -1336,14 +1336,14 @@ export class TenantSLOService extends EventEmitter {
       for (const tenantId of tenants) {
         try {
           await this.calculateTenantSLO(tenantId);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to calculate SLO for tenant', {
             tenantId,
             error: error instanceof Error ? error.message : String(error),
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to calculate all tenant SLOs', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -1357,14 +1357,14 @@ export class TenantSLOService extends EventEmitter {
       WHERE timestamp >= NOW() - INTERVAL '1 hour'
     `);
 
-    return result.rows.map((row) => row.tenant_id);
+    return result.rows.map((row: any) => row.tenant_id);
   }
 
   private async generateHourlyReports(): Promise<void> {
     for (const tenantId of this.tenantSLOs.keys()) {
       try {
         await this.calculateTenantSLO(tenantId, 'hour');
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to generate hourly report for tenant', {
           tenantId,
           error: error instanceof Error ? error.message : String(error),
@@ -1377,7 +1377,7 @@ export class TenantSLOService extends EventEmitter {
     for (const tenantId of this.tenantSLOs.keys()) {
       try {
         await this.generateTenantDashboard(tenantId);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to update dashboard for tenant', {
           tenantId,
           error: error instanceof Error ? error.message : String(error),
@@ -1399,7 +1399,7 @@ export class TenantSLOService extends EventEmitter {
 
     try {
       return await this.calculateTenantSLO(tenantId);
-    } catch (error) {
+    } catch (error: any) {
       return cached || null;
     }
   }
@@ -1416,7 +1416,7 @@ export class TenantSLOService extends EventEmitter {
 
     try {
       return await this.generateTenantDashboard(tenantId);
-    } catch (error) {
+    } catch (error: any) {
       return null;
     }
   }

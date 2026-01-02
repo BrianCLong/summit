@@ -24,7 +24,7 @@ export class IntelGraphAPI {
       try {
         const nodes = await this.backend.queryNodes(requestedTenantId, type as string);
         res.json(nodes);
-      } catch (e) {
+      } catch (e: any) {
         res.status(500).json({ error: (e as Error).message });
       }
     });
@@ -49,7 +49,7 @@ export class IntelGraphAPI {
             tenantId: userTenantId // Force tenantId from auth context
         });
         res.status(201).json(node);
-      } catch (e) {
+      } catch (e: any) {
          res.status(500).json({ error: (e as Error).message });
       }
     });

@@ -837,7 +837,7 @@ export class EvaluationService {
     }
 
     // Calculate overall risk level
-    const criticalRisks = risks.mapRisks.filter((r) =>
+    const criticalRisks = risks.mapRisks.filter((r: any) =>
       r.includes('CRITICAL'),
     ).length;
     const highRisks = Object.values(risks).flat().length;
@@ -934,7 +934,7 @@ export class EvaluationService {
           benchmarkTargets: BENCHMARK_TARGETS,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         details: {

@@ -93,7 +93,7 @@ router.post(
       );
 
       const archive = archiver('zip', { zlib: { level: 9 } });
-      archive.on('error', (err) => {
+      archive.on('error', (err: any) => {
         logger.error('Archive error', err);
         if (!res.headersSent) {
             res.status(500).json({ success: false, error: 'Archive generation failed' });
@@ -145,7 +145,7 @@ router.post(
 
       await archive.finalize();
 
-    } catch (error) {
+    } catch (error: any) {
         if (error instanceof z.ZodError) {
             return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
         }

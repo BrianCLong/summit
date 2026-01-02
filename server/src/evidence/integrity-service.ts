@@ -122,7 +122,7 @@ export class EvidenceIntegrityService {
       });
 
       return { checked, passed, mismatches, chunksProcessed };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error({ err: error }, 'Evidence integrity verification failed');
       throw error;
     } finally {
@@ -224,7 +224,7 @@ export class EvidenceIntegrityService {
 
     try {
       return await fs.readFile(storagePath);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn({ artifactId: artifact.id, storagePath, err: error }, 'Failed to read artifact content');
       return null;
     }

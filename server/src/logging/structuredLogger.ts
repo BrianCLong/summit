@@ -47,12 +47,12 @@ const baseLogger = (pino as any)(
     redact: ['req.headers.authorization', 'req.headers.cookie', 'password', 'ssn', 'card.number'],
     timestamp: (pino as any).stdTimeFunctions?.isoTime || (() => `,"time":"${new Date().toISOString()}"`),
     hooks: {
-      logMethod(args, method, level) {
+      logMethod(args: any[], method: any, level: any) {
         const safeArgs = sanitizeLogArguments(args);
         try {
           const event = formatLogEvent((level as LogLevel) || 'info', safeArgs);
           logEventBus.publish(event);
-        } catch (error) {
+        } catch (error: any) {
           // Guard against serialization errors without breaking application logging.
           baseLogger.warn({ error }, 'Failed to mirror log event to bus');
         }
@@ -92,9 +92,9 @@ const auditPipeline = new AuditLogPipeline({
 const auditChainEnabled = process.env.AUDIT_CHAIN === 'true';
 const auditLedger = auditChainEnabled
   ? new AuditLedger({
-      ledgerFilePath: process.env.AUDIT_LEDGER_FILE,
-      logger: baseLogger.child({ component: 'audit-ledger' }),
-    })
+    ledgerFilePath: process.env.AUDIT_LEDGER_FILE,
+    logger: baseLogger.child({ component: 'audit-ledger' }),
+  })
   : null;
 
 export const appLogger = baseLogger;

@@ -61,7 +61,7 @@ class DoclingService {
         '/v1/parse',
         parsePayload,
       );
-    } catch (error) {
+    } catch (error: any) {
       parseResponse = this.baselineParse(
         input.tenantId,
         requestId,
@@ -120,7 +120,7 @@ class DoclingService {
         '/v1/summarize',
         summaryPayload,
       );
-    } catch (error) {
+    } catch (error: any) {
       summaryResponse = this.baselineSummary(
         input.tenantId,
         requestId,
@@ -293,7 +293,7 @@ class DoclingService {
         '/v1/extract',
         payload,
       );
-    } catch (error) {
+    } catch (error: any) {
       response = this.baselineExtract(
         input.tenantId,
         requestId,
@@ -416,7 +416,7 @@ class DoclingService {
         '/v1/summarize',
         payload,
       );
-    } catch (error) {
+    } catch (error: any) {
       response = this.baselineSummary(
         input.tenantId,
         requestId,
@@ -482,7 +482,7 @@ class DoclingService {
         );
       }
       return data as DoclingBaseResponse<T>;
-    } catch (error) {
+    } catch (error: any) {
       endTimer();
       doclingInferenceTotal.labels(operation, 'error').inc();
       throw error;

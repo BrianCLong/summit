@@ -75,7 +75,7 @@ export default function sanitizeRequest(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, path: req.path }, 'Sanitization error');
     res.status(500).json({ error: 'Input sanitization failed' });
   }
@@ -107,7 +107,7 @@ export function strictSanitizeRequest(
     }
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error, path: req.path }, 'Strict sanitization error');
     res.status(400).json({ error: 'Input contains invalid content' });
   }

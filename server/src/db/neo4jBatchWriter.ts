@@ -293,7 +293,7 @@ export class Neo4jBatchWriter {
       try {
         const results = await this.executeBatch(type, batch);
         allResults.push(...results);
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, type, count: batch.length }, 'Batch execution failed');
         this.stats.failedBatches++;
 
@@ -343,7 +343,7 @@ export class Neo4jBatchWriter {
         try {
           results = await this.executeOperations(tx, type, operations);
           await tx.commit();
-        } catch (error) {
+        } catch (error: any) {
           await tx.rollback();
           throw error;
         }
@@ -591,7 +591,7 @@ export class Neo4jBatchWriter {
     try {
       await this.executeBatch(type, operations);
       logger.info({ type, count: operations.length, attempt }, 'Batch retry succeeded');
-    } catch (error) {
+    } catch (error: any) {
       logger.warn({ error, type, attempt }, 'Batch retry failed, will retry');
       await this.retryBatch(type, operations, attempt + 1);
     }
@@ -628,7 +628,7 @@ export class Neo4jBatchWriter {
 
     try {
       await this.executeBatch(type, batch);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, type, count: batch.length }, 'Type flush failed');
       this.stats.failedBatches++;
 

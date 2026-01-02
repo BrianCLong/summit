@@ -18,7 +18,7 @@ export class PptxExporter implements ReportExporter {
 
     const rows = normalizeTabularData(data);
     const headers = Object.keys(rows[0] || { value: 'value' });
-    const tableRows = [headers, ...rows.map((row) => headers.map((key) => `${row[key] ?? ''}`))];
+    const tableRows = [headers, ...rows.map((row: any) => headers.map((key) => `${row[key] ?? ''}`))];
     slide.addTable(tableRows as any, { x: 0.5, y: 1, w: 9, fontSize: 12 });
 
     if (options.watermark) {

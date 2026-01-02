@@ -30,7 +30,7 @@ export async function auditAIOperation(
         service: 'intelgraph-ai',
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to audit AI operation:', error);
   }
 }
@@ -165,7 +165,7 @@ export async function getAuditTrail(
       `AI_${entityType.toUpperCase()}_%`,
       limit,
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get audit trail:', error);
     return [];
   }
@@ -178,7 +178,7 @@ export async function getRecentSecurityEvents(hours: number = 24) {
   try {
     const events = await auditRepo.findRecent(hours);
     return events.filter((event: any) => event.type === 'AI_SECURITY_EVENT');
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get recent security events:', error);
     return [];
   }
@@ -212,7 +212,7 @@ export async function generateAuditReport(startDate: string, endDate: string) {
     };
 
     return report;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to generate audit report:', error);
     return null;
   }

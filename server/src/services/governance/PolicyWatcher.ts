@@ -87,7 +87,7 @@ export class PolicyWatcher {
             }
 
             const files = fs.readdirSync(this.policiesDir)
-                .filter(f => f.endsWith('.rego'))
+                .filter((f: string) => f.endsWith('.rego'))
                 .sort();
 
             const hash = createHash('sha256');
@@ -99,7 +99,7 @@ export class PolicyWatcher {
             }
 
             return hash.digest('hex');
-        } catch (e) {
+        } catch (e: any) {
             logger.error('Error hashing policies', e);
             throw e;
         }

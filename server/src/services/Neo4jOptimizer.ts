@@ -149,7 +149,7 @@ export class Neo4jOptimizer {
         results: result.records.map((record) => record.toObject()) as T[],
         profile,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, cypher, parameters }, 'Query execution failed');
       throw error;
     }
@@ -233,7 +233,7 @@ export class Neo4jOptimizer {
       try {
         await session.run(command);
         logger.info('Created index', { command: command.substring(0, 50) });
-      } catch (error) {
+      } catch (error: any) {
         logger.warn('Index creation failed or already exists', {
           command: command.substring(0, 50),
           error: (error as Error).message,

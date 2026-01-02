@@ -1,5 +1,5 @@
 // server/src/conductor/limits.ts
-export function shouldAdmit(req, costUsd: number) {
+export function shouldAdmit(req: any, costUsd: number) {
   const budgetDaily = Number(process.env.CONDUCTOR_BUDGET_DAILY_USD || 0);
   // fetch rolling cost from Redis/DB…
   const projected = /* currentDayCost */ 0 + costUsd;

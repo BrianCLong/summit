@@ -177,7 +177,7 @@ export class LinUCBOptimizer extends EventEmitter {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Arm selection failed', { error, context });
       this.emit('selection_error', { error, context });
       throw error;
@@ -259,7 +259,7 @@ export class LinUCBOptimizer extends EventEmitter {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Reward update failed', { error, armId, reward });
       this.emit('update_error', { error, armId, reward });
       throw error;
@@ -334,7 +334,7 @@ export class LinUCBOptimizer extends EventEmitter {
       const newArm: ArmState = {
         armId,
         theta: [...zeroVector],
-        A: identityMatrix.map((row) => [...row]), // Deep copy
+        A: identityMatrix.map((row: any) => [...row]), // Deep copy
         b: [...zeroVector],
         numPulls: 0,
         totalReward: 0,
@@ -399,7 +399,7 @@ export class LinUCBOptimizer extends EventEmitter {
 
       // Confidence bound: sqrt(x^T * A^(-1) * x)
       return Math.sqrt(Math.max(0, xAInvx));
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Confidence bound calculation failed, using fallback', {
         armId,
         error,
@@ -421,7 +421,7 @@ export class LinUCBOptimizer extends EventEmitter {
       const newB = armState.b.map((bi, i) => bi + reward * features[i]);
 
       // Update A: A = A + x * x^T (Sherman-Morrison formula)
-      const newA = armState.A.map((row) => [...row]); // Deep copy
+      const newA = armState.A.map((row: any) => [...row]); // Deep copy
       for (let i = 0; i < this.contextDimension; i++) {
         for (let j = 0; j < this.contextDimension; j++) {
           newA[i][j] += features[i] * features[j];
@@ -437,7 +437,7 @@ export class LinUCBOptimizer extends EventEmitter {
       armState.b = newB;
 
       return newTheta;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Sherman-Morrison update failed', {
         error,
         armId: armState.armId,
@@ -458,7 +458,7 @@ export class LinUCBOptimizer extends EventEmitter {
       try {
         const confidence = this.calculateConfidenceBound(armId, features);
         scores[armId.toString()] = confidence;
-      } catch (error) {
+      } catch (error: any) {
         scores[armId.toString()] = 0.5; // Default confidence
       }
     }
@@ -594,7 +594,7 @@ export class LinUCBOptimizer extends EventEmitter {
   }
 
   private matrixVectorProduct(matrix: number[][], vector: number[]): number[] {
-    return matrix.map((row) => this.dotProduct(row, vector));
+    return matrix.map((row: any) => this.dotProduct(row, vector));
   }
 
   private quadraticForm(x: number[], A: number[][]): number {
@@ -650,7 +650,7 @@ export class LinUCBOptimizer extends EventEmitter {
     }
 
     // Extract inverse matrix
-    return augmented.map((row) => row.slice(n));
+    return augmented.map((row: any) => row.slice(n));
   }
 
   private arraysEqual(a: number[], b: number[]): boolean {

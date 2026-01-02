@@ -30,10 +30,10 @@ interface PartitionType {
   description: string;
   resourceLimits: ResourceLimits;
   isolationLevel:
-    | 'shared'
-    | 'dedicated_compute'
-    | 'dedicated_instance'
-    | 'dedicated_cluster';
+  | 'shared'
+  | 'dedicated_compute'
+  | 'dedicated_instance'
+  | 'dedicated_cluster';
   costMultiplier: number;
   priority: number;
 }
@@ -94,12 +94,12 @@ interface TenantPartition {
   // Migration state
   migration: {
     status:
-      | 'none'
-      | 'scheduled'
-      | 'in_progress'
-      | 'completed'
-      | 'failed'
-      | 'rolled_back';
+    | 'none'
+    | 'scheduled'
+    | 'in_progress'
+    | 'completed'
+    | 'failed'
+    | 'rolled_back';
     scheduledAt?: Date;
     startedAt?: Date;
     completedAt?: Date;
@@ -117,12 +117,12 @@ interface TenantPartition {
 interface PartitioningEvent {
   timestamp: Date;
   event:
-    | 'evaluation'
-    | 'migration_scheduled'
-    | 'migration_started'
-    | 'migration_completed'
-    | 'migration_failed'
-    | 'rollback';
+  | 'evaluation'
+  | 'migration_scheduled'
+  | 'migration_started'
+  | 'migration_completed'
+  | 'migration_failed'
+  | 'rollback';
   fromPartition?: string;
   toPartition?: string;
   reason: string;
@@ -337,7 +337,7 @@ export class TenantPartitioningService extends EventEmitter {
       }
 
       logger.info('Loaded tenant partitions', { count: results.rows.length });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to load tenant partitions', {
         error: error.message,
       });
@@ -393,7 +393,7 @@ export class TenantPartitioningService extends EventEmitter {
               ) {
                 recommended++;
               }
-            } catch (error) {
+            } catch (error: any) {
               logger.error('Failed to evaluate tenant', {
                 tenantId,
                 error: error.message,
@@ -409,7 +409,7 @@ export class TenantPartitioningService extends EventEmitter {
             migrationsRecommended: recommended,
             duration,
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to evaluate all tenants', {
             error: error.message,
           });
@@ -499,7 +499,7 @@ export class TenantPartitioningService extends EventEmitter {
           }
 
           return result;
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Failed to evaluate tenant partition', {
             tenantId,
             error: error.message,
@@ -518,7 +518,7 @@ export class TenantPartitioningService extends EventEmitter {
       WHERE timestamp >= NOW() - INTERVAL '24 hours'
     `);
 
-    return result.rows.map((row) => row.tenant_id);
+    return result.rows.map((row: any) => row.tenant_id);
   }
 
   private async initializeTenantPartition(
@@ -712,7 +712,7 @@ export class TenantPartitioningService extends EventEmitter {
       `,
         [tenantId, JSON.stringify(partition)],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to save partition info', {
         tenantId,
         error: error.message,
@@ -925,7 +925,7 @@ export class TenantPartitioningService extends EventEmitter {
 
     try {
       await this.executeMigration(plan);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to execute migration', {
         tenantId: plan.tenantId,
         error: error.message,
@@ -1011,7 +1011,7 @@ export class TenantPartitioningService extends EventEmitter {
       });
 
       this.emit('migrationCompleted', { tenantId, plan, duration });
-    } catch (error) {
+    } catch (error: any) {
       // Migration failed - attempt rollback
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error('Migration failed, attempting rollback', {
@@ -1023,7 +1023,7 @@ export class TenantPartitioningService extends EventEmitter {
 
       try {
         await this.rollbackMigration(plan, errorMessage);
-      } catch (rollbackError) {
+      } catch (rollbackError: any) {
         logger.error('Rollback failed', {
           tenantId,
           error: rollbackError instanceof Error ? rollbackError.message : String(rollbackError),
@@ -1075,7 +1075,7 @@ export class TenantPartitioningService extends EventEmitter {
       try {
         await this.executeStep(step);
         await this.validateStep(step);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Rollback step failed', {
           tenantId,
           step: step.name,

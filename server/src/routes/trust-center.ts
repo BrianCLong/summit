@@ -302,7 +302,7 @@ router.get('/compliance', async (req: Request, res: Response) => {
       tenant: tenantId,
       lastUpdated: new Date().toISOString(),
       overallScore:
-        (complianceResults.filter((r) => r.overallStatus === 'compliant')
+        (complianceResults.filter((r: any) => r.overallStatus === 'compliant')
           .length /
           complianceResults.length) *
         100,

@@ -86,7 +86,7 @@ async function loop() {
     } finally {
       span?.end();
     }
-    await new Promise((r) => setTimeout(r, 5000));
+    await new Promise((r: any) => setTimeout(r, 5000));
   }
 }
 

@@ -114,7 +114,7 @@ export class EntityCommentService {
       await client.query('COMMIT');
 
       return this.mapCommentRow(commentRow, attachments, mentions);
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -434,7 +434,7 @@ export class EntityCommentService {
     };
   }
 
-  private mapAttachmentRow(row: any): EntityCommentAttachment {
+  private mapAttachmentRow(row): EntityCommentAttachment {
     return {
       id: row.id,
       fileName: row.file_name,

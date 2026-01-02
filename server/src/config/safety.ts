@@ -37,7 +37,7 @@ async function evaluateFlag(
   if (!flagService) return false;
   try {
     return await flagService.isEnabled(key, { key: 'system' }, false);
-  } catch (error) {
+  } catch (error: any) {
     logger.warn({ err: error, flag: key }, 'Feature flag evaluation failed');
     return false;
   }

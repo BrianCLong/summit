@@ -24,7 +24,7 @@ router.post('/evaluate', async (req: AuthenticatedRequest, res: Response) => {
     logger.info({ metrics }, 'ER Evaluation Completed');
 
     res.json(metrics);
-  } catch (error) {
+  } catch (error: any) {
     logger.error({ error: error instanceof Error ? error.message : String(error) }, 'ER Evaluation Failed');
     res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }

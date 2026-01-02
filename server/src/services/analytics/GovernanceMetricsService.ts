@@ -124,7 +124,7 @@ export class GovernanceMetricsService {
           evaluator: 'GovernanceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting verdict distribution:', error);
       // Return empty data on error
       return createDataEnvelope(
@@ -174,7 +174,7 @@ export class GovernanceMetricsService {
         [tenantId, timeRange.start, timeRange.end, dateFormat]
       );
 
-      const trends: VerdictTrend[] = result.rows.map((row) => ({
+      const trends: VerdictTrend[] = result.rows.map((row: any) => ({
         date: row.date,
         allow: parseInt(row.allow, 10) || 0,
         deny: parseInt(row.deny, 10) || 0,
@@ -192,7 +192,7 @@ export class GovernanceMetricsService {
           evaluator: 'GovernanceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting verdict trends:', error);
       return createDataEnvelope(
         [],
@@ -240,7 +240,7 @@ export class GovernanceMetricsService {
         [tenantId, timeRange.start, timeRange.end, limit]
       );
 
-      const policies: PolicyEffectiveness[] = result.rows.map((row) => ({
+      const policies: PolicyEffectiveness[] = result.rows.map((row: any) => ({
         policyId: row.policy_id,
         policyName: row.policy_name || row.policy_id,
         triggerCount: parseInt(row.trigger_count, 10),
@@ -260,7 +260,7 @@ export class GovernanceMetricsService {
           evaluator: 'GovernanceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting policy effectiveness:', error);
       return createDataEnvelope(
         [],
@@ -367,7 +367,7 @@ export class GovernanceMetricsService {
           evaluator: 'GovernanceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error detecting anomalies:', error);
       return createDataEnvelope(
         [],

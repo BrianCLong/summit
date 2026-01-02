@@ -42,7 +42,7 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
              res.setHeader('X-Quota-Remaining', quotaResult.remaining.toString());
         }
 
-    } catch (e) {
+    } catch (e: any) {
         logger.error('Quota check failed in middleware', e);
         // Fail open
     }

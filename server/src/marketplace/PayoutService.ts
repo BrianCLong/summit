@@ -640,7 +640,7 @@ export class PayoutService extends EventEmitter {
         'Payout completed'
       );
 
-    } catch (error) {
+    } catch (error: any) {
       payout.status = 'failed';
       payout.failureReason = error instanceof Error ? error.message : 'Unknown error';
       payout.updatedAt = new Date().toISOString();

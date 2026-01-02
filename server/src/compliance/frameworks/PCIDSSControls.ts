@@ -1444,8 +1444,8 @@ export class PCIDSSControlsService extends EventEmitter {
     }
 
     // Determine overall compliance
-    const allCompliant = requirementResults.every((r) => r.status === 'compliant');
-    const anyNonCompliant = requirementResults.some((r) => r.status === 'non_compliant');
+    const allCompliant = requirementResults.every((r: any) => r.status === 'compliant');
+    const anyNonCompliant = requirementResults.some((r: any) => r.status === 'non_compliant');
     const overallCompliance: ComplianceStatus = allCompliant
       ? 'compliant'
       : anyNonCompliant

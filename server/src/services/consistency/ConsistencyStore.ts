@@ -38,7 +38,7 @@ export class ConsistencyStore {
     if (!data) return [];
     try {
       return JSON.parse(data);
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(err, 'Failed to parse consistency reports from cache');
       return [];
     }

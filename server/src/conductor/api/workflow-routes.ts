@@ -34,7 +34,7 @@ router.get(
           timestamp: new Date().toISOString(),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to get available workflows', {
         error: error.message,
       });
@@ -91,7 +91,7 @@ router.post(
           message: 'Workflow execution started successfully',
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to execute workflow', {
         workflowName: req.params.workflowName,
         error: error.message,
@@ -142,7 +142,7 @@ router.get(
         success: true,
         data: execution,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to get execution status', {
         executionId: req.params.executionId,
         error: error.message,
@@ -204,7 +204,7 @@ router.post(
           status: 'cancelled',
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to cancel execution', {
         executionId: req.params.executionId,
         error: error.message,
@@ -275,7 +275,7 @@ router.get(
           ),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to list executions', { error: error.message });
 
       res.status(500).json({
@@ -363,7 +363,7 @@ router.get(
         success: true,
         data: metrics,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to get workflow metrics', {
         error: error.message,
       });
@@ -420,7 +420,7 @@ router.post(
           checkUrl: `/api/conductor/executions/${executionId}`,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to execute Hello World health check', {
         error: error.message,
       });
@@ -484,7 +484,7 @@ router.post(
           checkUrl: `/api/conductor/executions/${executionId}`,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to execute Hello Case E2E validation', {
         error: error.message,
       });
@@ -544,7 +544,7 @@ router.get(
           execution_id: executionId,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Failed to get execution logs', {
         executionId: req.params.executionId,
         error: error.message,

@@ -740,7 +740,7 @@ export class AdapterRegistry {
       try {
         await adapter.initialize(hub);
         console.log(`Initialized ${name} adapter`);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to initialize ${name} adapter:`, error);
       }
     }

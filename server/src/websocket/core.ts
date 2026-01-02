@@ -97,7 +97,7 @@ export class WebSocketCore {
         sub: decoded.sub || 'unknown',
         exp: decoded.exp || 0,
       };
-    } catch (error) {
+    } catch (error: any) {
       console.warn('JWT verification failed:', error);
       return null;
     }
@@ -119,7 +119,7 @@ export class WebSocketCore {
           [investigationId, userId]
       );
       return invResult.rowCount > 0;
-    } catch (error) {
+    } catch (error: any) {
       // If tables don't exist, we might be in a fresh env.
       // Log warning and default to deny for security (IG-204)
       console.warn(`Investigation access check failed for ${investigationId}:`, error);
@@ -205,7 +205,7 @@ export class WebSocketCore {
       });
 
       return allowed;
-    } catch (error) {
+    } catch (error: any) {
       console.error('OPA check failed:', error);
       return false; // Fail closed
     } finally {
@@ -287,7 +287,7 @@ export class WebSocketCore {
             req.getHeader('sec-websocket-extensions'),
             context
           );
-        } catch (error) {
+        } catch (error: any) {
             console.error('Yjs upgrade error:', error);
             res.writeStatus('500 Internal Server Error').end();
         } finally {
@@ -360,7 +360,7 @@ export class WebSocketCore {
             'websocket.user_id': claims.userId,
             'websocket.roles': claims.roles.join(','),
           });
-        } catch (error) {
+        } catch (error: any) {
           console.error('WebSocket upgrade error:', error);
           res.writeStatus('500 Internal Server Error').end();
         } finally {
@@ -405,7 +405,7 @@ export class WebSocketCore {
             'websocket.tenant_id': connection.tenantId,
             'websocket.user_id': connection.userId,
           });
-        } catch (error) {
+        } catch (error: any) {
           console.error('WebSocket message error:', error);
           const errorPayload = {
             type: 'error',
@@ -701,7 +701,7 @@ export class WebSocketCore {
           JSON.stringify(details),
         ],
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('WebSocket audit logging failed:', error);
     }
   }

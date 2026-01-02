@@ -598,7 +598,7 @@ export class FIPSComplianceService implements FIPSCrypto {
         // await this.hsmConnection.ping();
         hsmConnected = true;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('HSM health check failed:', error);
     }
 

@@ -267,7 +267,7 @@ export class MultimodalDataService {
         `Created media source: ${id}, type: ${metadata.mediaType}, size: ${metadata.filesize}`,
       );
       return mediaSource;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to create media source:`);
       throw error;
     }
@@ -284,7 +284,7 @@ export class MultimodalDataService {
       return result.rows.length > 0
         ? this.mapRowToMediaSource(result.rows[0])
         : null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to get media source ${id}:`);
       throw error;
     }
@@ -335,8 +335,8 @@ export class MultimodalDataService {
       }
 
       const result = await this.db.query(query, values);
-      return result.rows.map((row) => this.mapRowToMediaSource(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.mapRowToMediaSource(row));
+    } catch (error: any) {
       logger.error(
         error,
         `Failed to get media sources for investigation ${investigationId}:`,
@@ -367,7 +367,7 @@ export class MultimodalDataService {
       }
 
       return this.mapRowToMediaSource(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to update media source status ${id}:`);
       throw error;
     }
@@ -431,7 +431,7 @@ export class MultimodalDataService {
         `Created multimodal entity: ${id}, type: ${input.entityType}, confidence: ${input.confidence}`,
       );
       return entity;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to create multimodal entity:`);
       throw error;
     }
@@ -448,7 +448,7 @@ export class MultimodalDataService {
       return result.rows.length > 0
         ? this.mapRowToMultimodalEntity(result.rows[0])
         : null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to get multimodal entity ${id}:`);
       throw error;
     }
@@ -511,8 +511,8 @@ export class MultimodalDataService {
       }
 
       const result = await this.db.query(query, values);
-      return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.mapRowToMultimodalEntity(row));
+    } catch (error: any) {
       logger.error(
         error,
         `Failed to get multimodal entities for investigation ${investigationId}:`,
@@ -601,7 +601,7 @@ export class MultimodalDataService {
       }
 
       return this.mapRowToMultimodalEntity(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to update multimodal entity ${id}:`);
       throw error;
     }
@@ -650,7 +650,7 @@ export class MultimodalDataService {
         `Verified multimodal entity: ${id}, verified: ${verification.verified}, by: ${userId}`,
       );
       return entity;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to verify multimodal entity ${id}:`);
       throw error;
     }
@@ -671,7 +671,7 @@ export class MultimodalDataService {
       }
 
       return deleted;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to delete multimodal entity ${id}:`);
       throw error;
     }
@@ -698,8 +698,8 @@ export class MultimodalDataService {
            OR (cmm.target_entity_id = $1 AND source_ms.media_type = ANY($2))
       `;
       const result = await this.db.query(query, [entityId, targetMediaTypes]);
-      return result.rows.map((row) => this.mapRowToCrossModalMatch(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.mapRowToCrossModalMatch(row));
+    } catch (error: any) {
       logger.error(error, `Failed to find cross modal matches for ${entityId}:`);
       throw error;
     }
@@ -750,8 +750,8 @@ export class MultimodalDataService {
       }
 
       const result = await this.db.query(query, values);
-      return result.rows.map((row) => this.mapRowToCrossModalMatch(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.mapRowToCrossModalMatch(row));
+    } catch (error: any) {
       logger.error(
         error,
         `Failed to get cross modal matches for investigation ${investigationId}:`,
@@ -877,8 +877,8 @@ export class MultimodalDataService {
       }
 
       const result = await this.db.query(sqlQuery, values);
-      return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.mapRowToMultimodalEntity(row));
+    } catch (error: any) {
       logger.error(error, `Failed to perform semantic search:`);
       throw error;
     }
@@ -916,8 +916,8 @@ export class MultimodalDataService {
         topK,
       ]);
 
-      return result.rows.map((row) => this.mapRowToMultimodalEntity(row));
-    } catch (error) {
+      return result.rows.map((row: any) => this.mapRowToMultimodalEntity(row));
+    } catch (error: any) {
       logger.error(error, `Failed to find similar entities for ${entityId}:`);
       throw error;
     }
@@ -966,7 +966,7 @@ export class MultimodalDataService {
         verified: false,
         limit: filters.limit,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, 'Failed to get unverified entities:');
       throw error;
     }
@@ -1012,7 +1012,7 @@ export class MultimodalDataService {
     try {
         const metadata = await this.mediaUploadService.uploadMedia(upload, userId);
         return this.createMediaSource(metadata, userId);
-    } catch (error) {
+    } catch (error: any) {
         logger.error(error, 'Failed to upload media source:');
         throw error;
     }
@@ -1032,7 +1032,7 @@ export class MultimodalDataService {
       }
 
       return deleted;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to delete media source ${id}:`);
       throw error;
     }
@@ -1062,7 +1062,7 @@ export class MultimodalDataService {
 
       logger.info(`Updated media metadata: ${id} by user: ${userId}`);
       return this.mapRowToMediaSource(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
       logger.error(error, `Failed to update media metadata ${id}:`);
       throw error;
     }
@@ -1122,7 +1122,7 @@ export class MultimodalDataService {
         ];
         const result = await this.db.query(query, values);
         return this.mapRowToCrossModalMatch(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
         logger.error(error, 'Failed to create multimodal relationship:');
         throw error;
     }
@@ -1159,7 +1159,7 @@ export class MultimodalDataService {
             throw new Error(`Match ${id} not found`);
         }
         return this.mapRowToCrossModalMatch(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
         logger.error(error, 'Failed to update multimodal relationship:');
         throw error;
     }
@@ -1183,7 +1183,7 @@ export class MultimodalDataService {
         const result = await this.db.query(query, [verified, userId, id]);
         if (result.rows.length === 0) throw new Error(`Match ${id} not found`);
         return this.mapRowToCrossModalMatch(result.rows[0]);
-    } catch (error) {
+    } catch (error: any) {
         logger.error(error, `Failed to verify relationship ${id}:`);
         throw error;
     }
@@ -1210,7 +1210,7 @@ export class MultimodalDataService {
         'UPDATE media_sources SET extraction_count = extraction_count + 1 WHERE id = $1',
         [mediaSourceId],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         error,
         `Failed to increment extraction count for ${mediaSourceId}:`,

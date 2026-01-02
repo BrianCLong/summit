@@ -99,14 +99,14 @@ export async function ingestDocs() {
           [relPath, title, body, JSON.stringify(metadata), vectorStr]
         );
 
-      } catch (err) {
+      } catch (err: any) {
         logger.error({ err, file }, 'Failed to process file');
       }
     }
 
     logger.info('Docs ingestion complete');
 
-  } catch (err) {
+  } catch (err: any) {
     logger.error({ err }, 'Ingestion failed');
   } finally {
     await pool.end();

@@ -57,7 +57,7 @@ export class EntityResolver {
         // Fallback: if no candidates found via fuzzy search, maybe fetch some recent ones?
         // But findSimilarNodes should cover exact matches too.
 
-    } catch (e) {
+    } catch (e: any) {
         // If labels are invalid, ignore.
         console.warn('Error fetching candidates', e);
     }

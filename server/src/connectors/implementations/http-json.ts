@@ -33,7 +33,7 @@ export class HTTPJSONConnector extends BaseConnector {
         timeout: 5000
       });
       return true;
-    } catch (err) {
+    } catch (err: any) {
       // Fallback to GET if HEAD fails
       try {
          await axios.request({
@@ -44,7 +44,7 @@ export class HTTPJSONConnector extends BaseConnector {
             timeout: 5000
          });
          return true;
-      } catch (e) {
+      } catch (e: any) {
         this.logger.error({ err }, 'Connection test failed');
         return false;
       }
@@ -79,7 +79,7 @@ export class HTTPJSONConnector extends BaseConnector {
       }));
 
       return { fields, version: 1 };
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(`Failed to fetch schema: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }
@@ -122,7 +122,7 @@ export class HTTPJSONConnector extends BaseConnector {
             }
 
             stream.push(null);
-        } catch (err) {
+        } catch (err: any) {
             stream.destroy(err as Error);
             this.metrics.errors++;
         }

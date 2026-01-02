@@ -19,7 +19,7 @@ export async function executeSandbox(cypher: string, rowLimit = 10) {
   const session = driver.session();
   try {
     const result = await session.run(`${cypher} LIMIT ${rowLimit}`);
-    return result.records.map((r) => r.toObject());
+    return result.records.map((r: any) => r.toObject());
   } finally {
     await session.close();
     await driver.close();

@@ -229,7 +229,7 @@ export class WORMAuditChainService {
       try {
         const keyId = 'audit-chain-signing-key'; // Would be created during initialization
         chainEntry.signature = await fipsService.sign(currentHash, keyId);
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Failed to sign hash chain entry:', error);
       }
     }
@@ -303,7 +303,7 @@ export class WORMAuditChainService {
             segment.rootHash,
             keyId,
           );
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to sign segment root:', error);
           segment.rootSignature = 'signing_failed';
         }
@@ -405,7 +405,7 @@ export class WORMAuditChainService {
           const keyId = 'audit-encryption-key';
           const encrypted = await fipsService.encrypt(segmentJson, keyId);
           segmentJson = JSON.stringify(encrypted);
-        } catch (error) {
+        } catch (error: any) {
           console.warn(
             'Failed to encrypt segment, storing unencrypted:',
             error,
@@ -513,7 +513,7 @@ export class WORMAuditChainService {
             } else {
               result.errors.push(`Invalid signature at entry ${i}`);
             }
-          } catch (error) {
+          } catch (error: any) {
             result.errors.push(
               `Signature verification failed at entry ${i}: ${error}`,
             );
@@ -582,7 +582,7 @@ export class WORMAuditChainService {
 
         // Start new segment (finalizes current one)
         await this.startNewSegment();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Segment rotation failed:', error);
       }
     }, intervalMs);
@@ -594,7 +594,7 @@ export class WORMAuditChainService {
       // In production, this would read from database or S3
       this.lastHash = '0'; // Start with genesis hash
       this.sequenceCounter = 0;
-    } catch (error) {
+    } catch (error: any) {
       console.warn('No existing chain state found, starting fresh');
       this.lastHash = '0';
       this.sequenceCounter = 0;
@@ -663,7 +663,7 @@ export class WORMAuditChainService {
         });
         const keyId = 'audit-export-signing-key';
         exportSignature = await fipsService.sign(exportData, keyId);
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Failed to sign export:', error);
       }
 

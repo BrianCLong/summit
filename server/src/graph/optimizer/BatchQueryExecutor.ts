@@ -58,7 +58,7 @@ export class BatchQueryExecutor {
 
       // telemetry.subsystems.database.batch.size.record(batch.length);
 
-    } catch (error) {
+    } catch (error: any) {
        await tx.rollback();
        batch.forEach(item => item.reject(error));
     } finally {

@@ -23,7 +23,7 @@ export const ensurePolicy = (action: string, resource: string) => {
       }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       console.error('ABAC Check Failed', error);
       res.status(500).json({ error: 'Internal Policy Error' });
     }

@@ -70,7 +70,7 @@ export const deduplicationResolvers = {
           reasons: candidate.reasons || [],
           scores: candidate.scores,
         }));
-      } catch (error) {
+      } catch (error: any) {
         dedupLogger.error('Failed to fetch deduplication candidates', {
           investigationId: args.investigationId,
           error: error instanceof Error ? error.message : 'Unknown error',

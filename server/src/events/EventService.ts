@@ -55,7 +55,7 @@ export class EventService {
             tags: []
         };
         await siemManager.exportEvent(event.tenant_id, siemEvent);
-    } catch (e) {
+    } catch (e: any) {
         logger.error('Failed to dispatch to SIEM', { error: e });
         // Don't block main flow
     }

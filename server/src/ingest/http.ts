@@ -102,7 +102,7 @@ class IngestQueue {
         const batch = queue.splice(0, this.batchSize);
         await this.processBatch(tenantId, batch);
         ingestQueueDepth.set({ tenant_id: tenantId }, queue.length);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to process batch for tenant ${tenantId}:`, error);
       } finally {
         this.processing.set(tenantId, false);
@@ -132,7 +132,7 @@ class IngestQueue {
           }
 
           span.setAttributes({ signals_processed: signals.length });
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -294,7 +294,7 @@ export async function handleHttpSignal(req: Request, res: Response): Promise<voi
           } else {
             validSignals.push(enriched);
           }
-        } catch (error) {
+        } catch (error: any) {
           errors.push(`Signal validation failed: ${(error as Error).message}`);
         }
       }
@@ -341,7 +341,7 @@ export async function handleHttpSignal(req: Request, res: Response): Promise<voi
       });
 
       res.status(202).json(response);
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
 

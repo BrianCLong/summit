@@ -36,7 +36,7 @@ export class GossipProtocol {
         if (handler) {
           handler(parsed);
         }
-      } catch (err) {
+      } catch (err: any) {
         logger.error('Failed to parse gossip message', err);
       }
     });

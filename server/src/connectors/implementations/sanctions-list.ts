@@ -67,7 +67,7 @@ export class SanctionsListConnector extends BaseConnector {
             parser.on('end', () => stream.push(null));
             parser.on('error', (err: Error) => stream.destroy(err));
 
-          } catch (err) {
+          } catch (err: any) {
               stream.destroy(err as Error);
               this.metrics.errors++;
           }

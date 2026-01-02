@@ -273,7 +273,7 @@ export const conductorResolvers = {
           governance_limits_approaching:
             limits.warnings.length > 0 || limits.critical.length > 0,
         };
-      } catch (error) {
+      } catch (error: any) {
         // Always decrement concurrent counter on error
         governanceLimitEngine.decrementConcurrent(securityContext.userId);
         console.error('Conductor execution failed:', error);
@@ -357,7 +357,7 @@ export const conductorQueries = {
         status: 'healthy',
         message: `Router selected: ${testDecision.expert}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       checks.push({
         name: 'routing',
         status: 'unhealthy',

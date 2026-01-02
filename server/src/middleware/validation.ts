@@ -23,7 +23,7 @@ export const validateRequest = (schemas: {
         req.query = await schemas.query.parseAsync(req.query);
       }
       next();
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof ZodError) {
         const formattedErrors = error.errors.map((e) => ({
           path: e.path.join('.'),

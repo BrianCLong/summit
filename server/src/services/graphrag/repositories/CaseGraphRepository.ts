@@ -111,15 +111,15 @@ export class Neo4jCaseGraphRepository implements ICaseGraphRepository {
       );
 
       const nodes: GraphContextNode[] = [
-        ...caseNodeResult.map((row) => ({
+        ...caseNodeResult.map((row: any) => ({
           id: row.id,
           type: row.type,
           label: row.label,
           properties: this.sanitizeProperties(row.properties),
         })),
         ...nodesResult
-          .filter((row) => row.id !== null)
-          .map((row) => ({
+          .filter((row: any) => row.id !== null)
+          .map((row: any) => ({
             id: row.id,
             type: row.type,
             label: row.label,
@@ -128,8 +128,8 @@ export class Neo4jCaseGraphRepository implements ICaseGraphRepository {
       ];
 
       const edges: GraphContextEdge[] = edgesResult
-        .filter((row) => row.fromId && row.toId)
-        .map((row) => ({
+        .filter((row: any) => row.fromId && row.toId)
+        .map((row: any) => ({
           id: String(row.id),
           type: row.type,
           fromId: row.fromId,
@@ -147,7 +147,7 @@ export class Neo4jCaseGraphRepository implements ICaseGraphRepository {
       });
 
       return { nodes, edges };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to retrieve case subgraph',
         caseId,

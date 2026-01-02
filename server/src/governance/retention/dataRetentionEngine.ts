@@ -352,7 +352,7 @@ export class DataRetentionEngine {
     try {
       await this.performArchival(record, targetLocation);
       workflow.status = 'completed';
-    } catch (error) {
+    } catch (error: any) {
       workflow.status = 'failed';
       workflow.details = { error: (error as Error).message };
       throw error;
@@ -397,7 +397,7 @@ export class DataRetentionEngine {
       };
     });
 
-    const overdueDatasets = rows.filter((row) => {
+    const overdueDatasets = rows.filter((row: any) => {
       if (!row.nextPurge) {
         return false;
       }
@@ -407,7 +407,7 @@ export class DataRetentionEngine {
     const report: ComplianceReportSummary = {
       generatedAt: new Date(),
       totalDatasets: rows.length,
-      datasetsOnLegalHold: rows.filter((row) => row.onLegalHold).length,
+      datasetsOnLegalHold: rows.filter((row: any) => row.onLegalHold).length,
       overdueDatasets,
       archivedInPeriod: rows.reduce(
         (count, row) => count + row.archivedCount,

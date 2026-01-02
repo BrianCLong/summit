@@ -58,14 +58,14 @@ export class PricingEngine {
    * Retrieves a plan definition by ID.
    */
   async getPlanById(planId: string): Promise<Plan | null> {
-      const client = await this.pool.connect();
-      try {
-          const res = await client.query(`SELECT * FROM plans WHERE id = $1`, [planId]);
-          if (res.rows.length === 0) return null;
-          return this.mapRowToPlan(res.rows[0]);
-      } finally {
-          client.release();
-      }
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(`SELECT * FROM plans WHERE id = $1`, [planId]);
+      if (res.rows.length === 0) return null;
+      return this.mapRowToPlan(res.rows[0]);
+    } finally {
+      client.release();
+    }
   }
 
   private mapRowToPlan(row: any): Plan {
@@ -134,39 +134,39 @@ export class PricingEngine {
         const amount = billableQty * unitPrice;
 
         if (amount > 0) {
-            lineItems.push({
-                kind,
-                quantity: billableQty, // Billed quantity
-                unit: row.unit,
-                unitPrice,
-                amount,
-                metadata: {
-                    totalUsage: totalQty,
-                    includedUsage: included
-                }
-            });
-            subtotal += amount;
+          lineItems.push({
+            kind,
+            quantity: billableQty, // Billed quantity
+            unit: row.unit,
+            unitPrice,
+            amount,
+            metadata: {
+              totalUsage: totalQty,
+              includedUsage: included
+            }
+          });
+          subtotal += amount;
         }
       }
 
       const invoice: Invoice = {
-          id: randomUUID(),
-          tenantId,
-          periodStart,
-          periodEnd,
-          currency: plan.currency,
-          lineItems,
-          subtotal,
-          taxes: 0, // Placeholder
-          total: subtotal, // + taxes
-          status: 'DRAFT'
+        id: randomUUID(),
+        tenantId,
+        periodStart,
+        periodEnd,
+        currency: plan.currency,
+        lineItems,
+        subtotal,
+        taxes: 0, // Placeholder
+        total: subtotal, // + taxes
+        status: 'DRAFT'
       };
 
       // Persist invoice
       await client.query(
-          `INSERT INTO invoices (id, tenant_id, period_start, period_end, currency, line_items, subtotal, taxes, total, status)
+        `INSERT INTO invoices (id, tenant_id, period_start, period_end, currency, line_items, subtotal, taxes, total, status)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-           [invoice.id, invoice.tenantId, invoice.periodStart, invoice.periodEnd, invoice.currency, JSON.stringify(invoice.lineItems), invoice.subtotal, invoice.taxes, invoice.total, invoice.status]
+        [invoice.id, invoice.tenantId, invoice.periodStart, invoice.periodEnd, invoice.currency, JSON.stringify(invoice.lineItems), invoice.subtotal, invoice.taxes, invoice.total, invoice.status]
       );
 
       return invoice;

@@ -146,7 +146,7 @@ export class RegulatoryPackService {
 
       span?.addSpanAttributes({
         'regulatory_pack.loaded_count': results.length,
-        'regulatory_pack.error_count': results.filter((r) => r.validationErrors.length > 0).length,
+        'regulatory_pack.error_count': results.filter((r: any) => r.validationErrors.length > 0).length,
       });
 
       return results;
@@ -460,7 +460,7 @@ export class RegulatoryPackService {
             contentHash: createHash('sha256').update(contentStr).digest('hex'),
             contentSize: contentStr.length,
             redactionApplied: true,
-            redactionRules: DEFAULT_REDACTION_RULES.map((r) => r.category),
+            redactionRules: DEFAULT_REDACTION_RULES.map((r: any) => r.category),
           };
 
           snapshots.push(snapshot);

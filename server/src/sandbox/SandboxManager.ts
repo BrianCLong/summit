@@ -342,7 +342,7 @@ class SandboxManager {
       });
 
       return wrapInEnvelope(result, sandbox.tenantId, 'sandbox.execute', GovernanceResult.ALLOW);
-    } catch (error) {
+    } catch (error: any) {
       sandbox.status = 'failed';
       throw error;
     }
@@ -489,7 +489,7 @@ class SandboxManager {
     let passed = 0;
     let failed = 0;
 
-    results.forEach((r) => {
+    results.forEach((r: any) => {
       if (r.status === 'passed') passed++;
       else if (r.status === 'failed') failed++;
 
@@ -513,7 +513,7 @@ class SandboxManager {
       totalScenarios: results.length,
       passed,
       failed,
-      skipped: results.filter((r) => r.status === 'skipped').length,
+      skipped: results.filter((r: any) => r.status === 'skipped').length,
       executionTime,
       evaluationsPerformed,
       verdictDistribution: verdictCounts,
@@ -553,7 +553,7 @@ class SandboxManager {
     });
 
     const uncoveredRules = allRules.filter(
-      (r) => !coveredRules.has(`${r.policyId}:${r.ruleId}`)
+      (r: any) => !coveredRules.has(`${r.policyId}:${r.ruleId}`)
     );
 
     const testedPolicies = new Set<string>();
@@ -598,26 +598,26 @@ class SandboxManager {
         type: 'gap',
         severity: 'medium',
         description: `${coverage.uncoveredRules.length} rules were never triggered`,
-        affectedPolicies: [...new Set(coverage.uncoveredRules.map((r) => r.policyId))],
-        affectedRules: coverage.uncoveredRules.map((r) => r.ruleId),
+        affectedPolicies: [...new Set(coverage.uncoveredRules.map((r: any) => r.policyId))],
+        affectedRules: coverage.uncoveredRules.map((r: any) => r.ruleId),
         recommendation: 'Review uncovered rules for relevance or add scenarios to test them',
       });
     }
 
-    const failedResults = results.filter((r) => r.status === 'failed');
+    const failedResults = results.filter((r: any) => r.status === 'failed');
     if (failedResults.length > 0) {
       issues.push({
         type: 'conflict',
         severity: 'high',
         description: `${failedResults.length} scenarios produced unexpected verdicts`,
         affectedPolicies: [
-          ...new Set(failedResults.flatMap((r) => r.matchedRules.map((m) => m.split(':')[0]))),
+          ...new Set(failedResults.flatMap((r: any) => r.matchedRules.map((m: any) => m.split(':')[0]))),
         ],
         recommendation: 'Review policy rules for conflicts or update expected outcomes',
       });
     }
 
-    const slowScenarios = results.filter((r) => r.executionTime > 100);
+    const slowScenarios = results.filter((r: any) => r.executionTime > 100);
     if (slowScenarios.length > 0) {
       issues.push({
         type: 'performance',
@@ -723,7 +723,7 @@ class SandboxManager {
     const now = new Date();
     let cleaned = 0;
 
-    this.sandboxes.forEach((sandbox, id) => {
+    this.sandboxes.forEach((sandbox: any, id: string) => {
       if (new Date(sandbox.expiresAt) < now) {
         this.sandboxes.delete(id);
         cleaned++;

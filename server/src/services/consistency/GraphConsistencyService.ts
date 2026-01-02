@@ -48,14 +48,14 @@ export class GraphConsistencyService {
          WHERE tenant_id = $1 AND props->>'investigationId' = $2`,
         [tenantId, investigationId],
       );
-      const pgEntityIds = new Set(pgEntities.map((r) => r.id));
+      const pgEntityIds = new Set(pgEntities.map((r: any) => r.id));
 
       const { rows: pgRelationships } = await this.pg.query(
         `SELECT id FROM relationships
          WHERE tenant_id = $1 AND props->>'investigationId' = $2`,
         [tenantId, investigationId],
       );
-      const pgRelIds = new Set(pgRelationships.map((r) => r.id));
+      const pgRelIds = new Set(pgRelationships.map((r: any) => r.id));
 
       // 2. Get stats from Neo4j
       // Assuming investigationId is indexed on nodes
@@ -66,7 +66,7 @@ export class GraphConsistencyService {
         { investigationId },
       );
       const neo4jEntityIds = new Set(
-        neo4jEntitiesResult.records.map((r) => r.get('id')),
+        neo4jEntitiesResult.records.map((r: any) => r.get('id')),
       );
 
       const neo4jRelsResult = await session.run(
@@ -76,7 +76,7 @@ export class GraphConsistencyService {
         { investigationId },
       );
       const neo4jRelIds = new Set(
-        neo4jRelsResult.records.map((r) => r.get('id')),
+        neo4jRelsResult.records.map((r: any) => r.get('id')),
       );
 
       // 3. Check Indexes (Mocking check for now, assumes if query works, index works)

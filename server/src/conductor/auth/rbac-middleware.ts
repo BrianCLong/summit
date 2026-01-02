@@ -131,7 +131,7 @@ class RBACManager {
         const envConfig = JSON.parse(process.env.RBAC_CONFIG);
         this.config = { ...this.config, ...envConfig };
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         '⚠️ Failed to parse RBAC_CONFIG from environment, using defaults',
         { error: error.message },
@@ -337,7 +337,7 @@ export function authenticateUser(
     });
 
     next();
-  } catch (error) {
+  } catch (error: any) {
     logger.error('❌ Authentication middleware error', {
       error: error.message,
     });
@@ -386,7 +386,7 @@ export function requirePermission(permission: string) {
       });
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Authorization middleware error', {
         error: error.message,
         permission,
@@ -427,7 +427,7 @@ export function requireAnyPermission(...permissions: string[]) {
       }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('❌ Multi-permission authorization error', {
         error: error.message,
       });
@@ -466,7 +466,7 @@ export function getUserInfo(req: Request, res: Response): void {
         },
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('❌ Get user info error', { error: error.message });
     res.status(500).json({ error: 'Failed to get user information' });
   }

@@ -37,7 +37,7 @@ router.post('/models', async (req: Request, res: Response) => {
     });
 
     res.json({ id });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -60,7 +60,7 @@ router.post('/predict', async (req: Request, res: Response) => {
     });
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -74,7 +74,7 @@ router.post('/features/ingest', async (req: Request, res: Response) => {
     const { featureSet, entityId, values } = req.body;
     await featureStore.ingestFeatures(featureSet, entityId, values);
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });
@@ -94,7 +94,7 @@ router.post('/train', async (req: Request, res: Response) => {
     );
 
     res.json({ jobId });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
   }
 });

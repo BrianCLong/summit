@@ -95,7 +95,7 @@ export class GAEnrollmentService {
         this.memoryCacheConfig = res.rows[0].value;
         this.lastFetch = Date.now();
         return this.memoryCacheConfig as GAConfig;
-    } catch (e) {
+    } catch (e: any) {
         logger.error('Failed to fetch GA config, using default', e);
         return DEFAULT_CONFIG;
     } finally {

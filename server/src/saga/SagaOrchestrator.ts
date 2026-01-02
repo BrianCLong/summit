@@ -271,7 +271,7 @@ export class SagaOrchestrator<TPayload = unknown, TResult = unknown> extends Eve
           classification: DataClassification.INTERNAL,
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       state.status = 'failed';
       state.error = errorMessage;

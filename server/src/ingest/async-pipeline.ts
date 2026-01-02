@@ -159,7 +159,7 @@ export class PgAsyncIngestRepository implements AsyncIngestRepository {
 
       await client.query('COMMIT');
       return { job: this.mapRow(jobResult.rows[0]), duplicate: false };
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -211,7 +211,7 @@ export class PgAsyncIngestRepository implements AsyncIngestRepository {
 
       await client.query('COMMIT');
       return events;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -322,7 +322,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
     idempotencyKey?: string,
   ): Promise<{ job: AsyncIngestJob; duplicate: boolean }> {
     const duplicateJob = Array.from(this.jobs.values()).find(
-      (job) =>
+      (job: any) =>
         job.tenantId === payload.tenantId &&
         (job.payloadHash === payloadHash ||
           (!!idempotencyKey && job.idempotencyKey === idempotencyKey)),
@@ -445,7 +445,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
 
   async countProcessingForTenant(tenantId: string): Promise<number> {
     return Array.from(this.jobs.values()).filter(
-      (job) => job.tenantId === tenantId && job.status === 'PROCESSING',
+      (job: any) => job.tenantId === tenantId && job.status === 'PROCESSING',
     ).length;
   }
 }
@@ -508,7 +508,7 @@ export class AsyncIngestWorker {
   start() {
     if (this.timer) return;
     this.timer = setInterval(() => {
-      this.processOnce().catch((err) => {
+      this.processOnce().catch((err: any) => {
         logger.error({ err }, 'Async ingest worker tick failed');
       });
     }, this.options.pollIntervalMs);

@@ -64,7 +64,7 @@ export const copilotMVPResolvers = {
         }, 'NL query preview generated');
 
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, input }, 'Failed to preview NL query');
         throw new GraphQLError('Failed to generate query preview', {
           extensions: {
@@ -133,7 +133,7 @@ export const copilotMVPResolvers = {
           citations,
           auditId: preview.auditId,
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, input }, 'Failed to execute NL query');
 
         if (error instanceof GraphQLError) {
@@ -220,7 +220,7 @@ Generate ${input.count || 3} hypotheses in JSON format:
         }, 'Hypotheses generated');
 
         return formattedHypotheses;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, input }, 'Failed to generate hypotheses');
         throw new GraphQLError('Failed to generate hypotheses', {
           extensions: {
@@ -310,7 +310,7 @@ Generate a JSON response:
         }, 'Narrative generated');
 
         return narrative;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, input }, 'Failed to generate narrative');
         throw new GraphQLError('Failed to generate narrative', {
           extensions: {
@@ -338,7 +338,7 @@ Generate a JSON response:
           'Identify entities with conflicting information',
           'Show me entities added in the last 7 days',
         ];
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, investigationId }, 'Failed to get suggestions');
         return [];
       }
@@ -383,7 +383,7 @@ Generate a JSON response:
           citations,
           auditId: auditId || randomUUID(),
         };
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, cypher, investigationId }, 'Failed to execute Cypher');
         throw new GraphQLError('Failed to execute query', {
           extensions: {

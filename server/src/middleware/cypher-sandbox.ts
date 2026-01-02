@@ -426,7 +426,7 @@ export class CypherSandbox {
 
           // Return mock result for now
           return { records: [], summary: { resultAvailableAfter: duration } };
-        } catch (error) {
+        } catch (error: any) {
           logger.error({
             message: 'Query execution failed',
             error: error instanceof Error ? error.message : String(error),

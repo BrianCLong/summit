@@ -219,7 +219,7 @@ export class InvestigationRepo {
       }
 
       return false;
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -274,7 +274,7 @@ export class InvestigationRepo {
     params.push(Math.min(limit, 1000), offset);
 
     const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
-    return rows.map((row) => {
+    return rows.map((row: any) => {
       assertTenantMatch(row.tenant_id, scopedTenantId, 'investigation');
       return this.mapRow(row);
     });
@@ -331,7 +331,7 @@ export class InvestigationRepo {
 
     const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
     const investigationsMap = new Map(
-      rows.map((row) => {
+      rows.map((row: any) => {
         assertTenantMatch(row.tenant_id, scopedTenantId, 'investigation');
         return [row.id, this.mapRow(row)];
       }),

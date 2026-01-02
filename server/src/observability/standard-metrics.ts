@@ -24,7 +24,7 @@
  *     const result = await fetchUsers();
  *     redMetrics.http.recordSuccess({ method: 'GET', route: '/api/users' });
  *     return result;
- *   } catch (error) {
+ *   } catch (error: any) {
  *     redMetrics.http.recordError({ method: 'GET', route: '/api/users', error: error.name });
  *     throw error;
  *   } finally {

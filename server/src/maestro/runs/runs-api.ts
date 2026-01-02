@@ -37,7 +37,7 @@ const emitRunStatus = async (
     if (io) {
       MaestroEvents.emitStatusChange(io, tenantId, runId, status);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Failed to emit maestro status update', error);
   }
 };
@@ -80,7 +80,7 @@ router.get('/runs', authorize('run_maestro'), async (req, res) => {
     }));
 
     res.json({ items: formattedItems });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching runs:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -171,7 +171,7 @@ router.post('/runs', authorize('run_maestro'), async (req, res) => {
     });
 
     res.status(201).json(formattedRun);
-  } catch (error) {
+  } catch (error: any) {
     const [seconds, nanoseconds] = process.hrtime(start);
     const duration = seconds + nanoseconds / 1e9;
 
@@ -216,7 +216,7 @@ router.get('/runs/:id', authorize('run_maestro'), async (req, res) => {
     // }
 
     res.json(run);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching run:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -252,7 +252,7 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
     }
 
     res.json(run);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating run:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -264,7 +264,7 @@ router.delete('/runs/:id', authorize('run_maestro'), async (req, res) => {
       const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
       const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId
       res.status(deleted ? 204 : 404).send();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting run:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -287,7 +287,7 @@ router.get('/pipelines/:id/runs', authorize('run_maestro'), async (req, res) => 
       }));
 
       res.json({ items: formattedRuns });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching pipeline runs:', error);
       res.status(500).json({ error: 'Internal server error' });
     }

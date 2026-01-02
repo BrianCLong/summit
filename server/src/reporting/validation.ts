@@ -29,7 +29,7 @@ const deliveryInstructionSchema = z
     slack: slackConfigSchema.optional(),
     webhook: webhookConfigSchema.optional(),
   })
-  .superRefine((value, ctx) => {
+  .superRefine((value: any, ctx: any) => {
     const channelConfigs: Record<DeliveryChannel, boolean> = {
       email: !!value.email,
       slack: !!value.slack,
@@ -37,7 +37,7 @@ const deliveryInstructionSchema = z
     };
 
     for (const channel of value.channels) {
-      if (!channelConfigs[channel]) {
+      if (!channelConfigs[channel as DeliveryChannel]) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['channels'],

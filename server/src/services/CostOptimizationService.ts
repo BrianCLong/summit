@@ -131,7 +131,7 @@ export class CostOptimizationService {
             auto_implementable: opportunities.filter((o) => o.autoImplementable)
               .length,
           });
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -188,7 +188,7 @@ export class CostOptimizationService {
           (sum, r) => sum + r.actualSavingsUSD,
           0,
         );
-        const successCount = results.filter((r) => r.implemented).length;
+        const successCount = results.filter((r: any) => r.implemented).length;
 
         span.setAttributes({
           optimizations_attempted: opportunities.length,
@@ -464,7 +464,7 @@ export class CostOptimizationService {
         actualSavingsUSD: actualSavings,
         executionTime: Date.now() - startTime,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         opportunityId: opportunity.id,
         implemented: false,

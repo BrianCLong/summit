@@ -27,7 +27,7 @@ export class SwarmIntelligenceService {
       await this.gossip.initialize();
       await this.consensus.initialize();
       logger.info(`SwarmIntelligenceService initialized with Node ID: ${this.nodeId}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize SwarmIntelligenceService', error);
       throw error;
     }

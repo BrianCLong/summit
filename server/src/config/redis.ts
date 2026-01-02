@@ -25,7 +25,7 @@ export class RedisCacheManager {
         const cacheKey = this.getFullKey(prefix, key, tenantId);
         try {
             return await this.cacheManager.get(cacheKey);
-        } catch (error) {
+        } catch (error: any) {
             logger.error({ error, key: cacheKey }, 'Error getting from cache');
             return null;
         }
@@ -35,7 +35,7 @@ export class RedisCacheManager {
         const cacheKey = this.getFullKey(prefix, key, tenantId);
         try {
             await this.cacheManager.set(cacheKey, value, { ttl });
-        } catch (error) {
+        } catch (error: any) {
             logger.error({ error, key: cacheKey }, 'Error setting cache');
         }
     }
@@ -44,7 +44,7 @@ export class RedisCacheManager {
         const cacheKey = this.getFullKey(prefix, key, tenantId);
         try {
             await this.cacheManager.delete(cacheKey);
-        } catch (error) {
+        } catch (error: any) {
             logger.error({ error, key: cacheKey }, 'Error deleting from cache');
         }
     }
@@ -53,7 +53,7 @@ export class RedisCacheManager {
         try {
             // AdvancedCachingStrategy handles pattern invalidation
             return await this.cacheManager.invalidateByPattern(pattern);
-        } catch (error) {
+        } catch (error: any) {
             logger.error({ error, pattern }, 'Error deleting by pattern');
             return 0;
         }

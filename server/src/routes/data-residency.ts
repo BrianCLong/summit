@@ -522,10 +522,10 @@ router.get('/supported-regions', async (req, res) => {
       regions,
       totalRegions: Object.keys(regions).length,
       jurisdictions: [
-        ...new Set(Object.values(regions).map((r) => r.jurisdiction)),
+        ...new Set(Object.values(regions).map((r: any) => r.jurisdiction)),
       ],
       supportedLaws: [
-        ...new Set(Object.values(regions).flatMap((r) => r.dataLaws)),
+        ...new Set(Object.values(regions).flatMap((r: any) => r.dataLaws)),
       ],
     });
   } catch (error: any) {

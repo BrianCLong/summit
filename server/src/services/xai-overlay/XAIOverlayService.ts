@@ -613,7 +613,7 @@ export class XAIOverlayService {
 
       const verification = await dualNotary.verifyNotarizedRoot(notarized);
       return verification.valid;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Signature verification failed',
         traceId: trace.traceId,
@@ -815,7 +815,7 @@ export class XAIOverlayService {
     if (this.traceCache.size >= this.config.maxCacheSize) {
       // Remove oldest entry (FIFO)
       const firstKey = this.traceCache.keys().next().value;
-      this.traceCache.delete(firstKey);
+      if (firstKey) this.traceCache.delete(firstKey);
     }
 
     this.traceCache.set(trace.traceId, trace);
@@ -865,7 +865,7 @@ export class XAIOverlayService {
         if (!signing) {
           errors.push('Signing service unavailable');
         }
-      } catch (error) {
+      } catch (error: any) {
         errors.push('Signing health check failed');
       }
     }

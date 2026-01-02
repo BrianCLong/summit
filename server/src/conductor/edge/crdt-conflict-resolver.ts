@@ -98,7 +98,7 @@ export class CRDTConflictResolver {
       }
 
       return conflicts;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('CRDT conflict detection failed', {
         error: error.message,
         entityId,
@@ -185,7 +185,7 @@ export class CRDTConflictResolver {
           entityId,
           tenantId,
         );
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to resolve field conflict', {
           error: error.message,
           field: conflict.field,
@@ -282,7 +282,7 @@ export class CRDTConflictResolver {
 
       return {
         conflicts: conflictResult.rows,
-        resolutions: resolutionResult.rows.map((row) => ({
+        resolutions: resolutionResult.rows.map((row: any) => ({
           conflictId: row.conflict_id,
           resolvedBy: row.resolved_by,
           resolutionType: row.resolution_type,
@@ -624,7 +624,7 @@ export class CRDTConflictResolver {
 
       const { result } = await response.json();
       return result?.resolution || null;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to apply resolution policy', {
         error: error.message,
       });

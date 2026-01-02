@@ -170,7 +170,7 @@ export class CaseOverviewService {
       participantCount: Number(metrics.participant_count || 0),
       transitionCount: Number(metrics.transition_count || 0),
       auditEventCount: Number(metrics.audit_event_count || 0),
-      topEntities: topEntityRows.map((row) => ({
+      topEntities: topEntityRows.map((row: any) => ({
         graphEntityId: row.graph_entity_id,
         entityLabel: row.entity_label,
         entityType: row.entity_type,

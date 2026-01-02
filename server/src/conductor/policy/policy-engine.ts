@@ -201,7 +201,7 @@ export class PolicyEngine {
         evaluationTime,
         cached: false,
       };
-    } catch (error) {
+    } catch (error: any) {
       const evaluationTime = Date.now() - startTime;
 
       logger.error('Policy evaluation failed', {
@@ -285,7 +285,7 @@ export class PolicyEngine {
          ORDER BY priority ASC, created_at ASC`,
       );
 
-      const allRules = result.rows.map((row) => ({
+      const allRules = result.rows.map((row: any) => ({
         ...row,
         conditions:
           typeof row.conditions === 'string'
@@ -435,7 +435,7 @@ export class PolicyEngine {
       }
 
       throw new Error('Invalid OPA response format');
-    } catch (error) {
+    } catch (error: any) {
       if (error.response) {
         logger.error('OPA evaluation failed', {
           status: error.response.status,
@@ -618,7 +618,7 @@ export class PolicyEngine {
       }
 
       return null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to get cached policy decision', {
         error: error.message,
         cacheKey,
@@ -652,7 +652,7 @@ export class PolicyEngine {
         this.config.cacheTtlSeconds,
         JSON.stringify(cacheData),
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to cache policy decision', {
         error: error.message,
         cacheKey,
@@ -700,7 +700,7 @@ export class PolicyEngine {
           'policy-engine',
         ],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to record policy evaluation', {
         error: error.message,
         correlationId: input.context.correlationId,
@@ -872,7 +872,7 @@ export class PolicyEngine {
       }
 
       logger.info('Policy cache cleared');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to clear policy cache', { error: error.message });
     }
   }
@@ -903,7 +903,7 @@ export class PolicyEngine {
       let enabledRules = 0;
       const rulesByCategory: Record<string, number> = {};
 
-      rulesResult.rows.forEach((row) => {
+      rulesResult.rows.forEach((row: any) => {
         const count = parseInt(row.count);
         totalRules += count;
 

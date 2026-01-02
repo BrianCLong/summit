@@ -131,7 +131,7 @@ export class ComprehensiveAuditLoggingService {
       if (event.signature) {
         try {
           verify(event.signature, this.signingKey);
-        } catch (error) {
+        } catch (error: any) {
           failures.push({
             index,
             eventId: event.id,

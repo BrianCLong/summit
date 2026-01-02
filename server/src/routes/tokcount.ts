@@ -51,7 +51,7 @@ tokcountRouter.post('/api/tokcount', async (req: Request, res: Response) => {
         ...budgetCheck,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Token counting error:', error);
     res.status(500).json({
       error: 'Failed to count tokens',
@@ -100,7 +100,7 @@ tokcountRouter.post('/api/tokcount/batch', async (req: Request, res: Response) =
             success: true,
             ...result,
           };
-        } catch (error) {
+        } catch (error: any) {
           return {
             id: id || `error-${Date.now()}`,
             success: false,
@@ -122,12 +122,12 @@ tokcountRouter.post('/api/tokcount/batch', async (req: Request, res: Response) =
       results,
       summary: {
         totalRequests: requests.length,
-        successfulRequests: results.filter((r) => r.success).length,
+        successfulRequests: results.filter((r: any) => r.success).length,
         totalTokens,
         totalEstimatedCostUSD: Number(totalCost.toFixed(6)),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Batch token counting error:', error);
     res.status(500).json({
       error: 'Failed to process batch token counting',

@@ -160,7 +160,7 @@ export async function replayEvents(filePath: string, options: ReplayOptions = {}
         } else {
           console.warn(`No handler for event type: ${event.type}`);
         }
-      } catch (err) {
+      } catch (err: any) {
         errors.push({ line, error: err });
       }
     }
