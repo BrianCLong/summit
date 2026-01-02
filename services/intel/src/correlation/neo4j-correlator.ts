@@ -9,6 +9,33 @@
  * Copyright (c) 2025 IntelGraph
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'neo4j'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import neo4j, { Driver, Session, Transaction } from 'neo4j-driver';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -40,7 +67,7 @@ export interface CorrelatorConfig {
 const DEFAULT_CONFIG: CorrelatorConfig = {
   neo4jUri: process.env.NEO4J_URI || 'bolt://localhost:7687',
   neo4jUsername: process.env.NEO4J_USERNAME || 'neo4j',
-  neo4jPassword: process.env.NEO4J_PASSWORD || 'password',
+  neo4jPassword: requireSecret('NEO4J_PASSWORD', process.env.NEO4J_PASSWORD, 16),
   maxPathLength: 4,
   minCorrelationScore: 0.3,
   spatialProximityM: 50000, // 50km

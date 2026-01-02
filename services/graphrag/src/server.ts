@@ -3,6 +3,33 @@
  * Express-based API for the GraphRAG service
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'neo4j'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import express, { Request, Response, NextFunction } from 'express';
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 import { GraphRAGOrchestrator, createGraphRAGOrchestrator } from './GraphRAGOrchestrator.js';
@@ -261,13 +288,13 @@ async function main() {
     neo4j: {
       uri: process.env.NEO4J_URI || 'bolt://localhost:7687',
       username: process.env.NEO4J_USERNAME || 'neo4j',
-      password: process.env.NEO4J_PASSWORD || 'password',
+      password: requireSecret('NEO4J_PASSWORD', process.env.NEO4J_PASSWORD, 16),
     },
     redis: {
       url: process.env.REDIS_URL || 'redis://localhost:6379',
     },
     openai: {
-      apiKey: process.env.OPENAI_API_KEY || '',
+      apiKey: requireSecret('OPENAI_API_KEY', process.env.OPENAI_API_KEY, 40),
       model: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview',
       embeddingModel: process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small',
     },
