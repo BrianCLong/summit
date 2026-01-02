@@ -34,8 +34,20 @@ router.post('/recipes/run', express.json(), async (req, res) => {
     ].filter(Boolean);
 
     let validRecipeFile = null;
+    const recipesRoot = path.resolve(process.cwd(), 'recipes');
+
     for (const file of recipeFiles) {
-      const fullPath = path.join(process.cwd(), 'recipes', file);
+      // SECURITY: Prevent path traversal
+      const fullPath = path.resolve(recipesRoot, file);
+
+      // Ensure the resolved path is still inside the recipes directory
+      // Using path.relative checks for sibling directory attacks better than startsWith
+      const rel = path.relative(recipesRoot, fullPath);
+      if (rel.startsWith('..') || path.isAbsolute(rel)) {
+        console.warn(`[SECURITY] Blocked path traversal attempt: ${file}`);
+        continue;
+      }
+
       if (fs.existsSync(fullPath)) {
         validRecipeFile = file;
         break;
