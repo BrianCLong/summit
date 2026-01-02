@@ -1,7 +1,23 @@
-exceptions:
-  - id: CVE-2024-XYZ
-    package: some-lib@1.2.3
-    severity: HIGH
-    expires: 2025-10-01
-    reason: 'No fixed version; sandboxed usage'
-    approver: 'security@intelgraph'
+# CVE Exception Allowlist
+#
+# POLICY: All exceptions must have:
+# - Specific CVE ID
+# - Package name and version
+# - Severity classification
+# - Expiration date (max 90 days for CRITICAL/HIGH, 180 days for MEDIUM/LOW)
+# - Clear justification
+# - Approver (Security Lead required for HIGH/CRITICAL)
+# - Ticket reference
+#
+# FORMAT:
+# exceptions:
+#   - id: CVE-YYYY-XXXXX
+#     package: package-name@version
+#     severity: CRITICAL|HIGH|MEDIUM|LOW
+#     expires: YYYY-MM-DD
+#     reason: 'Clear justification'
+#     approver: 'security@intelgraph'
+#     ticket: 'SEC-XXXX'
+#
+# Currently no active exceptions (all CVE exceptions in .security/deps/policy.yaml)
+exceptions: []

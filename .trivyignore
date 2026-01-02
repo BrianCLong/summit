@@ -1,3 +1,10 @@
-# Example: ignore noisy dev CVEs; keep CRITICAL/HIGH on main.
+# Trivy CVE Ignore List
+#
+# POLICY: Only ignore CVEs that have documented justifications in .security/deps/policy.yaml
+# CRITICAL and HIGH severity CVEs should NEVER be ignored without Security Lead approval
+# All ignores must have an expiry date and ticket reference
+#
 # Keep SBOM targets (maestro, platform-sre, companyos-api, supply-chain) in scope.
-CVE-20xx-xxxx
+#
+# Example format:
+# CVE-YYYY-XXXXX # Justification: reason, Expires: YYYY-MM-DD, Ticket: SEC-XXXX

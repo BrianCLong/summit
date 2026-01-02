@@ -15,7 +15,7 @@ on:
         description: "Enable or disable Snyk dependency scanning."
         required: false
         type: boolean
-        default: false
+        default: true
     secrets:
       snyk_token:
         description: "Snyk API token when invoking as a reusable workflow."
@@ -52,11 +52,11 @@ jobs:
           fi
           echo "run_dast=$RUN_DAST" >> "$GITHUB_OUTPUT"
 
-          RUN_SNYK="false"
+          RUN_SNYK="true"
           if command -v jq >/dev/null 2>&1 && [ -f "$GITHUB_EVENT_PATH" ]; then
             VALUE=$(jq -r '.inputs.run_snyk // empty' "$GITHUB_EVENT_PATH")
-            if [ "$VALUE" = "true" ]; then
-              RUN_SNYK="true"
+            if [ "$VALUE" = "false" ]; then
+              RUN_SNYK="false"
             fi
           fi
           echo "run_snyk=$RUN_SNYK" >> "$GITHUB_OUTPUT"

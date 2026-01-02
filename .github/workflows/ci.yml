@@ -58,8 +58,7 @@ jobs:
     name: Test (${{ matrix.test-suite }})
     needs: [lint, verify]
     runs-on: ubuntu-latest
-    # Unit tests are non-blocking until ESM/node-fetch issues are resolved
-    continue-on-error: ${{ matrix.test-suite == 'unit' }}
+    # GA REQUIREMENT: All tests must pass - no exceptions
     strategy:
       matrix:
         test-suite: [unit, integration]
@@ -126,8 +125,7 @@ jobs:
     name: Governance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
+    # GA REQUIREMENT: Governance checks are now BLOCKING
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -145,8 +143,7 @@ jobs:
     name: Provenance
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until ESM test infrastructure is resolved
-    continue-on-error: true
+    # GA REQUIREMENT: Provenance checks are now BLOCKING
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -161,8 +158,7 @@ jobs:
     name: Schema Diff
     needs: test
     runs-on: ubuntu-latest
-    # Non-blocking until graphql-inspector loader issues are resolved
-    continue-on-error: true
+    # GA REQUIREMENT: Schema compatibility is now BLOCKING
     steps:
       - uses: actions/checkout@v4
         with:
