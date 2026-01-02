@@ -1,0 +1,58 @@
+name: Generate Ops Evidence Pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag, or SHA to generate evidence from'
+        required: true
+        default: 'main'
+      upload_to_release:
+        description: 'Upload to GitHub Release? (requires existing release)'
+        type: boolean
+        required: false
+        default: false
+      release_tag:
+        description: 'Release Tag to attach evidence to (required if upload_to_release is true)'
+        required: false
+
+permissions:
+  contents: write # Required to upload release assets
+
+jobs:
+  generate-ops-evidence:
+    runs-on: ubuntu-latest
+    environment: release # Enforce environment protection rules
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Generate Ops Evidence Pack
+        run: |
+          mkdir -p artifacts
+          RELEASE_TAG="${{ inputs.release_tag }}"
+          if [ -z "$RELEASE_TAG" ]; then
+             RELEASE_TAG="manual-$(date +%Y%m%d-%H%M%S)"
+          fi
+
+          ./scripts/verification/generate_ops_evidence_pack.sh "$RELEASE_TAG" "artifacts"
+
+          # Set output for filename
+          echo "ARTIFACT_PATH=artifacts/ops-evidence-pack-${RELEASE_TAG}.tar.gz" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=ops-evidence-pack-${RELEASE_TAG}.tar.gz" >> $GITHUB_ENV
+
+      - name: Upload Artifact to Workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-evidence-pack
+          path: ${{ env.ARTIFACT_PATH }}
+          retention-days: 5
+
+      - name: Upload to Release
+        if: ${{ inputs.upload_to_release == 'true' && inputs.release_tag != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ inputs.release_tag }}" "${{ env.ARTIFACT_PATH }}" --clobber
