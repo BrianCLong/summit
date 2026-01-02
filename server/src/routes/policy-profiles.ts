@@ -17,7 +17,7 @@ router.get('/', ensureAuthenticated, async (req: Request, res: Response) => {
       success: true,
       data: profiles,
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error in GET /api/policy-profiles:', error);
     res.status(500).json({
       success: false,

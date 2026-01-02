@@ -143,7 +143,7 @@ export class ContractTestingFramework extends EventEmitter {
     if (contract.schema) {
       try {
         this.ajv.compile(contract.schema);
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(
           `Invalid JSON schema in contract ${contract.id}: ${(error as Error).message}`,
         );
@@ -238,7 +238,7 @@ export class ContractTestingFramework extends EventEmitter {
                 test_type: rule.type,
                 result: testResult.result,
               });
-            } catch (error) {
+            } catch (error: any) {
               result.errors++;
               console.error(`Error executing rule ${rule.id}:`, error);
             }
@@ -260,7 +260,7 @@ export class ContractTestingFramework extends EventEmitter {
 
           this.emit('contractTestCompleted', result);
           return result;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;
@@ -323,7 +323,7 @@ export class ContractTestingFramework extends EventEmitter {
         default:
           throw new Error(`Unsupported rule type: ${rule.type}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       test.result = 'error';
       test.error = (error as Error).message;
     }
@@ -428,7 +428,7 @@ export class ContractTestingFramework extends EventEmitter {
 
         test.expectedResult = { success: true };
         test.result = 'pass';
-      } catch (error) {
+      } catch (error: any) {
         test.actualResult = { success: false, error: (error as Error).message };
         test.expectedResult = { success: true };
         test.result = 'fail';
@@ -463,7 +463,7 @@ export class ContractTestingFramework extends EventEmitter {
       }
 
       executionTime = Date.now() - startTime;
-    } catch (error) {
+    } catch (error: any) {
       test.result = 'error';
       test.error = (error as Error).message;
       return;
@@ -524,7 +524,7 @@ export class ContractTestingFramework extends EventEmitter {
         default:
           return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error comparing results:', error);
       return false;
     }
@@ -565,7 +565,7 @@ export class ContractTestingFramework extends EventEmitter {
       try {
         const result = await this.testContract(contract.id, tenantId);
         results.push(result);
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Failed to test contract ${contract.id}:`, error);
       }
     }
@@ -628,7 +628,7 @@ export class ContractTestingFramework extends EventEmitter {
       { critical: 0, high: 0, medium: 0, low: 0 },
     );
 
-    const contractSummary = results.map((r) => ({
+    const contractSummary = results.map((r: any) => ({
       contractId: r.contractId,
       passed: r.passed,
       failed: r.failed,

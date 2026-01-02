@@ -193,7 +193,7 @@ router.post('/simulations', (req, res) => {
     });
 
     res.status(201).json(state);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res
         .status(400)
@@ -239,7 +239,7 @@ router.post('/simulations/batch', async (req: AuthenticatedRequest, res: Respons
     );
 
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res
         .status(400)
@@ -264,7 +264,7 @@ router.post('/simulations/:id/tick', async (req: AuthenticatedRequest, res: Resp
     const { steps } = tickSchema.parse(req.body ?? {});
     const state = await narrativeSimulationManager.tick(req.params.id, steps);
     res.json(state);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res
         .status(400)
@@ -284,7 +284,7 @@ router.post('/simulations/:id/events', (req, res) => {
     };
     narrativeSimulationManager.queueEvent(req.params.id, event);
     res.status(202).json({ status: 'accepted', event });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res
         .status(400)
@@ -306,7 +306,7 @@ router.post('/simulations/:id/shock', (req, res) => {
 
     engine.injectShock(payload);
     res.status(202).json({ status: 'accepted', type: 'shock' });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res
         .status(400)
@@ -341,7 +341,7 @@ router.post('/simulations/:id/actions', (req, res) => {
     );
 
     res.status(202).json({ status: 'accepted' });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       res
         .status(400)

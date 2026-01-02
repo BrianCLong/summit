@@ -116,7 +116,7 @@ function validateEnvironment(): EnvConfig {
     }
 
     return parsed;
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       console.error('Environment validation failed:');
       error.issues.forEach((issue) => {

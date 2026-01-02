@@ -136,7 +136,7 @@ export class ClaimSyncEngine {
         revealedFields,
         hiddenFields,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to convert operation to claims', {
         error,
         operationId: operation.id,
@@ -476,7 +476,7 @@ export class ClaimSyncEngine {
       );
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Claim-based sync failed', { error });
       throw error;
     }
@@ -518,7 +518,7 @@ export class ClaimSyncEngine {
         valid: errors.length === 0,
         errors,
       };
-    } catch (error) {
+    } catch (error: any) {
       errors.push(error.message);
       return { valid: false, errors };
     }

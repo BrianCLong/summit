@@ -141,7 +141,7 @@ export class Maestro {
             clearTimeout(timeoutId!); // Clear timeout on success
             result = llmResult.content;
             break; // Success
-          } catch (err) {
+          } catch (err: any) {
             clearTimeout(timeoutId!); // Clear timeout on failure
             lastError = err;
             attempts++;

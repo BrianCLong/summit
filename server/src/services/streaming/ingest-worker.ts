@@ -229,7 +229,7 @@ export class StreamingIngestWorker extends EventEmitter {
 
       // Update worker status
       this.updateWorkerStatus(errorCount, batch.length);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Batch processing failed',
         error: error instanceof Error ? error.message : String(error),
@@ -298,7 +298,7 @@ export class StreamingIngestWorker extends EventEmitter {
       });
 
       return processedMessage;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Individual message processing failed',
         message_id: message.message_id,
@@ -535,7 +535,7 @@ export class StreamingIngestWorker extends EventEmitter {
 
       // Emit success event
       this.emit('message_processed', processed);
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Failed to handle processed message',
         message_id: processed.message_id,

@@ -182,7 +182,7 @@ class TenantContextService {
           });
 
           return tenantContext;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({ code: 2, message: (error as Error).message });
           throw error;

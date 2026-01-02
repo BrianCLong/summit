@@ -195,7 +195,7 @@ export class AbuseGuard {
               status: 'allowed',
             });
             next();
-          } catch (error) {
+          } catch (error: any) {
             logger.error('Abuse guard error', { error: error.message });
             span.recordException(error as Error);
 
@@ -223,8 +223,8 @@ export class AbuseGuard {
   }
 
   private checkBypassToken(req: Request): boolean {
-    const token = req.headers['x-bypass-token'] as string;
-    return token && this.config.bypassTokens.includes(token);
+    const token = (req.headers['x-bypass-token'] as string) || '';
+    return !!(token && this.config.bypassTokens.includes(token));
   }
 
   private isThrottled(tenantId: string): boolean {
@@ -271,7 +271,7 @@ export class AbuseGuard {
       );
 
       return anomalyResult;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error in rate analysis', {
         tenantId,
         error: error.message,
@@ -467,7 +467,7 @@ export class AbuseGuard {
         tenantId,
         severity: throttle.severity,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to send abuse alert', {
         tenantId,
         error: error.message,

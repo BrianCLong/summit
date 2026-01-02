@@ -187,7 +187,7 @@ export class OTelTracingService {
 
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-      } catch (error) {
+      } catch (error: any) {
         span.setAttributes({
           'authority.check_result': 'denied',
           'authority.success': false,
@@ -236,7 +236,7 @@ export class OTelTracingService {
   }
 
   // Get current span for manual operations
-  getCurrentSpan() {
+  getCurrentSpan(): any {
     return null;
   }
 

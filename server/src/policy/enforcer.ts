@@ -143,7 +143,7 @@ export class PolicyEnforcer {
         });
 
         return decision;
-      } catch (error) {
+      } catch (error: any) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
 
@@ -401,7 +401,7 @@ export class PolicyEnforcer {
       if (cached) {
         return JSON.parse(cached) as PolicyDecision;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Policy cache read error:', error);
     }
     return null;
@@ -414,7 +414,7 @@ export class PolicyEnforcer {
   ): Promise<void> {
     try {
       await redis.setWithTTL(key, JSON.stringify(decision), ttl);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Policy cache write error:', error);
     }
   }
@@ -441,7 +441,7 @@ export class PolicyEnforcer {
 
     try {
       await this.emitDecisionEvent(entry, context, decision);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Policy audit bus publish failed:', error);
     }
 

@@ -41,9 +41,9 @@ export function traceResolver<T extends any[], R>(
             ) {
               span.setAttribute(
                 `graphql.args.${key}`,
-                typeof resolverArgs[key] === 'string'
-                  ? resolverArgs[key]
-                  : JSON.stringify(resolverArgs[key]),
+                typeof (resolverArgs as any)[key] === 'string'
+                  ? (resolverArgs as any)[key]
+                  : JSON.stringify((resolverArgs as any)[key]),
               );
             }
           });
@@ -61,7 +61,7 @@ export function traceResolver<T extends any[], R>(
 
         span.setStatus({ code: SpanStatusCode.OK });
         return result;
-      } catch (error) {
+      } catch (error: any) {
         // Record the error
         span.recordException(error as Error);
         span.setStatus({
@@ -131,7 +131,7 @@ export const exampleResolvers = {
           span.setAttribute('graphql.result.count', entities.length);
           span.setStatus({ code: SpanStatusCode.OK });
           return entities;
-        } catch (error) {
+        } catch (error: any) {
           span.recordException(error as Error);
           span.setStatus({
             code: SpanStatusCode.ERROR,
@@ -165,7 +165,7 @@ export function createTracingMiddleware() {
       {},
       {
         get(target, prop) {
-          return traceResolver(`Query.${String(prop)}`, target[prop]);
+          return traceResolver(`Query.${String(prop)}`, (target as any)[prop]);
         },
       },
     ),
@@ -173,7 +173,7 @@ export function createTracingMiddleware() {
       {},
       {
         get(target, prop) {
-          return traceResolver(`Mutation.${String(prop)}`, target[prop]);
+          return traceResolver(`Mutation.${String(prop)}`, (target as any)[prop]);
         },
       },
     ),
@@ -181,7 +181,7 @@ export function createTracingMiddleware() {
       {},
       {
         get(target, prop) {
-          return traceResolver(`Subscription.${String(prop)}`, target[prop]);
+          return traceResolver(`Subscription.${String(prop)}`, (target as any)[prop]);
         },
       },
     ),

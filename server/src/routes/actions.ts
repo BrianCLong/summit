@@ -51,7 +51,7 @@ router.post('/preflight', ensureAuthenticated, async (req, res, next) => {
       request_hash: result.requestHash,
       correlation_id: req.correlationId,
     });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -104,7 +104,7 @@ router.post('/execute', ensureAuthenticated, async (req, res, next) => {
       default:
         return res.status(500).json({ error: 'unknown preflight validation state' });
     }
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

@@ -143,7 +143,7 @@ export class AlertingEngine {
       for (const rule of rules) {
         try {
           await this.evaluateRule(rule);
-        } catch (error) {
+        } catch (error: any) {
           logger.error('Rule evaluation failed', {
             ruleId: rule.id,
             error: error.message,
@@ -156,7 +156,7 @@ export class AlertingEngine {
         'alert_rules_evaluated',
         rules.length,
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Alert evaluation loop failed', { error: error.message });
     }
   }
@@ -349,7 +349,7 @@ export class AlertingEngine {
       if (data.status !== 'success') {
         throw new Error(`PromQL query validation failed: ${data.error}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Alert rule validation failed: ${error.message}`);
     }
 
@@ -373,7 +373,7 @@ export class AlertingEngine {
         SELECT * FROM alert_rules WHERE enabled = true
       `);
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         description: row.description,
@@ -441,7 +441,7 @@ export class AlertingEngine {
         const fingerprint = this.calculateAlertFingerprint(rule, {});
         await this.resolveAlert(fingerprint);
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Rule evaluation failed', {
         ruleId: rule.id,
         error: error.message,
@@ -560,7 +560,7 @@ export class AlertingEngine {
     for (const destination of destinations) {
       try {
         await this.sendAlert(alert, destination);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to send alert to destination', {
           alertId: alert.id,
           destinationId: destination.id,
@@ -580,7 +580,7 @@ export class AlertingEngine {
       `);
 
       return result.rows
-        .map((row) => ({
+        .map((row: any) => ({
           id: row.id,
           name: row.name,
           type: row.type,
@@ -823,7 +823,7 @@ View Details: ${alert.generatorUrl}
           await this.sendPagerDutyAlert(alert, destination.config);
         }
         // Add other resolution notifications as needed
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Failed to send resolution notification', {
           alertId: alert.id,
           destinationId: destination.id,

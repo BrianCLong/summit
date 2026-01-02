@@ -111,7 +111,7 @@ export class CVServiceManager {
 
       this.initialized = true;
       console.log('All CV models initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to initialize CV models:', error);
       throw error;
     }

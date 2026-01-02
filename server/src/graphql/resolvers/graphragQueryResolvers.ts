@@ -138,7 +138,7 @@ export const graphragQueryResolvers = {
         // });
 
         return response;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, args, userId }, 'GraphRAG query failed');
         throw new GraphQLError('Failed to execute GraphRAG query', {
           extensions: {
@@ -176,7 +176,7 @@ export const graphragQueryResolvers = {
         }
 
         return preview;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, previewId: args.id, userId }, 'Failed to get preview');
         throw error;
       }
@@ -209,7 +209,7 @@ export const graphragQueryResolvers = {
         }
 
         return run;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, runId: args.id, userId }, 'Failed to get run');
         throw error;
       }
@@ -245,7 +245,7 @@ export const graphragQueryResolvers = {
         });
 
         return result;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({
           error,
           investigationId: args.investigationId,
@@ -281,7 +281,7 @@ export const graphragQueryResolvers = {
         const history = await graphRAGQueryService.getReplayHistory(args.runId);
 
         return history;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, runId: args.runId, userId }, 'Failed to get replay history');
         throw new GraphQLError('Failed to get replay history', {
           extensions: {
@@ -334,7 +334,7 @@ export const graphragQueryResolvers = {
         });
 
         return preview;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({ error, args, userId }, 'Failed to create preview');
         throw new GraphQLError('Failed to create query preview', {
           extensions: {
@@ -374,7 +374,7 @@ export const graphragQueryResolvers = {
         );
 
         return preview;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({
           error,
           previewId: args.previewId,
@@ -432,7 +432,7 @@ export const graphragQueryResolvers = {
         });
 
         return response;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({
           error,
           previewId: args.input.previewId,
@@ -484,7 +484,7 @@ export const graphragQueryResolvers = {
         );
 
         return response;
-      } catch (error) {
+      } catch (error: any) {
         logger.error({
           error,
           runId: args.input.runId,

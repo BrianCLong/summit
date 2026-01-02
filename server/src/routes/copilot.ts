@@ -33,7 +33,7 @@ router.post('/nl-to-cypher', async (req, res) => {
       message:
         'This is a preview implementation - full NL→Cypher coming post-GA',
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       error: 'Translation failed',
       preview: true,

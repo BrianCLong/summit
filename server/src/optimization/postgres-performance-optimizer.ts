@@ -178,7 +178,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
       } finally {
         client.release();
       }
-    } catch (error) {
+    } catch (error: any) {
       const executionTime = Date.now() - startTime;
       this.emit('queryError', {
         queryHash,
@@ -210,7 +210,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
             ),
           ),
         ]);
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           'High priority connection failed, falling back to normal priority',
           {
@@ -274,7 +274,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
 
       this.queryPlans.set(queryHash, queryPlan);
       return queryPlan;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to analyze query plan', {
         error: error.message,
         query: query.substring(0, 100),
@@ -480,7 +480,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
           task.lastRun = now;
           task.nextRun = this.calculateNextRun(task.schedule, now);
           logger.info(`Completed maintenance task: ${name}`);
-        } catch (error) {
+        } catch (error: any) {
           logger.error(`Failed to run maintenance task ${name}:`, error);
         }
       }
@@ -502,7 +502,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
         const tableName = `"${row.schemaname}"."${row.tablename}"`;
         try {
           await client.query(`ANALYZE ${tableName}`);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`Failed to analyze table ${tableName}:`, error);
         }
       }
@@ -534,7 +534,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
           logger.info(
             `Vacuumed table ${tableName} (dead ratio: ${(row.dead_ratio * 100).toFixed(1)}%)`,
           );
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`Failed to vacuum table ${tableName}:`, error);
         }
       }
@@ -562,7 +562,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
         try {
           await client.query(`REINDEX INDEX ${indexName}`);
           logger.info(`Reindexed ${indexName} (size: ${row.index_size})`);
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`Failed to reindex ${indexName}:`, error);
         }
       }
@@ -820,7 +820,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
 
     try {
       return JSON.parse(cached) as QueryResult<T>;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to parse cached query result', { queryHash });
       await this.redis.del(`postgres:query:${queryHash}`);
       return null;
@@ -848,7 +848,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
         ttlSeconds,
         JSON.stringify(cacheData),
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to cache query result', {
         queryHash,
         error: error.message,
@@ -1047,7 +1047,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
 
     try {
       const topRecommendations = this.indexRecommendations
-        .filter((r) => r.priority === 'high')
+        .filter((r: any) => r.priority === 'high')
         .sort((a, b) => b.estimatedImprovement - a.estimatedImprovement)
         .slice(0, limit);
 
@@ -1064,7 +1064,7 @@ export class PostgresPerformanceOptimizer extends EventEmitter {
           logger.info(`Created recommended index: ${indexName}`, {
             reason: rec.reason,
           });
-        } catch (error) {
+        } catch (error: any) {
           logger.warn(`Failed to create index ${indexName}:`, error);
         }
       }

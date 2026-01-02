@@ -88,7 +88,7 @@ syncRouter.post('/nodes/register', async (req, res) => {
     );
 
     res.status(201).json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Node registration error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -161,7 +161,7 @@ syncRouter.post('/operations/apply', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Operation application error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -228,7 +228,7 @@ syncRouter.post('/sync/initiate', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Sync initiation error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent('edge_sync_error', { success: false });
@@ -295,7 +295,7 @@ syncRouter.post('/sync/receive', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Operation receive error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -332,7 +332,7 @@ syncRouter.get('/sync/status', async (req, res) => {
       success: true,
       status,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Status retrieval error:', error);
 
     res.status(500).json({
@@ -379,7 +379,7 @@ syncRouter.get('/nodes', async (req, res) => {
       })),
       total: nodes.length,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Node listing error:', error);
 
     res.status(500).json({
@@ -431,7 +431,7 @@ syncRouter.post('/sync/all', async (req, res) => {
             success: true,
             operationsSent: syncResponse.operations.length,
           };
-        } catch (error) {
+        } catch (error: any) {
           return {
             nodeId: node.nodeId,
             success: false,
@@ -467,7 +467,7 @@ syncRouter.post('/sync/all', async (req, res) => {
             success: true,
             operationsSent: syncResponse.operations.length,
           });
-        } catch (error) {
+        } catch (error: any) {
           syncResults.push({
             nodeId: node.nodeId,
             success: false,
@@ -511,7 +511,7 @@ syncRouter.post('/sync/all', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Sync all error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -563,7 +563,7 @@ syncRouter.post('/conflicts/resolve', async (req, res) => {
     );
 
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Conflict resolution error:', error);
 
     prometheusConductorMetrics.recordOperationalEvent(
@@ -606,7 +606,7 @@ syncRouter.get('/stats/offline', async (req, res) => {
       success: true,
       stats,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Offline stats error:', error);
 
     res.status(500).json({
@@ -634,7 +634,7 @@ syncRouter.get('/health', async (req, res) => {
       timestamp: Date.now(),
       service: 'edge-sync-api',
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Health check error:', error);
 
     res.status(503).json({

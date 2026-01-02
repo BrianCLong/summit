@@ -323,7 +323,7 @@ export class MetadataStoreImpl implements MetadataStore {
         await this.updateSQLMetadata(tableName, update.recordId, update.metadata);
       }
       await this.postgresClient.query('COMMIT');
-    } catch (error) {
+    } catch (error: any) {
       await this.postgresClient.query('ROLLBACK');
       throw error;
     }

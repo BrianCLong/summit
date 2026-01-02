@@ -2,7 +2,7 @@ import { GraphBackend, GraphNode, GraphEdge } from './backend.js';
 import pg from 'pg';
 
 export class PostgresGraphBackend implements GraphBackend {
-  constructor(private pool: pg.Pool) {}
+  constructor(private pool: pg.Pool) { }
 
   async createNode(nodeData: Omit<GraphNode, 'createdAt' | 'updatedAt'>): Promise<GraphNode> {
     const query = `
@@ -34,7 +34,7 @@ export class PostgresGraphBackend implements GraphBackend {
   }
 
   async createEdge(edgeData: Omit<GraphEdge, 'createdAt'>): Promise<GraphEdge> {
-     const query = `
+    const query = `
       INSERT INTO intelgraph_edges (id, tenant_id, from_id, to_id, type, props, created_at)
       VALUES ($1, $2, $3, $4, $5, $6, NOW())
       RETURNING *;

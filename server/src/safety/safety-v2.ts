@@ -210,7 +210,7 @@ export class SafetyV2Service {
       async () => {
         try {
           await this.updateWatchlists();
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to update watchlists:', error);
         }
       },
@@ -626,7 +626,7 @@ export class SafetyV2Service {
       );
 
       return result.rows[0]?.security_posture_score || 1.0;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to get tenant security posture:', error);
       return 1.0; // Default to maximum caution
     }
@@ -646,7 +646,7 @@ export class SafetyV2Service {
 
       const guardrails = new Map<string, SemanticGuardrail>();
 
-      result.rows.forEach((row) => {
+      result.rows.forEach((row: any) => {
         guardrails.set(row.id, {
           id: row.id,
           type: row.type,
@@ -666,7 +666,7 @@ export class SafetyV2Service {
       }
 
       return guardrails;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to get tenant guardrails:', error);
       return this.guardrails; // Fall back to defaults
     }
@@ -680,7 +680,7 @@ export class SafetyV2Service {
 
       // Placeholder for watchlist updates
       // Would fetch latest patterns from security vendors, threat intel feeds, etc.
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update watchlists:', error);
     }
   }

@@ -834,7 +834,7 @@ export class CampaignDetectionService {
         { limit },
       );
 
-      return result.records.map((r) =>
+      return result.records.map((r: any) =>
         this.recordToCampaign(r.get('camp')),
       );
     } finally {
@@ -1018,7 +1018,7 @@ export class CampaignDetectionService {
           thresholds: this.thresholds,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         details: {

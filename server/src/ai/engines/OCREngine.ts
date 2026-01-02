@@ -52,7 +52,7 @@ export class OCREngine {
 
       this.isInitialized = true;
       logger.info('OCR Engine initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize OCR Engine:', error);
       throw error;
     }
@@ -124,7 +124,7 @@ export class OCREngine {
         `OCR extraction completed: ${mergedResults.length} text regions found`,
       );
       return mergedResults;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('OCR extraction failed:', error);
       throw error;
     }
@@ -269,7 +269,7 @@ export class OCREngine {
         .toFile(enhancedPath);
 
       return enhancedPath;
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Image enhancement failed, using original:', error);
       return imagePath;
     }
@@ -405,7 +405,7 @@ export class OCREngine {
         // If multiple engines agree, increase confidence
         if (group.length > 1) {
           const textSimilarity = this.calculateTextSimilarity(
-            group.map((r) => r.text),
+            group.map((r: any) => r.text),
           );
 
           if (textSimilarity > 0.8) {
@@ -417,7 +417,7 @@ export class OCREngine {
       }
     }
 
-    return mergedResults.filter((r) => r.confidence >= confidenceThreshold);
+    return mergedResults.filter((r: any) => r.confidence >= confidenceThreshold);
   }
 
   /**

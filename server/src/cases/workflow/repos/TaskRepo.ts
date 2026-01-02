@@ -17,7 +17,7 @@ import {
 const repoLogger = logger.child({ name: 'TaskRepo' });
 
 export class TaskRepo {
-  constructor(private pg: Pool) {}
+  constructor(private pg: Pool) { }
 
   /**
    * Create a new task
@@ -308,7 +308,7 @@ export class TaskRepo {
       [caseId],
     );
 
-    return rows.map((row) => ({
+    return rows.map((row: any) => ({
       taskId: row.task_id,
       title: row.title,
       assignedTo: row.assigned_to,

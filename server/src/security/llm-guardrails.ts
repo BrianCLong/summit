@@ -445,7 +445,7 @@ export class LLMGuardrailsService {
         }
         riskScore = Math.max(riskScore, evaluation.riskScore);
         if (evaluation.reasoning) warnings.push(...evaluation.reasoning);
-      } catch (error) {
+      } catch (error: any) {
         logger.error('SafetyV2 check failed', error as Error);
         warnings.push('Safety check unavailable');
       }

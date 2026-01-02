@@ -76,7 +76,7 @@ router.get('/analysis', ensureAuthenticated, async (req, res, next) => {
     );
 
     res.json(analysis);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

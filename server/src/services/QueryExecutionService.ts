@@ -61,7 +61,7 @@ export class QueryExecutionService {
         timeout: timeoutMs,
       });
 
-      const records = result.records.map((r) => r.toObject());
+      const records = result.records.map((r: any) => r.toObject());
       const summary = result.summary;
 
       return {

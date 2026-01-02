@@ -35,7 +35,7 @@ export class ScenarioEngine {
             try {
               const impact = event.impact(currentState);
               currentState = { ...currentState, ...impact };
-            } catch (e) {
+            } catch (e: any) {
               console.error(`Error applying event at month ${currentState.timeMonth}:`, e);
             }
           }

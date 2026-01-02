@@ -36,7 +36,7 @@ router.post('/locations', async (req, res, next) => {
     const validated = addLocationSchema.parse(req.body);
     const id = await geoService.addLocation(validated);
     res.status(201).json({ id, message: 'Location added successfully' });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -54,7 +54,7 @@ router.get('/nearby', async (req, res, next) => {
 
     const locations = await geoService.findNearby(lat, lon, radius);
     res.json(locations);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -65,7 +65,7 @@ router.post('/routes', async (req, res, next) => {
     const validated = addRouteSchema.parse(req.body);
     const id = await geoService.addRoute(validated.name, validated.coordinates, validated.metadata);
     res.status(201).json({ id, message: 'Route added successfully' });
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -82,7 +82,7 @@ router.get('/geofence/check', async (req, res, next) => {
 
     const geofences = await geoService.checkGeofence(lat, lon);
     res.json(geofences);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -93,7 +93,7 @@ router.post('/optimize', async (req, res, next) => {
     const validated = optimizeRouteSchema.parse(req.body);
     const optimized = geoService.optimizeRoute(validated.stops);
     res.json(optimized);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -104,7 +104,7 @@ router.get('/clusters', async (req, res, next) => {
     const zoom = parseInt(req.query.zoom as string) || 10;
     const clusters = await geoService.clusterLocations(zoom);
     res.json(clusters);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

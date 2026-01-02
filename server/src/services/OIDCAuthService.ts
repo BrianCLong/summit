@@ -247,7 +247,7 @@ class OIDCAuthService {
         `Successfully authenticated user ${oidcUser.email} via ${provider}`,
       );
       return oidcUser;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `OAuth callback failed for provider ${provider}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
@@ -340,7 +340,7 @@ class OIDCAuthService {
         response.data.groups = groupsResponse.data.value.map(
           (group: any) => group.displayName,
         );
-      } catch (error) {
+      } catch (error: any) {
         logger.warn(
           `Failed to fetch Azure AD groups: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -567,7 +567,7 @@ class OIDCAuthService {
 
       await client.query('COMMIT');
       logger.info(`Upserted user ${oidcUser.email} with ID ${userId}`);
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error(
         `Failed to upsert user: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -626,7 +626,7 @@ class OIDCAuthService {
           active: false,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `SCIM provisioning failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );

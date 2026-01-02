@@ -68,7 +68,7 @@ router.post(
           len: content ? JSON.stringify(content).length : 0,
         },
       });
-    } catch (e) {
+    } catch (e: any) {
       logger.warn({ err: e }, 'provenance record failed for N8N_CALLBACK');
     }
 

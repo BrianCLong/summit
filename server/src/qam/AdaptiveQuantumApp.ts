@@ -189,7 +189,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       });
 
       return results;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Circuit execution failed', {
         error,
         parameters: this.currentParameters,
@@ -268,7 +268,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       });
 
       return learningUpdate;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Learning update failed', { error, executionId });
       this.emit('learning_error', { error, executionId });
       throw error;
@@ -299,7 +299,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       });
 
       return boundedParameters;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Parameter recommendation failed', { error });
       return this.currentParameters; // Fallback to current parameters
     }
@@ -380,7 +380,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
       });
 
       return bestBackend;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Backend selection failed', { error });
       return this.currentParameters.backend; // Fallback
     }
@@ -405,7 +405,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
         previousParameters: this.currentParameters,
         optimizedParameters: nextParameters,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Adaptive optimization failed', { error });
       throw error;
     }
@@ -602,7 +602,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
         },
         ['learning', 'performance', 'private'],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to persist learning state', { error });
     }
   }
@@ -853,7 +853,7 @@ export class AdaptiveQuantumApp extends EventEmitter {
         },
         ['shutdown', 'final_state'],
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to persist final state', { error });
     }
 

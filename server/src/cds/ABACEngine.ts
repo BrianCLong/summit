@@ -31,7 +31,7 @@ export class ABACEngine {
     if (resourceLabel.releasability && resourceLabel.releasability.length > 0) {
       const userRelTag = `REL_TO_${user.nationality}`;
       const isReleasable = resourceLabel.releasability.some(
-        (r) => r === userRelTag || r === 'REL_TO_ALL'
+        (r: any) => r === userRelTag || r === 'REL_TO_ALL'
       );
       if (!isReleasable) {
         return false;

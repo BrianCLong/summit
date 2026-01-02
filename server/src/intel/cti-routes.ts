@@ -171,7 +171,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
           res.setHeader('X-TAXII-Date-Added-Last', envelope.next);
         }
         res.json(envelope);
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Failed to retrieve objects');
       }
     },
@@ -195,7 +195,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
 
         res.setHeader('Content-Type', 'application/taxii+json;version=2.1');
         res.json(manifest);
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Failed to retrieve manifest');
       }
     },
@@ -228,7 +228,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
           objectCount: bundle.objects.length,
           statusId: status.id,
         }, 'Objects added to TAXII collection');
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Failed to add objects');
       }
     },
@@ -287,7 +287,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
         }
 
         res.status(204).send();
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Failed to delete object');
       }
     },
@@ -381,7 +381,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
 
         res.setHeader('Content-Type', 'application/stix+json;version=2.1');
         res.json(result);
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Export failed');
       }
     },
@@ -447,7 +447,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Content-Disposition', `attachment; filename="intelgraph-airgap-${Date.now()}.json"`);
         res.send(serialized);
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Air-gap export failed');
       }
     },
@@ -493,7 +493,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
           error: 'Invalid input',
           message: 'Expected air-gap package or signed bundle',
         });
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Verification failed');
       }
     },
@@ -528,7 +528,7 @@ export function createCtiRouter(deps: CtiRouterDeps): Router {
         }, 'Collection sync completed');
 
         res.json(status);
-      } catch (error) {
+      } catch (error: any) {
         handleError(res, error, 'Sync failed');
       }
     },
@@ -600,7 +600,7 @@ async function fetchEntities(
     [tenantId, entityIds],
   );
 
-  return result.rows.map(row => ({
+  return result.rows.map((row: any) => ({
     id: row.id,
     tenantId: row.tenant_id,
     kind: row.kind,

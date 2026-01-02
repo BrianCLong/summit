@@ -278,7 +278,7 @@ export class EvidenceRegistrationFlow {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         message: 'Document ingestion flow failed',
         error: error instanceof Error ? error.message : String(error),

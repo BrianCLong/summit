@@ -203,7 +203,7 @@ export class GRCExportService {
 
     // Map to GRCControlMappingExport format
     const controlMappings = await Promise.all(
-      result.rows.map(row => this.mapToControlMapping(row, tenantId))
+      result.rows.map((row: any) => this.mapToControlMapping(row, tenantId))
     );
 
     return {
@@ -270,7 +270,7 @@ export class GRCExportService {
     );
 
     // Map artifacts
-    const artifacts = evidenceResult.rows.map(row => ({
+    const artifacts = evidenceResult.rows.map((row: any) => ({
       id: row.id,
       type: row.type,
       name: row.name,
@@ -288,7 +288,7 @@ export class GRCExportService {
     );
 
     // Calculate manifest
-    const totalSize = artifacts.reduce((sum, a) => sum + a.size, 0);
+    const totalSize = artifacts.reduce((sum: number, a: any) => sum + a.size, 0);
     const manifestHash = this.calculateManifestHash(artifacts, attestations);
 
     return {
@@ -381,7 +381,7 @@ export class GRCExportService {
       [tenantId, row.control_id]
     );
 
-    const evidence = evidenceResult.rows.map(e => ({
+    const evidence = evidenceResult.rows.map((e: any) => ({
       id: e.id,
       type: e.type,
       location: e.location,

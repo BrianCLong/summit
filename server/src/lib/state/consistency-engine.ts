@@ -78,7 +78,7 @@ export class ConsistencyEngine {
         return dataStore.get(key);
       case ConsistencyLevel.Session:
         if (options.sessionId && sessionStore.has(options.sessionId)) {
-          const sessionData = sessionStore.get(options.sessionId);
+          const sessionData = sessionStore.get(options.sessionId)!;
           if (sessionData.has(key)) {
             return sessionData.get(key);
           }

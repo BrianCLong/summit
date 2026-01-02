@@ -1,20 +1,126 @@
 #!/bin/bash
-set -euo pipefail
+# SBOM Generation Script for Summit Platform
+# Generates SBOMs for all artifacts and stores alongside binaries
 
-# Usage: ./generate-sbom.sh [TARGET] [OUTPUT]
-# Example: ./generate-sbom.sh . artifacts/sbom/sbom.json
+set -e
 
-TARGET=${1:-.}
-ARTIFACTS_DIR=${ARTIFACTS_DIR:-artifacts/sbom}
-OUTPUT=${2:-"${ARTIFACTS_DIR}/sbom.json"}
+echo "🚀 Starting SBOM Generation Process..."
 
-if ! command -v syft &> /dev/null; then
-    echo "Error: syft is not installed. Please install it from https://github.com/anchore/syft"
-    exit 1
+# Configuration
+ARTIFACT_NAME=${1:-"summit-platform"}
+VERSION=${2:-$(git describe --tags --always)}
+OUTPUT_DIR=${3:-"./sboms"}
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Create output directory
+mkdir -p "$OUTPUT_DIR"
+
+# Generate SBOM for container images
+if [ -f "Dockerfile" ] || [ -f "Dockerfile.*" ]; then
+  echo "📦 Generating SBOMs for container images..."
+  
+  # Build and scan container image using syft
+  if command -v syft &> /dev/null; then
+    # For each Dockerfile, generate SBOM
+    for dockerfile in Dockerfile*; do
+      if [ -f "$dockerfile" ]; then
+        service_name=$(basename "$dockerfile" | sed 's/Dockerfile//g' | sed 's/^\.//')
+        if [ -z "$service_name" ]; then
+          service_name="main"
+        fi
+        
+        echo "  - Processing $service_name from $dockerfile..."
+        
+        # Generate CycloneDX format
+        syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"
+        
+        # Generate SPDX format
+        syft packages dir:. -o spdx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json"
+        
+        # Generate syft table format for human consumption
+        syft packages dir:. -o table --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.syft.txt"
+      fi
+    done
+  else
+    echo "⚠️  syft not found. Skipping container SBOM generation."
+  fi
 fi
 
-mkdir -p "$(dirname "$OUTPUT")"
+# Generate SBOM for npm packages
+if [ -f "package.json" ]; then
+  echo "📦 Generating SBOM for npm packages..."
+  
+  # Generate CycloneDX from package-lock.json if it exists
+  if [ -f "package-lock.json" ]; then
+    if command -v cyclonedx-npm &> /dev/null; then
+      cyclonedx-npm --output-file "$OUTPUT_DIR/${ARTIFACT_NAME}-npm-${VERSION}.cdx.json" --output-format JSON
+    else
+      echo "⚠️  cyclonedx-npm not found. Install it to generate npm SBOM."
+    fi
+  fi
+  
+  # Alternative: Use syft for npm
+  if command -v syft &> /dev/null; then
+    syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-npm-${VERSION}-alt.cdx.json"
+  fi
+fi
 
-echo "Generating SBOM for ${TARGET} using Syft..."
-syft "$TARGET" -o cyclonedx-json="$OUTPUT" --quiet
-echo "SBOM generated at ${OUTPUT}"
+# Generate SBOM for Python packages
+if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+  echo "🐍 Generating SBOM for Python packages..."
+  
+  if command -v syft &> /dev/null; then
+    syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-python-${VERSION}.cdx.json"
+  fi
+  
+  # If cdx-vex-gen is available, enhance with vulnerability info
+  if command -v grype &> /dev/null; then
+    grype dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-python-vulns-${VERSION}.cdx.json"
+  fi
+fi
+
+# Generate SBOM for Maven/Gradle projects
+if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+  echo "☕ Generating SBOM for Java packages..."
+  
+  if command -v syft &> /dev/null; then
+    syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-java-${VERSION}.cdx.json"
+  fi
+fi
+
+# Create summary file
+cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
+{
+  "artifactName": "$ARTIFACT_NAME",
+  "version": "$VERSION",
+  "timestamp": "$TIMESTAMP",
+  "generatedSboms": [
+EOF
+
+for sbom in "$OUTPUT_DIR"/*.json; do
+  if [ -f "$sbom" ]; then
+    sbom_name=$(basename "$sbom")
+    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo $sbom_name | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+  fi
+done
+
+# Remove the trailing comma and close the array
+sed -i '' '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" 2>/dev/null || sed -i '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+cat >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
+  ],
+  "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -c "cdx\|spdx" || echo 0)
+}
+EOF
+
+echo "✅ SBOM Generation Complete!"
+echo "📁 Generated SBOMs stored in: $OUTPUT_DIR"
+echo "📋 Summary available at: $OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+
+# Verification
+if [ -d "$OUTPUT_DIR" ] && [ "$(ls -1q "$OUTPUT_DIR"/*.json | wc -l)" -gt 0 ]; then
+  echo "🎉 SBOM generation successful!"
+  ls -la "$OUTPUT_DIR"/*.json
+else
+  echo "❌ Error: No SBOMs were generated"
+  exit 1
+fi

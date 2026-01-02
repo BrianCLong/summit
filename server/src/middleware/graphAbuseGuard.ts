@@ -385,7 +385,7 @@ export class GraphAbuseGuard {
             });
 
             next();
-          } catch (error) {
+          } catch (error: any) {
             logger.error('Graph abuse guard error', { error: error.message });
             span.recordException(error as Error);
 

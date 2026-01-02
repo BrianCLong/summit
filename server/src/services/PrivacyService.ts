@@ -134,7 +134,7 @@ export class PrivacyService extends EventEmitter {
     try {
         await pool.query(createRequestsTable);
         await pool.query(createEvidenceTable);
-    } catch (error) {
+    } catch (error: any) {
         logger.warn('Failed to initialize privacy tables (might already exist or permission issue)', {
             error: error instanceof Error ? error.message : String(error)
         });
@@ -365,7 +365,7 @@ export class PrivacyService extends EventEmitter {
 
       this.emit('requestCompleted', request);
 
-    } catch (error) {
+    } catch (error: any) {
       await this.failRequest(requestId, (error as Error).message);
     }
   }

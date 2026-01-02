@@ -1199,13 +1199,13 @@ export class CMMCControlsService extends EventEmitter {
 
     for (const domain of domains) {
       const domainPractices = requiredPractices.filter((p) => p.domain === domain);
-      const domainResults = practiceResults.filter((r) =>
+      const domainResults = practiceResults.filter((r: any) =>
         domainPractices.some((p) => p.practiceId === r.practiceId)
       );
 
-      const met = domainResults.filter((r) => r.result === 'met').length;
-      const notMet = domainResults.filter((r) => r.result === 'not_met').length;
-      const na = domainResults.filter((r) => r.result === 'not_applicable').length;
+      const met = domainResults.filter((r: any) => r.result === 'met').length;
+      const notMet = domainResults.filter((r: any) => r.result === 'not_met').length;
+      const na = domainResults.filter((r: any) => r.result === 'not_applicable').length;
       const applicable = domainPractices.length - na;
 
       domainScores[domain] = {
@@ -1218,8 +1218,8 @@ export class CMMCControlsService extends EventEmitter {
     }
 
     // Determine overall result
-    const totalMet = practiceResults.filter((r) => r.result === 'met').length;
-    const totalNotMet = practiceResults.filter((r) => r.result === 'not_met').length;
+    const totalMet = practiceResults.filter((r: any) => r.result === 'met').length;
+    const totalNotMet = practiceResults.filter((r: any) => r.result === 'not_met').length;
     const poamsRequired = totalNotMet;
 
     let overallResult: 'pass' | 'fail' | 'conditional' = 'fail';

@@ -12,7 +12,7 @@ const s3 = process.env.AWS_S3_BUCKET
          
         const { S3Client } = require('@aws-sdk/client-s3');
         return new S3Client({});
-      } catch (err) {
+      } catch (err: any) {
         console.warn(
           'AWS SDK not installed. S3 WORM storage unavailable. Install @aws-sdk/client-s3 for S3 support.',
         );

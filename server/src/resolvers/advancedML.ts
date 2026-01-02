@@ -23,7 +23,7 @@ const resolvers = {
           ...systemInfo,
           timestamp: new Date().toISOString(),
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to get ML system info', { error: errorMessage });
         return {
@@ -48,7 +48,7 @@ const resolvers = {
           device: model.device,
           memoryUsage: model.memory_usage,
         }));
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to list ML models', { error: errorMessage });
         throw new Error(`Failed to list ML models: ${errorMessage}`);
@@ -70,7 +70,7 @@ const resolvers = {
           models: modelMetrics,
           timestamp: new Date().toISOString(),
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to get ML metrics', { error: errorMessage });
         throw new Error(`Failed to get ML metrics: ${errorMessage}`);
@@ -82,7 +82,7 @@ const resolvers = {
     /**
      * Create a new ML model
      */
-    createMLModel: async (_, { input }) => {
+    createMLModel: async (_: any, { input }: any) => {
       try {
         const modelConfig = {
           model_type: input.modelType || 'accelerated_gnn',
@@ -104,7 +104,7 @@ const resolvers = {
           message: `ML model created successfully with ID: ${modelId}`,
           config: modelConfig,
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to create ML model', {
           error: errorMessage,
@@ -121,7 +121,7 @@ const resolvers = {
     /**
      * Train an ML model
      */
-    trainMLModel: async (_, { modelId, trainingConfig }) => {
+    trainMLModel: async (_: any, { modelId, trainingConfig }: any) => {
       try {
         const config = {
           batch_size: trainingConfig?.batchSize || 32,
@@ -150,7 +150,7 @@ const resolvers = {
           modelId,
           trainingConfig: config,
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to train ML model', {
           error: errorMessage,
@@ -167,7 +167,7 @@ const resolvers = {
     /**
      * Run ML inference on graph data
      */
-    runMLInference: async (_, { modelId, graphData }) => {
+    predictWithMLModel: async (_: any, { modelId, graphData }: any) => {
       try {
         const nodeFeatures = graphData.nodeFeatures || [];
         const edgeIndex = graphData.edgeIndex || [[], []];
@@ -188,7 +188,7 @@ const resolvers = {
           inferenceTime: result.inference_time_ms,
           device: result.device,
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('ML inference failed', { error: errorMessage, modelId });
         return {
@@ -202,9 +202,9 @@ const resolvers = {
     /**
      * Optimize ML model for deployment
      */
-    optimizeMLModel: async (
-      _,
-      { modelId, optimizationType, targetPrecision },
+    optimizeModel: async (
+      _: any,
+      { modelId, optimizationType, targetPrecision }: any,
     ) => {
       try {
         const message = await advancedMLService.optimizeModel(
@@ -220,7 +220,7 @@ const resolvers = {
           optimizationType: optimizationType || 'torchscript',
           targetPrecision: targetPrecision || 'fp16',
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('ML model optimization failed', {
           error: errorMessage,
@@ -237,7 +237,7 @@ const resolvers = {
     /**
      * Run quantum optimization on graph problems
      */
-    runQuantumOptimization: async (_, { input }) => {
+    detectAnomalies: async (_: any, { input }: any) => {
       try {
         const result = await advancedMLService.quantumOptimize({
           problem_type: input.problemType || 'combinatorial',
@@ -254,7 +254,7 @@ const resolvers = {
           numIterations: result.num_iterations,
           problemType: input.problemType,
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Quantum optimization failed', {
           error: errorMessage,
@@ -271,7 +271,7 @@ const resolvers = {
     /**
      * Enhanced graph analysis using advanced ML
      */
-    analyzeGraphWithML: async (_, { graphId, analysisType }) => {
+    analyzeGraphStructure: async (_: any, { graphId, analysisType }: any) => {
       try {
         // This would typically fetch graph data from Neo4j
         // For now, we'll simulate with sample data
@@ -307,7 +307,7 @@ const resolvers = {
           modelInfo: result.model_info,
           insights: generateInsights(result),
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Graph ML analysis failed', {
           error: errorMessage,
@@ -324,9 +324,9 @@ const resolvers = {
     /**
      * Quantum-enhanced graph optimization
      */
-    optimizeGraphWithQuantum: async (
-      _,
-      { graphId, optimizationType, numQubits },
+    optimizeQuantumCircuit: async (
+      _: any,
+      { graphId, optimizationType, numQubits }: any,
     ) => {
       try {
         // Simulate graph data - in production this would come from Neo4j
@@ -358,7 +358,7 @@ const resolvers = {
           graphInfo: result.graph_info,
           recommendations: generateOptimizationRecommendations(result),
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Quantum graph optimization failed', {
           error: errorMessage,
@@ -375,7 +375,7 @@ const resolvers = {
     /**
      * Delete ML model
      */
-    deleteMLModel: async (_, { modelId }) => {
+    deleteMLModel: async (_: any, { modelId }: any) => {
       try {
         await advancedMLService.deleteModel(modelId);
 
@@ -384,7 +384,7 @@ const resolvers = {
           message: `Model ${modelId} deleted successfully`,
           modelId,
         };
-      } catch (error) {
+      } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('Failed to delete ML model', {
           error: errorMessage,

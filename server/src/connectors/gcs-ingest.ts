@@ -151,7 +151,7 @@ export class GCSBatchConnector extends PullConnector {
                   await context.stateStore.set(stateKey, file.etag);
                   entitiesProcessed += count;
                 }
-              } catch (err) {
+              } catch (err: any) {
                 context.logger.error(`Error processing file ${file.name}`, err as Error);
                 errorCount++;
               }
@@ -172,7 +172,7 @@ export class GCSBatchConnector extends PullConnector {
         durationMs: Date.now() - startTime,
         cursor: pageToken,
       };
-    } catch (error) {
+    } catch (error: any) {
       return this.failureResult(
         error as Error,
         entitiesProcessed,
@@ -196,7 +196,7 @@ export class GCSBatchConnector extends PullConnector {
     let data;
     try {
       data = JSON.parse(content);
-    } catch (e) {
+    } catch (e: any) {
       context.logger.error(`Invalid JSON in ${metadata.name}`);
       throw e; // Let pull catch it as a file error
     }
@@ -230,7 +230,7 @@ export class GCSBatchConnector extends PullConnector {
         const entity = this.mapRecordToEntity(record, metadata, count);
         await context.emitter.emitEntity(entity);
         count++;
-      } catch (e) {
+      } catch (e: any) {
         context.logger.warn(`Invalid JSON line in ${metadata.name}: ${(e as Error).message}`);
         // We log line errors but don't fail the file?
         // Or we could track partial errors. For now, just warn.

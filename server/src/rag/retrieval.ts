@@ -70,7 +70,7 @@ export class KnowledgeFabricRetrievalService {
           metadata: r.metadata
         }))
       };
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error({ err, query }, 'Retrieval failed');
       return { snippets: [] };
     }

@@ -55,7 +55,7 @@ const Args = z
     topK: z.number().int().min(1).max(100).default(20),
     tenantId: z.string(),
   })
-  .refine((a) => a.entityId || a.text, {
+  .refine((a: any) => a.entityId || a.text, {
     message: 'entityId or text required',
   });
 
@@ -64,7 +64,7 @@ const embeddingService = new EmbeddingService();
 async function embeddingForText(text: string): Promise<number[]> {
   try {
     return await embeddingService.generateEmbedding({ text });
-  } catch (err) {
+  } catch (err: any) {
     log.error({ err }, 'embedding generation failed');
     return new Array(1536).fill(0);
   }

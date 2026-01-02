@@ -64,7 +64,7 @@ export class CTIFeedConnector extends BaseConnector {
                 this.metrics.errors++;
             });
 
-        } catch (err) {
+        } catch (err: any) {
             stream.destroy(err as Error);
             this.metrics.errors++;
         }

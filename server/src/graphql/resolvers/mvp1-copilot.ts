@@ -346,8 +346,8 @@ const mvp1CopilotResolvers = {
           },
         );
 
-        const successful = results.filter((r) => r.result !== null);
-        const failed = results.filter((r) => r.result === null);
+        const successful = results.filter((r: any) => r.result !== null);
+        const failed = results.filter((r: any) => r.result === null);
 
         return {
           success: failed.length === 0,

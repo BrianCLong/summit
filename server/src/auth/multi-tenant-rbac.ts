@@ -522,7 +522,7 @@ export class MultiTenantRBACManager {
 
     return (
       sensitiveActions.includes(action) ||
-      (resource.classification && sensitiveClassifications.includes(resource.classification))
+      Boolean(resource.classification && sensitiveClassifications.includes(resource.classification))
     );
   }
 
@@ -713,7 +713,7 @@ export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
       (req as AuthenticatedRequest).tenantId = tenantId;
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Multi-tenant auth middleware error', {
         error: error instanceof Error ? error.message : String(error),
       });
@@ -760,7 +760,7 @@ export function requireTenantPermission(rbac: MultiTenantRBACManager, permission
       }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Permission check middleware error', {
         error: error instanceof Error ? error.message : String(error),
         permission,
@@ -826,7 +826,7 @@ export function requireResourceAccess(
       }
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Resource access middleware error', {
         error: error instanceof Error ? error.message : String(error),
         resourceType,

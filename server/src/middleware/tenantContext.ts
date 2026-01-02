@@ -124,7 +124,7 @@ export const tenantContextMiddleware =
       res.setHeader('x-tenant-privilege-tier', tenantContext.privilegeTier);
 
       return next();
-    } catch (error) {
+    } catch (error: any) {
       const status = (error as any).status || 400;
       return res.status(status).json({
         error: 'tenant_context_error',

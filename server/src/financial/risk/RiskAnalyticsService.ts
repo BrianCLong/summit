@@ -153,7 +153,7 @@ export class RiskAnalyticsService {
     // Calculate portfolio returns
     const portfolioReturns: number[] = [];
     const numDays = Math.min(
-      ...Array.from(positionReturns.values()).map((r) => r.length),
+      ...Array.from(positionReturns.values()).map((r: any) => r.length),
     );
 
     for (let i = 0; i < numDays; i++) {
@@ -270,7 +270,7 @@ export class RiskAnalyticsService {
     const sharpeRatio = stdDev > 0 ? ((meanReturn - riskFreeRate) / stdDev) * Math.sqrt(252) : 0;
 
     // Sortino Ratio (downside deviation)
-    const downsideReturns = returns.filter((r) => r < riskFreeRate);
+    const downsideReturns = returns.filter((r: any) => r < riskFreeRate);
     const downsideVariance =
       downsideReturns.length > 0
         ? downsideReturns.reduce((sum, r) => sum + Math.pow(r - riskFreeRate, 2), 0) /

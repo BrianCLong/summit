@@ -179,7 +179,7 @@ export function costGuardMiddleware(
       res.set('X-Cost-Budget-Remaining', costCheck.budgetRemaining.toFixed(4));
 
       next();
-    } catch (error) {
+    } catch (error: any) {
       logger.error({
         error,
         tenantId,
@@ -228,7 +228,7 @@ export function costRecordingMiddleware(): (req: Request, res: Response, next: N
           duration,
           statusCode: res.statusCode,
         }, 'Cost recorded');
-      } catch (error) {
+      } catch (error: any) {
         logger.error({
           error,
           context: enhancedContext,
@@ -297,7 +297,7 @@ export async function withCostGuard<T>(
     costGuard.completeCostlyOperation(operationId);
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
     const duration = Date.now() - startTime;
 
     // Record failure with cost

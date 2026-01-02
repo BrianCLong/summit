@@ -48,7 +48,7 @@ router.get('/certificates', ensureAuthenticated, async (req, res) => {
   try {
     const certs = await masteryService.getUserCertificates((req as any).user.id, (req as any).user.tenantId);
     res.json(certs);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: 'Failed to fetch certificates' });
   }
 });

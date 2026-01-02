@@ -39,7 +39,7 @@ async function hashFile(filePath: string): Promise<string> {
   const { createReadStream } = await import('fs');
   return new Promise<string>((resolve, reject) => {
     const stream = createReadStream(filePath);
-    stream.on('data', (chunk) => hash.update(chunk));
+    stream.on('data', (chunk: any) => hash.update(chunk));
     stream.on('end', () => resolve(hash.digest('hex')));
     stream.on('error', reject);
   });

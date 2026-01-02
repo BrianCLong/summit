@@ -98,7 +98,7 @@ export class CostAttributionRepository implements CostAttributionSource {
   ): Promise<CostAttributionRow[]> {
     const start = new Date(periodStart).getTime();
     const end = new Date(periodEnd).getTime();
-    return this.rows.filter((row) => {
+    return this.rows.filter((row: any) => {
       if (row.tenantId !== tenantId) return false;
       const rowStart = new Date(row.periodStart).getTime();
       const rowEnd = new Date(row.periodEnd).getTime();
@@ -137,7 +137,7 @@ export class FinopsReportService {
     const end = periodEnd ? new Date(periodEnd) : new Date();
 
     const usageRows = await this.meteringSource.list();
-    const tenantRows = usageRows.filter((row) => this.isWithinRange(row, tenantId, start, end));
+    const tenantRows = usageRows.filter((row: any) => this.isWithinRange(row, tenantId, start, end));
 
     const meterLines = this.rollupMeters(tenantRows);
     const { currency, ratedLines } = await this.applyPricing(tenantId, meterLines);
@@ -174,7 +174,7 @@ export class FinopsReportService {
         grossMarginPercent,
       },
       coverage: {
-        meteringDays: new Set(tenantRows.map((row) => row.date)).size,
+        meteringDays: new Set(tenantRows.map((row: any) => row.date)).size,
         meteringMeters: ratedLines.length,
         attributionRows: attributionRows.length,
         correlatedEvents: tenantRows.reduce(
@@ -198,7 +198,7 @@ export class FinopsReportService {
       ].join(','),
     );
 
-    const attributionLines = report.attribution.breakdown.map((row) =>
+    const attributionLines = report.attribution.breakdown.map((row: any) =>
       [`cogs:${row.capability}:${row.resourceType}`, '', '', '', row.amount.toFixed(2), ''].join(','),
     );
 

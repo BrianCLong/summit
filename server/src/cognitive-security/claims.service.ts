@@ -341,7 +341,7 @@ export class ClaimsService {
       cypher += ' RETURN c ORDER BY c.lastObservedAt DESC LIMIT $limit';
 
       const result = await session.run(cypher, params);
-      return result.records.map((r) => this.recordToClaim(r.get('c')));
+      return result.records.map((r: any) => this.recordToClaim(r.get('c')));
     } finally {
       await session.close();
     }
@@ -1067,7 +1067,7 @@ export class ClaimsService {
           hasNLP: !!this.config.nlpService,
         },
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         healthy: false,
         details: {

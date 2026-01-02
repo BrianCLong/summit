@@ -38,7 +38,7 @@ export class RagContextBuilder {
     // Fallback or lazy load tokenizer
     try {
       this.tokenizer = get_encoding("cl100k_base");
-    } catch (e) {
+    } catch (e: any) {
       // If tiktoken isn't available, we might need a rough estimate fallback
       console.warn("tiktoken not available, using rough char estimate");
     }

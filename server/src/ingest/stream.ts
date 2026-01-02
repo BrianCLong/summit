@@ -75,7 +75,7 @@ export class StreamingIngestService {
                 eachMessage: this.handleMessage.bind(this),
                 autoCommit: false, // We commit manually after processing
             });
-        } catch (e) {
+        } catch (e: any) {
             logger.error(e, 'Failed to start Kafka consumer');
             throw e;
         }
@@ -108,7 +108,7 @@ export class StreamingIngestService {
                             }
                         }
                     }
-                } catch (e) {
+                } catch (e: any) {
                     logger.warn({ err: e }, 'Failed to fetch consumer lag');
                 }
 
@@ -116,7 +116,7 @@ export class StreamingIngestService {
             };
 
             checkLag();
-        } catch (e) {
+        } catch (e: any) {
             logger.error({ err: e }, 'Failed to start lag monitor');
         }
     }

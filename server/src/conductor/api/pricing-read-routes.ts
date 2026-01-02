@@ -29,7 +29,7 @@ router.get('/pools', requirePermission('pricing:read'), async (_req, res) => {
       success: true,
       data: { pools },
     });
-  } catch (error) {
+  } catch (error: any) {
     const durationMs = Date.now() - start;
     recordMetrics(route, 'error', durationMs);
     logger.error('Failed to list pools', { error: (error as Error).message });
@@ -53,7 +53,7 @@ router.get(
         success: true,
         data: { pricing },
       });
-    } catch (error) {
+    } catch (error: any) {
       const durationMs = Date.now() - start;
       recordMetrics(route, 'error', durationMs);
       logger.error('Failed to fetch current pricing', {
@@ -170,7 +170,7 @@ router.post(
           inputs: { est, residency, tenantId, includeReservations },
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       const durationMs = Date.now() - start;
       recordMetrics(route, 'error', durationMs);
       logger.error('Failed to simulate pricing selection', {

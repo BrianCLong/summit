@@ -115,7 +115,7 @@ export class MediaUploadService {
       await fs.mkdir(path.join(this.config.uploadPath, 'temp'), {
         recursive: true,
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to create upload directories:', error);
       throw error;
     }
@@ -267,7 +267,7 @@ export class MediaUploadService {
           `Successfully uploaded media: ${uniqueFilename}, size: ${finalStats.size}, type: ${mediaType}`,
         );
         return metadata;
-    } catch (error) {
+    } catch (error: any) {
       // Cleanup on error
       try {
         await fs.unlink(tempFilePath);
@@ -291,7 +291,7 @@ export class MediaUploadService {
 
     try {
       await pipeline(stream, writeStream);
-    } catch (error) {
+    } catch (error: any) {
       // Ensure write stream is closed
       writeStream.destroy();
       throw error;
@@ -349,7 +349,7 @@ export class MediaUploadService {
         default:
           return undefined;
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Failed to extract dimensions for ${filePath}:`, error);
       return undefined;
     }
@@ -464,7 +464,7 @@ export class MediaUploadService {
         default:
           break;
       }
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(
         `Failed to extract additional metadata from ${filePath}:`,
         error,
@@ -487,7 +487,7 @@ export class MediaUploadService {
         gps: decoded.gps,
         interoperability: decoded.interoperability,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Failed to parse EXIF data:', error);
       return { exifError: 'PARSE_FAILED' };
     }
@@ -629,7 +629,7 @@ export class MediaUploadService {
       }
 
       logger.info(`Generated thumbnail: ${thumbnailPath}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Failed to generate thumbnail for ${filename}:`, error);
     }
   }
@@ -694,14 +694,14 @@ export class MediaUploadService {
     try {
       await fs.unlink(filePath);
       logger.info(`Deleted media file: ${filename}`);
-    } catch (error) {
+    } catch (error: any) {
       logger.warn(`Failed to delete media file ${filename}:`, error);
     }
 
     try {
       await fs.unlink(thumbnailPath);
       logger.info(`Deleted thumbnail: thumb_${filename}.jpg`);
-    } catch (error) {
+    } catch (error: any) {
       // Thumbnail might not exist, ignore error
     }
   }
@@ -721,7 +721,7 @@ export class MediaUploadService {
         size: stats.size,
         modified: stats.mtime,
       };
-    } catch (error) {
+    } catch (error: any) {
       return { exists: false };
     }
   }
@@ -738,7 +738,7 @@ export class MediaUploadService {
     try {
       const actualChecksum = await this.calculateChecksum(filePath);
       return actualChecksum === expectedChecksum;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Failed to validate integrity for ${filename}:`, error);
       return false;
     }

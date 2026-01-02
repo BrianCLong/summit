@@ -119,7 +119,7 @@ export class EntityRepo {
       }
 
       return this.mapRow(entity);
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -205,7 +205,7 @@ export class EntityRepo {
       }
 
       return this.mapRow(entity);
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -258,7 +258,7 @@ export class EntityRepo {
         await client.query('ROLLBACK');
         return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -324,7 +324,7 @@ export class EntityRepo {
     params.push(Math.min(limit, 1000), offset); // Cap at 1000 for safety
 
     const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
-    return rows.map((row) => {
+    return rows.map((row: any) => {
       assertTenantMatch(row.tenant_id, scopedTenantId, 'entity');
       return this.mapRow(row);
     });
@@ -347,7 +347,7 @@ export class EntityRepo {
     );
 
     const { rows } = (await this.pg.query(query, params)) as { rows: EntityRow[] };
-    const scopedEntities = rows.map((row) => {
+    const scopedEntities = rows.map((row: any) => {
       assertTenantMatch(row.tenant_id, scopedTenantId, 'entity');
       return this.mapRow(row);
     });
@@ -375,7 +375,7 @@ export class EntityRepo {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `MERGE (e:Entity {id: $id})
            ON CREATE SET e.createdAt = timestamp()
@@ -399,7 +399,7 @@ export class EntityRepo {
     const session = this.neo4j.session();
 
     try {
-      await session.executeWrite(async (tx) => {
+      await session.executeWrite(async (tx: any) => {
         await tx.run(
           `MATCH (e:Entity {id: $id})
            DETACH DELETE e`,

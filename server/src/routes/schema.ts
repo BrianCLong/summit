@@ -35,7 +35,7 @@ router.post('/validate', ensureAuthenticated, async (req, res) => {
       });
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Schema validation error', error);
     res.status(500).json({ error: 'Internal server error during schema validation' });
   }

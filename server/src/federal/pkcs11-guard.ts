@@ -264,7 +264,7 @@ export async function performHSMSelfTest(
     try {
       const random = ctx.p11.C_GenerateRandom(ctx.session, 32);
       testResults.randomGeneration = random.length === 32;
-    } catch (error) {
+    } catch (error: any) {
       console.warn('HSM random generation test failed:', error);
     }
 
@@ -296,14 +296,14 @@ export async function performHSMSelfTest(
       const ciphertext2 = ctx.p11.C_EncryptFinal(ctx.session);
 
       testResults.encryption = ciphertext1.length > 0 || ciphertext2.length > 0;
-    } catch (error) {
+    } catch (error: any) {
       console.warn('HSM key generation/encryption test failed:', error);
     } finally {
       // Clean up temporary key
       if (hTempKey) {
         try {
           ctx.p11.C_DestroyObject(ctx.session, hTempKey);
-        } catch (error) {
+        } catch (error: any) {
           console.warn('Failed to cleanup temp key:', error);
         }
       }
@@ -329,7 +329,7 @@ export async function performHSMSelfTest(
         const signature = ctx.p11.C_Sign(ctx.session, testData);
         testResults.signing = signature.length > 0;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('HSM signing test failed:', error);
     }
 
@@ -494,13 +494,13 @@ export function ecdsaP384Sign(
 export function finalizePKCS11(ctx: PKCS11Context): void {
   try {
     ctx.p11.C_CloseSession(ctx.session);
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Failed to close PKCS#11 session:', error);
   }
 
   try {
     ctx.p11.C_Finalize();
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Failed to finalize PKCS#11:', error);
   }
 }

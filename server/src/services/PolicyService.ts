@@ -60,7 +60,7 @@ export class PolicyService {
 
       // Fallback: Basic RBAC/ABAC logic
       return this.evaluateLocal(ctx);
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error evaluating policy', { error, ctx });
       return { allow: false, reason: 'Policy evaluation error' };
     }
@@ -173,7 +173,7 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
         success: decision.allow,
         errorMessage: decision.reason
         });
-    } catch (e) {
+    } catch (e: any) {
         // ignore audit errors for now or log them
         logger.error('Audit write failed', e);
     }

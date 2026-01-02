@@ -210,7 +210,7 @@ export class GAEnforcementService {
       });
 
       return envelope;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Governance enforcement failed', {
         error: error instanceof Error ? error.message : String(error),
         userId: context.userId,

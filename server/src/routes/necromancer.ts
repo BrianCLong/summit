@@ -32,7 +32,7 @@ router.get('/synthetics', async (req, res, next) => {
   try {
     const synthetics = await necromancerService.getAllSynthetics();
     res.json(synthetics);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -67,7 +67,7 @@ router.post('/initiate', async (req, res, next) => {
     }
     const synthetic = await necromancerService.initiateDigitalAfterlife(params);
     res.status(201).json(synthetic);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });
@@ -102,7 +102,7 @@ router.get('/synthetics/:syntheticId/activity', async (req, res, next) => {
     const { syntheticId } = req.params;
     const activity = await necromancerService.getSyntheticActivity(syntheticId);
     res.json(activity);
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 });

@@ -647,9 +647,9 @@ export class StrategicMonitoringService {
     let reports = Array.from(reportsStore.values());
 
     if (filters) {
-      if (filters.reportType) reports = reports.filter((r) => r.reportType === filters.reportType);
-      if (filters.startDate) reports = reports.filter((r) => r.periodStart >= filters.startDate!);
-      if (filters.endDate) reports = reports.filter((r) => r.periodEnd <= filters.endDate!);
+      if (filters.reportType) reports = reports.filter((r: any) => r.reportType === filters.reportType);
+      if (filters.startDate) reports = reports.filter((r: any) => r.periodStart >= filters.startDate!);
+      if (filters.endDate) reports = reports.filter((r: any) => r.periodEnd <= filters.endDate!);
     }
 
     return reports.sort((a, b) => b.periodEnd.getTime() - a.periodEnd.getTime());

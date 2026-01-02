@@ -22,7 +22,7 @@ for (const p of candidates) {
       console.log(`Loaded ${ids.length} persisted operations from ${p}`);
       break;
     }
-  } catch (error) {
+  } catch (error: any) {
     // Continue to next candidate
   }
 }

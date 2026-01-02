@@ -266,7 +266,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       });
 
       return shapExplanation;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to generate SHAP explanation', { error, keyId });
       this.emit('explanation_error', { error, keyId });
       throw error;
@@ -343,7 +343,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       });
 
       return featureTrends;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to analyze feature importance trends', {
         error,
         keyId,

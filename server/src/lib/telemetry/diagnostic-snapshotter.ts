@@ -62,7 +62,7 @@ class DiagnosticSnapshotter {
       this.captureHeapSnapshot();
       this.captureConfigState();
       this.captureActiveRequests();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to capture diagnostic snapshot:', error);
     } finally {
       this.snapshotInProgress = false;

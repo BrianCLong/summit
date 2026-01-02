@@ -35,7 +35,7 @@ export const SafeMutationsResolvers = {
     ) {
       const { input } = args;
       const tracer = trace.getTracer('maestro');
-      return await tracer.startActiveSpan('createRunDraft', async (span) => {
+      return await tracer.startActiveSpan('createRunDraft', async (span: any) => {
         try {
           const auditId = `audit-${Date.now()}`;
           // TODO: enforce idempotency via audit/outbox store; validate DAG/policies
@@ -58,7 +58,7 @@ export const SafeMutationsResolvers = {
     ) {
       const { input } = args;
       const tracer = trace.getTracer('maestro');
-      return await tracer.startActiveSpan('startRun', async (span) => {
+      return await tracer.startActiveSpan('startRun', async (span: any) => {
         try {
           const dryRun = !!input?.meta?.dryRun;
           const auditId = `audit-${Date.now()}`;
@@ -108,7 +108,7 @@ export const SafeMutationsResolvers = {
       const tracer = trace.getTracer('maestro');
       return await tracer.startActiveSpan(
         'registerUATCheckpoint',
-        async (span) => {
+        async (span: any) => {
           try {
             const auditId = `audit-${Date.now()}`;
             try {

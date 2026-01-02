@@ -141,7 +141,7 @@ export class ResourceTaggingService {
       `);
 
       logger.info('Resource tagging database initialized');
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to initialize resource tagging database');
       throw error;
     }
@@ -189,7 +189,7 @@ export class ResourceTaggingService {
         { resourceId, resourceType, tagCount: tags.length },
         'Resource tagged',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resourceId, resourceType }, 'Failed to tag resource');
       throw error;
     }
@@ -217,7 +217,7 @@ export class ResourceTaggingService {
         [resourceId, resourceType],
       );
 
-      const tags: ResourceTag[] = result.rows.map((row) => ({
+      const tags: ResourceTag[] = result.rows.map((row: any) => ({
         category: row.tag_category,
         key: row.tag_key,
         value: row.tag_value,
@@ -227,7 +227,7 @@ export class ResourceTaggingService {
       this.tagCache.set(cacheKey, tags);
 
       return tags;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resourceId, resourceType }, 'Failed to get resource tags');
       return [];
     }
@@ -269,7 +269,7 @@ export class ResourceTaggingService {
         },
         'Resource cost recorded',
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resource }, 'Failed to record resource cost');
       throw error;
     }
@@ -338,7 +338,7 @@ export class ResourceTaggingService {
       }
 
       return allocationsArray;
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, dimension, startDate, endDate }, 'Failed to get cost allocation');
       throw error;
     }
@@ -386,7 +386,7 @@ export class ResourceTaggingService {
       if (change > 0.1) return 'increasing';
       if (change < -0.1) return 'decreasing';
       return 'stable';
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error }, 'Failed to calculate trend');
       return 'stable';
     }
@@ -412,12 +412,12 @@ export class ResourceTaggingService {
         [startDate, endDate],
       );
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         resourceType: row.resource_type,
         totalCost: parseFloat(row.total_cost),
         count: parseInt(row.count),
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, startDate, endDate }, 'Failed to get cost summary');
       throw error;
     }
@@ -477,7 +477,7 @@ export class ResourceTaggingService {
         byCostCenter,
         byResourceType,
       };
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, startDate, endDate }, 'Failed to generate cost report');
       throw error;
     }
@@ -513,12 +513,12 @@ export class ResourceTaggingService {
       const params = resourceType ? [resourceType, limit] : [limit];
       const result = await this.db.read(query, params);
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         resourceId: row.resource_id,
         resourceType: row.resource_type,
         lastSeen: row.last_seen,
       }));
-    } catch (error) {
+    } catch (error: any) {
       logger.error({ error, resourceType }, 'Failed to get untagged resources');
       throw error;
     }

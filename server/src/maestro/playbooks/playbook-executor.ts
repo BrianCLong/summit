@@ -66,12 +66,12 @@ export class PlaybookExecutorService {
     this.worker = deps.workerFactory
       ? deps.workerFactory(
           'maestro_playbooks',
-          async (job) => this.processStep(job.data),
+          async (job: any) => this.processStep(job.data),
           { connection: deps.redisConnection, concurrency: 3 },
         )
       : new Worker(
           'maestro_playbooks',
-          async (job) => this.processStep(job.data),
+          async (job: any) => this.processStep(job.data),
           { connection: deps.redisConnection, concurrency: 3 },
         );
   }
@@ -194,7 +194,7 @@ export class PlaybookExecutorService {
         { runKey: payload.runKey, stepId: nextStep.id },
         { jobId: `${payload.runKey}:${nextStep.id}` },
       );
-    } catch (error) {
+    } catch (error: any) {
       runRecord.stepStatuses.set(step.id, 'failed');
       runRecord.status = 'failed';
       runRecord.completedAt = new Date().toISOString();

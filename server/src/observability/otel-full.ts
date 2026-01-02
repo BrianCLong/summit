@@ -127,7 +127,7 @@ export async function withSpan<T>(
 ): Promise<T> {
   const tracer = getTracer();
 
-  return tracer.startActiveSpan(name, async (span) => {
+  return tracer.startActiveSpan(name, async (span: any) => {
     try {
       if (attributes) {
         span.setAttributes(attributes);
@@ -136,7 +136,7 @@ export async function withSpan<T>(
       const result = await fn(span);
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
-    } catch (error) {
+    } catch (error: any) {
       span.recordException(error as Error);
       span.setStatus({
         code: SpanStatusCode.ERROR,
@@ -160,7 +160,7 @@ export async function traceDbOperation<T>(
 ): Promise<T> {
   return withSpan(
     `db.${dbType}.${operation}`,
-    async (span) => {
+    async (span: any) => {
       span.setAttributes({
         'db.system': dbType,
         'db.operation': operation,
@@ -190,7 +190,7 @@ export async function traceGraphQLOperation<T>(
 ): Promise<T> {
   return withSpan(
     `graphql.${operationType}.${operationName}`,
-    async (span) => {
+    async (span: any) => {
       span.setAttributes({
         'graphql.operation.name': operationName,
         'graphql.operation.type': operationType,
@@ -211,7 +211,7 @@ export async function traceHttpCall<T>(
 ): Promise<T> {
   return withSpan(
     `http.client.${method}`,
-    async (span) => {
+    async (span: any) => {
       span.setAttributes({
         'http.method': method,
         'http.url': url,

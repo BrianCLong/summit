@@ -132,7 +132,7 @@ export class ComplianceMetricsService {
 
       const result = await this.pool.query(query, params);
 
-      const controls: ControlStatus[] = result.rows.map((row) => ({
+      const controls: ControlStatus[] = result.rows.map((row: any) => ({
         controlId: row.control_id,
         controlName: row.control_name,
         framework: row.framework,
@@ -152,7 +152,7 @@ export class ComplianceMetricsService {
           evaluator: 'ComplianceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting control status:', error);
       return createDataEnvelope(
         [],
@@ -199,7 +199,7 @@ export class ComplianceMetricsService {
         [tenantId]
       );
 
-      const effectiveness: ControlEffectiveness[] = result.rows.map((row) => {
+      const effectiveness: ControlEffectiveness[] = result.rows.map((row: any) => {
         const passed = parseInt(row.tests_passed, 10) || 0;
         const failed = parseInt(row.tests_failed, 10) || 0;
         const total = passed + failed;
@@ -226,7 +226,7 @@ export class ComplianceMetricsService {
           evaluator: 'ComplianceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting control effectiveness:', error);
       return createDataEnvelope(
         [],
@@ -263,7 +263,7 @@ export class ComplianceMetricsService {
         [tenantId]
       );
 
-      const totals = result.rows.find((r) => !r.evidence_type) || {
+      const totals = result.rows.find((r: any) => !r.evidence_type) || {
         total: 0,
         current: 0,
         expiring: 0,
@@ -272,8 +272,8 @@ export class ComplianceMetricsService {
 
       const byType: Record<string, number> = {};
       result.rows
-        .filter((r) => r.evidence_type)
-        .forEach((r) => {
+        .filter((r: any) => r.evidence_type)
+        .forEach((r: any) => {
           byType[r.evidence_type] = parseInt(r.type_count, 10);
         });
 
@@ -293,7 +293,7 @@ export class ComplianceMetricsService {
           evaluator: 'ComplianceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting evidence status:', error);
       return createDataEnvelope(
         {
@@ -338,7 +338,7 @@ export class ComplianceMetricsService {
         [tenantId]
       );
 
-      const overall = controlResult.rows.find((r) => !r.framework) || {
+      const overall = controlResult.rows.find((r: any) => !r.framework) || {
         total: 0,
         compliant: 0,
         partial: 0,
@@ -349,8 +349,8 @@ export class ComplianceMetricsService {
 
       const frameworkScores: Record<string, number> = {};
       controlResult.rows
-        .filter((r) => r.framework)
-        .forEach((r) => {
+        .filter((r: any) => r.framework)
+        .forEach((r: any) => {
           const total = parseInt(r.total, 10) || 1;
           const compliant = parseInt(r.compliant, 10) || 0;
           const partial = parseInt(r.partial, 10) || 0;
@@ -423,7 +423,7 @@ export class ComplianceMetricsService {
           evaluator: 'ComplianceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error calculating audit readiness:', error);
       return createDataEnvelope(
         {
@@ -475,7 +475,7 @@ export class ComplianceMetricsService {
         pci_dss: 'PCI DSS',
       };
 
-      const frameworks: FrameworkStatus[] = result.rows.map((row) => {
+      const frameworks: FrameworkStatus[] = result.rows.map((row: any) => {
         const total = parseInt(row.total_controls, 10) || 0;
         const compliant = parseInt(row.compliant_controls, 10) || 0;
 
@@ -500,7 +500,7 @@ export class ComplianceMetricsService {
           evaluator: 'ComplianceMetricsService',
         }
       );
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting framework status:', error);
       return createDataEnvelope(
         [],

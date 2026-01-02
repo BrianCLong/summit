@@ -91,7 +91,7 @@ async function executeWithDriver<T>(
     const res = await session.run(cypher, params);
     const duration = (Date.now() - start) / 1000;
     metrics.observeHistogram('query_duration_seconds', duration, { route, mode });
-    return res.records.map((r) => r.toObject()) as T[];
+    return res.records.map((r: any) => r.toObject()) as T[];
   } finally {
     await session.close();
     activeSessions--;

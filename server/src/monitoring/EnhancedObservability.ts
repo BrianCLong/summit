@@ -514,7 +514,7 @@ export class HealthCheckManager {
         } else if (results[name].status === 'degraded' && overallStatus !== 'unhealthy') {
           overallStatus = 'degraded';
         }
-      } catch (error) {
+      } catch (error: any) {
         results[name] = {
           status: 'unhealthy',
           message: error instanceof Error ? error.message : 'Unknown error',

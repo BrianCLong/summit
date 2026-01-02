@@ -310,7 +310,7 @@ export class LLMChainExecutor extends EventEmitter {
       this.trackExecution(config.chainType, result);
 
       return result;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('LLM chain execution failed', {
         chainType: config.chainType,
         error: (error as Error).message,
@@ -494,7 +494,7 @@ Generate parameterized Cypher queries. Return as JSON:
     context: HuntContext
   ): string {
     // Summarize results to avoid token overflow
-    const summarizedResults = results.map((r) => ({
+    const summarizedResults = results.map((r: any) => ({
       queryId: r.queryId,
       hypothesisId: r.hypothesisId,
       success: r.success,

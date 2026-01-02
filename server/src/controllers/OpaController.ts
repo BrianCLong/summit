@@ -31,7 +31,7 @@ const findOPA = async (): Promise<string> => {
         });
       });
       return loc;
-    } catch (e) {
+    } catch (e: any) {
       // ignore
     }
   }
@@ -45,7 +45,7 @@ export class OpaController {
       // Verify policy dir exists
       try {
         await fs.access(POLICY_DIR);
-      } catch (e) {
+      } catch (e: any) {
         // Fallback to relative path if process.cwd() is different
         // If we are in server/, policy is ../policy
         // If we are in root, policy is ./policy
@@ -54,7 +54,7 @@ export class OpaController {
       const realPolicyDir = (await fs.stat('policy').catch(() => false)) ? 'policy' : '../policy';
 
       const files = await fs.readdir(realPolicyDir);
-      const regoFiles = files.filter(f => f.endsWith('.rego'));
+      const regoFiles = files.filter((f: string) => f.endsWith('.rego'));
       res.json({ policies: regoFiles });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -73,7 +73,7 @@ export class OpaController {
 
       // Prevent directory traversal
       if (!filepath.startsWith(path.resolve(realPolicyDir))) {
-         return res.status(403).json({ error: 'Access denied' });
+        return res.status(403).json({ error: 'Access denied' });
       }
 
       const content = await fs.readFile(filepath, 'utf-8');
@@ -120,8 +120,8 @@ export class OpaController {
           }
         });
 
-        proc.on('error', (err) => {
-           reject(new Error(`Failed to start OPA: ${err.message}`));
+        proc.on('error', (err: any) => {
+          reject(new Error(`Failed to start OPA: ${err.message}`));
         });
       });
 
@@ -130,54 +130,54 @@ export class OpaController {
     } catch (error: any) {
       // If OPA is missing, return a mock response for testing if requested
       if (error.message.includes('ENOENT') || error.message.includes('Failed to start OPA')) {
-         return res.status(500).json({
-           error: 'OPA binary not found',
-           details: error.message,
-           suggestion: 'Please install OPA or ensure it is in the PATH.'
-         });
+        return res.status(500).json({
+          error: 'OPA binary not found',
+          details: error.message,
+          suggestion: 'Please install OPA or ensure it is in the PATH.'
+        });
       }
       res.status(500).json({ error: error.message });
     } finally {
       // Cleanup
-      await fs.unlink(policyFile).catch(() => {});
-      await fs.unlink(inputFile).catch(() => {});
+      await fs.unlink(policyFile).catch(() => { });
+      await fs.unlink(inputFile).catch(() => { });
     }
   }
 
   static async validatePolicy(req: Request, res: Response) {
-      const { policy } = req.body;
-      if (!policy) {
-          return res.status(400).json({ error: 'Policy content is required' });
-      }
+    const { policy } = req.body;
+    if (!policy) {
+      return res.status(400).json({ error: 'Policy content is required' });
+    }
 
-      const tmpDir = os.tmpdir();
-      const id = uuidv4();
-      const policyFile = path.join(tmpDir, `${id}.rego`);
+    const tmpDir = os.tmpdir();
+    const id = uuidv4();
+    const policyFile = path.join(tmpDir, `${id}.rego`);
 
-      try {
-          await fs.writeFile(policyFile, policy);
-          const opaCmd = await findOPA();
+    try {
+      await fs.writeFile(policyFile, policy);
+      const opaCmd = await findOPA();
 
-          // opa check policy.rego
-          const args = ['check', policyFile];
+      // opa check policy.rego
+      const args = ['check', policyFile];
 
-          await new Promise<void>((resolve, reject) => {
-              const proc = spawn(opaCmd, args);
-              let stderr = '';
-              proc.stderr.on('data', (data) => stderr += data.toString());
-              proc.on('close', (code) => {
-                  if (code !== 0) reject(new Error(stderr || 'Validation failed'));
-                  else resolve();
-              });
-              proc.on('error', (err) => reject(err));
-          });
+      await new Promise<void>((resolve, reject) => {
+        const proc = spawn(opaCmd, args);
+        let stderr = '';
+        proc.stderr.on('data', (data) => stderr += data.toString());
+        proc.on('close', (code) => {
+          if (code !== 0) reject(new Error(stderr || 'Validation failed'));
+          else resolve();
+        });
+        proc.on('error', (err: any) => reject(err));
+      });
 
-          res.json({ valid: true });
+      res.json({ valid: true });
 
-      } catch (error: any) {
-          res.json({ valid: false, error: error.message });
-      } finally {
-          await fs.unlink(policyFile).catch(() => {});
-      }
+    } catch (error: any) {
+      res.json({ valid: false, error: error.message });
+    } finally {
+      await fs.unlink(policyFile).catch(() => { });
+    }
   }
 }

@@ -8,7 +8,7 @@ function renderTable(doc: PDFDocument, rows: ReturnType<typeof normalizeTabularD
   doc.font('Helvetica-Bold').fontSize(10).text(keys.join(' | '));
   doc.moveDown(0.4);
   doc.font('Helvetica').fontSize(10);
-  rows.forEach((row) => {
+  rows.forEach((row: any) => {
     const line = keys.map((key) => String(row[key] ?? '')).join(' | ');
     doc.text(line);
   });

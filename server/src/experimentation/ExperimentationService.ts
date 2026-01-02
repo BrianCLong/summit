@@ -385,11 +385,11 @@ export class ExperimentationService {
     );
 
     const controlVariant = experiment.variants.find((v) => v.isControl);
-    const controlStats = statsResult.rows.find((r) => r.variant_id === controlVariant?.id);
+    const controlStats = statsResult.rows.find((r: any) => r.variant_id === controlVariant?.id);
     const controlRate = parseFloat(controlStats?.conversion_rate || '0');
 
     const variantResults: VariantResults[] = experiment.variants.map((variant) => {
-      const stats = statsResult.rows.find((r) => r.variant_id === variant.id);
+      const stats = statsResult.rows.find((r: any) => r.variant_id === variant.id);
       const sampleSize = parseInt(stats?.sample_size || '0');
       const conversionRate = parseFloat(stats?.conversion_rate || '0');
       const conversionCount = parseInt(stats?.conversions || '0');
@@ -554,7 +554,7 @@ export class ExperimentationService {
     ];
 
     // Add governance approval for experiments affecting user data
-    if (experiment.targetingRules.some((r) => r.attribute.includes('pii'))) {
+    if (experiment.targetingRules.some((r: any) => r.attribute.includes('pii'))) {
       approvals.push({ approver: '', role: 'governance', status: 'pending' });
     }
 
@@ -832,7 +832,7 @@ export class ExperimentationService {
       }
 
       logger.info('Loaded experiments', { count: this.experiments.size });
-    } catch (error) {
+    } catch (error: any) {
       logger.warn('Could not load experiments from database', { error });
     }
   }
