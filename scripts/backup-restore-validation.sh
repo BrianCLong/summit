@@ -7,8 +7,8 @@ set -euo pipefail
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 readonly PROD_NAMESPACE="intelgraph-prod"
-readonly RESTORE_NAMESPACE="intelgraph-restore-test"
-readonly TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+readonly TIMESTAMP=${TIMESTAMP:-$(date +%Y%m%d-%H%M%S)}
+readonly RESTORE_NAMESPACE="intelgraph-restore-${TIMESTAMP}"
 
 # Colors for output
 readonly RED='\033[0;31m'
@@ -24,6 +24,39 @@ log_warning() { echo -e "${YELLOW}[WARNING]${NC} $*"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 log_backup() { echo -e "${PURPLE}[BACKUP]${NC} $*"; }
 
+is_dry_run() {
+    [[ "${DRY_RUN:-false}" == "true" ]]
+}
+
+ensure_safe_namespace() {
+    if [[ "$RESTORE_NAMESPACE" =~ prod ]]; then
+        log_error "Refusing to use unsafe namespace: $RESTORE_NAMESPACE"
+        exit 1
+    fi
+}
+
+cleanup() {
+    rm -f "$PROJECT_ROOT/.temp-test-data.sql" "$PROJECT_ROOT/.temp-neo4j-test.cypher" || true
+    if is_dry_run; then
+        return
+    fi
+    kubectl delete namespace "$RESTORE_NAMESPACE" --ignore-not-found >/dev/null 2>&1 || true
+}
+
+trap cleanup EXIT
+
+print_dry_run_plan() {
+    log_info "🔍 DRY RUN: generating restore validation plan only"
+    cat <<EOF
+{
+  "restoreNamespace": "$RESTORE_NAMESPACE",
+  "postgresBackup": "postgres-backup-${TIMESTAMP}.sql",
+  "neo4jBackup": "neo4j-backup-${TIMESTAMP}.dump",
+  "checks": ["artifact-naming", "safe-namespace"]
+}
+EOF
+}
+
 # Global variables for tracking
 BACKUP_START_TIME=""
 RESTORE_START_TIME=""
@@ -34,6 +67,13 @@ TOTAL_RESTORE_TIME=""
 
 main() {
     log_backup "🛡️ Starting IntelGraph Backup & Restore Validation..."
+
+    ensure_safe_namespace
+
+    if is_dry_run; then
+        print_dry_run_plan
+        return
+    fi
 
     validate_prerequisites
     create_test_data

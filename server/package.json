@@ -15,7 +15,7 @@
     "test:coverage": "jest --config jest.config.ts --coverage",
     "test:quarantine": "jest --config jest.quarantine.config.js --passWithNoTests",
     "test:integration": "jest --config jest.config.js --testPathPattern=integration --passWithNoTests",
-    "test:unit": "jest --config jest.config.js --testPathIgnorePatterns=integration --passWithNoTests",
+    "test:unit": "node --loader ts-node/esm ./node_modules/jest/bin/jest.js --config jest.config.ts --testPathIgnorePatterns=integration --passWithNoTests --runInBand --forceExit",
     "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

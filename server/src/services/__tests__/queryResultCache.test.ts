@@ -7,25 +7,37 @@ describe('QueryResultCache', () => {
       b: 2,
       a: 1,
       nested: { y: 2, z: 3 },
-    });
+    }, 'tenant-a');
     const signatureB = cache.buildSignature('cypher', 'MATCH (n) RETURN n', {
       nested: { z: 3, y: 2 },
       a: 1,
       b: 2,
-    });
+    }, 'tenant-a');
     const signatureDifferent = cache.buildSignature('cypher', 'MATCH (n) RETURN n', {
       nested: { z: 4, y: 2 },
       a: 1,
       b: 2,
-    });
+    }, 'tenant-a');
 
     expect(signatureA).toBe(signatureB);
     expect(signatureA).not.toBe(signatureDifferent);
   });
 
+  it('isolates cache signatures by tenant', () => {
+    const cache = new QueryResultCache(null, { namespace: 'ns' });
+    const baseParams = { key: 'value' };
+
+    const signatureTenantA = cache.buildSignature('sql', 'SELECT 1', baseParams, 'tenant-a');
+    const signatureTenantB = cache.buildSignature('sql', 'SELECT 1', baseParams, 'tenant-b');
+
+    expect(signatureTenantA).not.toEqual(signatureTenantB);
+    expect(signatureTenantA).toContain('tenant-a');
+    expect(signatureTenantB).toContain('tenant-b');
+  });
+
   it('uses read-through caching and records hit ratios', async () => {
     const cache = new QueryResultCache(null, { ttlSeconds: 10 });
-    const signature = cache.buildSignature('sql', 'SELECT 1', { tenantId: 't1' });
+    const signature = cache.buildSignature('sql', 'SELECT 1', { tenantId: 't1' }, 'tenant-a');
     const loader = jest.fn(async () => ({
       rows: [{ id: 1 }],
       warnings: ['fresh'],
@@ -45,6 +57,27 @@ describe('QueryResultCache', () => {
     expect(cache.getStats().result.hitRate).toBeCloseTo(0.5);
   });
 
+  it('expires entries based on default TTL when none is provided', async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+
+    const cache = new QueryResultCache(null);
+    const signature = cache.buildSignature('cypher', 'RETURN 1', {}, 'tenant-a');
+    await cache.setResult(signature, {
+      rows: [{ id: 1 }],
+      warnings: [],
+      executionTimeMs: 1,
+    });
+
+    jest.advanceTimersByTime(599_000);
+    expect((await cache.getResult(signature, 'tenant-a'))?.rows).toEqual([{ id: 1 }]);
+
+    jest.advanceTimersByTime(2_000);
+    expect(await cache.getResult(signature, 'tenant-a')).toBeUndefined();
+
+    jest.useRealTimers();
+  });
+
   it('evicts least frequently used entries when capacity is exceeded', async () => {
     const cache = new QueryResultCache(null, { ttlSeconds: 50, maxEntries: 2 });
     const buildPayload = (label: string) => ({
@@ -53,9 +86,9 @@ describe('QueryResultCache', () => {
       executionTimeMs: 1,
     });
 
-    const signatureA = cache.buildSignature('cypher', 'RETURN 1', { id: 'a' });
-    const signatureB = cache.buildSignature('cypher', 'RETURN 1', { id: 'b' });
-    const signatureC = cache.buildSignature('cypher', 'RETURN 1', { id: 'c' });
+    const signatureA = cache.buildSignature('cypher', 'RETURN 1', { id: 'a' }, 'tenant-a');
+    const signatureB = cache.buildSignature('cypher', 'RETURN 1', { id: 'b' }, 'tenant-a');
+    const signatureC = cache.buildSignature('cypher', 'RETURN 1', { id: 'c' }, 'tenant-a');
 
     await cache.setResult(signatureA, buildPayload('a'));
     await cache.setResult(signatureB, buildPayload('b'));
@@ -72,6 +105,20 @@ describe('QueryResultCache', () => {
     expect(resultC?.rows).toEqual([{ label: 'c' }]);
   });
 
+  it('can be disabled via config flag for incident response', async () => {
+    const cache = new QueryResultCache(null, { enabled: false });
+    const signature = cache.buildSignature('sql', 'SELECT 1', {}, 'tenant-a');
+    const loader = jest.fn(async () => ({
+      rows: [{ id: 'fresh' }],
+      warnings: [],
+      executionTimeMs: 2,
+    }));
+
+    const result = await cache.readThrough(signature, 'tenant-a', loader);
+    expect(result.fromCache).toBe(false);
+    expect(await cache.getResult(signature, 'tenant-a')).toBeUndefined();
+  });
+
   it('stores streaming partials with short TTL for progressive rendering', async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2024-01-01T00:00:00Z'));
@@ -81,7 +128,7 @@ describe('QueryResultCache', () => {
       streamingMaxEntries: 5,
       partialLimit: 2,
     });
-    const signature = cache.buildSignature('cypher', 'MATCH (n) RETURN n', {});
+    const signature = cache.buildSignature('cypher', 'MATCH (n) RETURN n', {}, 'tenant-a');
 
     await cache.setStreamingPartial(signature, [1, 2, 3]);
     const cached = await cache.getStreamingPartial(signature);
