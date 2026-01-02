@@ -40,5 +40,13 @@ export function GraphPane() {
     });
   }, [dispatch]);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
+  return (
+    <div
+      ref={containerRef}
+      style={{ width: '100%', height: '100%' }}
+      role="figure"
+      aria-label="Network graph visualization"
+      tabIndex={0}
+    />
+  );
 }
