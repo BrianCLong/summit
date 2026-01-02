@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Command } from 'cmdk'
-import { Search, FileText, User, AlertTriangle, Zap } from 'lucide-react'
+import { Search, FileText, User, AlertTriangle, Zap, Loader2, X } from 'lucide-react'
 import { useSearch } from '@/contexts/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
@@ -25,15 +25,14 @@ export function GlobalSearch() {
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
-    if (!query.trim()) {return []}
     if (!query || !query.trim()) return []
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300))
 
     if (!isDemoMode) {
       return []
     }
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 200))
 
     const mockResults: SearchResult[] = [
       // Entities
@@ -113,15 +112,44 @@ export function GlobalSearch() {
   }
 
   useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        if (isOpen) {
+          closeSearch()
+        } else {
+          // Open search logic is handled in context or parent usually,
+          // but if this component is conditionally rendered, this listener might need to be global.
+          // Assuming useSearch handles the toggle, or this component is always mounted but hidden.
+          // If isOpen is false, this component returns null, so this listener might not be active
+          // unless it's attached in a parent or this component is always mounted with `display: none`.
+          // For now, we assume this component is mounted but hidden or the key listener is global.
+          // IF this component is unmounted when closed, this listener won't work to OPEN it.
+          // However, standard `cmdk` pattern often wraps the whole app or is mounted at root.
+          // Let's assume the context handles opening.
+        }
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [isOpen, closeSearch])
+
+  useEffect(() => {
     if (!query || !query.trim()) {
       setResults([])
+      setLoading(false)
       return
     }
 
     setLoading(true)
-    searchFunction(query)
-      .then(setResults)
-      .finally(() => setLoading(false))
+    const timeoutId = setTimeout(() => {
+      searchFunction(query)
+        .then(setResults)
+        .finally(() => setLoading(false))
+    }, 300) // Debounce already in searchFunction? No, searchFunction has delay, but we need debounce here to avoid calling it too often.
+
+    return () => clearTimeout(timeoutId)
   }, [query, isDemoMode])
 
   const handleSelect = (result: SearchResult) => {
@@ -168,41 +196,57 @@ export function GlobalSearch() {
   if (!isOpen) {return null}
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-      <div className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl">
-        <Command className="rounded-lg border shadow-md bg-popover">
-          <div className="flex items-center border-b px-3">
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" onClick={closeSearch}>
+      <div className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <Command className="rounded-xl border shadow-md bg-popover overflow-hidden" loop>
+          <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Command.Input
               placeholder="Search entities, investigations, alerts..."
               value={query}
               onValueChange={setQuery}
               className="flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              autoFocus
+              aria-label="Global search"
             />
+            <div className="flex items-center gap-1 text-xs text-muted-foreground ml-2">
+               <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                  <span className="text-xs">Esc</span>
+                </kbd>
+            </div>
           </div>
 
-          <Command.List className="max-h-96 overflow-y-auto p-2">
+          <Command.List className="max-h-[500px] overflow-y-auto p-2 scroll-py-2">
             {!isDemoMode && (
               <div className="py-3 text-center text-xs text-muted-foreground">
                 Live search is unavailable until a backend connection is configured.
               </div>
             )}
+
             {loading && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                Searching...
+              <div className="flex flex-col items-center justify-center py-6 text-sm text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin mb-2 opacity-50" />
+                <span>Searching...</span>
               </div>
             )}
 
             {!loading && query && results.length === 0 && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                No results found for "{query}"
+              <div className="flex flex-col items-center justify-center py-10 text-sm text-muted-foreground">
+                <Search className="h-10 w-10 mb-3 opacity-20" />
+                <p>No results found for "{query}"</p>
+                <p className="text-xs mt-1 opacity-70">Try adjusting your search terms</p>
               </div>
             )}
 
             {!query && !loading && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                Type to search across entities, investigations, and more...
-              </div>
+               <div className="py-6 px-4">
+                 <p className="text-xs font-medium text-muted-foreground mb-2">SUGGESTED SEARCHES</p>
+                 <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="cursor-pointer hover:bg-accent" onClick={() => setQuery("John")}>John</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-accent" onClick={() => setQuery("Network")}>Network</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-accent" onClick={() => setQuery("Suspicious")}>Suspicious</Badge>
+                 </div>
+               </div>
             )}
 
             {results.length > 0 && (
@@ -217,17 +261,18 @@ export function GlobalSearch() {
                       <Command.Group
                         key={type}
                         heading={type.charAt(0).toUpperCase() + type.slice(1)}
+                        className="text-xs font-medium text-muted-foreground px-2 py-1.5"
                       >
                         {typeResults.map(result => {
                           const Icon = result.icon || getTypeIcon(result.type)
                           return (
                             <Command.Item
                               key={result.id}
-                              value={result.id}
+                              value={`${result.title} ${result.description}`}
                               onSelect={() => handleSelect(result)}
-                              className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-md"
+                              className="relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground aria-selected:bg-accent aria-selected:text-accent-foreground"
                             >
-                              <Icon className="h-4 w-4 text-muted-foreground" />
+                              <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium truncate">
                                   {result.title}
@@ -243,7 +288,7 @@ export function GlobalSearch() {
                                   variant={
                                     getTypeBadgeVariant(result.type) as any
                                   }
-                                  className="text-xs"
+                                  className="ml-2 text-[10px] h-5"
                                 >
                                   {result.badge}
                                 </Badge>
@@ -259,17 +304,14 @@ export function GlobalSearch() {
             )}
           </Command.List>
 
-          <div className="border-t px-3 py-2 text-xs text-muted-foreground">
+          <div className="border-t bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
             <div className="flex items-center justify-between">
-              <span>Press Enter to select, Esc to close</span>
+              <div className="flex gap-3">
+                 <span><kbd className="font-sans font-semibold">↵</kbd> Select</span>
+                 <span><kbd className="font-sans font-semibold">↑↓</kbd> Navigate</span>
+              </div>
               <div className="flex items-center gap-1">
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
-                  ↑
-                </kbd>
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
-                  ↓
-                </kbd>
-                <span className="text-[10px]">to navigate</span>
+                <span>Search powered by IntelGraph</span>
               </div>
             </div>
           </div>
