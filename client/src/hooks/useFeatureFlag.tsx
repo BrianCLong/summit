@@ -1,21 +1,22 @@
-// client/src/hooks/useFeatureFlag.ts
-import { useState, useEffect, useContext, createContext } from 'react';
+// client/src/hooks/useFeatureFlag.tsx
+import { useState, useEffect, useContext, createContext, ReactNode } from 'react';
 
 // Define types for feature flags
 export interface FeatureFlag {
   key: string;
   enabled: boolean;
-  value?: any;
-  variants?: Record<string, any>;
+  value?: unknown;
+  variants?: Record<string, unknown>;
   lastUpdated?: Date;
 }
 
 export interface FeatureFlagContextType {
   flags: Record<string, FeatureFlag>;
   isLoading: boolean;
+  error: Error | null;
   refreshFlags: () => Promise<void>;
   getFlag: (key: string) => FeatureFlag | null;
-  getFlagValue: <T = any>(key: string, defaultValue?: T) => T | boolean | undefined;
+  getFlagValue: <T = unknown>(key: string, defaultValue?: T) => T | boolean | undefined;
 }
 
 // Create the context with default values
@@ -23,7 +24,7 @@ const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(und
 
 // Provider component
 interface FeatureFlagProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   apiUrl?: string;
   userId?: string;
   autoRefresh?: boolean;
@@ -68,10 +69,10 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       }
 
       const data: FeatureFlag[] = await response.json();
-      
+
       // Transform array to record for easier access
       const flagsRecord: Record<string, FeatureFlag> = {};
-      data.forEach(flag => {
+      data.forEach((flag) => {
         flagsRecord[flag.key] = {
           ...flag,
           lastUpdated: new Date()
@@ -82,6 +83,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error');
       setError(error);
+      // eslint-disable-next-line no-console
       console.error('Error fetching feature flags:', error);
     } finally {
       setIsLoading(false);
@@ -91,18 +93,18 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
   // Effect to fetch flags on mount
   useEffect(() => {
     fetchFlags();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Effect to set up auto-refresh if enabled
   useEffect(() => {
     if (!autoRefresh) return;
 
     const intervalId = setInterval(fetchFlags, refreshInterval);
-    
+
     return () => {
       clearInterval(intervalId);
     };
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, fetchFlags]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Function to refresh flags manually
   const refreshFlags = async (): Promise<void> => {
@@ -115,7 +117,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
   };
 
   // Function to get a specific flag's value with type safety
-  const getFlagValue = <T = any>(key: string, defaultValue?: T): T | boolean | undefined => {
+  const getFlagValue = <T = unknown>(key: string, defaultValue?: T): T | boolean | undefined => {
     const flag = getFlag(key);
     if (!flag) {
       return defaultValue;
@@ -128,7 +130,8 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
     }
 
     // Otherwise return the boolean enabled value or the specific value
-    return (flag.value !== undefined ? flag.value : flag.enabled) as T | boolean;
+    const flagValue = flag.value;
+    return flagValue !== undefined ? flagValue as T : Boolean(flag.enabled);
   };
 
   const contextValue: FeatureFlagContextType = {
@@ -148,15 +151,15 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
 };
 
 // Hook to use the feature flag context
-export const useFeatureFlag = (flagKey: string): { 
-  enabled: boolean; 
-  value?: any; 
-  isLoading: boolean; 
+export const useFeatureFlag = (flagKey: string): {
+  enabled: boolean;
+  value?: unknown;
+  isLoading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
 } => {
   const context = useContext(FeatureFlagContext);
-  
+
   if (!context) {
     throw new Error('useFeatureFlag must be used within a FeatureFlagProvider');
   }
@@ -165,7 +168,7 @@ export const useFeatureFlag = (flagKey: string): {
   const value = context.getFlagValue(flagKey);
 
   return {
-    enabled: flag ? (flag.value !== undefined ? !!flag.value : flag.enabled) : false,
+    enabled: flag ? Boolean(flag.value !== undefined ? flag.value : flag.enabled) : false,
     value: flag ? (flag.value !== undefined ? flag.value : flag.enabled) : undefined,
     isLoading: context.isLoading,
     error: context.error,
@@ -176,7 +179,7 @@ export const useFeatureFlag = (flagKey: string): {
 // Hook to get multiple flags
 export const useMultipleFeatureFlags = (flagKeys: string[]): {
   flags: Record<string, boolean>;
-  values: Record<string, any>;
+  values: Record<string, unknown>;
   isLoading: boolean;
   error: Error | null;
 } => {
@@ -187,11 +190,11 @@ export const useMultipleFeatureFlags = (flagKeys: string[]): {
   }
 
   const flags: Record<string, boolean> = {};
-  const values: Record<string, any> = {};
+  const values: Record<string, unknown> = {};
 
-  flagKeys.forEach(key => {
+  flagKeys.forEach((key) => {
     const flag = context.getFlag(key);
-    flags[key] = flag ? (flag.value !== undefined ? !!flag.value : flag.enabled) : false;
+    flags[key] = flag ? Boolean(flag.value !== undefined ? flag.value : flag.enabled) : false;
     values[key] = flag ? (flag.value !== undefined ? flag.value : flag.enabled) : undefined;
   });
 
@@ -212,7 +215,7 @@ export const useFeatureFlagAll = (flagKeys: string[]): {
   const { flags, isLoading, error } = useMultipleFeatureFlags(flagKeys);
 
   // Check if all flags are enabled
-  const allEnabled = flagKeys.every(key => flags[key]);
+  const allEnabled = flagKeys.every((key) => flags[key]);
 
   return {
     allEnabled,
@@ -230,7 +233,7 @@ export const useFeatureFlagAny = (flagKeys: string[]): {
   const { flags, isLoading, error } = useMultipleFeatureFlags(flagKeys);
 
   // Check if any flag is enabled
-  const anyEnabled = flagKeys.some(key => flags[key]);
+  const anyEnabled = flagKeys.some((key) => flags[key]);
 
   return {
     anyEnabled,
