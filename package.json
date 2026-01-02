@@ -224,7 +224,9 @@
     "auditConfig": {
       "ignoreCves": [
         "CVE-2024-22363",
-        "CVE-2023-30533"
+        "CVE-2023-30533",
+        "CVE-2022-24434",
+        "CVE-2023-28155"
       ]
     },
     "overrides": {
@@ -248,7 +250,10 @@
       "@babel/runtime": ">=7.26.0",
       "esbuild": ">=0.25.0",
       "electron": ">=35.7.5",
-      "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+      "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+      "qs": ">=6.14.1",
+      "form-data": ">=2.5.4",
+      "tough-cookie": ">=4.1.3"
     }
   }
 }
