@@ -1,0 +1,15 @@
+{
+  "repo": "BrianCLong/summit",
+  "state_filter": "all",
+  "batch_size": 50,
+  "cursor": {
+    "last_processed_issue_number": 0,
+    "page": 88
+  },
+  "run_started_at": "2026-01-02T17:28:17.871Z",
+  "run_updated_at": "2026-01-02T23:56:42.699Z",
+  "processed_count": 4362,
+  "error_count": 0,
+  "failures": [],
+  "open_prs": []
+}

@@ -1,0 +1,77 @@
+{
+  "issue_number": 3568,
+  "title": "IG Oct25 | october2025/aureliusIG.md | Mission Decomposition (numbered)",
+  "url": "https://github.com/BrianCLong/summit/issues/3568",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-02T02:26:47Z",
+  "createdAt": "2025-10-02T02:26:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14376,
+        "url": "https://github.com/BrianCLong/summit/pull/14376",
+        "mergedAt": "2025-12-23T04:35:24Z",
+        "title": "Bump esbuild and vitest in /apps/gateway"
+      },
+      {
+        "number": 13634,
+        "url": "https://github.com/BrianCLong/summit/pull/13634",
+        "mergedAt": "2025-12-17T02:55:59Z",
+        "title": "build(deps): bump esbuild and vitest in /services/nl-cypher"
+      },
+      {
+        "number": 13633,
+        "url": "https://github.com/BrianCLong/summit/pull/13633",
+        "mergedAt": "2025-12-17T02:12:47Z",
+        "title": "build(deps): bump esbuild and vitest in /services/ai-nlq"
+      },
+      {
+        "number": 1354,
+        "url": "https://github.com/BrianCLong/summit/pull/1354",
+        "mergedAt": "2025-09-23T16:44:12Z",
+        "title": "chore(deps): bump esbuild and vitest in /contracts"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 1349,
+        "url": "https://github.com/BrianCLong/summit/pull/1349",
+        "mergedAt": "2025-09-23T06:56:23Z",
+        "title": "chore(deps): bump esbuild, vite and vitest in /intelgraph/client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

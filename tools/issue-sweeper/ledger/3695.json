@@ -1,0 +1,47 @@
+{
+  "issue_number": 3695,
+  "title": "IG Oct25 | october2025/aurelius_aiml_intelgraph_q_425_sprint_23_2025_10_27_02.md | **M5 (D10):** Canary perf gates pass; IP v2 merged; demo.",
+  "url": "https://github.com/BrianCLong/summit/issues/3695",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-02T02:30:15Z",
+  "createdAt": "2025-10-02T02:30:15Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1717,
+        "url": "https://github.com/BrianCLong/summit/pull/1717",
+        "mergedAt": null,
+        "title": "chore(deps): bump redis from 4.3.4 to 6.4.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

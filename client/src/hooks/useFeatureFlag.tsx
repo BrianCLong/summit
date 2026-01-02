@@ -57,6 +57,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       }
 
       const response = await fetch(`${apiUrl}?${queryParams.toString()}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           // Add any auth headers if needed

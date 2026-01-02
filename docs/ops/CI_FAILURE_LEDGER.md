@@ -189,10 +189,38 @@ for (const file of recipeFiles) {
 ## Action Items
 
 - [x] Fix supply-chain-integrity.yml pnpm cache issue
-- [ ] Push fix branch and create PR
+- [x] Push fix branch and create PR (#15406)
+- [ ] Wait for PR #15406 CI to complete (currently queued - runner backlog)
+- [ ] Merge PR #15406 (supply-chain fix)
 - [ ] Merge PR #15373 (path traversal fix)
 - [ ] Rebase PR #15380 on updated main
 - [ ] Verify all supply-chain workflows pass on main
+
+---
+
+## Current Status (2026-01-02 23:50 UTC)
+
+### PR #15406 - Supply Chain Workflow Fix
+- **Branch:** `fix/supply-chain-workflows-ga-unblock`
+- **Status:** OPEN, MERGEABLE
+- **CI Status:** 33 checks queued, 0 failed, 1 completed
+- **Fix Applied:** Added pnpm/action-setup@v4, changed cache from 'npm' to 'pnpm'
+
+### PR #15373 - Security Path Traversal Fix
+- **Branch:** `sentinel-fix-path-traversal-recipes-9225132464907612930`
+- **Status:** OPEN, MERGEABLE
+- **CI Status:** 35 checks queued, 3 in progress, 75 completed (70 cancelled from previous run)
+- **Fix Applied:** Added path.relative() validation in recipes.ts
+
+### PR #15380 - Sprint 2026.02 Hard Gates
+- **Branch:** `sprint-2026-02-hard-gates-336599783514769177`
+- **Status:** OPEN, CONFLICTING
+- **Action Required:** Rebase after PR #15373 merges
+
+### Merge Order Recommendation
+1. PR #15406 (supply-chain fix) - unblocks main CI
+2. PR #15373 (security fix) - clean, focused security patch
+3. PR #15380 (rebase required) - larger sprint bundle
 
 ---
 
