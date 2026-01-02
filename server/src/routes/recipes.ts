@@ -35,7 +35,14 @@ router.post('/recipes/run', express.json(), async (req, res) => {
 
     let validRecipeFile = null;
     for (const file of recipeFiles) {
-      const fullPath = path.join(process.cwd(), 'recipes', file);
+      if (!file) continue;
+
+      const fullPath = path.resolve(recipesDir, file);
+      // Ensure path traversal protection
+      if (!fullPath.startsWith(recipesDir + path.sep)) {
+        continue;
+      }
+
       if (fs.existsSync(fullPath)) {
         validRecipeFile = file;
         break;
@@ -44,7 +51,7 @@ router.post('/recipes/run', express.json(), async (req, res) => {
 
     if (!validRecipeFile) {
       const availableRecipes = fs
-        .readdirSync(path.join(process.cwd(), 'recipes'))
+        .readdirSync(recipesDir)
         .filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'))
         .join(', ');
       return res.status(404).json({

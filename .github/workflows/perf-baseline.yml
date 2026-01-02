@@ -1,0 +1,41 @@
+name: Performance Baseline (Nightly)
+on:
+  schedule:
+    - cron: '0 2 * * *' # 2 AM nightly
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Assuming we need to spin up the stack
+      - name: Start Stack
+        run: |
+          cp .env.example .env
+          docker compose up -d
+          # Wait for health
+          ./scripts/health-check.sh
+
+      - name: Install k6
+        run: |
+            sudo gpg -k
+            sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+            echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+            sudo apt-get update
+            sudo apt-get install k6
+
+      - name: Run GraphQL Benchmark
+        run: k6 run k6/graphql-throughput.js --out json=perf-results.json
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-baseline
+          path: perf-results.json

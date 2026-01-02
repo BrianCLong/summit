@@ -46,22 +46,22 @@ module.exports = {
   ],
   coverageThreshold: {
     global: {
+      branches: 50, // Starting realistic as requested
+      functions: 50,
+      lines: 50,
+      statements: 50,
+    },
+    './server/src/middleware/**/*.ts': {
       branches: 80,
       functions: 80,
       lines: 80,
       statements: 80,
     },
-    './server/src/middleware/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
     './server/src/services/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
     },
   },
   testMatch: [

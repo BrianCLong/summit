@@ -11,13 +11,23 @@ export async function listRecipes() {
 }
 
 export async function loadRecipe(name: string) {
-  const p = path.join(process.cwd(), 'recipes', name);
-  const y = fs.readFileSync(p, 'utf8');
-  // Lazy import to avoid bundling when not needed
+  const recipesDir = path.resolve(process.cwd(), 'recipes');
+  const targetPath = path.resolve(recipesDir, name);
+
+  // Prevent path traversal
+  if (!targetPath.startsWith(recipesDir + path.sep)) {
+    return { __error: 'Invalid recipe path', raw: '' } as any;
+  }
+
   try {
+    const y = fs.readFileSync(targetPath, 'utf8');
+    // Lazy import to avoid bundling when not needed
     const YAML = (await import('yaml')).default as any;
     return YAML.parse(y);
-  } catch {
-    return { __error: 'YAML module not installed', raw: y } as any;
+  } catch (err: any) {
+    if (err.code === 'ENOENT') {
+         return { __error: 'Recipe not found', raw: '' } as any;
+    }
+    return { __error: 'YAML module not installed', raw: '' } as any;
   }
 }

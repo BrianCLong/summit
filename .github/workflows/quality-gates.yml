@@ -1,0 +1,49 @@
+name: Quality Gates (Coverage & Fuzzing)
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+
+      - name: Run Tests with Coverage
+        run: pnpm test -- --coverage
+
+      - name: Archive Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  fuzzing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
+
+      - name: Run API Fuzzing / Contract Tests
+        # Assuming there is a fuzz test script or we use the graph-guardrails fuzz target
+        run: pnpm run test:fuzz:graph-guardrails
+
+      - name: Archive Fuzzing Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzzing-results
+          path: test_server_output.txt # Adjust path based on actual output
