@@ -22,10 +22,10 @@ export interface FeatureFlag {
 export interface FlagCondition {
   // Environment-based conditions
   env?: string[];
-  
+
   // User attribute-based conditions
   user?: Record<string, any>;
-  
+
   // Context-based conditions
   context?: Record<string, any>;
 }
@@ -41,4 +41,12 @@ export interface EvaluationContext {
   groups?: string[];
   attributes?: Record<string, any>;
   // Additional context fields can be added as needed
+}
+
+export interface FeatureFlagRepository {
+  getFlag(key: string): Promise<FeatureFlag | null>;
+  getAllFlags(): Promise<FeatureFlag[]>;
+  createFlag(flag: FeatureFlag): Promise<void>;
+  updateFlag(flag: FeatureFlag): Promise<void>;
+  deleteFlag(key: string): Promise<void>;
 }

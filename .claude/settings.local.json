@@ -325,7 +325,9 @@
       "Bash(do echo \"Enabling auto-merge on PR #$pr...\")",
       "Bash(do echo \"Approving PR #$pr...\")",
       "Bash(do echo \"Triggering CI for PR #$pr...\")",
-      "Bash(gh workflow list:*)"
+      "Bash(gh workflow list:*)",
+      "Bash(while read id)",
+      "Bash(do gh run cancel $id)"
     ],
     "deny": [],
     "ask": []
