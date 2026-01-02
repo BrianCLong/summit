@@ -8,7 +8,7 @@ on:
 permissions:
   contents: write
   packages: write
-  id-token: write # For OIDC/Cosign if needed
+  id-token: write # For OIDC/Cosign
 
 jobs:
   test-and-verify:
@@ -29,12 +29,28 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run Server Tests
-        run: pnpm test:server
+        run: pnpm test:server > test-results.txt 2>&1
         continue-on-error: false
 
       - name: Run Policy Checks
         run: ./scripts/policy-test.sh
         continue-on-error: false
+
+      - name: Run SOC Verification
+        run: |
+          if [ -f "test/verification/soc-controls.test.ts" ]; then
+            npx tsx test/verification/soc-controls.test.ts > soc-controls.txt
+          else
+            echo "Test skipped" > soc-controls.txt
+          fi
+
+      - name: Save Test Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            test-results.txt
+            soc-controls.txt
 
       - name: Verify Documentation Completeness
         run: ./scripts/check_traceability.cjs
@@ -79,22 +95,70 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+
       - name: Download Server Artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts-server-${{ github.run_id }}
-          path: evidence/server
+          path: artifacts/server
 
       - name: Download Client Artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts-client-${{ github.run_id }}
-          path: evidence/client
+          path: artifacts/client
+
+      - name: Download Test Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: test-artifacts
+          path: artifacts/tests
+
+      - name: Install Security Tools
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run Vulnerability Scan (Report)
+        run: |
+          # Generate reports (no fail)
+          trivy sbom artifacts/server/sbom.cdx.json --format json --output artifacts/vuln-report-server.json
+          trivy sbom artifacts/client/sbom.cdx.json --format json --output artifacts/vuln-report-client.json
+
+          # Merge reports
+          jq -s '.' artifacts/vuln-report-server.json artifacts/vuln-report-client.json > artifacts/vuln-report.json
+
+      - name: Enforce Security Gate (Fail on Critical)
+        run: |
+          # Re-run trivy check to fail build if CRITICAL vulns found
+          trivy sbom artifacts/server/sbom.cdx.json --severity CRITICAL --exit-code 1 --format table
+          trivy sbom artifacts/client/sbom.cdx.json --severity CRITICAL --exit-code 1 --format table
 
       - name: Create Evidence Bundle
         run: |
           mkdir -p release-assets
-          tar -czf release-assets/evidence.tar.gz evidence/
+
+          # Consolidate artifacts
+          mkdir -p evidence-staging/security
+          mkdir -p evidence-staging/testing
+
+          cp artifacts/server/sbom.cdx.json evidence-staging/security/server-sbom.cdx.json
+          cp artifacts/server/sbom.spdx.json evidence-staging/security/server-sbom.spdx.json
+          cp artifacts/client/sbom.cdx.json evidence-staging/security/client-sbom.cdx.json
+          cp artifacts/client/sbom.spdx.json evidence-staging/security/client-sbom.spdx.json
+
+          cp artifacts/vuln-report.json evidence-staging/security/
+          cp artifacts/tests/test-results.txt evidence-staging/testing/test-summary.txt
+          cp artifacts/tests/soc-controls.txt evidence-staging/testing/soc-controls.txt
+
+          # Run emitter
+          npx tsx scripts/compliance/emit_evidence_bundle.ts --version=${{ github.ref_name }} --output=release-assets --artifacts=evidence-staging
 
       - name: Generate Release Notes
         id: notes
@@ -104,7 +168,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/evidence.tar.gz
+          files: release-assets/evidence-bundle-*.tar.gz
           body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: false
