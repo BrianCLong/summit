@@ -1,3 +1,30 @@
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'neo4j'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import { trace, context } from '@opentelemetry/api';
 import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';
@@ -42,7 +69,7 @@ export class IngestOrchestrator {
       process.env.NEO4J_URI || 'bolt://localhost:7687',
       neo4j.auth.basic(
         process.env.NEO4J_USERNAME || 'neo4j',
-        process.env.NEO4J_PASSWORD || 'password',
+        requireSecret('NEO4J_PASSWORD', process.env.NEO4J_PASSWORD, 16),
       ),
     );
 

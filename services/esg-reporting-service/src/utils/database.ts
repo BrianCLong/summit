@@ -3,6 +3,33 @@
  * PostgreSQL connection for ESG Reporting Service
  */
 
+// ============================================================================
+// SECURITY: Credential Validation
+// ============================================================================
+
+function requireSecret(name: string, value: string | undefined, minLength: number = 16): string {
+  if (!value) {
+    console.error(`FATAL: ${name} environment variable is required but not set`);
+    console.error(`Set ${name} in your environment or .env file`);
+    process.exit(1);
+  }
+
+  if (value.length < minLength) {
+    console.error(`FATAL: ${name} must be at least ${minLength} characters`);
+    console.error(`Current length: ${value.length}`);
+    process.exit(1);
+  }
+
+  const insecureValues = ['password', 'secret', 'changeme', 'default', 'devpassword', 'summit'];
+  if (insecureValues.some(v => value.toLowerCase().includes(v))) {
+    console.error(`FATAL: ${name} is set to an insecure default value`);
+    console.error(`Use a strong, unique secret (e.g., generated via: openssl rand -base64 32)`);
+    process.exit(1);
+  }
+
+  return value;
+}
+
 import pg from 'pg';
 import { logger } from './logger.js';
 
@@ -35,7 +62,7 @@ class Database {
       port: config?.port || parseInt(process.env.POSTGRES_PORT || '5432', 10),
       database: config?.database || process.env.POSTGRES_DB || 'summit_dev',
       user: config?.user || process.env.POSTGRES_USER || 'summit',
-      password: config?.password || process.env.POSTGRES_PASSWORD || 'devpassword',
+      password: config?.password || requireSecret('POSTGRES_PASSWORD', process.env.POSTGRES_PASSWORD, 16),
       ssl:
         process.env.NODE_ENV === 'production'
           ? { rejectUnauthorized: false }
