@@ -217,9 +217,30 @@ export async function enforceTokenBudgetWithTracking(
       completion,
     );
 
-    // TODO: Implement usage tracking per user/tenant
-    // This would integrate with a usage tracking service
-    // const usage = await trackTokenUsage(userId, tenantId, tokenCount);
+    // Track token usage per user/tenant for billing and monitoring
+    // NOTE: This is async fire-and-forget to not block the request
+    // Actual enforcement happens via budgetCheck below
+    if (req.user?.id && req.tenantId) {
+      import('../llm/metering/service.js')
+        .then(({ default: meteringService }) => {
+          meteringService.recordUsage({
+            userId: req.user.id,
+            tenantId: req.tenantId,
+            model,
+            promptTokens: tokenCount.prompt || 0,
+            completionTokens: tokenCount.completion || 0,
+            totalTokens: tokenCount.total,
+            estimatedCostUSD: tokenCount.estimatedCostUSD || 0,
+            timestamp: new Date().toISOString(),
+          }).catch(err => {
+            // Log but don't fail request on tracking errors
+            logger.warn({ error: err.message, userId: req.user?.id }, 'Failed to track token usage');
+          });
+        })
+        .catch(err => {
+          logger.debug({ error: err.message }, 'Metering service not available');
+        });
+    }
 
     const budgetLimit = Number(process.env.TOKEN_BUDGET_LIMIT || 120000);
     const budgetCheck = validateTokenBudget(tokenCount.total, budgetLimit);

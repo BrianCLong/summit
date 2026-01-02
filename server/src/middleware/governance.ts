@@ -194,8 +194,56 @@ async function validateAccessPurpose(
       };
     }
 
-    // TODO: Check if user has required role for this purpose
-    // This would involve checking approval_roles against user's roles
+    // Check if user has required role for this purpose
+    if (purposeConfig.approval_roles && purposeConfig.approval_roles.length > 0) {
+      try {
+        const userResult = await db.query(
+          `SELECT role FROM users WHERE id = $1`,
+          [userId],
+        );
+
+        if (userResult.rows.length === 0) {
+          return {
+            valid: false,
+            reason: `User ${userId} not found`,
+          };
+        }
+
+        const userRole = userResult.rows[0].role;
+        const approvalRoles = purposeConfig.approval_roles;
+
+        if (!approvalRoles.includes(userRole)) {
+          logger.warn({
+            userId,
+            userRole,
+            requiredRoles: approvalRoles,
+            purpose,
+          }, 'User role not authorized for purpose');
+
+          return {
+            valid: false,
+            reason: `User role '${userRole}' not authorized for purpose '${purpose}'. Required roles: ${approvalRoles.join(', ')}`,
+          };
+        }
+
+        logger.info({
+          userId,
+          userRole,
+          purpose,
+        }, 'User role authorized for purpose');
+      } catch (roleCheckError: any) {
+        logger.error({
+          error: roleCheckError.message,
+          userId,
+          purpose,
+        }, 'Failed to check user role for purpose');
+
+        return {
+          valid: false,
+          reason: 'Internal error checking user authorization',
+        };
+      }
+    }
 
     return {
       valid: true,
