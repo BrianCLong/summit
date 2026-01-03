@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T00:00:00Z",
+  "revision_note": "Added pre-merge policy simulation gate and updated evidence links",
   "initiatives": [
     {
       "id": "A",
@@ -76,7 +76,7 @@
           "status": "rc-ready",
           "owner": "Jules",
           "evidence": "PolicyEngine.ts, PolicyManagementService.ts, PolicySimulatorService.ts exist and functional; OPA integration verified",
-          "notes": "Policy re-evaluation at execute time added 2025-12-30"
+          "notes": "Policy re-evaluation at execute time added 2025-12-30; pre-merge policy simulation gate wired with CLI + CI 2026-01-03"
         },
         {
           "id": "C2",

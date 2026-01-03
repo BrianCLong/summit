@@ -1,0 +1,17 @@
+{
+  "id": "anomaly-metrics-fixtures",
+  "fixtures": [
+    {
+      "id": "ANOM-001",
+      "description": "baseline latency remains stable",
+      "baseline": [100, 102, 99, 101],
+      "candidate": [100, 101, 102, 101]
+    },
+    {
+      "id": "ANOM-002",
+      "description": "latency spike is detected",
+      "baseline": [95, 97, 96, 98],
+      "candidate": [95, 97, 150, 152]
+    }
+  ]
+}

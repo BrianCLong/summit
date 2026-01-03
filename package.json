@@ -86,6 +86,7 @@
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "security:policy-sim": "pnpm tsx server/src/policy/simulation/cli.ts",
     "prepare": "husky"
   },
   "keywords": [
