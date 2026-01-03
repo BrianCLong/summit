@@ -29,7 +29,8 @@
     "@types/jest": "^30.0.0",
     "eslint": "^9.39.1",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@typescript-eslint/parser": "^8.46.4"
+    "@typescript-eslint/parser": "^8.46.4",
+    "@types/node": "20.19.27"
   },
   "peerDependencies": {
     "react": "^18.0.0",

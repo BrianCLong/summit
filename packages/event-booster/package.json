@@ -20,5 +20,8 @@
   "files": [
     "dist"
   ],
-  "sideEffects": false
+  "sideEffects": false,
+  "devDependencies": {
+    "@types/node": "20.19.27"
+  }
 }
