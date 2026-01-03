@@ -20,6 +20,7 @@ import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
 import { doctor } from './commands/doctor.js';
 import { loadConfig, getConfig } from './config.js';
+import { registerAle } from './commands/ale.js';
 
 const program = new Command();
 
@@ -45,6 +46,7 @@ program
   .addCommand(configCommands.init);
 
 program.addCommand(doctor);
+registerAle(program);
 
 // Policy commands
 program
