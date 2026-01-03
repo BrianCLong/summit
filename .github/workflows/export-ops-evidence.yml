@@ -1,0 +1,125 @@
+name: Export Ops Evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'The ID of the workflow run to get the artifact from'
+        required: true
+        type: string
+      artifact_name:
+        description: 'The name of the artifact to export'
+        required: true
+        type: string
+        default: 'evidence-bundle'
+      destination_uri:
+        description: 'The S3 destination URI (e.g., s3://my-bucket/prefix/)'
+        required: true
+        type: string
+      overwrite:
+        description: 'Overwrite the artifact if it already exists in the destination'
+        required: false
+        type: boolean
+        default: false
+      checksum_verify:
+        description: 'Verify the checksum of the artifact before exporting'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  export-evidence:
+    name: Export Evidence
+    runs-on: ubuntu-latest
+    environment: ops-evidence-export
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: EvidenceExport
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.inputs.artifact_name }}
+          path: ./artifact
+          run-id: ${{ github.event.inputs.run_id }}
+
+      - name: Find Artifact File
+        id: find_artifact
+        run: |
+          ARTIFACT_FILE_PATH=$(find ./artifact -type f -print -quit)
+          if [ -z "$ARTIFACT_FILE_PATH" ]; then
+            echo "::error::Artifact directory is empty or contains no files."
+            exit 1
+          fi
+          echo "artifact_path=$ARTIFACT_FILE_PATH" >> $GITHUB_OUTPUT
+          echo "artifact_filename=$(basename "$ARTIFACT_FILE_PATH")" >> $GITHUB_OUTPUT
+
+      - name: Calculate Checksum
+        if: github.event.inputs.checksum_verify == true
+        id: checksum
+        run: |
+          sha256=$(sha256sum ${{ steps.find_artifact.outputs.artifact_path }} | awk '{print $1}')
+          echo "sha256=$sha256" >> $GITHUB_OUTPUT
+          echo "Artifact SHA256: $sha256"
+
+      - name: Upload to S3
+        id: upload_s3
+        run: |
+          set -e
+          ARTIFACT_FILE_PATH="${{ steps.find_artifact.outputs.artifact_path }}"
+          ARTIFACT_FILE_NAME="${{ steps.find_artifact.outputs.artifact_filename }}"
+          DESTINATION_OBJECT_URI="${{ github.event.inputs.destination_uri }}${ARTIFACT_FILE_NAME}"
+          echo "destination_uri=${DESTINATION_OBJECT_URI}" >> $GITHUB_OUTPUT
+
+          if [[ ! "$DESTINATION_OBJECT_URI" == s3://* ]]; then
+            echo "::error::Invalid destination_uri. Must start with s3://"
+            exit 1
+          fi
+
+          if [[ "${{ github.event.inputs.overwrite }}" == "false" ]]; then
+            echo "Overwrite is disabled. Checking for existing object at $DESTINATION_OBJECT_URI..."
+            if aws s3 ls "$DESTINATION_OBJECT_URI" >/dev/null 2>&1; then
+              echo "::error::Object already exists at ${DESTINATION_OBJECT_URI} and overwrite is set to false."
+              exit 1
+            fi
+          fi
+
+          echo "Uploading ${ARTIFACT_FILE_PATH} to ${DESTINATION_OBJECT_URI}..."
+          aws s3 cp "${ARTIFACT_FILE_PATH}" "${DESTINATION_OBJECT_URI}"
+          echo "::notice::Successfully uploaded artifact to ${DESTINATION_OBJECT_URI}"
+
+      - name: Generate Export Receipt
+        id: receipt
+        run: |
+          CHECKSUM_VALUE='"${{ steps.checksum.outputs.sha256 }}"'
+          if [[ -z "${{ steps.checksum.outputs.sha256 }}" ]]; then
+            CHECKSUM_VALUE=null
+          fi
+
+          cat << EOF > EXPORT_RECEIPT.json
+          {
+            "source_run_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.event.inputs.run_id }}",
+            "artifact_name": "${{ github.event.inputs.artifact_name }}",
+            "sha256": ${CHECKSUM_VALUE},
+            "destination_uri": "${{ steps.upload_s3.outputs.destination_uri }}",
+            "exported_at_utc": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          }
+          EOF
+          echo "receipt_path=EXPORT_RECEIPT.json" >> $GITHUB_OUTPUT
+
+      - name: Upload Export Receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: EXPORT_RECEIPT
+          path: ${{ steps.receipt.outputs.receipt_path }}
