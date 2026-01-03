@@ -82,6 +82,9 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "scripts/release/sbom.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "security:deps-report": "npx tsx scripts/security/deps-report.ts",
+    "security:deps-drift-check": "npx tsx scripts/security/deps-drift-check.ts",
+    "security:dup-deps-check": "npx tsx scripts/security/dup-deps-check.ts",
     "prepare": "husky",
     "perf:ui-ux": "node perf/comprehensive/run-performance-tests.js"
   },
@@ -178,7 +181,7 @@
         {
           "assets": [
             "package.json",
-            "package-lock.json",
+            "pnpm-lock.yaml",
             "CHANGELOG.md"
           ],
           "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
@@ -240,6 +243,9 @@
       "@babel/runtime": ">=7.26.0",
       "esbuild": ">=0.25.0",
       "electron": ">=35.7.5",
+      "tough-cookie": ">=4.1.3",
+      "form-data": ">=4.0.1",
+      "dicer": ">=0.3.1",
       "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     }
   }
