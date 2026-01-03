@@ -123,6 +123,7 @@ import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
+import { createInsightsRouter } from './api/insightsRouter.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
@@ -426,6 +427,30 @@ export const createApp = async () => {
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);
   app.use('/analytics', analyticsRouter);
+
+  // Initialize and mount insights router
+  const { InsightsService } = await import('./ai/InsightsService.js');
+  const { AnalyticsEngine } = await import('./ai/AnalyticsEngine.js');
+  const redis = await import('ioredis');
+  const redisInstance = new redis.default(process.env.REDIS_URL || 'redis://localhost:6379');
+  const analyticsEngine = new AnalyticsEngine({
+    redis: redisInstance,
+    insightRetentionDays: 30,
+    anomalyThreshold: 0.7,
+    trendThreshold: 0.1,
+    minDataPointsForAnalysis: 10,
+    analysisWindowMinutes: 60,
+    predictionHorizonMinutes: 30
+  });
+  const insightsService = new InsightsService({
+    redis: redisInstance,
+    analyticsEngine,
+    insightGenerationInterval: 300000, // 5 minutes
+    maxConcurrentInsights: 5,
+    insightRetentionDays: 30
+  });
+  app.use('/api/insights', createInsightsRouter(insightsService, analyticsEngine));
+
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...
