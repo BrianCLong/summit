@@ -85,6 +85,7 @@
     "security:deps-report": "npx tsx scripts/security/deps-report.ts",
     "security:deps-drift-check": "npx tsx scripts/security/deps-drift-check.ts",
     "security:dup-deps-check": "npx tsx scripts/security/dup-deps-check.ts",
+    "security:scorecard": "npx tsx scripts/security/scorecard.ts",
     "prepare": "husky",
     "perf:ui-ux": "node perf/comprehensive/run-performance-tests.js"
   },
