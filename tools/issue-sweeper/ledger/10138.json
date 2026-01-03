@@ -1,0 +1,40 @@
+{
+  "issue_number": 10138,
+  "title": "[P1] Reliability & Chaos Program (GA Blocker)",
+  "url": "https://github.com/BrianCLong/summit/issues/10138",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9108056144,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHoUA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/reliability",
+      "name": "reliability",
+      "color": "d73a4a",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9399486827,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDJaw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ops",
+      "name": "area:ops",
+      "color": "fbca04",
+      "default": false,
+      "description": "Operations and SRE"
+    }
+  ],
+  "updatedAt": "2025-10-06T13:42:42Z",
+  "createdAt": "2025-10-06T13:42:42Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

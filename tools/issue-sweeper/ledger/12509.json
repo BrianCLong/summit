@@ -1,0 +1,21 @@
+{
+  "issue_number": 12509,
+  "title": "Implement case spaces with ABAC/RBAC and audit",
+  "url": "https://github.com/BrianCLong/summit/pull/12509",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-18T02:38:10Z",
+  "createdAt": "2025-11-27T20:55:09Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
