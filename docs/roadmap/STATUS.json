@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T04:30:00Z",
+  "revision_note": "Added agent session explorer flag and UI entry behind AGENT_SESSION_EXPLORER_ENABLED",
   "initiatives": [
     {
       "id": "A",

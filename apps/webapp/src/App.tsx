@@ -16,10 +16,13 @@ import { TimelinePane } from './panes/TimelinePane';
 import { MapPane } from './panes/MapPane';
 import { CommandPalette } from './components/CommandPalette';
 import { SelectionSummary } from './components/SelectionSummary';
+import { AgentSessionExplorerPage } from './agent-sessions/AgentSessionExplorerPage';
 
 export function App() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
   const theme = useMemo(() => createTheme({ palette: { mode } }), [mode]);
+  const agentExplorerEnabled =
+    import.meta.env.VITE_AGENT_SESSION_EXPLORER_ENABLED === 'true';
 
   const toggleMode = () => setMode((m) => (m === 'light' ? 'dark' : 'light'));
 
@@ -78,6 +81,12 @@ export function App() {
                 </Box>
               }
             />
+            {agentExplorerEnabled && (
+              <Route
+                path="/ops/agent-sessions"
+                element={<AgentSessionExplorerPage />}
+              />
+            )}
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
