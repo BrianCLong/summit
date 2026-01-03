@@ -1,0 +1,32 @@
+name: Security Hardened Gate
+
+on:
+  push:
+    branches: [ main, 'antigravity/**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Security Scorecard
+        run: pnpm security:scorecard
+
+      - name: Verify 0 Critical CVEs
+        run: pnpm audit --audit-level=critical
+
+      - name: Check Path Traversal Protection (Static)
+        run: |
+          grep "resolveSafePath" server/src/services/AttachmentService.ts
+          grep "rawJobId" services/exporter/src/index.ts

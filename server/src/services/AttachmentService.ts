@@ -118,7 +118,7 @@ export class AttachmentService {
       writeStream,
     );
     const sha256 = hash.digest('hex');
-    const finalPath = path.join(this.baseDir, sha256);
+    const finalPath = resolveSafePath(this.baseDir, sha256); // Use resolveSafePath for the final destination
     await fs.rename(tempPath, finalPath);
     const stats = await fs.stat(finalPath);
     const provenance: ProvenanceRecord = {

@@ -23,8 +23,8 @@ app.post('/export', async (req, res) => {
   const body = req.body as ExportRequest;
   const wantsStream =
     streamingEnabled && (String(req.query.stream || '') === '1' || req.headers['x-stream-bulk-io'] === '1');
-  const jobId =
-    (wantsStream && typeof req.query.jobId === 'string' && req.query.jobId) ||
+  const rawJobId =
+    (wantsStream && typeof req.query.jobId === 'string' && req.query.jobId.replace(/[^a-zA-Z0-9_-]/g, '_')) ||
     crypto.randomUUID();
 
   if (!wantsStream) {
