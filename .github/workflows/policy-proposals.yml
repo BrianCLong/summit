@@ -1,0 +1,87 @@
+name: Generate Policy Proposals
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_bundle_path:
+        description: 'Path to target TenantPolicyBundle (JSON)'
+        required: true
+        default: 'server/src/policy/fixtures/tenant-strict.json'
+      change_type:
+        description: 'Type of change to propose'
+        required: true
+        type: choice
+        options:
+        - ENFORCE_GUARDRAIL_PURPOSE
+        - ENFORCE_GUARDRAIL_DENY
+        - RESTRICT_CROSS_TENANT
+        - ADD_DENY_RULE
+      rationale:
+        description: 'Why is this change needed?'
+        required: true
+      dry_run:
+        description: 'Simulation only (do not upload artifacts)'
+        type: boolean
+        default: false
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Detect Drift (Optional Signal)
+        id: drift
+        continue-on-error: true
+        run: |
+          # Run drift detection if we were using it as a trigger
+          # For manual dispatch, we just log it
+          npx tsx server/scripts/detect_runtime_drift.ts || echo "Drift detected"
+
+      - name: Generate Proposal
+        env:
+          TARGET_PATH: ${{ inputs.target_bundle_path }}
+          CHANGE_TYPE: ${{ inputs.change_type }}
+          RATIONALE: ${{ inputs.rationale }}
+        run: |
+          # Create a temporary script to invoke the engine
+          cat <<EOF > generate_proposal.ts
+          import { PolicyProposalEngine } from './server/src/policy/proposals/engine.js';
+          import { TenantPolicyBundle } from './server/src/policy/tenantBundle.js';
+          import { readFile } from 'fs/promises';
+
+          async function main() {
+             const bundlePath = process.env.TARGET_PATH!;
+             const bundle = JSON.parse(await readFile(bundlePath, 'utf-8'));
+
+             const engine = new PolicyProposalEngine('./policy-proposals-out');
+
+             const proposal = await engine.generateProposal({
+                 targetBundleId: bundle.tenantId,
+                 changeType: process.env.CHANGE_TYPE as any,
+                 rationale: process.env.RATIONALE!,
+                 triggers: [{ type: 'manual', source: 'workflow_dispatch', timestamp: new Date().toISOString(), details: {} }]
+             }, bundle);
+
+             console.log('Generated Proposal:', proposal.id);
+             console.log(JSON.stringify(proposal, null, 2));
+          }
+          main().catch(e => { console.error(e); process.exit(1); });
+          EOF
+
+          npx tsx generate_proposal.ts
+
+      - name: Archive Proposal Artifacts
+        if: ${{ !inputs.dry_run }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: policy-proposal-bundle
+          path: policy-proposals-out/
