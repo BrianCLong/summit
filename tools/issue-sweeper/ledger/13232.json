@@ -1,0 +1,21 @@
+{
+  "issue_number": 13232,
+  "title": "Security Hardening: Input Validation and Sanitization",
+  "url": "https://github.com/BrianCLong/summit/pull/13232",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-17T06:32:06Z",
+  "createdAt": "2025-12-04T01:16:56Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

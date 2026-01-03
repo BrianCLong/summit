@@ -1,0 +1,31 @@
+{
+  "issue_number": 10209,
+  "title": "polish(ci): add guard telemetry and repo variables for operational tuning",
+  "url": "https://github.com/BrianCLong/summit/pull/10209",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-15T16:14:22Z",
+  "createdAt": "2025-10-15T04:02:13Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,0 +1,21 @@
+{
+  "issue_number": 15053,
+  "title": "feat: Wave W1 Data Classification Types & Registry",
+  "url": "https://github.com/BrianCLong/summit/pull/15053",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-30T22:39:31Z",
+  "createdAt": "2025-12-30T02:54:31Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
