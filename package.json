@@ -49,6 +49,8 @@
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier -w . && ruff format",
+    "pr:triage": "npx tsx scripts/triage/pr-triage.ts",
+    "ci:cluster": "npx tsx scripts/triage/ci-signature-cluster.ts",
     "pr:risk": "node scripts/pr-risk-score.js",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
