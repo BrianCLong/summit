@@ -1,0 +1,21 @@
+{
+  "issue_number": 12854,
+  "title": "Add Sprint 26 Plan: Information Environment Mapping",
+  "url": "https://github.com/BrianCLong/summit/pull/12854",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-04T16:53:26Z",
+  "createdAt": "2025-11-29T07:02:48Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
