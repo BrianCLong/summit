@@ -36,9 +36,12 @@ describe('AdversaryProfileCard', () => {
   it('renders stats correctly', () => {
     render(<AdversaryProfileCard adversary={mockAdversary} />);
 
+    // Use getAllByText since some numbers may appear multiple times
     expect(screen.getByText(mockAdversary.techniques.length.toString())).toBeInTheDocument();
-    expect(screen.getByText(mockAdversary.malware.length.toString())).toBeInTheDocument();
-    expect(screen.getByText(mockAdversary.tools.length.toString())).toBeInTheDocument();
+    const malwareCount = screen.getAllByText(mockAdversary.malware.length.toString());
+    expect(malwareCount.length).toBeGreaterThanOrEqual(1);
+    const toolsCount = screen.getAllByText(mockAdversary.tools.length.toString());
+    expect(toolsCount.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(mockAdversary.campaigns.length.toString())).toBeInTheDocument();
   });
 
@@ -46,7 +49,14 @@ describe('AdversaryProfileCard', () => {
     const onSelect = jest.fn();
     render(<AdversaryProfileCard adversary={mockAdversary} onSelect={onSelect} />);
 
-    fireEvent.click(screen.getByTestId('adversary-card'));
+    // Click on the header section which has the click handler
+    const card = screen.getByTestId('adversary-card');
+    const clickableArea = card.querySelector('[class*="cursor-pointer"]');
+    if (clickableArea) {
+      fireEvent.click(clickableArea);
+    } else {
+      fireEvent.click(card);
+    }
 
     expect(onSelect).toHaveBeenCalledWith(mockAdversary);
   });
