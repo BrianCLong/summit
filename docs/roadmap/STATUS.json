@@ -9,19 +9,19 @@
         {
           "id": "A1",
           "name": "Local Vector Store",
-          "status": "incomplete",
+          "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "No dedicated vector store service found in /server/src/services/",
-          "blockers": ["Need to implement vector store service", "No storage backend configured"],
+          "evidence": "pgvector-backed agentic-rag store added with migration 2026-01-03_agentic_rag.sql",
+          "blockers": [],
           "target_completion": "Sprint N+1"
         },
         {
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
-          "status": "partial",
+          "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "GraphRAGService.ts exists; ingestion incomplete",
-          "blockers": ["Missing source connectors", "Incomplete processing pipeline"],
+          "evidence": "Agentic RAG orchestrator, ingestion CLI, and GraphQL ragAnswer mutation implemented",
+          "blockers": [],
           "target_completion": "Sprint N+1"
         },
         {

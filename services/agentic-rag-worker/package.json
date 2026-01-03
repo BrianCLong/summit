@@ -1,0 +1,13 @@
+{
+  "name": "agentic-rag-worker",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "ioredis": "^5.8.2",
+    "prom-client": "^15.1.3",
+    "uuid": "^13.0.0",
+    "@intelgraph/agentic-rag": "0.1.0"
+  }
+}

@@ -10,6 +10,13 @@ import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
 import { CausalGraphService } from '../services/CausalGraphService';
 import type { GraphQLContext } from './apollo-v5-server.js';
+import { getPostgresPool, getNeo4jDriver, getRedisClient } from '../config/database.js';
+import {
+  RAGOrchestrator,
+  PgVectorStore,
+  Neo4jGraphStore,
+} from '../../packages/agentic-rag/src/index.js';
+import { cacheHits } from '../../packages/agentic-rag/src/observability/instrumentation.js';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
@@ -169,6 +176,69 @@ export const resolvers = {
       } finally {
         end();
       }
+    },
+    async ragAnswer(_: any, { input }: any) {
+      if (process.env.AGENTIC_RAG_ENABLED !== 'true') {
+        return { answer: 'Agentic RAG disabled', citations: [], debug: { enabled: false } };
+      }
+
+      const normalized = {
+        query: input?.query ?? '',
+        workspaceId: input?.workspaceId,
+        filters: input?.filters,
+        topK: input?.topK ?? Number(process.env.AGENTIC_RAG_TOPK || 8),
+        useHyde: input?.useHyDE ?? process.env.AGENTIC_RAG_USE_HYDE === 'true',
+        useTools: input?.useTools ?? process.env.AGENTIC_RAG_USE_TOOLS !== 'false',
+      };
+
+      const cacheKey = `rag:cache:${normalized.query}:${normalized.workspaceId ?? 'global'}:${normalized.topK}:${JSON.stringify(
+        normalized.filters ?? {}
+      )}`;
+
+      const redis = getRedisClient() ?? redisClient;
+      if (redis) {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+          cacheHits.labels('hit').inc();
+          return JSON.parse(cached);
+        }
+        cacheHits.labels('miss').inc();
+      }
+
+      const poolWrapper = getPostgresPool();
+      const pool = (poolWrapper as any).pool ?? poolWrapper;
+
+      let graphStore: Neo4jGraphStore | undefined;
+      try {
+        graphStore = new Neo4jGraphStore({ driver: getNeo4jDriver() as any });
+      } catch (error) {
+        graphStore = undefined;
+      }
+
+      const orchestrator = new RAGOrchestrator({
+        vectorStore: new PgVectorStore({ pool }),
+        graphStore,
+      });
+
+      const result = await orchestrator.answer({
+        query: normalized.query,
+        workspaceId: normalized.workspaceId,
+        filters: normalized.filters,
+        topK: normalized.topK,
+        useHyde: normalized.useHyde,
+        useTools: normalized.useTools,
+      });
+
+      if (redis) {
+        await redis.set(
+          cacheKey,
+          JSON.stringify(result),
+          'EX',
+          Number(process.env.AGENTIC_RAG_REDIS_TTL_SECONDS || 900)
+        );
+      }
+
+      return result;
     },
   },
   Subscription: {
