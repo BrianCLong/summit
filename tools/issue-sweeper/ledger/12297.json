@@ -1,0 +1,40 @@
+{
+  "issue_number": 12297,
+  "title": "Fix P1: Add repo context for gh workflow run command",
+  "url": "https://github.com/BrianCLong/summit/pull/12297",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9698642906,
+      "node_id": "LA_kwDOPaNncM8AAAACQhWL2g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20XS",
+      "name": "size: XS",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9698679515,
+      "node_id": "LA_kwDOPaNncM8AAAACQhYa2w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size/xs",
+      "name": "size/xs",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-11-25T22:48:46Z",
+  "createdAt": "2025-11-25T22:00:09Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
