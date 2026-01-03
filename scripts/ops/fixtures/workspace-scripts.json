@@ -1,0 +1,5367 @@
+{
+  "./docs-site/package.json": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "clear": "docusaurus clear",
+    "serve": "docusaurus serve",
+    "docs:build": "docusaurus build",
+    "write-translations": "docusaurus write-translations",
+    "write-heading-ids": "docusaurus write-heading-ids"
+  },
+  "./summit-mini/package.json": {
+    "dev": "pnpm -C server dev & pnpm -C web dev",
+    "build": "pnpm -C server build && pnpm -C web build",
+    "start": "pnpm -C server start"
+  },
+  "./summit-mini/web/package.json": {
+    "dev": "vite --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --port 5173"
+  },
+  "./summit-mini/server/package.json": {
+    "dev": "node --watch --loader ts-node/esm src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "./agents/orchestrator/package.json": {
+    "build": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "./agents/multimodal/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "if [ -d src ]; then eslint src --ext .ts; else eslint . --ext .ts; fi",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./agents/governance/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "./impl/sdk/js/package.json": {
+    "build": "tsc -p ."
+  },
+  "./active-measures-module/package.json": {
+    "start": "ts-node src/index.ts",
+    "test": "jest --coverage"
+  },
+  "./templates/golden-path-service/package.json": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "lint": "eslint 'src/**/*.ts' 'scripts/**/*.ts'",
+    "format": "prettier --write 'src/**/*.ts' 'scripts/**/*.ts'",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "seed": "node --loader ts-node/esm scripts/seed.ts",
+    "reset:db": "node --loader ts-node/esm scripts/reset-db.ts",
+    "dev:stack": "docker compose -f docker-compose.dev.yml up --build",
+    "docker:build": "docker build -t ghcr.io/companyos/golden-path-service:dev ."
+  },
+  "./templates/service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint ."
+  },
+  "./templates/companyos-service-template/package.json": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "lint": "eslint 'src/**/*.ts' 'scripts/**/*.ts'",
+    "format": "prettier --write 'src/**/*.ts' 'scripts/**/*.ts'",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "seed": "node --loader ts-node/esm scripts/seed.ts",
+    "reset:db": "node --loader ts-node/esm scripts/reset-db.ts",
+    "dev:stack": "docker compose -f docker-compose.dev.yml up --build",
+    "docker:build": "docker build -t ghcr.io/companyos/companyos-service-template:dev ."
+  },
+  "./templates/golden-service-ts/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
+    "format": "prettier --write ."
+  },
+  "./ai/cdis/e2e/package.json": {
+    "test": "playwright test"
+  },
+  "./assistant/autotriage/package.json": {
+    "build": "tsc",
+    "clean": "rm -rf **/*.js **/*.d.ts **/*.js.map **/*.d.ts.map coverage",
+    "triage": "node cli.js triage",
+    "triage:github": "node cli.js triage --github",
+    "triage:all": "node cli.js triage --all",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "example": "node examples/usage-example.js"
+  },
+  "./conductor-ui/frontend/package.json": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:maestro": "vite build -c vite.config.maestro.ts --base=/maestro/",
+    "build:production": "./scripts/build-production.sh",
+    "build:staging": "vite build --mode staging --config vite.config.production.ts",
+    "build:analyze": "vite build --mode analyze",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "preview": "vite preview",
+    "test": "playwright test",
+    "test:e2e": "playwright test e2e/",
+    "test:a11y": "playwright test --grep @a11y",
+    "test:perf": "echo 'Performance tests skipped'",
+    "test:privacy": "playwright test privacy/tests/",
+    "deploy:production": "./scripts/deploy-production.sh",
+    "setup:grafana": "./scripts/setup-grafana.sh",
+    "bundle:check": "bundlesize",
+    "bundle:analyze": "npx vite-bundle-analyzer dist"
+  },
+  "./conductor-ui/package.json": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "./conductor-ui/backend/package.json": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "./ico/dashboard/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "./prov-ledger-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node src/server.ts",
+    "test": "pnpm run build && jest",
+    "lint": "eslint src"
+  },
+  "./intelgraph/package.json": {
+    "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
+    "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:prod": "docker-compose up",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "cd ../server && npm test",
+    "test:client": "cd ../client && npm test",
+    "test:e2e": "npx playwright test",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "deploy:dev": "scripts/deploy.sh dev",
+    "deploy:staging": "scripts/deploy.sh staging",
+    "deploy:prod": "scripts/deploy.sh prod",
+    "backup": "scripts/backup.sh",
+    "lint": "npm run lint:server && npm run lint:client",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd client && npm run lint",
+    "format": "prettier --write .",
+    "db:migrate": "cd server && npm run db:migrate",
+    "db:seed": "cd server && npm run db:seed",
+    "db:reset": "npm run db:migrate && npm run db:seed"
+  },
+  "./intelgraph/server/package.json": {
+    "start": "node server.js",
+    "dev": "nodemon --inspect=0.0.0.0:9229 server.js",
+    "build": "echo 'No build step required'",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "db:reset": "npm run db:migrate && npm run db:seed"
+  },
+  "./intelgraph/client/package.json": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "./bootstrap/package.json": {
+    "start": "tsx src/cli.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "./.archive/v039/server/package.json": {
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint ."
+  },
+  "./.archive/v039/client/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./tools/plugin-cli/package.json": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./tools/agsm-dashboard/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "tsx src/index.ts"
+  },
+  "./tools/security-gates/package.json": {
+    "build": "tsc",
+    "check": "node dist/index.js",
+    "test": "echo 'No tests configured'"
+  },
+  "./tools/deps-drift/package.json": {
+    "test": "node --test"
+  },
+  "./tools/scaffold-cli/package.json": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./tools/xra/dashboard/package.json": {
+    "build": "ts-node src/generateDashboard.ts"
+  },
+  "./tools/issue-sweeper/package.json": {
+    "start": "node --loader ts-node/esm src/index.ts",
+    "build": "tsc",
+    "test": "node --loader ts-node/esm --test test/main.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./tools/package.json": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "./tools/prompt-system/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli/index.js",
+    "validate": "node dist/cli/index.js validate",
+    "metrics": "node dist/cli/index.js metrics",
+    "generate": "node dist/cli/index.js generate"
+  },
+  "./tools/ultra-agent/vscode/package.json": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./"
+  },
+  "./tools/promise-tracker/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/cli.ts",
+    "cli": "tsx src/cli.ts",
+    "extract": "tsx src/extract.ts",
+    "report": "tsx src/report.ts",
+    "sync": "tsx src/sync.ts",
+    "health": "tsx src/health.ts",
+    "metrics": "tsx src/metrics.ts",
+    "init": "tsx src/init.ts",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "./tools/sandbox-cli/package.json": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./tools/ses/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "dev": "vitest",
+    "start": "node dist/index.js"
+  },
+  "./tools/claim-verifier/package.json": {
+    "test": "node --test"
+  },
+  "./tools/vscode/intelgraph-docs/package.json": {},
+  "./tools/vscode/doc-lsp/package.json": {},
+  "./tools/prov/ig-prov-verify/package.json": {},
+  "./tools/tesq/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "test": "vitest run",
+    "redteam": "ts-node src/redteam.ts"
+  },
+  "./tools/summitctl/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.js",
+    "test": "jest"
+  },
+  "./tools/replayctl/package.json": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./tools/decs-cli/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "node --test"
+  },
+  "./tools/aql/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node ts/cli.ts"
+  },
+  "./tools/auditctl/package.json": {},
+  "./tools/admin-cli/package.json": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "test": "jest --passWithNoTests",
+    "clean": "rm -rf dist"
+  },
+  "./tools/debt-detector/package.json": {
+    "scan": "npx tsx src/index.ts"
+  },
+  "./deepagent-mvp/package.json": {
+    "prestart": "docker run --rm -v $(pwd)/src/agent/policies:/policies openpolicyagent/opa build -t wasm -e deepagent/authz /policies/opa.rego > src/agent/policies/policy.wasm",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "k6": "k6 run tests/k6/script.js"
+  },
+  "./deepagent-mvp/mocks/tool-server/package.json": {
+    "start": "node index.js"
+  },
+  "./mcc/package.json": {
+    "build": "tsc -p .",
+    "clean": "rimraf dist",
+    "lint": "eslint --ext .ts src",
+    "prebuild": "npm run clean",
+    "sample": "node samples/sample-app.mjs",
+    "validate": "node dist/bin/mcc.js validate"
+  },
+  "./frontend/package.json": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "./frontend/.vite/deps_temp_3d618747/package.json": {},
+  "./frontend/.vite/deps_temp_f4413440/package.json": {},
+  "./package.json": {
+    "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "verify:verbose": "tsx scripts/verify.ts --verbose",
+    "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
+    "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "server:dev": "cd server && npm run dev",
+    "client:dev": "cd client && npm run dev",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up",
+    "docker:prod": "docker-compose up",
+    "test": "jest --runInBand",
+    "test:quick": "echo 'Quick sanity check passed'",
+    "test:server": "cd server && npm test",
+    "test:client": "cd client && npm test",
+    "test:web": "cd apps/web && npm test",
+    "test:e2e": "npx playwright test",
+    "test:a11y-gate": "pnpm exec playwright test -c playwright.a11y-keyboard.config.ts",
+    "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
+    "test:smoke:backend": "cd server && npm run test:smoke",
+    "test:smoke:frontend": "cd client && npm run test:smoke",
+    "test:unit": "cd server && npm run test:unit",
+    "test:integration": "cd server && npm run test:integration",
+    "test:fuzz:graph-guardrails": "GRAPH_GUARDRAIL_FUZZ_ITERATIONS=${GRAPH_GUARDRAIL_FUZZ_ITERATIONS:-80} GRAPH_GUARDRAIL_FUZZ_SEED=${GRAPH_GUARDRAIL_FUZZ_SEED:-7331} jest --config test/fuzz/jest.config.cjs --runTestsByPath test/fuzz/graphGuardrails/generator.test.ts test/fuzz/graphGuardrails/graphGuardrails.fuzz.test.ts",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "deploy:dev": "scripts/deploy.sh dev",
+    "deploy:staging": "scripts/deploy.sh staging",
+    "deploy:prod": "scripts/deploy.sh prod",
+    "backup": "scripts/backup.sh",
+    "optimize:check": "npx tsx scripts/optimization/check_optimization_metrics.ts",
+    "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
+    "config:validate": "pnpm --filter intelgraph-server run config:validate",
+    "lint": "eslint . && (ruff check . || true)",
+    "lint:strict": "eslint . && (ruff check . || true)",
+    "security:check": "node scripts/security-check.js",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd client && npm run lint",
+    "test:quarantine": "echo 'Quarantine test placeholder - no flaky tests currently'",
+    "typecheck": "tsc -b --pretty false",
+    "typecheck:server": "cd server && tsc --noEmit",
+    "typecheck:client": "cd client && tsc --noEmit",
+    "format": "prettier -w . && ruff format",
+    "pr:risk": "node scripts/pr-risk-score.js",
+    "db:migrate": "cd server && npm run db:migrate",
+    "db:seed": "cd server && npm run db:seed",
+    "db:reset": "npm run db:migrate && npm run db:seed",
+    "db:migrate:neo4j": "npx ts-node --esm scripts/migrate.ts",
+    "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
+    "install:pm": "node scripts/select-pm.js",
+    "schema:diff": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json",
+    "schema:diff:text": "npx ts-node scripts/schema-diff.ts --version=v1 --output=text",
+    "schema:diff:strict": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json --strict",
+    "schema:validate": "npm run schema:diff:strict",
+    "update:golden": "ts-node --esm scripts/update-golden.ts",
+    "e2e": "playwright test",
+    "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
+    "graphql:codegen": "graphql-codegen",
+    "db:pg:generate": "prisma generate",
+    "db:pg:migrate": "prisma migrate deploy",
+    "db:pg:status": "prisma migrate status",
+    "db:knex:migrate": "knex migrate:latest --knexfile packages/db/knex/knexfile.cjs",
+    "db:knex:rollback": "knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs",
+    "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
+    "changeset": "changeset",
+    "release": "changeset version && changeset publish",
+    "precommit": "lint-staged",
+    "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
+    "db:knex:smoke": "knex migrate:down && knex migrate:up",
+    "check:governance": "node scripts/check-governance.cjs",
+    "verify:living-documents": "node scripts/governance/verify-living-documents.cjs",
+    "check:debt": "node scripts/ci/check_debt_regression.cjs",
+    "partners:check": "node scripts/ci/check_partner_model.js",
+    "compliance:check": "npx tsx scripts/compliance/check_drift.ts",
+    "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
+    "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
+    "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
+    "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "prepare": "husky"
+  },
+  "./ui/jitae/package.json": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext ts,tsx"
+  },
+  "./ui/qawe/package.json": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "./contracts/package.json": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "./reo/ts/package.json": {
+    "build": "tsc -p .",
+    "lint": "eslint src --ext .ts"
+  },
+  "./adversarial-misinfo-defense-platform/web/package.json": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "./benchmarks/graph/package.json": {
+    "bench:quick": "node runner/index.js --size small --scenarios quick",
+    "bench:full": "node runner/index.js --size all --scenarios all",
+    "bench:ci": "node runner/index.js --size small,medium --scenarios ci --budget-check",
+    "bench:profile": "node --inspect runner/index.js --size medium --scenarios all",
+    "report": "node runner/report.js",
+    "clean": "rm -rf reports/*.json reports/*.html"
+  },
+  "./benchmarks/harness/package.json": {
+    "perf:mini": "node run-mini.js",
+    "report:publish": "node report.js"
+  },
+  "./gateway/package.json": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./gateway/graphql-bff/package.json": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest --runInBand",
+    "contract:federation": "jest --runInBand __tests__/contract.test.ts",
+    "sec:zap": "echo 'zap scan placeholder'",
+    "docker:build": "docker build . -t graphql-bff"
+  },
+  "./gateway/policy-lac/package.json": {
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "policy:lint": "node -e \"require('./dist/policy-engine'); console.log('policy schema ok')\"",
+    "policy:sim:export": "lac-sim policies/examples/deny-export-no-purpose.json contexts/examples/export-press.json || true",
+    "policy:sim:read": "lac-sim policies/examples/allow-read-low.json contexts/examples/read-low.json"
+  },
+  "./devtools/pr-review/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "scan": "ts-node src/main.ts"
+  },
+  "./ccs/bindings/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "ts-node --transpile-only test/replay.test.ts"
+  },
+  "./safety-harness/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "run": "node dist/cli.js",
+    "run-suite": "node dist/cli.js run-suite",
+    "run-differential": "node dist/cli.js differential",
+    "report": "node dist/cli.js report"
+  },
+  "./services/election-integrity-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./services/prer/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "vitest run"
+  },
+  "./services/authenticity-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "./services/license-registry/package.json": {
+    "build": "npx tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/mlops-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./services/i18n-service/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "start": "node dist/index.js"
+  },
+  "./services/citizen-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/identity-fusion/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node --esm src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "./services/strategic-foresight/package.json": {
+    "dev": "uvicorn app:app --reload --host 0.0.0.0 --port 8003",
+    "start": "uvicorn app:app --host 0.0.0.0 --port 8003",
+    "test": "pytest tests/ -v"
+  },
+  "./services/scim/package.json": {
+    "start": "tsx index.ts"
+  },
+  "./services/auth-gateway/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/analytics-service/package.json": {
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "./services/worker-queue/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node-dev src/index.ts"
+  },
+  "./services/catalog-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/agents/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/ingest-runner/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "vitest run"
+  },
+  "./services/sum/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "./services/universal-ingestion/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/report-assembly/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/exporter/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs .",
+    "format": "prettier --check ."
+  },
+  "./services/hypothesis-workbench/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest"
+  },
+  "./services/ai-security-scanner/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/entity-resolution/package.json": {
+    "build": "npx tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/esg-reporting-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/geotemporal-api/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/ai-nlq/package.json": {
+    "build": "tsc -p . || true",
+    "dev": "node dist/server.js",
+    "test:unit": "vitest run || true",
+    "test:contract": "echo 'contract ok' && exit 0"
+  },
+  "./services/mtfs/client/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./services/etl-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/cep/package.json": {
+    "start": "node src/server.js",
+    "lint": "eslint .",
+    "test": "node --test services/cep/tests"
+  },
+  "./services/unified-audit/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "./services/websocket-server/package.json": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch 'src/**/*' --exec 'tsx' src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "./services/receipt-worker/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "pnpm run build && jest --config jest.config.cjs"
+  },
+  "./services/signal-bus-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/agent-execution-platform/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/datalab-service/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/secure-elections/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ tests/",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/zk-tx/package.json": {
+    "build": "tsc -p . || true",
+    "dev": "node dist/server.js",
+    "test:unit": "vitest run || true",
+    "test:contract": "echo 'contract ok' && exit 0"
+  },
+  "./services/red-team-service/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./services/nlp-service/package.json": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -b",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/self-upgrading-infrastructure/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./services/cost-optimization/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./services/agentic-mesh-evaluation/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:integration": "NODE_ENV=test jest --testPathPattern=integration",
+    "test:e2e": "NODE_ENV=test jest --testPathPattern=e2e",
+    "test:load": "k6 run tests/load/mesh-load-test.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "node scripts/migrate.js",
+    "docs": "typedoc src/index.ts"
+  },
+  "./services/ref-data-service/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/model-hub-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "./services/data-spine/package.json": {
+    "test": "node --test"
+  },
+  "./services/data-monetization-engine/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/data-pool/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./services/ai-marketplace/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/coa-planner/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./services/policy-compiler/package.json": {
+    "build": "tsc -p . || true",
+    "dev": "node dist/server.js",
+    "test:unit": "vitest run || true",
+    "test:contract": "echo 'contract ok' && exit 0"
+  },
+  "./services/stix-taxii-ingestion/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:benchmark": "vitest bench",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/feed-processor/package.json": {
+    "build": "npx tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/prd-generator/package.json": {
+    "build": "tsc",
+    "cli": "tsx src/cli.ts"
+  },
+  "./services/data-factory-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest --config jest.config.cjs",
+    "test:unit": "jest --config jest.config.cjs --testPathPattern=test/unit",
+    "test:e2e": "jest --config jest.config.cjs --testPathPattern=test/e2e",
+    "test:coverage": "jest --config jest.config.cjs --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts"
+  },
+  "./services/digital-twin-cognition/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/golden-sample/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
+    "format": "prettier --write ."
+  },
+  "./services/approvals/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx src/db/migrate.ts",
+    "migrate:rollback": "tsx src/db/migrate.ts rollback"
+  },
+  "./services/federation-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/agent-gateway/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:safety": "NODE_ENV=test jest --testPathPattern=safety-scenarios",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "migrate": "node scripts/migrate.js"
+  },
+  "./services/gateway-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/risk-assessment-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest --coverage",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/crm/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/counterterrorism-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./services/dialectic-agents/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./services/timeseries-metrics/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx src/migrations/run.ts",
+    "seed": "tsx src/seed/index.ts"
+  },
+  "./services/prediction-service/package.json": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest"
+  },
+  "./services/krpcp/ui/package.json": {
+    "build": "tsc --project tsconfig.json",
+    "render": "node dist/index.js"
+  },
+  "./services/copilot/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "NODE_ENV=test jest",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/media-pipeline-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
+    "test:unit": "NODE_OPTIONS='--experimental-vm-modules' jest --testPathPattern=__tests__",
+    "test:integration": "NODE_OPTIONS='--experimental-vm-modules' jest --testPathPattern=tests/integration",
+    "test:load": "tsx tests/load/load-test.ts",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx src/scripts/migrate.ts"
+  },
+  "./services/spar/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rimraf dist"
+  },
+  "./services/marketplace/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "typecheck": "tsc --noEmit --project tsconfig.typecheck.json",
+    "clean": "rm -rf dist",
+    "db:migrate": "psql -f migrations/001_marketplace_schema.sql",
+    "docker:build": "docker build -t intelgraph/marketplace .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "./services/model-training/package.json": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "./services/runbooks/package.json": {
+    "build": "tsc",
+    "dev": "ts-node-esm src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/transcription-service/package.json": {
+    "dev": "ts-node --esm src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/compliance-evaluator/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "NODE_ENV=test jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/admin-api/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/notification-router/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/event-bus-service/package.json": {
+    "build": "tsc",
+    "dev": "ts-node-esm src/server.ts",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/tenant-admin/package.json": {
+    "start": "node index.js",
+    "test": "node --test",
+    "build": "echo skip"
+  },
+  "./services/synthesis-service/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "./services/dl-training-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/admin-automation/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/warehouse-service/package.json": {
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "./services/plugin-executor/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/geocoding-api/package.json": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/model-serving-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/scenario-registry/package.json": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -b",
+    "start": "node dist/server.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "db:migrate": "node dist/db/migrate.js"
+  },
+  "./services/logging-pipeline/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "./services/kb-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest --config jest.config.js",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "migrate": "tsx src/db/migrate.ts",
+    "seed": "tsx src/db/seed.ts"
+  },
+  "./services/threat-library-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --passWithNoTests",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/authz-gateway/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "test": "jest --coverage",
+    "test:fuzz": "jest --runTestsByPath tests/fuzz/governance-gate.fuzz.test.ts --coverage",
+    "phase1:gate": "ts-node src/security/phase1-cli.ts",
+    "phase1:build-artifacts": "npm run build && node dist/security/phase1-cli.js"
+  },
+  "./services/er-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests --ext .ts",
+    "lint:fix": "eslint src tests --ext .ts --fix"
+  },
+  "./services/global-integration/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/cloud-orchestrator/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "./services/regulatory-compliance-agents/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/resilient-orchestrator/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "./services/battle-ingest-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/procurement-automation/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/collaboration-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "./services/sync-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/synthdata/package.json": {
+    "start": "node index.js",
+    "build": "npx tsc",
+    "test": "jest"
+  },
+  "./services/edge-gateway/package.json": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/foreign-intel-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/enrichment-service/package.json": {
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "./services/trr/package.json": {
+    "build": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "./services/govtech-export-engine/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node --esm src/index.ts",
+    "test": "jest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs .",
+    "format": "prettier --check ."
+  },
+  "./services/zk-deconfliction/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest",
+    "start": "node dist/server.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/csr/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" --max-warnings=0"
+  },
+  "./services/ingest-adapters/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/control-tower-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/docling-svc/package.json": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "./services/finance-normalizer-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "db:migrate": "psql -f migrations/001_finance_schema.sql",
+    "docker:build": "docker build -t intelgraph/finance-normalizer-service .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "./services/geoint-threat-platform/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/search-indexer/package.json": {
+    "build": "tsc -p . || true",
+    "dev": "node --watch dist/index.js || ts-node src/index.ts",
+    "test": "vitest run"
+  },
+  "./services/data-discovery-fusion/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/smart-contracting-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "./services/edge-orchestrator/package.json": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/schema-ingest-wizard/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest"
+  },
+  "./services/graphrag/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/audit-blackbox-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "verify:chain": "tsx src/cli/verify-chain.ts",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "./services/labeling-service/package.json": {
+    "build": "npx tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx src/scripts/migrate.ts",
+    "seed": "tsx src/scripts/seed.ts"
+  },
+  "./services/dashboard-service/package.json": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "./services/crypto-service/package.json": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "jest"
+  },
+  "./services/audio-service/package.json": {
+    "dev": "ts-node --esm src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/queue-manager/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/hello-service/package.json": {
+    "start": "node index.js",
+    "test": "node index.test.js"
+  },
+  "./services/scoring-engine/package.json": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "./services/disaster-recovery/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "./services/osint-service/package.json": {
+    "build": "tsc",
+    "dev": "ts-node src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "./services/graphrag-copilot/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest"
+  },
+  "./services/graph-core/package.json": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest"
+  },
+  "./services/sandbox-tenant-profile/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/mission-coordination-service/package.json": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "./services/sandbox-gateway/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "codegen": "graphql-codegen",
+    "clean": "rm -rf dist"
+  },
+  "./services/supply-chain-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest --coverage",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/graph-compute/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/build-hub/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "docker:build": "docker build -t maestro-build-hub ."
+  },
+  "./services/ml-inference/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --watch dist/server.js",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "./services/workflow/package.json": {
+    "start": "node src/server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "build": "echo skip"
+  },
+  "./services/chatops/package.json": {
+    "build": "tsc -b",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/biometric-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node --esm src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "./services/ai-sandbox/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --forceExit",
+    "test:unit": "NODE_OPTIONS='--experimental-vm-modules' jest --testPathPattern='(sandbox|policy|types)' --forceExit",
+    "test:integration": "NODE_OPTIONS='--experimental-vm-modules' jest --testPathPattern='integration' --forceExit",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --forceExit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist coverage"
+  },
+  "./services/predictive-analytics/graph-predictive-orchestration/package.json": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/predictive-analytics/predictive-integrity-shield/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/predictive-analytics/cross-system-entanglement/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/predictive-analytics/synthetic-future-personas/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "./services/predictive-analytics/recursive-outcome-amplifier/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/predictive-analytics/causal-horizon-engine/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/predictive-analytics/anomaly-time-warp/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/predictive-analytics/collective-intelligence-weaving/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/predictive-analytics/emergent-pattern-genesis/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/predictive-analytics/temporal-fracture-forecasting/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/predictive-analytics/uncertainty-field-mapping/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/pca-verifier/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "verify": "tsx src/cli.ts verify",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/config-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:integration": "jest --config jest.integration.config.cjs",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/sigint-service/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest"
+  },
+  "./services/nl-cypher/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "./services/plugin-registry/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/bundle-pipeline-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx src/scripts/migrate.ts"
+  },
+  "./services/data-marketplace/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./services/metadata-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/receipt-signer/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node src/server.ts",
+    "test": "pnpm run build && jest"
+  },
+  "./services/companyos-sync/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "./services/graph-db-service/package.json": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js"
+  },
+  "./services/vision-api/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/predictd/package.json": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest"
+  },
+  "./services/reporting/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint src --ext .ts"
+  },
+  "./services/citizen-ai/package.json": {
+    "build": "tsc -b",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/policy-aware-cache/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "cli": "tsx src/cli/index.ts"
+  },
+  "./services/decision-api/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "./services/sigint-telemetry/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "simulate": "tsx src/simulation/runner.ts",
+    "generate-data": "tsx src/generators/cli.ts"
+  },
+  "./services/battle-api/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/talent-magnet/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/scenario-engine-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run build"
+  },
+  "./services/lakehouse-service/package.json": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/cloud-platform-service/package.json": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/operations-c2-service/package.json": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "./services/innovation-sandbox/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/ai-service-platform/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "./services/humint-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "./services/api-gateway/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/policy-audit/package.json": {
+    "start": "node index.js",
+    "build": "npx tsc"
+  },
+  "./services/battle-fusion-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/quantum-service/package.json": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "jest"
+  },
+  "./services/agent-runtime/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/privacy/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --runInBand",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./services/feature-flags/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "./services/distributed-registry/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./services/safe-analytics-workbench/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./services/stream-processor/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/sparql-endpoint/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/digital-twin/package.json": {
+    "build": "tsc -b",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/alert-engine/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/policy-engine/package.json": {
+    "build": "npx tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/threat-assessment-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./services/logistics-automation-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "./services/battle-command-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/intel/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node --esm src/index.ts",
+    "test": "jest --config jest.config.cjs",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/mtif/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "ts-node --esm src/server.ts",
+    "test": "jest --passWithNoTests"
+  },
+  "./services/ops-guard/package.json": {
+    "start": "node --loader ts-node/esm src/index.ts",
+    "dev": "nodemon --watch src --exec \"npm run start\"",
+    "build": "tsc -p .",
+    "lint": "eslint 'src/**/*.ts'"
+  },
+  "./services/realtime/package.json": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "./services/model-registry-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./services/mdm-service/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/orchestration/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/gov-ai-governance/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/spacetime-service/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js"
+  },
+  "./services/espionage-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./services/ingest/package.json": {
+    "build": "tsc -p . || true",
+    "dev": "node dist/server.js",
+    "test:unit": "vitest run || true",
+    "test:contract": "echo 'contract ok' && exit 0"
+  },
+  "./services/streaming-ingest/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "replay": "tsx src/cli/replay.ts",
+    "verify": "tsx src/cli/verifier.ts"
+  },
+  "./services/deception-detection-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "./services/prov-ledger/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev src/index.ts",
+    "test": "jest"
+  },
+  "./services/health-aggregator/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest"
+  },
+  "./services/provenance-cli/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./services/privacy-analytics-service/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "NODE_ENV=test jest --runInBand",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./web/retention-dashboard/package.json": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "./web/sfm-dashboard/package.json": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "./er-service/package.json": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:benchmarks": "jest --testMatch='**/benchmarks/**/*.test.ts'",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "./sdk/jpr-ts/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/safejoin/ts/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/acx/package.json": {
+    "build": "npm run lint:patterns && tsc -p tsconfig.json",
+    "lint:patterns": "node ./scripts/check-dark-patterns.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./sdk/rarl/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "./sdk/psc-runner/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/cce-ts/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/zk-tx-client/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/pdil/dashboard/package.json": {
+    "build": "tsc -p .",
+    "lint": "eslint src --ext .ts",
+    "start": "node dist/index.js"
+  },
+  "./sdk/cab/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "node --test"
+  },
+  "./sdk/ts/dlc-client/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "echo 'lint not configured'",
+    "test": "echo 'no tests'"
+  },
+  "./sdk/ts/pcl/package.json": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "./sdk/kkp/ts/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/pcqp/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "./sdk/typescript/fhem-client/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --loader ts-node/esm tests/golden.test.ts"
+  },
+  "./sdk/typescript/alsp-client/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/typescript/apm/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "test": "npm run build && node --test test/apm.test.mjs"
+  },
+  "./sdk/typescript/package.json": {
+    "test": "jest",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"{src,test}/**/*.ts\"",
+    "format": "prettier --write \"{src,test}/**/*.ts\""
+  },
+  "./sdk/prer-ts/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdk/acc/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run"
+  },
+  "./sdk/qpg/typescript/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./sdpwa/bindings/ts/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "./ingestion/contracts/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/**/*.js",
+    "lint": "eslint src --ext .ts"
+  },
+  "./hil-review/server/package.json": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "./hil-review/client/package.json": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "./summit-company_extended/intelgraph/api/package.json": {
+    "start": "ts-node server.ts"
+  },
+  "./pcbo/cli/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "test": "node --test dist",
+    "prepare": "npm run build"
+  },
+  "./platform/governance-kernel/package.json": {
+    "test": "jest"
+  },
+  "./platform/summitsight/package.json": {
+    "test": "jest"
+  },
+  "./platform/maas/package.json": {
+    "test": "jest"
+  },
+  "./platform/device-trust/node/package.json": {
+    "start": "node src/server.js",
+    "test": "node src/server.js --selftest"
+  },
+  "./platform/intelgraph-core/package.json": {
+    "test": "jest"
+  },
+  "./platform/maestro-core/package.json": {
+    "test": "jest"
+  },
+  "./platform/aurelius/package.json": {
+    "test": "jest"
+  },
+  "./platform/securiteyes/package.json": {
+    "test": "jest"
+  },
+  "./platform/chm/package.json": {
+    "build": "tsc -b",
+    "lint": "eslint --ext .ts src",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "dev": "ts-node src/index.ts"
+  },
+  "./packages/geospatial/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "benchmark": "jest --testPathPattern=benchmark"
+  },
+  "./packages/license-registry/package.json": {},
+  "./packages/satellite-imagery/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/policy-types/package.json": {},
+  "./packages/distributed-training/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/authz-core/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/cybint-bulwark/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/neural-networks/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/extension-sdk/package.json": {
+    "build": "tsc"
+  },
+  "./packages/ktoon/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "./packages/rptc/package.json": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "test": "jest --config jest.config.ts",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src",
+    "format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\""
+  },
+  "./packages/event-sourcing/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/missile-intelligence/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/fusion-analytics/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/compliance-monitor/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/strategic-foresight/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/audio-analytics/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/purple-team/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/deep-learning-core/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/strands-agents/package.json": {
+    "build": "tsc -b",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/object-storage/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "./packages/financial-crime/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/mdm-analytics/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/mesh-sdk/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/sigint-collector/package.json": {
+    "build": "tsc",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "./packages/attribution-engine/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w",
+    "test": "jest"
+  },
+  "./packages/community/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "npm_config_progress=false npx --yes c8 node --loader ts-node/esm --test __tests__/communityHub.test.ts"
+  },
+  "./packages/advanced-caching/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/event-bus/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/workspace/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/network-interceptor/package.json": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "./packages/kompromat-sim/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/cli.js"
+  },
+  "./packages/platform-telemetry/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/cybercrime-monitor/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/foreign-policy-analysis/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/treaty-verification/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/metrics-exporter/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/language-models/package.json": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/sigint-processor/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/trafficking-networks/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/fake-account-detection/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/convergence-tracking/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/graph-viz/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/canonical-entities/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/cryptographic-agility/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/entity-resolution/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/bilateral-relations/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/platform-cache/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/dpec/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint . --ext .ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "./packages/model-explainability/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/time-series/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/gdr/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/data-warehouse/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/mdm-core/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/websocket-client/package.json": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "./packages/ledger-server/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "./packages/platform-governance/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/graph-reasoning/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/component-tracker/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/afl-store/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/data-lineage/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/model-monitoring/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/generative-models/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/catalog-analytics/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/signal-contracts/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./packages/semantic-analysis/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/ai-wellbeing-predictors/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/web-scraper/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w",
+    "test": "jest"
+  },
+  "./packages/procurement-os/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./packages/eval-funnel/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/sentiment-analysis/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/canonical-schema/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/message-queue-enhanced/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/post-quantum-crypto/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/attack-surface/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "./packages/cryptanalysis-engine/package.json": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "./packages/logistics-intel/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/biometrics/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/operations-center/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/v2-sandbox/package.json": {
+    "test": "echo 'Sandbox tests passing'"
+  },
+  "./packages/image-synthesis/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/etl-assistant/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/mapping-dsl/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/deception-tech/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/network-graph/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; else echo \"skip lint (no src directory)\"; fi",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/collaboration/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/diplomatic-tracking/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/foreign-intelligence/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/kafka-integration/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/regional-readiness-engine/package.json": {
+    "test": "jest --config ../../jest.config.cjs --runInBand --testPathPattern=packages/regional-readiness-engine"
+  },
+  "./packages/graph-synthesis/package.json": {},
+  "./packages/event-streaming/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/stream-analytics/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/data-augmentation/package.json": {},
+  "./packages/threat-actors/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "./packages/api-framework/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/data-catalog/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/terrorist-tracking/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/sdk-ts/package.json": {
+    "build": "tsc"
+  },
+  "./packages/federated-campaign-radar/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./packages/slow-query-killer/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/organized-crime-tracker/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "./packages/explainability-sdk/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/"
+  },
+  "./packages/sdk-js/package.json": {},
+  "./packages/battle-fusion/package.json": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "./packages/rnn-platform/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/transformers/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/supply-chain-types/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/liquid-nano/package.json": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "test": "jest --config ./jest.config.ts --runInBand",
+    "test:coverage": "jest --config ./jest.config.ts --coverage",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "format": "prettier --check .",
+    "prepare": "pnpm run build"
+  },
+  "./packages/prov-manifest/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "ts-node src/cli.ts",
+    "test": "./run-tests.sh",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/esg-reporting/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/hitl-orchestrator/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/index.js"
+  },
+  "./packages/mobile-sdk/package.json": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "./packages/quantum-simulation/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/business-glossary/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/training-orchestration/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/diplomatic-comms/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/dlp-core/package.json": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/audio-processing/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/nuclear-monitoring/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/radicalization-detection/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/audio-synthesis/package.json": {},
+  "./packages/audio-enhancement/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/battle-types/package.json": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/rpa/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/real-time-sync/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/feature-engineering/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/ai-safety-suite/package.json": {},
+  "./packages/emerging-threats/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/metadata-discovery/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/predictive-models/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/technical-analysis/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/etl-pipelines/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/multi-int-fusion/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/smart-contracts/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/agent-identification/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/media-manipulation/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/mass-behavior-dynamics/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./packages/extension-api/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/red-team/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/mlops-platform/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/acs-learner/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/index.js"
+  },
+  "./packages/terrorist-finance/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/3d-visualization/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; else echo \"skip lint (no src directory)\"; fi",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/relationship-mining/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/integration-modernization/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config jest.config.cjs",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./packages/plan-eval-platform/package.json": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "eval:run": "tsx src/eval/cli.ts",
+    "benchmark:report": "tsx benchmark/generate-report.ts"
+  },
+  "./packages/forecasting/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/quantum-optimization/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/golden-path/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "jest --config ../../jest.config.cjs --runInBand --rootDir ../../ --testPathPattern=packages/golden-path/__tests__",
+    "format": "prettier -w ."
+  },
+  "./packages/golden-path/template/package.json": {
+    "dev": "node --loader ts-node/esm cmd/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "jest"
+  },
+  "./packages/graph-database/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/acs-simulator/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/index.js"
+  },
+  "./packages/ml-models/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/fztr-relay/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/index.js"
+  },
+  "./packages/quantum-ml/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/adapter-sdk/package.json": {
+    "build": "tsc",
+    "dev": "tsc -w -p tsconfig.json",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./packages/image-forensics/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/cache/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/plugin-sdk/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/query-optimizer/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/connector-sdk/package.json": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/migration-linter/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint:ci": "pnpm run build && node dist/cli.js",
+    "test": "vitest run"
+  },
+  "./packages/deepfake-detection/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/index.js"
+  },
+  "./packages/provenance-visualizer/package.json": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/messaging/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/counterintel-ops/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/authentication/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/risk-scoring/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/migration-orchestrator/package.json": {
+    "build": "node -e \"console.log('build not required for js sources')\"",
+    "test": "node --experimental-strip-types --test tests/**/*.test.ts"
+  },
+  "./packages/malware-analysis/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "./packages/rf-processor/package.json": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "./packages/sdk/connector-js/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/sdk/anomaly-js/package.json": {
+    "test": "node --test"
+  },
+  "./packages/sdk/privacy-js/package.json": {},
+  "./packages/sdk/graph-algos-js/package.json": {},
+  "./packages/sdk/prov-ledger-js/package.json": {
+    "test": "node --test"
+  },
+  "./packages/sdk/package.json": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "generate": "pnpm dlx openapi-typescript-codegen --input ../../openapi/intelgraph-core-api.yaml --output src/generated --client fetch --useOptions --exportSchemas true --indent 2 --name IntelGraphCoreClient",
+    "test": "jest --config jest.config.cjs"
+  },
+  "./packages/sdk/reporting-js/package.json": {},
+  "./packages/sdk/workflow-js/package.json": {},
+  "./packages/sdk/signing-js/package.json": {},
+  "./packages/sdk/data-quality-js/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/sdk/policy-js/package.json": {
+    "test": "node --test"
+  },
+  "./packages/sdk/synthdata-js/package.json": {
+    "test": "jest"
+  },
+  "./packages/sdk/gateway-js/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c .eslintrc.cjs .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest"
+  },
+  "./packages/sdk/collab-js/package.json": {},
+  "./packages/sdk/geospatial-js/package.json": {},
+  "./packages/sdk/enrichment-js/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/sdk/typescript/package.json": {
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/sdk/tenant-js/package.json": {},
+  "./packages/sdk/audit-js/package.json": {},
+  "./packages/sdk/search-js/package.json": {
+    "build": "tsc"
+  },
+  "./packages/platform-data/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/atl/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/telemetry-config/package.json": {
+    "build": "tsc"
+  },
+  "./packages/third-party-risk/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/propaganda-analysis/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/object-detection/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/error-handling/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/telephony/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/rate-limiter/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/threat-intelligence/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "./packages/targeting-support/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/operations-management/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/osint-search/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/unified-analytics/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/geopolitical-analysis/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/geospatial-synthesis/package.json": {},
+  "./packages/mdm-governance/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/entity-linking/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/graphql-dataloader/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/dashboard-framework/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/types/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/data-monetization-types/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./packages/cloud-abstraction/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "./packages/prov-ledger-client/package.json": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "./packages/prov-ledger-extensions/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/prov-ledger-verifier/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "verify:fixtures": "pnpm run build && node dist/cli.js --bundle fixtures/valid-bundle --json && node dist/cli.js --bundle fixtures/valid-bundle.zip --json"
+  },
+  "./packages/version-control/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/hrn/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/graph-analytics/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/logistics-automation-types/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/crisis-diplomacy/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/flow-governance/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath \"packages/flow-governance/__tests__/flow-governance.test.ts\"",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./packages/graph-algorithms/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/content-verification/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/risk-forecasting/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/cache-core/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/speaker-identification/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/comint-analyzer/package.json": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "./packages/social-media-intel/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w",
+    "test": "jest"
+  },
+  "./packages/digital-signatures/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/olap-engine/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/etl-framework/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/sim-harness/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:integration": "jest --testMatch='**/*.integration.test.ts'",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "run-scenario": "node dist/cli.js",
+    "clean": "rm -rf dist reports/*.json reports/*.html"
+  },
+  "./packages/adversarial-ai/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/ci-analytics/package.json": {},
+  "./packages/fztr-client/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/errors/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/spatial-analysis/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/ingest-wizard/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/observability/package.json": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "dev": "tsc -b --watch",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/espionage-tracking/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/document-governance/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "migrate": "node dist/neo4j/migrate.js",
+    "seed": "node dist/neo4j/seed.js"
+  },
+  "./packages/mesh-observability/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/no-code-builder/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/face-analysis/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/common-types/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "generate:schema": "node scripts/generateSchemas.js"
+  },
+  "./packages/text-analytics/package.json": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/ioc-manager/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "./packages/multilateral-tracking/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/mdm-sync/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/database-sharding/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/drug-intelligence/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/collection-coordination/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/corruption-tracking/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/facial-recognition/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/digital-twin-brain/package.json": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "./packages/graph-query/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/jira-integration/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src __tests__",
+    "test": "jest --coverage",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./packages/govbrief/package.json": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/entity-extraction/package.json": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/behavioral-analysis/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/agent-lab/package.json": {
+    "build": "tsc -b",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/help-overlay/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest --config jest.config.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "./packages/event-booster/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/event-booster/test/EventBooster.test.ts packages/event-booster/test/SyntheticGenerators.test.ts packages/event-booster/test/PerformanceBenchmarks.test.ts --coverage"
+  },
+  "./packages/supplier-risk/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/modernization-engine/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/modernization-engine/tests/modernization-engine.test.ts"
+  },
+  "./packages/edge-computing/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/narrative-tracking/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/rest-api/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/platform-benchmarks/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "benchmark": "tsx src/cli.ts",
+    "benchmark:ci": "tsx src/cli.ts --ci --output json",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/darkweb-intel/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/chain-of-custody/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/dimensional-modeling/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/edge-sync/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/humint-types/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "jest"
+  },
+  "./packages/document-verification/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/cli/package.json": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/foreign-fighters/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/maestro-core/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "./packages/osint-collector/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w",
+    "test": "jest"
+  },
+  "./packages/provenance/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "pnpm run build && jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/synthetic-data/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/semantic-search/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/adc/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/network-threat-detection/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/i18n/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest",
+    "extract": "node scripts/extract-strings.js",
+    "validate": "node scripts/validate-translations.js",
+    "coverage": "node scripts/translation-coverage.js"
+  },
+  "./packages/proliferation-networks/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/gateway-tariff/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/narrative-engine/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/geolocation-engine/package.json": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "./packages/threat-detection-core/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/crsp/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/canary-lattice/package.json": {
+    "build": "tsc"
+  },
+  "./packages/vcr-kit/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts",
+    "test": "node --test dist/**/*.spec.js"
+  },
+  "./packages/futures-analysis/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/reference-data/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/signal-processing/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json",
+    "test": "jest --runInBand --rootDir ../../ --config ../../jest.config.cjs --runTestsByPath packages/signal-processing/__tests__",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "./packages/economic-diplomacy/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/tasks-core/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "vitest run",
+    "prepublishOnly": "npm run clean && npm run build && npm test"
+  },
+  "./packages/wmd-tracking/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/tri-pane-ux/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/federated-learning/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/nlp/package.json": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/technical-intelligence/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/audio-intelligence/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/watchlist-screening/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/governance-hooks/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/disinformation-detection/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/computer-vision/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/lakehouse/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "./packages/competitive-execution/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/graph-ai-core/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/video-analysis/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/data-integration/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/plugin-system/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/supply-chain-mapper/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/lreg-exporter/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "./packages/partner-governance/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/influence-mining/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "preextract": "npm run build",
+    "extract": "node dist/cli.js",
+    "test": "jest"
+  },
+  "./packages/text-generation/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/api-analytics/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/events-producer/package.json": {
+    "build": "tsc"
+  },
+  "./packages/diplomatic-personnel/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/plugin-host/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/decision-support/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/finance-normalizer-types/package.json": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "./packages/map-visualization/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; else echo \"skip lint (no src directory)\"; fi",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/influence-detection/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/synthetic-media/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/kpw-media/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --env-file=.env dist/server.js",
+    "start": "node dist/server.js",
+    "verify": "node dist/cli.js"
+  },
+  "./packages/cloud-governance/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/decentralized-identity/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./packages/security-defense/package.json": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --watch --project tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
+  },
+  "./packages/vulnerability-intel/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "./packages/blockchain/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "./packages/treaty-monitor/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/aer-ledger/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "./packages/threat-hunting/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/vulnerability-intelligence/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/smart-contract-sdk/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./packages/hit-protocol/package.json": {
+    "build": "tsc"
+  },
+  "./packages/identity-resolution/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/api-gateway/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit --project tsconfig.typecheck.json"
+  },
+  "./packages/query-language/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/predictive-graph-intelligence/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/connectors/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "lint": "eslint src"
+  },
+  "./packages/cep-engine/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/policy-audit/package.json": {
+    "test": "jest",
+    "build": "npx tsc"
+  },
+  "./packages/covert-ops/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/edge-ai/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/training-strategies/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/pve/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/edge-runtime/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/stream-processing/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/charting/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; else echo \"skip lint (no src directory)\"; fi",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/model-interpretability/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/streaming-api/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/cloud-platform/package.json": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "./packages/feature-flags/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/bitemporal/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/model-serving/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/logger/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "./packages/causal-inference/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/ocr/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/extremism-monitor/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/task-routing/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/model-optimization/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/prov-ledger-sdk/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/extensions/package.json": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "./packages/mesh-eval-sdk/package.json": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "./packages/autonomous-ops/package.json": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "./packages/maestro-cli/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "./packages/visualization/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/threat-emulation/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/cqrs/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/hierarchy-management/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/business-rules/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/speech-recognition/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/cnn-framework/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/deception-detector/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/index.js"
+  },
+  "./packages/commenting/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/decision-graph/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "./packages/orchestration/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "./packages/authority-compiler/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/supply-chain-ai/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/rate-limiting/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/golden-records/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/covert-operations/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/knowledge-graph/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/prov-ledger/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/server.js"
+  },
+  "./packages/audio-forensics/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/shared/package.json": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "./packages/link-prediction/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/api-management/package.json": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/election-disruption-detection/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./packages/anomaly-detection/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./packages/quantum-supply-chain/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "./packages/privacy-preserving/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "./packages/ingest-connector-sdk/package.json": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "./packages/predictive-diplomacy/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./packages/mdm-stewardship/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./intelgraph-quickstart/ui/package.json": {
+    "dev": "vite"
+  },
+  "./intelgraph-quickstart/api/package.json": {
+    "build": "tsc -p .",
+    "start": "node dist/src/index.js",
+    "start:dev": "tsx src/index.ts",
+    "test": "jest --runInBand"
+  },
+  "./intelgraph-quickstart/ingest/package.json": {
+    "start:dev": "tsx src/s3csv-worker.ts",
+    "demo": "tsx src/s3csv-worker.ts --local sample-data/people.csv sample-data/mapping.json"
+  },
+  "./infra/registry/package.json": {
+    "build": "tsc",
+    "test": "jest --config jest.config.js",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint 'cosign/**/*.ts' 'slsa/**/*.ts' 'sync/**/*.ts'",
+    "typecheck": "tsc --noEmit",
+    "cosign:verify": "ts-node cosign/cosign-verifier.ts verify",
+    "slsa:verify": "ts-node slsa/slsa3-verifier.ts verify",
+    "sync:export": "ts-node sync/offline-sync.ts export",
+    "sync:import": "ts-node sync/offline-sync.ts import"
+  },
+  "./server/ai/nl2cypher/package.json": {
+    "start": "node dist/index.js",
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./server/package.json": {
+    "start": "node dist/src/index.js",
+    "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "config:validate": "ts-node scripts/validate-config.ts",
+    "test": "jest --config jest.config.ts",
+    "test:watch": "jest --config jest.config.ts --watch",
+    "test:coverage": "jest --config jest.config.ts --coverage",
+    "test:quarantine": "jest --config jest.quarantine.config.js --passWithNoTests",
+    "test:integration": "jest --config jest.config.js --testPathPattern=integration --passWithNoTests",
+    "test:unit": "jest --config jest.config.js --testPathIgnorePatterns=integration --passWithNoTests",
+    "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "case-overview-cache": "ts-node src/scripts/case-overview-cache.ts",
+    "migrate": "ts-node scripts/migrate.ts up",
+    "migrate:persistence": "node scripts/migrate-persistence.js",
+    "verify:policies": "tsx scripts/verify_policy_lifecycle.ts && tsx scripts/verify_policy_simulation.ts",
+    "worker:outbox": "node scripts/outbox-worker.js",
+    "test:smoke": "node scripts/smoke-test.cjs",
+    "codegen": "graphql-codegen --config codegen.yml",
+    "codegen:watch": "graphql-codegen --config codegen.yml --watch",
+    "seed": "ts-node scripts/seed-data.ts",
+    "seed:demo": "ts-node scripts/seed-demo.ts",
+    "seed:golden": "ts-node scripts/seed-golden-path.ts",
+    "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
+    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts",
+    "partition:maintain": "ts-node scripts/partition-maintenance.ts",
+    "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts"
+  },
+  "./plugins/tri-pane-explain/package.json": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "./plugins/nlq-copilot/package.json": {
+    "build": "npx tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "build:ui": "vite build --outDir dist/ui"
+  },
+  "./src/context/capsules/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "demo": "ts-node src/context/capsules/demo.ts",
+    "advanced-demo": "ts-node src/context/capsules/advanced-example.ts",
+    "test:unit": "jest src/context/capsules/__tests__",
+    "lint": "eslint src/context/capsules/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "./clients/cos-policy-fetcher/package.json": {
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "./sim-harness/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "test:integration": "jest --config jest.integration.config.js",
+    "sim:run": "node dist/cli.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./streaming/ingest-gw/package.json": {},
+  "./streaming/alerts-api/package.json": {},
+  "./apps/labeling-ui/package.json": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "./apps/ml-engine/package.json": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit",
+    "setup-python": "cd src/python && pip3 install -r requirements.txt",
+    "train": "node dist/cli.js train",
+    "evaluate": "node dist/cli.js evaluate"
+  },
+  "./apps/desktop-electron/package.json": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:package": "tsc && vite build && electron-builder",
+    "build:win": "npm run build:package -- --win",
+    "build:mac": "npm run build:package -- --mac",
+    "build:linux": "npm run build:package -- --linux",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "./apps/search-engine/package.json": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src",
+    "type-check": "tsc --noEmit"
+  },
+  "./apps/ui/package.json": {
+    "build": "node build.js"
+  },
+  "./apps/gateway/package.json": {
+    "build": "tsc -p . || true",
+    "dev": "node --watch dist/server.js || ts-node src/server.ts",
+    "test:unit": "vitest run"
+  },
+  "./apps/mobile-native/package.json": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "pod-install": "cd ios && bundle exec pod install",
+    "android:release": "cd android && ./gradlew assembleRelease",
+    "android:bundle": "cd android && ./gradlew bundleRelease",
+    "ios:release": "cd ios && xcodebuild -workspace IntelGraph.xcworkspace -scheme IntelGraph -configuration Release",
+    "prebuild:ios": "npx expo prebuild -p ios",
+    "prebuild:android": "npx expo prebuild -p android",
+    "build:ios": "eas build --platform ios",
+    "build:android": "eas build --platform android",
+    "submit:ios": "eas submit -p ios",
+    "submit:android": "eas submit -p android",
+    "update:ota": "eas update",
+    "clean": "watchman watch-del-all && rm -rf node_modules && pnpm install",
+    "clean:android": "cd android && ./gradlew clean",
+    "clean:ios": "cd ios && xcodebuild clean",
+    "analyze-bundle": "node scripts/analyze-bundle.js",
+    "analyze-bundle:android": "node scripts/analyze-bundle.js android",
+    "analyze-bundle:ios": "node scripts/analyze-bundle.js ios",
+    "performance:report": "node -e \"import('./src/services/PerformanceMonitor').then(m => console.log(m.performanceMonitor.generateReport()))\"",
+    "startup:report": "node -e \"import('./src/services/StartupOptimizer').then(m => console.log(JSON.stringify(m.startupOptimizer.getReport(), null, 2)))\""
+  },
+  "./apps/switchboard-web/package.json": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
+  },
+  "./apps/web/package.json": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "build:analyze": "ANALYZE=true vite build && echo '\n📊 Bundle analysis available at dist/stats.html'",
+    "preview": "vite preview",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
+    "lint:a11y": "ESLINT_USE_FLAT_CONFIG=false eslint src/components/Layout.tsx src/pages/SignInPage.tsx --max-warnings=0",
+    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "analyze:bundle": "vite build && echo 'Bundle analysis available at dist/stats.html'"
+  },
+  "./apps/web/ingest-wizard/package.json": {
+    "start": "webpack serve",
+    "build": "webpack",
+    "test": "jest"
+  },
+  "./apps/graph-analytics/package.json": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit"
+  },
+  "./apps/intelgraph-api/package.json": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint . || true"
+  },
+  "./apps/.desktop-electron-disabled/package.json": {
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "build:win": "npm run build -- --win",
+    "build:mac": "npm run build -- --mac",
+    "build:linux": "npm run build -- --linux",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; elif [ -d electron ]; then eslint electron --ext .ts,.tsx; else echo \"skip lint (no lintable sources)\"; fi",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "./apps/server/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config ./jest.config.cjs --runInBand"
+  },
+  "./apps/workflow-engine/package.json": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit",
+    "seed-templates": "node dist/scripts/seed-templates.js"
+  },
+  "./apps/compliance-console/package.json": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "./apps/webapp/package.json": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --no-eslintrc --config .eslintrc.cjs \"src/**/*.{ts,tsx}\"",
+    "format": "prettier --check 'src/**/*.{ts,tsx,css,html}'",
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:visual": "playwright test --project=visual",
+    "test:cypress": "cypress run --browser chromium"
+  },
+  "./apps/tri-pane/package.json": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "./apps/a11y-lab/package.json": {
+    "test": "pnpm exec playwright test",
+    "test:report": "pnpm exec playwright show-report",
+    "ci:gate": "node ./scripts/ci-gate.mjs",
+    "heatmap:build": "node ./scripts/emit-heatmap-snippet.mjs"
+  },
+  "./apps/command-console/package.json": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives"
+  },
+  "./apps/api/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest"
+  },
+  "./apps/mobile/package.json": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "start:reset": "react-native start --reset-cache",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json}\"",
+    "pod-install": "cd ios && bundle exec pod install",
+    "clean": "watchman watch-del-all && rm -rf node_modules && pnpm install",
+    "clean:android": "cd android && ./gradlew clean",
+    "clean:ios": "cd ios && xcodebuild clean",
+    "android:release": "cd android && ./gradlew assembleRelease",
+    "android:bundle": "cd android && ./gradlew bundleRelease",
+    "ios:release": "cd ios && xcodebuild -workspace IntelGraphMobile.xcworkspace -scheme IntelGraphMobile -configuration Release",
+    "prebuild:ios": "npx expo prebuild -p ios",
+    "prebuild:android": "npx expo prebuild -p android",
+    "build:ios": "eas build --platform ios",
+    "build:android": "eas build --platform android",
+    "submit:ios": "eas submit -p ios",
+    "submit:android": "eas submit -p android",
+    "update:ota": "eas update",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "e2e:android": "detox test -c android.emu.release",
+    "e2e:ios": "detox test -c ios.sim.release",
+    "e2e:build:android": "detox build -c android.emu.release",
+    "e2e:build:ios": "detox build -c ios.sim.release"
+  },
+  "./apps/mobile-interface/package.json": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "./apps/.mobile-native-disabled/package.json": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "pod-install": "cd ios && bundle exec pod install",
+    "android:release": "cd android && ./gradlew assembleRelease",
+    "android:bundle": "cd android && ./gradlew bundleRelease",
+    "ios:release": "cd ios && xcodebuild -workspace IntelGraph.xcworkspace -scheme IntelGraph -configuration Release",
+    "prebuild:ios": "npx expo prebuild -p ios",
+    "prebuild:android": "npx expo prebuild -p android",
+    "build:ios": "eas build --platform ios",
+    "build:android": "eas build --platform android",
+    "submit:ios": "eas submit -p ios",
+    "submit:android": "eas submit -p android",
+    "update:ota": "eas update",
+    "clean": "watchman watch-del-all && rm -rf node_modules && pnpm install",
+    "clean:android": "cd android && ./gradlew clean",
+    "clean:ios": "cd ios && xcodebuild clean",
+    "analyze-bundle": "node scripts/analyze-bundle.js",
+    "analyze-bundle:android": "node scripts/analyze-bundle.js android",
+    "analyze-bundle:ios": "node scripts/analyze-bundle.js ios",
+    "performance:report": "node -e \"import('./src/services/PerformanceMonitor').then(m => console.log(m.performanceMonitor.generateReport()))\"",
+    "startup:report": "node -e \"import('./src/services/StartupOptimizer').then(m => console.log(JSON.stringify(m.startupOptimizer.getReport(), null, 2)))\""
+  },
+  "./apps/field-kit/package.json": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "./apps/slo-exporter/package.json": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "./apps/analytics-engine/package.json": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit",
+    "seed-templates": "node dist/scripts/seed-templates.js"
+  },
+  "./intelgraph-mcp/tools/conformance-cli/package.json": {
+    "start": "tsx bin/ig-mcp-conformance.ts",
+    "build": "tsc -p .",
+    "test": "vitest run"
+  },
+  "./intelgraph-mcp/package.json": {
+    "xpnpm": "node tools/pnpm/run-pnpm.js",
+    "build": "npm run xpnpm -- -r build",
+    "dev": "npm run xpnpm -- -r --parallel dev",
+    "test": "npm run xpnpm -- -r test",
+    "lint": "npm run xpnpm -- -r lint",
+    "typecheck": "npm run xpnpm -- -r typecheck",
+    "conformance": "npm run xpnpm -- --filter conformance-cli start",
+    "bench": "npm run xpnpm -- --filter harness start",
+    "shootout": "npm run xpnpm -- --filter shootout-ui dev"
+  },
+  "./intelgraph-mcp/benchmarks/harness/package.json": {
+    "start": "tsx src/run.ts"
+  },
+  "./intelgraph-mcp/services/runtime-pooler/package.json": {
+    "dev": "ts-node-dev src/index.ts",
+    "build": "tsc -p .",
+    "lint": "eslint .",
+    "typecheck": "tsc -p . --noEmit",
+    "test": "vitest run"
+  },
+  "./intelgraph-mcp/services/replay-engine/package.json": {
+    "dev": "ts-node-dev src/index.ts",
+    "build": "tsc -p .",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc -p . --noEmit"
+  },
+  "./intelgraph-mcp/packages/sdk-ts/package.json": {
+    "build": "tsc -p .",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc -p . --noEmit"
+  },
+  "./intelgraph-mcp/shootout-ui/package.json": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "./cli/ig-brief/package.json": {},
+  "./cli/package.json": {
+    "build": "tsc && chmod +x dist/cli.js dist/summit.js",
+    "dev": "tsx watch src/cli.ts",
+    "start": "node dist/cli.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build",
+    "pkg:linux": "pkg dist/cli.js -t node18-linux-x64 -o bin/intelgraph-linux",
+    "pkg:macos": "pkg dist/cli.js -t node18-macos-x64 -o bin/intelgraph-macos",
+    "pkg:macos-arm": "pkg dist/cli.js -t node18-macos-arm64 -o bin/intelgraph-macos-arm64",
+    "pkg:windows": "pkg dist/cli.js -t node18-win-x64 -o bin/intelgraph-win.exe",
+    "pkg:all": "npm run pkg:linux && npm run pkg:macos && npm run pkg:macos-arm && npm run pkg:windows"
+  },
+  "./cli/ig-detect/package.json": {},
+  "./cli/prov-verify/package.json": {},
+  "./intelgraph-starter/gateway/package.json": {
+    "dev": "node server.js"
+  },
+  "./intelgraph-starter/ingest/package.json": {
+    "dev": "node server.js"
+  },
+  "./webapp/package.json": {
+    "dev": "node src/index.js",
+    "lint": "prettier -c ."
+  },
+  "./operator-kit/package.json": {
+    "dev": "tsx server/index.ts",
+    "build": "tsc -p .",
+    "start": "node dist/index.js"
+  },
+  "./bundle-server/package.json": {
+    "start": "node index.js"
+  },
+  "./ga-caseops/packages/gateway/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "./ga-caseops/packages/policy/package.json": {},
+  "./ga-caseops/packages/common-types/package.json": {},
+  "./ga-caseops/packages/prov-ledger/package.json": {},
+  "./pbs/tools/pbs-dashboard/package.json": {
+    "build": "tsc",
+    "start": "node dist/cli.js"
+  },
+  "./october2025/companyos-switchboard/package.json": {
+    "bootstrap": "make bootstrap",
+    "dev": "make dev",
+    "build": "make build",
+    "tauri:dev": "make tauri-dev",
+    "policy:test": "make policy-test"
+  },
+  "./cea/sdk/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit"
+  },
+  "./client/package.json": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.strict.json --noEmit",
+    "test": "npm run test:jest && npm run test:vitest",
+    "test:jest": "node node_modules/jest/bin/jest.js --config jest.config.cjs",
+    "test:vitest": "vitest",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test tests/e2e/a11y-smoke.spec.ts",
+    "test:smoke": "echo 'Client smoke tests are consolidated in root smoke-test.js'",
+    "test:golden-path": "playwright test golden-path-ci-gate.spec.ts",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write .",
+    "persist:queries": "graphql-codegen --config codegen.ts",
+    "generate:persisted": "node scripts/generate-persisted-operations.js",
+    "analyze:bundle": "vite build && echo 'Bundle analysis available at dist/stats.html'"
+  },
+  "./companyos/templates/new-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:unit": "vitest run --reporter=verbose",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "./companyos/package.json": {
+    "build": "tsc -p .",
+    "start": "node dist/index.js",
+    "evidence:sample": "node dist/evidence/publish_sample.js"
+  },
+  "./companyos/services/api-svc-template/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "eslint --ext .ts src tests",
+    "seed": "node -e \"console.log('seed: no-op template')\"",
+    "sbom": "syft packages dir:. -o json > sbom.json"
+  },
+  "./companyos/services/tenant-api/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "migrate": "psql $DATABASE_URL -f migrations/001_create_tenants.sql"
+  },
+  "./companyos/services/incident-api/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "eslint --ext .ts src tests",
+    "seed": "node -e \"console.log('seed: no-op template')\"",
+    "sbom": "syft packages dir:. -o json > sbom.json"
+  },
+  "./companyos/services/companyos-api/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node --esm src/index.ts",
+    "test": "vitest run"
+  },
+  "./mdr/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "compile": "ts-node src/cli.ts compile",
+    "diff": "ts-node src/cli.ts diff",
+    "test": "ts-node src/cli.ts test"
+  },
+  "./mobile/package.json": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "eslint .",
+    "test": "jest"
+  },
+  "./ga-graphai/package.json": {
+    "test": "npm run -ws --if-present test",
+    "test:smoke": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-World\"",
+    "test:load": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-Case\""
+  },
+  "./ga-graphai/packages/maestro-conductor/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/data-integrity/package.json": {
+    "test": "vitest run",
+    "schema:check": "node --loader ts-node/esm ./src/schema/cli.ts"
+  },
+  "./ga-graphai/packages/threat-analytics/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/workcell-runtime/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/meta-orchestrator/package.json": {
+    "test": "vitest run",
+    "test:smoke": "vitest run tests/referenceWorkflows.test.ts --filter Hello-World",
+    "test:load": "vitest run tests/referenceWorkflows.test.ts --filter Hello-Case --threads false"
+  },
+  "./ga-graphai/packages/cost-guard/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/prov-manifest/package.json": {
+    "test": "node --test tests/*.test.js",
+    "build": "true"
+  },
+  "./ga-graphai/packages/gateway/package.json": {
+    "test": "vitest run --coverage && node --test tests"
+  },
+  "./ga-graphai/packages/web/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/er-service/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/policy/package.json": {
+    "test": "vitest run && NODE_TEST=1 NODE_OPTIONS=--loader ts-node/esm node --test tests/policy-engine.test.js",
+    "test:validator": "node --loader ts-node/esm ./tests/validator.test.ts"
+  },
+  "./ga-graphai/packages/c2pa-bridge/package.json": {
+    "build": "npm run build:node && npm run build:browser",
+    "build:node": "tsc -p tsconfig.json",
+    "build:browser": "tsc -p tsconfig.browser.json",
+    "clean": "rimraf dist",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test \"tests/**/*.js\""
+  },
+  "./ga-graphai/packages/mocc/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/customer-success-os/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/common-types/package.json": {
+    "test": "vitest run",
+    "test:workflow": "node --loader ts-node/esm ./tests/workflow-types.test.ts"
+  },
+  "./ga-graphai/packages/event-sourcing-cqrs/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/secrets/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/query-copilot/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/summit-qaf/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/workflow-diff-engine/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/ai-readiness-control/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/cloud-arbitrage/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/knowledge-graph/package.json": {
+    "test": "vitest run"
+  },
+  "./ga-graphai/packages/prov-ledger/package.json": {
+    "test": "vitest run",
+    "test:record": "node --loader ts-node/esm ./tests/record.test.ts"
+  },
+  "./.disabled/afl-store/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./.disabled/mcp-core.disabled/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "jest --config ./jest.config.ts"
+  },
+  "./.disabled/cfa-tdw/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./.disabled/atl/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./.disabled/maestro-mcp.disabled/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js"
+  },
+  "./.disabled/adc/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "./.disabled/intelgraph-mcp.disabled/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js"
+  },
+  "./connectors/s3csv/package.json": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest"
+  },
+  "./connectors/sensors/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./monitoring/synthetic/package.json": {
+    "start": "node synthetic-monitor.js",
+    "test": "node --test test/synthetic-monitor.test.js",
+    "health": "node health-check.js",
+    "debug": "NODE_ENV=development DEBUG=* node synthetic-monitor.js"
+  },
+  "./examples/incident-investigation/package.json": {
+    "start": "tsx index.ts"
+  },
+  "./examples/plugins/pattern-analytics/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "./examples/plugins/threat-intel-connector/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "./examples/plugins/network-visualization/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "./examples/golden-service/package.json": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src/"
+  },
+  "./examples/hello-world-plugin/package.json": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "./examples/code-refactor/package.json": {
+    "start": "tsx index.ts"
+  },
+  "./intelgraph-mvp/ui/package.json": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "playwright test"
+  },
+  "./intelgraph-mvp/gateway/package.json": {},
+  "./intelgraph-mvp/ingest/package.json": {},
+  "./website/package.json": {
+    "dev": "next dev",
+    "build": "node scripts/verify-env.mjs && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "docs:generate": "node scripts/generate-ga-docs.mjs",
+    "ci": "pnpm -s lint && pnpm -s typecheck && pnpm -s test && pnpm -s build && pnpm -s e2e"
+  },
+  "./extensions/vscode-maestro/package.json": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "./extensions/package.json": {},
+  "./extensions/symphony-ops/package.json": {},
+  "./extensions/examples/analytics-dashboard/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "./dprs/cli/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "start": "node dist/index.js"
+  },
+  "./bindings/djce-pb/package.json": {
+    "build": "napi build --release --features node",
+    "build:debug": "napi build --features node",
+    "lint": "eslint \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "./bindings/ibrs-node/package.json": {
+    "build": "napi build --release",
+    "build:debug": "napi build",
+    "prepublishOnly": "npm run build"
+  },
+  "./tests/e2e/package.json": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium-desktop",
+    "test:firefox": "playwright test --project=firefox-desktop",
+    "test:webkit": "playwright test --project=webkit-desktop",
+    "test:mobile": "playwright test --project=chromium-mobile --project=webkit-mobile",
+    "test:accessibility": "playwright test --project=chromium-a11y",
+    "test:performance": "playwright test --project=chromium-performance",
+    "test:security": "playwright test --project=chromium-security",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "install": "playwright install --with-deps",
+    "codegen": "playwright codegen localhost:3000"
+  },
+  "./tests/load/package.json": {
+    "test:load": "k6 run --vus 50 --duration 300s maestro-load-test.js",
+    "test:load:production": "k6 run --vus 100 --duration 600s maestro-load-test.js",
+    "test:soak": "k6 run --duration 14400s soak-test.js",
+    "test:capacity": "k6 run capacity-planning.js",
+    "test:load:ci": "k6 run --quiet --vus 10 --duration 60s maestro-load-test.js",
+    "test:smoke": "k6 run --vus 1 --duration 30s maestro-load-test.js"
+  },
+  "./orchestration/packages/intent-engine/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "./libs/ingest-worker/node/package.json": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "./libs/configguard/ts/package.json": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config jest.config.cjs --runInBand"
+  },
+  "./libs/audit/node/package.json": {
+    "build": "tsc index.ts"
+  },
+  "./libs/realtime/package.json": {
+    "build": "tsc"
+  }
+}

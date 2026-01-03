@@ -1,0 +1,18 @@
+agent: Claude
+workstream_id: ws-claude-20260103-01
+branch: autopilot/claude/ws-claude-20260103-01
+boundaries:
+  include_globs:
+    - ".github/workflows/**"
+  exclude_globs:
+objectives:
+  - "Resolve GENERIC_FAILURE clusters"
+  - "Diagnose systemic CI/test failures"
+verification:
+  commands:
+    - "pnpm build"
+    - "pnpm test"
+evidence:
+  notes: Auto-generated workstream based on 21 detected failures.
+risks:
+  rollback_plan: Revert changes and re-run p0p1-autopilot

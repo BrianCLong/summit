@@ -1,0 +1,104 @@
+Scope: 648 of 649 workspace projects
+apps/analytics-engine build$ tsc
+apps/command-console build$ tsc -b && vite build
+apps/compliance-console build$ tsc && vite build
+apps/desktop-electron build$ tsc && vite build
+apps/desktop-electron build: ▲ [WARNING] Duplicate key "verify" in object literal [duplicate-object-key]
+apps/desktop-electron build:     ../../package.json:88:4:
+apps/desktop-electron build:       88 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+apps/desktop-electron build:          ╵     ~~~~~~~~
+apps/desktop-electron build:   The original key "verify" is here:
+apps/desktop-electron build:     ../../package.json:10:4:
+apps/desktop-electron build:       10 │     "verify": "tsx scripts/verify.ts",
+apps/desktop-electron build:          ╵     ~~~~~~~~
+apps/desktop-electron build: [33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+apps/compliance-console build: ▲ [WARNING] Duplicate key "verify" in object literal [duplicate-object-key]
+apps/compliance-console build:     ../../package.json:88:4:
+apps/compliance-console build:       88 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+apps/compliance-console build:          ╵     ~~~~~~~~
+apps/compliance-console build:   The original key "verify" is here:
+apps/compliance-console build:     ../../package.json:10:4:
+apps/compliance-console build:       10 │     "verify": "tsx scripts/verify.ts",
+apps/compliance-console build:          ╵     ~~~~~~~~
+apps/compliance-console build: vite v5.4.21 building for production...
+apps/desktop-electron build: vite v7.2.6 building client environment for production...
+apps/compliance-console build: transforming...
+apps/desktop-electron build: transforming...
+apps/command-console build: ▲ [WARNING] Duplicate key "verify" in object literal [duplicate-object-key]
+apps/command-console build:     ../../package.json:88:4:
+apps/command-console build:       88 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+apps/command-console build:          ╵     ~~~~~~~~
+apps/command-console build:   The original key "verify" is here:
+apps/command-console build:     ../../package.json:10:4:
+apps/command-console build:       10 │     "verify": "tsx scripts/verify.ts",
+apps/command-console build:          ╵     ~~~~~~~~
+apps/command-console build: vite v5.4.21 building for production...
+apps/command-console build: transforming...
+apps/analytics-engine build: Done
+apps/field-kit build$ tsc --noEmit && vite build
+apps/desktop-electron build: ✓ 28 modules transformed.
+apps/command-console build: ✓ 36 modules transformed.
+apps/desktop-electron build: rendering chunks...
+apps/desktop-electron build: computing gzip size...
+apps/desktop-electron build: dist/index.html                  0.43 kB │ gzip:   0.29 kB
+apps/desktop-electron build: dist/assets/index-CfZGprq8.js  391.08 kB │ gzip: 116.99 kB
+apps/desktop-electron build: ✓ built in 5.50s
+apps/compliance-console build: ✓ 86 modules transformed.
+apps/desktop-electron build: vite v5.4.21 building for production...
+apps/desktop-electron build: transforming...
+apps/desktop-electron build: ✓ 1 modules transformed.
+apps/desktop-electron build: rendering chunks...
+apps/desktop-electron build: computing gzip size...
+apps/desktop-electron build: dist-electron/main.js  4.47 kB │ gzip: 1.91 kB
+apps/desktop-electron build: ✓ built in 159ms
+apps/desktop-electron build: vite v5.4.21 building for production...
+apps/desktop-electron build: transforming...
+apps/desktop-electron build: ✓ 1 modules transformed.
+apps/desktop-electron build: rendering chunks...
+apps/desktop-electron build: computing gzip size...
+apps/desktop-electron build: dist-electron/preload.js  0.83 kB │ gzip: 0.38 kB
+apps/desktop-electron build: ✓ built in 46ms
+apps/command-console build: rendering chunks...
+apps/command-console build: computing gzip size...
+apps/command-console build: dist/index.html                  0.33 kB │ gzip:   0.24 kB
+apps/command-console build: dist/assets/index-DiFzl5HQ.js  346.61 kB │ gzip: 106.35 kB
+apps/command-console build: ✓ built in 5.31s
+apps/desktop-electron build: Done
+apps/gateway build$ tsc -p . || true
+apps/command-console build: Done
+apps/graph-analytics build$ tsc
+apps/compliance-console build: rendering chunks...
+apps/compliance-console build: computing gzip size...
+apps/compliance-console build: dist/index.html                  0.33 kB │ gzip:   0.24 kB
+apps/compliance-console build: dist/assets/index-2oBhRGhq.js  385.87 kB │ gzip: 118.90 kB
+apps/compliance-console build: ✓ built in 6.21s
+apps/compliance-console build: Done
+apps/intelgraph-api build$ tsc -p tsconfig.json
+apps/field-kit build: ▲ [WARNING] Duplicate key "verify" in object literal [duplicate-object-key]
+apps/field-kit build:     ../../package.json:88:4:
+apps/field-kit build:       88 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+apps/field-kit build:          ╵     ~~~~~~~~
+apps/field-kit build:   The original key "verify" is here:
+apps/field-kit build:     ../../package.json:10:4:
+apps/field-kit build:       10 │     "verify": "tsx scripts/verify.ts",
+apps/field-kit build:          ╵     ~~~~~~~~
+apps/field-kit build: vite v7.2.6 building client environment for production...
+apps/field-kit build: transforming...
+apps/intelgraph-api build: Done
+apps/labeling-ui build$ tsc && vite build
+apps/graph-analytics build: Done
+apps/ml-engine build$ tsc
+apps/gateway build: src/middleware/flags.ts(2,41): error TS6059: File '/app/libs/flags/node/index.ts' is not under 'rootDir' '/app/apps/gateway/src'. 'rootDir' is expected to contain all source files.
+apps/gateway build: ../../libs/audit/node/index.ts(5,33): error TS6059: File '/app/libs/audit/node/json-canon.ts' is not under 'rootDir' '/app/apps/gateway/src'. 'rootDir' is expected to contain all source files.
+apps/gateway build: Done
+apps/mobile-interface build$ next build
+apps/mobile-interface build: ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+apps/mobile-interface build: ⨯ Failed to load next.config.js, see more info here https://nextjs.org/docs/messages/next-config-error
+apps/mobile-interface build: > Build error occurred
+apps/mobile-interface build: TypeError: pify(...).bind is not a function
+apps/mobile-interface build:     at ignore-listed frames
+apps/mobile-interface build: Failed
+/app/apps/mobile-interface:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/mobile-interface@2.0.0 build: `next build`
+Exit status 1
+apps/search-engine build$ tsc

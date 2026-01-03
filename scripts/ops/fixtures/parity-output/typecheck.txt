@@ -1,0 +1,19 @@
+Scope: 648 of 649 workspace projects
+apps/desktop-electron typecheck$ tsc --noEmit
+apps/field-kit typecheck$ tsc --noEmit
+apps/labeling-ui typecheck$ tsc --noEmit
+apps/mobile-native typecheck$ tsc --noEmit
+apps/field-kit typecheck: Done
+apps/web typecheck$ tsc --noEmit
+apps/desktop-electron typecheck: Done
+client typecheck$ tsc -p tsconfig.strict.json --noEmit
+apps/labeling-ui typecheck: Done
+companyos/services/tenant-api typecheck$ tsc --noEmit
+apps/mobile-native typecheck: Done
+libs/ingest-worker/node typecheck$ tsc --noEmit
+companyos/services/tenant-api typecheck: src/index.ts(30,7): error TS2742: The inferred type of 'app' cannot be named without a reference to '.pnpm/@types+express-serve-static-core@4.19.7/node_modules/@types/express-serve-static-core'. This is likely not portable. A type annotation is necessary.
+companyos/services/tenant-api typecheck: Failed
+/app/companyos/services/tenant-api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/tenant-api@2.0.0 typecheck: `tsc --noEmit`
+Exit status 2
+packages/adapter-sdk typecheck$ tsc --noEmit -p tsconfig.json

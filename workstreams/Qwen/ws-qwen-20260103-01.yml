@@ -1,0 +1,18 @@
+agent: Qwen
+workstream_id: ws-qwen-20260103-01
+branch: autopilot/qwen/ws-qwen-20260103-01
+boundaries:
+  include_globs:
+    - "companyos/services/tenant-api/**"
+  exclude_globs:
+objectives:
+  - "Resolve GENERIC_FAILURE clusters"
+  - "Fix specific package runtime issues (metrics, network)"
+verification:
+  commands:
+    - "pnpm build"
+    - "pnpm test"
+evidence:
+  notes: Auto-generated workstream based on 2 detected failures.
+risks:
+  rollback_plan: Revert changes and re-run p0p1-autopilot

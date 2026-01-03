@@ -1,0 +1,22 @@
+agent: Codex
+workstream_id: ws-codex-20260103-01
+branch: autopilot/codex/ws-codex-20260103-01
+boundaries:
+  include_globs:
+    - "**/*.json"
+    - "**/*.ts"
+  exclude_globs:
+    - "server/src/config/**"
+    - "companyos/services/tenant-api/**"
+objectives:
+  - "Resolve LINT_CONFIGURATION clusters"
+  - "Resolve PNPM_RECURSIVE_FAIL clusters"
+  - "Fix lint configurations and TS errors across packages"
+verification:
+  commands:
+    - "pnpm build"
+    - "pnpm test"
+evidence:
+  notes: Auto-generated workstream based on 7 detected failures.
+risks:
+  rollback_plan: Revert changes and re-run p0p1-autopilot
