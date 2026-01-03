@@ -1,0 +1,28 @@
+{
+  "issue_number": 12922,
+  "title": "🏗️ Recovery (partial): Build Open Source Intelligence Automation Platform",
+  "url": "https://github.com/BrianCLong/summit/pull/12922",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-04T15:47:49Z",
+  "createdAt": "2025-11-30T07:54:29Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1209,
+        "url": "https://github.com/BrianCLong/summit/pull/1209",
+        "mergedAt": null,
+        "title": "chore(deps): bump cryptography from 42.0.8 to 45.0.7"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
