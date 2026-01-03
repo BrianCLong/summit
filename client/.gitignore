@@ -1,0 +1,9 @@
+# Node
+/node_modules
+/dist
+/build
+/coverage
+
+# Test reports
+/playwright-report/
+/test-results/

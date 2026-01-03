@@ -1,0 +1,544 @@
+{
+  "config": {
+    "configFile": "/app/client/playwright.config.ts",
+    "rootDir": "/app/client/tests/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "junit.xml"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/app/client/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/app/client/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/app/client/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/app/client/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/app/client/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 2
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/app/client/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 2,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true
+    }
+  },
+  "suites": [
+    {
+      "title": "investigation-determinism.spec.ts",
+      "file": "investigation-determinism.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Investigation Detail Page Determinism",
+          "file": "investigation-determinism.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should not display stale data when navigating quickly between investigations",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 4837,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_ABORTED at http://localhost:3000/investigations/INV-2025-001\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_ABORTED at http://localhost:3000/investigations/INV-2025-001\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10",
+                        "location": {
+                          "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                          "column": 10,
+                          "line": 20
+                        },
+                        "snippet": "  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 10,
+                            "line": 20
+                          },
+                          "message": "Error: page.goto: net::ERR_ABORTED at http://localhost:3000/investigations/INV-2025-001\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n\n  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10"
+                        },
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 16,
+                            "line": 23
+                          },
+                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-002\", waiting until \"load\"\u001b[22m\n\n\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n> 23 |     await page.goto(`/investigations/${investigationId2}`);\n     |                ^\n  24 |\n  25 |     // --- End of Rapid Navigation ---\n  26 |\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:23:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-03T05:25:10.595Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-chromium/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                        "column": 10,
+                        "line": 20
+                      }
+                    },
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 871,
+                      "error": {
+                        "message": "Error: page.goto: net::ERR_ABORTED at http://localhost:3000/investigations/INV-2025-001\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: net::ERR_ABORTED at http://localhost:3000/investigations/INV-2025-001\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10",
+                        "location": {
+                          "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                          "column": 10,
+                          "line": 20
+                        },
+                        "snippet": "  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 10,
+                            "line": 20
+                          },
+                          "message": "Error: page.goto: net::ERR_ABORTED at http://localhost:3000/investigations/INV-2025-001\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n\n  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10"
+                        },
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 16,
+                            "line": 23
+                          },
+                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-002\", waiting until \"load\"\u001b[22m\n\n\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n> 23 |     await page.goto(`/investigations/${investigationId2}`);\n     |                ^\n  24 |\n  25 |     // --- End of Rapid Navigation ---\n  26 |\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:23:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-01-03T05:25:17.433Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-chromium-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-chromium-retry1/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                        "column": 10,
+                        "line": 20
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "78132b6249702b9102ee-4c5cde587feff05f9535",
+              "file": "investigation-determinism.spec.ts",
+              "line": 4,
+              "column": 3
+            },
+            {
+              "title": "should not display stale data when navigating quickly between investigations",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 3557,
+                      "error": {
+                        "message": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10",
+                        "location": {
+                          "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                          "column": 10,
+                          "line": 20
+                        },
+                        "snippet": "  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 10,
+                            "line": 20
+                          },
+                          "message": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n\n  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10"
+                        },
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 16,
+                            "line": 23
+                          },
+                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-002\", waiting until \"load\"\u001b[22m\n\n\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n> 23 |     await page.goto(`/investigations/${investigationId2}`);\n     |                ^\n  24 |\n  25 |     // --- End of Rapid Navigation ---\n  26 |\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:23:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-03T05:25:10.681Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-firefox/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-firefox/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                        "column": 10,
+                        "line": 20
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 4276,
+                      "error": {
+                        "message": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10",
+                        "location": {
+                          "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                          "column": 10,
+                          "line": 20
+                        },
+                        "snippet": "  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 10,
+                            "line": 20
+                          },
+                          "message": "Error: page.goto: NS_BINDING_ABORTED\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n\n  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10"
+                        },
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 16,
+                            "line": 23
+                          },
+                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-002\", waiting until \"load\"\u001b[22m\n\n\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n> 23 |     await page.goto(`/investigations/${investigationId2}`);\n     |                ^\n  24 |\n  25 |     // --- End of Rapid Navigation ---\n  26 |\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:23:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-01-03T05:25:17.553Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-firefox-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-firefox-retry1/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-firefox-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                        "column": 10,
+                        "line": 20
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "78132b6249702b9102ee-5992a25ffded420e5b20",
+              "file": "investigation-determinism.spec.ts",
+              "line": 4,
+              "column": 3
+            },
+            {
+              "title": "should not display stale data when navigating quickly between investigations",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1920,
+                      "error": {
+                        "message": "Error: page.goto: Navigation to \"http://localhost:3000/investigations/INV-2025-001\" is interrupted by another navigation to \"http://localhost:3000/investigations/INV-2025-002\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: Navigation to \"http://localhost:3000/investigations/INV-2025-001\" is interrupted by another navigation to \"http://localhost:3000/investigations/INV-2025-002\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10",
+                        "location": {
+                          "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                          "column": 10,
+                          "line": 20
+                        },
+                        "snippet": "  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 10,
+                            "line": 20
+                          },
+                          "message": "Error: page.goto: Navigation to \"http://localhost:3000/investigations/INV-2025-001\" is interrupted by another navigation to \"http://localhost:3000/investigations/INV-2025-002\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n\n  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10"
+                        },
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 16,
+                            "line": 23
+                          },
+                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-002\", waiting until \"load\"\u001b[22m\n\n\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n> 23 |     await page.goto(`/investigations/${investigationId2}`);\n     |                ^\n  24 |\n  25 |     // --- End of Rapid Navigation ---\n  26 |\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:23:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-01-03T05:25:20.343Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-webkit/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-webkit/video.webm"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                        "column": 10,
+                        "line": 20
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 870,
+                      "error": {
+                        "message": "Error: page.goto: Navigation to \"http://localhost:3000/investigations/INV-2025-001\" is interrupted by another navigation to \"http://localhost:3000/investigations/INV-2025-002\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n",
+                        "stack": "Error: page.goto: Navigation to \"http://localhost:3000/investigations/INV-2025-001\" is interrupted by another navigation to \"http://localhost:3000/investigations/INV-2025-002\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10",
+                        "location": {
+                          "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                          "column": 10,
+                          "line": 20
+                        },
+                        "snippet": "  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 10,
+                            "line": 20
+                          },
+                          "message": "Error: page.goto: Navigation to \"http://localhost:3000/investigations/INV-2025-001\" is interrupted by another navigation to \"http://localhost:3000/investigations/INV-2025-002\"\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-001\", waiting until \"load\"\u001b[22m\n\n\n  18 |\n  19 |     // 1. Navigate to the first investigation page. Do not wait for the page to be fully loaded.\n> 20 |     page.goto(`/investigations/${investigationId1}`);\n     |          ^\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n  23 |     await page.goto(`/investigations/${investigationId2}`);\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:20:10"
+                        },
+                        {
+                          "location": {
+                            "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                            "column": 16,
+                            "line": 23
+                          },
+                          "message": "Error: page.goto: Test ended.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/investigations/INV-2025-002\", waiting until \"load\"\u001b[22m\n\n\n  21 |\n  22 |     // 2. Immediately navigate to the second investigation page.\n> 23 |     await page.goto(`/investigations/${investigationId2}`);\n     |                ^\n  24 |\n  25 |     // --- End of Rapid Navigation ---\n  26 |\n    at /app/client/tests/e2e/investigation-determinism.spec.ts:23:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-01-03T05:25:26.472Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-webkit-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-webkit-retry1/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/app/client/test-results/investigation-determinism--d7a36-ckly-between-investigations-webkit-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/app/client/tests/e2e/investigation-determinism.spec.ts",
+                        "column": 10,
+                        "line": 20
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "78132b6249702b9102ee-9797fb04d1d629ebd130",
+              "file": "investigation-determinism.spec.ts",
+              "line": 4,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-01-03T05:25:07.415Z",
+    "duration": 20278.494000000002,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

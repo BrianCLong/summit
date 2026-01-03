@@ -10,7 +10,7 @@ export function useSafeQuery<T = any>({
   deps = [],
 }: {
   queryKey: string;
-  fetcher?: () => Promise<T>;
+  fetcher?: (opts: { signal: AbortSignal }) => Promise<T>;
   mock?: T;
   deps?: any[];
 }) {
@@ -24,26 +24,31 @@ export function useSafeQuery<T = any>({
   const memoDeps = useMemo(() => deps, deps);
 
   useEffect(() => {
-    let mounted = true;
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     async function run() {
       setLoading(true);
+      setError(null);
       try {
         if (shouldMock && mock !== undefined) {
           await new Promise((r) => setTimeout(r, 10));
-          if (mounted) setData(mock);
+          if (!signal.aborted) setData(mock);
         } else if (fetcher) {
-          const res = await fetcher();
-          if (mounted) setData(res);
+          // Assuming the fetcher can accept a signal
+          const res = await fetcher({ signal });
+          if (!signal.aborted) setData(res);
         } else {
-          if (mounted) setData(undefined as any);
+          if (!signal.aborted) setData(undefined as any);
         }
-        if (mounted) setError(null);
       } catch (e) {
-        if (mounted) setError(e);
+        if (e.name !== 'AbortError') {
+          setError(e);
+        }
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
         // DEV-only telemetry stub
-        if (shouldMock) {
+        if (shouldMock && !signal.aborted) {
           (window as any).__ui_metrics = (window as any).__ui_metrics || {};
           (window as any).__ui_metrics[queryKey] =
             ((window as any).__ui_metrics[queryKey] || 0) + 1;
@@ -52,7 +57,7 @@ export function useSafeQuery<T = any>({
     }
     run();
     return () => {
-      mounted = false;
+      controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, memoDeps);
