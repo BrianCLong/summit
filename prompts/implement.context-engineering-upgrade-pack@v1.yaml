@@ -1,0 +1,97 @@
+meta:
+  id: implement.context-engineering-upgrade-pack@v1
+  owner: 'intelgraph-architecture-council'
+  purpose: 'Lift-and-shift FlowHunt context-engineering patterns into Summit with production-grade design/backlog/plan.'
+  tags: ['context-engineering', 'rag', 'llm-systems', 'observability', 'security']
+  guardrails:
+    - 'Security-first: all memory retrieval respects tenant boundaries and data labels.'
+    - 'No regressions: each change ships with tests and rollback guidance.'
+    - 'Prefer smaller, higher-precision contexts over maximal token usage.'
+    - 'Preserve provenance and auditability for all summaries and retrieval steps.'
+    - 'Deliver modular, incrementally adoptable interfaces.'
+modelConfig:
+  model: 'gpt-5.1-codex-max'
+  temperature: 0.2
+  maxTokens: 6000
+inputs:
+  target_product: string
+  article_url: string
+  security_model: string
+  observability_scope: string
+  rollout_horizon: string
+
+template: |
+  You are an expert LLM systems architect working on {{target_product}}: a multi-agent, policy-governed intelligence platform with GraphRAG + provenance + observability + multi-tenant security.
+
+  Read and extract the most actionable patterns from this article:
+  {{article_url}}
+
+  GOAL
+  Produce a Summit-specific “Context Engineering Upgrade Pack” that we can implement with minimal regressions.
+
+  OUTPUTS (must deliver all)
+  1) A concise design doc (Markdown) titled:
+     docs/architecture/context-engineering-upgrade-pack.md
+     Include: problem statement, principles, proposed architecture, data schemas, APIs, failure modes, privacy/security, and rollout plan.
+
+  2) A prioritized backlog (10–25 items) with:
+     - title, description, acceptance criteria, risk, effort (S/M/L), and dependencies
+     - group items into: Write / Select / Compress / Isolate / Eval+Obs
+
+  3) An implementation plan that respects “atomic PRs” (one roadmap prompt per PR):
+     - 6–12 PR slices, each independently mergeable, with exact files/modules you’d touch
+     - test strategy per PR (unit/integration/e2e) and required docs updates
+
+  4) A minimal prototype plan (“thin vertical slice”) that proves value quickly:
+     - one agent workflow end-to-end using Write+Select+Compress+Isolate
+     - include mock data if needed; specify metrics and success thresholds
+
+  WHAT TO EXTRACT FROM THE ARTICLE (be precise)
+  A) Summarize the article’s definition of context engineering vs prompt engineering and why it matters for production systems.
+  B) Capture the “four core strategies” (Write, Select, Compress, Isolate) as implementable engineering requirements.
+  C) Capture “context rot” implications and translate into specific mitigations + an evaluation harness.
+  D) Capture best practices: measurement/observability, automated memory management, decay functions, auditability/clarity.
+
+  SUMMIT TRANSLATION REQUIREMENTS (make this concrete)
+  1) Write Context
+     - Define a memory taxonomy aligned to the article (episodic/procedural/semantic).
+     - Propose a unified “MemoryItem” schema: id, type, scope, timestamps, ttl/decay, confidence, provenance/source pointers, security label, pii flags, embeddings pointers, graph links.
+     - Specify storage interfaces (vector + graph + event-log) and how policy (OPA/ABAC) gates access.
+
+  2) Select Context
+     - Design a “Context Assembly Pipeline” that composes the model input from:
+       (a) user message + session state,
+       (b) retrieved knowledge (hybrid: keyword + vector + graph traversal),
+       (c) retrieved tools (tool-RAG; only relevant tool specs),
+       (d) relevant memories (ranked + filtered),
+       (e) policies/rules.
+     - Include reranking and explicit token budgets per section.
+     - Include “bad retrieval” defenses (e.g., irrelevant/unsafe memory injection).
+
+  3) Compress Context
+     - Implement auto-compact triggers (e.g., at threshold of budget usage).
+     - Use hierarchical + targeted summarization (summarize tool/search/log blobs, not just chat).
+     - Preserve provenance: summaries must link back to sources and include “what was dropped.”
+
+  4) Isolate Context
+     - Propose multi-agent separation of concerns (planner/retriever/verifier/synthesizer/etc.).
+     - Define a structured runtime state object where only selected fields are shown to the LLM.
+     - Keep token-heavy artifacts in sandboxes/external stores; pass back only essential extracts.
+
+  5) Evaluation + Observability
+     - Define metrics: correctness, citation/provenance accuracy, latency, token usage, cost, user success.
+     - Add tracing for “what context was shown” at each step (auditable context packs).
+     - Build a “context rot” test suite: long context, distractors, position bias checks, degradation cliffs.
+
+  CONSTRAINTS
+  - No regressions: every change must include tests and clear rollback.
+  - Security-first: all memory and retrieval must respect tenant boundaries and data labels.
+  - Deliver implementable interfaces, not just prose: include pseudo-code or signatures for key components.
+  - Keep the design modular so we can incrementally adopt it.
+
+  DELIVERABLE QUALITY BAR
+  - Be explicit about tradeoffs (token cost of multi-agent, failure modes, privacy leakage).
+  - Provide “default safe” behavior when uncertain (e.g., prefer smaller, higher-precision context).
+  - Use crisp headings, diagrams-as-text (ASCII ok), and ready-to-ticket acceptance criteria.
+
+  Add alignment to {{security_model}} and {{observability_scope}}. Assume rollout horizon {{rollout_horizon}} for sequencing.

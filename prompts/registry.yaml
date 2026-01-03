@@ -28,3 +28,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: implement.context-engineering-upgrade-pack
+    version: v1
+    path: prompts/implement.context-engineering-upgrade-pack@v1.yaml
+    sha256: 968cb56883a3db92a5e1d99970a78ea4be6a13ca6dc080a7df20a7d77e9fbc5c
+    description: Lift-and-shift FlowHunt context-engineering patterns into Summit with secure, measurable rollouts.
+    scope:
+      paths:
+        - docs/architecture/
+        - docs/roadmap/
+        - prompts/
+      domains:
+        - architecture
+        - governance
+        - observability
+        - rag
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
