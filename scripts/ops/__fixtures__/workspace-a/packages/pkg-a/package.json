@@ -1,0 +1,1 @@
+{"name":"pkg-a","scripts":{"lint":"echo lint","test":"echo test","build":"echo build","typecheck":"echo typecheck"},"dependencies":{"jest":"^29.0.0"}}

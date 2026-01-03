@@ -1,0 +1,1 @@
+{"name":"pkg-b","scripts":{"test":"echo test"},"dependencies":{"vitest":"^1.0.0"}}

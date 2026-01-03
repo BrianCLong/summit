@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
-    "verify": "tsx scripts/verify.ts",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
@@ -85,8 +85,9 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "ops:readiness": "npx tsx scripts/ops/readiness-check.ts",
+    "ops:readiness:report": "npx tsx scripts/ops/readiness-check.ts --writeReport"
   },
   "keywords": [
     "intelligence-analysis",
