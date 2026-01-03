@@ -1,0 +1,28 @@
+{
+  "issue_number": 11928,
+  "title": "Build event-driven architecture with message bus",
+  "url": "https://github.com/BrianCLong/summit/pull/11928",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-21T05:52:44Z",
+  "createdAt": "2025-11-20T10:06:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12924,
+        "url": "https://github.com/BrianCLong/summit/pull/12924",
+        "mergedAt": "2025-11-30T14:43:00Z",
+        "title": "🏗️ Recovery (partial): Build event-driven architecture with message bus"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
