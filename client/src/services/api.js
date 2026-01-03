@@ -3,6 +3,14 @@ export function apiBase() {
   return root.replace(/\/$/, '');
 }
 
+export function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
 export async function apiFetch(path, opts = {}) {
   const token = localStorage.getItem('token');
   const headers = {

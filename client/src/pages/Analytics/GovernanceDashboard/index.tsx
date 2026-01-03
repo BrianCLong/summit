@@ -16,7 +16,6 @@ import {
   Grid,
   Card,
   CardContent,
-  CardHeader,
   Select,
   MenuItem,
   FormControl,
@@ -26,7 +25,6 @@ import {
   Alert,
   IconButton,
   Tooltip,
-  Divider,
   List,
   ListItem,
   ListItemIcon,
@@ -168,7 +166,7 @@ const GovernanceDashboard: React.FC = () => {
   const policies = usePolicyEffectiveness(timePreset, 5);
   const anomalies = useAnomalies(timePreset);
 
-  const handleTimeRangeChange = useCallback((event: any) => {
+  const handleTimeRangeChange = useCallback((event: { target: { value: string } }) => {
     setTimePreset(event.target.value);
   }, []);
 
@@ -223,7 +221,7 @@ const GovernanceDashboard: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Health Score */}
-        <Grid item xs={12} md={3}>
+        <Grid size={{ xs: 12, md: 3 }}>
           <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               System Health
@@ -238,13 +236,13 @@ const GovernanceDashboard: React.FC = () => {
         </Grid>
 
         {/* Verdict Distribution */}
-        <Grid item xs={12} md={9}>
+        <Grid size={{ xs: 12, md: 9 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Verdict Distribution
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <MetricCard
                   title="Allowed"
                   value={metrics.data?.verdictDistribution.allow || 0}
@@ -252,7 +250,7 @@ const GovernanceDashboard: React.FC = () => {
                   icon={<CheckIcon fontSize="large" />}
                 />
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <MetricCard
                   title="Denied"
                   value={metrics.data?.verdictDistribution.deny || 0}
@@ -260,7 +258,7 @@ const GovernanceDashboard: React.FC = () => {
                   icon={<BlockIcon fontSize="large" />}
                 />
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <MetricCard
                   title="Escalated"
                   value={metrics.data?.verdictDistribution.escalate || 0}
@@ -268,7 +266,7 @@ const GovernanceDashboard: React.FC = () => {
                   icon={<WarningIcon fontSize="large" />}
                 />
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <MetricCard
                   title="Warned"
                   value={metrics.data?.verdictDistribution.warn || 0}
@@ -288,7 +286,7 @@ const GovernanceDashboard: React.FC = () => {
         </Grid>
 
         {/* Top Policies */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Top Active Policies
@@ -321,7 +319,7 @@ const GovernanceDashboard: React.FC = () => {
         </Grid>
 
         {/* Anomalies */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Detected Anomalies
@@ -368,7 +366,7 @@ const GovernanceDashboard: React.FC = () => {
         </Grid>
 
         {/* Trends Chart Placeholder */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Verdict Trends

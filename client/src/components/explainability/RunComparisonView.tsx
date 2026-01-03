@@ -15,7 +15,6 @@ import {
   Alert,
   Stack,
   Grid,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -31,10 +30,14 @@ import {
 } from '@mui/icons-material';
 
 interface RunComparison {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   run_a: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   run_b: any;
   deltas: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     input_diff: Record<string, { before: any; after: any }>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     output_diff: Record<string, { before: any; after: any }>;
     confidence_delta: number;
     duration_delta_ms: number | null;
@@ -84,6 +87,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
     if (runIdA && runIdB) {
       handleCompare();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runIdA, runIdB]);
 
   const getConfidenceTrend = (delta: number) => {
@@ -156,7 +160,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
                 Summary
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
@@ -182,7 +186,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
                   </Card>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
@@ -302,7 +306,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
                         </TableCell>
                         <TableCell>
                           <Grid container spacing={2}>
-                            <Grid item xs={6}>
+                            <Grid size={6}>
                               <Typography variant="caption" color="text.secondary">
                                 Before (Run A)
                               </Typography>
@@ -310,7 +314,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
                                 {JSON.stringify(diff.before, null, 2)}
                               </pre>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={6}>
                               <Typography variant="caption" color="text.secondary">
                                 After (Run B)
                               </Typography>
@@ -344,7 +348,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
                         </TableCell>
                         <TableCell>
                           <Grid container spacing={2}>
-                            <Grid item xs={6}>
+                            <Grid size={6}>
                               <Typography variant="caption" color="text.secondary">
                                 Before (Run A)
                               </Typography>
@@ -352,7 +356,7 @@ const RunComparisonView: React.FC<RunComparisonViewProps> = ({ runIdA, runIdB })
                                 {JSON.stringify(diff.before, null, 2)}
                               </pre>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid size={6}>
                               <Typography variant="caption" color="text.secondary">
                                 After (Run B)
                               </Typography>

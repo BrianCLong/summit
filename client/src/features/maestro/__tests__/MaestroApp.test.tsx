@@ -6,10 +6,9 @@ import userEvent from '@testing-library/user-event';
 import { MaestroApp } from '../../maestro/MaestroApp';
 
 jest.mock('react-virtualized', async () => {
-  const actual =
-    await jest.importActual<typeof import('react-virtualized')>(
-      'react-virtualized',
-    );
+  const actual = (await jest.importActual(
+    'react-virtualized',
+  )) as typeof import('react-virtualized');
   return {
     ...actual,
     AutoSizer: ({

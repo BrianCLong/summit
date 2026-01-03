@@ -53,9 +53,7 @@ import { usePolicySimulator, usePolicies } from '../../hooks/usePolicies';
 import {
   SimulationRequest,
   SimulationContext,
-  SimulationResult,
   PolicyRule,
-  ImpactAnalysis,
   ManagedPolicy,
 } from '../../services/policy-api';
 
@@ -164,8 +162,9 @@ const PolicySimulator: React.FC = () => {
       JSON.parse(json);
       setJsonErrors((prev) => ({ ...prev, [field]: undefined }));
       return true;
-    } catch (err: any) {
-      setJsonErrors((prev) => ({ ...prev, [field]: err.message }));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Invalid JSON';
+      setJsonErrors((prev) => ({ ...prev, [field]: errorMessage }));
       return false;
     }
   }, []);
@@ -268,7 +267,7 @@ const PolicySimulator: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Left Panel - Input */}
-        <Grid item xs={12} lg={6}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Paper sx={{ p: 2 }}>
             <Tabs value={tab} onChange={handleTabChange} sx={{ mb: 2 }}>
               <Tab label="Simulate" />
@@ -494,7 +493,7 @@ const PolicySimulator: React.FC = () => {
         </Grid>
 
         {/* Right Panel - Results */}
-        <Grid item xs={12} lg={6}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           {/* Simulation Result */}
           {simulator.result && (
             <Card sx={{ mb: 2 }}>
@@ -596,14 +595,14 @@ const PolicySimulator: React.FC = () => {
                     <AccordionDetails>
                       <Grid container spacing={2}>
                         {simulator.result.comparisonDiff.actionChanged && (
-                          <Grid item xs={12}>
+                          <Grid size={12}>
                             <Alert severity="warning">
                               Action changed: {simulator.result.comparisonDiff.beforeAction} → {simulator.result.comparisonDiff.afterAction}
                             </Alert>
                           </Grid>
                         )}
                         {simulator.result.comparisonDiff.addedRules.length > 0 && (
-                          <Grid item xs={12}>
+                          <Grid size={12}>
                             <Typography variant="subtitle2" color="success.main">
                               Added Rules:
                             </Typography>
@@ -619,7 +618,7 @@ const PolicySimulator: React.FC = () => {
                           </Grid>
                         )}
                         {simulator.result.comparisonDiff.removedRules.length > 0 && (
-                          <Grid item xs={12}>
+                          <Grid size={12}>
                             <Typography variant="subtitle2" color="error.main">
                               Removed Rules:
                             </Typography>
@@ -653,7 +652,7 @@ const PolicySimulator: React.FC = () => {
                 </Box>
 
                 <Grid container spacing={2} sx={{ mb: 2 }}>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                       <Typography variant="h4">
                         {simulator.impactAnalysis.estimatedAffectedUsers}
@@ -663,7 +662,7 @@ const PolicySimulator: React.FC = () => {
                       </Typography>
                     </Paper>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                       <Typography variant="h4">
                         {simulator.impactAnalysis.estimatedAffectedResources}
