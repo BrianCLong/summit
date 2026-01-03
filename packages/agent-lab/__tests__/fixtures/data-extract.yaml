@@ -1,0 +1,49 @@
+metadata:
+  id: data-extraction-normalize-graph
+  name: Data Extraction → Normalize → Entity Resolve → Graph Ingest
+  description: Guided workflow that prepares graph-ready data
+  risk_level: medium
+  tags:
+    - extraction
+    - graph
+steps:
+  - id: extract
+    title: Data Extraction
+    description: Pulls structured data from source
+    prompt: Provide source URL and format
+    input:
+      prompt: Provide source details
+      schema:
+        source_url: { type: string }
+        format: { type: string }
+    tool:
+      tool_id: extractor
+      input_mapping: {}
+      output_mapping: {}
+    retries: 1
+  - id: normalize
+    title: Normalize
+    description: Standardize and clean records
+    prompt: Normalize fields
+    tool:
+      tool_id: normalizer
+      input_mapping: {}
+      output_mapping: {}
+    retries: 1
+  - id: entity-resolve
+    title: Entity Resolution
+    description: Deduplicate entities
+    prompt: Resolve entities
+    tool:
+      tool_id: resolver
+      input_mapping: {}
+      output_mapping: {}
+    retries: 2
+  - id: graph-ingest
+    title: Graph Ingest
+    description: Write normalized entities to graph store
+    prompt: Ingest to graph
+    tool:
+      tool_id: graph-writer
+      input_mapping: {}
+      output_mapping: {}

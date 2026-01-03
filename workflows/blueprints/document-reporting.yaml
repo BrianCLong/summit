@@ -1,0 +1,64 @@
+metadata:
+  id: doc-summarize-claim-check-report
+  name: Doc Set → Summarize → Claim-check → Produce Report w/ citations
+  description: Guided workflow to summarize a document set and emit a cited report
+  risk_level: low
+  tags:
+    - summarization
+    - governance
+steps:
+  - id: collect-docs
+    title: Collect document set
+    description: Upload or paste documents to summarize
+    prompt: "Provide documents to summarize (upload or paste text)"
+    input:
+      prompt: "Document set metadata"
+      schema:
+        doc_sources: { type: array }
+        audience: { type: string }
+      validation:
+        required: [doc_sources]
+    tool:
+      tool_id: doc-bundler
+      input_mapping: {}
+      output_mapping:
+        bundle_path: bundle
+    retries: 1
+  - id: summarize
+    title: Summarize documents
+    description: Generate concise summary with citations
+    prompt: "Summarize bundle"
+    tool:
+      tool_id: summarizer
+      input_mapping:
+        bundle: bundle
+      output_mapping:
+        summary: summary
+        citations: citations
+    retries: 2
+  - id: claim-check
+    title: Claim-check
+    description: Validate claims against citations
+    prompt: "Verify claims"
+    tool:
+      tool_id: claim-checker
+      input_mapping:
+        summary: summary
+        citations: citations
+      output_mapping:
+        verified_summary: verified_summary
+        issues: issues
+    retries: 2
+    fallback_step: summarize
+  - id: report
+    title: Produce report
+    description: Create exportable report with citations
+    prompt: "Generate final report"
+    tool:
+      tool_id: report-writer
+      input_mapping:
+        summary: verified_summary
+        citations: citations
+      output_mapping:
+        report_path: report
+    stop_condition: report
