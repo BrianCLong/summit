@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T04:06:20Z",
+  "revision_note": "Documented Summit DX orchestration blueprint and governance-first agent runtime plan",
   "initiatives": [
     {
       "id": "A",
