@@ -1,0 +1,42 @@
+name: Ops Evidence Pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag or SHA to check'
+        required: true
+        default: 'main'
+
+jobs:
+  generate-evidence:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Generate Evidence Pack
+        run: ./scripts/verification/generate_ops_evidence_pack.sh
+
+      - name: Upload Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ops-evidence-pack
+          path: artifacts/ops-evidence/*.tar.gz
+          retention-days: 90
