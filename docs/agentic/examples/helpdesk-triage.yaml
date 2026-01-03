@@ -1,0 +1,136 @@
+version: 0.1.0
+metadata:
+  name: helpdesk-triage
+  description: Intake → retrieve → decide → escalate with bounded autonomy
+  owner: ops-team
+  labels: [helpdesk, triage, ops]
+  created_at: 2026-01-03T00:00:00Z
+channels:
+  natural_language:
+    transport: message_bus
+    codec: markdown
+  control:
+    transport: grpc
+    codec: json
+agents:
+  - id: intake
+    role: Collect user issue details and normalize intent
+    capability_contract: intake.v1
+    model: router://summit/default
+    tools: [intent-normalizer]
+    policies: [opa://tool-allowlist/intake]
+    channels: [natural_language]
+  - id: retriever
+    role: Fetch KB snippets and ticket history
+    capability_contract: retrieval.v1
+    model: router://summit/default
+    tools: [kb-search, ticket-search]
+    policies: [opa://tool-allowlist/retriever]
+    channels: [control]
+  - id: decider
+    role: Decide resolution vs escalation
+    capability_contract: decision.v1
+    model: router://summit/high-precision
+    tools: [resolution-writer, escalation-router]
+    policies: [opa://tool-allowlist/decider]
+    channels: [natural_language, control]
+tools:
+  - id: intent-normalizer
+    type: internal
+    adapter: nl-intent-normalizer
+    capability_contract: intent-normalizer.v1
+    policies: [opa://tool-allowlist/intent]
+    secrets: []
+    redaction:
+      patterns: [pii, credentials]
+    observability:
+      emit_spans: true
+  - id: kb-search
+    type: internal
+    adapter: graph-rag
+    capability_contract: search.v1
+    policies: [opa://tool-allowlist/search]
+    secrets: []
+    redaction:
+      patterns: [pii, secrets]
+    observability:
+      emit_spans: true
+  - id: ticket-search
+    type: internal
+    adapter: ticket-query
+    capability_contract: ticket-search.v1
+    policies: [opa://tool-allowlist/ticket]
+    secrets: [handle://helpdesk-db]
+    redaction:
+      patterns: [pii, secrets]
+    observability:
+      emit_spans: true
+  - id: resolution-writer
+    type: internal
+    adapter: response-writer
+    capability_contract: response-writer.v1
+    policies: [opa://tool-allowlist/resolve]
+    secrets: []
+    redaction:
+      patterns: [pii]
+    observability:
+      emit_spans: true
+  - id: escalation-router
+    type: external
+    adapter: external/agent-bridge
+    capability_contract: escalation.v1
+    policies: [opa://tool-allowlist/escalate]
+    secrets: [handle://pagerduty-key]
+    redaction:
+      patterns: [tokens]
+    observability:
+      emit_spans: true
+workflows:
+  - id: triage
+    trigger: user
+    entry_agent: intake
+    steps:
+      - agent: intake
+        on_success: retrieve
+        on_failure: human_escalation
+      - agent: retriever
+        input: ${intake.output}
+        on_success: decide
+        on_failure: human_escalation
+      - agent: decider
+        input: ${retriever.output}
+        on_success: resolve_or_escalate
+        on_failure: human_escalation
+    handoffs:
+      - from: intake
+        to: retriever
+        fields: [issue_summary, user_id]
+      - from: retriever
+        to: decider
+        fields: [kb_snippets, ticket_history]
+    escalations:
+      - condition: policy_denied || budget_exceeded || handle_invalid
+        target: human_escalation
+security:
+  secret_broker:
+    service: secret-handle-broker
+    default_ttl: 900s
+  redaction_rules: [pii, credentials, secrets]
+  budget:
+    tokens: 12000
+    wall_time_ms: 20000
+  capability_receipts:
+    required: true
+    signer: summit-root
+observability:
+  trace:
+    namespace: agentic
+    sampling: 0.5
+    exporter: otlp
+  metrics:
+    tokens: true
+    latency_ms: true
+    policy_decisions: true
+  logs:
+    audit: s3://provenance-ledger/helpdesk
+    retention_days: 90
