@@ -12,16 +12,10 @@ import type {
   HuntConfiguration,
   ThreatHypothesis,
   EnrichedFinding,
-  HuntFinding,
   LLMChainResult,
   QueryValidationStatus,
   RemediationPlan,
 } from '../types';
-import type {
-  HypothesisGenerationOutput,
-  QueryGenerationOutput,
-  ResultAnalysisOutput,
-} from '../LLMChainExecutor';
 
 
 
@@ -528,7 +522,7 @@ describe('ThreatHuntingOrchestrator', () => {
 
     it('should emit phase_started events during execution', async () => {
       const phases: string[] = [];
-      orchestrator.on('phase_started', (event) => {
+      orchestrator.on('phase_started', (event: any) => {
         phases.push(event.data.phase);
       });
 
@@ -723,7 +717,7 @@ describe('LLMChainExecutor', () => {
           ctiSources: [],
           osintSources: [],
         },
-      } as HuntContext;
+      } as unknown as HuntContext;
 
       await executor.generateHypotheses(context);
 
@@ -857,7 +851,7 @@ describe('AutoRemediationHooks', () => {
 
       await hooks.approvePlan(plan.id, 'test-user');
 
-      const updatedPlan = hooks.getActivePlans().find((p) => p.id === plan.id);
+      const updatedPlan = hooks.getActivePlans().find((p: any) => p.id === plan.id);
       expect(updatedPlan?.status).toBe('approved');
       expect(updatedPlan?.approvedBy).toBe('test-user');
     });
@@ -876,7 +870,7 @@ describe('AutoRemediationHooks', () => {
 
       // The created plan should be in pending approvals
       expect(Array.isArray(pending)).toBe(true);
-      const ourPlan = pending.find((p) => p.id === plan.id);
+      const ourPlan = pending.find((p: any) => p.id === plan.id);
       expect(ourPlan).toBeDefined();
       expect(ourPlan?.status).toBe('pending_approval');
     });

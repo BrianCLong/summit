@@ -1,0 +1,40 @@
+{
+  "issue_number": 12653,
+  "title": "feat: add multimodal frontier architecture and schemas",
+  "url": "https://github.com/BrianCLong/summit/pull/12653",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9710667994,
+      "node_id": "LA_kwDOPaNncM8AAAACQs0I2g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20feature",
+      "name": "type: feature",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-18T01:46:51Z",
+  "createdAt": "2025-11-28T07:38:19Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
