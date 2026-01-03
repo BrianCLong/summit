@@ -10,11 +10,9 @@
     "paths": {
       "@maestro/core/*": ["../maestro-core/dist/*"]
     },
-    "types": []
+    "types": ["node"]
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": [
     {
       "path": "../types"

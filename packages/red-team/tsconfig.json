@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "composite": true,
-    "types": [],
+    "types": ["node"],
     "noEmit": false
   },
   "include": ["src/**/*"],

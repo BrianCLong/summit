@@ -6,7 +6,7 @@
     "allowImportingTsExtensions": false,
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "types": []
+    "types": ["node"]
   },
   "include": ["src"],
   "references": [

@@ -4,7 +4,7 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": []
+    "types": ["node"]
   },
   "include": ["src"],
   "references": [

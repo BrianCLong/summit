@@ -6,9 +6,9 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": true
-    ,"allowImportingTsExtensions": false,
-    "types": []
+    "composite": true,
+    "allowImportingTsExtensions": false,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],

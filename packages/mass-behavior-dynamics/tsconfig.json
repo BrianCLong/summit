@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "noEmit": false,
-    "types": [],
+    "types": ["node"],
     "typeRoots": ["../../node_modules/@types", "./node_modules/@types"],
     "allowImportingTsExtensions": false
   },

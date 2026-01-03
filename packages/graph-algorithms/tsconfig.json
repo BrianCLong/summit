@@ -9,7 +9,7 @@
     "allowImportingTsExtensions": false,
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
-    "types": []
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests", "src/**/*.test.ts"]

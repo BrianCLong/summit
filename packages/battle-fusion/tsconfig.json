@@ -7,7 +7,7 @@
     "declarationMap": true,
     "noEmit": false,
     "composite": true,
-    "types": [],
+    "types": ["node"],
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "allowImportingTsExtensions": false,
     "baseUrl": ".",

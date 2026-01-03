@@ -15,6 +15,7 @@
   "devDependencies": {
     "@jest/globals": "^30.0.0",
     "@types/jest": "^30.0.0",
+    "@types/node": "20.19.27",
     "typescript": "^5.9.3"
   },
   "exports": {

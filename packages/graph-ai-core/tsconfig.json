@@ -10,11 +10,9 @@
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,
-    "types": []
+    "types": ["node"]
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": [
     {
       "path": "../types"
