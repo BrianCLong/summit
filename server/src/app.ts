@@ -68,6 +68,7 @@ import { phantomLimbRouter } from './routes/phantom_limb.js';
 import { actionsRouter } from './routes/actions.js';
 import { echelon2Router } from './routes/echelon2.js';
 import { mnemosyneRouter } from './routes/mnemosyne.js';
+import { gamMemoryRouter } from './routes/gam-memory.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
@@ -398,6 +399,7 @@ export const createApp = async () => {
   app.use('/api/phantom-limb', phantomLimbRouter);
   app.use('/api/echelon2', echelon2Router);
   app.use('/api/mnemosyne', mnemosyneRouter);
+  app.use('/api', gamMemoryRouter);
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
