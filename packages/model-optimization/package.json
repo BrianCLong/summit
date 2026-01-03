@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@intelgraph/deep-learning-core": "workspace:*",
+    "@intelgraph/platform-telemetry": "workspace:*",
     "zod": "^4.1.12"
   },
   "devDependencies": {

@@ -53,6 +53,27 @@ Features can be toggled via environment variables without code changes.
 
 See `server/src/config/mvp1-features.ts` for a full list of available flags.
 
+### 4. RLVR PEFT Policy Guardrails
+
+Enable RLVR-aware PEFT defaults when running reinforcement-learning-from-verifier (RLVR) tuning jobs.
+
+- **Environment Variables:**
+  - `RLVR_ENABLED` (default: `false`)
+  - `RLVR_PEFT_ADAPTER` (options: `lora`, `dora`, `adalora`, `miss`; default: `dora` when RLVR is enabled)
+  - `RLVR_PEFT_RANK` (default: `32`; enforced minimum: `8` unless overridden)
+  - `RLVR_PEFT_ALLOW_UNSAFE` (default: `false`; required to bypass guardrails for SVD-init or rank<8)
+  - `RLVR_PEFT_WARN_ONLY` (default: `false`; converts hard errors to warnings for experimentation)
+
+**Guardrails:**
+
+- Blocks SVD-initialized adapters (`pissa`, `milora`, `svd_init_*`) under RLVR unless `RLVR_PEFT_ALLOW_UNSAFE=true`.
+- Blocks ranks below `8` under RLVR unless explicitly overridden.
+- Warns (override required) for extreme parameter reductions such as `vera`, `rank1`, `ln_tune_only`, or `ia3_only`.
+- Prefers structural adapters (DoRA/AdaLoRA/MiSS) over vanilla LoRA for RLVR workloads.
+
+**Why:** Based on arXiv:2512.23165, structural PEFT variants outperform vanilla LoRA for RLVR, SVD-initialized adapters can
+collapse, and aggressive parameter reduction bottlenecks reasoning.
+
 ---
 
 ## 🔒 Security Configuration
