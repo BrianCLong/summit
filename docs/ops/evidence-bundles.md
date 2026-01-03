@@ -84,3 +84,18 @@ Each bundle captures what ran in CI and what artifacts were produced. Mandatory 
 - Attach the bundle JSON (and signatures, if present) to incident reviews or change records.
 - The `summary` block provides quick answers for "what tests ran" and "what security checks were enforced"; the `artifacts` lists give direct hash evidence for every shipped asset.
 - Because bundles are keyed by commit SHA, evidence can be correlated to tags/releases without ambiguity.
+
+## Access Requests & Exceptions
+
+Access to retained evidence (beyond standard CI visibility) or requests for retention exceptions (e.g., Legal Holds) must be formally requested.
+
+**When to use:**
+- Audit or Compliance inquiries requiring bulk evidence export.
+- Legal holds requiring suspension of purge policies.
+- Incident response needing access to cold storage/archives.
+
+**Process:**
+1.  File an [Ops Evidence Access Request](../../.github/ISSUE_TEMPLATE/ops-evidence-access-request.yml) (or use the [Markdown Template](templates/OPS_EVIDENCE_ACCESS_REQUEST.md)).
+2.  Obtain required approvals (Engineering Owner + Security/Compliance).
+    - **Legal Hold** requests require Legal approval.
+3.  Record the outcome and link the approved issue ID in the evidence index notes.

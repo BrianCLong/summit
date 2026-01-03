@@ -1,0 +1,130 @@
+name: Ops Evidence Access / Exception Request
+description: Request access to retained evidence for audits, legal holds, or investigations.
+title: "[Evidence Request]: <Short Description>"
+labels: ["ops", "evidence", "compliance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Ops Evidence Access / Exception Request
+
+        Use this form to request access to retained operational evidence (logs, artifacts, bundles) or to request a retention exception.
+
+        **Governing Policies:**
+        - [Retention Policy](../../docs/governance/data-retention-policy.md)
+        - [Incident Response](../../docs/ops/INCIDENT_RESPONSE.md)
+        - [Evidence Bundles](../../docs/ops/evidence-bundles.md)
+
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: Request Type
+      options:
+        - Audit / Compliance
+        - Legal hold
+        - Incident response
+        - Engineering investigation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence_identifier
+    attributes:
+      label: Evidence Identifier
+      description: Provide specific identifiers such as Release Tags, ISO Weeks, Commit SHAs, or Evidence Bundle references.
+      placeholder: |
+        - Release: v1.2.3
+        - Commit: 8f3a2c1
+        - Bundle Artifact: evidence-bundle-8f3a2c1
+    validations:
+      required: true
+
+  - type: input
+    id: time_window
+    attributes:
+      label: Time Window (UTC)
+      placeholder: YYYY-MM-DD HH:MM to YYYY-MM-DD HH:MM
+    validations:
+      required: true
+
+  - type: textarea
+    id: justification
+    attributes:
+      label: Justification
+      description: Explain why this access is required.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope Requested
+      options:
+        - label: Evidence pack tarball
+        - label: Export receipt(s)
+        - label: Logs only
+        - label: Manifest/checksums only
+
+  - type: dropdown
+    id: access_method
+    attributes:
+      label: Access Method Requested
+      options:
+        - Provide workflow artifact link
+        - Export to external storage (protected)
+        - Attach to release (if policy allows)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: approvals
+    attributes:
+      label: Approvals & Acknowledgements
+      options:
+        - label: I acknowledge the [Retention Policy](../../docs/governance/data-retention-policy.md)
+          required: true
+        - label: I acknowledge least-privilege access principles
+          required: true
+        - label: I acknowledge sensitive data handling requirements
+          required: true
+
+  - type: input
+    id: owner
+    attributes:
+      label: Engineering Owner
+      placeholder: "@username"
+
+  - type: input
+    id: security_approver
+    attributes:
+      label: Security/Compliance Approver
+      placeholder: "@username"
+
+  - type: input
+    id: legal_approver
+    attributes:
+      label: Legal Approver
+      description: Required only for Legal Hold requests.
+      placeholder: "@username"
+
+  - type: textarea
+    id: handling_notes
+    attributes:
+      label: Handling Notes
+      description: Specify data minimization expectations and redaction requirements.
+      value: |
+        **Minimization:** Only request the specific artifacts needed.
+        **Redaction:** PII must be redacted unless explicitly authorized.
