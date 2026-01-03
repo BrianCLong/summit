@@ -4,6 +4,7 @@ import { MockProvider } from './providers/mock.js';
 import { CostControlPolicy, LatencyPolicy } from './policies/index.js';
 import { PIIGuardrail } from './safety.js';
 import { defaultConfig, LLMRouterConfig } from './config.js';
+import { PromptInjectionGuardrail } from './security/guardrails.js';
 import { ProviderAdapter, RoutingPolicy, SafetyGuardrail } from './types.js';
 
 export function createLLMRouter(config: LLMRouterConfig = defaultConfig): LLMRouter {
@@ -28,6 +29,16 @@ export function createLLMRouter(config: LLMRouterConfig = defaultConfig): LLMRou
     const guardrails: SafetyGuardrail[] = [];
     if (config.guardrails.piiRedaction.enabled) {
         guardrails.push(new PIIGuardrail());
+    }
+    if (config.security.firewall.enabled) {
+        guardrails.push(new PromptInjectionGuardrail({
+            firewall: {
+                strictThreshold: config.security.firewall.strictThreshold,
+                stepUpThreshold: config.security.firewall.stepUpThreshold,
+                blockThreshold: config.security.firewall.blockThreshold,
+            },
+            toolPermissions: config.security.tools.enabled ? config.security.tools.permissions : undefined,
+        }));
     }
 
     return new LLMRouter({

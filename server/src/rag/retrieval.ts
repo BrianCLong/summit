@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { pg } from '../db/pg.js';
 import { Logger } from 'pino';
+import { PromptFirewall } from '../llm/security/promptFirewall.js';
+import { RetrievedChunk } from '../llm/types.js';
 
 export interface RetrievalQuery {
   tenantId: string;
@@ -13,12 +15,7 @@ export interface RetrievalQuery {
 }
 
 export interface RetrievalResult {
-  snippets: {
-    text: string;
-    docId: string;
-    score: number;
-    metadata: any;
-  }[];
+  snippets: RetrievedChunk[];
 }
 
 // Stub for Embedding Service
@@ -28,7 +25,11 @@ async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 export class KnowledgeFabricRetrievalService {
-  constructor(private logger: Logger) {}
+  private firewall: PromptFirewall;
+
+  constructor(private logger: Logger) {
+    this.firewall = new PromptFirewall({});
+  }
 
   async search(query: RetrievalQuery): Promise<RetrievalResult> {
     const limit = query.limit || 5;
@@ -62,14 +63,16 @@ export class KnowledgeFabricRetrievalService {
     try {
       const rows = await pg.manyOrNone(sql, params);
 
-      return {
-        snippets: rows.map(r => ({
-          text: r.text,
-          docId: r.document_id,
-          score: r.score,
-          metadata: r.metadata
-        }))
-      };
+      const rawSnippets: RetrievedChunk[] = rows.map(r => ({
+        text: r.text,
+        docId: r.document_id,
+        score: r.score,
+        metadata: r.metadata
+      }));
+
+      const guarded = rawSnippets.map(chunk => this.firewall.evaluateRetrievalChunk(chunk));
+
+      return { snippets: guarded };
     } catch (err: any) {
       this.logger.error({ err, query }, 'Retrieval failed');
       return { snippets: [] };
