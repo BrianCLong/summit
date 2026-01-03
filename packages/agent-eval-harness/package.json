@@ -1,0 +1,14 @@
+{
+  "name": "@intelgraph/agent-eval-harness",
+  "version": "0.1.0",
+  "description": "Agent evaluation harness with mock provider and dataset registry support",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint src --ext .ts",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}

@@ -1,0 +1,81 @@
+version: 1
+registry: agent-dataset-registry
+last_reviewed: 2026-01-03
+notes: >
+  provenance_required marks datasets that must have verifiable lineage before they are allowed in
+  Summit pipelines. Entries mirror the survey "From Language to Action: A Review of LLMs as
+  Autonomous Agents and Tool Users" and are intended for governance visibility, not automatic
+  ingestion.
+datasets:
+  - id: toolbench
+    name: ToolBench / ToolEval
+    category: tool_use
+    license: unknown
+    source_url: https://github.com/OpenBMB/ToolBench
+    intended_use: eval
+    notes: Tool-use benchmark with ToolEval scoring and thousands of APIs
+    provenance_required: true
+  - id: mind2web
+    name: Mind2Web
+    category: web_agent
+    license: unknown
+    source_url: https://github.com/OSU-NLP-Group/Mind2Web
+    intended_use: eval
+    notes: Grounded web agent benchmark for real websites
+    provenance_required: true
+  - id: humaneval
+    name: HumanEval
+    category: code
+    license: MIT
+    source_url: https://github.com/openai/human-eval
+    intended_use: eval
+    notes: Code generation function completion set
+    provenance_required: true
+  - id: gsm8k
+    name: GSM8K
+    category: reasoning
+    license: MIT
+    source_url: https://github.com/openai/gsm8k
+    intended_use: eval
+    notes: Grade school math word problems
+    provenance_required: true
+  - id: mmlu
+    name: MMLU
+    category: reasoning
+    license: unknown
+    source_url: https://github.com/hendrycks/test
+    intended_use: eval
+    notes: Multi-task language understanding benchmark
+    provenance_required: true
+  - id: gaia
+    name: GAIA Benchmark
+    category: tool_use
+    license: unknown
+    source_url: https://huggingface.co/datasets/gaia-benchmark/GAIA
+    intended_use: eval
+    notes: General AI assistant tasks combining tools and reasoning
+    provenance_required: true
+  - id: bigbench
+    name: BIG-bench
+    category: reasoning
+    license: unknown
+    source_url: https://github.com/google/BIG-bench
+    intended_use: eval
+    notes: Broad general language understanding benchmark
+    provenance_required: true
+  - id: pku-saferlhf
+    name: PKU SafeRLHF
+    category: safety
+    license: CC-BY-SA-4.0
+    source_url: https://huggingface.co/datasets/PKU-Alignment/PKU-SafeRLHF
+    intended_use: train
+    notes: Safety-focused preference dataset for RLHF
+    provenance_required: true
+  - id: hh-rlhf
+    name: Anthropic HH-RLHF
+    category: safety
+    license: CC-BY-SA-4.0
+    source_url: https://huggingface.co/datasets/Anthropic/hh-rlhf
+    intended_use: train
+    notes: Helpful and harmless alignment conversations
+    provenance_required: true

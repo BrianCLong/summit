@@ -119,6 +119,16 @@ Our CI pipeline ("Fast Lane") enforces:
 
 See: TESTING.md
 
+## Agent Evaluation Harness
+
+Run the mock, deterministic agent evaluation suite inspired by the "From Language to Action" survey:
+
+```bash
+pnpm eval:agent -- --suite tool-use-mini --report ./artifacts/agent-eval.json
+```
+
+The command prints a human-readable summary (success rate, tool call totals, and mean latency) and writes a JSON report when `--report` is provided. Dataset governance metadata for the suites lives in `docs/datasets/agent-dataset-registry.yaml`.
+
 ---
 
 ## Contributing
