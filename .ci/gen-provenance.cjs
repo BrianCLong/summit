@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import fs from 'fs';
-import { createHash } from 'crypto';
-import { execSync } from 'child_process';
+const fs = require('fs');
+const { createHash } = require('crypto');
+const { execSync } = require('child_process');
 
 function sha256(path) {
   const buf = fs.readFileSync(path);

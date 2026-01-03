@@ -177,6 +177,10 @@ pr-release:
 	  --state "$(STATE_FILE)" \
 	  --node "$(NODE_VERSION)"
 
+provenance:
+	@node .ci/gen-provenance.cjs > provenance.json && node .ci/verify-provenance.cjs provenance.json
+
+
 
 
 ci-check:
