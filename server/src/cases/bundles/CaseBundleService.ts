@@ -37,7 +37,7 @@ const DEFAULT_INCLUDE: IncludeConfig = {
 };
 
 export class CaseBundleService {
-  constructor(private readonly store: CaseBundleStore = new FixtureCaseBundleStore()) {}
+  constructor(private readonly store: CaseBundleStore = new FixtureCaseBundleStore()) { }
 
   async exportCases(
     caseIds: string[],
@@ -364,7 +364,17 @@ export class CaseBundleService {
     const loaded: Array<{ manifest: CaseBundleManifestEntry; parsed: T }> = [];
 
     for (const entry of orderedEntries) {
-      const absolutePath = path.join(baseDir, entry.path);
+      // Prevent Path Traversal by resolving and verifying the path is within baseDir
+      const normalizedPath = path.normalize(entry.path);
+      if (normalizedPath.startsWith('..') || path.isAbsolute(normalizedPath)) {
+        throw new Error(`invalid_entry_path:${entry.id}`);
+      }
+
+      const absolutePath = path.join(baseDir, normalizedPath);
+      if (!absolutePath.startsWith(path.resolve(baseDir))) {
+        throw new Error(`path_traversal_detected:${entry.id}`);
+      }
+
       const fileContent = await fs.readFile(absolutePath, 'utf-8');
       const computedHash = this.hashString(fileContent);
       if (computedHash !== entry.hash) {
