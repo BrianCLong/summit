@@ -1,0 +1,53 @@
+{
+  "issue_number": 13559,
+  "title": "Unify Auth, Authorization, and Tenancy Model",
+  "url": "https://github.com/BrianCLong/summit/pull/13559",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9694760005,
+      "node_id": "LA_kwDOPaNncM8AAAACQdpMRQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20L",
+      "name": "size: L",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9695444019,
+      "node_id": "LA_kwDOPaNncM8AAAACQeS8Mw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-tests",
+      "name": "needs-tests",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-17T03:06:02Z",
+  "createdAt": "2025-12-07T20:44:34Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1716,
+        "url": "https://github.com/BrianCLong/summit/pull/1716",
+        "mergedAt": null,
+        "title": "chore(deps): bump pytest from 7.4.3 to 8.4.2"
+      },
+      {
+        "number": 1212,
+        "url": "https://github.com/BrianCLong/summit/pull/1212",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps): bump pytest from 7.4.0 to 8.4.2"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

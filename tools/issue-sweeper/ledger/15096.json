@@ -1,0 +1,21 @@
+{
+  "issue_number": 15096,
+  "title": "feat: Create Summit Mini standalone demo application",
+  "url": "https://github.com/BrianCLong/summit/pull/15096",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-30T22:38:10Z",
+  "createdAt": "2025-12-30T04:09:16Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
