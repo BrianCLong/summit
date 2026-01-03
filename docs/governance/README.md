@@ -15,4 +15,5 @@ This directory contains the canonical governance and agent operations framework 
 - [Service Inventory](SERVICE_INVENTORY.md)
 - [Provenance Architecture](PROVENANCE_ARCHITECTURE.md)
 - [Style Guide](style-guide.md)
+- [Ops Evidence Retention Policy](OPS_EVIDENCE_RETENTION_POLICY.md)
 - [Board Governance Framework](board/README.md)
