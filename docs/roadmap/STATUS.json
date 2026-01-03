@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T00:00:00Z",
+  "revision_note": "Documented memory blocks baseline and background reflection worker.",
   "initiatives": [
     {
       "id": "A",
@@ -113,7 +113,8 @@
           "id": "D1",
           "name": "KTOON core libraries",
           "status": "in-progress",
-          "owner": "Amp"
+          "owner": "Amp",
+          "notes": "Memory Blocks persistence, prompt compilation, and reflection worker added to reduce context drift."
         }
       ]
     },
