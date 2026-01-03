@@ -1,0 +1,28 @@
+{
+  "issue_number": 12209,
+  "title": "Claude/government ai governance 01 hy l35mi fqx m rajh zy tx7v w",
+  "url": "https://github.com/BrianCLong/summit/pull/12209",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-22T01:03:18Z",
+  "createdAt": "2025-11-21T16:27:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12986,
+        "url": "https://github.com/BrianCLong/summit/pull/12986",
+        "mergedAt": "2025-12-17T21:32:53Z",
+        "title": "🏗️ Recovery (partial): Claude/government ai governance 01 hy l35mi fqx m rajh zy tx7v w"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

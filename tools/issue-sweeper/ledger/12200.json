@@ -1,0 +1,58 @@
+{
+  "issue_number": 12200,
+  "title": "Claude/ai global integration 011jf p rjja7o aiu sgrn8 d5wx",
+  "url": "https://github.com/BrianCLong/summit/pull/12200",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-22T01:03:38Z",
+  "createdAt": "2025-11-21T16:24:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13136,
+        "url": "https://github.com/BrianCLong/summit/pull/13136",
+        "mergedAt": "2025-12-03T04:24:45Z",
+        "title": "🏗️ Recovery: Claude/ai global integration 011jf p rjja7o aiu sgrn8 d5wx"
+      },
+      {
+        "number": 13093,
+        "url": "https://github.com/BrianCLong/summit/pull/13093",
+        "mergedAt": "2025-12-02T22:26:46Z",
+        "title": "🏗️ Recovery: Claude/ai global integration 011jf p rjja7o aiu sgrn8 d5wx"
+      },
+      {
+        "number": 13082,
+        "url": "https://github.com/BrianCLong/summit/pull/13082",
+        "mergedAt": "2025-12-02T20:35:33Z",
+        "title": "🏗️ Recovery: Claude/ai global integration 011jf p rjja7o aiu sgrn8 d5wx"
+      },
+      {
+        "number": 13077,
+        "url": "https://github.com/BrianCLong/summit/pull/13077",
+        "mergedAt": "2025-12-02T13:46:40Z",
+        "title": "🏗️ Recovery: Claude/ai global integration 011jf p rjja7o aiu sgrn8 d5wx"
+      },
+      {
+        "number": 13066,
+        "url": "https://github.com/BrianCLong/summit/pull/13066",
+        "mergedAt": "2025-12-02T08:48:40Z",
+        "title": "🏗️ Recovery: Claude/ai global integration 011jf p rjja7o aiu sgrn8 d5wx"
+      },
+      {
+        "number": 13030,
+        "url": "https://github.com/BrianCLong/summit/pull/13030",
+        "mergedAt": "2025-12-01T21:52:08Z",
+        "title": "🏗️ Recovery (partial): Claude/ai global integration 011jf p rjja7o aiu sgrn8 d5wx"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
