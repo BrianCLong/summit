@@ -1,0 +1,56 @@
+{
+  "issue_number": 13469,
+  "title": "🚨 E2E Test Failure - 2025-12-06",
+  "url": "https://github.com/BrianCLong/summit/issues/13469",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9385409179,
+      "node_id": "LA_kwDOPaNncM8AAAACL2n6mw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:high",
+      "name": "priority:high",
+      "color": "E11D21",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9783252570,
+      "node_id": "LA_kwDOPaNncM8AAAACRyCWWg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/e2e-failure",
+      "name": "e2e-failure",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9783252572,
+      "node_id": "LA_kwDOPaNncM8AAAACRyCWXA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/automated",
+      "name": "automated",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-19T02:19:36Z",
+  "createdAt": "2025-12-06T22:21:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13573,
+        "url": "https://github.com/BrianCLong/summit/pull/13573",
+        "mergedAt": "2025-12-17T02:28:09Z",
+        "title": "Fix E2E and Smoke Test Failures"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,0 +1,28 @@
+{
+  "issue_number": 10211,
+  "title": "SEV-1: Add workflow_dispatch to CI Backbone + perf boost",
+  "url": "https://github.com/BrianCLong/summit/pull/10211",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-10-15T16:39:48Z",
+  "createdAt": "2025-10-15T16:36:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10215,
+        "url": "https://github.com/BrianCLong/summit/pull/10215",
+        "mergedAt": "2025-10-15T17:23:12Z",
+        "title": "fix: CI Backbone queue-guard repo detection"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
