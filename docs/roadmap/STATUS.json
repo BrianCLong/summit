@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T00:30:00Z",
+  "revision_note": "Recorded security/gov P0/P1 remediation ledger, readiness assertion, and dependency review gate",
   "initiatives": [
     {
       "id": "A",
