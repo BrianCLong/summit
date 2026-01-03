@@ -1,0 +1,39 @@
+name: workcell-redteam
+
+on:
+  pull_request:
+    paths:
+      - "ga-graphai/packages/workcell-runtime/**"
+      - "ga-graphai/packages/common-types/**"
+      - ".github/workflows/workcell-redteam.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "ga-graphai/packages/workcell-runtime/**"
+      - "ga-graphai/packages/common-types/**"
+      - ".github/workflows/workcell-redteam.yml"
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile || pnpm install
+
+      - name: Run malfunction amplification harness
+        run: pnpm --filter workcell-runtime test -- --run tests/redteam-harness.test.ts
