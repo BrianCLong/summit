@@ -1,0 +1,18 @@
+{
+  "schema": "intelgraph.provenance/v1",
+  "createdAt": "2026-01-03T15:12:45.687Z",
+  "git": {
+    "commit": "aedca8122d589703a9e5a17ddec473e2808e0047",
+    "branch": "antigravity/supplychain-hardening-20260103-01"
+  },
+  "artifacts": [
+    {
+      "path": "package.json",
+      "sha256": "1c17653a466e63139b602a9d32c7eef690188358d3d6017506287aa5af8629db"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "2e7c2381d8e97f3840d42f1369bf6a36e4e8f685e10fa6be4693b8b67042268a"
+    }
+  ]
+}

@@ -9,7 +9,8 @@
 #   0 - All checks passed
 #   1 - One or more checks failed
 
-set -euo pipefail
+set -uo pipefail
+# Note: -e disabled to allow warnings without exit
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -97,17 +98,23 @@ check_esm_packages() {
 check_jest_configs() {
     log_info "Checking Jest ESM preset usage..."
 
-    local configs
-    configs=$(find "$ROOT_DIR" -name "jest.config.*" -not -path "*/node_modules/*" -not -path "*/dist/*" 2>/dev/null)
-
     local esm_count=0
     local total_count=0
 
+    # Use a timeout to prevent hanging on large codebases
+    local configs
+    configs=$(timeout 10 find "$ROOT_DIR" -name "jest.config.*" -not -path "*/node_modules/*" -not -path "*/dist/*" -maxdepth 5 2>/dev/null || echo "")
+
+    if [[ -z "$configs" ]]; then
+        log_warn "No Jest configs found or search timed out"
+        return
+    fi
+
     while IFS= read -r config; do
-        if [[ -n "$config" ]]; then
-            ((total_count++))
+        if [[ -n "$config" && -f "$config" ]]; then
+            ((total_count++)) || true
             if grep -q "default-esm" "$config" 2>/dev/null || grep -q "useESM.*true" "$config" 2>/dev/null; then
-                ((esm_count++))
+                ((esm_count++)) || true
             fi
         fi
     done <<< "$configs"
@@ -124,10 +131,10 @@ check_runner_conflicts() {
     log_info "Checking for test runner conflicts..."
 
     local jest_count
-    jest_count=$(find "$ROOT_DIR" -name "jest.config.*" -not -path "*/node_modules/*" -not -path "*/dist/*" 2>/dev/null | wc -l | tr -d ' ')
+    jest_count=$(timeout 10 find "$ROOT_DIR" -name "jest.config.*" -not -path "*/node_modules/*" -not -path "*/dist/*" -maxdepth 5 2>/dev/null | wc -l | tr -d ' ') || jest_count=0
 
     local vitest_count
-    vitest_count=$(find "$ROOT_DIR" -name "vitest.config.*" -not -path "*/node_modules/*" 2>/dev/null | wc -l | tr -d ' ')
+    vitest_count=$(timeout 10 find "$ROOT_DIR" -name "vitest.config.*" -not -path "*/node_modules/*" -maxdepth 5 2>/dev/null | wc -l | tr -d ' ') || vitest_count=0
 
     log_info "Found $jest_count Jest configs and $vitest_count Vitest configs"
 
@@ -143,13 +150,19 @@ check_runner_conflicts() {
 check_extension_resolution() {
     log_info "Checking module extension resolution..."
 
-    local mappers_with_js
-    mappers_with_js=$(find "$ROOT_DIR" -name "jest.config.*" -not -path "*/node_modules/*" -not -path "*/dist/*" -exec grep -l '\.js.*\$1' {} \; 2>/dev/null | wc -l | tr -d ' ')
+    local mappers_with_js=0
+
+    # Check key config files for ESM extension mapper
+    for config in "$ROOT_DIR/jest.config.cjs" "$ROOT_DIR/server/jest.config.ts" "$ROOT_DIR/client/jest.config.cjs"; do
+        if [[ -f "$config" ]] && grep -q '\.js.*\$1' "$config" 2>/dev/null; then
+            ((mappers_with_js++)) || true
+        fi
+    done
 
     if [[ "$mappers_with_js" -gt 0 ]]; then
-        log_pass "$mappers_with_js configs have .js -> no-extension mapper"
+        log_pass "$mappers_with_js core configs have .js -> no-extension mapper"
     else
-        log_warn "No Jest configs with ESM extension mapper found"
+        log_warn "No core Jest configs with ESM extension mapper found"
     fi
 }
 

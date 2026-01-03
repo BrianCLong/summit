@@ -329,7 +329,9 @@
       "Bash(while read id)",
       "Bash(do gh run cancel $id)",
       "Bash(od:*)",
-      "Bash(xargs -I {} sh -c 'echo \"\"Cancelling {}\"\"; gh run cancel {} 2>&1 || true')"
+      "Bash(xargs -I {} sh -c 'echo \"\"Cancelling {}\"\"; gh run cancel {} 2>&1 || true')",
+      "Bash(/Users/brianlong/Developer/summit/scripts/verification/verify_runtime.sh:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx jest:*)"
     ],
     "deny": [],
     "ask": []
