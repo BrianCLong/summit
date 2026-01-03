@@ -31,7 +31,7 @@ prompts:
   - id: security-p0p1-gates
     version: v1
     path: prompts/security/p0p1-security-gates.md
-    sha256: f2412e4982765b0dbb9fe8db7a7adf0c6d6f85af4078013467748f7d8cf5f47a
+    sha256: fa67143156ebca274fc40fb08463bdb4e4df7d41119d2d2024d21fc2168e95bf
     description: P0/P1 security remediation, CI security gates, and compliance evidence updates.
     scope:
       paths:
