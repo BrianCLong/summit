@@ -28,3 +28,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: jules-table-list-ux
+    version: v1
+    path: prompts/jules/table-list-ux@v1.md
+    sha256: 7764f4ddc96117afcb04c390fba84c5cca98d46d374c125b4451c860ef95ef87
+    description: Table/list UX and performance improvements for Summit surfaces (pagination, sorting, states, accessibility).
+    scope:
+      paths:
+        - ga-graphai/packages/web/
+        - docs/ux/
+        - docs/roadmap/STATUS.json
+        - prompts/jules/table-list-ux@v1.md
+      domains:
+        - frontend
+        - performance
+        - ux
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 1
+    allowed_operations:
+      - create
+      - edit

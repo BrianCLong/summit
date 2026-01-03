@@ -7,6 +7,9 @@ export type ApprovalFilter = {
   riskTier?: string;
   page?: number;
   pageSize?: number;
+  sortBy?: "operation" | "requesterId" | "tenantId" | "status" | "createdAt";
+  sortDirection?: "asc" | "desc";
+  signal?: AbortSignal;
 };
 
 interface PagedResult<T> {
@@ -24,8 +27,10 @@ export async function fetchApprovals(filters: ApprovalFilter): Promise<PagedResu
   if (filters.riskTier) params.set("riskTier", filters.riskTier);
   if (filters.page != null) params.set("page", String(filters.page));
   if (filters.pageSize != null) params.set("pageSize", String(filters.pageSize));
+  if (filters.sortBy) params.set("sortBy", filters.sortBy);
+  if (filters.sortDirection) params.set("sortDirection", filters.sortDirection);
 
-  const res = await fetch(`/api/approvals?${params.toString()}`);
+  const res = await fetch(`/api/approvals?${params.toString()}`, { signal: filters.signal });
   if (!res.ok) throw new Error("Failed to load approvals");
   return res.json();
 }
