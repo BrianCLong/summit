@@ -79,6 +79,18 @@ Each bundle captures what ran in CI and what artifacts were produced. Mandatory 
 4. **Provenance linkage**
    - If `attestations.provenance` points to a provenance file, verify it using your SLSA tooling and confirm the subject matches the recorded artifact digests.
 
+## Ops Evidence Index
+
+After generating an Evidence Pack, you must record it in the **Ops Evidence Index**. This central registry ensures that auditors and tooling can locate all official evidence artifacts over time.
+
+1.  **Generate** the evidence pack (e.g., via `generate-evidence-bundle.ts`).
+2.  **Add** an entry to [`docs/ops/EVIDENCE_INDEX.json`](./EVIDENCE_INDEX.md).
+3.  **Validate** the index using the verification script:
+    ```bash
+    npx tsx scripts/verification/verify_ops_evidence_index.ts
+    ```
+4.  **Helper Workflow**: You can use the `emit-evidence-index-entry` workflow to generate a JSON snippet for the index.
+
 ## Using Bundles for Audits
 
 - Attach the bundle JSON (and signatures, if present) to incident reviews or change records.

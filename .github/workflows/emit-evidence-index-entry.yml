@@ -1,0 +1,131 @@
+name: Emit Evidence Index Entry
+on:
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: 'Kind of evidence pack'
+        required: true
+        type: choice
+        options:
+        - weekly
+        - release
+        - incident
+        - ad-hoc
+        default: 'ad-hoc'
+      ref:
+        description: 'Git Reference (branch/tag)'
+        required: true
+        default: 'main'
+      status:
+        description: 'Status'
+        required: true
+        type: choice
+        options:
+        - pass
+        - fail
+        - partial
+        default: 'pass'
+      artifact_type:
+        description: 'Artifact Type'
+        required: true
+        type: choice
+        options:
+        - workflow_artifact
+        - release_asset
+        - external_storage
+        default: 'workflow_artifact'
+      artifact_reference:
+        description: 'Artifact Reference (URL/URI)'
+        required: true
+      sha256:
+        description: 'Artifact SHA256 (optional)'
+        required: false
+      release_tag:
+        description: 'Release Tag (optional)'
+        required: false
+      iso_week:
+        description: 'ISO Week (e.g. 2026-W01) (optional)'
+        required: false
+      incident_id:
+        description: 'Incident ID (optional)'
+        required: false
+      notes:
+        description: 'Notes (optional)'
+        required: false
+
+jobs:
+  emit-entry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate JSON Entry
+        id: generate
+        run: |
+          # Calculate ID based on inputs
+          # If iso_week is provided and kind is weekly, prefer Week-based ID
+          # Otherwise use Timestamp-based ID
+
+          UTC_NOW=$(date -u +"%Y%m%dT%H%M%SZ")
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          if [[ "${{ inputs.kind }}" == "weekly" && -n "${{ inputs.iso_week }}" ]]; then
+             ENTRY_ID="${{ inputs.iso_week }}*${SHORT_SHA}"
+          else
+             ENTRY_ID="${UTC_NOW}*${SHORT_SHA}"
+          fi
+
+          # Construct JSON using jq
+          # We use a temporary file to construct the object safely
+
+          cat <<EOF > entry_template.json
+          {
+            "id": "$ENTRY_ID",
+            "kind": "${{ inputs.kind }}",
+            "generated_at_utc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "commit_sha": "${{ github.sha }}",
+            "ref": "${{ inputs.ref }}",
+            "status": "${{ inputs.status }}",
+            "artifact": {
+              "type": "${{ inputs.artifact_type }}",
+              "reference": "${{ inputs.artifact_reference }}"
+            },
+            "notes": "${{ inputs.notes }}"
+          }
+          EOF
+
+          # Add optional fields if present
+          if [[ -n "${{ inputs.sha256 }}" ]]; then
+            jq --arg val "${{ inputs.sha256 }}" '.artifact.sha256 = $val' entry_template.json > tmp.json && mv tmp.json entry_template.json
+          fi
+
+          # Related object construction
+          RELATED="{}"
+          HAS_RELATED=false
+
+          if [[ -n "${{ inputs.release_tag }}" ]]; then
+             RELATED=$(echo "$RELATED" | jq --arg val "${{ inputs.release_tag }}" '.release_tag = $val')
+             HAS_RELATED=true
+          fi
+          if [[ -n "${{ inputs.iso_week }}" ]]; then
+             RELATED=$(echo "$RELATED" | jq --arg val "${{ inputs.iso_week }}" '.iso_week = $val')
+             HAS_RELATED=true
+          fi
+          if [[ -n "${{ inputs.incident_id }}" ]]; then
+             RELATED=$(echo "$RELATED" | jq --arg val "${{ inputs.incident_id }}" '.incident_id = $val')
+             HAS_RELATED=true
+          fi
+
+          if [ "$HAS_RELATED" = true ]; then
+             jq --argjson rel "$RELATED" '.related = $rel' entry_template.json > tmp.json && mv tmp.json entry_template.json
+          fi
+
+          echo "Generated Entry:"
+          cat entry_template.json
+
+          # Save to file for upload
+          cp entry_template.json snippet.json
+
+      - name: Upload Snippet
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-index-entry-snippet
+          path: snippet.json
