@@ -105,8 +105,11 @@ ci: lint test
 k6:     ## Perf smoke (TARGET=http://host:port make k6)
 	./ops/k6/smoke.sh
 
-sbom:   ## Generate CycloneDX SBOM
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+sbom:   ## Generate SBOMs (SPDX) using Syft
+	@./scripts/release/sbom.sh
+
+release-verify: ## Verify release artifacts
+	@./scripts/release/verify.sh $(DIR)
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
@@ -174,8 +177,7 @@ pr-release:
 	  --state "$(STATE_FILE)" \
 	  --node "$(NODE_VERSION)"
 
-provenance:
-	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+
 
 ci-check:
 	@pnpm install --frozen-lockfile

@@ -29,25 +29,62 @@ jobs:
     secrets:
       registry_password: ${{ secrets.GITHUB_TOKEN }}
 
+  # New job: Generate Source SBOM
+  sbom-source:
+    name: Generate Source SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: sbom-source.spdx.json
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-source
+          path: sbom-source.spdx.json
+
   release:
     name: Create release bundle
-    runs-on: ubuntu-latest
+    outputs:
+      base64-hashes: ${{ steps.hash.outputs.base64-hashes }}
+    permissions:
+      contents: write # for release creation
+      id-token: write # for provenance
     needs:
       - build-server
       - build-client
+      - sbom-source
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-artifacts-${{ github.run_id }}
+          pattern: build-artifacts-*
           path: build-artifacts
           merge-multiple: true
+      - name: Download Source SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-source
+          path: build-artifacts/
       - name: Prepare release directory
         run: mkdir -p release-bundle/compliance
       - name: Move artifacts to compliance bundle
-        run: mv build-artifacts/* release-bundle/compliance/
+        run: |
+          mv build-artifacts/* release-bundle/compliance/ || true
+          # Normalize SBOM names to match contract (remove repo prefixes)
+          # Expected input: sbom-Kevin-summit-server.spdx.json -> sbom-server.spdx.json
+          # We use a wildcard approach to catch the repo-prefix
+          find release-bundle/compliance -name "sbom-*-server.spdx.json" -exec mv {} release-bundle/compliance/sbom-server.spdx.json \;
+          find release-bundle/compliance -name "sbom-*-client.spdx.json" -exec mv {} release-bundle/compliance/sbom-client.spdx.json \;
+
+          # Ensure source SBOM is correctly placed if not already
+          [ -f sbom-source.spdx.json ] && mv sbom-source.spdx.json release-bundle/compliance/ || true
       - name: Generate manifest
         run: |
           echo '{
@@ -57,17 +94,21 @@ jobs:
             "clientImage": "${{ needs.build-client.outputs.image_uri }}",
             "slsaLevel": "SLSA_3"
           }' > release-bundle/manifest.json
+      - name: Generate Checksums
+        working-directory: release-bundle
+        run: |
+          find . -type f -exec sha256sum {} \; > checksums.txt
       - name: Create compliance bundle archive
         run: |
           tar -czf \
             release-bundle/compliance-bundle-v${{ inputs.version }}.tgz \
-            -C release-bundle/compliance .
+            -C release-bundle compliance checksums.txt manifest.json
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-bundle
           path: release-bundle/
-      - name: Create GitHub release
+      - name: Create GitHub release (pre-provenance)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
@@ -80,3 +121,46 @@ jobs:
           files: |
             release-bundle/manifest.json
             release-bundle/compliance-bundle-v${{ inputs.version }}.tgz
+            release-bundle/checksums.txt
+
+      - name: Output Release Bundle Hash
+        id: hash
+        run: |
+          # We need the hash of the tgz bundle for SLSA
+          HASH=$(sha256sum release-bundle/compliance-bundle-v${{ inputs.version }}.tgz | cut -d' ' -f1)
+          echo "hash=$HASH" >> "$GITHUB_OUTPUT"
+          echo "hashes=$HASH compliance-bundle-v${{ inputs.version }}.tgz" | base64 -w0 > hashes.base64
+          echo "base64-hashes=$(cat hashes.base64)" >> "$GITHUB_OUTPUT"
+
+  provenance:
+    name: Generate Provenance (Bundle)
+    needs: [release]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
+    with:
+      base64-subjects: "${{ needs.release.outputs.base64-hashes }}"
+      upload-assets: true # This uploads to workflow artifacts; we need to add to release separately if desired, OR user downloads from Run.
+      # Note: The generic generator doesn't automatically attach to the GH Release unless we add a step.
+      # For now, it provides a verifiable artifact in the CI Run.
+
+  upload-provenance:
+    name: Attach Provenance to Release
+    needs: [release, provenance]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Provenance
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "provenance*"
+          merge-multiple: true
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          files: |
+            *.intoto.jsonl

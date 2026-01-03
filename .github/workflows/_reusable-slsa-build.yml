@@ -236,13 +236,21 @@ jobs:
           echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
           echo "Achieved SLSA Level: $LEVEL"
 
+      - name: Rename and Prepare Artifacts
+        if: inputs.sbom
+        run: |
+          # Create a safe filename suffix from image name (replace / with -)
+          SAFE_NAME=$(echo "${{ inputs.image_name }}" | tr '/' '-')
+          mv sbom.cdx.json "sbom-${SAFE_NAME}.cdx.json"
+          mv sbom.spdx.json "sbom-${SAFE_NAME}.spdx.json"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |
-            sbom.cdx.json
-            sbom.spdx.json
+            sbom-*.cdx.json
+            sbom-*.spdx.json
           retention-days: 90
 
   # SLSA provenance generation using official generator
