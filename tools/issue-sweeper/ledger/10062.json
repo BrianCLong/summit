@@ -1,0 +1,67 @@
+{
+  "issue_number": 10062,
+  "title": "[P0][Observability] Commit Grafana JSON + Panel UIDs for core SLO dashboards",
+  "url": "https://github.com/BrianCLong/summit/issues/10062",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9209094192,
+      "node_id": "LA_kwDOPaNncM8AAAACJOegMA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/docs",
+      "name": "docs",
+      "color": "0E8A16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9399487325,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDLXQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prio:P0",
+      "name": "prio:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Critical priority"
+    },
+    {
+      "id": 9402657980,
+      "node_id": "LA_kwDOPaNncM8AAAACMHEsvA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prd:october",
+      "name": "prd:october",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9402658090,
+      "node_id": "LA_kwDOPaNncM8AAAACMHEtKg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/lane:observability",
+      "name": "lane:observability",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-04T19:15:57Z",
+  "createdAt": "2025-10-04T18:15:40Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
