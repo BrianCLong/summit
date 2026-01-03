@@ -1,0 +1,28 @@
+{
+  "issue_number": 12201,
+  "title": "Claude/secure election platform 01 a3y g bd9nr4 e1 cd ph1 w kv tu",
+  "url": "https://github.com/BrianCLong/summit/pull/12201",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-22T01:03:36Z",
+  "createdAt": "2025-11-21T16:25:31Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12977,
+        "url": "https://github.com/BrianCLong/summit/pull/12977",
+        "mergedAt": "2025-12-17T21:33:57Z",
+        "title": "🏗️ Recovery (partial): Claude/secure election platform 01 a3y g bd9nr4 e1 cd ph1 w kv tu"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,0 +1,21 @@
+{
+  "issue_number": 12171,
+  "title": "Build comprehensive user onboarding flow system",
+  "url": "https://github.com/BrianCLong/summit/pull/12171",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-21T08:28:59Z",
+  "createdAt": "2025-11-21T08:23:55Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

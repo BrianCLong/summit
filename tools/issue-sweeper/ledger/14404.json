@@ -1,0 +1,21 @@
+{
+  "issue_number": 14404,
+  "title": "feat: Metering and Quotas Subsystem",
+  "url": "https://github.com/BrianCLong/summit/pull/14404",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-24T12:28:57Z",
+  "createdAt": "2025-12-24T04:01:54Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
