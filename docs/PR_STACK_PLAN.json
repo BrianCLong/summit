@@ -1,0 +1,71 @@
+{
+  "authority": "Jules",
+  "last_updated": "2025-10-27",
+  "inventory": [
+    {
+      "pr_number": 15373,
+      "description": "Security Hotfix",
+      "owner": "Security",
+      "status": "Critical",
+      "files_touched": ["server/src/security/", "server/src/auth/"],
+      "overlap_risk": "High"
+    },
+    {
+      "pr_number": 15380,
+      "description": "Bundle Updates",
+      "owner": "Claude",
+      "status": "Pending",
+      "files_touched": [".github/workflows/", "package.json"],
+      "overlap_risk": "High"
+    },
+    {
+      "pr_number": 15381,
+      "description": "Storage/DR Validation",
+      "owner": "Jules",
+      "status": "Pending",
+      "files_touched": ["server/src/dr/", "test/verification/ops.node.test.ts"],
+      "overlap_risk": "Medium"
+    },
+    {
+      "pr_number": 15382,
+      "description": "Observability",
+      "owner": "Jules",
+      "status": "Pending",
+      "files_touched": ["server/src/observability/", "server/otel.ts"],
+      "overlap_risk": "Medium"
+    },
+    {
+      "pr_number": 15383,
+      "description": "Issue Sweeper",
+      "owner": "Jules",
+      "status": "Pending",
+      "files_touched": ["tools/", "scripts/"],
+      "overlap_risk": "Low"
+    },
+    {
+      "pr_number": 15365,
+      "description": "Coverage/Fuzz Gates",
+      "owner": "Codex",
+      "status": "Pending",
+      "files_touched": [".github/workflows/coverage.yml", "test/fuzz/"],
+      "overlap_risk": "Medium"
+    },
+    {
+      "pr_number": 15370,
+      "description": "Turborepo Segmentation",
+      "owner": "Codex",
+      "status": "Pending",
+      "files_touched": ["turbo.json", "package.json", "apps/*/"],
+      "overlap_risk": "High"
+    }
+  ],
+  "merge_order": [
+    15373,
+    15380,
+    15365,
+    15382,
+    15381,
+    15383,
+    15370
+  ]
+}
