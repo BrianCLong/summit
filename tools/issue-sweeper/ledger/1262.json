@@ -1,0 +1,47 @@
+{
+  "issue_number": 1262,
+  "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature",
+  "url": "https://github.com/BrianCLong/summit/pull/1262",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208476596,
+      "node_id": "LA_kwDOPaNncM8AAAACJN4ztA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%205/5",
+      "name": "Review effort 5/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-19T02:22:37Z",
+  "createdAt": "2025-09-15T09:12:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

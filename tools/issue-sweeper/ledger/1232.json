@@ -1,0 +1,56 @@
+{
+  "issue_number": 1232,
+  "title": "Maestro Build Failure - Maestro Build Pipeline #130",
+  "url": "https://github.com/BrianCLong/summit/issues/1232",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767055,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX0zw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/bug",
+      "name": "bug",
+      "color": "d73a4a",
+      "default": true,
+      "description": "Something isn't working"
+    },
+    {
+      "id": 9208753401,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/maestro",
+      "name": "maestro",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208753403,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ci-failure",
+      "name": "ci-failure",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-05T16:47:27Z",
+  "createdAt": "2025-09-14T23:47:51Z",
+  "classification": "bug",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

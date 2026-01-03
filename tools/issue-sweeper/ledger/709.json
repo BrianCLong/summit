@@ -1,0 +1,28 @@
+{
+  "issue_number": 709,
+  "title": "feat: IntelGraph GA Foundation - Complete Architecture Implementation",
+  "url": "https://github.com/BrianCLong/summit/pull/709",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-21T00:35:10Z",
+  "createdAt": "2025-08-20T09:36:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 725,
+        "url": "https://github.com/BrianCLong/summit/pull/725",
+        "mergedAt": "2025-08-29T10:39:49Z",
+        "title": "hotfix(ci): GA Core CI rescue - baseline reliability"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

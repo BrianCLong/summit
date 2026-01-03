@@ -1,0 +1,68 @@
+{
+  "issue_number": 1346,
+  "title": "Add Maestro PRD addenda with 23 patent-grade capabilities",
+  "url": "https://github.com/BrianCLong/summit/pull/1346",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9278618923,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Kw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:high",
+      "name": "risk:high",
+      "color": "1D76DB",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9284194884,
+      "node_id": "LA_kwDOPaNncM8AAAACKWGSRA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%202/5",
+      "name": "Review effort 2/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-23T06:34:14Z",
+  "createdAt": "2025-09-23T06:23:22Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1346,
+        "url": "https://github.com/BrianCLong/summit/pull/1346",
+        "mergedAt": "2025-09-23T06:25:26Z",
+        "title": "Add Maestro PRD addenda with 23 patent-grade capabilities"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

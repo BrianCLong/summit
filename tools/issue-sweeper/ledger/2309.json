@@ -1,0 +1,53 @@
+{
+  "issue_number": 2309,
+  "title": "IG Oct25 | october2025/Switchboard.md | Auto-building dossiers from any interface (ingest)",
+  "url": "https://github.com/BrianCLong/summit/issues/2309",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:58:00Z",
+  "createdAt": "2025-10-01T15:58:00Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1763,
+        "url": "https://github.com/BrianCLong/summit/pull/1763",
+        "mergedAt": null,
+        "title": "chore(deps): bump canvas from 2.11.2 to 3.2.0"
+      },
+      {
+        "number": 1137,
+        "url": "https://github.com/BrianCLong/summit/pull/1137",
+        "mergedAt": null,
+        "title": "chore(deps): bump canvas from 2.11.2 to 3.2.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,221 @@
+{
+  "issue_number": 2024,
+  "title": "IG Oct25 | october2025/Dulles.md | Temporary restraining order (TRO) draft checklist (relief language, bond, servic",
+  "url": "https://github.com/BrianCLong/summit/issues/2024",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:33:57Z",
+  "createdAt": "2025-10-01T15:33:57Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14557,
+        "url": "https://github.com/BrianCLong/summit/pull/14557",
+        "mergedAt": "2025-12-27T04:15:25Z",
+        "title": "chore(deps): Bump requests from 2.31.0 to 2.32.4 in /predictive_threat_suite"
+      },
+      {
+        "number": 12739,
+        "url": "https://github.com/BrianCLong/summit/pull/12739",
+        "mergedAt": "2025-12-04T15:56:17Z",
+        "title": "Add graph-narrative capability moat plan for 2024–2025"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 14573,
+        "url": "https://github.com/BrianCLong/summit/pull/14573",
+        "mergedAt": "2025-12-27T05:27:34Z",
+        "title": "chore(deps): Bump black from 23.12.0 to 24.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 12740,
+        "url": "https://github.com/BrianCLong/summit/pull/12740",
+        "mergedAt": "2025-12-04T17:44:49Z",
+        "title": "Add human-AI collaboration capability roadmap"
+      },
+      {
+        "number": 14377,
+        "url": "https://github.com/BrianCLong/summit/pull/14377",
+        "mergedAt": "2025-12-23T04:35:21Z",
+        "title": "Bump webpack-dev-server from 4.15.2 to 5.2.1 in /apps/web/ingest-wizard"
+      },
+      {
+        "number": 13061,
+        "url": "https://github.com/BrianCLong/summit/pull/13061",
+        "mergedAt": "2025-12-01T23:28:53Z",
+        "title": "chore(deps): bump express from 4.21.2 to 4.22.1 in /services/admin-automation"
+      },
+      {
+        "number": 14023,
+        "url": "https://github.com/BrianCLong/summit/pull/14023",
+        "mergedAt": "2025-12-19T22:46:22Z",
+        "title": "Upgrade deepspeed to version 0.15.1"
+      },
+      {
+        "number": 14009,
+        "url": "https://github.com/BrianCLong/summit/pull/14009",
+        "mergedAt": "2025-12-19T21:17:18Z",
+        "title": "Update nltk version to 3.9 in requirements.txt"
+      },
+      {
+        "number": 13319,
+        "url": "https://github.com/BrianCLong/summit/pull/13319",
+        "mergedAt": null,
+        "title": "deps(npm): bump react-leaflet from 4.2.1 to 5.0.0"
+      },
+      {
+        "number": 13614,
+        "url": "https://github.com/BrianCLong/summit/pull/13614",
+        "mergedAt": "2025-12-16T21:05:14Z",
+        "title": "build(deps): bump github.com/jackc/pgx/v5 from 5.5.3 to 5.5.4 in /services/retentiond"
+      },
+      {
+        "number": 14022,
+        "url": "https://github.com/BrianCLong/summit/pull/14022",
+        "mergedAt": "2025-12-19T22:40:03Z",
+        "title": "Upgrade python-multipart to version 0.0.18"
+      },
+      {
+        "number": 14021,
+        "url": "https://github.com/BrianCLong/summit/pull/14021",
+        "mergedAt": "2025-12-19T22:35:08Z",
+        "title": "Upgrade paddlepaddle to version 2.6.2"
+      },
+      {
+        "number": 15347,
+        "url": "https://github.com/BrianCLong/summit/pull/15347",
+        "mergedAt": "2026-01-01T11:36:56Z",
+        "title": "Create ADR and Scaffolds for Context Provenance Graph"
+      },
+      {
+        "number": 13471,
+        "url": "https://github.com/BrianCLong/summit/pull/13471",
+        "mergedAt": "2025-12-07T02:16:04Z",
+        "title": "deps(npm): bump express from 5.1.0 to 5.2.0"
+      },
+      {
+        "number": 14564,
+        "url": "https://github.com/BrianCLong/summit/pull/14564",
+        "mergedAt": "2025-12-27T04:47:57Z",
+        "title": "chore(deps): Bump pillow from 10.1.0 to 10.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 10230,
+        "url": "https://github.com/BrianCLong/summit/pull/10230",
+        "mergedAt": "2025-10-17T00:56:02Z",
+        "title": "[Aikido] Fix security issue in torch via minor version upgrade from 2.0.1 to 2.8.0 in apps"
+      },
+      {
+        "number": 10231,
+        "url": "https://github.com/BrianCLong/summit/pull/10231",
+        "mergedAt": "2025-10-17T00:56:00Z",
+        "title": "[Aikido] Fix security issue in torch via minor version upgrade from 2.1.0 to 2.8.0 in server"
+      },
+      {
+        "number": 1723,
+        "url": "https://github.com/BrianCLong/summit/pull/1723",
+        "mergedAt": null,
+        "title": "chore(deps): bump requests from 2.31.0 to 2.32.4 in /server"
+      },
+      {
+        "number": 10214,
+        "url": "https://github.com/BrianCLong/summit/pull/10214",
+        "mergedAt": null,
+        "title": "[Aikido] Fix security issue in torch via minor version upgrade from 2.1.0 to 2.8.0 in server"
+      },
+      {
+        "number": 10212,
+        "url": "https://github.com/BrianCLong/summit/pull/10212",
+        "mergedAt": null,
+        "title": "[Aikido] Fix security issue in torch via minor version upgrade from 2.0.1 to 2.8.0 in apps"
+      },
+      {
+        "number": 10213,
+        "url": "https://github.com/BrianCLong/summit/pull/10213",
+        "mergedAt": null,
+        "title": "[Aikido] Fix security issue in torch via minor version upgrade from 2.1.0 to 2.8.0 in server"
+      },
+      {
+        "number": 1344,
+        "url": "https://github.com/BrianCLong/summit/pull/1344",
+        "mergedAt": "2025-09-23T06:24:19Z",
+        "title": "chore(deps): bump black from 23.11.0 to 24.3.0 in /services/insight-ai"
+      },
+      {
+        "number": 1270,
+        "url": "https://github.com/BrianCLong/summit/pull/1270",
+        "mergedAt": "2025-09-19T02:20:37Z",
+        "title": "chore(deps): bump react-leaflet from 4.2.1 to 5.0.0 in /client"
+      },
+      {
+        "number": 1721,
+        "url": "https://github.com/BrianCLong/summit/pull/1721",
+        "mergedAt": null,
+        "title": "chore(deps): bump nltk from 3.8.1 to 3.9 in /server"
+      },
+      {
+        "number": 1763,
+        "url": "https://github.com/BrianCLong/summit/pull/1763",
+        "mergedAt": null,
+        "title": "chore(deps): bump canvas from 2.11.2 to 3.2.0"
+      },
+      {
+        "number": 14539,
+        "url": "https://github.com/BrianCLong/summit/pull/14539",
+        "mergedAt": "2025-12-26T23:53:10Z",
+        "title": "chore(deps): Bump github.com/go-chi/chi/v5 from 5.0.10 to 5.2.2 in /services/q3c"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 13616,
+        "url": "https://github.com/BrianCLong/summit/pull/13616",
+        "mergedAt": "2025-12-16T21:23:51Z",
+        "title": "build(deps): bump github.com/go-chi/chi/v5 from 5.0.11 to 5.2.2 in /templates/golden-path-platform/services/hello-service"
+      },
+      {
+        "number": 1148,
+        "url": "https://github.com/BrianCLong/summit/pull/1148",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps-dev): bump @testing-library/react from 13.4.0 to 16.3.0 in /client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

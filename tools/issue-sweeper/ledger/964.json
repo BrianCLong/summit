@@ -1,0 +1,21 @@
+{
+  "issue_number": 964,
+  "title": "Absorb orphan: codex/deliver-hunting-studio-and-analytics-v1-yuagwt",
+  "url": "https://github.com/BrianCLong/summit/pull/964",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:31:00Z",
+  "createdAt": "2025-08-29T03:33:18Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,38 @@
+{
+  "issue_number": 770,
+  "title": "feat(client): add tri-pane explorer shell",
+  "url": "https://github.com/BrianCLong/summit/pull/770",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-22T05:04:15Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10098,
+        "url": "https://github.com/BrianCLong/summit/pull/10098",
+        "mergedAt": "2025-10-14T13:05:14Z",
+        "title": "feat: add legal hold orchestration service"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

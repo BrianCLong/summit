@@ -1,0 +1,47 @@
+{
+  "issue_number": 1307,
+  "title": "chore: back-merge v2025.09.21-mega-merge to main",
+  "url": "https://github.com/BrianCLong/summit/pull/1307",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9284194884,
+      "node_id": "LA_kwDOPaNncM8AAAACKWGSRA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%202/5",
+      "name": "Review effort 2/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-23T06:17:04Z",
+  "createdAt": "2025-09-22T00:11:16Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1307,
+        "url": "https://github.com/BrianCLong/summit/pull/1307",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "chore: back-merge v2025.09.21-mega-merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

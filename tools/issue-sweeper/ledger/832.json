@@ -1,0 +1,38 @@
+{
+  "issue_number": 832,
+  "title": "feat: add forge hermetic build workflow",
+  "url": "https://github.com/BrianCLong/summit/pull/832",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:33:52Z",
+  "createdAt": "2025-08-24T07:36:23Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11912,
+        "url": "https://github.com/BrianCLong/summit/pull/11912",
+        "mergedAt": null,
+        "title": "Implement structured logging with correlation IDs"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

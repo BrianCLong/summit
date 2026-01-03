@@ -1,0 +1,137 @@
+{
+  "issue_number": 2023,
+  "title": "IG Oct25 | october2025/Dulles.md | Jurisdiction & venue selection rationale:",
+  "url": "https://github.com/BrianCLong/summit/issues/2023",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:46:38Z",
+  "createdAt": "2025-10-01T15:33:54Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14376,
+        "url": "https://github.com/BrianCLong/summit/pull/14376",
+        "mergedAt": "2025-12-23T04:35:24Z",
+        "title": "Bump esbuild and vitest in /apps/gateway"
+      },
+      {
+        "number": 13310,
+        "url": "https://github.com/BrianCLong/summit/pull/13310",
+        "mergedAt": null,
+        "title": "deps(npm): bump @google-cloud/recommender from 5.0.6 to 7.2.1"
+      },
+      {
+        "number": 13634,
+        "url": "https://github.com/BrianCLong/summit/pull/13634",
+        "mergedAt": "2025-12-17T02:55:59Z",
+        "title": "build(deps): bump esbuild and vitest in /services/nl-cypher"
+      },
+      {
+        "number": 13633,
+        "url": "https://github.com/BrianCLong/summit/pull/13633",
+        "mergedAt": "2025-12-17T02:12:47Z",
+        "title": "build(deps): bump esbuild and vitest in /services/ai-nlq"
+      },
+      {
+        "number": 13727,
+        "url": "https://github.com/BrianCLong/summit/pull/13727",
+        "mergedAt": "2025-12-20T11:44:41Z",
+        "title": "build(deps-dev): Bump storybook from 7.6.20 to 7.6.21"
+      },
+      {
+        "number": 13315,
+        "url": "https://github.com/BrianCLong/summit/pull/13315",
+        "mergedAt": null,
+        "title": "deps(npm): bump @google-cloud/billing from 4.6.0 to 5.1.1"
+      },
+      {
+        "number": 14539,
+        "url": "https://github.com/BrianCLong/summit/pull/14539",
+        "mergedAt": "2025-12-26T23:53:10Z",
+        "title": "chore(deps): Bump github.com/go-chi/chi/v5 from 5.0.10 to 5.2.2 in /services/q3c"
+      },
+      {
+        "number": 1287,
+        "url": "https://github.com/BrianCLong/summit/pull/1287",
+        "mergedAt": "2025-09-23T06:10:18Z",
+        "title": "chore(deps): bump redis from 4.3.4 to 4.4.4 in /reliability-service"
+      },
+      {
+        "number": 1765,
+        "url": "https://github.com/BrianCLong/summit/pull/1765",
+        "mergedAt": "2025-09-29T21:51:43Z",
+        "title": "chore(deps): bump react-map-gl from 7.1.9 to 8.0.4"
+      },
+      {
+        "number": 1714,
+        "url": "https://github.com/BrianCLong/summit/pull/1714",
+        "mergedAt": null,
+        "title": "chore(deps): bump pytest-cov from 4.1.0 to 7.0.0"
+      },
+      {
+        "number": 1354,
+        "url": "https://github.com/BrianCLong/summit/pull/1354",
+        "mergedAt": "2025-09-23T16:44:12Z",
+        "title": "chore(deps): bump esbuild and vitest in /contracts"
+      },
+      {
+        "number": 1721,
+        "url": "https://github.com/BrianCLong/summit/pull/1721",
+        "mergedAt": null,
+        "title": "chore(deps): bump nltk from 3.8.1 to 3.9 in /server"
+      },
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      },
+      {
+        "number": 1349,
+        "url": "https://github.com/BrianCLong/summit/pull/1349",
+        "mergedAt": "2025-09-23T06:56:23Z",
+        "title": "chore(deps): bump esbuild, vite and vitest in /intelgraph/client"
+      },
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

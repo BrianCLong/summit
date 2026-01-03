@@ -1,0 +1,62 @@
+{
+  "issue_number": 1200,
+  "title": "Maestro Build Failure - Maestro Build Pipeline #110",
+  "url": "https://github.com/BrianCLong/summit/issues/1200",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767055,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX0zw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/bug",
+      "name": "bug",
+      "color": "d73a4a",
+      "default": true,
+      "description": "Something isn't working"
+    },
+    {
+      "id": 9208753401,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/maestro",
+      "name": "maestro",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208753403,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ci-failure",
+      "name": "ci-failure",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-11T06:26:55Z",
+  "createdAt": "2025-09-11T06:26:55Z",
+  "classification": "bug",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15408,
+        "url": "https://github.com/BrianCLong/summit/pull/15408",
+        "mergedAt": null,
+        "title": "docs: park packages/memory from #15380 bundle"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,71 @@
+{
+  "issue_number": 714,
+  "title": "GA Core Release Plan - 8-10 Week Execution",
+  "url": "https://github.com/BrianCLong/summit/issues/714",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342919,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9Rw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic",
+      "name": "epic",
+      "color": "8250DF",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968038,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQJg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P0",
+      "name": "P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9142265704,
+      "node_id": "LA_kwDOPaNncM8AAAACIOvnaA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ga-core",
+      "name": "ga-core",
+      "color": "1e40af",
+      "default": false,
+      "description": "GA Core release scope and planning"
+    },
+    {
+      "id": 9360062798,
+      "node_id": "LA_kwDOPaNncM8AAAACLec5Tg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/stale",
+      "name": "stale",
+      "color": "e4e669",
+      "default": false,
+      "description": "PR with no activity for 30 days"
+    }
+  ],
+  "updatedAt": "2025-09-28T01:09:36Z",
+  "createdAt": "2025-08-20T15:01:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 1714,
+        "url": "https://github.com/BrianCLong/summit/pull/1714",
+        "mergedAt": null,
+        "title": "chore(deps): bump pytest-cov from 4.1.0 to 7.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

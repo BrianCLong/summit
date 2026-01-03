@@ -1,0 +1,122 @@
+{
+  "issue_number": 800,
+  "title": "feat: add wizard-of-oz stub API",
+  "url": "https://github.com/BrianCLong/summit/pull/800",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:48Z",
+  "createdAt": "2025-08-24T05:57:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 15083,
+        "url": "https://github.com/BrianCLong/summit/pull/15083",
+        "mergedAt": null,
+        "title": "Add contracting-ready wedges and compliance documentation packs"
+      },
+      {
+        "number": 14717,
+        "url": "https://github.com/BrianCLong/summit/pull/14717",
+        "mergedAt": "2025-12-27T21:18:08Z",
+        "title": "Add third-party integration threat model and Semgrep CI gate"
+      },
+      {
+        "number": 13189,
+        "url": "https://github.com/BrianCLong/summit/pull/13189",
+        "mergedAt": "2025-12-04T15:38:50Z",
+        "title": "Integrate OPA and Falco for zero-trust security"
+      },
+      {
+        "number": 13335,
+        "url": "https://github.com/BrianCLong/summit/pull/13335",
+        "mergedAt": "2025-12-05T16:54:23Z",
+        "title": "Air-Gapped Deployment & ODNI Zero-Trust Compliance"
+      },
+      {
+        "number": 12071,
+        "url": "https://github.com/BrianCLong/summit/pull/12071",
+        "mergedAt": null,
+        "title": "Build Enterprise Compliance and Governance Framework"
+      },
+      {
+        "number": 12680,
+        "url": "https://github.com/BrianCLong/summit/pull/12680",
+        "mergedAt": "2025-12-18T01:40:28Z",
+        "title": "Set up artifact disclosure pack skeleton"
+      },
+      {
+        "number": 11983,
+        "url": "https://github.com/BrianCLong/summit/pull/11983",
+        "mergedAt": "2025-11-20T15:06:02Z",
+        "title": "Implement ABAC governance and audit foundations"
+      },
+      {
+        "number": 12242,
+        "url": "https://github.com/BrianCLong/summit/pull/12242",
+        "mergedAt": "2025-12-18T03:36:59Z",
+        "title": "Build zero-trust infrastructure for agentic mesh"
+      },
+      {
+        "number": 13098,
+        "url": "https://github.com/BrianCLong/summit/pull/13098",
+        "mergedAt": "2025-12-03T01:54:50Z",
+        "title": "Harden Summit security with RBAC and audit trails"
+      },
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      },
+      {
+        "number": 13195,
+        "url": "https://github.com/BrianCLong/summit/pull/13195",
+        "mergedAt": "2025-12-04T15:56:11Z",
+        "title": "Deploy Harbor proxy for air-gapped image pulls"
+      },
+      {
+        "number": 11924,
+        "url": "https://github.com/BrianCLong/summit/pull/11924",
+        "mergedAt": "2025-11-20T10:20:18Z",
+        "title": "Build Case Spaces with audit logs and access prompts"
+      },
+      {
+        "number": 10113,
+        "url": "https://github.com/BrianCLong/summit/pull/10113",
+        "mergedAt": "2025-10-14T10:40:26Z",
+        "title": "docs: add fast-ship sku one-pager and order forms"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,59 @@
+{
+  "issue_number": 731,
+  "title": "chore(deps): bump uvicorn[standard] from 0.24.0 to 0.35.0",
+  "url": "https://github.com/BrianCLong/summit/pull/731",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9133974250,
+      "node_id": "LA_kwDOPaNncM8AAAACIG1i6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/python",
+      "name": "python",
+      "color": "2b67c6",
+      "default": false,
+      "description": "Pull requests that update python code"
+    }
+  ],
+  "updatedAt": "2025-08-29T16:25:00Z",
+  "createdAt": "2025-08-21T00:45:20Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15263,
+        "url": "https://github.com/BrianCLong/summit/pull/15263",
+        "mergedAt": "2026-01-01T07:29:38Z",
+        "title": "Build user-facing explainability and provenance explorer"
+      },
+      {
+        "number": 1257,
+        "url": "https://github.com/BrianCLong/summit/pull/1257",
+        "mergedAt": null,
+        "title": "chore(deps): bump pytest-asyncio from 0.21.1 to 1.2.0"
+      },
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

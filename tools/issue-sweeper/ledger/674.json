@@ -1,0 +1,50 @@
+{
+  "issue_number": 674,
+  "title": "feat(server): add tenant-aware connection routing",
+  "url": "https://github.com/BrianCLong/summit/pull/674",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:44:03Z",
+  "createdAt": "2025-08-20T06:47:05Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 12305,
+        "url": "https://github.com/BrianCLong/summit/pull/12305",
+        "mergedAt": "2025-11-27T00:19:42Z",
+        "title": "Bump node-forge from 1.3.1 to 1.3.2 in /conductor-ui"
+      },
+      {
+        "number": 10115,
+        "url": "https://github.com/BrianCLong/summit/pull/10115",
+        "mergedAt": "2025-10-14T10:40:20Z",
+        "title": "feat: improve websocket connection resilience"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,58 @@
+{
+  "issue_number": 932,
+  "title": "docs: add Sprint 14 task CSV and sourcing instructions",
+  "url": "https://github.com/BrianCLong/summit/pull/932",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    },
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9189484598,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xoNg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:infra",
+      "name": "priority:infra",
+      "color": "800080",
+      "default": false,
+      "description": "Infrastructure and deployment"
+    },
+    {
+      "id": 9189485033,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xp6Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/status:ready-merge",
+      "name": "status:ready-merge",
+      "color": "00FF00",
+      "default": false,
+      "description": "Ready for auto-merge"
+    }
+  ],
+  "updatedAt": "2025-09-21T01:17:28Z",
+  "createdAt": "2025-08-29T02:22:57Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,38 @@
+{
+  "issue_number": 746,
+  "title": "feat: add merkle manifest to provenance exports",
+  "url": "https://github.com/BrianCLong/summit/pull/746",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-21T01:10:42Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

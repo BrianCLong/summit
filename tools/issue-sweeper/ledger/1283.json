@@ -1,0 +1,53 @@
+{
+  "issue_number": 1283,
+  "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform",
+  "url": "https://github.com/BrianCLong/summit/pull/1283",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208476596,
+      "node_id": "LA_kwDOPaNncM8AAAACJN4ztA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%205/5",
+      "name": "Review effort 5/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-20T23:41:38Z",
+  "createdAt": "2025-09-19T02:15:24Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14014,
+        "url": "https://github.com/BrianCLong/summit/pull/14014",
+        "mergedAt": "2025-12-19T21:27:26Z",
+        "title": "Update python-jose version to 3.4.0"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,47 @@
+{
+  "issue_number": 1228,
+  "title": "Observability: OTel Standardization",
+  "url": "https://github.com/BrianCLong/summit/issues/1228",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968269,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/observability",
+      "name": "observability",
+      "color": "5319E7",
+      "default": false,
+      "description": "OTel/Grafana/Alerts"
+    },
+    {
+      "id": 9283516291,
+      "node_id": "LA_kwDOPaNncM8AAAACKVc3gw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/must",
+      "name": "must",
+      "color": "FF0000",
+      "default": false,
+      "description": "Must-have (blockers)"
+    }
+  ],
+  "updatedAt": "2025-09-14T23:12:17Z",
+  "createdAt": "2025-09-14T23:12:17Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1210,
+        "url": "https://github.com/BrianCLong/summit/pull/1210",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump neo4j from 4.4.1 to 5.28.2"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

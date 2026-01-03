@@ -1,0 +1,103 @@
+{
+  "issue_number": 1089,
+  "title": "[orchestrator-core] Implement Kill Switch and Autonomy Profiles",
+  "url": "https://github.com/BrianCLong/summit/issues/1089",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446636,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2-rA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/orchestrator-core",
+      "name": "area/orchestrator-core",
+      "color": "B60205",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208446885,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_pQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/feat",
+      "name": "type/feat",
+      "color": "C2E0C6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208446909,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_vQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P0-blocker",
+      "name": "priority/P0-blocker",
+      "color": "5319E7",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208446942,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_3g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/autonomy/A2",
+      "name": "autonomy/A2",
+      "color": "C5DEF5",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447078,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3AZg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/autonomy/A0",
+      "name": "autonomy/A0",
+      "color": "FBCA04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447092,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3AdA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/autonomy/A1",
+      "name": "autonomy/A1",
+      "color": "C5DEF5",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447106,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Agg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/autonomy/A3",
+      "name": "autonomy/A3",
+      "color": "C2E0C6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447118,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Ajg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/autonomy/A4",
+      "name": "autonomy/A4",
+      "color": "0E8A16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447123,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Akw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/autonomy/A5",
+      "name": "autonomy/A5",
+      "color": "5319E7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-01T23:42:17Z",
+  "createdAt": "2025-09-01T23:42:16Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

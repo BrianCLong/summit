@@ -1,0 +1,221 @@
+{
+  "issue_number": 2025,
+  "title": "IG Oct25 | october2025/Dulles.md | Witnesses & declarations (who / by when):",
+  "url": "https://github.com/BrianCLong/summit/issues/2025",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:34:00Z",
+  "createdAt": "2025-10-01T15:34:00Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15444,
+        "url": "https://github.com/BrianCLong/summit/pull/15444",
+        "mergedAt": null,
+        "title": "Add MAS-GAIN traceability and graph retrieval design docs"
+      },
+      {
+        "number": 15219,
+        "url": "https://github.com/BrianCLong/summit/pull/15219",
+        "mergedAt": "2026-01-01T11:45:27Z",
+        "title": "Security Hardening: External Review Remediation (SEC-2025-001)"
+      },
+      {
+        "number": 14489,
+        "url": "https://github.com/BrianCLong/summit/pull/14489",
+        "mergedAt": null,
+        "title": "feat(arch): 2025-Q4 Architecture RFCs & Prototypes"
+      },
+      {
+        "number": 14181,
+        "url": "https://github.com/BrianCLong/summit/pull/14181",
+        "mergedAt": "2025-12-22T07:08:01Z",
+        "title": "Add final epics to Summit 2025 roadmap"
+      },
+      {
+        "number": 13697,
+        "url": "https://github.com/BrianCLong/summit/pull/13697",
+        "mergedAt": "2025-12-20T03:30:54Z",
+        "title": "Align release train 2025-W51 tracker and Promise Tracker health"
+      },
+      {
+        "number": 12742,
+        "url": "https://github.com/BrianCLong/summit/pull/12742",
+        "mergedAt": "2025-12-04T17:47:55Z",
+        "title": "Add 2025 collaborative intelligence capability roadmap"
+      },
+      {
+        "number": 12797,
+        "url": "https://github.com/BrianCLong/summit/pull/12797",
+        "mergedAt": "2025-12-17T22:00:19Z",
+        "title": "Add sprint plan for Dec 15–26, 2025"
+      },
+      {
+        "number": 12777,
+        "url": "https://github.com/BrianCLong/summit/pull/12777",
+        "mergedAt": "2025-12-18T00:37:42Z",
+        "title": "MCP+ v1: Goose-Learned Velocity 2025-11-28"
+      },
+      {
+        "number": 14463,
+        "url": "https://github.com/BrianCLong/summit/pull/14463",
+        "mergedAt": "2025-12-25T04:27:10Z",
+        "title": "docs: Add Definition of Production and Repo Map (Sprint Lock 2025-12-29)"
+      },
+      {
+        "number": 12324,
+        "url": "https://github.com/BrianCLong/summit/pull/12324",
+        "mergedAt": "2025-12-18T03:08:38Z",
+        "title": "Define 5 Parallel Strategic Sprints for Q4 2025"
+      },
+      {
+        "number": 12743,
+        "url": "https://github.com/BrianCLong/summit/pull/12743",
+        "mergedAt": "2025-12-04T17:47:52Z",
+        "title": "Add 2025 agentic AI R&D roadmap"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 11863,
+        "url": "https://github.com/BrianCLong/summit/pull/11863",
+        "mergedAt": "2025-11-20T22:22:30Z",
+        "title": "docs: add October 2025 Board Pack"
+      },
+      {
+        "number": 12739,
+        "url": "https://github.com/BrianCLong/summit/pull/12739",
+        "mergedAt": "2025-12-04T15:56:17Z",
+        "title": "Add graph-narrative capability moat plan for 2024–2025"
+      },
+      {
+        "number": 15181,
+        "url": "https://github.com/BrianCLong/summit/pull/15181",
+        "mergedAt": "2025-12-31T14:21:22Z",
+        "title": "chore(deps): bump github/codeql-action from 3 to 4"
+      },
+      {
+        "number": 12810,
+        "url": "https://github.com/BrianCLong/summit/pull/12810",
+        "mergedAt": "2025-12-04T17:41:57Z",
+        "title": "Update sprint plan for Dec 1–12 2025 golden path"
+      },
+      {
+        "number": 15229,
+        "url": "https://github.com/BrianCLong/summit/pull/15229",
+        "mergedAt": null,
+        "title": "docs: add institutional multi-year roadmap artifact"
+      },
+      {
+        "number": 15045,
+        "url": "https://github.com/BrianCLong/summit/pull/15045",
+        "mergedAt": null,
+        "title": "docs: align roadmap with release cadence"
+      },
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      },
+      {
+        "number": 15133,
+        "url": "https://github.com/BrianCLong/summit/pull/15133",
+        "mergedAt": null,
+        "title": "chore(deps): bump aws-actions/configure-aws-credentials from 4 to 5"
+      },
+      {
+        "number": 1363,
+        "url": "https://github.com/BrianCLong/summit/pull/1363",
+        "mergedAt": null,
+        "title": "Release 2025.09.23.1710"
+      },
+      {
+        "number": 13885,
+        "url": "https://github.com/BrianCLong/summit/pull/13885",
+        "mergedAt": "2025-12-20T03:21:08Z",
+        "title": "docs: add patent intake form for roadmap traceability"
+      },
+      {
+        "number": 13895,
+        "url": "https://github.com/BrianCLong/summit/pull/13895",
+        "mergedAt": "2025-12-20T03:20:18Z",
+        "title": "Add innovation intake and provisional docket doc"
+      },
+      {
+        "number": 12749,
+        "url": "https://github.com/BrianCLong/summit/pull/12749",
+        "mergedAt": "2025-12-04T15:56:16Z",
+        "title": "Create Claude prompts for IntelGraph roadmap"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 14362,
+        "url": "https://github.com/BrianCLong/summit/pull/14362",
+        "mergedAt": "2025-12-22T07:15:17Z",
+        "title": "docs: add GLM-4.6 to catalog"
+      },
+      {
+        "number": 14616,
+        "url": "https://github.com/BrianCLong/summit/pull/14616",
+        "mergedAt": null,
+        "title": "docs: add CI runner isolation blueprint"
+      },
+      {
+        "number": 14755,
+        "url": "https://github.com/BrianCLong/summit/pull/14755",
+        "mergedAt": null,
+        "title": "docs: add MVP-3-GA org design governance model"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

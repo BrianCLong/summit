@@ -1,0 +1,56 @@
+{
+  "issue_number": 1100,
+  "title": "[scheduler] Implement Robust Scheduler with Concurrency, Locks, and Hedging",
+  "url": "https://github.com/BrianCLong/summit/issues/1100",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446885,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_pQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/feat",
+      "name": "type/feat",
+      "color": "C2E0C6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447163,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Auw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P1",
+      "name": "priority/P1",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208936775,
+      "node_id": "LA_kwDOPaNncM8AAAACJOU5Rw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/scheduler",
+      "name": "area/scheduler",
+      "color": "FBCA04",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-02T00:52:57Z",
+  "createdAt": "2025-09-02T00:52:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15338,
+        "url": "https://github.com/BrianCLong/summit/pull/15338",
+        "mergedAt": "2026-01-01T11:38:05Z",
+        "title": "Control the Arena: Governance Definitions and Debt Automation"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

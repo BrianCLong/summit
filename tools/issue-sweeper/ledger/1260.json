@@ -1,0 +1,53 @@
+{
+  "issue_number": 1260,
+  "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508",
+  "url": "https://github.com/BrianCLong/summit/pull/1260",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853862,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%204/5",
+      "name": "Review effort 4/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-19T11:00:59Z",
+  "createdAt": "2025-09-15T08:39:24Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

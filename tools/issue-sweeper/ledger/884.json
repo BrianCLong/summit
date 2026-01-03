@@ -1,0 +1,38 @@
+{
+  "issue_number": 884,
+  "title": "feat: add tradecraft vertical slice",
+  "url": "https://github.com/BrianCLong/summit/pull/884",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:18:57Z",
+  "createdAt": "2025-08-24T16:37:02Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 269,
+        "url": "https://github.com/BrianCLong/summit/pull/269",
+        "mergedAt": "2025-08-15T21:09:19Z",
+        "title": "chore(deps): bump dotenv from 16.6.1 to 17.2.1 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

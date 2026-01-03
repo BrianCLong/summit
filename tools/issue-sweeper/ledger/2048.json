@@ -1,0 +1,59 @@
+{
+  "issue_number": 2048,
+  "title": "IG Oct25 | october2025/Switchboard.md | const startMeeting = () => {",
+  "url": "https://github.com/BrianCLong/summit/issues/2048",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:35:13Z",
+  "createdAt": "2025-10-01T15:35:13Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11904,
+        "url": "https://github.com/BrianCLong/summit/pull/11904",
+        "mergedAt": "2025-11-20T10:25:38Z",
+        "title": "Set up Security Autopilot for Summit repoCreate pull request"
+      },
+      {
+        "number": 13182,
+        "url": "https://github.com/BrianCLong/summit/pull/13182",
+        "mergedAt": "2025-12-04T15:39:06Z",
+        "title": "Build SIGINT dashboard with live waveform visualization"
+      },
+      {
+        "number": 1352,
+        "url": "https://github.com/BrianCLong/summit/pull/1352",
+        "mergedAt": "2025-09-23T06:56:06Z",
+        "title": "chore(deps): bump parse-url from 6.0.5 to 8.1.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

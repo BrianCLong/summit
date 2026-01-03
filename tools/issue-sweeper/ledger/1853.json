@@ -1,0 +1,38 @@
+{
+  "issue_number": 1853,
+  "title": "chore: restore repo baseline for scoped PRs",
+  "url": "https://github.com/BrianCLong/summit/pull/1853",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-10-01T00:49:03Z",
+  "createdAt": "2025-09-29T01:35:44Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1857,
+        "url": "https://github.com/BrianCLong/summit/pull/1857",
+        "mergedAt": null,
+        "title": "Hypervelocity Infrastructure Merge - PR 1853 Conflict Resolution"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

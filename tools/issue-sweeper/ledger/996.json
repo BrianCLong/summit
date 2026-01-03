@@ -1,0 +1,28 @@
+{
+  "issue_number": 996,
+  "title": "Absorb orphan: codex/implement-graphrag-path-with-caching-and-tests",
+  "url": "https://github.com/BrianCLong/summit/pull/996",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:21:09Z",
+  "createdAt": "2025-08-29T03:35:21Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

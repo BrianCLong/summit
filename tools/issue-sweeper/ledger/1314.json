@@ -1,0 +1,68 @@
+{
+  "issue_number": 1314,
+  "title": "docs: refresh sprint 24 plan",
+  "url": "https://github.com/BrianCLong/summit/pull/1314",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9284194884,
+      "node_id": "LA_kwDOPaNncM8AAAACKWGSRA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%202/5",
+      "name": "Review effort 2/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-23T16:58:20Z",
+  "createdAt": "2025-09-22T06:16:40Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1314,
+        "url": "https://github.com/BrianCLong/summit/pull/1314",
+        "mergedAt": null,
+        "title": "docs: refresh sprint 24 plan"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

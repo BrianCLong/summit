@@ -1,0 +1,80 @@
+{
+  "issue_number": 829,
+  "title": "feat: add sdk service endpoints",
+  "url": "https://github.com/BrianCLong/summit/pull/829",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-24T07:22:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 408,
+        "url": "https://github.com/BrianCLong/summit/pull/408",
+        "mergedAt": null,
+        "title": "feat: add collaborative workspace service"
+      },
+      {
+        "number": 413,
+        "url": "https://github.com/BrianCLong/summit/pull/413",
+        "mergedAt": "2025-08-17T17:43:21Z",
+        "title": "docs: add virtual ICS attack chain output"
+      },
+      {
+        "number": 411,
+        "url": "https://github.com/BrianCLong/summit/pull/411",
+        "mergedAt": "2025-08-17T17:43:44Z",
+        "title": "docs: add virtual ICS attack chain output"
+      },
+      {
+        "number": 461,
+        "url": "https://github.com/BrianCLong/summit/pull/461",
+        "mergedAt": "2025-08-17T14:35:33Z",
+        "title": "feat: prioritize OSINT feeds via admin settings"
+      },
+      {
+        "number": 425,
+        "url": "https://github.com/BrianCLong/summit/pull/425",
+        "mergedAt": "2025-08-17T17:41:36Z",
+        "title": "feat: add universal data ingestion pipeline"
+      },
+      {
+        "number": 426,
+        "url": "https://github.com/BrianCLong/summit/pull/426",
+        "mergedAt": "2025-08-17T17:41:22Z",
+        "title": "feat: add universal data ingestion pipeline"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

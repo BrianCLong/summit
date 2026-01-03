@@ -1,0 +1,40 @@
+{
+  "issue_number": 1046,
+  "title": "Absorb orphan: codex/work-on-mvp1-core-graph-issues",
+  "url": "https://github.com/BrianCLong/summit/pull/1046",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T18:13:27Z",
+  "createdAt": "2025-08-29T03:37:54Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13104,
+        "url": "https://github.com/BrianCLong/summit/pull/13104",
+        "mergedAt": "2025-12-03T01:45:05Z",
+        "title": "Implement OSINT fusion agentic capability"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

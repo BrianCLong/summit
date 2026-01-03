@@ -1,0 +1,31 @@
+{
+  "issue_number": 1821,
+  "title": "Feature/cfa tdw",
+  "url": "https://github.com/BrianCLong/summit/pull/1821",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-29T07:13:42Z",
+  "createdAt": "2025-09-28T18:02:11Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

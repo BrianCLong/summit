@@ -1,0 +1,53 @@
+{
+  "issue_number": 1536,
+  "title": "feat: add verifiable synthetic data forge package",
+  "url": "https://github.com/BrianCLong/summit/pull/1536",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9359995057,
+      "node_id": "LA_kwDOPaNncM8AAAACLeYwsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-review",
+      "name": "needs-review",
+      "color": "fbca04",
+      "default": false,
+      "description": "Awaiting review from code owners"
+    }
+  ],
+  "updatedAt": "2025-11-20T22:29:49Z",
+  "createdAt": "2025-09-27T01:01:11Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 631,
+        "url": "https://github.com/BrianCLong/summit/pull/631",
+        "mergedAt": null,
+        "title": "chore(deps): bump tqdm from 4.66.1 to 4.67.1"
+      },
+      {
+        "number": 118,
+        "url": "https://github.com/BrianCLong/summit/pull/118",
+        "mergedAt": "2025-08-15T21:10:52Z",
+        "title": "chore(deps-dev): bump lint-staged from 13.3.0 to 16.1.5"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

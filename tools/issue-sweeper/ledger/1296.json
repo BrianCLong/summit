@@ -1,0 +1,38 @@
+{
+  "issue_number": 1296,
+  "title": "feat(automation): Weekly Repository Hygiene Workflow",
+  "url": "https://github.com/BrianCLong/summit/pull/1296",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9215499745,
+      "node_id": "LA_kwDOPaNncM8AAAACJUld4Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%203/5",
+      "name": "Review effort 3/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-21T02:01:26Z",
+  "createdAt": "2025-09-21T01:53:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1296,
+        "url": "https://github.com/BrianCLong/summit/pull/1296",
+        "mergedAt": "2025-09-21T02:01:25Z",
+        "title": "feat(automation): Weekly Repository Hygiene Workflow"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

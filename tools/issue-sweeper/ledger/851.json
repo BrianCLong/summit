@@ -1,0 +1,62 @@
+{
+  "issue_number": 851,
+  "title": "feat: add graph core service with entity resolution",
+  "url": "https://github.com/BrianCLong/summit/pull/851",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:28:15Z",
+  "createdAt": "2025-08-24T08:17:41Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13107,
+        "url": "https://github.com/BrianCLong/summit/pull/13107",
+        "mergedAt": "2025-12-03T04:34:58Z",
+        "title": "Build governance orchestration for agent fleets"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 1077,
+        "url": "https://github.com/BrianCLong/summit/pull/1077",
+        "mergedAt": "2025-08-29T20:17:32Z",
+        "title": "feat: GA-Core Integration Train - Complete Enterprise Intelligence Platform"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

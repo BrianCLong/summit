@@ -1,0 +1,49 @@
+{
+  "issue_number": 1099,
+  "title": "[test] Implement Comprehensive Test Packs",
+  "url": "https://github.com/BrianCLong/summit/issues/1099",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446636,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2-rA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/orchestrator-core",
+      "name": "area/orchestrator-core",
+      "color": "B60205",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447163,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Auw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P1",
+      "name": "priority/P1",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208935729,
+      "node_id": "LA_kwDOPaNncM8AAAACJOU1MQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/test",
+      "name": "type/test",
+      "color": "FBCA04",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-02T00:52:36Z",
+  "createdAt": "2025-09-02T00:52:36Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

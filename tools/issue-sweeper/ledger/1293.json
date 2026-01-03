@@ -1,0 +1,21 @@
+{
+  "issue_number": 1293,
+  "title": "Repo Hygiene Blocker: Uncommitted Local Changes and Untracked Files",
+  "url": "https://github.com/BrianCLong/summit/issues/1293",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-09-21T01:21:34Z",
+  "createdAt": "2025-09-20T23:20:46Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

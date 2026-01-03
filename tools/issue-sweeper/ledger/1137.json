@@ -1,0 +1,47 @@
+{
+  "issue_number": 1137,
+  "title": "chore(deps): bump canvas from 2.11.2 to 3.2.0 in /server",
+  "url": "https://github.com/BrianCLong/summit/pull/1137",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-09-06T20:56:55Z",
+  "createdAt": "2025-09-04T09:48:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15338,
+        "url": "https://github.com/BrianCLong/summit/pull/15338",
+        "mergedAt": "2026-01-01T11:38:05Z",
+        "title": "Control the Arena: Governance Definitions and Debt Automation"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

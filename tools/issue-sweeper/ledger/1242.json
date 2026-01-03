@@ -1,0 +1,49 @@
+{
+  "issue_number": 1242,
+  "title": "Frontend: Playwright Critical Flow",
+  "url": "https://github.com/BrianCLong/summit/issues/1242",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9283516325,
+      "node_id": "LA_kwDOPaNncM8AAAACKVc3pQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/should",
+      "name": "should",
+      "color": "1F6FEB",
+      "default": false,
+      "description": "Should-have"
+    },
+    {
+      "id": 9283516530,
+      "node_id": "LA_kwDOPaNncM8AAAACKVc4cg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/test",
+      "name": "test",
+      "color": "0E8A16",
+      "default": false,
+      "description": "Tests/Evidence"
+    }
+  ],
+  "updatedAt": "2025-09-15T00:56:05Z",
+  "createdAt": "2025-09-15T00:56:05Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

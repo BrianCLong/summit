@@ -1,0 +1,21 @@
+{
+  "issue_number": 764,
+  "title": "Fix: repair broken workflows (YAML + structure)",
+  "url": "https://github.com/BrianCLong/summit/pull/764",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-22T00:19:31Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

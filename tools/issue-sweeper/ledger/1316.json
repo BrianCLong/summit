@@ -1,0 +1,77 @@
+{
+  "issue_number": 1316,
+  "title": "docs: update IG squad sprint plan",
+  "url": "https://github.com/BrianCLong/summit/pull/1316",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9285861077,
+      "node_id": "LA_kwDOPaNncM8AAAACKXr-1Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%201/5",
+      "name": "Review effort 1/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-23T06:11:27Z",
+  "createdAt": "2025-09-22T06:16:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      },
+      {
+        "number": 1316,
+        "url": "https://github.com/BrianCLong/summit/pull/1316",
+        "mergedAt": "2025-09-23T06:11:25Z",
+        "title": "docs: update IG squad sprint plan"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

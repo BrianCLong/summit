@@ -1,0 +1,28 @@
+{
+  "issue_number": 947,
+  "title": "Absorb orphan: codex/add-six-unique-transformative-features",
+  "url": "https://github.com/BrianCLong/summit/pull/947",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:48Z",
+  "createdAt": "2025-08-29T03:32:14Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11903,
+        "url": "https://github.com/BrianCLong/summit/pull/11903",
+        "mergedAt": "2025-11-20T09:49:20Z",
+        "title": "Add security headers and OWASP compliance"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

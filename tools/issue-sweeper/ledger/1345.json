@@ -1,0 +1,62 @@
+{
+  "issue_number": 1345,
+  "title": "chore(deps): bump torch from 2.1.1 to 2.8.0 in /services/insight-ai",
+  "url": "https://github.com/BrianCLong/summit/pull/1345",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9133974250,
+      "node_id": "LA_kwDOPaNncM8AAAACIG1i6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/python",
+      "name": "python",
+      "color": "2b67c6",
+      "default": false,
+      "description": "Pull requests that update python code"
+    },
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-23T06:24:10Z",
+  "createdAt": "2025-09-23T06:18:28Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

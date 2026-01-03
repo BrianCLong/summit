@@ -1,0 +1,62 @@
+{
+  "issue_number": 1336,
+  "title": "Int/deps",
+  "url": "https://github.com/BrianCLong/summit/pull/1336",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208476596,
+      "node_id": "LA_kwDOPaNncM8AAAACJN4ztA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%205/5",
+      "name": "Review effort 5/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9278618923,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Kw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:high",
+      "name": "risk:high",
+      "color": "1D76DB",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-23T06:17:04Z",
+  "createdAt": "2025-09-23T03:43:28Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 11785,
+        "url": "https://github.com/BrianCLong/summit/pull/11785",
+        "mergedAt": "2025-10-28T02:59:20Z",
+        "title": "chore(deps): bump validator and express-validator in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

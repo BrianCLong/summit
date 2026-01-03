@@ -1,0 +1,21 @@
+{
+  "issue_number": 1868,
+  "title": "Test Issue",
+  "url": "https://github.com/BrianCLong/summit/issues/1868",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-10-01T17:02:42Z",
+  "createdAt": "2025-10-01T15:23:41Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,47 @@
+{
+  "issue_number": 1297,
+  "title": "feat(phase-3): implement comprehensive test strategy hardening",
+  "url": "https://github.com/BrianCLong/summit/pull/1297",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853862,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%204/5",
+      "name": "Review effort 4/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-23T06:17:04Z",
+  "createdAt": "2025-09-21T02:02:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1297,
+        "url": "https://github.com/BrianCLong/summit/pull/1297",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): implement comprehensive test strategy hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

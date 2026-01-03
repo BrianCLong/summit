@@ -1,0 +1,52 @@
+{
+  "issue_number": 730,
+  "title": "Release/1.0.1",
+  "url": "https://github.com/BrianCLong/summit/pull/730",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-21T00:31:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11900,
+        "url": "https://github.com/BrianCLong/summit/pull/11900",
+        "mergedAt": "2025-11-20T10:26:00Z",
+        "title": "Add observability and disaster recovery infrastructure"
+      },
+      {
+        "number": 301,
+        "url": "https://github.com/BrianCLong/summit/pull/301",
+        "mergedAt": "2025-08-16T22:23:30Z",
+        "title": "docs: add velocity plans v4-v6"
+      },
+      {
+        "number": 300,
+        "url": "https://github.com/BrianCLong/summit/pull/300",
+        "mergedAt": "2025-08-16T22:23:32Z",
+        "title": "docs: add velocity plans v4-v6"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

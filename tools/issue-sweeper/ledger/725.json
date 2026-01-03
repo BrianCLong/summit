@@ -1,0 +1,28 @@
+{
+  "issue_number": 725,
+  "title": "hotfix(ci): GA Core CI rescue - baseline reliability",
+  "url": "https://github.com/BrianCLong/summit/pull/725",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-20T20:04:41Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15182,
+        "url": "https://github.com/BrianCLong/summit/pull/15182",
+        "mergedAt": "2025-12-31T14:21:25Z",
+        "title": "chore(deps): bump actions/upload-artifact from 4 to 6"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

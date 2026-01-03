@@ -1,0 +1,49 @@
+{
+  "issue_number": 1237,
+  "title": "Gateway: OPA ABAC Enforcement",
+  "url": "https://github.com/BrianCLong/summit/issues/1237",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9283516291,
+      "node_id": "LA_kwDOPaNncM8AAAACKVc3gw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/must",
+      "name": "must",
+      "color": "FF0000",
+      "default": false,
+      "description": "Must-have (blockers)"
+    }
+  ],
+  "updatedAt": "2025-09-15T00:55:55Z",
+  "createdAt": "2025-09-15T00:55:55Z",
+  "classification": "security",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

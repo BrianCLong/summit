@@ -1,0 +1,44 @@
+{
+  "issue_number": 1290,
+  "title": "Phase 7: Canary Deployment & GA Release v2025.09.19",
+  "url": "https://github.com/BrianCLong/summit/pull/1290",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853862,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%204/5",
+      "name": "Review effort 4/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-20T16:30:05Z",
+  "createdAt": "2025-09-20T11:51:15Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      },
+      {
+        "number": 1290,
+        "url": "https://github.com/BrianCLong/summit/pull/1290",
+        "mergedAt": "2025-09-20T16:30:04Z",
+        "title": "Phase 7: Canary Deployment & GA Release v2025.09.19"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

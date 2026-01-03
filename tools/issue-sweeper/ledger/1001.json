@@ -1,0 +1,34 @@
+{
+  "issue_number": 1001,
+  "title": "Absorb orphan: codex/implement-predictive-analytics-layer-15aukl",
+  "url": "https://github.com/BrianCLong/summit/pull/1001",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:19:45Z",
+  "createdAt": "2025-08-29T03:35:43Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14539,
+        "url": "https://github.com/BrianCLong/summit/pull/14539",
+        "mergedAt": "2025-12-26T23:53:10Z",
+        "title": "chore(deps): Bump github.com/go-chi/chi/v5 from 5.0.10 to 5.2.2 in /services/q3c"
+      },
+      {
+        "number": 13616,
+        "url": "https://github.com/BrianCLong/summit/pull/13616",
+        "mergedAt": "2025-12-16T21:23:51Z",
+        "title": "build(deps): bump github.com/go-chi/chi/v5 from 5.0.11 to 5.2.2 in /templates/golden-path-platform/services/hello-service"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

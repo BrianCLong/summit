@@ -1,0 +1,38 @@
+{
+  "issue_number": 1776,
+  "title": "feat: integrate opa policy enforcement",
+  "url": "https://github.com/BrianCLong/summit/pull/1776",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-10-01T00:55:45Z",
+  "createdAt": "2025-09-27T22:42:32Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13079,
+        "url": "https://github.com/BrianCLong/summit/pull/13079",
+        "mergedAt": "2025-12-02T11:19:57Z",
+        "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

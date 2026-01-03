@@ -1,0 +1,28 @@
+{
+  "issue_number": 1783,
+  "title": "Feat/asset inventory hardening and validation",
+  "url": "https://github.com/BrianCLong/summit/pull/1783",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-10-01T00:54:11Z",
+  "createdAt": "2025-09-28T02:51:45Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13079,
+        "url": "https://github.com/BrianCLong/summit/pull/13079",
+        "mergedAt": "2025-12-02T11:19:57Z",
+        "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

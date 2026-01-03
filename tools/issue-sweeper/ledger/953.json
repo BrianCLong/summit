@@ -1,0 +1,34 @@
+{
+  "issue_number": 953,
+  "title": "Absorb orphan: codex/complete-next-2-sprints",
+  "url": "https://github.com/BrianCLong/summit/pull/953",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:25:03Z",
+  "createdAt": "2025-08-29T03:32:36Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,56 @@
+{
+  "issue_number": 922,
+  "title": "feat: add url resolver service",
+  "url": "https://github.com/BrianCLong/summit/pull/922",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    },
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9189485033,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xp6Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/status:ready-merge",
+      "name": "status:ready-merge",
+      "color": "00FF00",
+      "default": false,
+      "description": "Ready for auto-merge"
+    }
+  ],
+  "updatedAt": "2025-08-29T16:22:17Z",
+  "createdAt": "2025-08-24T18:53:57Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15133,
+        "url": "https://github.com/BrianCLong/summit/pull/15133",
+        "mergedAt": null,
+        "title": "chore(deps): bump aws-actions/configure-aws-credentials from 4 to 5"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

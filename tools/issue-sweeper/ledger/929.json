@@ -1,0 +1,65 @@
+{
+  "issue_number": 929,
+  "title": "chore(graphql): namespace ops + bundle hygiene guards",
+  "url": "https://github.com/BrianCLong/summit/pull/929",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    },
+    {
+      "id": 9189484985,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xpuQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:monorepo",
+      "name": "area:monorepo",
+      "color": "FFD700",
+      "default": false,
+      "description": "Monorepo architecture"
+    },
+    {
+      "id": 9189485033,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xp6Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/status:ready-merge",
+      "name": "status:ready-merge",
+      "color": "00FF00",
+      "default": false,
+      "description": "Ready for auto-merge"
+    }
+  ],
+  "updatedAt": "2025-09-19T11:00:54Z",
+  "createdAt": "2025-08-27T00:29:22Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

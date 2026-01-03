@@ -1,0 +1,44 @@
+{
+  "issue_number": 715,
+  "title": "style(js): resolve merge artifacts and adjust formatter ignores",
+  "url": "https://github.com/BrianCLong/summit/pull/715",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:14:40Z",
+  "createdAt": "2025-08-20T15:10:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 13180,
+        "url": "https://github.com/BrianCLong/summit/pull/13180",
+        "mergedAt": "2025-12-04T15:39:12Z",
+        "title": "Build AI governance metrics dashboard with analytics"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,44 @@
+{
+  "issue_number": 780,
+  "title": "feat(fusionhub): add org profile policy enforcement",
+  "url": "https://github.com/BrianCLong/summit/pull/780",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:37:01Z",
+  "createdAt": "2025-08-24T03:08:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 1188,
+        "url": "https://github.com/BrianCLong/summit/pull/1188",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump @hookform/resolvers from 3.10.0 to 5.2.1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

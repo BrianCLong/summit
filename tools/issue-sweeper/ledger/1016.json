@@ -1,0 +1,21 @@
+{
+  "issue_number": 1016,
+  "title": "Absorb orphan: codex/implement-sprint-19-action-plan-1oqnpb",
+  "url": "https://github.com/BrianCLong/summit/pull/1016",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:17:33Z",
+  "createdAt": "2025-08-29T03:36:26Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,34 @@
+{
+  "issue_number": 975,
+  "title": "Absorb orphan: codex/expand-and-implement-osint-data-ingestion-pipelines",
+  "url": "https://github.com/BrianCLong/summit/pull/975",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:31:31Z",
+  "createdAt": "2025-08-29T03:33:53Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

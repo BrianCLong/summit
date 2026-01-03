@@ -1,0 +1,40 @@
+{
+  "issue_number": 773,
+  "title": "dry-run: gate check",
+  "url": "https://github.com/BrianCLong/summit/pull/773",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:50Z",
+  "createdAt": "2025-08-22T21:32:23Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12248,
+        "url": "https://github.com/BrianCLong/summit/pull/12248",
+        "mergedAt": "2025-12-18T03:31:58Z",
+        "title": "Add universal data ingestion prompts for IntelGraph"
+      },
+      {
+        "number": 1276,
+        "url": "https://github.com/BrianCLong/summit/pull/1276",
+        "mergedAt": "2025-09-19T02:20:51Z",
+        "title": "chore(deps-dev): bump @vitejs/plugin-react from 4.7.0 to 5.0.3 in /client"
+      },
+      {
+        "number": 1150,
+        "url": "https://github.com/BrianCLong/summit/pull/1150",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @vitejs/plugin-react from 4.7.0 to 5.0.2 in /client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

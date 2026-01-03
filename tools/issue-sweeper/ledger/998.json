@@ -1,0 +1,21 @@
+{
+  "issue_number": 998,
+  "title": "Absorb orphan: codex/implement-interaction-logging-and-analytics-mntfxa",
+  "url": "https://github.com/BrianCLong/summit/pull/998",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:31:44Z",
+  "createdAt": "2025-08-29T03:35:31Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

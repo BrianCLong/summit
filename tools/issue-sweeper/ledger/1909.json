@@ -1,0 +1,47 @@
+{
+  "issue_number": 1909,
+  "title": "IG Oct25 | october2025/Dulles.md | **Victory is Paramount:** Legal, diplomatic, or reputational wins are not abstra",
+  "url": "https://github.com/BrianCLong/summit/issues/1909",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:38:47Z",
+  "createdAt": "2025-10-01T15:28:08Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11783,
+        "url": "https://github.com/BrianCLong/summit/pull/11783",
+        "mergedAt": "2025-10-24T19:47:04Z",
+        "title": "chore(deps): bump vite from 7.1.7 to 7.1.12 in /services/trr"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

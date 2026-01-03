@@ -1,0 +1,38 @@
+{
+  "issue_number": 1279,
+  "title": "feat(ga): artifacts pack for v1.0.0",
+  "url": "https://github.com/BrianCLong/summit/pull/1279",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9208476596,
+      "node_id": "LA_kwDOPaNncM8AAAACJN4ztA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%205/5",
+      "name": "Review effort 5/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-20T23:41:40Z",
+  "createdAt": "2025-09-18T02:12:26Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

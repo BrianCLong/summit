@@ -1,0 +1,21 @@
+{
+  "issue_number": 948,
+  "title": "Absorb orphan: codex/automate-deployment-build-and-start",
+  "url": "https://github.com/BrianCLong/summit/pull/948",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:25:15Z",
+  "createdAt": "2025-08-29T03:32:20Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

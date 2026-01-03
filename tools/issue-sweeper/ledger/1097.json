@@ -1,0 +1,49 @@
+{
+  "issue_number": 1097,
+  "title": "[web-automation] Playwright Sandbox + SSRF/eURL Guards",
+  "url": "https://github.com/BrianCLong/summit/issues/1097",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446985,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3ACQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/security",
+      "name": "type/security",
+      "color": "006B75",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447163,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Auw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P1",
+      "name": "priority/P1",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208896212,
+      "node_id": "LA_kwDOPaNncM8AAAACJOSa1A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/web-automation",
+      "name": "area/web-automation",
+      "color": "E99695",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-02T00:40:17Z",
+  "createdAt": "2025-09-02T00:40:17Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

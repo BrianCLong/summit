@@ -1,0 +1,59 @@
+{
+  "issue_number": 1976,
+  "title": "IG Oct25 | october2025/Dulles.md | One-paragraph summary of conclusions (with confidence levels).",
+  "url": "https://github.com/BrianCLong/summit/issues/1976",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:31:31Z",
+  "createdAt": "2025-10-01T15:31:31Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1068,
+        "url": "https://github.com/BrianCLong/summit/pull/1068",
+        "mergedAt": null,
+        "title": "docs: deepen counterintelligence deception detection engine"
+      },
+      {
+        "number": 792,
+        "url": "https://github.com/BrianCLong/summit/pull/792",
+        "mergedAt": "2025-08-29T10:36:30Z",
+        "title": "docs: add phase 4 2027 plan"
+      },
+      {
+        "number": 774,
+        "url": "https://github.com/BrianCLong/summit/pull/774",
+        "mergedAt": "2025-08-29T10:37:31Z",
+        "title": "ci: stabilize PR checks; fix Ruff hooks; pin toolchain"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

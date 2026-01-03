@@ -1,0 +1,28 @@
+{
+  "issue_number": 995,
+  "title": "Absorb orphan: codex/implement-devsecops-and-observability-features",
+  "url": "https://github.com/BrianCLong/summit/pull/995",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:24:40Z",
+  "createdAt": "2025-08-29T03:35:02Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11840,
+        "url": "https://github.com/BrianCLong/summit/pull/11840",
+        "mergedAt": null,
+        "title": "feat(intelgraph-api): add advanced graph analytics endpoints"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

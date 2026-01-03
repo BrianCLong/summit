@@ -1,0 +1,44 @@
+{
+  "issue_number": 758,
+  "title": "feat: add API contracts and service skeletons",
+  "url": "https://github.com/BrianCLong/summit/pull/758",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-21T15:45:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15258,
+        "url": "https://github.com/BrianCLong/summit/pull/15258",
+        "mergedAt": "2026-01-01T07:29:50Z",
+        "title": "Predictive Analytics and Multi-Agent Negotiation"
+      },
+      {
+        "number": 1188,
+        "url": "https://github.com/BrianCLong/summit/pull/1188",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump @hookform/resolvers from 3.10.0 to 5.2.1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

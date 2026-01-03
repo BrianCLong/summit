@@ -1,0 +1,47 @@
+{
+  "issue_number": 1355,
+  "title": "chore: add hardened ci guardrails",
+  "url": "https://github.com/BrianCLong/summit/pull/1355",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9215499745,
+      "node_id": "LA_kwDOPaNncM8AAAACJUld4Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%203/5",
+      "name": "Review effort 3/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-24T04:15:52Z",
+  "createdAt": "2025-09-23T17:31:27Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1355,
+        "url": "https://github.com/BrianCLong/summit/pull/1355",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore: add hardened ci guardrails"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

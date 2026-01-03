@@ -1,0 +1,21 @@
+{
+  "issue_number": 1282,
+  "title": "Post-Cutover Mini-Chaos Drill — T+24h (prod)",
+  "url": "https://github.com/BrianCLong/summit/issues/1282",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-09-18T05:42:04Z",
+  "createdAt": "2025-09-18T05:42:04Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

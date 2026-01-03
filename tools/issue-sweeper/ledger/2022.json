@@ -1,0 +1,95 @@
+{
+  "issue_number": 2022,
+  "title": "IG Oct25 | october2025/Dulles.md | Balance of harms & public interest arguments:",
+  "url": "https://github.com/BrianCLong/summit/issues/2022",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:46:35Z",
+  "createdAt": "2025-10-01T15:33:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12048,
+        "url": "https://github.com/BrianCLong/summit/pull/12048",
+        "mergedAt": "2025-11-21T03:59:12Z",
+        "title": "Update and secure project dependencies"
+      },
+      {
+        "number": 14015,
+        "url": "https://github.com/BrianCLong/summit/pull/14015",
+        "mergedAt": "2025-12-19T21:35:03Z",
+        "title": "Update Pillow version to 10.3.0"
+      },
+      {
+        "number": 14014,
+        "url": "https://github.com/BrianCLong/summit/pull/14014",
+        "mergedAt": "2025-12-19T21:27:26Z",
+        "title": "Update python-jose version to 3.4.0"
+      },
+      {
+        "number": 13620,
+        "url": "https://github.com/BrianCLong/summit/pull/13620",
+        "mergedAt": "2025-12-17T01:48:40Z",
+        "title": "Build compliance and trust center product"
+      },
+      {
+        "number": 12071,
+        "url": "https://github.com/BrianCLong/summit/pull/12071",
+        "mergedAt": null,
+        "title": "Build Enterprise Compliance and Governance Framework"
+      },
+      {
+        "number": 1178,
+        "url": "https://github.com/BrianCLong/summit/pull/1178",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps-dev): bump @graphql-codegen/client-preset from 4.8.3 to 5.0.0 in /client"
+      },
+      {
+        "number": 13635,
+        "url": "https://github.com/BrianCLong/summit/pull/13635",
+        "mergedAt": "2025-12-17T04:30:31Z",
+        "title": "build(deps): bump prismjs and react-syntax-highlighter in /client"
+      },
+      {
+        "number": 1721,
+        "url": "https://github.com/BrianCLong/summit/pull/1721",
+        "mergedAt": null,
+        "title": "chore(deps): bump nltk from 3.8.1 to 3.9 in /server"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

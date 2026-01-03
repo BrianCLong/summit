@@ -1,0 +1,21 @@
+{
+  "issue_number": 1370,
+  "title": "ops: review and document migration enablement gates",
+  "url": "https://github.com/BrianCLong/summit/issues/1370",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-09-25T18:56:09Z",
+  "createdAt": "2025-09-25T18:56:09Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

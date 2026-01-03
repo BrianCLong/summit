@@ -1,0 +1,56 @@
+{
+  "issue_number": 1261,
+  "title": "Server deps: resolve express@5 and eslint@9 into merge/all-to-main-20250915-022508",
+  "url": "https://github.com/BrianCLong/summit/pull/1261",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9284194884,
+      "node_id": "LA_kwDOPaNncM8AAAACKWGSRA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%202/5",
+      "name": "Review effort 2/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-19T11:00:59Z",
+  "createdAt": "2025-09-15T08:42:19Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1261,
+        "url": "https://github.com/BrianCLong/summit/pull/1261",
+        "mergedAt": null,
+        "title": "Server deps: resolve express@5 and eslint@9 into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

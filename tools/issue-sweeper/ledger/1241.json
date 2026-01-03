@@ -1,0 +1,59 @@
+{
+  "issue_number": 1241,
+  "title": "Dashboards & Alerts",
+  "url": "https://github.com/BrianCLong/summit/issues/1241",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968269,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/observability",
+      "name": "observability",
+      "color": "5319E7",
+      "default": false,
+      "description": "OTel/Grafana/Alerts"
+    },
+    {
+      "id": 9283516291,
+      "node_id": "LA_kwDOPaNncM8AAAACKVc3gw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/must",
+      "name": "must",
+      "color": "FF0000",
+      "default": false,
+      "description": "Must-have (blockers)"
+    }
+  ],
+  "updatedAt": "2025-09-15T00:56:03Z",
+  "createdAt": "2025-09-15T00:56:03Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

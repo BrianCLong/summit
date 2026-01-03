@@ -43,27 +43,34 @@ jest.mock('../../src/db/postgres.js', () => ({
 describe('VectorStoreService', () => {
   let service: VectorStoreService;
   let mockGenerateEmbedding: any;
-  let pool: any; // Changed from mockPool
+  let pool: any;
 
-  beforeEach(async () => { // Changed from beforeAll
+  beforeEach(async () => {
     // Reset mocks
     jest.clearAllMocks();
-    console.log('VectorStoreService Test: getPostgresPool type:', typeof getPostgresPool);
-    if (typeof getPostgresPool === 'function') {
-      console.log('VectorStoreService Test: getPostgresPool return:', getPostgresPool());
-    } else {
-      console.log('VectorStoreService Test: getPostgresPool is not a function');
-    }
 
-    pool = getPostgresPool(); // Assign to 'pool'
+    // Setup Postgres mock
+    const mockPoolObj = {
+      write: jest.fn(),
+      read: jest.fn(),
+      withTransaction: jest.fn((callback: any) => callback({
+        query: jest.fn(),
+        release: jest.fn(),
+      })),
+    };
+    (getPostgresPool as jest.Mock).mockReturnValue(mockPoolObj);
+    pool = mockPoolObj;
 
-    // Mock EmbeddingService
+    // Setup EmbeddingService mock
+    mockGenerateEmbedding = (jest.fn() as any).mockResolvedValue([0.1, 0.2, 0.3]);
+    const mockGenerateEmbeddings = (jest.fn() as any).mockResolvedValue([
+      [0.1, 0.2, 0.3],
+      [0.4, 0.5, 0.6],
+    ]);
+
     (EmbeddingService as jest.Mock).mockImplementation(() => ({
-      generateEmbeddings: jest.fn().mockResolvedValue([
-        [0.1, 0.2, 0.3],
-        [0.4, 0.5, 0.6],
-      ]),
-      generateEmbedding: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+      generateEmbeddings: mockGenerateEmbeddings,
+      generateEmbedding: mockGenerateEmbedding,
     }));
 
     // Singleton reset
@@ -83,18 +90,18 @@ describe('VectorStoreService', () => {
       metadata: { author: 'Jules' },
     };
 
-    mockPool.write.mockResolvedValueOnce({ rowCount: 1 }); // Insert doc
+    pool.write.mockResolvedValueOnce({ rowCount: 1 }); // Insert doc
 
     const result = await service.ingestDocument(tenantId, docData);
 
     expect(result.chunkCount).toBeGreaterThan(0);
-    expect(mockPool.write).toHaveBeenCalledWith(
+    expect(pool.write).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO documents'),
       expect.arrayContaining([tenantId, docData.title])
     );
 
     // Check if transaction was called for chunks
-    expect(mockPool.withTransaction).toHaveBeenCalled();
+    expect(pool.withTransaction).toHaveBeenCalled();
   });
 
   it('should search for documents', async () => {
@@ -102,7 +109,7 @@ describe('VectorStoreService', () => {
     const query = 'Hello';
 
     // Mock search result
-    mockPool.read.mockResolvedValueOnce({
+    pool.read.mockResolvedValueOnce({
       rows: [
         {
           id: 'chunk-1',
@@ -120,7 +127,7 @@ describe('VectorStoreService', () => {
     expect(results).toHaveLength(1);
     expect(results[0].content).toBe('Hello world');
     expect(mockGenerateEmbedding).toHaveBeenCalledWith({ text: query });
-    expect(mockPool.read).toHaveBeenCalledWith(
+    expect(pool.read).toHaveBeenCalledWith(
       expect.stringContaining('SELECT'),
       expect.arrayContaining([tenantId])
     );

@@ -1,0 +1,38 @@
+{
+  "issue_number": 1264,
+  "title": "Jest: remove malformed jest.config.cjs; use package.json config",
+  "url": "https://github.com/BrianCLong/summit/pull/1264",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9285861077,
+      "node_id": "LA_kwDOPaNncM8AAAACKXr-1Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%201/5",
+      "name": "Review effort 1/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-15T09:36:55Z",
+  "createdAt": "2025-09-15T09:24:35Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1264,
+        "url": "https://github.com/BrianCLong/summit/pull/1264",
+        "mergedAt": "2025-09-15T09:26:43Z",
+        "title": "Jest: remove malformed jest.config.cjs; use package.json config"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,28 @@
+{
+  "issue_number": 970,
+  "title": "Absorb orphan: codex/develop-spatiotemporal-ai-framework",
+  "url": "https://github.com/BrianCLong/summit/pull/970",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:31:09Z",
+  "createdAt": "2025-08-29T03:33:36Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 267,
+        "url": "https://github.com/BrianCLong/summit/pull/267",
+        "mergedAt": "2025-08-15T21:09:25Z",
+        "title": "chore(deps): bump @bull-board/api from 5.23.0 to 6.12.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

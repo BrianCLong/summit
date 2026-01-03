@@ -1,0 +1,49 @@
+{
+  "issue_number": 1092,
+  "title": "[dr-orchestrator] Snapshot → verify (SHA256, signed) → restore with streamed status",
+  "url": "https://github.com/BrianCLong/summit/issues/1092",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446885,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_pQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/feat",
+      "name": "type/feat",
+      "color": "C2E0C6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208446909,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_vQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P0-blocker",
+      "name": "priority/P0-blocker",
+      "color": "5319E7",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208747931,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJXmw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/dr-orchestrator",
+      "name": "area/dr-orchestrator",
+      "color": "F9D0C4",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-01T23:48:36Z",
+  "createdAt": "2025-09-01T23:48:36Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

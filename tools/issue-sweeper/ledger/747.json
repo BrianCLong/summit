@@ -1,0 +1,46 @@
+{
+  "issue_number": 747,
+  "title": "Fix/conn secrets logger hardening",
+  "url": "https://github.com/BrianCLong/summit/pull/747",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-21T02:42:00Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      },
+      {
+        "number": 13107,
+        "url": "https://github.com/BrianCLong/summit/pull/13107",
+        "mergedAt": "2025-12-03T04:34:58Z",
+        "title": "Build governance orchestration for agent fleets"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

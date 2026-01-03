@@ -1,0 +1,34 @@
+{
+  "issue_number": 721,
+  "title": "Epic/ingest core a",
+  "url": "https://github.com/BrianCLong/summit/pull/721",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-20T16:25:03Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11873,
+        "url": "https://github.com/BrianCLong/summit/pull/11873",
+        "mergedAt": "2025-11-20T14:33:58Z",
+        "title": "Optimize database performance and caching"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

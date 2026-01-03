@@ -1,0 +1,62 @@
+{
+  "issue_number": 835,
+  "title": "feat: add NL to Cypher service stub",
+  "url": "https://github.com/BrianCLong/summit/pull/835",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:29:14Z",
+  "createdAt": "2025-08-24T08:04:16Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1276,
+        "url": "https://github.com/BrianCLong/summit/pull/1276",
+        "mergedAt": "2025-09-19T02:20:51Z",
+        "title": "chore(deps-dev): bump @vitejs/plugin-react from 4.7.0 to 5.0.3 in /client"
+      },
+      {
+        "number": 13098,
+        "url": "https://github.com/BrianCLong/summit/pull/13098",
+        "mergedAt": "2025-12-03T01:54:50Z",
+        "title": "Harden Summit security with RBAC and audit trails"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

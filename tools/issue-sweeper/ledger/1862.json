@@ -1,0 +1,21 @@
+{
+  "issue_number": 1862,
+  "title": "Resolve 1858 1759193914",
+  "url": "https://github.com/BrianCLong/summit/pull/1862",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-09-30T04:27:53Z",
+  "createdAt": "2025-09-30T01:09:47Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

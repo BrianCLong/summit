@@ -1,0 +1,47 @@
+{
+  "issue_number": 1499,
+  "title": "chore: establish incremental lint baseline",
+  "url": "https://github.com/BrianCLong/summit/pull/1499",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9359995057,
+      "node_id": "LA_kwDOPaNncM8AAAACLeYwsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-review",
+      "name": "needs-review",
+      "color": "fbca04",
+      "default": false,
+      "description": "Awaiting review from code owners"
+    }
+  ],
+  "updatedAt": "2025-11-21T05:58:50Z",
+  "createdAt": "2025-09-26T20:17:02Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 120,
+        "url": "https://github.com/BrianCLong/summit/pull/120",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump husky from 8.0.3 to 9.1.7"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,31 @@
+{
+  "issue_number": 1244,
+  "title": "PR Dashboards (multi-wave)",
+  "url": "https://github.com/BrianCLong/summit/issues/1244",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9283816984,
+      "node_id": "LA_kwDOPaNncM8AAAACKVvOGA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/pr-dashboards",
+      "name": "pr-dashboards",
+      "color": "5319e7",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-20T07:35:33Z",
+  "createdAt": "2025-09-15T01:13:11Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

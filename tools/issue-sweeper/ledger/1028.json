@@ -1,0 +1,28 @@
+{
+  "issue_number": 1028,
+  "title": "Absorb orphan: codex/initiate-backend-transformation-for-intelgraph",
+  "url": "https://github.com/BrianCLong/summit/pull/1028",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T18:11:48Z",
+  "createdAt": "2025-08-29T03:36:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10122,
+        "url": "https://github.com/BrianCLong/summit/pull/10122",
+        "mergedAt": "2025-10-14T08:53:50Z",
+        "title": "feat: add influence mining extractor pipeline"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

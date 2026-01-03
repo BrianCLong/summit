@@ -1,0 +1,89 @@
+{
+  "issue_number": 739,
+  "title": "chore(deps): bump pgvector from 0.1.8 to 0.2.1",
+  "url": "https://github.com/BrianCLong/summit/pull/739",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-29T10:30:20Z",
+  "createdAt": "2025-08-21T00:51:53Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 366,
+        "url": "https://github.com/BrianCLong/summit/pull/366",
+        "mergedAt": null,
+        "title": "feat: enable telemetry and metrics automation"
+      },
+      {
+        "number": 365,
+        "url": "https://github.com/BrianCLong/summit/pull/365",
+        "mergedAt": "2025-08-17T04:51:05Z",
+        "title": "fix(ui): address accessibility gaps and add tests"
+      },
+      {
+        "number": 368,
+        "url": "https://github.com/BrianCLong/summit/pull/368",
+        "mergedAt": "2025-08-17T04:51:00Z",
+        "title": "feat: deliver sprint 7 UX refinements"
+      },
+      {
+        "number": 381,
+        "url": "https://github.com/BrianCLong/summit/pull/381",
+        "mergedAt": "2025-08-17T04:50:21Z",
+        "title": "docs: expand backend enhancement details"
+      },
+      {
+        "number": 323,
+        "url": "https://github.com/BrianCLong/summit/pull/323",
+        "mergedAt": "2025-08-16T22:23:13Z",
+        "title": "feat: add deletion helpers for Neo4j store"
+      },
+      {
+        "number": 322,
+        "url": "https://github.com/BrianCLong/summit/pull/322",
+        "mergedAt": "2025-08-16T22:23:16Z",
+        "title": "feat: add GNN node classifier and close issues"
+      },
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

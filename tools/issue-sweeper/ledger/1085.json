@@ -1,0 +1,47 @@
+{
+  "issue_number": 1085,
+  "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks",
+  "url": "https://github.com/BrianCLong/summit/pull/1085",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208476596,
+      "node_id": "LA_kwDOPaNncM8AAAACJN4ztA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%205/5",
+      "name": "Review effort 5/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-19T11:00:54Z",
+  "createdAt": "2025-09-01T22:09:22Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,62 @@
+{
+  "issue_number": 1154,
+  "title": "Maestro Build Failure - Maestro Build Pipeline #57",
+  "url": "https://github.com/BrianCLong/summit/issues/1154",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767055,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX0zw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/bug",
+      "name": "bug",
+      "color": "d73a4a",
+      "default": true,
+      "description": "Something isn't working"
+    },
+    {
+      "id": 9208753401,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/maestro",
+      "name": "maestro",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208753403,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ci-failure",
+      "name": "ci-failure",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-07T01:42:11Z",
+  "createdAt": "2025-09-07T01:42:11Z",
+  "classification": "bug",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14382,
+        "url": "https://github.com/BrianCLong/summit/pull/14382",
+        "mergedAt": null,
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2"
+      },
+      {
+        "number": 14379,
+        "url": "https://github.com/BrianCLong/summit/pull/14379",
+        "mergedAt": "2025-12-23T04:35:14Z",
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2 in /apps/compliance-console"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

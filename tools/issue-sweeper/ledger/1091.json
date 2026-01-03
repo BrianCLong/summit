@@ -1,0 +1,58 @@
+{
+  "issue_number": 1091,
+  "title": "[workers] Code-LLM unit test generation (diff-only contract)",
+  "url": "https://github.com/BrianCLong/summit/issues/1091",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446885,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_pQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/feat",
+      "name": "type/feat",
+      "color": "C2E0C6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447163,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Auw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P1",
+      "name": "priority/P1",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447216,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3A8A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/provider/code-llm",
+      "name": "provider/code-llm",
+      "color": "0E8A16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447252,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3BFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/workers",
+      "name": "area/workers",
+      "color": "0052CC",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-01T23:42:28Z",
+  "createdAt": "2025-09-01T23:42:28Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

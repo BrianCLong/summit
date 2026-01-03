@@ -21,7 +21,14 @@ import { getPostgresPool } from '../../config/database.js';
 jest.mock('argon2');
 jest.mock('jsonwebtoken');
 jest.mock('../../config/database.js', () => ({
-  getPostgresPool: jest.fn<() => Pool>(() => mockPool),
+  getPostgresPool: jest.fn(),
+}));
+jest.mock('../../utils/metrics.js', () => ({
+  PrometheusMetrics: jest.fn().mockImplementation(() => ({
+    createHistogram: jest.fn(),
+    observeHistogram: jest.fn(),
+    incrementCounter: jest.fn(),
+  })),
 }));
 jest.mock('../../config/index.js', () => ({
   __esModule: true,
@@ -425,6 +432,7 @@ describe('AuthService', () => {
         role: 'ADMIN',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(adminUser, 'investigation:create')).toBe(
@@ -441,6 +449,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(
@@ -460,6 +469,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(analystUser, 'user:create')).toBe(false);
@@ -475,6 +485,7 @@ describe('AuthService', () => {
         role: 'VIEWER',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(viewerUser, 'investigation:read')).toBe(
@@ -492,6 +503,7 @@ describe('AuthService', () => {
         role: 'VIEWER',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(authService.hasPermission(viewerUser, 'investigation:create')).toBe(
@@ -517,6 +529,7 @@ describe('AuthService', () => {
         role: null as any,
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(
@@ -531,6 +544,7 @@ describe('AuthService', () => {
         role: 'UNKNOWN_ROLE',
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(
@@ -545,6 +559,7 @@ describe('AuthService', () => {
         role: 'analyst', // lowercase
         isActive: true,
         createdAt: new Date(),
+        scopes: [],
       };
 
       expect(
@@ -562,6 +577,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
         is_active: true,
         created_at: new Date(),
+        scopes: [],
       };
 
       mockClient.query.mockResolvedValue({ rows: [mockUser] });

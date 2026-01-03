@@ -1,0 +1,21 @@
+{
+  "issue_number": 991,
+  "title": "Absorb orphan: codex/implement-automated-narrative-generation-mvij6l",
+  "url": "https://github.com/BrianCLong/summit/pull/991",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:19:29Z",
+  "createdAt": "2025-08-29T03:34:46Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

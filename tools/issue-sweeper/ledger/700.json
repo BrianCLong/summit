@@ -1,0 +1,62 @@
+{
+  "issue_number": 700,
+  "title": "feat(collab): presence + CRDT notepad + graph comments + audit",
+  "url": "https://github.com/BrianCLong/summit/pull/700",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-20T08:28:32Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 12103,
+        "url": "https://github.com/BrianCLong/summit/pull/12103",
+        "mergedAt": null,
+        "title": "Enable strict TypeScript mode in CI"
+      },
+      {
+        "number": 12680,
+        "url": "https://github.com/BrianCLong/summit/pull/12680",
+        "mergedAt": "2025-12-18T01:40:28Z",
+        "title": "Set up artifact disclosure pack skeleton"
+      },
+      {
+        "number": 502,
+        "url": "https://github.com/BrianCLong/summit/pull/502",
+        "mergedAt": "2025-08-17T22:33:17Z",
+        "title": "chore(ci): require Golden Path + policy lint + PR size guard"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

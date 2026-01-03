@@ -1,0 +1,44 @@
+{
+  "issue_number": 858,
+  "title": "feat: add minimal copilot service skeleton",
+  "url": "https://github.com/BrianCLong/summit/pull/858",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:20:49Z",
+  "createdAt": "2025-08-24T15:59:35Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

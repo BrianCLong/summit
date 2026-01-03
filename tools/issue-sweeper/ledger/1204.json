@@ -1,0 +1,47 @@
+{
+  "issue_number": 1204,
+  "title": "chore(deps): bump the minor-and-patch group with 70 updates",
+  "url": "https://github.com/BrianCLong/summit/pull/1204",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9133974250,
+      "node_id": "LA_kwDOPaNncM8AAAACIG1i6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/python",
+      "name": "python",
+      "color": "2b67c6",
+      "default": false,
+      "description": "Pull requests that update python code"
+    }
+  ],
+  "updatedAt": "2025-09-14T04:00:36Z",
+  "createdAt": "2025-09-11T12:42:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

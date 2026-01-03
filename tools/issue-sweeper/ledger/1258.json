@@ -1,0 +1,40 @@
+{
+  "issue_number": 1258,
+  "title": "chore(deps): bump paddlepaddle from 2.5.1 to 3.2.0",
+  "url": "https://github.com/BrianCLong/summit/pull/1258",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9133974250,
+      "node_id": "LA_kwDOPaNncM8AAAACIG1i6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/python",
+      "name": "python",
+      "color": "2b67c6",
+      "default": false,
+      "description": "Pull requests that update python code"
+    }
+  ],
+  "updatedAt": "2025-09-17T10:32:40Z",
+  "createdAt": "2025-09-15T07:29:30Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

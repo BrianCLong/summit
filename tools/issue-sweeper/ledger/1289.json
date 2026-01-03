@@ -1,0 +1,80 @@
+{
+  "issue_number": 1289,
+  "title": "Phase 5: Comprehensive Observability & Monitoring Hardening",
+  "url": "https://github.com/BrianCLong/summit/pull/1289",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9198853863,
+      "node_id": "LA_kwDOPaNncM8AAAACJEte5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Possible%20security%20concern",
+      "name": "Possible security concern",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9215499745,
+      "node_id": "LA_kwDOPaNncM8AAAACJUld4Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%203/5",
+      "name": "Review effort 3/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9278618923,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Kw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:high",
+      "name": "risk:high",
+      "color": "1D76DB",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-23T06:49:10Z",
+  "createdAt": "2025-09-20T11:46:24Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      },
+      {
+        "number": 1289,
+        "url": "https://github.com/BrianCLong/summit/pull/1289",
+        "mergedAt": "2025-09-23T06:48:53Z",
+        "title": "Phase 5: Comprehensive Observability & Monitoring Hardening"
+      },
+      {
+        "number": 1086,
+        "url": "https://github.com/BrianCLong/summit/pull/1086",
+        "mergedAt": null,
+        "title": "Release 2.5.0: Grafana Release Health dashboard + Playwright smoke pack"
+      },
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

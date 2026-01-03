@@ -1,0 +1,58 @@
+{
+  "issue_number": 1725,
+  "title": "chore(deps): bump torch from 2.1.0 to 2.8.0 in /server",
+  "url": "https://github.com/BrianCLong/summit/pull/1725",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9133974250,
+      "node_id": "LA_kwDOPaNncM8AAAACIG1i6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/python",
+      "name": "python",
+      "color": "2b67c6",
+      "default": false,
+      "description": "Pull requests that update python code"
+    },
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9359995057,
+      "node_id": "LA_kwDOPaNncM8AAAACLeYwsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-review",
+      "name": "needs-review",
+      "color": "fbca04",
+      "default": false,
+      "description": "Awaiting review from code owners"
+    }
+  ],
+  "updatedAt": "2025-10-01T00:57:03Z",
+  "createdAt": "2025-09-27T07:10:06Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

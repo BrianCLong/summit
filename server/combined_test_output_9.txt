@@ -1,0 +1,170 @@
+
+> intelgraph-server@4.0.1 test /Users/brianlong/Developer/summit/server
+> jest --config jest.config.ts "tests/services/VectorStoreService.test.ts" "src/ai/copilot/__tests__/guardrails.service.test.ts" "src/hunting/__tests__/ThreatHuntingOrchestrator.test.ts"
+
+🚀 Starting Jest Global Setup...
+✅ Jest Global Setup completed successfully
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env.test -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (../node_modules/.pnpm/dotenv@17.2.3/node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env.test -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+      at _log (../node_modules/.pnpm/dotenv@17.2.3/node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env.test -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+      at _log (../node_modules/.pnpm/dotenv@17.2.3/node_modules/dotenv/lib/main.js:142:11)
+
+{"level":30,"time":1767420702948,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","config":{"requireCitations":true,"minCitationsRequired":1,"minConfidenceThreshold":0.1,"logRiskyPrompts":true,"riskScoreThreshold":0.1,"blockHighRiskPrompts":true,"maxAnswerLength":10000,"deniedKeywords":["delete all","drop database","export credentials","bypass","ignore restrictions"]},"msg":"Guardrail config updated"}
+{"level":30,"time":1767420703564,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"779e3371-47d3-4940-848e-c40b647c31ee","field":"citation_[1]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["PII"],"timestamp":"2026-01-03T06:11:43.558Z"},{"decisionId":"60771ba3-a4fb-4fc1-b82b-9ab518c445e0","field":"answer_text","redacted":true,"reason":"Policy labels require redaction","policyLabels":["PII"],"timestamp":"2026-01-03T06:11:43.563Z"},{"decisionId":"8ac87d32-7175-4e7e-99c6-d392ced4aa9f","field":"provenance","redacted":true,"reason":"Removed references to redacted content","policyLabels":[],"timestamp":"2026-01-03T06:11:43.564Z"}],"msg":"Redaction applied to answer"}
+FAIL src/ai/copilot/__tests__/guardrails.service.test.ts (171.131 s)
+  GuardrailsService
+    Citation Requirements
+      ✓ should pass validation when answer has citations (50 ms)
+      ✓ should generate refusal for injection in original prompt (20 ms)
+      ✓ should fail validation when answer has no citations (4 ms)
+      ✓ should fail when citations below minimum threshold (7 ms)
+      ✓ should pass when citations disabled (1 ms)
+    Prompt Injection Detection
+      ✓ should block prompts with instruction override attempts (1 ms)
+      ✓ should block prompts asking for system prompt (25 ms)
+      ✓ should block role manipulation attempts (5 ms)
+      ✓ should block jailbreak attempts (3 ms)
+      ✓ should allow legitimate queries (8 ms)
+      ✓ should allow complex but legitimate queries (3 ms)
+    Denied Keywords
+      ✓ should block prompts with denied keywords (381 ms)
+      ✓ should block "export credentials" requests (3 ms)
+      ✓ should block bypass attempts
+    Risky Prompt Logging
+      ✓ should log high-risk prompts for review (7 ms)
+      ✓ should track blocked prompts (4 ms)
+      ✓ should categorize risk levels (3 ms)
+      ✓ should return prompts requiring review (5 ms)
+      ✓ should allow marking prompts as reviewed (1 ms)
+    Answer Content Validation
+      ✓ should fail validation for empty answers (1 ms)
+      ✓ should fail validation for very short answers
+      ✓ should pass validation for substantive answers
+    Refusal Generation
+      ✓ should generate refusal for citation failures (1 ms)
+      ✕ should generate refusal for injection in original prompt (33 ms)
+      ✓ should include helpful suggestions in refusals (4 ms)
+      ✓ should create policy refusal with audit ID (11 ms)
+    Configuration
+      ✓ should allow updating configuration (1 ms)
+      ✓ should return current configuration (5 ms)
+  RedactionService
+    Policy Label Redaction
+      ✓ should redact citations with denied policy labels (10 ms)
+      ✓ should not redact citations with allowed policy labels (9 ms)
+      ✓ should redact citations above user clearance level (1 ms)
+    PII Pattern Detection
+      ✓ should redact SSN patterns in answer text (13 ms)
+      ✓ should redact email addresses (2 ms)
+      ✓ should redact phone numbers (2 ms)
+      ✓ should redact classification markers
+    Uncertainty Indication
+      ✓ should indicate low uncertainty for minimal redaction (8 ms)
+      ✓ should indicate high uncertainty for extensive redaction (1 ms)
+      ✓ should update answer warnings for redaction uncertainty (3 ms)
+    Provenance Adjustment
+      ✓ should remove redacted entity IDs from provenance (1 ms)
+      ✓ should adjust chain confidence for redacted provenance (3 ms)
+    Policy Updates
+      ✓ should allow updating redaction policy (2 ms)
+      ✓ should return current policy (1 ms)
+
+  ● GuardrailsService › Refusal Generation › should generate refusal for injection in original prompt
+
+    expect(received).toBeDefined()
+
+    Received: undefined
+
+      372 |       // But wait the test is "should generate refusal".
+      373 |       expect(result.valid).toBe(true);
+    > 374 |       expect(result.refusal).toBeDefined();
+          |                              ^
+      375 |       expect(result.refusal?.category).toBe('policy_violation');
+      376 |     });
+      377 |
+
+      at Object.<anonymous> (src/ai/copilot/__tests__/guardrails.service.test.ts:374:30)
+
+{"level":40,"time":1767420702962,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"30a5dfef-61c4-48bf-9a08-ec4c526359a9","riskLevel":"critical","riskFactors":["no_injection_detected"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":30,"time":1767420702967,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","config":{"requireCitations":true,"minCitationsRequired":1,"minConfidenceThreshold":0.1,"logRiskyPrompts":true,"riskScoreThreshold":0.1,"blockHighRiskPrompts":false,"maxAnswerLength":10000,"deniedKeywords":["delete all","drop database","export credentials","bypass","ignore restrictions"]},"msg":"Guardrail config updated"}
+{"level":40,"time":1767420702970,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"4d197e29-65e2-4537-ac36-f2a3aff5e606","riskLevel":"high","riskFactors":["has_citations"],"blocked":false,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420702979,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"bb826038-c385-46b2-a5b9-a5e47baa34e2","riskLevel":"critical","riskFactors":["show\\s+(me\\s+)?(the\\s+)?(system\\s+)?(prompt|instructions|rules)","guard-service-detection"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420702980,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"e9210e1c-c17b-4b65-83e5-0cbaa94b5bed","riskLevel":"critical","riskFactors":["what\\s+(is|are)\\s+(your\\s+)?(system\\s+)?(prompt|instructions|rules)","guard-service-detection"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703009,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"c67bd1f0-355f-439a-902d-419e67b32eab","riskLevel":"critical","riskFactors":["you\\s+are\\s+now\\s+(a|an)\\s+\\w+","pretend\\s+(to\\s+be|you\\s+are)","(DAN|STAN)(\\s+mode)?"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703014,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"a4cd00cf-1c0d-4e4b-b44d-8490fc94e5a4","riskLevel":"critical","riskFactors":["developer\\s+mode"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703027,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"29d2e1ec-42aa-4161-9816-8f56d381e39d","riskLevel":"high","riskFactors":["denied_keyword:delete all"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703411,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"05ad3625-c5cb-4597-9da2-b4ce5dbd6bf6","riskLevel":"high","riskFactors":["denied_keyword:export credentials"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703412,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"1f42de17-80d5-4232-b9f2-f558aa546fd4","riskLevel":"high","riskFactors":["denied_keyword:bypass"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703413,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"692e9c65-363f-4ae5-960e-d458a4c0ed74","riskLevel":"critical","riskFactors":["ignore\\s+(previous|prior|above|all)\\s+(instructions|prompts|rules|context)","guard-service-detection"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703425,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"5d32128a-7f0b-44da-a94b-6c1cd7f2da7f","riskLevel":"high","riskFactors":["denied_keyword:delete all"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703430,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"caab48e7-e357-48c9-aafd-81a533b5eacb","riskLevel":"high","riskFactors":["denied_keyword:delete all"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703433,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"dbfba7bd-f9c6-49a9-ab9b-fa0962ba62de","riskLevel":"critical","riskFactors":["ignore\\s+(previous|prior|above|all)\\s+(instructions|prompts|rules|context)","guard-service-detection"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703435,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"42a7cce2-a3c4-4451-a3f6-8698230a9703","riskLevel":"high","riskFactors":["denied_keyword:bypass"],"blocked":true,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703437,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"ad121376-0ab3-4334-b979-bb23aa7c0267","riskLevel":"high","riskFactors":["answer_not_empty"],"blocked":false,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703437,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"e5d010d9-4817-4eee-9d37-83235ccdce49","riskLevel":"high","riskFactors":["answer_not_empty"],"blocked":false,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703438,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"970f9d4b-dcef-41fd-a28c-c5233d015528","riskLevel":"high","riskFactors":["has_citations"],"blocked":false,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703537,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","logId":"e4fc1f25-c456-4d0e-9c78-1258ba553b7e","riskLevel":"high","riskFactors":["has_citations"],"blocked":false,"requiresReview":true,"msg":"Risky prompt logged for review"}
+{"level":40,"time":1767420703538,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","reason":"User lacks authorization","context":{"userId":"user-123"},"msg":"Policy refusal created"}
+{"level":30,"time":1767420703550,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"guardrails-service","config":{"requireCitations":true,"minCitationsRequired":5,"minConfidenceThreshold":0.1,"logRiskyPrompts":true,"riskScoreThreshold":0.5,"blockHighRiskPrompts":false,"maxAnswerLength":10000,"deniedKeywords":["delete all","drop database","export credentials","bypass","ignore restrictions"]},"msg":"Guardrail config updated"}
+{"level":30,"time":1767420703575,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"0a86bd38-5f2f-46d2-b7e5-564759c742f7","field":"citation_[1]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["TOP_SECRET"],"timestamp":"2026-01-03T06:11:43.574Z"},{"decisionId":"ff63f4fe-39d7-4fc4-8f27-678fb7b76b4c","field":"answer_text","redacted":true,"reason":"Policy labels require redaction","policyLabels":["TOP_SECRET"],"timestamp":"2026-01-03T06:11:43.574Z"},{"decisionId":"b3c0711b-7749-46a7-9495-c2dc8c9bc595","field":"provenance","redacted":true,"reason":"Removed references to redacted content","policyLabels":[],"timestamp":"2026-01-03T06:11:43.575Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703582,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"d0cd97d4-8040-4e2c-8613-7da615582f9d","field":"answer_text_SSN","redacted":true,"reason":"Pattern SSN detected and redacted","policyLabels":[],"timestamp":"2026-01-03T06:11:43.582Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703588,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"d25d05b9-5889-4954-b9d2-218cb3893325","field":"answer_text_EMAIL","redacted":true,"reason":"Pattern EMAIL detected and redacted","policyLabels":[],"timestamp":"2026-01-03T06:11:43.588Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703591,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"04e426e0-1275-4361-bfeb-ffce1a44eba0","field":"answer_text_PHONE","redacted":true,"reason":"Pattern PHONE detected and redacted","policyLabels":[],"timestamp":"2026-01-03T06:11:43.591Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703592,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"2f2f5dd1-dd51-4598-9832-66b03534cfec","field":"answer_text_CLASSIFICATION_MARKER","redacted":true,"reason":"Pattern CLASSIFICATION_MARKER detected and redacted","policyLabels":[],"timestamp":"2026-01-03T06:11:43.592Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703593,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"medium","decisions":[{"decisionId":"6ffb6aba-eb49-4a47-ae29-e66dd11b890c","field":"citation_[3]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["PII"],"timestamp":"2026-01-03T06:11:43.593Z"},{"decisionId":"07293c98-b81a-4bf4-a648-0ecdfa845eb9","field":"answer_text","redacted":true,"reason":"Policy labels require redaction","policyLabels":["PII"],"timestamp":"2026-01-03T06:11:43.593Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703600,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":2,"uncertaintyLevel":"high","decisions":[{"decisionId":"f14e8a2b-34d5-4539-a0ff-9a1ab7169bda","field":"citation_[1]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["CLASSIFIED"],"timestamp":"2026-01-03T06:11:43.600Z"},{"decisionId":"4ea96f77-3fee-44b5-a40c-75d48c8a44fe","field":"citation_[2]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["RESTRICTED"],"timestamp":"2026-01-03T06:11:43.600Z"},{"decisionId":"4198ed08-77e7-4731-94a5-db1565d36d6b","field":"answer_text","redacted":true,"reason":"Policy labels require redaction","policyLabels":["CLASSIFIED","RESTRICTED"],"timestamp":"2026-01-03T06:11:43.600Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703601,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"8355c264-4a7a-4c3d-8977-3915a92d38e8","field":"citation_[1]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["PII"],"timestamp":"2026-01-03T06:11:43.601Z"},{"decisionId":"86406be9-925f-4677-b017-3949e6f6cbd7","field":"answer_text","redacted":true,"reason":"Policy labels require redaction","policyLabels":["PII"],"timestamp":"2026-01-03T06:11:43.601Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703604,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"d42d6f24-8b4c-491f-a62f-959f89dd7df6","field":"citation_[1]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["CLASSIFIED"],"timestamp":"2026-01-03T06:11:43.604Z"},{"decisionId":"971284de-2d72-4082-a1bd-fedc5303c152","field":"answer_text","redacted":true,"reason":"Policy labels require redaction","policyLabels":["CLASSIFIED"],"timestamp":"2026-01-03T06:11:43.604Z"},{"decisionId":"638e5953-6576-49a7-a8ce-54680a5bb01b","field":"provenance","redacted":true,"reason":"Removed references to redacted content","policyLabels":[],"timestamp":"2026-01-03T06:11:43.604Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703606,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","answerId":"test-answer-123","redactedCount":1,"uncertaintyLevel":"high","decisions":[{"decisionId":"2dcdca10-1175-41f6-bc89-b3af1edc26b9","field":"citation_[1]","redacted":true,"reason":"Policy labels require redaction","policyLabels":["CLASSIFIED"],"timestamp":"2026-01-03T06:11:43.605Z"},{"decisionId":"70ff7f75-b0d1-4d81-bec4-5bf826df13a3","field":"answer_text","redacted":true,"reason":"Policy labels require redaction","policyLabels":["CLASSIFIED"],"timestamp":"2026-01-03T06:11:43.605Z"},{"decisionId":"2ea38ee1-6c64-4d31-b003-57a802024e37","field":"provenance","redacted":true,"reason":"Removed references to redacted content","policyLabels":[],"timestamp":"2026-01-03T06:11:43.605Z"}],"msg":"Redaction applied to answer"}
+{"level":30,"time":1767420703613,"pid":54626,"hostname":"Brians-MacBook-Pro.local","name":"redaction-service","policy":{"userClearance":"SECRET","allowedPolicyLabels":["PUBLIC","UNCLASSIFIED"],"deniedPolicyLabels":["PII","CLASSIFIED","RESTRICTED"],"showPartialContent":false,"redactionPlaceholder":"[REDACTED]","auditRedactions":true},"msg":"Redaction policy updated"}
+FAIL tests/services/VectorStoreService.test.ts
+  ● Test suite failed to run
+
+    [96mtests/services/VectorStoreService.test.ts[0m:[93m63[0m:[93m55[0m - [91merror[0m[90m TS2345: [0mArgument of type 'number[][]' is not assignable to parameter of type 'never'.
+
+    [7m63[0m       generateEmbeddings: jest.fn().mockResolvedValue([
+    [7m  [0m [91m                                                      ~[0m
+    [7m64[0m         [0.1, 0.2, 0.3],
+    [7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m65[0m         [0.4, 0.5, 0.6],
+    [7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m66[0m       ]),
+    [7m  [0m [91m~~~~~~~[0m
+    [96mtests/services/VectorStoreService.test.ts[0m:[93m67[0m:[93m54[0m - [91merror[0m[90m TS2345: [0mArgument of type 'number[]' is not assignable to parameter of type 'never'.
+
+    [7m67[0m       generateEmbedding: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+    [7m  [0m [91m                                                     ~~~~~~~~~~~~~~~[0m
+
+FAIL src/hunting/__tests__/ThreatHuntingOrchestrator.test.ts
+  ● Test suite failed to run
+
+    [96msrc/hunting/__tests__/ThreatHuntingOrchestrator.test.ts[0m:[93m141[0m:[93m1[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+    [7m141[0m });
+    [7m   [0m [91m~[0m
+    [96msrc/hunting/__tests__/ThreatHuntingOrchestrator.test.ts[0m:[93m141[0m:[93m2[0m - [91merror[0m[90m TS1128: [0mDeclaration or statement expected.
+
+    [7m141[0m });
+    [7m   [0m [91m ~[0m
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+Test Suites: 3 failed, 3 total
+Tests:       1 failed, 41 passed, 42 total
+Snapshots:   0 total
+Time:        300.477 s
+Ran all test suites matching /tests\/services\/VectorStoreService.test.ts|src\/ai\/copilot\/__tests__\/guardrails.service.test.ts|src\/hunting\/__tests__\/ThreatHuntingOrchestrator.test.ts/i.
+🧹 Starting Jest Global Teardown...
+🗑️ Cleaning up temporary directories...
+🔌 Closing global connections...
+✅ Jest Global Teardown completed successfully
+ ELIFECYCLE  Test failed. See above for more details.

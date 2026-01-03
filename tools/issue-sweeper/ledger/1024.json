@@ -1,0 +1,40 @@
+{
+  "issue_number": 1024,
+  "title": "Absorb orphan: codex/implement-velocity-plan-for-pr-workflow",
+  "url": "https://github.com/BrianCLong/summit/pull/1024",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T18:11:43Z",
+  "createdAt": "2025-08-29T03:36:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15471,
+        "url": "https://github.com/BrianCLong/summit/pull/15471",
+        "mergedAt": null,
+        "title": "Responsive: harden retention dashboard mobile layout"
+      },
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,34 @@
+{
+  "issue_number": 781,
+  "title": "Docs/releases/v3.0.0 ga artifacts clean",
+  "url": "https://github.com/BrianCLong/summit/pull/781",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-24T04:10:46Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 633,
+        "url": "https://github.com/BrianCLong/summit/pull/633",
+        "mergedAt": null,
+        "title": "chore(deps): bump jest-extended from 4.0.2 to 6.0.0"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

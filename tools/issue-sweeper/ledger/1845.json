@@ -1,0 +1,34 @@
+{
+  "issue_number": 1845,
+  "title": "[AUTO] feature/model-card-registry",
+  "url": "https://github.com/BrianCLong/summit/pull/1845",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-10-01T00:53:38Z",
+  "createdAt": "2025-09-28T22:24:15Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12974,
+        "url": "https://github.com/BrianCLong/summit/pull/12974",
+        "mergedAt": null,
+        "title": "🏗️ Recovery (partial): [AUTO] feature/model-card-registry"
+      },
+      {
+        "number": 1846,
+        "url": "https://github.com/BrianCLong/summit/pull/1846",
+        "mergedAt": null,
+        "title": "[PREP] [AUTO] feature/model-card-registry"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

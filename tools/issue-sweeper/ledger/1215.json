@@ -1,0 +1,40 @@
+{
+  "issue_number": 1215,
+  "title": "Docs Debt — 2025-09-12",
+  "url": "https://github.com/BrianCLong/summit/issues/1215",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9209094192,
+      "node_id": "LA_kwDOPaNncM8AAAACJOegMA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/docs",
+      "name": "docs",
+      "color": "0E8A16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9272134965,
+      "node_id": "LA_kwDOPaNncM8AAAACKKmNNQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/docs-debt",
+      "name": "docs-debt",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-12T14:13:57Z",
+  "createdAt": "2025-09-12T14:13:57Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

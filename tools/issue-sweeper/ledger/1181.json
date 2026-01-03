@@ -1,0 +1,68 @@
+{
+  "issue_number": 1181,
+  "title": "Maestro Build Failure - Maestro Build Pipeline #91",
+  "url": "https://github.com/BrianCLong/summit/issues/1181",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767055,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX0zw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/bug",
+      "name": "bug",
+      "color": "d73a4a",
+      "default": true,
+      "description": "Something isn't working"
+    },
+    {
+      "id": 9208753401,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/maestro",
+      "name": "maestro",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208753403,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ci-failure",
+      "name": "ci-failure",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-09T14:09:39Z",
+  "createdAt": "2025-09-09T14:09:39Z",
+  "classification": "bug",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13108,
+        "url": "https://github.com/BrianCLong/summit/pull/13108",
+        "mergedAt": "2025-12-03T04:34:22Z",
+        "title": "Deploy comprehensive observability for distributed systems"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,56 @@
+{
+  "issue_number": 1843,
+  "title": "chore(ts): base TS config + DOM libs; ignore *.updated.ts; web lint deps",
+  "url": "https://github.com/BrianCLong/summit/pull/1843",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-29T07:07:38Z",
+  "createdAt": "2025-09-28T22:14:20Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14382,
+        "url": "https://github.com/BrianCLong/summit/pull/14382",
+        "mergedAt": null,
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2"
+      },
+      {
+        "number": 14379,
+        "url": "https://github.com/BrianCLong/summit/pull/14379",
+        "mergedAt": "2025-12-23T04:35:14Z",
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2 in /apps/compliance-console"
+      },
+      {
+        "number": 1844,
+        "url": "https://github.com/BrianCLong/summit/pull/1844",
+        "mergedAt": "2025-09-29T07:07:34Z",
+        "title": "[PREP] chore(ts): base TS config + DOM libs; ignore *.updated.ts; web lint deps"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

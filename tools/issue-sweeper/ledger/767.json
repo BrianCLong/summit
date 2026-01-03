@@ -1,0 +1,34 @@
+{
+  "issue_number": 767,
+  "title": "chore(ci): consolidate CI, fix workflows, remove .env, pin scanners",
+  "url": "https://github.com/BrianCLong/summit/pull/767",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-22T01:51:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15263,
+        "url": "https://github.com/BrianCLong/summit/pull/15263",
+        "mergedAt": "2026-01-01T07:29:38Z",
+        "title": "Build user-facing explainability and provenance explorer"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

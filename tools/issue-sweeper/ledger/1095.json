@@ -1,0 +1,49 @@
+{
+  "issue_number": 1095,
+  "title": "[ci-cd] Implement CI Gates, Ephemeral Environments, and Canary/Rollback",
+  "url": "https://github.com/BrianCLong/summit/issues/1095",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446885,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_pQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/feat",
+      "name": "type/feat",
+      "color": "C2E0C6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208447163,
+      "node_id": "LA_kwDOPaNncM8AAAACJN3Auw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P1",
+      "name": "priority/P1",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208894773,
+      "node_id": "LA_kwDOPaNncM8AAAACJOSVNQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/ci-cd",
+      "name": "area/ci-cd",
+      "color": "5319E7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-02T00:38:51Z",
+  "createdAt": "2025-09-02T00:38:51Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

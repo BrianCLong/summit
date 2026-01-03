@@ -1,0 +1,56 @@
+{
+  "issue_number": 768,
+  "title": "feat: add observability pack scaffolding",
+  "url": "https://github.com/BrianCLong/summit/pull/768",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-22T04:48:43Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      },
+      {
+        "number": 11914,
+        "url": "https://github.com/BrianCLong/summit/pull/11914",
+        "mergedAt": "2025-11-20T10:25:00Z",
+        "title": "Consolidate Summit orchestration layer"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

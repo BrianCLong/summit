@@ -1,0 +1,58 @@
+{
+  "issue_number": 1087,
+  "title": "[orchestrator-core] Implement durable run/task/event store (Postgres)",
+  "url": "https://github.com/BrianCLong/summit/issues/1087",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9208446636,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2-rA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/orchestrator-core",
+      "name": "area/orchestrator-core",
+      "color": "B60205",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208446885,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_pQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/feat",
+      "name": "type/feat",
+      "color": "C2E0C6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208446909,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_vQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority/P0-blocker",
+      "name": "priority/P0-blocker",
+      "color": "5319E7",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9208446942,
+      "node_id": "LA_kwDOPaNncM8AAAACJN2_3g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/autonomy/A2",
+      "name": "autonomy/A2",
+      "color": "C5DEF5",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-09-01T23:42:03Z",
+  "createdAt": "2025-09-01T23:42:03Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

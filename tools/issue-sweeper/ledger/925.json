@@ -1,0 +1,58 @@
+{
+  "issue_number": 925,
+  "title": "GA: IntelGraph Launch Gates and Docs",
+  "url": "https://github.com/BrianCLong/summit/pull/925",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    },
+    {
+      "id": 9189484438,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xnlg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:release",
+      "name": "priority:release",
+      "color": "8B0000",
+      "default": false,
+      "description": "Critical release functionality"
+    },
+    {
+      "id": 9189485033,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xp6Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/status:ready-merge",
+      "name": "status:ready-merge",
+      "color": "00FF00",
+      "default": false,
+      "description": "Ready for auto-merge"
+    }
+  ],
+  "updatedAt": "2025-09-19T11:00:58Z",
+  "createdAt": "2025-08-24T21:06:14Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

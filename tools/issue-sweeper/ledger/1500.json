@@ -1,0 +1,65 @@
+{
+  "issue_number": 1500,
+  "title": "feat: add graph migration tooling",
+  "url": "https://github.com/BrianCLong/summit/pull/1500",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9359995057,
+      "node_id": "LA_kwDOPaNncM8AAAACLeYwsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-review",
+      "name": "needs-review",
+      "color": "fbca04",
+      "default": false,
+      "description": "Awaiting review from code owners"
+    }
+  ],
+  "updatedAt": "2025-11-21T05:58:48Z",
+  "createdAt": "2025-09-26T20:59:19Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11791,
+        "url": "https://github.com/BrianCLong/summit/pull/11791",
+        "mergedAt": "2025-11-20T21:12:56Z",
+        "title": "fix: align jest config usage and refine MoE routing priorities"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 120,
+        "url": "https://github.com/BrianCLong/summit/pull/120",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump husky from 8.0.3 to 9.1.7"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

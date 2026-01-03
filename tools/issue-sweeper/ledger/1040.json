@@ -1,0 +1,28 @@
+{
+  "issue_number": 1040,
+  "title": "Absorb orphan: codex/refactor-intelgraph-for-deployability",
+  "url": "https://github.com/BrianCLong/summit/pull/1040",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T18:13:20Z",
+  "createdAt": "2025-08-29T03:37:31Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1208,
+        "url": "https://github.com/BrianCLong/summit/pull/1208",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump sentence-transformers from 2.2.2 to 5.1.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

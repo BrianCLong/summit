@@ -1,0 +1,56 @@
+{
+  "issue_number": 926,
+  "title": "feat(rebrand): IntelGraph → Summit soft rename (Level B)",
+  "url": "https://github.com/BrianCLong/summit/pull/926",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    },
+    {
+      "id": 9189485033,
+      "node_id": "LA_kwDOPaNncM8AAAACI7xp6Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/status:ready-merge",
+      "name": "status:ready-merge",
+      "color": "00FF00",
+      "default": false,
+      "description": "Ready for auto-merge"
+    }
+  ],
+  "updatedAt": "2025-09-19T11:00:56Z",
+  "createdAt": "2025-08-24T21:14:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

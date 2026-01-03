@@ -1,0 +1,56 @@
+{
+  "issue_number": 669,
+  "title": "feat: improve entity normalization",
+  "url": "https://github.com/BrianCLong/summit/pull/669",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-21T01:17:09Z",
+  "createdAt": "2025-08-20T05:35:02Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 1207,
+        "url": "https://github.com/BrianCLong/summit/pull/1207",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump psutil from 5.9.5 to 7.0.0"
+      },
+      {
+        "number": 717,
+        "url": "https://github.com/BrianCLong/summit/pull/717",
+        "mergedAt": null,
+        "title": "🚀 IntelGraph GA Core Release - Production Ready (CONDITIONAL GO)"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

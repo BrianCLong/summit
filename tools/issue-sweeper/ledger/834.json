@@ -1,0 +1,38 @@
+{
+  "issue_number": 834,
+  "title": "docs: outline provenance ledger architecture",
+  "url": "https://github.com/BrianCLong/summit/pull/834",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:29:20Z",
+  "createdAt": "2025-08-24T08:02:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15010,
+        "url": "https://github.com/BrianCLong/summit/pull/15010",
+        "mergedAt": "2025-12-30T22:44:33Z",
+        "title": "Analyze repository for MVP-4-GA release"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

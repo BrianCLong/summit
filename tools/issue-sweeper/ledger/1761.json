@@ -1,0 +1,77 @@
+{
+  "issue_number": 1761,
+  "title": "chore(deps): bump sharp from 0.33.5 to 0.34.4",
+  "url": "https://github.com/BrianCLong/summit/pull/1761",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    },
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9359995057,
+      "node_id": "LA_kwDOPaNncM8AAAACLeYwsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-review",
+      "name": "needs-review",
+      "color": "fbca04",
+      "default": false,
+      "description": "Awaiting review from code owners"
+    }
+  ],
+  "updatedAt": "2025-09-29T21:59:55Z",
+  "createdAt": "2025-09-27T07:55:14Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12233,
+        "url": "https://github.com/BrianCLong/summit/pull/12233",
+        "mergedAt": "2025-11-23T00:37:29Z",
+        "title": "Bump nodemailer from 6.10.1 to 7.0.7 in /server"
+      },
+      {
+        "number": 10161,
+        "url": "https://github.com/BrianCLong/summit/pull/10161",
+        "mergedAt": "2025-10-08T17:07:15Z",
+        "title": "chore(deps): bump nodemailer from 6.10.1 to 7.0.7"
+      },
+      {
+        "number": 1213,
+        "url": "https://github.com/BrianCLong/summit/pull/1213",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump openai-whisper from 20230918 to 20250625"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

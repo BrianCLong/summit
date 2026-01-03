@@ -1,0 +1,38 @@
+{
+  "issue_number": 1292,
+  "title": "fix: workflow pnpm order and cache setup",
+  "url": "https://github.com/BrianCLong/summit/pull/1292",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9215499745,
+      "node_id": "LA_kwDOPaNncM8AAAACJUld4Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%203/5",
+      "name": "Review effort 3/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-23T06:17:04Z",
+  "createdAt": "2025-09-20T21:13:30Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1292,
+        "url": "https://github.com/BrianCLong/summit/pull/1292",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm order and cache setup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

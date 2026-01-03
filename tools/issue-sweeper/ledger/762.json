@@ -1,0 +1,34 @@
+{
+  "issue_number": 762,
+  "title": "🚀 CI/CD Stabilization: Fix 32 Blocked PRs",
+  "url": "https://github.com/BrianCLong/summit/pull/762",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-21T21:09:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      },
+      {
+        "number": 10096,
+        "url": "https://github.com/BrianCLong/summit/pull/10096",
+        "mergedAt": "2025-10-14T13:05:54Z",
+        "title": "feat: add pii ontology mapping engine"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

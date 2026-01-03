@@ -1,0 +1,50 @@
+{
+  "issue_number": 900,
+  "title": "feat: add docs service skeleton",
+  "url": "https://github.com/BrianCLong/summit/pull/900",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T16:15:50Z",
+  "createdAt": "2025-08-24T17:47:19Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11888,
+        "url": "https://github.com/BrianCLong/summit/pull/11888",
+        "mergedAt": "2025-11-20T10:26:20Z",
+        "title": "Implement comprehensive API documentation system"
+      },
+      {
+        "number": 11874,
+        "url": "https://github.com/BrianCLong/summit/pull/11874",
+        "mergedAt": null,
+        "title": "Build Resilience Lab with automated chaos drills"
+      },
+      {
+        "number": 1259,
+        "url": "https://github.com/BrianCLong/summit/pull/1259",
+        "mergedAt": null,
+        "title": "Merge conflict-free branches and PRs into main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,70 @@
+{
+  "issue_number": 958,
+  "title": "Absorb orphan: codex/create-connector-hub-and-rules-engine-v1",
+  "url": "https://github.com/BrianCLong/summit/pull/958",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:22:12Z",
+  "createdAt": "2025-08-29T03:32:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14539,
+        "url": "https://github.com/BrianCLong/summit/pull/14539",
+        "mergedAt": "2025-12-26T23:53:10Z",
+        "title": "chore(deps): Bump github.com/go-chi/chi/v5 from 5.0.10 to 5.2.2 in /services/q3c"
+      },
+      {
+        "number": 13616,
+        "url": "https://github.com/BrianCLong/summit/pull/13616",
+        "mergedAt": "2025-12-16T21:23:51Z",
+        "title": "build(deps): bump github.com/go-chi/chi/v5 from 5.0.11 to 5.2.2 in /templates/golden-path-platform/services/hello-service"
+      },
+      {
+        "number": 267,
+        "url": "https://github.com/BrianCLong/summit/pull/267",
+        "mergedAt": "2025-08-15T21:09:25Z",
+        "title": "chore(deps): bump @bull-board/api from 5.23.0 to 6.12.0 in /server"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

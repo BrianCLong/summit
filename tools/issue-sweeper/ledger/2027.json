@@ -1,0 +1,83 @@
+{
+  "issue_number": 2027,
+  "title": "IG Oct25 | october2025/Dulles.md | Q: Did the company break the law? A: We are investigating. We take compliance se",
+  "url": "https://github.com/BrianCLong/summit/issues/2027",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:46:50Z",
+  "createdAt": "2025-10-01T15:34:07Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13977,
+        "url": "https://github.com/BrianCLong/summit/pull/13977",
+        "mergedAt": "2025-12-20T01:26:48Z",
+        "title": "Replace 2027 capacity budget workbook with markdown"
+      },
+      {
+        "number": 13859,
+        "url": "https://github.com/BrianCLong/summit/pull/13859",
+        "mergedAt": "2025-12-20T03:23:59Z",
+        "title": "Add Q1 2027 revenue engine sprint plan"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 12801,
+        "url": "https://github.com/BrianCLong/summit/pull/12801",
+        "mergedAt": "2025-12-04T17:42:29Z",
+        "title": "Add 2027-2030 strategic independence roadmap"
+      },
+      {
+        "number": 792,
+        "url": "https://github.com/BrianCLong/summit/pull/792",
+        "mergedAt": "2025-08-29T10:36:30Z",
+        "title": "docs: add phase 4 2027 plan"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

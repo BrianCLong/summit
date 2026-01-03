@@ -1,0 +1,221 @@
+{
+  "issue_number": 2026,
+  "title": "IG Oct25 | october2025/Dulles.md | Q: What happened? A: [holding statement]. Escalation: material adverse facts.",
+  "url": "https://github.com/BrianCLong/summit/issues/2026",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:46:47Z",
+  "createdAt": "2025-10-01T15:34:03Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15380,
+        "url": "https://github.com/BrianCLong/summit/pull/15380",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults"
+      },
+      {
+        "number": 15376,
+        "url": "https://github.com/BrianCLong/summit/pull/15376",
+        "mergedAt": null,
+        "title": "Sprint 2026.01: GA Rails + Audit Pack Implementation"
+      },
+      {
+        "number": 15394,
+        "url": "https://github.com/BrianCLong/summit/pull/15394",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults (Decomposed)"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 15375,
+        "url": "https://github.com/BrianCLong/summit/pull/15375",
+        "mergedAt": null,
+        "title": "feat: Release Automation & Evidence Bundle"
+      },
+      {
+        "number": 15471,
+        "url": "https://github.com/BrianCLong/summit/pull/15471",
+        "mergedAt": null,
+        "title": "Responsive: harden retention dashboard mobile layout"
+      },
+      {
+        "number": 15448,
+        "url": "https://github.com/BrianCLong/summit/pull/15448",
+        "mergedAt": null,
+        "title": "Add malfunction guardrails and red-team harness"
+      },
+      {
+        "number": 15391,
+        "url": "https://github.com/BrianCLong/summit/pull/15391",
+        "mergedAt": null,
+        "title": "Include missing server sources in tsconfig"
+      },
+      {
+        "number": 14759,
+        "url": "https://github.com/BrianCLong/summit/pull/14759",
+        "mergedAt": "2025-12-29T17:10:16Z",
+        "title": "docs: add sprint plan for feb 23 2026"
+      },
+      {
+        "number": 12671,
+        "url": "https://github.com/BrianCLong/summit/pull/12671",
+        "mergedAt": "2025-12-18T01:43:45Z",
+        "title": "Harden 2026 warplan execution"
+      },
+      {
+        "number": 15277,
+        "url": "https://github.com/BrianCLong/summit/pull/15277",
+        "mergedAt": "2026-01-01T05:13:38Z",
+        "title": "docs: refresh SummitThreat roadmap narrative"
+      },
+      {
+        "number": 15410,
+        "url": "https://github.com/BrianCLong/summit/pull/15410",
+        "mergedAt": null,
+        "title": "chore: enforce secret scanning gate"
+      },
+      {
+        "number": 12388,
+        "url": "https://github.com/BrianCLong/summit/pull/12388",
+        "mergedAt": "2025-12-18T02:54:38Z",
+        "title": "docs: add 2026 summit roadmap"
+      },
+      {
+        "number": 13850,
+        "url": "https://github.com/BrianCLong/summit/pull/13850",
+        "mergedAt": "2025-12-20T03:45:05Z",
+        "title": "Add sprint plan for Aug 17–28 2026"
+      },
+      {
+        "number": 13847,
+        "url": "https://github.com/BrianCLong/summit/pull/13847",
+        "mergedAt": "2025-12-20T03:44:50Z",
+        "title": "Add sprint plan for Jul 20–31, 2026"
+      },
+      {
+        "number": 13862,
+        "url": "https://github.com/BrianCLong/summit/pull/13862",
+        "mergedAt": "2025-12-20T03:23:44Z",
+        "title": "Add sprint plan for Sep 14–25 2026"
+      },
+      {
+        "number": 15299,
+        "url": "https://github.com/BrianCLong/summit/pull/15299",
+        "mergedAt": "2026-01-01T08:08:11Z",
+        "title": "Document next roadmap priorities and agent task spec"
+      },
+      {
+        "number": 13858,
+        "url": "https://github.com/BrianCLong/summit/pull/13858",
+        "mergedAt": "2025-12-20T03:24:04Z",
+        "title": "Add Sprint 24 plan for Nov 9–20 2026"
+      },
+      {
+        "number": 13766,
+        "url": "https://github.com/BrianCLong/summit/pull/13766",
+        "mergedAt": "2025-12-20T03:34:54Z",
+        "title": "docs: add sprint plan for May 11–22, 2026"
+      },
+      {
+        "number": 13849,
+        "url": "https://github.com/BrianCLong/summit/pull/13849",
+        "mergedAt": "2025-12-20T03:45:00Z",
+        "title": "Add Sprint 19 plan for Aug 31–Sep 11 2026"
+      },
+      {
+        "number": 13848,
+        "url": "https://github.com/BrianCLong/summit/pull/13848",
+        "mergedAt": "2025-12-20T03:44:57Z",
+        "title": "Add sprint plan for Aug 3–14, 2026 (America/Denver)"
+      },
+      {
+        "number": 13854,
+        "url": "https://github.com/BrianCLong/summit/pull/13854",
+        "mergedAt": "2025-12-20T03:24:19Z",
+        "title": "Add sprint 21 plan for Sep 28–Oct 9 2026"
+      },
+      {
+        "number": 13759,
+        "url": "https://github.com/BrianCLong/summit/pull/13759",
+        "mergedAt": "2025-12-20T03:34:19Z",
+        "title": "Add sprint plan for Jul 6–17 2026 (Sprint 15)"
+      },
+      {
+        "number": 12803,
+        "url": "https://github.com/BrianCLong/summit/pull/12803",
+        "mergedAt": "2025-12-04T17:42:23Z",
+        "title": "Add 2026 H2 exit readiness playbook"
+      },
+      {
+        "number": 12816,
+        "url": "https://github.com/BrianCLong/summit/pull/12816",
+        "mergedAt": "2025-12-04T15:50:15Z",
+        "title": "Add 2026 Q1 MVP2 execution roadmap"
+      },
+      {
+        "number": 15047,
+        "url": "https://github.com/BrianCLong/summit/pull/15047",
+        "mergedAt": null,
+        "title": "Add sprint plan for Greenline + Evidence"
+      },
+      {
+        "number": 13856,
+        "url": "https://github.com/BrianCLong/summit/pull/13856",
+        "mergedAt": "2025-12-20T03:24:12Z",
+        "title": "Add sprint plan for Oct 26–Nov 6 2026 enterprise platform"
+      },
+      {
+        "number": 13779,
+        "url": "https://github.com/BrianCLong/summit/pull/13779",
+        "mergedAt": "2025-12-20T03:35:31Z",
+        "title": "docs: refresh Feb 16–27 2026 sprint plan for enterprise readiness"
+      },
+      {
+        "number": 12733,
+        "url": "https://github.com/BrianCLong/summit/pull/12733",
+        "mergedAt": "2025-12-18T01:26:54Z",
+        "title": "Add 2026 research agenda for OSINT/CTI capabilities"
+      },
+      {
+        "number": 12738,
+        "url": "https://github.com/BrianCLong/summit/pull/12738",
+        "mergedAt": "2025-12-04T17:47:58Z",
+        "title": "Add 2026 human-AI collaborative intelligence roadmap"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

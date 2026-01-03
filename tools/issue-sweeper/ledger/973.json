@@ -1,0 +1,21 @@
+{
+  "issue_number": 973,
+  "title": "Absorb orphan: codex/exceed-splunk-s-reporting-limits",
+  "url": "https://github.com/BrianCLong/summit/pull/973",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:24:52Z",
+  "createdAt": "2025-08-29T03:33:47Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

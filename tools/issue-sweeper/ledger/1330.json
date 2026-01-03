@@ -1,0 +1,62 @@
+{
+  "issue_number": 1330,
+  "title": "feat: enrich counter-response agent orchestration",
+  "url": "https://github.com/BrianCLong/summit/pull/1330",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9215499745,
+      "node_id": "LA_kwDOPaNncM8AAAACJUld4Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%203/5",
+      "name": "Review effort 3/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9359995057,
+      "node_id": "LA_kwDOPaNncM8AAAACLeYwsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-review",
+      "name": "needs-review",
+      "color": "fbca04",
+      "default": false,
+      "description": "Awaiting review from code owners"
+    }
+  ],
+  "updatedAt": "2025-11-21T06:03:25Z",
+  "createdAt": "2025-09-22T16:35:32Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1330,
+        "url": "https://github.com/BrianCLong/summit/pull/1330",
+        "mergedAt": null,
+        "title": "feat: enrich counter-response agent orchestration"
+      },
+      {
+        "number": 11785,
+        "url": "https://github.com/BrianCLong/summit/pull/11785",
+        "mergedAt": "2025-10-28T02:59:20Z",
+        "title": "chore(deps): bump validator and express-validator in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

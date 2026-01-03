@@ -1,0 +1,71 @@
+{
+  "issue_number": 2000,
+  "title": "IG Oct25 | october2025/Dulles.md | Concession ladder (what to give, order, and trigger):",
+  "url": "https://github.com/BrianCLong/summit/issues/2000",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-01T15:32:44Z",
+  "createdAt": "2025-10-01T15:32:44Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11954,
+        "url": "https://github.com/BrianCLong/summit/pull/11954",
+        "mergedAt": "2025-11-20T10:20:47Z",
+        "title": "Define and implement codebase maintainability metrics"
+      },
+      {
+        "number": 12038,
+        "url": "https://github.com/BrianCLong/summit/pull/12038",
+        "mergedAt": "2025-11-21T03:59:50Z",
+        "title": "Optimize GraphQL implementation and resolver performance"
+      },
+      {
+        "number": 14564,
+        "url": "https://github.com/BrianCLong/summit/pull/14564",
+        "mergedAt": "2025-12-27T04:47:57Z",
+        "title": "chore(deps): Bump pillow from 10.1.0 to 10.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

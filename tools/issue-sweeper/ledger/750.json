@@ -1,0 +1,44 @@
+{
+  "issue_number": 750,
+  "title": "feat: add codex panel stubs",
+  "url": "https://github.com/BrianCLong/summit/pull/750",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T10:38:51Z",
+  "createdAt": "2025-08-21T08:13:29Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15261,
+        "url": "https://github.com/BrianCLong/summit/pull/15261",
+        "mergedAt": "2026-01-01T07:29:41Z",
+        "title": "Expand test coverage and fix issues"
+      },
+      {
+        "number": 12240,
+        "url": "https://github.com/BrianCLong/summit/pull/12240",
+        "mergedAt": "2025-12-18T03:33:37Z",
+        "title": "Build graph analytics suite with path finding"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,46 @@
+{
+  "issue_number": 772,
+  "title": "CI: stabilize PR checks + Ruff hook fix",
+  "url": "https://github.com/BrianCLong/summit/pull/772",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-22T19:08:47Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11911,
+        "url": "https://github.com/BrianCLong/summit/pull/11911",
+        "mergedAt": "2025-11-20T10:25:10Z",
+        "title": "Create Grafana observability dashboard for IntelGraph"
+      },
+      {
+        "number": 13194,
+        "url": "https://github.com/BrianCLong/summit/pull/13194",
+        "mergedAt": "2025-12-04T15:38:36Z",
+        "title": "Add multimodal fusion pipeline with embeddings"
+      },
+      {
+        "number": 633,
+        "url": "https://github.com/BrianCLong/summit/pull/633",
+        "mergedAt": null,
+        "title": "chore(deps): bump jest-extended from 4.0.2 to 6.0.0"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

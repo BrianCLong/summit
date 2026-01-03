@@ -1,0 +1,49 @@
+{
+  "issue_number": 1216,
+  "title": "Maestro Build Failure - Maestro Build Pipeline #125",
+  "url": "https://github.com/BrianCLong/summit/issues/1216",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767055,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX0zw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/bug",
+      "name": "bug",
+      "color": "d73a4a",
+      "default": true,
+      "description": "Something isn't working"
+    },
+    {
+      "id": 9208753401,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/maestro",
+      "name": "maestro",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9208753403,
+      "node_id": "LA_kwDOPaNncM8AAAACJOJs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ci-failure",
+      "name": "ci-failure",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-05T16:47:35Z",
+  "createdAt": "2025-09-13T06:15:09Z",
+  "classification": "bug",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

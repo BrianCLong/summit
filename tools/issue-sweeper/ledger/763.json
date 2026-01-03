@@ -1,0 +1,28 @@
+{
+  "issue_number": 763,
+  "title": "ci: final-mile hardening",
+  "url": "https://github.com/BrianCLong/summit/pull/763",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-22T00:09:21Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11901,
+        "url": "https://github.com/BrianCLong/summit/pull/11901",
+        "mergedAt": "2025-11-20T10:25:49Z",
+        "title": "Build proof-carrying publishing with disclosure packager"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

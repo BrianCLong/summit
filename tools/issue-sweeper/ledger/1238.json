@@ -1,0 +1,49 @@
+{
+  "issue_number": 1238,
+  "title": "Policies: Baseline ABAC Rego + Tests",
+  "url": "https://github.com/BrianCLong/summit/issues/1238",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9283516291,
+      "node_id": "LA_kwDOPaNncM8AAAACKVc3gw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/must",
+      "name": "must",
+      "color": "FF0000",
+      "default": false,
+      "description": "Must-have (blockers)"
+    },
+    {
+      "id": 9283516435,
+      "node_id": "LA_kwDOPaNncM8AAAACKVc4Ew",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/policy",
+      "name": "policy",
+      "color": "FBCA04",
+      "default": false,
+      "description": "OPA/ABAC"
+    }
+  ],
+  "updatedAt": "2025-09-15T00:55:57Z",
+  "createdAt": "2025-09-15T00:55:57Z",
+  "classification": "security",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,34 @@
+{
+  "issue_number": 1036,
+  "title": "Absorb orphan: codex/prepare-sprint-3-and-4-plans",
+  "url": "https://github.com/BrianCLong/summit/pull/1036",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T18:11:58Z",
+  "createdAt": "2025-08-29T03:37:21Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1262,
+        "url": "https://github.com/BrianCLong/summit/pull/1262",
+        "mergedAt": "2025-09-19T02:22:35Z",
+        "title": "Release 2.5 dash: merge into merge/all-to-main-20250915-022508 with UI/docs from feature"
+      },
+      {
+        "number": 1085,
+        "url": "https://github.com/BrianCLong/summit/pull/1085",
+        "mergedAt": null,
+        "title": "chore(compat): seed GraphQL N-1 and N-2\nbaselines for CI schema checks"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

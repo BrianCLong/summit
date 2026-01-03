@@ -1,0 +1,110 @@
+{
+  "issue_number": 1712,
+  "title": "Add FHE micro-analytics service and client",
+  "url": "https://github.com/BrianCLong/summit/pull/1712",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9359995057,
+      "node_id": "LA_kwDOPaNncM8AAAACLeYwsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-review",
+      "name": "needs-review",
+      "color": "fbca04",
+      "default": false,
+      "description": "Awaiting review from code owners"
+    }
+  ],
+  "updatedAt": "2025-10-01T00:57:21Z",
+  "createdAt": "2025-09-27T06:54:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13081,
+        "url": "https://github.com/BrianCLong/summit/pull/13081",
+        "mergedAt": "2025-12-03T05:33:29Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 13064,
+        "url": "https://github.com/BrianCLong/summit/pull/13064",
+        "mergedAt": "2025-12-02T15:05:54Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 13039,
+        "url": "https://github.com/BrianCLong/summit/pull/13039",
+        "mergedAt": "2025-12-01T21:47:53Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 13008,
+        "url": "https://github.com/BrianCLong/summit/pull/13008",
+        "mergedAt": "2025-12-01T17:48:52Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 13004,
+        "url": "https://github.com/BrianCLong/summit/pull/13004",
+        "mergedAt": "2025-12-01T16:48:33Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 13002,
+        "url": "https://github.com/BrianCLong/summit/pull/13002",
+        "mergedAt": "2025-12-01T15:55:05Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 13000,
+        "url": "https://github.com/BrianCLong/summit/pull/13000",
+        "mergedAt": "2025-12-01T14:57:45Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 12998,
+        "url": "https://github.com/BrianCLong/summit/pull/12998",
+        "mergedAt": "2025-12-01T13:44:07Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 12997,
+        "url": "https://github.com/BrianCLong/summit/pull/12997",
+        "mergedAt": "2025-12-01T13:00:09Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      },
+      {
+        "number": 12970,
+        "url": "https://github.com/BrianCLong/summit/pull/12970",
+        "mergedAt": "2025-12-01T11:28:09Z",
+        "title": "🏗️ Recovery: Add FHE micro-analytics service and client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

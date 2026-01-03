@@ -1,0 +1,40 @@
+{
+  "issue_number": 783,
+  "title": "ci(docs): add docs-only markdownlint and skip heavy CI on docs/config-only",
+  "url": "https://github.com/BrianCLong/summit/pull/783",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-24T04:24:00Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1276,
+        "url": "https://github.com/BrianCLong/summit/pull/1276",
+        "mergedAt": "2025-09-19T02:20:51Z",
+        "title": "chore(deps-dev): bump @vitejs/plugin-react from 4.7.0 to 5.0.3 in /client"
+      },
+      {
+        "number": 1150,
+        "url": "https://github.com/BrianCLong/summit/pull/1150",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @vitejs/plugin-react from 4.7.0 to 5.0.2 in /client"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

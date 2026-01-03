@@ -1,0 +1,28 @@
+{
+  "issue_number": 1007,
+  "title": "Absorb orphan: codex/implement-risk-engine-v1-and-watchlists",
+  "url": "https://github.com/BrianCLong/summit/pull/1007",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T16:31:57Z",
+  "createdAt": "2025-08-29T03:36:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11911,
+        "url": "https://github.com/BrianCLong/summit/pull/11911",
+        "mergedAt": "2025-11-20T10:25:10Z",
+        "title": "Create Grafana observability dashboard for IntelGraph"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

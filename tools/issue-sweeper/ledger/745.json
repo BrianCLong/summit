@@ -1,0 +1,77 @@
+{
+  "issue_number": 745,
+  "title": "chore(deps): bump @opentelemetry/sdk-node from 0.45.1 to 0.203.0",
+  "url": "https://github.com/BrianCLong/summit/pull/745",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-29T10:53:37Z",
+  "createdAt": "2025-08-21T00:53:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15182,
+        "url": "https://github.com/BrianCLong/summit/pull/15182",
+        "mergedAt": "2025-12-31T14:21:25Z",
+        "title": "chore(deps): bump actions/upload-artifact from 4 to 6"
+      },
+      {
+        "number": 15341,
+        "url": "https://github.com/BrianCLong/summit/pull/15341",
+        "mergedAt": "2026-01-01T08:47:02Z",
+        "title": "Implement adversarial resistance and truth defense"
+      },
+      {
+        "number": 13104,
+        "url": "https://github.com/BrianCLong/summit/pull/13104",
+        "mergedAt": "2025-12-03T01:45:05Z",
+        "title": "Implement OSINT fusion agentic capability"
+      },
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

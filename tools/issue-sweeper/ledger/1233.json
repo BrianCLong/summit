@@ -1,0 +1,38 @@
+{
+  "issue_number": 1233,
+  "title": "v24: PR Dashboard (PRs 1–10)",
+  "url": "https://github.com/BrianCLong/summit/issues/1233",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9283693225,
+      "node_id": "LA_kwDOPaNncM8AAAACKVnqqQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/v24",
+      "name": "v24",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-09-20T07:39:55Z",
+  "createdAt": "2025-09-15T00:25:00Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14540,
+        "url": "https://github.com/BrianCLong/summit/pull/14540",
+        "mergedAt": "2025-12-26T23:52:45Z",
+        "title": "chore(deps): Bump multer from 1.4.5-lts.2 to 2.0.2 in /services/vision-api"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

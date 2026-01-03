@@ -1,0 +1,21 @@
+{
+  "issue_number": 1023,
+  "title": "Absorb orphan: codex/implement-v1-graphql-typedefs-and-resolvers",
+  "url": "https://github.com/BrianCLong/summit/pull/1023",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:03:56Z",
+  "createdAt": "2025-08-29T03:36:45Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

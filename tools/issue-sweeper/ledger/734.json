@@ -1,0 +1,71 @@
+{
+  "issue_number": 734,
+  "title": "chore(deps): bump numpy from 1.24.3 to 2.0.2",
+  "url": "https://github.com/BrianCLong/summit/pull/734",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9133974250,
+      "node_id": "LA_kwDOPaNncM8AAAACIG1i6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/python",
+      "name": "python",
+      "color": "2b67c6",
+      "default": false,
+      "description": "Pull requests that update python code"
+    }
+  ],
+  "updatedAt": "2025-08-29T16:24:56Z",
+  "createdAt": "2025-08-21T00:46:50Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15182,
+        "url": "https://github.com/BrianCLong/summit/pull/15182",
+        "mergedAt": "2025-12-31T14:21:25Z",
+        "title": "chore(deps): bump actions/upload-artifact from 4 to 6"
+      },
+      {
+        "number": 1276,
+        "url": "https://github.com/BrianCLong/summit/pull/1276",
+        "mergedAt": "2025-09-19T02:20:51Z",
+        "title": "chore(deps-dev): bump @vitejs/plugin-react from 4.7.0 to 5.0.3 in /client"
+      },
+      {
+        "number": 1150,
+        "url": "https://github.com/BrianCLong/summit/pull/1150",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @vitejs/plugin-react from 4.7.0 to 5.0.2 in /client"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 744,
+        "url": "https://github.com/BrianCLong/summit/pull/744",
+        "mergedAt": "2025-08-29T10:29:49Z",
+        "title": "chore(deps): bump archiver from 6.0.2 to 7.0.1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
