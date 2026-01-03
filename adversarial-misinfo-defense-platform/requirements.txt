@@ -42,6 +42,9 @@ black>=21.0
 flake8>=3.9.0
 mypy>=0.910
 
+# LLM Integration
+anthropic>=0.40.0
+
 # Additional dependencies for specific modules
 moviepy>=1.0.0
 pydub>=0.25.0
