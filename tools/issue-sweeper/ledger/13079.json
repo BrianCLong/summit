@@ -1,0 +1,67 @@
+{
+  "issue_number": 13079,
+  "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server",
+  "url": "https://github.com/BrianCLong/summit/pull/13079",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    },
+    {
+      "id": 9696311256,
+      "node_id": "LA_kwDOPaNncM8AAAACQfH32A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20M",
+      "name": "size: M",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9698631589,
+      "node_id": "LA_kwDOPaNncM8AAAACQhVfpQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/auto-merge-candidate",
+      "name": "auto-merge-candidate",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9755368954,
+      "node_id": "LA_kwDOPaNncM8AAAACRXcd-g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20dependencies",
+      "name": "type: dependencies",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-02T11:25:18Z",
+  "createdAt": "2025-12-02T11:19:29Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
