@@ -1,0 +1,49 @@
+{
+  "issue_number": 12988,
+  "title": "🏗️ Recovery (partial): Build Advanced Machine Learning Operations Platform",
+  "url": "https://github.com/BrianCLong/summit/pull/12988",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9694960151,
+      "node_id": "LA_kwDOPaNncM8AAAACQd1aFw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20XL",
+      "name": "size: XL",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9695444019,
+      "node_id": "LA_kwDOPaNncM8AAAACQeS8Mw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-tests",
+      "name": "needs-tests",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9745579774,
+      "node_id": "LA_kwDOPaNncM8AAAACROG-_g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/automerge-safe",
+      "name": "automerge-safe",
+      "color": "0E8A16",
+      "default": false,
+      "description": "Approved for auto-merge by the merge train"
+    }
+  ],
+  "updatedAt": "2025-12-02T08:24:00Z",
+  "createdAt": "2025-12-01T11:32:16Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

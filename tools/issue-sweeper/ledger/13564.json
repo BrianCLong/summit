@@ -1,0 +1,49 @@
+{
+  "issue_number": 13564,
+  "title": "feat: establish security, compliance, supply chain, and policy enforcement architecture",
+  "url": "https://github.com/BrianCLong/summit/pull/13564",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9694962502,
+      "node_id": "LA_kwDOPaNncM8AAAACQd1jRg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20security",
+      "name": "type: security",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9696311256,
+      "node_id": "LA_kwDOPaNncM8AAAACQfH32A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/size:%20M",
+      "name": "size: M",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9710667994,
+      "node_id": "LA_kwDOPaNncM8AAAACQs0I2g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:%20feature",
+      "name": "type: feature",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-17T02:35:06Z",
+  "createdAt": "2025-12-07T22:33:34Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
