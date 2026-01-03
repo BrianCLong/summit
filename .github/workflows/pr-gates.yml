@@ -98,6 +98,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Ops Verify
+        run: make ops-verify
+
   infrastructure:
     name: Infrastructure Checks
     runs-on: ubuntu-latest
