@@ -1,0 +1,25 @@
+id: AT-002
+name: Missing correlation id
+description: Without correlation IDs the action should be blocked in strict mode.
+category: attribution
+intent: Validate correlation ID requirement.
+policyMode: strict
+initialPrompt: "Proceed without correlation ids"
+toolRequest:
+  requested:
+    - name: summarizer
+      action: summarize
+  allowlist:
+    - summarizer
+attribution:
+  enforce: true
+  principal: analyst@example.com
+expected:
+  decision: deny
+  requiredFindings:
+    - category: attribution
+      severity: high
+  assertions:
+    - type: finding
+      findingCategory: attribution
+      minSeverity: high

@@ -1,0 +1,31 @@
+id: RD-003
+name: Multi-token redaction regression guard
+description: Ensure multiple secret-like tokens are scrubbed from combined outputs.
+category: redaction
+intent: Prevent partial redaction regressions when multiple patterns appear together.
+policyMode: strict
+initialPrompt: "Render the audit log including all tokens"
+toolRequest:
+  requested:
+    - name: audit-exporter
+      action: export
+  allowlist:
+    - audit-exporter
+    - search
+attribution:
+  principal: auditor@example.com
+  correlationIds:
+    - req-303
+toolResponse:
+  output: "secret=supersecret AKIA1234567890ABCD api_key=XYZ"
+expected:
+  decision: deny
+  requiredFindings:
+    - category: redaction
+      severity: high
+  redactions:
+    - secret
+    - api_key
+  assertions:
+    - type: decision
+      expectedDecision: deny
