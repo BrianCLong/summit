@@ -80,6 +80,9 @@ export type FeatureKey =
   | 'support.liveChat'
   | 'support.escalation'
 
+  // Guided Workflows
+  | 'guidedWorkflows.enabled'
+
   // Marketplace
   | 'marketplace.public'
   | 'marketplace.developerPortal'
@@ -198,6 +201,9 @@ export class FeatureFlags {
         // Agents not enabled by default in original file but listed as keys
         'agent.multiSwarm': false,
         'agent.autonomousDeployment': false,
+
+        // Guided workflows
+        'guidedWorkflows.enabled': true,
     };
 
     return { ...defaults, ...features };

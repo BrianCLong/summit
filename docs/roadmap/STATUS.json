@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T13:15:00Z",
+  "revision_note": "Registered guided workflows blueprints/orchestrator and UI trace surfacing",
   "initiatives": [
     {
       "id": "A",
@@ -146,14 +146,37 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Guided Workflows",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Blueprint-driven chat wizard",
+          "status": "in-progress",
+          "owner": "Codex",
+          "evidence": "GuidedWorkflowBlueprint schema, orchestrator, and example blueprints shipped in packages/agent-lab and workflows/blueprints.",
+          "target_completion": "Sprint N+1"
+        },
+        {
+          "id": "F2",
+          "name": "UI + trace timeline",
+          "status": "not-started",
+          "owner": "Codex",
+          "evidence": "Guided Workflows tab added in UI with chat-wizard scaffolding; requires backend wiring to promote to complete.",
+          "target_completion": "Sprint N+1"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
     "partial": 2,
     "incomplete": 2,
-    "not_started": 6,
-    "total": 12,
+    "not_started": 7,
+    "in_progress": 2,
+    "total": 15,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }
