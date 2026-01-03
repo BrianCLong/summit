@@ -1,0 +1,38 @@
+{
+  "issue_number": 14156,
+  "title": "docs: add immediate v2.0 hardening priorities",
+  "url": "https://github.com/BrianCLong/summit/pull/14156",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-12-22T08:30:32Z",
+  "createdAt": "2025-12-21T01:26:43Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1153,
+        "url": "https://github.com/BrianCLong/summit/pull/1153",
+        "mergedAt": null,
+        "title": "chore(deps): bump puppeteer from 22.15.0 to 24.18.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

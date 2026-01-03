@@ -1,0 +1,94 @@
+{
+  "issue_number": 10150,
+  "title": "[P1] LLM Ops & Model Evaluation Harness",
+  "url": "https://github.com/BrianCLong/summit/issues/10150",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968276,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/performance",
+      "name": "performance",
+      "color": "D93F0B",
+      "default": false,
+      "description": "Perf/Load"
+    },
+    {
+      "id": 9399486827,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDJaw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ops",
+      "name": "area:ops",
+      "color": "fbca04",
+      "default": false,
+      "description": "Operations and SRE"
+    },
+    {
+      "id": 9399487010,
+      "node_id": "LA_kwDOPaNncM8AAAACMEDKIg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:analytics",
+      "name": "area:analytics",
+      "color": "fbca04",
+      "default": false,
+      "description": "Analytics and insights"
+    },
+    {
+      "id": 9402657980,
+      "node_id": "LA_kwDOPaNncM8AAAACMHEsvA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/prd:october",
+      "name": "prd:october",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9402658137,
+      "node_id": "LA_kwDOPaNncM8AAAACMHEtWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/lane:platform",
+      "name": "lane:platform",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9412396692,
+      "node_id": "LA_kwDOPaNncM8AAAACMQXGlA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/evaluation",
+      "name": "evaluation",
+      "color": "aaaaaa",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-10-06T15:48:06Z",
+  "createdAt": "2025-10-06T15:48:06Z",
+  "classification": "perf",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

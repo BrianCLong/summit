@@ -1,0 +1,21 @@
+{
+  "issue_number": 14952,
+  "title": "feat: standardized error taxonomy system",
+  "url": "https://github.com/BrianCLong/summit/pull/14952",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-30T22:46:59Z",
+  "createdAt": "2025-12-29T21:46:43Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
