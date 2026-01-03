@@ -37,3 +37,5 @@ This table provides a consolidated view of all controls, their mappings to the v
 | **SEC-001** | Secret Scanning | SOC, ISO | [.husky/pre-commit](.husky/pre-commit) |
 | **SEC-002** | Production Guardrails | SOC, ISO | [server/src/config.ts](server/src/config.ts) |
 | **SEC-003** | Dependency Vulnerability Scanning | SOC, ISO | [.github/workflows/pr-quality-gate.yml](.github/workflows/pr-quality-gate.yml) |
+| **SEC-004** | Automated Incident Triage | SOC, AI | [docs/security/soc-copilot.md](docs/security/soc-copilot.md) |
+| **SEC-005** | Incident Triage Unit Tests | SOC, AI | [tests/security/soc/correlation.test.ts](tests/security/soc/correlation.test.ts) |

@@ -127,6 +127,7 @@ import { centralizedErrorHandler } from './middleware/error-handling-middleware.
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
 import securityAdminRouter from './routes/security/security-admin.js';
+import socRouter from './routes/soc.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
 import onboardingRouter from './routes/onboarding.js';
@@ -448,6 +449,7 @@ export const createApp = async () => {
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
   app.use('/api/security', securityAdminRouter);
+  app.use('/api/soc', socRouter);
   app.use('/api/compliance', complianceAdminRouter);
   app.use('/api/sandbox', sandboxAdminRouter);
   app.use('/api/v1/onboarding', onboardingRouter);

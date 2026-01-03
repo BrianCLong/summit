@@ -62,7 +62,7 @@ jobs:
     continue-on-error: ${{ matrix.test-suite == 'unit' }}
     strategy:
       matrix:
-        test-suite: [unit, integration]
+        test-suite: [unit, integration, soc]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
