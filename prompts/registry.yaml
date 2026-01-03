@@ -28,3 +28,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: security-p0p1-gates
+    version: v1
+    path: prompts/security/p0p1-security-gates.md
+    sha256: f2412e4982765b0dbb9fe8db7a7adf0c6d6f85af4078013467748f7d8cf5f47a
+    description: P0/P1 security remediation, CI security gates, and compliance evidence updates.
+    scope:
+      paths:
+        - .github/
+        - docs/
+        - agents/
+        - prompts/
+        - package.json
+        - pnpm-lock.yaml
+        - SECURITY.md
+      domains:
+        - security
+        - governance
+        - compliance
+        - ci
+        - supply-chain
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
