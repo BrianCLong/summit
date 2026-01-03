@@ -198,7 +198,10 @@ else
     run_step "security-secrets" "echo 'gitleaks not installed, skipping'"
 fi
 
-# Step 8: Provenance check (existing in repo)
+# Step 8: Security Scorecard (Definitive Gate)
+run_step "security-scorecard" "pnpm run security:scorecard"
+
+# Step 9: Provenance check (existing in repo)
 if [[ -f ".ci/gen-provenance.cjs" ]] && [[ -f ".ci/verify-provenance.cjs" ]]; then
     run_step "provenance" "node .ci/gen-provenance.cjs > /tmp/provenance.json && node .ci/verify-provenance.cjs /tmp/provenance.json"
 fi
