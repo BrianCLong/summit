@@ -49,10 +49,10 @@
         {
           "id": "B2",
           "name": "RSS/Atom Connector",
-          "status": "not-started",
+          "status": "in-progress",
           "owner": "Jules",
-          "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "evidence": "Autonomous Agents research feed added with Git-based ingestion pipeline and scheduled workflow",
+          "blockers": ["Need additional sources beyond Git feeds"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -151,9 +151,10 @@
   "summary": {
     "rc_ready": 2,
     "partial": 2,
+    "in_progress": 2,
     "incomplete": 2,
-    "not_started": 6,
-    "total": 12,
+    "not_started": 5,
+    "total": 13,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }

@@ -1,0 +1,65 @@
+name: Autonomous Agents Research Ingestion
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: summit
+          POSTGRES_PASSWORD: summit
+          POSTGRES_DB: summit
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U summit" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: summit
+      POSTGRES_DB: summit
+      CONFIG_VALIDATE_ON_START: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install server dependencies
+        run: cd server && npm ci --ignore-scripts
+
+      - name: Prepare database
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+
+      - name: Run migrations
+        run: cd server && npm run migrate:persistence
+        env:
+          POSTGRES_HOST: ${{ env.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ env.POSTGRES_PORT }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          CONFIG_VALIDATE_ON_START: "false"
+
+      - name: Ingest Autonomous Agents feed
+        run: cd server && npx tsx scripts/ingest-autonomous-agents.ts
+        env:
+          POSTGRES_HOST: ${{ env.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ env.POSTGRES_PORT }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          CONFIG_VALIDATE_ON_START: "false"

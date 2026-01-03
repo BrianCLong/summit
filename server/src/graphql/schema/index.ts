@@ -36,6 +36,13 @@ const cogSecTypeDefs = fs.readFileSync(cogSecSchemaPath, 'utf8');
 const dedupSchemaPath = path.join(__dirname, '../schemas/deduplication.graphql');
 const dedupTypeDefs = fs.readFileSync(dedupSchemaPath, 'utf8');
 
+// Autonomous Agents research feed schema
+const autonomousAgentsSchemaPath = path.join(
+  __dirname,
+  './autonomous-agents.graphql',
+);
+const autonomousAgentsTypeDefs = fs.readFileSync(autonomousAgentsSchemaPath, 'utf8');
+
 const base = gql`
   scalar JSON
   scalar DateTime
@@ -73,6 +80,7 @@ export const typeDefs = [
   collabTypeDefs,
   cogSecTypeDefs,
   dedupTypeDefs,
+  autonomousAgentsTypeDefs,
 ];
 
 export default typeDefs;

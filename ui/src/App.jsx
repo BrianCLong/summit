@@ -8,6 +8,7 @@ import PoliciesLOA from './components/PoliciesLOA.jsx';
 import Observability from './components/Observability.jsx';
 import CIChaos from './components/CIChaos.jsx';
 import DocsRunbooks from './components/DocsRunbooks.jsx';
+import AutonomousAgents from './components/AutonomousAgents.jsx';
 import './App.css';
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
     { id: 'observability', name: 'Observability', icon: '👁️' },
     { id: 'ci-chaos', name: 'CI & Chaos', icon: '⚡' },
     { id: 'docs', name: 'Docs & Runbooks', icon: '📚' },
+    { id: 'research', name: 'Research • Autonomous Agents', icon: '🧠' },
   ];
 
   const renderTabContent = () => {
@@ -36,6 +38,7 @@ const App = () => {
       case 'observability': return <Observability />;
       case 'ci-chaos': return <CIChaos />;
       case 'docs': return <DocsRunbooks />;
+      case 'research': return <AutonomousAgents />;
       default: return <Dashboard />;
     }
   };
