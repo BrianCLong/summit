@@ -1,0 +1,7 @@
+environments:
+  prod:
+    mode: strict
+    enforce: true
+    bundles:
+      - governance
+      - access_control
