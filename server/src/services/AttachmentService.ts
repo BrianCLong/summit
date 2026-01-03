@@ -1,4 +1,5 @@
 import { createWriteStream, promises as fs } from 'fs';
+import { resolveSafePath } from '@intelgraph/security-utils';
 import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
 import * as path from 'path';
@@ -118,7 +119,7 @@ export class AttachmentService {
       writeStream,
     );
     const sha256 = hash.digest('hex');
-    const finalPath = path.join(this.baseDir, sha256);
+    const finalPath = resolveSafePath(this.baseDir, sha256);
     await fs.rename(tempPath, finalPath);
     const stats = await fs.stat(finalPath);
     const provenance: ProvenanceRecord = {
