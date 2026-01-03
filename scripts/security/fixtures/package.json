@@ -1,0 +1,7 @@
+{
+  "name": "fixture-package",
+  "scripts": {
+    "security:test": "echo 'test'",
+    "build": "echo 'build'"
+  }
+}

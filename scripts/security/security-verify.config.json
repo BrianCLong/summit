@@ -1,0 +1,9 @@
+{
+  "commands": [
+    "security:check",
+    "check:governance",
+    "verify:governance",
+    "verify:compliance",
+    "check:debt"
+  ]
+}

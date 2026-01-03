@@ -1,0 +1,202 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Helper to find repo root
+const findRepoRoot = (dir) => {
+  if (fs.existsSync(path.join(dir, 'package.json'))) return dir;
+  const parent = path.dirname(dir);
+  if (parent === dir) throw new Error('Could not find repo root');
+  return findRepoRoot(parent);
+};
+
+const REPO_ROOT = findRepoRoot(__dirname);
+const REPORT_PATH = path.join(REPO_ROOT, 'docs/security/SECURITY_EXECUTION_REPORT.md');
+
+// Configuration
+const ARTIFACT_PATTERNS = [
+  'SECURITY.md',
+  'docs/compliance',
+  'docs/risk',
+  'docs/ops',
+  'policy',
+  'docs/policy',
+  'scripts/security',
+  'scripts/verification',
+  'invariants'
+];
+
+// Helper to get args
+const getArg = (name) => {
+  const arg = process.argv.find(a => a.startsWith(`--${name}=`));
+  return arg ? arg.split('=')[1] : null;
+};
+
+const MODE = getArg('mode') || 'live'; // 'live' or 'offline'
+const FIXTURES_DIR = getArg('fixturesDir') ? path.resolve(process.cwd(), getArg('fixturesDir')) : null;
+
+// File system abstraction for modes
+const listFiles = (dir) => {
+  if (MODE === 'offline' && FIXTURES_DIR) {
+    // In offline mode, simulate file existence based on fixtures or a static list
+    // specific to the test case. For simplicity in this bridge script,
+    // we might rely on a passed-in inventory or just verify the logic flow.
+    // However, to satisfy the requirement of "offline fixtures", we should
+    // allow mapping the search path to a fixture path.
+
+    // For this specific script, if in offline mode, we will try to read
+    // a 'filesystem-inventory.json' from the fixtures dir if it exists,
+    // otherwise fallback to empty.
+    const inventoryPath = path.join(FIXTURES_DIR, 'scripts-inventory.json');
+    if (fs.existsSync(inventoryPath)) {
+        const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
+        // Flatten inventory for regex matching if needed, or just return relevant mock paths
+        // This is a simplification.
+        return inventory.files || [];
+    }
+    return [];
+  }
+
+  // Live mode: recursive walk
+  let results = [];
+  if (!fs.existsSync(dir)) return results;
+
+  const list = fs.readdirSync(dir);
+  list.forEach(file => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(listFiles(filePath));
+    } else {
+      results.push(filePath);
+    }
+  });
+  return results;
+};
+
+// Filter files based on patterns
+const filterArtifacts = (files) => {
+  return files.filter(file => {
+    const relPath = path.relative(REPO_ROOT, file);
+    return ARTIFACT_PATTERNS.some(pattern => relPath.startsWith(pattern) || relPath === pattern);
+  });
+};
+
+// Extract scripts from package.json
+const getScripts = () => {
+    if (MODE === 'offline' && FIXTURES_DIR) {
+        const pkgPath = path.join(FIXTURES_DIR, 'package.json');
+         if (fs.existsSync(pkgPath)) {
+             return JSON.parse(fs.readFileSync(pkgPath, 'utf8')).scripts || {};
+         }
+         return {};
+    }
+    const pkgPath = path.join(REPO_ROOT, 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    return pkg.scripts || {};
+};
+
+
+const generateReport = () => {
+  console.log(`Generating report in ${MODE} mode...`);
+
+  let artifacts = [];
+  if (MODE === 'live') {
+      ARTIFACT_PATTERNS.forEach(pattern => {
+          const fullPath = path.join(REPO_ROOT, pattern);
+          if (fs.existsSync(fullPath)) {
+              if (fs.statSync(fullPath).isDirectory()) {
+                 artifacts = artifacts.concat(listFiles(fullPath));
+              } else {
+                 artifacts.push(fullPath);
+              }
+          }
+      });
+  } else {
+      // Offline mode logic
+      artifacts = listFiles(REPO_ROOT).filter(f => {
+          const rel = path.relative(REPO_ROOT, f); // This logic depends on listFiles returning full paths
+          // In offline mock, listFiles returns relative paths or mock paths.
+          // Let's assume listFiles returns paths that we can filter.
+           return ARTIFACT_PATTERNS.some(pattern => f.includes(pattern));
+      });
+  }
+
+  // Normalize paths relative to repo root and sort
+  const normalizedArtifacts = artifacts
+    .map(f => path.relative(REPO_ROOT, f))
+    .sort();
+
+  const scripts = getScripts();
+  const securityScripts = Object.keys(scripts)
+    .filter(name =>
+      name.includes('security') ||
+      name.includes('verify') ||
+      name.includes('audit') ||
+      name.includes('check') ||
+      name.includes('compliance') ||
+      name.includes('governance') ||
+      name.includes('sbom') ||
+      name.includes('provenance')
+    )
+    .sort();
+
+  let content = `# Security Execution Report
+
+*Generated by scripts/security/security-exec-bridge.ts*
+*Date: ${MODE === 'offline' ? 'YYYY-MM-DD' : new Date().toISOString().split('T')[0]}*
+
+## Executive Summary
+
+- **Total Security Artifacts Found**: ${normalizedArtifacts.length}
+- **Total Verification Commands Found**: ${securityScripts.length}
+
+## Discovered Security Artifacts
+
+The following files were identified as security controls, policies, or compliance documentation:
+
+`;
+
+  normalizedArtifacts.forEach(file => {
+    content += `- [ ] \`${file}\`\n`;
+  });
+
+  content += `\n## Discovered Verification Commands\n\nThe following scripts in \`package.json\` appear to be related to security or verification:\n\n`;
+
+  securityScripts.forEach(script => {
+    content += `- **${script}**: \`${scripts[script]}\`\n`;
+  });
+
+  content += `\n## Missing Coverage Analysis\n\n`;
+  content += `*This section identifies artifacts that do not appear to have a direct dedicated verification command pattern match.*\n\n`;
+
+  // Simple heuristic: check if artifact name appears in any script command
+  const likelyUnverified = normalizedArtifacts.filter(artifact => {
+    const baseName = path.basename(artifact, path.extname(artifact)).toLowerCase();
+    return !securityScripts.some(s => s.includes(baseName) || scripts[s].includes(baseName));
+  });
+
+  if (likelyUnverified.length === 0) {
+      content += `All artifacts appear to have potential coverage.\n`;
+  } else {
+      likelyUnverified.forEach(a => {
+           content += `- [?] \`${a}\`\n`;
+      });
+  }
+
+  if (MODE === 'live') {
+      fs.writeFileSync(REPORT_PATH, content);
+      console.log(`Report written to ${REPORT_PATH}`);
+  } else {
+      console.log('Offline mode: Output would be written to report file.');
+      // For testing, we might want to return the content or write to a temp location
+      if (getArg('output')) {
+          fs.writeFileSync(getArg('output'), content);
+      }
+  }
+};
+
+generateReport();

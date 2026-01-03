@@ -86,6 +86,9 @@
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "security:exec-bridge": "npx tsx scripts/security/security-exec-bridge.ts --mode=live",
+    "security:exec-bridge:offline": "npx tsx scripts/security/security-exec-bridge.ts --mode=offline --fixturesDir=scripts/security/fixtures",
+    "security:verify-posture": "npx tsx scripts/security/verify-security-posture.ts",
     "prepare": "husky"
   },
   "keywords": [
