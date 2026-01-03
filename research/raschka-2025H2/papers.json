@@ -1,0 +1,23 @@
+{
+  "access_status": "paywalled-no-content",
+  "source": "https://magazine.sebastianraschka.com/p/llm-research-papers-2025-part2",
+  "retrieved_at": "2026-01-03T00:00:00Z",
+  "notes": [
+    "Full paper list inaccessible without subscriber or pasted content.",
+    "Preserving taxonomy scaffold for downstream ingestion once content is available.",
+    "Downstream backlog, ADRs, and PR plans are deferred pending data ingestion."
+  ],
+  "categories": [
+    { "id": "1a", "name": "Training Reasoning Models", "papers": [] },
+    { "id": "1b", "name": "Inference-Time Reasoning Strategies", "papers": [] },
+    { "id": "1c", "name": "Evaluating LLMs and/or Understanding Reasoning", "papers": [] },
+    { "id": "2", "name": "Other Reinforcement Learning Methods for LLMs", "papers": [] },
+    { "id": "3", "name": "Other Inference-Time Scaling Methods", "papers": [] },
+    { "id": "4", "name": "Model Releases / Technical Reports", "papers": [] },
+    { "id": "5", "name": "Architectures", "papers": [] },
+    { "id": "6", "name": "Efficient Training", "papers": [] },
+    { "id": "7", "name": "Diffusion-Based Language Models", "papers": [] },
+    { "id": "8", "name": "Multimodal & Vision-Language Models", "papers": [] },
+    { "id": "9", "name": "Data & Pre-training Datasets", "papers": [] }
+  ]
+}
