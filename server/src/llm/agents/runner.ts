@@ -1,8 +1,15 @@
 
-import { LlmOrchestrator, ChatCompletionRequest, ChatCompletionResult, ChatMessage, ToolCallInvocation } from '../types.js';
+import {
+  LlmOrchestrator,
+  ChatCompletionRequest,
+  ChatCompletionResult,
+  ChatMessage,
+  ToolCallInvocation,
+} from '../types.js';
 import { ToolRegistry } from '../tools/registry.js';
 import { logger, correlationStorage } from '../../config/logger.js';
 import { metrics } from '../../lib/observability/metrics.js';
+import { IntrinsicMemoryEngine } from './intrinsicMemoryEngine.js';
 
 export interface AgentPlanStep {
   type: "llm_call" | "tool_call" | "decision";
@@ -17,18 +24,29 @@ export interface AgentResult {
 }
 
 export class AgentRunner {
+  private memoryEngine?: IntrinsicMemoryEngine;
+
   constructor(
-      private orchestrator: LlmOrchestrator,
-      private tools: ToolRegistry
+    private orchestrator: LlmOrchestrator,
+    private tools: ToolRegistry,
   ) {}
 
   async run(
-      tenantId: string,
-      task: string,
-      maxSteps: number = 5
+    tenantId: string,
+    task: string,
+    maxSteps: number = 5,
+    agentId = 'default-agent',
+    agentRole = 'generalist',
   ): Promise<AgentResult> {
     const startTime = Date.now();
     const correlationId = correlationStorage.getStore()?.get('correlationId') || 'unknown';
+
+    const intrinsicMemoryEnabled = process.env.INTRINSIC_MEMORY_ENABLED === '1';
+    const tokenBudget = Number(process.env.INTRINSIC_MEMORY_TOKEN_BUDGET ?? '3200');
+    const dynamicTemplate = process.env.INTRINSIC_MEMORY_TEMPLATE === 'dynamic';
+    if (intrinsicMemoryEnabled && !this.memoryEngine) {
+      this.memoryEngine = new IntrinsicMemoryEngine();
+    }
 
     logger.info({
         event: 'AgentExecutionStarted',
@@ -55,14 +73,29 @@ export class AgentRunner {
     const availableTools = this.tools.getDefinitions();
 
     try {
+      let shouldStop = false;
       for (let i = 0; i < maxSteps; i++) {
         // 1. LLM Call
         const stepStartTime = Date.now();
+        const conversationHistory = intrinsicMemoryEnabled && this.memoryEngine
+          ? ([{ role: 'user', content: task }, ...messages] as ChatMessage[])
+          : messages;
+        const contextualMessages =
+          intrinsicMemoryEnabled && this.memoryEngine
+            ? this.memoryEngine.constructContext({
+                task,
+                agentId,
+                conversationHistory,
+                agentMemory: this.memoryEngine.getMemory(agentId),
+                tokenBudget,
+              })
+            : messages;
+
         const response = await this.orchestrator.chat({
             tenantId,
             purpose: 'agent',
             riskLevel: 'medium',
-            messages,
+            messages: contextualMessages,
             tools: availableTools
         });
 
@@ -130,7 +163,25 @@ export class AgentRunner {
         } else {
             // No tool calls, we are done
             finalAnswer = response.content || '';
-            break;
+            shouldStop = true;
+        }
+
+        if (intrinsicMemoryEnabled && this.memoryEngine) {
+          const agentOutput = response.content ?? (response.toolCalls ? JSON.stringify(response.toolCalls) : '');
+          await this.memoryEngine.updateAgentMemory({
+            agentId,
+            agentRole,
+            tenantId,
+            orchestrator: this.orchestrator,
+            previousMemory: this.memoryEngine.getMemory(agentId),
+            agentOutput,
+            enableDynamicTemplate: dynamicTemplate,
+            task,
+          });
+        }
+
+        if (shouldStop) {
+          break;
         }
     }
 
