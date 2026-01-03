@@ -1,7 +1,10 @@
 import path from 'path';
 
+import { AgentActionGateway, AgentActionRequest, GatewayResult, KillSwitch } from './agentActionGateway';
+import { AuditLogger } from './audit';
 import { ContentBoundary } from './contentBoundary';
 import { EvidenceStore, RunSummary } from './evidence';
+import { PrincipalChain } from './identity';
 import { BasicPolicyEngine, PolicyConfig, PolicyDecision, PolicyEngine } from './policy';
 import { ToolDefinition } from './tools';
 import { WorkflowSpec } from './workflowSpec';
@@ -14,6 +17,12 @@ export interface ToolBusOptions {
   dryRun: boolean;
   labMode: boolean;
   timeoutMs?: number;
+  principal: PrincipalChain;
+  correlationId: string;
+  environment?: string;
+  attributionMode?: 'lenient' | 'strict';
+  requireHuman?: boolean;
+  killSwitch?: KillSwitch;
 }
 
 export class ToolBus {
@@ -21,8 +30,21 @@ export class ToolBus {
 
   private readonly policy: PolicyEngine;
 
+  private readonly gateway: AgentActionGateway;
+
   constructor(private readonly options: ToolBusOptions) {
     this.policy = options.policyEngine ?? new BasicPolicyEngine(options.policyConfig);
+    const audit = new AuditLogger(path.join(options.baseArtifactsDir, 'runs', options.correlationId), options.boundary);
+    this.gateway = new AgentActionGateway({
+      policyEngine: this.policy,
+      boundary: options.boundary,
+      auditLogger: audit,
+      killSwitch: options.killSwitch ?? KillSwitch.fromEnv(),
+      attributionMode: options.attributionMode,
+      requireHuman: options.requireHuman,
+      maxOutputLength: options.policyConfig.dataEgress?.maxOutputLength,
+      labMode: options.labMode,
+    });
   }
 
   register(tool: ToolDefinition) {
@@ -38,34 +60,39 @@ export class ToolBus {
     inputs: Record<string, unknown>,
     evidence: EvidenceStore,
     stepName: string,
-  ): Promise<{ decision: PolicyDecision; artifactId?: string; status: 'allowed' | 'denied' | 'error'; message: string }> {
+  ): Promise<{ decision: PolicyDecision; artifactId?: string; status: GatewayResult['status']; message: string }> {
     const tool = this.registry[toolName];
     if (!tool) {
       return { decision: { allowed: false, reason: 'Unknown tool', policyVersion: '1.0.0' }, status: 'denied', message: 'Tool not registered' };
     }
 
     const target = typeof inputs.url === 'string' ? inputs.url : typeof inputs.domain === 'string' ? inputs.domain : undefined;
-    const decision = this.policy.evaluate({ tool: toolName, target, labMode: this.options.labMode });
-    if (!decision.allowed) {
-      const artifact = evidence.record(stepName, tool.name, tool.version, inputs, { denied: true }, decision, decision.reason);
-      return { decision, artifactId: artifact.id, status: 'denied', message: decision.reason };
-    }
+    const action: AgentActionRequest = {
+      tool: tool.name,
+      action: stepName,
+      inputs,
+      target,
+      principal: this.options.principal,
+      correlationId: this.options.correlationId,
+      environment: this.options.environment,
+    };
 
-    try {
-      const result = await tool.execute(inputs, {
-        labMode: this.options.labMode,
-        dryRun: this.options.dryRun,
-        boundary: this.options.boundary,
-        evidenceRoot: evidence.runPath,
-        policyDecision: decision,
-        timeoutMs: this.options.timeoutMs ?? this.options.policyConfig.defaultTimeoutMs ?? 5000,
-      });
-      const artifact = evidence.record(stepName, tool.name, tool.version, inputs, result.output, decision, result.notes);
-      return { decision, artifactId: artifact.id, status: 'allowed', message: 'Completed' };
-    } catch (err: any) {
-      const artifact = evidence.record(stepName, tool.name, tool.version, inputs, { error: err?.message ?? String(err) }, decision);
-      return { decision, artifactId: artifact.id, status: 'error', message: err?.message ?? String(err) };
-    }
+    const result = await this.gateway.guardAndExecute(
+      action,
+      (decision) => {
+        return tool.execute(inputs, {
+          labMode: this.options.labMode,
+          dryRun: this.options.dryRun,
+          boundary: this.options.boundary,
+          evidenceRoot: evidence.runPath,
+          policyDecision: decision,
+          timeoutMs: this.options.timeoutMs ?? this.options.policyConfig.defaultTimeoutMs ?? 5000,
+        });
+      },
+      evidence,
+    );
+
+    return { decision: result.decision, artifactId: result.artifactId, status: result.status, message: result.message };
   }
 }
 
@@ -147,11 +174,14 @@ export const createDefaultBus = (
   labMode: boolean,
 ) => {
   const policyConfig: PolicyConfig = {
-    allowedTools: tools.map((t) => t.name),
+    allowedTools: workflow.policy?.allowedTools ?? tools.map((t) => t.name),
     targetAllowlist: workflow.policy?.targetAllowlist ?? ['example.com', 'example.org', 'localhost'],
     commandAllowlist: workflow.policy?.commandAllowlist,
     defaultTimeoutMs: workflow.policy?.defaultTimeoutMs ?? 5000,
     rateLimit: { maxCalls: 50, intervalMs: 60000 },
+    dataEgress: { maxOutputLength: 2000, redactSecrets: true },
+    deniedTools: workflow.policy?.denylist,
+    environmentRestrictions: workflow.policy?.environmentRestrictions,
   };
   const bus = new ToolBus({
     baseArtifactsDir: artifactsDir,
@@ -159,6 +189,15 @@ export const createDefaultBus = (
     policyConfig,
     dryRun,
     labMode,
+    principal: {
+      agent: { id: workflow.name, displayName: 'agent-lab', source: 'workflow' },
+      runtime: { id: runId, sessionId: runId, hostname: process.env.HOSTNAME },
+      request: { correlationId: runId, workflowRunId: runId },
+    },
+    correlationId: runId,
+    environment: process.env.AGENT_LAB_ENV ?? 'dev',
+    attributionMode: workflow.policy?.attributionMode ?? 'strict',
+    requireHuman: workflow.policy?.requireHuman === true,
   });
   tools.forEach((tool) => bus.register(tool));
   const evidence = new EvidenceStore(path.join(artifactsDir, 'runs'), boundary, runId);

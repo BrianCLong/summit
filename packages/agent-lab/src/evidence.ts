@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { BoundedContent, ContentBoundary } from './contentBoundary';
+import { PrincipalChain } from './identity';
 import { JudgeScores } from './judge';
 import { PolicyDecision } from './policy';
 
@@ -22,6 +23,12 @@ export interface EvidenceArtifact {
   redaction: string[];
   notes?: string;
   allowed: boolean;
+  principal?: PrincipalChain;
+  correlationId?: string;
+  target?: string;
+  status?: string;
+  latencyMs?: number;
+  failureClass?: string;
 }
 
 export interface RunSummary {
@@ -32,7 +39,7 @@ export interface RunSummary {
   steps: Array<{
     name: string;
     tool: string;
-    status: 'allowed' | 'denied' | 'error';
+    status: 'allowed' | 'denied' | 'error' | 'kill-switch';
     message: string;
     evidenceId?: string;
   }>;
@@ -91,6 +98,14 @@ export class EvidenceStore {
     output: unknown,
     policy: PolicyDecision,
     notes?: string,
+    principal?: PrincipalChain,
+    metadata: {
+      correlationId?: string;
+      target?: string;
+      status?: string;
+      latencyMs?: number;
+      failureClass?: string;
+    } = {},
   ): EvidenceArtifact {
     const id = this.nextId();
     const bounded = this.boundary.markUntrusted(output);
@@ -113,6 +128,12 @@ export class EvidenceStore {
       redaction: bounded.redactions,
       notes,
       allowed: policy.allowed,
+      principal,
+      correlationId: metadata.correlationId,
+      target: metadata.target,
+      status: metadata.status,
+      latencyMs: metadata.latencyMs,
+      failureClass: metadata.failureClass,
     };
 
     const ledgerPath = path.join(this.runPath, 'evidence', 'evidence.ndjson');

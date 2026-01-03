@@ -23,6 +23,10 @@ export const WorkflowSpecSchema = z.object({
       targetAllowlist: z.array(z.string()).optional(),
       commandAllowlist: z.array(z.string()).optional(),
       defaultTimeoutMs: z.number().optional(),
+      denylist: z.array(z.string()).optional(),
+      environmentRestrictions: z.record(z.string(), z.array(z.string())).optional(),
+      attributionMode: z.enum(['lenient', 'strict']).optional(),
+      requireHuman: z.boolean().optional(),
     })
     .optional(),
   steps: z.array(WorkflowStepSchema).nonempty(),

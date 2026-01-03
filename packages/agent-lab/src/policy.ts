@@ -4,10 +4,12 @@ export interface PolicyDecision {
   allowed: boolean;
   reason: string;
   policyVersion: string;
+  enforced?: string[];
 }
 
 export interface PolicyConfig {
   allowedTools?: string[];
+  deniedTools?: string[];
   targetAllowlist?: string[];
   commandAllowlist?: string[];
   defaultTimeoutMs?: number;
@@ -19,6 +21,7 @@ export interface PolicyConfig {
     maxOutputLength: number;
     redactSecrets: boolean;
   };
+  environmentRestrictions?: Record<string, string[]>;
 }
 
 export interface PolicyEvaluationContext {
@@ -26,6 +29,7 @@ export interface PolicyEvaluationContext {
   target?: string;
   command?: string;
   labMode?: boolean;
+  environment?: string;
 }
 
 export interface PolicyEngine {
@@ -65,11 +69,21 @@ export class BasicPolicyEngine implements PolicyEngine {
   }
 
   evaluate(context: PolicyEvaluationContext): PolicyDecision {
+    if (this.config.deniedTools && this.config.deniedTools.includes(context.tool)) {
+      return {
+        allowed: false,
+        reason: `Tool ${context.tool} is explicitly denied`,
+        policyVersion: DEFAULT_POLICY_VERSION,
+        enforced: ['denylist'],
+      };
+    }
+
     if (!this.enforceRateLimit()) {
       return {
         allowed: false,
         reason: 'Rate limit exceeded',
         policyVersion: DEFAULT_POLICY_VERSION,
+        enforced: ['rate-limit'],
       };
     }
 
@@ -78,6 +92,7 @@ export class BasicPolicyEngine implements PolicyEngine {
         allowed: false,
         reason: `Tool ${context.tool} is not allowlisted`,
         policyVersion: DEFAULT_POLICY_VERSION,
+        enforced: ['tool-allowlist'],
       };
     }
 
@@ -87,6 +102,19 @@ export class BasicPolicyEngine implements PolicyEngine {
           allowed: false,
           reason: `Command ${context.command} is not allowlisted`,
           policyVersion: DEFAULT_POLICY_VERSION,
+          enforced: ['command-allowlist'],
+        };
+      }
+    }
+
+    if (this.config.environmentRestrictions && context.environment) {
+      const restricted = this.config.environmentRestrictions[context.environment] ?? [];
+      if (restricted.includes(context.tool)) {
+        return {
+          allowed: false,
+          reason: `Tool ${context.tool} is restricted in environment ${context.environment}`,
+          policyVersion: DEFAULT_POLICY_VERSION,
+          enforced: ['environment-restriction'],
         };
       }
     }
@@ -105,6 +133,7 @@ export class BasicPolicyEngine implements PolicyEngine {
           allowed: false,
           reason: `Target ${targetHost} is not allowlisted`,
           policyVersion: DEFAULT_POLICY_VERSION,
+          enforced: ['target-allowlist'],
         };
       }
     }
@@ -115,6 +144,7 @@ export class BasicPolicyEngine implements PolicyEngine {
       allowed: true,
       reason,
       policyVersion: DEFAULT_POLICY_VERSION,
+      enforced: ['allowlist', 'rate-limit'],
     };
   }
 }

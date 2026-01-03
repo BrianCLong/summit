@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import { tmpdir } from 'os';
-import { ContentBoundary } from '../src/contentBoundary';
-import { EvidenceStore } from '../src/evidence';
-import { judgeRun } from '../src/judge';
-import { BasicPolicyEngine } from '../src/policy';
-import { runWorkflow, createDefaultBus } from '../src/toolBus';
-import { builtInTools } from '../src/tools';
-import { validateWorkflowSpec } from '../src/workflowSpec';
+const fs = require('fs');
+const path = require('path');
+const { tmpdir } = require('os');
+const { ContentBoundary } = require('../src/contentBoundary');
+const { EvidenceStore } = require('../src/evidence');
+const { judgeRun } = require('../src/judge');
+const { BasicPolicyEngine } = require('../src/policy');
+const { runWorkflow, createDefaultBus } = require('../src/toolBus');
+const { builtInTools } = require('../src/tools');
+const { validateWorkflowSpec } = require('../src/workflowSpec');
 describe('Policy Engine', () => {
     it('denies when tool not allowlisted', () => {
         const engine = new BasicPolicyEngine({ allowedTools: ['dns_lookup'] });
