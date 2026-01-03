@@ -20,7 +20,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  FormHelperText,
   Box,
   Typography,
   Chip,
@@ -351,12 +350,12 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
 
         <Grid container spacing={2}>
           {/* Basic Info */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Basic Information
             </Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth
               label="Display Name"
@@ -367,7 +366,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               required
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth
               label="Policy Name (ID)"
@@ -379,7 +378,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               required
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <TextField
               fullWidth
               multiline
@@ -391,17 +390,18 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
           </Grid>
 
           {/* Classification */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Divider sx={{ my: 1 }} />
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Classification
             </Typography>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
               <Select
                 value={formData.category}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={handleChange('category') as any}
                 label="Category"
               >
@@ -413,11 +413,12 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <FormControl fullWidth>
               <InputLabel>Action</InputLabel>
               <Select
                 value={formData.action}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={handleChange('action') as any}
                 label="Action"
               >
@@ -429,7 +430,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <TextField
               fullWidth
               type="number"
@@ -442,13 +443,13 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
           </Grid>
 
           {/* Scope */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Divider sx={{ my: 1 }} />
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Scope
             </Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Autocomplete
               multiple
               options={STAGES}
@@ -474,7 +475,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               )}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Autocomplete
               multiple
               freeSolo
@@ -503,7 +504,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
           </Grid>
 
           {/* Effective Period */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth
               type="datetime-local"
@@ -513,7 +514,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth
               type="datetime-local"
@@ -525,7 +526,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
           </Grid>
 
           {/* Rules */}
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="text.secondary">
@@ -540,7 +541,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
               </Button>
             </Box>
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             {formData.rules.length === 0 ? (
               <Alert severity="info" sx={{ mb: 1 }}>
                 No rules defined. Policy will match all requests in scope.
@@ -574,7 +575,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} md={4}>
+                      <Grid size={{ xs: 12, md: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -586,7 +587,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                           placeholder="payload.field.path"
                         />
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid size={{ xs: 12, md: 4 }}>
                         <FormControl fullWidth size="small">
                           <InputLabel>Operator</InputLabel>
                           <Select
@@ -602,7 +603,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
                           </Select>
                         </FormControl>
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid size={{ xs: 12, md: 4 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -625,7 +626,7 @@ const PolicyEditor: React.FC<PolicyEditorProps> = ({
 
           {/* Changelog (for edits) */}
           {isEditing && (
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Divider sx={{ my: 1 }} />
               <TextField
                 fullWidth

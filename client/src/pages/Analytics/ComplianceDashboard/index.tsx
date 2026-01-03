@@ -121,7 +121,7 @@ const FrameworkCard: React.FC<{
   percentage: number;
   total: number;
   compliant: number;
-}> = ({ framework, displayName, percentage, total, compliant }) => {
+}> = ({ framework: _framework, displayName, percentage, total, compliant }) => {
   const getColor = () => {
     if (percentage >= 80) return 'success';
     if (percentage >= 60) return 'warning';
@@ -202,7 +202,7 @@ const ComplianceDashboard: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* Audit Readiness Score */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3, textAlign: 'center', height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Audit Readiness
@@ -231,13 +231,13 @@ const ComplianceDashboard: React.FC = () => {
         </Grid>
 
         {/* Control Status Summary */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Control Status
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <Card sx={{ bgcolor: 'success.light', color: 'success.contrastText' }}>
                   <CardContent sx={{ textAlign: 'center', py: 1 }}>
                     <Typography variant="h4">
@@ -247,7 +247,7 @@ const ComplianceDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <Card sx={{ bgcolor: 'warning.light', color: 'warning.contrastText' }}>
                   <CardContent sx={{ textAlign: 'center', py: 1 }}>
                     <Typography variant="h4">
@@ -257,7 +257,7 @@ const ComplianceDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <Card sx={{ bgcolor: 'error.light', color: 'error.contrastText' }}>
                   <CardContent sx={{ textAlign: 'center', py: 1 }}>
                     <Typography variant="h4">
@@ -267,7 +267,7 @@ const ComplianceDashboard: React.FC = () => {
                   </CardContent>
                 </Card>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6, sm: 3 }}>
                 <Card sx={{ bgcolor: 'grey.300' }}>
                   <CardContent sx={{ textAlign: 'center', py: 1 }}>
                     <Typography variant="h4">
@@ -302,7 +302,7 @@ const ComplianceDashboard: React.FC = () => {
         </Grid>
 
         {/* Framework Status */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Framework Compliance
@@ -310,7 +310,7 @@ const ComplianceDashboard: React.FC = () => {
             <Grid container spacing={2}>
               {frameworks.data && frameworks.data.length > 0 ? (
                 frameworks.data.map((fw) => (
-                  <Grid item xs={12} sm={6} md={3} key={fw.framework}>
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={fw.framework}>
                     <FrameworkCard
                       framework={fw.framework}
                       displayName={fw.displayName}
@@ -321,7 +321,7 @@ const ComplianceDashboard: React.FC = () => {
                   </Grid>
                 ))
               ) : (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <Typography color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
                     No framework data available. Configure compliance frameworks to see status.
                   </Typography>
@@ -332,35 +332,35 @@ const ComplianceDashboard: React.FC = () => {
         </Grid>
 
         {/* Evidence Status */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Evidence Status
             </Typography>
             {summary.data?.evidenceStatus ? (
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'success.light', borderRadius: 2 }}>
                     <InventoryIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.current}</Typography>
                     <Typography variant="body2">Current</Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.light', borderRadius: 2 }}>
                     <TimelineIcon sx={{ fontSize: 40, color: 'warning.main', mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.expiring}</Typography>
                     <Typography variant="body2">Expiring Soon</Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'error.light', borderRadius: 2 }}>
                     <ErrorIcon sx={{ fontSize: 40, color: 'error.main', mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.expired}</Typography>
                     <Typography variant="body2">Expired</Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'grey.200', borderRadius: 2 }}>
                     <AssignmentIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
                     <Typography variant="h4">{summary.data.evidenceStatus.total}</Typography>
@@ -377,7 +377,7 @@ const ComplianceDashboard: React.FC = () => {
         </Grid>
 
         {/* Recommendations */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Recommendations
@@ -402,7 +402,7 @@ const ComplianceDashboard: React.FC = () => {
         </Grid>
 
         {/* Control Details Table */}
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Control Details

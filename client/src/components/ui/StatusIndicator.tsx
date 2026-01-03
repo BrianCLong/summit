@@ -1,15 +1,13 @@
 // client/src/components/ui/StatusIndicator.tsx
 import React from 'react';
-import { Chip, Tooltip, Box } from '@mui/material';
-import { 
-  Circle, 
-  Square, 
-  Diamond, 
-  Hexagon, 
-  Triangle,
+import { Chip, Tooltip } from '@mui/material';
+import {
+  Circle,
+  Diamond,
+  Hexagon,
+  ChangeHistory,
   FiberManualRecord,
   RadioButtonUnchecked,
-  CropSquare
 } from '@mui/icons-material';
 
 interface StatusIndicatorProps {
@@ -20,20 +18,20 @@ interface StatusIndicatorProps {
   sx?: object;
 }
 
-const StatusIndicator: React.FC<StatusIndicatorProps> = ({ 
-  status, 
-  size = 'medium', 
-  label, 
-  description, 
-  sx = {}
+const sizeMap = {
+  small: { fontSize: '1rem', chipSize: 'small' as const },
+  medium: { fontSize: '1.2rem', chipSize: 'medium' as const },
+  large: { fontSize: '1.5rem', chipSize: 'medium' as const }, // MUI Chip only supports small/medium
+};
+
+const StatusIndicator: React.FC<StatusIndicatorProps> = ({
+  status,
+  size = 'medium',
+  label,
+  description,
+  sx = {},
 }) => {
   const getStatusConfig = () => {
-    const sizeMap = {
-      small: { fontSize: '1rem', chipSize: 'small' },
-      medium: { fontSize: '1.2rem', chipSize: 'medium' },
-      large: { fontSize: '1.5rem', chipSize: 'large' }
-    };
-
     const config = sizeMap[size];
 
     switch (status) {
@@ -66,7 +64,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         };
       case 'testing':
         return {
-          icon: <Triangle sx={{ fontSize: config.fontSize, color: '#2196f3' }} />,
+          icon: <ChangeHistory sx={{ fontSize: config.fontSize, color: '#2196f3' }} />,
           label: label || 'TEST',
           color: 'info',
           backgroundColor: '#e3f2fd',
@@ -94,7 +92,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
     }
   };
 
-  const { icon, label: statusLabel, color, backgroundColor, borderColor, description: statusDesc } = getStatusConfig();
+  const { icon, label: statusLabel, backgroundColor, borderColor, description: statusDesc } = getStatusConfig();
 
   return (
     <Tooltip title={statusDesc} arrow>

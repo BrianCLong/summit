@@ -260,7 +260,7 @@ export const EnhancedAIAssistant: React.FC<EnhancedAIAssistantProps> = ({
             setStreamBuf('');
             streamBufRef.current = '';
           }
-          setStatus('Online');
+          setStatus('idle');
           setIsTyping(false);
           break;
         }

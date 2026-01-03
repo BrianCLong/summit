@@ -29,9 +29,9 @@ export default function PerfFixtureRoute() {
   const [search, setSearch] = useState('');
   const [rowCount, setRowCount] = useState(10_000);
   const debouncedSearch = useDebouncedValue(search, 120);
-  const virtualListsEnabled = useFeatureFlag('ui.virtualLists');
-  const devFixtureEnabled = useFeatureFlag('ui.virtualLists.devFixture');
-  const virtualized = virtualListsEnabled || devFixtureEnabled;
+  const virtualListsFlag = useFeatureFlag('ui.virtualLists');
+  const devFixtureFlag = useFeatureFlag('ui.virtualLists.devFixture');
+  const virtualized = virtualListsFlag.enabled || devFixtureFlag.enabled;
   const { mark, overlayState } = usePerfMarkers('perf-fixture', virtualized);
 
   const rows = useMemo(() => buildRows(rowCount), [rowCount]);
