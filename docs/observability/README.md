@@ -109,3 +109,39 @@ This package deploys a production-grade OpenTelemetry-first stack with Prometheu
 - [ ] Grafana dashboards render agent KPIs, system health, audit rates, and profiling with live data.
 - [ ] Alerts remain green for healthy pipelines; smoke tests fire Alertmanager routes.
 - [ ] Audit trail logs respect retention class/PII masking and `audit_events_total` increments with activity.
+
+---
+
+## Deployment & Validation Addendum (PR #15382)
+
+This addendum documents where to deploy the observability artifacts introduced for PR #15382 and how to validate them deterministically.
+
+### Deployment Targets
+
+- **Prometheus rules**: Load the rule files listed in `docs/observability/INVENTORY.md` into the Prometheus servers that monitor IntelGraph (core, Maestro, Conductor, and canary clusters). For local dev, mount them via `- /workspace/monitoring:/etc/prometheus` in `docker-compose.monitoring.yml`.
+- **Grafana dashboards**: Import the JSON dashboards from `monitoring/` (see inventory) into the Grafana instance used by the environment (production, staging, or local). For local dev, Grafana auto-imports dashboards from `/var/lib/grafana/dashboards` via `docker-compose.monitoring.yml`.
+- **Alertmanager**: Ensure `monitoring/alertmanager.yml` or `monitoring/alertmanager/alertmanager.yml` is deployed alongside Prometheus so alerts are routed to the correct on-call destinations.
+
+### Local Validation (deterministic)
+
+From the repository root:
+
+```bash
+# Prometheus rules (uses local promtool or pinned prom/prometheus:v2.54.1 container)
+./scripts/verification/verify_prometheus_rules.sh
+
+# Grafana dashboards (structure and query field validation)
+pnpm tsx scripts/verification/verify_grafana_dashboards.ts
+```
+
+Both scripts fail fast and report the exact file/path that needs attention.
+
+### CI Validation
+
+A dedicated CI step (**Validate Observability Artifacts** in `.github/workflows/ci.yml`) runs both validators on every PR and push to `main`. The job reuses the existing Node toolchain, invokes the Prometheus rule checker, and validates Grafana dashboards with `pnpm tsx` for deterministic results.
+
+### Rollback Plan
+
+- **Prometheus**: If a new rule causes noisy or broken alerting, remove the affected rule file from the Prometheus configuration and reload Prometheus (`/-/reload` or pod restart). Redeploy the last known good ruleset from version control.
+- **Grafana**: If a dashboard import fails or panels break, revert to the previous JSON definition (stored in git history) and re-import. Grafana keeps version history per dashboard; restore the prior version if available.
+- **CI**: If CI fails due to validator changes, revert the scripts in `scripts/verification/` and the CI step in `.github/workflows/ci.yml` to the last passing commit and rerun the pipeline.
