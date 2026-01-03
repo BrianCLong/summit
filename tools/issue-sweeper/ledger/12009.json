@@ -1,0 +1,28 @@
+{
+  "issue_number": 12009,
+  "title": "Build Supply Chain Intelligence System",
+  "url": "https://github.com/BrianCLong/summit/pull/12009",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-20T15:38:32Z",
+  "createdAt": "2025-11-20T14:53:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13029,
+        "url": "https://github.com/BrianCLong/summit/pull/13029",
+        "mergedAt": "2025-12-01T21:52:42Z",
+        "title": "🏗️ Recovery (partial): Build Supply Chain Intelligence System"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

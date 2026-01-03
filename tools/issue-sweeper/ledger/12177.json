@@ -1,0 +1,28 @@
+{
+  "issue_number": 12177,
+  "title": "Claude/implement entity resolution service 011 su5qc e9wu kub6 s wo4kid y",
+  "url": "https://github.com/BrianCLong/summit/pull/12177",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-21T09:29:47Z",
+  "createdAt": "2025-11-21T09:15:24Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13037,
+        "url": "https://github.com/BrianCLong/summit/pull/13037",
+        "mergedAt": "2025-12-01T21:49:51Z",
+        "title": "🏗️ Recovery (partial): Claude/implement entity resolution service 011 su5qc e9wu kub6 s wo4kid y"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

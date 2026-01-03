@@ -1,0 +1,59 @@
+{
+  "issue_number": 7339,
+  "title": "IG Oct25 | october2025/confidential_design_analyst_experience_2025_11_17_v_4.md | *Accept*: Activity log; semantic version (x.y.z) auto; diff viewer.",
+  "url": "https://github.com/BrianCLong/summit/issues/7339",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9382634695,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-kxw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type/chore",
+      "name": "type/chore",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9382634865,
+      "node_id": "LA_kwDOPaNncM8AAAACLz-lcQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/program/release-train",
+      "name": "program/release-train",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-02T15:10:55Z",
+  "createdAt": "2025-10-02T15:10:55Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 13365,
+        "url": "https://github.com/BrianCLong/summit/pull/13365",
+        "mergedAt": "2025-12-06T09:54:02Z",
+        "title": "build(deps): bump playwright and @playwright/test in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 1152,
+        "url": "https://github.com/BrianCLong/summit/pull/1152",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @playwright/test from 1.54.2 to 1.55.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
