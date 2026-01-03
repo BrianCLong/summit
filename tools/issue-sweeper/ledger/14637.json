@@ -1,0 +1,21 @@
+{
+  "issue_number": 14637,
+  "title": "Tailor infrastructure and ship v1.0.0-canary",
+  "url": "https://github.com/BrianCLong/summit/pull/14637",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-27T07:02:22Z",
+  "createdAt": "2025-12-27T06:35:48Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

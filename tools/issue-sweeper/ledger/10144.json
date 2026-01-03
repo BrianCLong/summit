@@ -1,0 +1,49 @@
+{
+  "issue_number": 10144,
+  "title": "[P1] Production Incident Workflow & Automated Runbooks",
+  "url": "https://github.com/BrianCLong/summit/issues/10144",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122098427,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gs-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-8",
+      "name": "sprint-8",
+      "color": "E17055",
+      "default": false,
+      "description": "Sprint 8: Production-Grade AI & Collaborative Intelligence"
+    },
+    {
+      "id": 9122099213,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gwDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-ai-analytics",
+      "name": "epic-ai-analytics",
+      "color": "A29BFE",
+      "default": false,
+      "description": "AI analytics and business intelligence"
+    },
+    {
+      "id": 9208896212,
+      "node_id": "LA_kwDOPaNncM8AAAACJOSa1A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area/web-automation",
+      "name": "area/web-automation",
+      "color": "E99695",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-10-06T14:30:20Z",
+  "createdAt": "2025-10-06T14:30:20Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
