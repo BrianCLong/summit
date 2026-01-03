@@ -44,13 +44,20 @@ This document outlines the security policy for the Summit (IntelGraph) platform.
 
 ## Security Controls
 
-Our CI/CD pipeline enforces a number of security controls on every pull request and release. These controls are defined in the `.github/workflows/ci-security.yml` workflow.
+Our CI/CD pipeline enforces a number of security controls on pull requests and release workflows.
+The primary gates run via `.github/workflows/pr-quality-gate.yml` (which invokes
+`.github/workflows/ci-security.yml`) and `.github/workflows/ci-verify.yml`.
 
-- **Secret Scanning**: We use `gitleaks` to scan for hardcoded secrets in the codebase. This is configured to run on every pull request and fail the build if any secrets are found.
+- **Secret Scanning**: We use `gitleaks` to scan for hardcoded secrets in the codebase. This runs as
+  a blocking gate in `.github/workflows/ci-verify.yml` and as part of the reusable
+  `.github/workflows/ci-security.yml` suite.
 
-- **Static Application Security Testing (SAST)**: We use `CodeQL` and `Semgrep` to identify potential vulnerabilities in our code. `CodeQL` is configured to run on both JavaScript and Python code. `Semgrep` uses the `p/ci` ruleset to check for common security issues.
+- **Static Application Security Testing (SAST)**: We use `CodeQL` and `Semgrep` to identify potential
+  vulnerabilities in our code. `CodeQL` runs for JavaScript and Python in
+  `.github/workflows/ci-security.yml`, and `Semgrep` uses the `p/ci` ruleset.
 
-- **Dependency Vulnerability Scanning**: We use `Snyk` to scan our dependencies for known vulnerabilities. The `SNYK_FAIL_THRESHOLD` is set to `high`, which means that pull requests with `HIGH` or `CRITICAL` vulnerabilities will be blocked from merging.
+- **Dependency Vulnerability Scanning**: We use `Snyk` (when enabled) and Trivy-based scans in
+  `.github/workflows/ci-security.yml`, with high/critical thresholds.
 
 - **Filesystem and Container Scanning**: We use `Trivy` to scan our filesystem and container images for vulnerabilities. This includes scanning for known CVEs in the operating system and application packages.
 

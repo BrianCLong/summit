@@ -1,0 +1,47 @@
+{
+  "task_id": "SECURITY_P0P1_GATES_20260103",
+  "agent_id": "codex-cli",
+  "prompt_ref": {
+    "id": "security-p0p1-gates",
+    "version": "v1",
+    "sha256": "fa67143156ebca274fc40fb08463bdb4e4df7d41119d2d2024d21fc2168e95bf",
+    "path": "prompts/security/p0p1-security-gates.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/",
+      "docs/",
+      "agents/",
+      "prompts/",
+      "package.json",
+      "pnpm-lock.yaml",
+      "SECURITY.md"
+    ],
+    "domains": ["security", "governance", "compliance", "ci", "supply-chain"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "pnpm audit --prod",
+      "dependency-review workflow",
+      "gitleaks scan",
+      "opa policy tests"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "P0/P1 vulnerabilities remediated or documented",
+    "PR dependency review gate enforced",
+    "Evidence index updated for security gates",
+    "Readiness assertion present"
+  ],
+  "stop_conditions": [
+    "Scope breach outside declared paths",
+    "Missing registered prompt hash",
+    "Security gate regression"
+  ]
+}
