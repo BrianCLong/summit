@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T04:15:00Z",
+  "revision_note": "Added agent-context efficiency middleware and updated serialization initiative evidence",
   "initiatives": [
     {
       "id": "A",
@@ -113,7 +113,8 @@
           "id": "D1",
           "name": "KTOON core libraries",
           "status": "in-progress",
-          "owner": "Amp"
+          "owner": "Amp",
+          "evidence": "Agent context manager (masking/hybrid) added under packages/agent-context with Maestro integration"
         }
       ]
     },

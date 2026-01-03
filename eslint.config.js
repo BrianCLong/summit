@@ -91,7 +91,6 @@ const IGNORE = [
   // Core frontend directories with own eslint configs
   'apps/**',
   'client/**',
-  'packages/**',
   'services/**',
   'server/**',
   'streaming/**',
@@ -243,6 +242,13 @@ export default [
       'no-new-func': 'warn', // Relaxed to warn for gradual migration
       'no-return-await': 'warn',
       'require-await': 'warn',
+    },
+  },
+  {
+    files: ['packages/agent-context/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      'require-await': 'off',
+      '@typescript-eslint/require-await': 'off',
     },
   },
 ];
