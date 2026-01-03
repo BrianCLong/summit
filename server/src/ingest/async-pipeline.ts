@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import { createHash, randomUUID } from 'crypto';
 import { IngestService, IngestInput } from '../services/IngestService.js';
 import logger from '../utils/logger.js';
+import { createRunSpan, runSpanBus } from '../observability/run-spans/index.js';
 
 export type AsyncIngestStatus =
   | 'PENDING'
@@ -469,6 +470,24 @@ export class AsyncIngestDispatcher {
       idempotencyKey,
     );
 
+    await runSpanBus.emit(
+      createRunSpan({
+        runId: job.id,
+        traceId: job.id,
+        tenantId: payload.tenantId,
+        stage: 'ingest.enqueue',
+        kind: 'exec',
+        status: 'ok',
+        startTimeMs: job.createdAt.getTime(),
+        endTimeMs: job.createdAt.getTime(),
+        attributes: {
+          tenantId: payload.tenantId,
+          payloadHash,
+          source: 'async_ingest',
+        },
+      }),
+    );
+
     return {
       jobId: job.id,
       duplicate,
@@ -566,12 +585,42 @@ export class AsyncIngestWorker {
       this.inFlight.set(tenantId, (this.inFlight.get(tenantId) || 0) + 1);
       await this.repo.markJobProcessing(event.jobId);
 
+      const runId = event.job.id;
+      const traceId = event.job.id;
+      const queueSpanId = randomUUID();
+
+      await runSpanBus.emit(
+        createRunSpan({
+          runId,
+          traceId,
+          tenantId,
+          spanId: queueSpanId,
+          stage: 'ingest.queue.wait',
+          kind: 'queue',
+          status: 'ok',
+          startTimeMs: event.job.createdAt.getTime(),
+          endTimeMs: now.getTime(),
+          retryCount: event.attempts,
+          attributes: {
+            tenantId,
+            payloadHash: event.job.payloadHash,
+            source: 'async_ingest',
+            priority: event.job.payload?.priority || 'standard',
+          },
+        }),
+      );
+
+      const execSpanId = randomUUID();
+      const execStart = Date.now();
+      let execStatus: 'ok' | 'error' = 'ok';
+
       try {
         await this.ingestService.ingest(event.job.payload);
         await this.repo.markJobCompleted(event.jobId);
         await this.repo.markOutboxProcessed(event.id);
         this.breaker.recordSuccess('ingest');
       } catch (error: any) {
+        execStatus = 'error';
         const delayMs = calculateBackoffDelay(
           event.attempts,
           this.options.baseBackoffMs,
@@ -588,6 +637,28 @@ export class AsyncIngestWorker {
         );
         this.breaker.recordFailure('ingest', now.getTime());
       } finally {
+        const execEnd = Date.now();
+        await runSpanBus.emit(
+          createRunSpan({
+            runId,
+            traceId,
+            tenantId,
+            spanId: execSpanId,
+            parentSpanId: queueSpanId,
+            stage: 'ingest.exec',
+            kind: 'exec',
+            status: execStatus,
+            startTimeMs: execStart,
+            endTimeMs: execEnd,
+            retryCount: event.attempts,
+            attributes: {
+              tenantId,
+              payloadHash: event.job.payloadHash,
+              retryReason: execStatus === 'error' ? event.job.lastError || 'ingest failure' : 'none',
+            },
+          }),
+        );
+
         this.inFlight.set(
           tenantId,
           Math.max(0, (this.inFlight.get(tenantId) || 1) - 1),

@@ -104,6 +104,7 @@ import tenantBillingRouter from './routes/tenants/billing.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
 import analyticsRouter from './routes/analytics.js';
+import observabilityRunsRouter from './routes/observability-runs.js';
 import experimentRouter from './routes/experiments.js';
 import cohortRouter from './routes/cohorts.js';
 import funnelRouter from './routes/funnels.js';
@@ -426,6 +427,7 @@ export const createApp = async () => {
   app.use('/api/gtm', gtmRouter);
   app.use('/airgap', airgapRouter);
   app.use('/analytics', analyticsRouter);
+  app.use('/api/observability', observabilityRunsRouter);
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...

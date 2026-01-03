@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T12:00:00Z",
+  "revision_note": "Seeded request-first observability slice behind feature flags and updated timelines",
   "initiatives": [
     {
       "id": "A",
@@ -146,14 +146,28 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Observability & Cost Accountability",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Request-first run analytics",
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "Run spans + aggregator + UI shipped behind OBS_RUNS_UI_ENABLED for async ingest",
+          "target_completion": "Sprint N+1"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
-    "partial": 2,
+    "partial": 3,
     "incomplete": 2,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }
