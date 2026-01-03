@@ -55,6 +55,11 @@ jobs:
           path: policy/bundle.tar.gz
           retention-days: 7
 
+      - name: Run Server Tests
+        run: |
+          cd server
+          npm test
+
       - name: Container Hardening Audit
         run: |
           chmod +x security-hardening/harden_container.sh

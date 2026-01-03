@@ -313,9 +313,171 @@ jest.mock('prom-client', () => {
   };
 });
 
+// Mock redis package to prevent real connections
+jest.mock('redis', () => {
+  const EventEmitter = require('events');
+
+  class MockRedisClient extends EventEmitter {
+    constructor() {
+      super();
+      this.status = 'ready';
+      this.connected = true;
+    }
+
+    async connect() {
+      this.status = 'ready';
+      this.connected = true;
+      this.emit('connect');
+      this.emit('ready');
+      return 'OK';
+    }
+
+    async disconnect() {
+      this.status = 'end';
+      this.connected = false;
+      this.emit('end');
+      return 'OK';
+    }
+
+    async get(key) {
+      return null; // Always return null for testing
+    }
+
+    async set(key, value, opts = {}) {
+      return 'OK';
+    }
+
+    async setEx(key, ttl, value) {
+      return 'OK';
+    }
+
+    async setex(key, ttl, value) {
+      return 'OK';
+    }
+
+    async incr(key) {
+      return 1; // Always return 1 for rate limiting tests
+    }
+
+    async expire(key, ttl) {
+      return 1;
+    }
+
+    async ttl(key) {
+      return -1; // Negative means key doesn't exist or no expiry
+    }
+
+    async del(...keys) {
+      return keys.length; // Return number of keys deleted
+    }
+
+    async keys(pattern) {
+      return [];
+    }
+
+    async mget(...keys) {
+      return keys.map(() => null);
+    }
+
+    async publish(channel, message) {
+      return 1;
+    }
+
+    async subscribe(channel, listener) {
+      // Mock subscription behavior
+    }
+
+    select() {
+      return Promise.resolve('OK');
+    }
+  }
+
+  const createClient = jest.fn(() => new MockRedisClient());
+
+  return {
+    createClient,
+    default: {
+      createClient,
+    }
+  };
+});
+
+// Import and use the metrics reset helper to clear the registry between tests
+const { resetRegistry } = require('../../src/metrics/registry');  // Relative to test directory structure
+
+// Implement network ban to prevent real network connections in tests
+const originalNetConnect = require('net').connect;
+const originalDnsResolve = require('dns').lookup;
+
+// Store original methods to allow restore in afterAll
+const originalMethods = {
+  netConnect: originalNetConnect,
+  dnsLookup: originalDnsResolve,
+};
+
+// Ban network connections during tests
+beforeAll(() => {
+  // Override net.connect to prevent TCP connections (includes Redis)
+  jest.spyOn(require('net'), 'connect').mockImplementation((...args) => {
+    const error = new Error(
+      'Network connection attempt blocked in tests. ' +
+      'All network connections must be mocked. ' +
+      'Connection attempt details: ' + JSON.stringify(args)
+    );
+    error.name = 'NetworkConnectionBlockedError';
+    throw error;
+  });
+
+  // Override DNS lookup to prevent DNS resolution (this helps catch Redis, DB, API calls)
+  jest.spyOn(require('dns'), 'lookup').mockImplementation((hostname, options, callback) => {
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    // Allow localhost for specific test utilities if needed (though ideally no network at all)
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      // Even localhost should typically be mocked, but we'll log a warning
+      console.warn(`⚠️  Network connection to localhost attempted: ${hostname}. This should be mocked!`);
+    }
+
+    const error = new Error(
+      `DNS lookup blocked in tests. All network calls must be mocked. Attempted to resolve: ${hostname}`
+    );
+    error.name = 'DnsLookupBlockedError';
+
+    if (callback) {
+      setImmediate(() => callback(error));
+    } else {
+      throw error;
+    }
+  });
+});
+
+// Clean up network bans
+afterAll(() => {
+  // Restore original methods
+  try {
+    if (originalMethods.netConnect) {
+      require('net').connect = originalMethods.netConnect;
+    }
+    if (originalMethods.dnsLookup) {
+      require('dns').lookup = originalMethods.dnsLookup;
+    }
+  } catch (e) {
+    // Ignore errors during restore
+  }
+});
 
 // Clean up after each test
 afterEach(() => {
   jest.clearAllMocks();
   jest.clearAllTimers();
+
+  // Also try to reset the real registry if it exists (for cases where mocks didn't fully work)
+  try {
+    resetRegistry();
+  } catch (error) {
+    // Ignore errors if the module wasn't imported or doesn't exist
+  }
 });

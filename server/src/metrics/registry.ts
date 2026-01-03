@@ -1,13 +1,27 @@
 import {
   collectDefaultMetrics,
   register as defaultRegistry,
+  Registry,
 } from 'prom-client';
 
-const g = globalThis as any;
-if (!g.__intelgraph_metrics_inited) {
-  // Prefix your metrics to avoid collisions
-  collectDefaultMetrics({ register: defaultRegistry, prefix: 'intelgraph_' });
-  g.__intelgraph_metrics_inited = true;
-}
+// Create a new registry instance to avoid global persistence issues in tests
+export const createRegistry = (): Registry => {
+  const registry = new Registry();
+  // Only collect default metrics in production mode
+  if (process.env.NODE_ENV !== 'test') {
+    collectDefaultMetrics({ register: registry, prefix: 'intelgraph_' });
+  }
+  return registry;
+};
 
-export const registry = defaultRegistry;
+// Default registry instance
+export const registry = createRegistry();
+
+// Helper function for test cleanup
+export const resetRegistry = (): void => {
+  if (registry) {
+    registry.clear();
+  }
+};
+
+export default registry;
