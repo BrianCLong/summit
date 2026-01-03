@@ -98,8 +98,9 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
       });
 
       this.isInitialized = true;
+      const templates = this.templateEngine.getAllTemplates?.() ?? [];
       logger.info('Threat Hunting Orchestrator initialized', {
-        templatesLoaded: this.templateEngine.getAllTemplates().length,
+        templatesLoaded: templates.length,
       });
     } catch (error) {
       logger.error('Failed to initialize orchestrator', {

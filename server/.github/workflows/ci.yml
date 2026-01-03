@@ -84,10 +84,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Clean build artifacts
+        run: rm -rf dist/ build/
+
       - name: Run unit tests
-        run: pnpm test:unit --coverage
+        run: pnpm test:unit --coverage --runInBand --forceExit
         env:
           CI: true
+          ZERO_FOOTPRINT: 'true'
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -153,13 +158,18 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/summit_test
 
+      - name: Clean build artifacts
+        run: rm -rf dist/ build/
+
       - name: Run integration tests
-        run: pnpm test:integration
+        run: pnpm test:integration --runInBand --forceExit
         env:
           CI: true
           DATABASE_URL: postgresql://test:test@localhost:5432/summit_test
           REDIS_URL: redis://localhost:6379
           NODE_ENV: test
+          ZERO_FOOTPRINT: 'false'
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
