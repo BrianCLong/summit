@@ -1,0 +1,28 @@
+{
+  "issue_number": 11930,
+  "title": "Build cloud data platform with lakehouse architecture",
+  "url": "https://github.com/BrianCLong/summit/pull/11930",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-11-21T05:52:39Z",
+  "createdAt": "2025-11-20T10:06:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12983,
+        "url": "https://github.com/BrianCLong/summit/pull/12983",
+        "mergedAt": "2025-12-04T15:41:56Z",
+        "title": "🏗️ Recovery (partial): Build cloud data platform with lakehouse architecture"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
