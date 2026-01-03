@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-03T04:05:00Z",
+  "revision_note": "Documented agentic trajectory framework & bench harness progress",
   "initiatives": [
     {
       "id": "A",

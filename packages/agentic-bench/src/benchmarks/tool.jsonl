@@ -1,0 +1,2 @@
+{"id":"tool-1","type":"tool","name":"Search then summarize","description":"Expect search pipeline","request":"Find two open datasets about river flow","toolSpec":"bash search + summarize","expectedToolShape":["search","summarize"]}
+{"id":"tool-2","type":"tool","name":"Planner first","description":"Planner then executor","request":"Prepare quick vulnerability triage","toolSpec":"planner + browser","expectedToolShape":["planner","browser"]}

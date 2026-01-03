@@ -8,8 +8,14 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "resolveJsonModule": true,
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./packages/agentic-bench/src",
+      "./types"
+    ]
   },
   "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"]
 }

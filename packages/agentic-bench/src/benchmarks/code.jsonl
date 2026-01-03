@@ -1,0 +1,2 @@
+{"id":"code-1","type":"code","name":"Patch summary","description":"Expect summary reuse","repoPath":".","issue":"Add bounds check to parser","expectedSummary":"bounds check added","tests":["npm test -- --runInBand"]}
+{"id":"code-2","type":"code","name":"Tooling plan","description":"Ensure plan is present","repoPath":"packages/agentic-trajectories","issue":"Create validation harness","expectedSummary":"validation hooks"}

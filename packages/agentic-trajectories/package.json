@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/agentic-trajectories",
+  "version": "0.1.0",
+  "description": "Agentic trajectory schema, validation, augmentation, and re-execution hooks for Summit",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config ../../jest.config.cjs --runTestsByPath packages/agentic-trajectories/tests/validate.test.ts packages/agentic-trajectories/tests/negative.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.7.3"
+  },
+  "license": "MIT"
+}
