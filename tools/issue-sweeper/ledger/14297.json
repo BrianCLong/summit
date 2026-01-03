@@ -1,0 +1,21 @@
+{
+  "issue_number": 14297,
+  "title": "docs: Create initial data classification document",
+  "url": "https://github.com/BrianCLong/summit/pull/14297",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-12-22T08:07:51Z",
+  "createdAt": "2025-12-21T09:45:19Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

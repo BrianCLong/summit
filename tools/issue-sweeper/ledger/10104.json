@@ -1,0 +1,56 @@
+{
+  "issue_number": 10104,
+  "title": "Add decision-ready Link Analysis Canvas PRD and agent prompt",
+  "url": "https://github.com/BrianCLong/summit/pull/10104",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9278618923,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Kw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:high",
+      "name": "risk:high",
+      "color": "1D76DB",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9284194884,
+      "node_id": "LA_kwDOPaNncM8AAAACKWGSRA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/Review%20effort%202/5",
+      "name": "Review effort 2/5",
+      "color": "d1bcf9",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-10-14T11:53:03Z",
+  "createdAt": "2025-10-05T21:19:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10104,
+        "url": "https://github.com/BrianCLong/summit/pull/10104",
+        "mergedAt": "2025-10-14T11:53:01Z",
+        "title": "Add decision-ready Link Analysis Canvas PRD and agent prompt"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}
