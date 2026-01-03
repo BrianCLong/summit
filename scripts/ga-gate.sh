@@ -160,6 +160,7 @@ record_check "Smoke Test" "make smoke" || { generate_report; exit 1; }
 
 # 7. Security Checks
 security_gate() {
+    pnpm run security:scorecard
     make sbom || echo "⚠️ SBOM generation failed (non-critical if tool missing)"
 
     # Attempt secret scan if script exists
