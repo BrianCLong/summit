@@ -1,29 +1,39 @@
-import { createTestClient } from 'apollo-server-testing';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
 import { typeDefs } from '../../src/graphql/schema-combined';
 import { resolvers } from '../../src/graphql/resolvers-combined';
 import { neo } from '../../src/db/neo4j';
 import { parseTaxonomy, ingestTaxonomy } from '../../../scripts/ingest-taxonomy.js';
 
+// Helper to execute GraphQL operations against the test server
+async function executeOperation(
+  server: ApolloServer,
+  operation: { query?: string; mutation?: string; variables?: Record<string, any> }
+) {
+  const { query, mutation, variables } = operation;
+  return server.executeOperation({
+    query: query || mutation || '',
+    variables,
+  }, {
+    contextValue: { user: { tenantId: 'test-tenant' } },
+  });
+}
+
 describe('GraphQL Document API', () => {
   let server: ApolloServer;
-  let testClient: ReturnType<typeof createTestClient>;
   let createdDocId: string;
 
   beforeAll(async () => {
     server = new ApolloServer({
       typeDefs,
       resolvers,
-      context: () => ({ user: { tenantId: 'test-tenant' } }),
     });
-    testClient = createTestClient(server);
 
     // Run the ingestion script to populate the database with the taxonomy
     const taxonomy = parseTaxonomy();
     await ingestTaxonomy(taxonomy);
 
     // Create a document to be used in tests
-    const response = await testClient.mutate({
+    const response = await executeOperation(server, {
       mutation: `
         mutation CreateDocument($input: DocumentInput!) {
           createDocument(input: $input) {
@@ -39,7 +49,7 @@ describe('GraphQL Document API', () => {
         },
       },
     });
-    createdDocId = response.data.createDocument.id;
+    createdDocId = response.body.kind === 'single' ? (response.body.singleResult.data as any).createDocument.id : '';
   });
 
   afterAll(async () => {
@@ -79,11 +89,14 @@ describe('GraphQL Document API', () => {
       },
     };
 
-    const response1 = await testClient.mutate({ mutation: createMutation, variables: variables1 });
-    const response2 = await testClient.mutate({ mutation: createMutation, variables: variables2 });
+    const response1 = await executeOperation(server, { mutation: createMutation, variables: variables1 });
+    const response2 = await executeOperation(server, { mutation: createMutation, variables: variables2 });
 
-    expect(response1.data.createDocument.id).toBe(response2.data.createDocument.id);
-    expect(response2.data.createDocument.entity.props.custom).toBe('value2');
+    const data1 = response1.body.kind === 'single' ? response1.body.singleResult.data as any : null;
+    const data2 = response2.body.kind === 'single' ? response2.body.singleResult.data as any : null;
+
+    expect(data1!.createDocument.id).toBe(data2!.createDocument.id);
+    expect(data2!.createDocument.entity.props.custom).toBe('value2');
 
     const countResponse = await neo.run(
       'MATCH (d:Document {name: "My Test NDA", tenantId: "test-tenant"}) RETURN count(d) as count'
@@ -92,7 +105,7 @@ describe('GraphQL Document API', () => {
   });
 
   it('fetches a single document by ID', async () => {
-    const response = await testClient.query({
+    const response = await executeOperation(server, {
       query: `
         query Document($id: ID!, $tenantId: String!) {
           document(id: $id, tenantId: $tenantId) {
@@ -108,13 +121,14 @@ describe('GraphQL Document API', () => {
       },
     });
 
-    expect(response.data.document.id).toBe(createdDocId);
-    expect(response.data.document.category).toBe('Finance');
-    expect(response.data.document.subType).toBe('My Test Invoice');
+    const data = response.body.kind === 'single' ? response.body.singleResult.data as any : null;
+    expect(data!.document.id).toBe(createdDocId);
+    expect(data!.document.category).toBe('Finance');
+    expect(data!.document.subType).toBe('My Test Invoice');
   });
 
   it('returns null for a non-existent document', async () => {
-    const response = await testClient.query({
+    const response = await executeOperation(server, {
       query: `
         query Document($id: ID!, $tenantId: String!) {
           document(id: $id, tenantId: $tenantId) {
@@ -128,11 +142,12 @@ describe('GraphQL Document API', () => {
       },
     });
 
-    expect(response.data.document).toBeNull();
+    const data = response.body.kind === 'single' ? response.body.singleResult.data as any : null;
+    expect(data!.document).toBeNull();
   });
 
   it('fetches documents with name filter', async () => {
-    const response = await testClient.query({
+    const response = await executeOperation(server, {
       query: `
         query Documents($tenantId: String!, $name: String) {
           documents(tenantId: $tenantId, name: $name) {
@@ -149,13 +164,14 @@ describe('GraphQL Document API', () => {
       },
     });
 
-    expect(response.data.documents.length).toBe(1);
-    expect(response.data.documents[0].variants).toContain('NDA');
-    expect(response.data.documents[0].variants).toContain('MNDA');
+    const data = response.body.kind === 'single' ? response.body.singleResult.data as any : null;
+    expect(data!.documents.length).toBe(1);
+    expect(data!.documents[0].variants).toContain('NDA');
+    expect(data!.documents[0].variants).toContain('MNDA');
   });
 
   it('fetches documents with category and subType filters', async () => {
-    const response = await testClient.query({
+    const response = await executeOperation(server, {
       query: `
         query Documents($tenantId: String!, $category: String, $subType: String) {
           documents(tenantId: $tenantId, category: $category, subType: $subType) {
@@ -170,12 +186,13 @@ describe('GraphQL Document API', () => {
       },
     });
 
-    expect(response.data.documents.length).toBe(1);
+    const data = response.body.kind === 'single' ? response.body.singleResult.data as any : null;
+    expect(data!.documents.length).toBe(1);
   });
 
   it('fetches document relationships', async () => {
     // Find a document that should have relationships
-    const msaResponse = await testClient.query({
+    const msaResponse = await executeOperation(server, {
       query: `
           query Documents($tenantId: String!, $name: String) {
             documents(tenantId: $tenantId, name: $name) {
@@ -188,9 +205,10 @@ describe('GraphQL Document API', () => {
         name: 'MSA / SOW',
       },
     });
-    const msaId = msaResponse.data.documents[0].id;
+    const msaData = msaResponse.body.kind === 'single' ? msaResponse.body.singleResult.data as any : null;
+    const msaId = msaData!.documents[0].id;
 
-    const response = await testClient.query({
+    const response = await executeOperation(server, {
       query: `
         query Document($id: ID!, $tenantId: String!) {
           document(id: $id, tenantId: $tenantId) {
@@ -209,8 +227,9 @@ describe('GraphQL Document API', () => {
       },
     });
 
-    expect(response.data.document.relationships.length).toBeGreaterThan(0);
-    expect(response.data.document.relationships[0].type).toBe('GOVERNING_AGREEMENT');
-    expect(response.data.document.relationships[0].document.subType).toBe('SOW');
+    const data = response.body.kind === 'single' ? response.body.singleResult.data as any : null;
+    expect(data!.document.relationships.length).toBeGreaterThan(0);
+    expect(data!.document.relationships[0].type).toBe('GOVERNING_AGREEMENT');
+    expect(data!.document.relationships[0].document.subType).toBe('SOW');
   });
 });
