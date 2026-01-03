@@ -1,0 +1,4 @@
+> typecheck
+> tsc -b
+
+Done in 2.00s.

@@ -85,6 +85,8 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "release:preflight": "tsx scripts/release/preflight.ts --mode=live",
+    "release:preflight:offline": "tsx scripts/release/preflight.ts --mode=offline --fixturesDir=scripts/release/fixtures",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },

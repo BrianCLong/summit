@@ -1,0 +1,10 @@
+> test
+> node:test
+
+Running tests...
+▶ test 1
+  ✔ pass
+▶ test 2
+  ✔ pass
+
+Tests: 2 passed, 0 failed
