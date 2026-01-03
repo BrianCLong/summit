@@ -15,14 +15,17 @@ Whether you are a human developer or an AI agent, this guide will help you contr
 If you are new here, please start with our **[Developer Onboarding Guide](docs/ONBOARDING.md)**. It will get you from `git clone` to a running stack in under 30 minutes.
 
 ### The "Golden Path" Command
+
 ```bash
 make bootstrap && make up && make smoke
 ```
+
 This sequence is our contract. If it passes, your environment is healthy.
 
 ## 🛠 Development Workflow
 
 ### 1. Issue & Branching
+
 - **Pick an Issue**: Check our [Roadmap](docs/roadmap.md) or [Issues](https://github.com/BrianCLong/summit/issues).
 - **Branch Naming**: Use the format `type/scope/description`.
   - `feat/ingest/add-rss-connector`
@@ -30,6 +33,7 @@ This sequence is our contract. If it passes, your environment is healthy.
   - `docs/api/update-schema`
 
 ### 2. Making Changes
+
 - **Atomic PRs**: One feature or fix per PR. Avoid "kitchen sink" PRs.
 - **Conventional Commits**: We strictly enforce [Conventional Commits](https://www.conventionalcommits.org/).
   - `feat: ...`, `fix: ...`, `docs: ...`, `test: ...`, `chore: ...`
@@ -39,6 +43,7 @@ This sequence is our contract. If it passes, your environment is healthy.
   - **Smoke**: `make smoke` (Core integration loop)
 
 ### 3. Submission
+
 - Open a Pull Request against `main`.
 - Fill out the PR template completely.
 - Ensure all CI checks pass (Lint, Unit, Golden Path).
@@ -48,12 +53,15 @@ This sequence is our contract. If it passes, your environment is healthy.
 We welcome contributions from AI agents and automated systems. To reduce friction and ensure safety, please follow these rules:
 
 ### For AI Agents & Bots
+
 1.  **Read the Instructions**: You **MUST** read and adhere to [`AGENTS.md`](AGENTS.md). It contains specific directives for code generation, architectural boundaries, and prohibited actions.
-2.  **Sign Your Work**: All commits must be signed.
-3.  **Context Awareness**: Do not hallucinate dependencies or APIs. Verify existence before importing.
-4.  **No-Op Changes**: If you need to force a review on an existing file without functional changes, add a non-breaking comment or whitespace change to trigger the diff.
+2.  **Honor the Quality Charter**: Follow the Agent Quality Charter (in `AGENTS.md`)—no debug print statements or commented-out code; run `pnpm format:check` and `pnpm lint` (treat warnings as failures) locally before opening a PR.
+3.  **Sign Your Work**: All commits must be signed.
+4.  **Context Awareness**: Do not hallucinate dependencies or APIs. Verify existence before importing.
+5.  **No-Op Changes**: If you need to force a review on an existing file without functional changes, add a non-breaking comment or whitespace change to trigger the diff.
 
 ### Co-authoring
+
 When collaborating with an AI or another human, use the `Co-authored-by` trailer in your commit message to give credit.
 
 ```text
@@ -66,6 +74,7 @@ Co-authored-by: Alice Smith <alice@example.com>
 ```
 
 ### The "Council of Solvers"
+
 Major architectural changes are reviewed by our internal "Council of Solvers" (a set of specialized AI agents). If your PR receives automated feedback from "Jules" or "Amp", treat it as you would a human code review.
 
 ## 📦 Release Cadence & CI/CD
