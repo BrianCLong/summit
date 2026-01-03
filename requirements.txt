@@ -37,7 +37,7 @@ click==8.1.8
     # via uvicorn
 coverage[toml]==7.8.0
     # via pytest-cov
-cryptography==46.0.2
+cryptography==46.0.3
     # via python-jose
 dataclasses-json==0.6.7
     # via langchain-community
@@ -145,7 +145,7 @@ pydantic-settings==2.12.0
     # via langchain-community
 pygments==2.19.2
     # via pytest
-pyjwt==2.10.1
+PyJWT==2.10.1
     # via redis
 pytest==9.0.1
     # via pytest-cov
