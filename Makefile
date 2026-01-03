@@ -259,6 +259,26 @@ demo-seed: ## Seed demo data
 
 demo-smoke: ## Run demo smoke tests
 	@./scripts/demo-smoke-test.sh
+
+# --- Preflight & Merge Train ---
+
+.PHONY: preflight preflight-fast merge-train pr-queue
+
+preflight: ## Run full preflight checks (mirrors CI gates)
+	@./scripts/ci/preflight.sh
+
+preflight-fast: ## Run fast preflight checks (skip e2e, build)
+	@./scripts/ci/preflight.sh --fast
+
+merge-train: ## Run merge train on ordered PR list (Usage: make merge-train prs=15486,15483)
+	@./scripts/ops/merge_train.sh --prs "$(prs)" --mode full
+
+merge-train-fast: ## Fast merge train (skip e2e)
+	@./scripts/ops/merge_train.sh --prs "$(prs)" --mode fast
+
+pr-queue: ## Generate PR queue triage report
+	@./scripts/ops/pr_queue_snapshot.sh
+
 # Conductor / Maestro / Pipeline Commands
 
 SRV_PORT ?= 4000
