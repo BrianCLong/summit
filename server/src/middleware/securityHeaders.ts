@@ -17,7 +17,7 @@ export function securityHeaders({
   enabled = process.env.SECURITY_HEADERS_ENABLED !== 'false',
   allowedOrigins = [],
   enableCsp = process.env.SECURITY_HEADERS_CSP_ENABLED === 'true' ||
-    process.env.NODE_ENV === 'production',
+  process.env.NODE_ENV === 'production',
   cspReportOnly = process.env.SECURITY_HEADERS_CSP_REPORT_ONLY === 'true',
 }: SecurityHeadersOptions = {}): RequestHandler {
   if (!enabled) {
@@ -35,7 +35,7 @@ export function securityHeaders({
     crossOriginResourcePolicy: { policy: 'same-origin' },
     hsts:
       process.env.NODE_ENV === 'production'
-        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+        ? { maxAge: 63072000, includeSubDomains: true, preload: true }
         : false,
     contentSecurityPolicy: enableCsp
       ? {
@@ -45,8 +45,8 @@ export function securityHeaders({
           baseUri: ["'self'"],
           objectSrc: ["'none'"],
           imgSrc: ["'self'", 'data:'],
-          scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'", 'https://cdn.jsdelivr.net'],
+          styleSrc: ["'self'", 'https://fonts.googleapis.com'],
           connectSrc,
         },
         reportOnly: cspReportOnly,
