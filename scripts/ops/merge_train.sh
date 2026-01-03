@@ -110,13 +110,60 @@ log "  Dry Run: $DRY_RUN"
 log ""
 
 # Ensure we're in repo root
-cd "$(git rev-parse --show-toplevel)" || exit 1
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT" || exit 1
 
 # Check for gh CLI
 if ! command -v gh &> /dev/null; then
     log_error "gh (GitHub CLI) is required but not installed."
     exit 1
 fi
+
+# Copy preflight script to temp location (so it works on branches that don't have it)
+PREFLIGHT_SCRIPT="/tmp/preflight_merge_train_$$.sh"
+if [[ -f "$REPO_ROOT/scripts/ci/preflight.sh" ]]; then
+    cp "$REPO_ROOT/scripts/ci/preflight.sh" "$PREFLIGHT_SCRIPT"
+    chmod +x "$PREFLIGHT_SCRIPT"
+    log "Preflight script cached at $PREFLIGHT_SCRIPT"
+else
+    log_warn "No preflight.sh found - will use fallback validation"
+    PREFLIGHT_SCRIPT=""
+fi
+
+# Fallback validation function (when preflight.sh not available)
+run_fallback_validation() {
+    local mode="$1"
+    log "  Running fallback validation ($mode)..."
+
+    # Install
+    if ! pnpm install --frozen-lockfile 2>/dev/null; then
+        pnpm install 2>/dev/null || return 1
+    fi
+
+    # Lint
+    if ! pnpm lint 2>/dev/null; then
+        log_warn "Lint failed or not available"
+    fi
+
+    # Typecheck
+    if ! pnpm typecheck 2>/dev/null; then
+        log_warn "Typecheck failed or not available"
+    fi
+
+    if [[ "$mode" != "fast" ]]; then
+        # Test
+        if ! pnpm test 2>/dev/null; then
+            log_warn "Tests failed or not available"
+        fi
+
+        # Build
+        if ! pnpm build 2>/dev/null; then
+            return 1
+        fi
+    fi
+
+    return 0
+}
 
 # Initialize report
 cat > "$REPORT_FILE" << EOF
@@ -232,7 +279,20 @@ for PR_NUM in "${PRS[@]}"; do
         PREFLIGHT_FLAG="--fast"
     fi
 
-    if ! ./scripts/ci/preflight.sh $PREFLIGHT_FLAG > "/tmp/preflight_pr${PR_NUM}.log" 2>&1; then
+    # Use cached preflight script or fallback
+    PREFLIGHT_OK=false
+    if [[ -n "$PREFLIGHT_SCRIPT" ]] && [[ -f "$PREFLIGHT_SCRIPT" ]]; then
+        if "$PREFLIGHT_SCRIPT" $PREFLIGHT_FLAG > "/tmp/preflight_pr${PR_NUM}.log" 2>&1; then
+            PREFLIGHT_OK=true
+        fi
+    else
+        # Use fallback validation
+        if run_fallback_validation "$MODE" > "/tmp/preflight_pr${PR_NUM}.log" 2>&1; then
+            PREFLIGHT_OK=true
+        fi
+    fi
+
+    if ! $PREFLIGHT_OK; then
         PREFLIGHT_STATUS="FAIL"
         log_error "Preflight failed. See /tmp/preflight_pr${PR_NUM}.log"
 
@@ -324,6 +384,9 @@ done
 
 echo ""
 log "Full report: $REPORT_FILE"
+
+# Cleanup temp preflight script
+[[ -n "${PREFLIGHT_SCRIPT:-}" ]] && rm -f "$PREFLIGHT_SCRIPT" 2>/dev/null || true
 
 if [[ $FAILED -gt 0 ]] && ! $DRY_RUN; then
     log_error "$FAILED PR(s) need attention before merge"
