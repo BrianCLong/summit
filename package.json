@@ -86,7 +86,9 @@
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "wt:new": "node -e \"const { execSync } = require('node:child_process'); const args = process.argv.slice(2); if (!args.length) { console.error('Usage: pnpm wt:new -- <branch>'); process.exit(1); } const branch = args[0]; const isWin = process.platform === 'win32'; const cmd = isWin ? `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/agent-worktree.ps1 wt-new ${branch}` : `sh scripts/agent-worktree.sh wt-new ${branch}`; execSync(cmd, { stdio: 'inherit' });\"",
+    "wt:rm": "node -e \"const { execSync } = require('node:child_process'); const isWin = process.platform === 'win32'; const cmd = isWin ? 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts/agent-worktree.ps1 wt-rm' : 'sh scripts/agent-worktree.sh wt-rm'; execSync(cmd, { stdio: 'inherit' });\""
   },
   "keywords": [
     "intelligence-analysis",
