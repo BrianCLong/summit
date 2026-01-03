@@ -1,0 +1,40 @@
+{
+  "issue_number": 648,
+  "title": "feat: consolidate all feature branches and improvements",
+  "url": "https://github.com/BrianCLong/summit/pull/648",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:50Z",
+  "createdAt": "2025-08-19T19:16:17Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 740,
+        "url": "https://github.com/BrianCLong/summit/pull/740",
+        "mergedAt": "2025-08-29T10:30:24Z",
+        "title": "chore(deps): bump graphql-ws from 5.16.2 to 6.0.6"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

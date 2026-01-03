@@ -1,0 +1,68 @@
+{
+  "issue_number": 578,
+  "title": "feat: extend TTP miner with clustering",
+  "url": "https://github.com/BrianCLong/summit/pull/578",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:23:44Z",
+  "createdAt": "2025-08-18T02:19:19Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15261,
+        "url": "https://github.com/BrianCLong/summit/pull/15261",
+        "mergedAt": "2026-01-01T07:29:41Z",
+        "title": "Expand test coverage and fix issues"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 1082,
+        "url": "https://github.com/BrianCLong/summit/pull/1082",
+        "mergedAt": "2025-08-31T01:12:06Z",
+        "title": "🎯 CRITICAL WORK ABSORPTION - Zero Loss Recovery Complete"
+      },
+      {
+        "number": 1190,
+        "url": "https://github.com/BrianCLong/summit/pull/1190",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump tailwind-merge from 2.6.0 to 3.3.1"
+      },
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
