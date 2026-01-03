@@ -17,6 +17,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - (New features will be documented here)
 
+## [4.0.1] - Birthday Hardening Sweep - 2026-01-03
+
+### Security
+- **Birthday Hardening Sweep**: Comprehensive security audit and remediation.
+- **Path Traversal Protection**: Centralized `resolveSafePath` utility in `@intelgraph/security-utils` preventing LFI across multiple services (Attachment, Exporter, Case Bundle).
+- **Security Headers**: Hardened `helmet` configuration with strict Content Security Policy (removed `'unsafe-inline'`) and increased HSTS duration (2 years).
+- **Dependency Consolidation**: 28 critical dependency overrides added to root `package.json` to mitigate fragmented and vulnerable library versions.
+- **CI/CD Hardening**: Established `Security Hardened Gate` in GitHub Actions for continuous verification of hardened state.
+- **Provenance Integrity**: Standardized SLSA Level 3 provenance script execution in the monorepo root.
+
 ### Changed
 - Documented Node.js 20.11.0 as the required runtime to match the repository toolchain.
 
