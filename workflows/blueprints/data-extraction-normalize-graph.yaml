@@ -1,0 +1,62 @@
+metadata:
+  id: data-extraction-normalize-graph
+  name: Data Extraction → Normalize → Entity Resolve → Graph Ingest
+  description: Guided chat-wizard for getting data into the knowledge graph
+  risk_level: medium
+  tags:
+    - ingestion
+    - graph
+    - quality
+steps:
+  - id: collect
+    title: Collect source details
+    description: Ask for the source URL, credentials, and format using a schema-backed form
+    prompt: "Provide a source URL, format (csv/json/api), and authentication method"
+    input:
+      prompt: "Source details"
+      schema:
+        source_url: { type: string }
+        format: { type: string }
+        auth_type: { type: string }
+      validation:
+        required: [source_url, format]
+    tool:
+      tool_id: fetch-source
+      input_mapping:
+        url: source_url
+      output_mapping:
+        raw_records: records
+    retries: 1
+  - id: normalize
+    title: Normalize records
+    description: Apply schema normalization and unit cleanup
+    prompt: "Normalize columns to canonical schema"
+    tool:
+      tool_id: normalize-records
+      input_mapping:
+        records: raw_records
+      output_mapping:
+        normalized_records: records
+    retries: 2
+  - id: resolve
+    title: Entity resolution
+    description: Deduplicate and resolve entities using matching thresholds
+    prompt: "Resolve duplicate entities"
+    tool:
+      tool_id: entity-resolver
+      input_mapping:
+        records: normalized_records
+      output_mapping:
+        resolved_entities: entities
+    retries: 2
+  - id: ingest
+    title: Graph ingest
+    description: Load resolved entities into the graph store
+    prompt: "Ingest entities into graph"
+    tool:
+      tool_id: graph-ingestor
+      input_mapping:
+        entities: resolved_entities
+      output_mapping:
+        graph_ingest_report: ingest_report
+    stop_condition: graph_ingest_report
