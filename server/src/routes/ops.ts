@@ -8,6 +8,7 @@ import logger from '../config/logger.js';
 import { evidenceIntegrityService } from '../evidence/integrity-service.js';
 import { policyHotReloadService } from '../policy/hotReloadService.js';
 import { policyBundleStore } from '../policy/bundleStore.js';
+import { releaseReadinessService } from '../services/releaseReadinessService.js';
 
 const router = Router();
 const backupService = new BackupService();
@@ -185,5 +186,43 @@ router.post('/evidence/verify', async (req, res) => {
         return res.status(500).json({ ok: false, error: 'Failed to verify evidence integrity' });
     }
 });
+
+/**
+ * @route GET /ops/release-readiness/summary
+ * @description Get release readiness summary with governance checks
+ */
+router.get(
+  '/release-readiness/summary',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'OPERATOR']),
+  async (req, res) => {
+    try {
+      const summary = await releaseReadinessService.getSummary();
+      res.json(summary);
+    } catch (error: any) {
+      logger.error('Failed to get release readiness summary', error);
+      res.status(500).json({ error: 'Failed to retrieve release readiness summary' });
+    }
+  },
+);
+
+/**
+ * @route GET /ops/release-readiness/evidence-index
+ * @description Get structured evidence index from governance artifacts
+ */
+router.get(
+  '/release-readiness/evidence-index',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'OPERATOR']),
+  async (req, res) => {
+    try {
+      const evidenceIndex = await releaseReadinessService.getEvidenceIndex();
+      res.json(evidenceIndex);
+    } catch (error: any) {
+      logger.error('Failed to get evidence index', error);
+      res.status(500).json({ error: 'Failed to retrieve evidence index' });
+    }
+  },
+);
 
 export default router;
