@@ -2,14 +2,21 @@
 
 Enterprise Intelligence Platform: graph analytics, real-time collaboration, and AI-driven insights for high-stakes environments.
 
-## NEW in v2.0.0 (December 2025)
-Summit v2.0.0 consolidates major platform capabilities (infrastructure, AI/ML, security hardening, real-time systems).  
-See: Release Notes | Migration Guide | Roadmap.
+## 🎉 NEW in v4.1.0 GA (January 3, 2026)
+
+**Happy Birthday Edition!** Summit v4.1.0 achieves General Availability with:
+
+- ✅ Production-ready build pipeline
+- ✅ Security baseline (SBOM, dependency audit, secret scanning)
+- ✅ TypeScript 5.9 clean compilation
+- ✅ Comprehensive documentation
+  See: [GA Evidence Pack](./GA_EVIDENCE_PACK.md) | [CHANGELOG](./CHANGELOG.md) | [Release Notes](https://github.com/BrianCLong/summit/releases/tag/v4.1.0)
 
 ---
 
 ## Quickstart (Golden Path)
-Prerequisites: Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 9, Python 3.11+.
+
+**Prerequisites:** Docker Desktop ≥ 4.x, Node.js 20.11.0 (matches `.tool-versions`), pnpm 10.0.0, Python 3.11+.
 
 ```bash
 # 1) Clone & Bootstrap
@@ -44,11 +51,11 @@ This runs the enforced readiness sequence:
 
 ## Service Endpoints (Local)
 
-* Frontend: [http://localhost:3000](http://localhost:3000)
-* GraphQL API: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-* Neo4j Browser: [http://localhost:7474](http://localhost:7474) (User: `neo4j`, Pass: `devpassword`)
-* Adminer: [http://localhost:8080](http://localhost:8080)
-* Grafana: [http://localhost:3001](http://localhost:3001)
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- GraphQL API: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+- Neo4j Browser: [http://localhost:7474](http://localhost:7474) (User: `neo4j`, Pass: `devpassword`)
+- Adminer: [http://localhost:8080](http://localhost:8080)
+- Grafana: [http://localhost:3001](http://localhost:3001)
 
 ---
 
@@ -56,19 +63,19 @@ This runs the enforced readiness sequence:
 
 Summit is built on a modern distributed stack designed for scalability and auditability:
 
-* Frontend: React 18, Vite, Material-UI (`client/`)
-* Backend: Node.js, Express, Apollo GraphQL (`backend/`, `api/`)
-* Data Layer:
+- Frontend: React 18, Vite, Material-UI (`client/`)
+- Backend: Node.js, Express, Apollo GraphQL (`backend/`, `api/`)
+- Data Layer:
+  - Neo4j (graph relationships)
+  - PostgreSQL (structured data, audit logs, vectors/embeddings)
+  - TimescaleDB (telemetry and metrics)
+  - Redis (caching, rate limiting, real-time Pub/Sub)
 
-  * Neo4j (graph relationships)
-  * PostgreSQL (structured data, audit logs, vectors/embeddings)
-  * TimescaleDB (telemetry and metrics)
-  * Redis (caching, rate limiting, real-time Pub/Sub)
-* Orchestration: Maestro (BullMQ) for background jobs and AI pipelines (`.maestro/`)
+- Orchestration: Maestro (BullMQ) for background jobs and AI pipelines (`.maestro/`)
 
 See also:
 
-* docs/ARCHITECTURE.md
+- docs/ARCHITECTURE.md
 
 ---
 
@@ -77,33 +84,29 @@ See also:
 This repository is a large monorepo containing:
 
 1. **Platform Runtime**
-
-   * `client/` — Primary user-facing UI
-   * `conductor-ui/` — Admin/Ops UI
-   * `backend/` — API runtime services
-   * `api/`, `apis/`, `api-schemas/` — API surfaces, schemas, contracts
-   * `cli/` — Operator/developer CLI tooling
-   * `.maestro/`, `.orchestrator/` — job orchestration, pipelines, worker controls
-   * `compose/`, `charts/`, `config/`, `configs/` — infra, deployment & configuration
+   - `client/` — Primary user-facing UI
+   - `conductor-ui/` — Admin/Ops UI
+   - `backend/` — API runtime services
+   - `api/`, `apis/`, `api-schemas/` — API surfaces, schemas, contracts
+   - `cli/` — Operator/developer CLI tooling
+   - `.maestro/`, `.orchestrator/` — job orchestration, pipelines, worker controls
+   - `compose/`, `charts/`, `config/`, `configs/` — infra, deployment & configuration
 
 2. **Governance, Security, Operations**
-
-   * `RUNBOOKS/` — incident playbooks, operational procedures
-   * `SECURITY/`, `.security/` — security policies & automation scaffolding
-   * `compliance/` — compliance controls and mapping artifacts
-   * `audit/` — audit readiness artifacts and evidence workflows
-   * `.ci/`, `ci/`, `.ga-check/`, `.github/` — CI and GA readiness gates
-   * `__tests__/`, `__mocks__/`, `GOLDEN/ datasets`, `.evidence/` — tests, fixtures, evidence
+   - `RUNBOOKS/` — incident playbooks, operational procedures
+   - `SECURITY/`, `.security/` — security policies & automation scaffolding
+   - `compliance/` — compliance controls and mapping artifacts
+   - `audit/` — audit readiness artifacts and evidence workflows
+   - `.ci/`, `ci/`, `.ga-check/`, `.github/` — CI and GA readiness gates
+   - `__tests__/`, `__mocks__/`, `GOLDEN/ datasets`, `.evidence/` — tests, fixtures, evidence
 
 3. **Agentic Development Tooling**
-
-   * `.agentic-prompts/`, `.agent-guidance/` — standardized prompts and guidance
-   * `.claude/`, `.gemini/`, `.jules/`, `.qwen/` — per-agent workflows and configuration
-   * `.devcontainer/` — standardized dev environment
+   - `.agentic-prompts/`, `.agent-guidance/` — standardized prompts and guidance
+   - `.claude/`, `.gemini/`, `.jules/`, `.qwen/` — per-agent workflows and configuration
+   - `.devcontainer/` — standardized dev environment
 
 4. **AI/ML and Domain Modules**
-
-   * `ai-ml-suite/` plus multiple domain modules (e.g., `cognitive-*`, `active-measures-module/`, etc.)
+   - `ai-ml-suite/` plus multiple domain modules (e.g., `cognitive-*`, `active-measures-module/`, etc.)
 
 ---
 
@@ -123,14 +126,14 @@ See: TESTING.md
 
 ## Contributing
 
-* Follow the Golden Path and GA Gate requirements.
-* Prefer small, reviewable PRs with explicit scope.
-* If the build breaks, stop and fix it: the Golden Path is enforced.
+- Follow the Golden Path and GA Gate requirements.
+- Prefer small, reviewable PRs with explicit scope.
+- If the build breaks, stop and fix it: the Golden Path is enforced.
 
 See:
 
-* CONTRIBUTING.md
-* docs/ONBOARDING.md
+- CONTRIBUTING.md
+- docs/ONBOARDING.md
 
 ---
 
