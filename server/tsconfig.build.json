@@ -8,16 +8,7 @@
     "useUnknownInCatchVariables": false,
     "noImplicitThis": false,
     "skipLibCheck": true,
-    "noEmitOnError": false
-  },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/__tests__/**",
-    "tests/**",
-    "src/tests/**",
-    "src/routes/geoint.js"
-  ]
+    "noEmitOnError": false,
+    "allowJs": false
+  }
 }

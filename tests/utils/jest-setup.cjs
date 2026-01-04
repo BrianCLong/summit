@@ -5,6 +5,28 @@
  * It sets up global test utilities and configuration.
  */
 
+// Load test environment variables first
+require('dotenv').config({ path: './.env.test' });
+
+// Mock required environment variables for config.ts validation
+// These must be set before any imports that load config.ts
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'postgres://postgres:postgres@localhost:5432/intelgraph_test';
+}
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only-must-be-32-chars';
+}
+if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 32) {
+  process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret-for-testing-only-32-chars';
+}
+if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
+if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
+if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
+
+// Use Zero Footprint mode to avoid real DB connections by default
+process.env.ZERO_FOOTPRINT = 'true';
+process.env.NODE_ENV = 'test';
+
 // Extend Jest timeout for integration tests
 if (typeof jest !== 'undefined') {
   jest.setTimeout(30000);

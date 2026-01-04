@@ -1,6 +1,9 @@
 // @ts-nocheck
 import { logger } from './config/logger.js';
-import { initializeTracing } from './observability/tracer.js';
+import { initializeTracing, getTracer as _getTracer } from './observability/tracer.js';
+
+// Re-export getTracer for backward compatibility
+export const getTracer = _getTracer;
 
 // Legacy OpenTelemetry entry point - redirects to new tracer implementation
 // Maintained for backward compatibility and to satisfy build requirements

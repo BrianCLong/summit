@@ -26,6 +26,7 @@
       "@intelgraph/maestro": ["packages/maestro-cli/src/index.ts"],
       "@intelgraph/prov-ledger-core": ["packages/prov-ledger/src/index.ts"],
       "@intelgraph/strategic-foresight-pkg": ["packages/strategic-foresight/src/index.ts"],
+      "@intelgraph/security-utils": ["packages/security-utils/src/index.ts"],
       "@summitsec/vcr-kit": ["packages/vcr-kit/src/index.ts"],
       "zod/v4": ["types/shims/zod-v4.d.ts"]
     }

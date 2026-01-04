@@ -1,16 +1,19 @@
 /**
  * ThreatHuntingDashboard Tests
+ * @jest-environment jsdom
  */
 
 import React from 'react';
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { ThreatHuntingDashboard } from '../ThreatHuntingDashboard';
+import { HuntQueryBuilder } from '../HuntQueryBuilder';
 
 // Mock fetch
 const mockFetch = jest.fn();
-global.fetch = mockFetch;
+(globalThis as unknown as { fetch: typeof fetch }).fetch = mockFetch as unknown as typeof fetch;
 
 describe('ThreatHuntingDashboard', () => {
   beforeEach(() => {
@@ -328,7 +331,6 @@ describe('ThreatHuntingDashboard', () => {
 });
 
 describe('HuntQueryBuilder', () => {
-  const { HuntQueryBuilder } = require('../HuntQueryBuilder');
 
   it('should render the query builder', () => {
     render(<HuntQueryBuilder />);

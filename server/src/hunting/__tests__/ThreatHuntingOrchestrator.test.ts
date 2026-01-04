@@ -113,60 +113,60 @@ const mockCypherTemplateEngineFactory = () => ({
 // Mock other hunting modules that may have singletons
 jest.mock('../CypherTemplateEngine.js', () => {
   const engine = {
-    initialize: jest.fn < async() => Promise < void>> ().mockResolvedValue(undefined),
-      generateQuery: jest.fn(),
-        getAllTemplates: jest.fn().mockReturnValue([]),
-          validateQuery: jest.fn((query: string) => {
-            const upperQuery = query.toUpperCase();
-            let isValid = true;
-            let isReadOnly = true;
-            let hasLimit = /\bLIMIT\s+\d+/i.test(query);
-            let complexity = 10;
-            if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
-              isValid = false;
-              isReadOnly = false;
-            }
-            if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
-            if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
-            return { isValid, isReadOnly, hasLimit, complexity, estimatedCost: complexity * 10 };
-          }),
-            ensureLimit: jest.fn((query: string, limit: number = 100) => {
-              if (/\bLIMIT\s+\d+/i.test(query)) return query;
-              return `${query.trim()} LIMIT ${limit}`;
-            }),
+    initialize: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    generateQuery: jest.fn(),
+    getAllTemplates: jest.fn().mockReturnValue([]),
+    validateQuery: jest.fn((query: string) => {
+      const upperQuery = query.toUpperCase();
+      let isValid = true;
+      let isReadOnly = true;
+      const hasLimit = /\bLIMIT\s+\d+/i.test(query);
+      let complexity = 10;
+      if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
+        isValid = false;
+        isReadOnly = false;
+      }
+      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
+      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+      return { isValid, isReadOnly, hasLimit, complexity, estimatedCost: complexity * 10 };
+    }),
+    ensureLimit: jest.fn((query: string, limit: number = 100) => {
+      if (/\bLIMIT\s+\d+/i.test(query)) return query;
+      return `${query.trim()} LIMIT ${limit}`;
+    }),
   };
-return {
-  cypherTemplateEngine: engine,
-  CypherTemplateEngine: jest.fn(() => engine),
-};
+  return {
+    cypherTemplateEngine: engine,
+    CypherTemplateEngine: jest.fn(() => engine),
+  };
 });
 jest.mock('../CypherTemplateEngine', () => {
   const engine = {
-    initialize: jest.fn < async() => Promise < void>> ().mockResolvedValue(undefined),
-      generateQuery: jest.fn(),
-        getAllTemplates: jest.fn().mockReturnValue([]),
-          validateQuery: jest.fn((query: string) => {
-            const upperQuery = query.toUpperCase();
-            let isValid = true;
-            let isReadOnly = true;
-            let hasLimit = /\bLIMIT\s+\d+/i.test(query);
-            let complexity = 10;
-            if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
-              isValid = false;
-              isReadOnly = false;
-            }
-            if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
-            if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
-            return { isValid, isReadOnly, hasLimit, complexity, estimatedCost: complexity * 10 };
-          }),
-            ensureLimit: jest.fn((query: string, limit: number = 100) => {
-              if (/\bLIMIT\s+\d+/i.test(query)) return query;
-              return `${query.trim()} LIMIT ${limit}`;
-            }),
+    initialize: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    generateQuery: jest.fn(),
+    getAllTemplates: jest.fn().mockReturnValue([]),
+    validateQuery: jest.fn((query: string) => {
+      const upperQuery = query.toUpperCase();
+      let isValid = true;
+      let isReadOnly = true;
+      const hasLimit = /\bLIMIT\s+\d+/i.test(query);
+      let complexity = 10;
+      if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
+        isValid = false;
+        isReadOnly = false;
+      }
+      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
+      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+      return { isValid, isReadOnly, hasLimit, complexity, estimatedCost: complexity * 10 };
+    }),
+    ensureLimit: jest.fn((query: string, limit: number = 100) => {
+      if (/\bLIMIT\s+\d+/i.test(query)) return query;
+      return `${query.trim()} LIMIT ${limit}`;
+    }),
   };
-return {
-  cypherTemplateEngine: engine,
-  CypherTemplateEngine: jest.fn(() => engine),
+  return {
+    cypherTemplateEngine: engine,
+    CypherTemplateEngine: jest.fn(() => engine),
 };
 });
 
