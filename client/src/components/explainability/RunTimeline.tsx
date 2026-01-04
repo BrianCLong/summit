@@ -17,7 +17,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Button,
   LinearProgress,
   Alert,
   Stack,
@@ -64,7 +63,7 @@ interface RunTimelineProps {
 }
 
 const RunTimeline: React.FC<RunTimelineProps> = ({
-  tenantId,
+  tenantId: _tenantId,
   onRunSelect,
   autoRefresh = false,
   refreshIntervalMs = 30000,
@@ -105,6 +104,7 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
 
   useEffect(() => {
     fetchRuns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   useEffect(() => {
@@ -112,6 +112,7 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
       const interval = setInterval(fetchRuns, refreshIntervalMs);
       return () => clearInterval(interval);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoRefresh, refreshIntervalMs, filter]);
 
   const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'error' => {

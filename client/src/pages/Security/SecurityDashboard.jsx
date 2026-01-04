@@ -53,15 +53,10 @@ import {
   Refresh,
   Add,
   RotateRight,
-  Delete,
   Warning,
-  CheckCircle,
-  Error,
   Search,
   Shield,
   Lock,
-  Visibility,
-  VisibilityOff,
   Timeline,
 } from '@mui/icons-material';
 import { KeyManagementAPI, PIIDetectionAPI } from '../../services/security-api';

@@ -61,10 +61,7 @@ export default function RoleList() {
     permissionCategories,
     loading,
     error,
-    selectedRole,
     refreshRoles,
-    loadRole,
-    clearSelection,
     createRole,
     updateRole,
     deleteRole,
@@ -314,6 +311,7 @@ export default function RoleList() {
                       <Chip
                         label={role.scope}
                         size="small"
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         color={getScopeColor(role.scope) as any}
                       />
                     </TableCell>

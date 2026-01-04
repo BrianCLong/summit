@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Run Detail View Component
  *
@@ -15,7 +16,6 @@ import {
   LinearProgress,
   Alert,
   Stack,
-  Divider,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -23,18 +23,13 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Link,
-  Tooltip,
-  IconButton,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
-  Info as InfoIcon,
   Verified as VerifiedIcon,
-  Link as LinkIcon,
 } from '@mui/icons-material';
 
 interface ExplainableRun {
@@ -136,14 +131,10 @@ interface RunDetailViewProps {
   onClose?: () => void;
 }
 
-const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose }) => {
+const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose }) => {
   const [run, setRun] = useState<ExplainableRun | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchRunDetails();
-  }, [runId]);
 
   const fetchRunDetails = async () => {
     setLoading(true);
@@ -164,6 +155,11 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchRunDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runId]);
 
   const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'error' => {
     if (confidence >= 0.8) return 'success';

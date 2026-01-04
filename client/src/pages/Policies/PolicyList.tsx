@@ -146,10 +146,12 @@ const PolicyList: React.FC = () => {
     updateFilters({ search: event.target.value, page: 1 });
   }, [updateFilters]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleStatusFilter = useCallback((event: any) => {
     updateFilters({ status: event.target.value || undefined, page: 1 });
   }, [updateFilters]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCategoryFilter = useCallback((event: any) => {
     updateFilters({ category: event.target.value || undefined, page: 1 });
   }, [updateFilters]);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Analytics Hooks
  *
@@ -21,7 +22,6 @@ import {
   AuditReadiness,
   ControlStatus,
   ControlEffectiveness,
-  EvidenceStatus,
   FrameworkStatus,
   TimeRange,
 } from '../services/analytics-api';

@@ -30,7 +30,6 @@ import {
   DialogActions,
   Alert,
   LinearProgress,
-  Tooltip,
   Paper,
   Table,
   TableBody,
@@ -38,9 +37,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
   Switch,
-  Divider,
   Badge,
   Tabs,
   Tab,
@@ -51,13 +48,9 @@ import {
   Add,
   CheckCircle,
   Error,
-  Warning,
   Link,
   LinkOff,
-  Settings,
   PlayArrow,
-  Refresh,
-  Security,
   Approval,
   History,
 } from '@mui/icons-material';
@@ -366,7 +359,9 @@ function IntegrationCard({ integration, manifest, onConnect, onDisconnect, onExe
 
 // Approval Queue Component
 function ApprovalQueue() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { approvals, loading, error, processing, approve, reject, refresh } = useIntegrationApprovals();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [comment, setComment] = useState('');
 
   if (loading) return <LinearProgress />;
@@ -513,6 +508,7 @@ export default function IntegrationCatalog() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [setupManifest, setSetupManifest] = useState(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [executeIntegration, setExecuteIntegration] = useState(null);
 
   // Create manifest lookup

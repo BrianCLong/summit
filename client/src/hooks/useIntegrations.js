@@ -273,6 +273,7 @@ export function useIntegrationAudit(params = {}) {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.integrationId, params.from, params.to]);
 
   useEffect(() => {

@@ -15,7 +15,7 @@ export const getFeatureFlags = (): FeatureFlagConfig => {
         if (typeof process !== 'undefined' && process.env && process.env[envKey] === 'true') {
             return true;
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
 
@@ -27,7 +27,7 @@ export const getFeatureFlags = (): FeatureFlagConfig => {
         if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[envKey] === 'true') {
             return true;
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
 

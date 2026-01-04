@@ -1,6 +1,6 @@
 // client/src/components/ui/StatusBar.tsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Box, Stack, Divider } from '@mui/material';
+import { AppBar, Toolbar, Typography, Stack, Divider } from '@mui/material';
 import StatusIndicator from './StatusIndicator';
 
 interface StatusBarProps {
@@ -114,6 +114,7 @@ const StatusBar: React.FC<StatusBarProps> = ({
           {additionalIndicators.map((indicator, index) => (
             <StatusIndicator
               key={`additional-${index}`}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               status={indicator.status as any}
               label={indicator.label}
               description={indicator.description}

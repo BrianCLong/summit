@@ -156,11 +156,11 @@ export const WebGLGraphRenderer = forwardRef<
     height = 600,
     onNodeClick,
     onNodeHover,
-    onEdgeClick,
+    onEdgeClick: _onEdgeClick,
     selectedNodeIds = [],
     highlightedNodeIds = [],
     enableProgressiveLoading = true,
-    batchSize = 100,
+    batchSize: _batchSize = 100,
     lodThresholds = DEFAULT_LOD_THRESHOLDS,
     performanceMode = 'balanced',
   },
@@ -517,7 +517,9 @@ export const WebGLGraphRenderer = forwardRef<
       visibleNodes: visibleNodes.length,
       totalNodes: nodes.length,
       renderTime: Math.round(renderTime * 100) / 100,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       memoryUsage: (performance as any).memory?.usedJSHeapSize
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)
         : 0,
     });
