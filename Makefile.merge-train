@@ -111,6 +111,15 @@ mt-auto-update: ## Auto-update a batch of PRs with main
 		done
 	@echo "$(GREEN)✓ Update complete$(RESET)"
 
+preflight: ## Run local gates (lint, typecheck, test). Use fast=true to skip tests.
+	@./scripts/ops/preflight.ts $(if $(filter true,$(fast)),--fast,)
+
+pr-queue: ## Generate a triage report of the current PR queue.
+	@./scripts/ops/pr-queue.ts
+
+merge-train: ## Simulate a merge train run for specific PRs (prs=123,456)
+	@./scripts/ops/merge-train.ts prs=$(prs)
+
 mt-express-lane: ## List PRs eligible for express lane (<100 LOC, green CI)
 	@echo "$(YELLOW)=== Merge Train: Express Lane Candidates ===$(RESET)"
 	@gh pr list --state open --limit 100 --json number,title,additions,deletions,mergeable,statusCheckRollup | \
