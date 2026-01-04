@@ -1,5 +1,7 @@
 import { createHash, randomUUID } from 'crypto';
-import { promises as fs, createWriteStream } from 'fs';
+import { resolveSafePath } from '@intelgraph/security-utils';
+import fs from 'fs/promises';
+import { createWriteStream } from 'fs';
 import path from 'path';
 import { tmpdir } from 'os';
 import archiver from 'archiver';
@@ -37,7 +39,7 @@ const DEFAULT_INCLUDE: IncludeConfig = {
 };
 
 export class CaseBundleService {
-  constructor(private readonly store: CaseBundleStore = new FixtureCaseBundleStore()) {}
+  constructor(private readonly store: CaseBundleStore = new FixtureCaseBundleStore()) { }
 
   async exportCases(
     caseIds: string[],
@@ -57,7 +59,7 @@ export class CaseBundleService {
     const cases = await this.store.getCases(caseIds);
     if (cases.length !== caseIds.length) {
       const missing = caseIds.filter((id) => !cases.find((c) => c.id === id));
-      throw new Error(`missing_cases:${missing.join(',')}`);
+      throw new Error(`missing_cases:${missing.join(',')} `);
     }
 
     const evidence = include.evidence ? await this.store.getEvidence(caseIds) : [];
@@ -77,7 +79,7 @@ export class CaseBundleService {
     };
 
     for (const caseRecord of this.sortById(cases)) {
-      const artifactPath = `cases/${caseRecord.id}.json`;
+      const artifactPath = `cases / ${caseRecord.id}.json`;
       const hash = await this.writeOrderedJson(bundlePath, artifactPath, caseRecord);
       manifestBase.cases.push({
         id: caseRecord.id,
@@ -88,7 +90,7 @@ export class CaseBundleService {
     }
 
     for (const evidenceRecord of this.sortById(evidence)) {
-      const artifactPath = `evidence/${evidenceRecord.id}.json`;
+      const artifactPath = `evidence / ${evidenceRecord.id}.json`;
       const hash = await this.writeOrderedJson(
         bundlePath,
         artifactPath,
@@ -104,7 +106,7 @@ export class CaseBundleService {
     }
 
     for (const note of this.sortById(notes)) {
-      const artifactPath = `notes/${note.id}.json`;
+      const artifactPath = `notes / ${note.id}.json`;
       const hash = await this.writeOrderedJson(bundlePath, artifactPath, note);
       manifestBase.notes.push({
         id: note.id,
@@ -116,7 +118,7 @@ export class CaseBundleService {
     }
 
     for (const node of this.sortById(graph.nodes)) {
-      const artifactPath = `graph/nodes/${node.id}.json`;
+      const artifactPath = `graph / nodes / ${node.id}.json`;
       const hash = await this.writeOrderedJson(bundlePath, artifactPath, node);
       manifestBase.graph.nodes.push({
         id: node.id,
@@ -129,7 +131,7 @@ export class CaseBundleService {
     }
 
     for (const edge of this.sortById(graph.edges)) {
-      const artifactPath = `graph/edges/${edge.id}.json`;
+      const artifactPath = `graph / edges / ${edge.id}.json`;
       const hash = await this.writeOrderedJson(bundlePath, artifactPath, edge);
       manifestBase.graph.edges.push({
         id: edge.id,
@@ -170,7 +172,7 @@ export class CaseBundleService {
   ): Promise<CaseBundleImportResult> {
     const include = this.resolveInclude(options.include);
     const workingDir = await this.ensureDirectory(bundlePath);
-    const manifestPath = path.join(workingDir, 'manifest.json');
+    const manifestPath = resolveSafePath(workingDir, 'manifest.json');
     const manifestRaw = await fs.readFile(manifestPath, 'utf-8');
     const manifest: CaseBundleManifest = JSON.parse(manifestRaw);
 
@@ -294,12 +296,12 @@ export class CaseBundleService {
           oldId: entry.parsed.id,
           newId,
           type: 'graph-edge',
-          caseId: `${mappedFrom}->${mappedTo}`,
+          caseId: `${mappedFrom} -> ${mappedTo} `,
         });
       }
     }
 
-    const mappingPath = path.join(workingDir, 'import-mapping.json');
+    const mappingPath = resolveSafePath(workingDir, 'import-mapping.json');
     await fs.writeFile(mappingPath, JSON.stringify(this.orderValue(mappingReport), null, 2));
 
     return {
@@ -349,7 +351,7 @@ export class CaseBundleService {
   ): Promise<string> {
     const ordered = this.orderValue(payload);
     const serialized = JSON.stringify(ordered, null, 2);
-    const target = path.join(baseDir, relativePath);
+    const target = resolveSafePath(baseDir, relativePath);
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.writeFile(target, serialized);
     return this.hashString(serialized);
@@ -364,11 +366,11 @@ export class CaseBundleService {
     const loaded: Array<{ manifest: CaseBundleManifestEntry; parsed: T }> = [];
 
     for (const entry of orderedEntries) {
-      const absolutePath = path.join(baseDir, entry.path);
+      const absolutePath = resolveSafePath(baseDir, entry.path);
       const fileContent = await fs.readFile(absolutePath, 'utf-8');
       const computedHash = this.hashString(fileContent);
       if (computedHash !== entry.hash) {
-        throw new Error(`integrity_mismatch:${kind}:${entry.id}`);
+        throw new Error(`integrity_mismatch:${kind}:${entry.id} `);
       }
       loaded.push({ manifest: entry, parsed: JSON.parse(fileContent) as T });
     }
@@ -427,10 +429,10 @@ export class CaseBundleService {
 
   private generateNewId(sourceId: string, options: CaseBundleImportOptions): string {
     if (options.preserveIds) {
-      return options.namespace ? `${options.namespace}:${sourceId}` : sourceId;
+      return options.namespace ? `${options.namespace}:${sourceId} ` : sourceId;
     }
     if (options.namespace) {
-      return `${options.namespace}:${sourceId}`;
+      return `${options.namespace}:${sourceId} `;
     }
     return randomUUID();
   }
