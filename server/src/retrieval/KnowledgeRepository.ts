@@ -119,6 +119,12 @@ export class KnowledgeRepository {
       // Full Text Search Condition
       params.push(query.queryText);
       const qIdx = pIdx;
+      pIdx++;
+
+      // Use parameterized query for limit to prevent injection
+      const limitVal = typeof query.topK === 'number' ? query.topK : 10;
+      params.push(limitVal);
+      const limitIdx = pIdx;
 
       const sql = `
         SELECT
@@ -128,7 +134,7 @@ export class KnowledgeRepository {
         WHERE ${whereConditions.join(' AND ')}
           AND to_tsvector('english', coalesce(ko.title, '') || ' ' || coalesce(ko.body, '')) @@ plainto_tsquery('english', $${qIdx})
         ORDER BY rank DESC
-        LIMIT ${query.topK || 10}
+        LIMIT $${limitIdx}
       `;
 
       const res = await client.query(sql, params);
@@ -177,6 +183,11 @@ export class KnowledgeRepository {
       // For now assume one primary embedding or take the max similarity.
       params.push(vectorStr);
       const vecParamIdx = pIdx;
+      pIdx++;
+
+      const limitVal = typeof query.topK === 'number' ? query.topK : 10;
+      params.push(limitVal);
+      const limitIdx = pIdx;
 
       // Note: We select from knowledge_objects joined with embedding_records
       const sql = `
@@ -187,7 +198,7 @@ export class KnowledgeRepository {
         JOIN embedding_records er ON ko.id = er.object_id
         WHERE ${whereConditions.join(' AND ')}
         ORDER BY similarity DESC
-        LIMIT ${query.topK || 10}
+        LIMIT $${limitIdx}
       `;
 
       const res = await client.query(sql, params);
