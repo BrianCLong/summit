@@ -34,7 +34,7 @@ jobs:
       - name: Run Server Unit Tests with Coverage (Security Focus)
         working-directory: ./server
         run: |
-          pnpm exec jest --config jest.config.js --passWithNoTests --coverage --collectCoverageFrom="src/security/**/*.ts" --testMatch="**/security/__tests__/**/*.test.ts" --reporters=default --reporters=jest-junit
+          pnpm exec jest --config jest.config.ts --passWithNoTests --coverage --collectCoverageFrom="src/security/**/*.ts" --testMatch="**/security/__tests__/**/*.test.ts" --reporters=default --reporters=jest-junit
         env:
           CI: true
           NODE_ENV: test
