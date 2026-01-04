@@ -1,28 +1,19 @@
 // @ts-nocheck
 import neo4j from 'neo4j-driver';
-import { Neo4jContainer, StartedNeo4jContainer } from '@testcontainers/neo4j';
+import { getNeo4jDriver } from '../config/database';
 
 export async function executeSandbox(cypher: string, rowLimit = 10) {
-  if (/(CREATE|MERGE|DELETE|SET)/i.test(cypher)) {
+  if (/(CREATE|MERGE|DELETE|SET|DROP|REMOVE|CALL|LOAD)/i.test(cypher)) {
     throw new Error('Mutations are not allowed');
   }
-  let container: StartedNeo4jContainer;
+
+  const driver = getNeo4jDriver();
+  const session = driver.session({ defaultAccessMode: neo4j.session.READ });
+
   try {
-    container = await new Neo4jContainer('neo4j:5')
-      .withPassword('password')
-      .start();
-  } catch {
-    throw new Error('Neo4j container unavailable');
-  }
-  const uri = container.getBoltUri();
-  const driver = neo4j.driver(uri, neo4j.auth.basic('neo4j', 'password'));
-  const session = driver.session();
-  try {
-    const result = await session.run(`${cypher} LIMIT ${rowLimit}`);
+    const result = await session.run(`${cypher} LIMIT ${Math.floor(Number(rowLimit))}`);
     return result.records.map((r: any) => r.toObject());
   } finally {
     await session.close();
-    await driver.close();
-    await container.stop();
   }
 }

@@ -50,6 +50,7 @@ const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
+const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -131,6 +132,7 @@ function App() {
                         The prompts asked for a "shell", usually implying it might stand alone or take over.
                         I'll put it at /workbench. */}
                     <Route path="/workbench" element={<WorkbenchShell />} />
+                    <Route path="/copilot" element={<CopilotPage />} />
 
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
