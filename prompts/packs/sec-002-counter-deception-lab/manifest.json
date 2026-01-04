@@ -1,0 +1,17 @@
+{
+  "id": "sec-002-counter-deception-lab",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: sec-002-counter-deception-lab",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {},
+  "guardrails": {
+    "tags": [
+      "claude",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}
