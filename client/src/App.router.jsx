@@ -42,6 +42,7 @@ import {
   Settings,
   RocketLaunch,
   PendingActions,
+  Shield,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -52,7 +53,8 @@ import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import RouteAnnouncer from './components/a11y/RouteAnnouncer';
-import { useFeatureFlag } from './hooks/useFeatureFlag';
+import { useFeatureFlag, FeatureFlagContext } from './hooks/useFeatureFlag';
+import { useResilientPolling } from './hooks/useResilientPolling';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -112,6 +114,9 @@ const ComplianceCenter = React.lazy(() =>
 const SandboxDashboard = React.lazy(() =>
   import('./pages/Sandbox/SandboxDashboard')
 );
+const AdversarialDashboard = React.lazy(() =>
+  import('./features/security/AdversarialDashboard')
+);
 
 import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -160,6 +165,13 @@ const navigationItems = [
   { path: '/plugins', label: 'Plugins', icon: <Extension />, roles: [ADMIN] },
   { path: '/integrations', label: 'Integrations', icon: <Cable />, roles: [ADMIN] },
   { path: '/security', label: 'Security', icon: <Key />, roles: [ADMIN] },
+  {
+    path: '/security/adversarial',
+    label: 'Adversarial Defense',
+    icon: <Shield />,
+    roles: [ADMIN],
+    featureFlag: 'adversarial-defense-ui',
+  },
   { path: '/compliance', label: 'Compliance', icon: <VerifiedUser />, roles: [ADMIN] },
   { path: '/sandbox', label: 'Sandbox', icon: <Science />, roles: [ADMIN] },
 ];
@@ -208,7 +220,7 @@ function ConnectionStatus() {
 }
 
 // Navigation Drawer
-function NavigationDrawer({ open, onClose }) {
+function NavigationDrawer({ open, onClose, featureFlags }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasRole, hasPermission } = useAuth();
@@ -222,6 +234,11 @@ function NavigationDrawer({ open, onClose }) {
     if (item.roles && !item.roles.some((r) => hasRole(r))) return false;
     if (item.permissions && !item.permissions.some((p) => hasPermission(p)))
       return false;
+    // Filter by feature flag if specified
+    if (item.featureFlag && featureFlags) {
+      const flagValue = featureFlags[item.featureFlag];
+      if (!flagValue) return false;
+    }
     return true;
   });
 
@@ -301,28 +318,32 @@ function DashboardPage() {
     alertsCount: 2,
   });
 
-  // Simulate real-time updates
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setMetrics((prev) => ({
-        ...prev,
-        systemLoad: Math.max(
+  // Simulate real-time updates with network-aware polling
+  const updateMetrics = React.useCallback(async () => {
+    setMetrics((prev) => ({
+      ...prev,
+      systemLoad: Math.max(
+        20,
+        Math.min(95, prev.systemLoad + (Math.random() - 0.5) * 10),
+      ),
+      activeUsers: Math.max(
+        1,
+        Math.min(
           20,
-          Math.min(95, prev.systemLoad + (Math.random() - 0.5) * 10),
+          prev.activeUsers + Math.floor((Math.random() - 0.5) * 3),
         ),
-        activeUsers: Math.max(
-          1,
-          Math.min(
-            20,
-            prev.activeUsers + Math.floor((Math.random() - 0.5) * 3),
-          ),
-        ),
-        graphNodes: prev.graphNodes + Math.floor(Math.random() * 3),
-      }));
-    }, 3000);
-
-    return () => clearInterval(interval);
+      ),
+      graphNodes: prev.graphNodes + Math.floor(Math.random() * 3),
+    }));
   }, []);
+
+  // Use resilient polling that pauses when offline
+  useResilientPolling(updateMetrics, {
+    interval: 3000,
+    enabled: true,
+    refreshOnReconnect: false, // Metrics are simulated, no need to refresh
+    preventConcurrent: false, // Updates are synchronous
+  });
 
   return (
     <Container maxWidth="lg">
@@ -704,6 +725,18 @@ function MainLayout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const mainRef = useRef(null);
   const a11yGuardrailsEnabled = useFeatureFlag('ui.a11yGuardrails');
+  const featureFlagContext = React.useContext(FeatureFlagContext);
+
+  // Build a simple map of feature flags for navigation filtering
+  const featureFlags = React.useMemo(() => {
+    if (!featureFlagContext) return {};
+    const flags = {};
+    Object.keys(featureFlagContext.flags).forEach((key) => {
+      const flag = featureFlagContext.flags[key];
+      flags[key] = flag.enabled;
+    });
+    return flags;
+  }, [featureFlagContext]);
 
   const routeLabels = useMemo(
     () =>
@@ -726,6 +759,7 @@ function MainLayout() {
       <NavigationDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        featureFlags={featureFlags}
       />
 
       <Box
@@ -784,6 +818,10 @@ function MainLayout() {
                 <Route path="/plugins" element={<InstalledPlugins />} />
                 <Route path="/integrations" element={<IntegrationCatalog />} />
                 <Route path="/security" element={<SecurityDashboard />} />
+                <Route
+                  path="/security/adversarial"
+                  element={<AdversarialDashboard />}
+                />
                 <Route path="/compliance" element={<ComplianceCenter />} />
                 <Route path="/sandbox" element={<SandboxDashboard />} />
               </Route>
