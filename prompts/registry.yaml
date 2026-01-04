@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: durable-work-orchestration-pr1
+    version: v1
+    path: prompts/agent-tasks/durable-work-orchestration-pr1.md
+    sha256: 7d62336d408d488712d0bd88c9eeeb94b130bb4839a9a5b255d9dcf7a11cf052
+    description: Durable work orchestration MVP prompt covering design doc and schemas/interfaces for PR1.
+    scope:
+      paths:
+        - docs/architecture/durable-work-orchestration.md
+        - docs/roadmap/STATUS.json
+        - prompts/agent-tasks/durable-work-orchestration-pr1.md
+        - prompts/registry.yaml
+        - agents/examples/durable-work-orchestration-pr1.json
+        - server/src/work-orchestration/
+      domains:
+        - orchestration
+        - governance
+        - documentation
+        - server
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

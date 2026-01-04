@@ -1,0 +1,14 @@
+{
+  "task_id": "DWO_PR1",
+  "agent_id": "codex",
+  "prompt_ref": "durable-work-orchestration-pr1@v1",
+  "status": "completed",
+  "summary": "Created durable work orchestration design doc, MVP schema/interfaces, and deterministic ID helpers with unit test.",
+  "artifacts": {
+    "design_doc": "docs/architecture/durable-work-orchestration.md",
+    "schemas": "server/src/work-orchestration/schema.sql",
+    "interfaces": "server/src/work-orchestration/types.ts",
+    "tests": "server/src/work-orchestration/__tests__/ids.test.ts"
+  },
+  "timestamp": "2026-01-04T00:03:04Z"
+}

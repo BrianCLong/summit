@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-04T00:03:04Z",
+  "revision_note": "Added Durable Work Orchestration MVP entry with initial design + schema artifacts",
   "initiatives": [
     {
       "id": "A",
@@ -146,14 +146,33 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Durable Work Orchestration",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Durable Work Orchestration MVP",
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "Design doc and MVP schemas/interfaces defined; implementation gated",
+          "blockers": [
+            "API surface not yet implemented",
+            "Persistence integration pending",
+            "Patrol loops not yet wired"
+          ],
+          "target_completion": "Sprint N+1"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 2,
-    "partial": 2,
+    "partial": 3,
     "incomplete": 2,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
   }
 }
