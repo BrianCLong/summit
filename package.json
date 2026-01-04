@@ -9,6 +9,7 @@
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "tsx scripts/verify.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
+    "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
