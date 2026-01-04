@@ -1,20 +1,26 @@
-{
-    "items": [
-        {
-            "number": 101,
-            "title": "Fix: login button",
-            "html_url": "https://github.com/BrianCLong/summit/pull/101",
-            "pull_request": {
-                "merged_at": null
-            }
-        },
-        {
-            "number": 102,
-            "title": "Feat: Dark mode implementation",
-            "html_url": "https://github.com/BrianCLong/summit/pull/102",
-            "pull_request": {
-                "merged_at": "2026-01-01T12:00:00Z"
-            }
-        }
-    ]
-}
+[
+  {
+    "number": 123,
+    "title": "Fix: UI element rendering",
+    "url": "https://github.com/BrianCLong/summit/pull/123",
+    "mergedAt": "2025-01-02T10:30:00Z"
+  },
+  {
+    "number": 124,
+    "title": "Feat: Dark mode implementation",
+    "url": "https://github.com/BrianCLong/summit/pull/124",
+    "mergedAt": null
+  },
+  {
+    "number": 125,
+    "title": "Fix #3: API 500 error",
+    "url": "https://github.com/BrianCLong/summit/pull/125",
+    "mergedAt": "2025-01-03T12:30:00Z"
+  },
+  {
+    "number": 126,
+    "title": "Docs: Update installation guide",
+    "url": "https://github.com/BrianCLong/summit/pull/126",
+    "mergedAt": "2025-01-04T13:30:00Z"
+  }
+]

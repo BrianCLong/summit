@@ -1,53 +1,60 @@
-import { GitHubClient } from './github.js';
+import { GitHubClient, GitHubPR } from './github';
+import { LedgerEntry, SolvedStatus } from './ledger';
 
-export interface Evidence {
-    prs: { number: number; url: string; mergedAt: string | null; title: string }[];
-    commits: { sha: string; url: string; message: string }[];
-    paths: { path: string; reason: string }[];
-    tests: { name: string; command: string }[];
-}
+export async function detectAlreadySolved(
+  issueNumber: number,
+  issueTitle: string,
+  github: GitHubClient
+): Promise<{ status: SolvedStatus; evidence: LedgerEntry['evidence']; notes: string }> {
+  const evidence: LedgerEntry['evidence'] = {
+    prs: [],
+    commits: [],
+    paths: [],
+    tests: [],
+  };
+  let notes = '';
+  let status: SolvedStatus = 'not_solved';
 
-export type SolvedStatus = 'already_solved' | 'not_solved' | 'blocked' | 'duplicate' | 'invalid' | 'solved_in_this_run';
+  // 1. Search for PRs referencing the issue number
+  // The GitHub search API for issues/PRs is powerful.
+  // We'll search for PRs that mention the issue number in their title or body.
+  const prQuery = `#${issueNumber}`;
+  let prs: GitHubPR[] = [];
+  try {
+    prs = await github.searchPullRequests(prQuery);
+  } catch (error) {
+    console.warn(`Could not search PRs for issue #${issueNumber}: ${error}`);
+    notes += `Warning: Could not search PRs for issue #${issueNumber}. `;
+  }
 
-export interface DetectionResult {
-    solved_status: SolvedStatus;
-    evidence: Evidence;
-}
+  const mergedPrs = prs.filter(pr => pr.mergedAt !== null);
 
-export async function detectAlreadySolved(issue: any, github: GitHubClient): Promise<DetectionResult> {
-    const evidence: Evidence = {
-        prs: [],
-        commits: [],
-        paths: [],
-        tests: [],
-    };
-    let solved_status: SolvedStatus = 'not_solved';
+  if (mergedPrs.length > 0) {
+    status = 'already_solved';
+    evidence.prs = mergedPrs.map(pr => ({
+      number: pr.number,
+      url: pr.url,
+      mergedAt: pr.mergedAt,
+      title: pr.title,
+    }));
+    notes += `Found merged PR(s) referencing issue #${issueNumber}.`;
+  }
 
-    // Search for PRs referencing the issue
-    const searchResults = await github.searchPRs(issue.number);
-    if (searchResults.items && searchResults.items.length > 0) {
-        for (const pr of searchResults.items) {
-            evidence.prs.push({
-                number: pr.number,
-                url: pr.html_url,
-                mergedAt: pr.pull_request?.merged_at || null,
-                title: pr.title,
-            });
+  // 2. Search commit history for keywords or paths (Placeholder for local git log)
+  // The prompt suggests `git log --grep "#<issue_number>"`. This implies local git access.
+  // For an API-only approach, searching commit messages directly via API is not straightforward
+  // without iterating through commits, which is inefficient.
+  // We'll assume this part will be handled by a local `git log` command if needed,
+  // or a more sophisticated GitHub search API query if available and efficient.
+  // For now, we'll just add a note if no PRs were found.
+  if (status === 'not_solved') {
+    notes += 'No merged PRs found referencing this issue. Further investigation (e.g., local git log) may be needed.';
+  }
 
-            if (pr.pull_request?.merged_at) {
-                solved_status = 'already_solved';
-            }
-        }
-    }
+  // TODO: Add more sophisticated checks:
+  // - Search for tests added corresponding to the issue
+  // - Verify by checking the fix is on the default branch (requires more context about default branch)
+  // - Verify with tests or a reproduction attempt (when feasible)
 
-    // A more robust check could involve checking for closing keywords in PRs/commits
-    // e.g. "Closes #123", "Fixes #123"
-    // This would require more detailed parsing of PR/commit bodies.
-
-    // For now, a merged PR referencing the issue is our primary signal.
-
-    return {
-        solved_status,
-        evidence,
-    };
+  return { status, evidence, notes };
 }

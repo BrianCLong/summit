@@ -1,50 +1,65 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import { LedgerEntry } from './ledger';
 
-const REPORT_FILE = path.join('tools', 'issue-sweeper', 'REPORT.md');
+const REPORT_FILE = 'REPORT.md';
 
-export interface BatchSummary {
-    batch_range: string;
-    counts: {
-        already_solved: number;
-        not_solved: number;
-        blocked: number;
-        duplicate: number;
-        invalid: number;
-        solved_in_this_run: number;
-    };
-    prs_opened: any[];
-    failures: any[];
-}
+export class Reporter {
+  private readonly reportFilePath: string;
 
-export async function appendToReport(summary: BatchSummary) {
-    const reportContent = `
-## Batch Report (${new Date().toISOString()})
+  constructor(toolsDir: string) {
+    this.reportFilePath = path.join(toolsDir, REPORT_FILE);
+  }
 
-- **Issue Range:** ${summary.batch_range}
-- **Counts:**
-    - Already Solved: ${summary.counts.already_solved}
-    - Not Solved: ${summary.counts.not_solved}
-    - Blocked: ${summary.counts.blocked}
-    - Duplicate: ${summary.counts.duplicate}
-    - Invalid: ${summary.counts.invalid}
-    - Solved in this Run: ${summary.counts.solved_in_this_run}
-- **PRs Opened:** ${summary.prs_opened.length}
-- **Failures:** ${summary.failures.length}
-`;
+  async appendBatchReport(
+    batchNumber: number,
+    processedEntries: LedgerEntry[],
+    openPrs: { issue_number: number; pr_url: string }[]
+  ): Promise<void> {
+    let reportContent = `## Batch Report - Batch #${batchNumber}\n`;
+    reportContent += `Run at: ${new Date().toISOString()}\n\n`;
 
-    await fs.appendFile(REPORT_FILE, reportContent);
-}
+    const counts = processedEntries.reduce((acc, entry) => {
+      acc[entry.solved_status] = (acc[entry.solved_status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-export async function initReport() {
-    const header = `# Issue Sweeper Report
-
-This report summarizes the results of the issue sweeper runs.
-`;
-    try {
-        await fs.access(REPORT_FILE);
-    } catch (error) {
-        // File does not exist, create it
-        await fs.writeFile(REPORT_FILE, header);
+    reportContent += '### Summary by Solved Status:\n';
+    for (const status in counts) {
+      reportContent += `- ${status}: ${counts[status]}\n`;
     }
+    reportContent += '\n';
+
+    const prsOpenedInBatch = openPrs.filter(pr =>
+      processedEntries.some(entry => entry.issue_number === pr.issue_number && entry.solved_status === 'solved_in_this_run')
+    );
+
+    if (prsOpenedInBatch.length > 0) {
+      reportContent += '### Pull Requests Opened in this Batch:\n';
+      prsOpenedInBatch.forEach(pr => {
+        reportContent += `- Issue #${pr.issue_number}: ${pr.pr_url}\n`;
+      });
+      reportContent += '\n';
+    }
+
+    // TODO: Implement logic for top recurring labels and systemic failure patterns
+    // This would require more sophisticated analysis of the `processedEntries` and potentially the full ledger.
+    reportContent += '### Systemic Themes (TODO: Implement analysis)\n';
+    reportContent += '- [ ] Dependency drift\n';
+    reportContent += '- [ ] Flaky tests\n';
+    reportContent += '- [ ] Docs gaps\n';
+    reportContent += '\n---\n\n';
+
+    await fs.appendFile(this.reportFilePath, reportContent, 'utf-8');
+  }
+
+  async initializeReport(): Promise<void> {
+    const initialContent = `# Issue Sweeper Report\n\nThis report summarizes the progress of the Issue Sweeper tool.\n\n`;
+    try {
+      await fs.writeFile(this.reportFilePath, initialContent, 'utf-8');
+    } catch (error: any) {
+      console.error('Error initializing report file:', error);
+      throw error;
+    }
+  }
 }
