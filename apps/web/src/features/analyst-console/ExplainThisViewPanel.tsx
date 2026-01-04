@@ -33,13 +33,14 @@ import type {
   AnalystLink,
   ViewExplanation,
   ViewExplanationMetrics,
+  TimeWindow
 } from './types'
 
 /**
  * Build a human-readable explanation of the current view
  */
 function buildViewExplanation(params: {
-  timeWindow: { from: string; to: string }
+  timeWindow: TimeWindow
   visibleEntities: AnalystEntity[]
   visibleLinks: AnalystLink[]
   visibleEventCount: number
@@ -109,8 +110,8 @@ function buildViewExplanation(params: {
   }
 
   // Build headline
-  const fromDate = new Date(timeWindow.from)
-  const toDate = new Date(timeWindow.to)
+  const fromDate = new Date(timeWindow.startMs)
+  const toDate = new Date(timeWindow.endMs)
   const daysDiff = Math.ceil(
     (toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24)
   )
@@ -209,8 +210,8 @@ export function ExplainThisViewPanel({
 
   // Filter data based on current view state
   const filteredData = useMemo(() => {
-    const fromTime = new Date(state.timeWindow.from).getTime()
-    const toTime = new Date(state.timeWindow.to).getTime()
+    const fromTime = state.timeWindow.startMs
+    const toTime = state.timeWindow.endMs
 
     // Filter entities
     let visibleEntities = entities.filter(entity => {
