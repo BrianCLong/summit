@@ -155,7 +155,7 @@ export const ThreatHuntingDashboard: React.FC = () => {
 
   // Polling for hunt status
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
 
     if (activeHunt && !['completed', 'failed', 'cancelled'].includes(activeHunt.status)) {
       interval = setInterval(async () => {

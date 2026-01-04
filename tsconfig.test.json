@@ -9,7 +9,14 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "types": ["node", "jest"]
+    "jsx": "react-jsx",
+    "types": ["node", "jest", "@testing-library/jest-dom"]
   },
-  "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"]
+  "include": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "client/src/types/**/*.d.ts",
+    "client/types/**/*.d.ts"
+  ]
 }

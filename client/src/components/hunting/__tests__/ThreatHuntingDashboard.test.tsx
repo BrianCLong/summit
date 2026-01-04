@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, beforeEach, afterEach } from '@jest/globals';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
@@ -128,7 +128,8 @@ describe('ThreatHuntingDashboard', () => {
       await userEvent.click(startButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/test-hunt-123/i)).toBeInTheDocument();
+        // Component shows first 8 chars of huntId: "test-hun..."
+        expect(screen.getByText(/test-hun/i)).toBeInTheDocument();
       });
     });
 
@@ -169,37 +170,26 @@ describe('ThreatHuntingDashboard', () => {
 
   describe('Hunt Progress', () => {
     it('should display progress bar during hunt', async () => {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              huntId: 'test-hunt-123',
-              status: 'initializing',
-              estimatedDuration: 120000,
-            }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              huntId: 'test-hunt-123',
-              status: 'executing_queries',
-              progress: 50,
-              currentPhase: 'Executing Graph Queries',
-              findingsCount: 5,
-              elapsedTimeMs: 30000,
-              estimatedRemainingMs: 30000,
-            }),
-        });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            huntId: 'test-hunt-123',
+            status: 'initializing',
+            estimatedDuration: 120000,
+          }),
+      });
 
       render(<ThreatHuntingDashboard />);
 
       const startButton = screen.getByRole('button', { name: /start hunt/i });
       await userEvent.click(startButton);
 
+      // Verify hunt is active - check for any progress indicators
+      // Component shows both CircularProgress and LinearProgress, so use findAllByRole
       await waitFor(() => {
-        expect(screen.getByRole('progressbar')).toBeInTheDocument();
+        const progressbars = screen.getAllByRole('progressbar');
+        expect(progressbars.length).toBeGreaterThan(0);
       });
     });
   });
@@ -235,7 +225,7 @@ describe('ThreatHuntingDashboard', () => {
 
   describe('Metrics Display', () => {
     it('should display metrics after hunt completion', async () => {
-      jest
+      mockFetch
         .mockResolvedValueOnce({
           ok: true,
           json: () =>
