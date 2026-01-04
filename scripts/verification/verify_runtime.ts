@@ -362,6 +362,122 @@ function checkPackageType(): void {
 }
 
 // ============================================================================
+// Check 6: ESM/CJS Config Compatibility
+// ============================================================================
+function checkConfigCompatibility(): void {
+  section('Config Compatibility');
+
+  const packages = findPackages();
+  const incompatibleConfigs: string[] = [];
+
+  for (const pkgPath of packages) {
+    const pkgJsonPath = join(pkgPath, 'package.json');
+    if (!existsSync(pkgJsonPath)) continue;
+
+    try {
+      const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+      const isEsm = pkgJson.type === 'module';
+      const relativePath = pkgPath.replace(ROOT_DIR + '/', '');
+
+      // In ESM packages, .js files are treated as ESM, so jest configs need .cjs
+      if (isEsm) {
+        const hasJsConfig = existsSync(join(pkgPath, 'jest.config.js'));
+        const hasCjsConfig = existsSync(join(pkgPath, 'jest.config.cjs'));
+
+        if (hasJsConfig && !hasCjsConfig) {
+          incompatibleConfigs.push(`${relativePath}: ESM package has jest.config.js (should be .cjs)`);
+        }
+      }
+    } catch {
+      // Skip packages with invalid package.json
+    }
+  }
+
+  check(
+    'ESM/CJS config compatibility',
+    incompatibleConfigs.length === 0,
+    incompatibleConfigs.length === 0
+      ? 'All configs use correct extensions'
+      : `${incompatibleConfigs.length} incompatible config(s)`,
+    incompatibleConfigs.length > 0
+      ? [...incompatibleConfigs, '', 'FIX: Rename .js to .cjs in ESM packages']
+      : undefined
+  );
+}
+
+// ============================================================================
+// Check 7: Test Setup Files
+// ============================================================================
+function checkTestSetupFiles(): void {
+  section('Test Setup Files');
+
+  // Check key setup files exist
+  const setupFiles = [
+    { path: 'server/tests/setup/jest.setup.cjs', required: true },
+    { path: 'server/tests/setup/globalSetup.cjs', required: true },
+    { path: 'server/tests/setup/globalTeardown.cjs', required: true },
+  ];
+
+  let allExist = true;
+  const missingFiles: string[] = [];
+
+  for (const file of setupFiles) {
+    const fullPath = join(ROOT_DIR, file.path);
+    const exists = existsSync(fullPath);
+
+    if (!exists && file.required) {
+      allExist = false;
+      missingFiles.push(file.path);
+    }
+  }
+
+  check(
+    'Test setup files exist',
+    allExist,
+    allExist ? 'All required setup files present' : `Missing ${missingFiles.length} file(s)`,
+    missingFiles.length > 0 ? missingFiles : undefined
+  );
+}
+
+// ============================================================================
+// Check 8: Transform Patterns
+// ============================================================================
+function checkTransformPatterns(): void {
+  section('Transform Configuration');
+
+  // Check that transformIgnorePatterns is configured for ESM packages
+  const jestConfigPath = join(ROOT_DIR, 'jest.config.cjs');
+  if (!existsSync(jestConfigPath)) {
+    check('Transform patterns', false, 'jest.config.cjs not found');
+    return;
+  }
+
+  try {
+    const configContent = readFileSync(jestConfigPath, 'utf8');
+
+    // Check for transformIgnorePatterns
+    const hasTransformIgnore = configContent.includes('transformIgnorePatterns');
+    check(
+      'transformIgnorePatterns configured',
+      hasTransformIgnore,
+      hasTransformIgnore ? 'Present' : 'Missing - may cause ESM import issues',
+      hasTransformIgnore ? undefined : ['Add transformIgnorePatterns to handle ESM-only packages']
+    );
+
+    // Check for moduleNameMapper for .js extensions
+    const hasJsMapper = configContent.includes('.js$');
+    check(
+      'JS extension mapper',
+      hasJsMapper,
+      hasJsMapper ? 'Configured' : 'Missing - may cause ESM resolution issues',
+      hasJsMapper ? undefined : ['Add moduleNameMapper: { "^(.*)\\.js$": "$1" }']
+    );
+  } catch {
+    check('Transform patterns', false, 'Could not read jest.config.cjs');
+  }
+}
+
+// ============================================================================
 // Main
 // ============================================================================
 async function main(): Promise<void> {
@@ -373,6 +489,9 @@ async function main(): Promise<void> {
   checkVersions();
   checkLockfile();
   checkPackageType();
+  checkConfigCompatibility();
+  checkTestSetupFiles();
+  checkTransformPatterns();
   checkRunnerConfigs();
   checkModuleResolution();
 
