@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { neo } from '../db/neo4j.js';
 import { randomUUID } from 'node:crypto';
 
 export const documentResolvers = {
   Document: {
-    relationships: async (parent, _) => {
+    relationships: async (parent: any, _: any) => {
       const result = await neo.run(
         `
         MATCH (d:Document {id: $id})-[r:RELATED]->(other:Document)
@@ -12,7 +13,7 @@ export const documentResolvers = {
         { id: parent.id }
       );
 
-      return result.records.map((record) => {
+      return result.records.map((record: any) => {
         const rel = record.get('r').properties;
         const otherDoc = record.get('other').properties;
         return {
@@ -27,7 +28,7 @@ export const documentResolvers = {
         };
       });
     },
-    category: async (parent, _) => {
+    category: async (parent: any, _: any) => {
       const result = await neo.run(
         `
         MATCH (c:DocumentCategory)-[:HAS_DOCUMENT]->(d:Document {id: $id})
@@ -39,7 +40,7 @@ export const documentResolvers = {
     },
   },
   Query: {
-    document: async (_, { id, tenantId }) => {
+    document: async (_: any, { id, tenantId }: any) => {
       const result = await neo.run(
         'MATCH (d:Document {id: $id, tenantId: $tenantId}) RETURN d',
         { id, tenantId }
@@ -56,9 +57,9 @@ export const documentResolvers = {
         entity: doc,
       };
     },
-    documents: async (_, { tenantId, category, subType, name }) => {
+    documents: async (_: any, { tenantId, category, subType, name }: any) => {
       const conditions = [];
-      const params = { tenantId };
+      const params: { tenantId: string; category?: string; subType?: string; name?: string } = { tenantId };
 
       let query = `MATCH (d:Document {tenantId: $tenantId})`;
 
@@ -86,7 +87,7 @@ export const documentResolvers = {
 
       const result = await neo.run(query, params);
 
-      return result.records.map((record) => {
+      return result.records.map((record: any) => {
         const doc = record.get('d').properties;
         return {
           id: doc.id,
@@ -99,9 +100,9 @@ export const documentResolvers = {
     },
   },
   Mutation: {
-    createDocument: async (_, { input }) => {
+    createDocument: async (_: any, { input }: any) => {
       const { tenantId, name, category, props } = input;
-      const variants = name.split(' / ').map(v => v.trim());
+      const variants = name.split(' / ').map((v: string) => v.trim());
       const subType = variants[0];
       const result = await neo.run(
         `

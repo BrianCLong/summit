@@ -1,16 +1,23 @@
 import AuthService from '../services/AuthService.js';
 import { PubSub } from 'graphql-subscriptions';
-const copilotResolvers = require('./resolvers.copilot.js');
-const graphResolvers = require('./resolvers.graphops.js');
-const aiResolvers = require('./resolvers.ai.js');
-const annotationsResolvers = require('./resolvers.annotations.js');
+import copilotResolvers from './resolvers.copilot';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const graphResolversModule = require('./resolvers.graphops');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const aiResolversModule = require('./resolvers.ai');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const annotationsResolvers = require('./resolvers.annotations') as any;
 import { v040Resolvers } from './resolvers/v040/index';
-import { activityResolvers } from './resolvers/activity.js';
-import { geoIntResolvers } from './resolvers/geoint.js';
-import { documentResolvers } from './resolvers.document.js';
-import { ingestionResolvers } from './resolvers/ingestionResolvers.js';
+import { activityResolvers } from './resolvers/activity';
+import { geoIntResolvers } from './resolvers/geoint';
+import { documentResolvers } from './resolvers.document';
+import { ingestionResolvers } from './resolvers/ingestionResolvers';
 import { randomUUID } from 'node:crypto';
-import { erResolvers } from './resolvers.er.js';
+import { erResolvers } from './resolvers.er';
+
+// Extract from CommonJS module exports
+const graphResolvers = graphResolversModule.graphResolvers || graphResolversModule;
+const aiResolvers = aiResolversModule.aiResolvers || aiResolversModule;
 
 interface User {
   id: string;

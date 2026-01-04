@@ -3,6 +3,8 @@
  * Provides basic goal management functionality for copilot integration
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // In-memory goal store (replace with database later)
 const goals = new Map();
 let idCounter = 1;
@@ -13,7 +15,7 @@ class GoalService {
    * @param {Object} goalData Goal data
    * @returns {Object} Created goal
    */
-  static createGoal(goalData) {
+  static createGoal(goalData: any) {
     const goal = {
       id: String(idCounter++),
       text: goalData.text,
@@ -32,7 +34,7 @@ class GoalService {
    * @param {string} id Goal ID
    * @returns {Object|null} Goal or null if not found
    */
-  static getGoalById(id) {
+  static getGoalById(id: any) {
     return goals.get(id) || null;
   }
 
@@ -59,7 +61,7 @@ class GoalService {
    * @param {Object} updateData Update data
    * @returns {Object|null} Updated goal or null if not found
    */
-  static updateGoal(id, updateData) {
+  static updateGoal(id: any, updateData: any) {
     const goal = goals.get(id);
     if (!goal) return null;
 
@@ -78,7 +80,7 @@ class GoalService {
    * @param {string} id Goal ID
    * @returns {boolean} True if deleted, false if not found
    */
-  static deleteGoal(id) {
+  static deleteGoal(id: any) {
     return goals.delete(id);
   }
 
@@ -92,11 +94,11 @@ class GoalService {
 }
 
 // Export both the class and individual functions for compatibility
-module.exports = GoalService;
+
 
 // Named exports for backward compatibility
-module.exports.getGoalById = GoalService.getGoalById.bind(GoalService);
-module.exports.createGoal = GoalService.createGoal.bind(GoalService);
-module.exports.getAllGoals = GoalService.getAllGoals.bind(GoalService);
-module.exports.updateGoal = GoalService.updateGoal.bind(GoalService);
-module.exports.deleteGoal = GoalService.deleteGoal.bind(GoalService);
+export const getGoalById = GoalService.getGoalById.bind(GoalService);
+export const createGoal = GoalService.createGoal.bind(GoalService);
+export const getAllGoals = GoalService.getAllGoals.bind(GoalService);
+export const updateGoal = GoalService.updateGoal.bind(GoalService);
+export const deleteGoal = GoalService.deleteGoal.bind(GoalService);

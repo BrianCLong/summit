@@ -3,9 +3,9 @@
  * Type definitions for GraphRAG operations
  */
 
-const gql = require('graphql-tag');
+import { gql } from 'graphql-tag';
 
-const graphragTypes = gql`
+export const graphragTypes = gql`
   # GraphRAG Query Input
   input GraphRAGQueryInput {
     query: String!
@@ -193,5 +193,3 @@ const graphragTypes = gql`
     ): GenerateEmbeddingsResponse!
   }
 `;
-
-module.exports = { graphragTypes };

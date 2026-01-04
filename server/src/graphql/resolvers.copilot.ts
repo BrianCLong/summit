@@ -1,13 +1,14 @@
-const { getGoalById } = require('../services/goalService'); // stub or in-memory from previous ticket
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { getGoalById } from '../services/goalService';
 
 const copilotResolvers = {
   Query: {
-    copilotRun: async (_, { id }, { dataSources }) => {
+    copilotRun: async (_: any, { id }: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.getRunInfo(id);
     },
 
-    copilotEvents: async (_, { runId, afterId, limit }, { dataSources }) => {
+    copilotEvents: async (_: any, { runId, afterId, limit }: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       const run = await copilotOrchestrator.store.getRun(runId);
       if (!run) throw new Error('Run not found');
@@ -16,16 +17,16 @@ const copilotResolvers = {
     },
 
     copilotRuns: async (
-      _,
-      { investigationId, status, limit = 20 },
-      { dataSources },
+      _: any,
+      { investigationId, status, limit = 20 }: any,
+      { dataSources }: any,
     ) => {
       const { copilotOrchestrator } = dataSources;
       // TODO: Add proper filtering to store
       return copilotOrchestrator.store.findResumableRuns(investigationId);
     },
 
-    copilotStats: async (_, { timeRange = '24 hours' }, { dataSources }) => {
+    copilotStats: async (_: any, { timeRange = '24 hours' }: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.getStats(timeRange);
     },
@@ -33,9 +34,9 @@ const copilotResolvers = {
 
   Mutation: {
     startCopilotRun: async (
-      _,
-      { goalId, goalText, investigationId, resume = false },
-      { dataSources, user },
+      _: any,
+      { goalId, goalText, investigationId, resume = false }: any,
+      { dataSources, user }: any,
     ) => {
       const { copilotOrchestrator } = dataSources;
 
@@ -58,12 +59,12 @@ const copilotResolvers = {
       });
     },
 
-    pauseCopilotRun: async (_, { runId }, { dataSources }) => {
+    pauseCopilotRun: async (_: any, { runId }: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.pauseRun(runId);
     },
 
-    resumeCopilotRun: async (_, { runId }, { dataSources }) => {
+    resumeCopilotRun: async (_: any, { runId }: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       const run = await copilotOrchestrator.store.getRun(runId);
       if (!run) throw new Error('Run not found');
@@ -75,7 +76,7 @@ const copilotResolvers = {
   // Subscriptions for real-time updates
   Subscription: {
     copilotEvents: {
-      subscribe: async (_, { runId }, { dataSources, pubsub }) => {
+      subscribe: async (_: any, { runId }: any, { dataSources, pubsub }: any) => {
         // Verify run exists
         const { copilotOrchestrator } = dataSources;
         const run = await copilotOrchestrator.store.getRun(runId);
@@ -83,27 +84,27 @@ const copilotResolvers = {
 
         return pubsub.asyncIterator(`COPILOT_EVENT_${runId}`);
       },
-      resolve: (event) => event.payload,
+      resolve: (event: any) => event.payload,
     },
   },
 
   // Field resolvers for nested data
   CopilotRun: {
-    tasks: async (run, _, { dataSources }) => {
+    tasks: async (run: any, _: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.store.getTasksForRun(run.id);
     },
 
-    events: async (run, { limit = 50 }, { dataSources }) => {
+    events: async (run: any, { limit = 50 }: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.store.listEvents(run.id, { limit });
     },
 
-    isActive: (run, _, { dataSources }) => {
+    isActive: (run: any, _: any, { dataSources }: any) => {
       const { copilotOrchestrator } = dataSources;
       return copilotOrchestrator.activeRuns.has(run.id);
     },
   },
 };
 
-module.exports = { copilotResolvers };
+export default copilotResolvers;

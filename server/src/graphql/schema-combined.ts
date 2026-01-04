@@ -1,13 +1,13 @@
 import { gql } from 'apollo-server-express';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-const { copilotTypeDefs } = require('./schema.copilot.js');
-const { graphTypeDefs } = require('./schema.graphops.js');
-const { aiTypeDefs } = require('./schema.ai.js');
-const graphragTypes = require('./types/graphragTypes.js');
-const coreTypeDefs = require('./schema/core.js');
-import { activityTypeDefs } from './schema/activity.js';
-import { documentTypeDefs } from './schema.document.js';
+import { copilotTypeDefs } from './schema.copilot';
+import { graphTypeDefs } from './schema.graphops';
+import { aiTypeDefs } from './schema.ai';
+import { graphragTypes } from './types/graphragTypes';
+import coreTypeDefs from './schema/core';
+import { activityTypeDefs } from './schema/activity';
+import { documentTypeDefs } from './schema.document';
 import { threatActorTypeDefs } from './schema.threat-actor';
 
 // Load v0.4.0 Transcendent Intelligence schema
