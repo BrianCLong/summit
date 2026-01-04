@@ -12,6 +12,8 @@ import ReactFlow, {
   Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { useResilientPolling } from '../../hooks/useResilientPolling';
+import { OfflineBanner } from '../../components/common/OfflineBanner';
 
 interface RunStep {
   id: string;
@@ -125,7 +127,7 @@ export default function RunViewer() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Fetch run data with polling
+  // Fetch run data with network resilience
   const fetchRunData = useCallback(async () => {
     if (!runId) {
       setError('No runId provided in query parameters');
@@ -141,28 +143,34 @@ export default function RunViewer() {
 
       const data = await response.json();
       setRunData(data);
-      setError('');
+      // Don't clear error state while offline - preserve last known good view
+      if (navigator.onLine) {
+        setError('');
+      }
     } catch (err) {
       console.error('Failed to fetch run data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch run data');
+      // Only set error if we're online - offline state is handled by banner
+      if (navigator.onLine) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch run data');
+      }
     } finally {
       setLoading(false);
     }
   }, [runId]);
 
-  // Initial fetch and polling setup
+  // Initial fetch
   useEffect(() => {
     fetchRunData();
+  }, [fetchRunData]);
 
-    // Set up polling every 5 seconds if run is still active
-    const pollInterval = setInterval(() => {
-      if (runData?.status === 'running' || runData?.status === 'pending') {
-        fetchRunData();
-      }
-    }, 5000);
-
-    return () => clearInterval(pollInterval);
-  }, [fetchRunData, runData?.status]);
+  // Set up resilient polling for active runs
+  const isRunActive = runData?.status === 'running' || runData?.status === 'pending';
+  useResilientPolling(fetchRunData, {
+    interval: 5000,
+    enabled: isRunActive,
+    refreshOnReconnect: true,
+    preventConcurrent: true,
+  });
 
   // Generate nodes and edges from run data
   const { flowNodes, flowEdges } = useMemo(() => {
@@ -327,6 +335,9 @@ export default function RunViewer() {
 
   return (
     <div className="h-screen flex flex-col">
+      {/* Offline Banner */}
+      <OfflineBanner onRetry={fetchRunData} />
+
       {/* Header */}
       <div className="p-4 border-b bg-white">
         <div className="flex items-center justify-between">
