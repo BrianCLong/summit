@@ -44,6 +44,14 @@ dev-down: dev-prereqs ## Stop dev stack and remove volumes
 	@echo "Stopping dev stack defined in $(COMPOSE_DEV_FILE)..."
 	docker compose -f $(COMPOSE_DEV_FILE) down -v
 
+preflight: ## Run local preflight checks (Lint + Test + Config)
+	@echo "Running Preflight Checks..."
+	@$(MAKE) lint
+	@$(MAKE) test
+	@echo "Checking configuration hygiene..."
+	@if [ -f "server/scripts/validate_config_hygiene.ts" ]; then npx tsx server/scripts/validate_config_hygiene.ts; fi
+	@echo "Preflight complete. Ready for PR."
+
 dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Running dev smoke checks..."
 	@docker compose -f $(COMPOSE_DEV_FILE) ps

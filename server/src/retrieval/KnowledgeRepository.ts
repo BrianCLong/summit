@@ -120,6 +120,19 @@ export class KnowledgeRepository {
       params.push(query.queryText);
       const qIdx = pIdx;
 
+      // Parameterize LIMIT
+      let limit = 10;
+      if (typeof query.topK === 'number' && query.topK > 0) {
+        limit = Math.ceil(query.topK);
+      } else if (typeof query.topK === 'string') {
+        const parsed = parseInt(query.topK, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          limit = parsed;
+        }
+      }
+      params.push(limit);
+      const limitIdx = params.length;
+
       const sql = `
         SELECT
           ko.*,
@@ -128,7 +141,7 @@ export class KnowledgeRepository {
         WHERE ${whereConditions.join(' AND ')}
           AND to_tsvector('english', coalesce(ko.title, '') || ' ' || coalesce(ko.body, '')) @@ plainto_tsquery('english', $${qIdx})
         ORDER BY rank DESC
-        LIMIT ${query.topK || 10}
+        LIMIT $${limitIdx}
       `;
 
       const res = await client.query(sql, params);
@@ -179,6 +192,19 @@ export class KnowledgeRepository {
       const vecParamIdx = pIdx;
 
       // Note: We select from knowledge_objects joined with embedding_records
+      // Parameterize LIMIT
+      let limit = 10;
+      if (typeof query.topK === 'number' && query.topK > 0) {
+        limit = Math.ceil(query.topK);
+      } else if (typeof query.topK === 'string') {
+        const parsed = parseInt(query.topK, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          limit = parsed;
+        }
+      }
+      params.push(limit);
+      const limitIdx = params.length;
+
       const sql = `
         SELECT
           ko.*,
@@ -187,7 +213,7 @@ export class KnowledgeRepository {
         JOIN embedding_records er ON ko.id = er.object_id
         WHERE ${whereConditions.join(' AND ')}
         ORDER BY similarity DESC
-        LIMIT ${query.topK || 10}
+        LIMIT $${limitIdx}
       `;
 
       const res = await client.query(sql, params);

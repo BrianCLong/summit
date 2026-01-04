@@ -8,9 +8,43 @@ on:
 permissions:
   contents: write
   id-token: write
+  packages: write
 
 jobs:
+  verify:
+    name: Verify Release Candidate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Run Lint
+        run: pnpm lint
+
+      - name: Run Tests
+        run: pnpm test
+
+      - name: Policy Checks
+        run: |
+           if [ -f "./scripts/policy-test.sh" ]; then
+             ./scripts/policy-test.sh
+           else
+             echo "Policy script not found, skipping."
+           fi
+
   build-and-release:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,18 +53,45 @@ jobs:
       - name: Install Cosign
         uses: sigstore/cosign-installer@dc72c7d5c4d10195b02b81eb88bd40881fffc95b # v3.7.0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Build Server & Client
+        run: |
+          pnpm build
+
       - name: Setup Python
         uses: actions/setup-python@0b93645e9fea784236b2b76e330d4058d7913d12 # v5.3.0
         with:
           python-version: '3.11'
 
-      - name: Install Dependencies
+      - name: Install Python Build Tools
         run: |
           pip install build
 
-      - name: Build Artifacts
+      - name: Build Python Artifacts
         run: |
-          python -m build --wheel --outdir dist/
+          python -m build --wheel --outdir dist/python
+
+      - name: Package Node Artifacts
+        run: |
+          mkdir -p dist/server dist/client
+          cp -r server/dist/* dist/server/
+          cp -r client/dist/* dist/client/
+          # Create a tarball for node artifacts
+          tar -czf dist/node-artifacts.tar.gz -C dist server client
+
+      - name: Generate Provenance (Server/Client)
+        run: |
+           node .ci/gen-provenance.js > dist/provenance.json
 
       - name: Generate SBOM (Syft)
         uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.18.0
@@ -42,7 +103,8 @@ jobs:
 
       - name: Sign and Attest Artifacts
         run: |
-          for artifact in dist/*.whl; do
+          # Sign Python Wheels
+          for artifact in dist/python/*.whl; do
             echo "Signing $artifact..."
             cosign sign-blob --yes \
               --output-signature "${artifact}.sig" \
@@ -57,6 +119,27 @@ jobs:
               "$artifact"
           done
 
+          # Sign Node Artifacts
+          echo "Signing node-artifacts.tar.gz..."
+          cosign sign-blob --yes \
+            --output-signature "dist/node-artifacts.tar.gz.sig" \
+            --output-certificate "dist/node-artifacts.tar.gz.cert" \
+            "dist/node-artifacts.tar.gz"
+
+          echo "Attesting SBOM for node-artifacts.tar.gz..."
+          cosign attest-blob --yes \
+            --predicate dist/sbom.json \
+            --type cyclonedx \
+            --output-attestation "dist/node-artifacts.tar.gz.att" \
+            "dist/node-artifacts.tar.gz"
+
+          # Sign Provenance
+          echo "Signing provenance.json..."
+          cosign sign-blob --yes \
+            --output-signature "dist/provenance.json.sig" \
+            --output-certificate "dist/provenance.json.cert" \
+            "dist/provenance.json"
+
       - name: Prepare Evidence Bundle
         run: |
           TAG=${GITHUB_REF#refs/tags/}
@@ -64,11 +147,11 @@ jobs:
           mkdir -p "$EVIDENCE_DIR"
 
           # Copy artifacts and signatures to evidence dir
-          cp dist/* "$EVIDENCE_DIR/"
+          cp -r dist/* "$EVIDENCE_DIR/"
 
           # Generate Checksums
           cd dist
-          sha256sum * > ../"$EVIDENCE_DIR/SHA256SUMS"
+          find . -type f -exec sha256sum {} \; > ../"$EVIDENCE_DIR/SHA256SUMS"
           cd ..
 
           # Metadata
@@ -98,11 +181,18 @@ jobs:
         uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.0.1
         with:
           files: |
-            dist/*.whl
-            dist/*.json
-            dist/*.sig
-            dist/*.cert
-            dist/*.att
+            dist/python/*.whl
+            dist/python/*.sig
+            dist/python/*.cert
+            dist/python/*.att
+            dist/node-artifacts.tar.gz
+            dist/node-artifacts.tar.gz.sig
+            dist/node-artifacts.tar.gz.cert
+            dist/node-artifacts.tar.gz.att
+            dist/sbom.json
+            dist/provenance.json
+            dist/provenance.json.sig
+            dist/provenance.json.cert
             evidence-bundle.tar.gz
             EVIDENCE.md
           body_path: EVIDENCE.md
