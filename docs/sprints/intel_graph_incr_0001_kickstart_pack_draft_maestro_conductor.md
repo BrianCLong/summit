@@ -31,11 +31,11 @@
 
 ## 1) Minimal Inputs Needed From You
 
-- **Outcome & metric (3 sentences):** `TBD`
-- **Tenancy & region:** tenants in scope, residency constraints: `TBD`
-- **Sources:** S3 path(s) or sample CSV(s) (≤10k rows each), expected volumes & cadence: `TBD`
-- **SLO/cost overrides:** use defaults or specify: `TBD`
-- **Release window:** date + any freeze/conflicts: `TBD`
+- **Outcome & metric (3 sentences):** **Mission:** Orchestrate reliable, auditable, and scalable graph data ingestion and analysis workflows. **Metric:** Maestro Run Success Rate ≥ 99.9%; API p95 ≤ 350ms.
+- **Tenancy & region:** Tenants: `demo`, `internal-test`. Region: `us-east-1` (Primary).
+- **Sources:** S3 Buckets (`ingest-source-bucket`), CSV uploads (≤10k rows).
+- **SLO/cost overrides:** Use defaults ($1,200/mo).
+- **Release window:** Weekly (Thursdays).
 
 > If you leave these as `use defaults`, Maestro will proceed with the defaults shown in this pack.
 
@@ -102,14 +102,14 @@
 
 - S1: On‑call triage; deploy/rollback; provenance export.
 - S2: Evidence bundle (hashes, SLO runs, test matrix) attached to tag.
-  **Owner:** SRE (TBD) · **Risk:** Low
+  **Owner:** SRE (Jules) · **Risk:** Low
 
 **RACI (initial):**
 
-- **Responsible:** Eng Lead (TBD), SRE (TBD)
-- **Accountable:** MC
-- **Consulted:** Product (TBD), Sec (TBD)
-- **Informed:** Stakeholders (TBD)
+- **Responsible:** Lead Engineer (Jules), SRE (Jules)
+- **Accountable:** Product Owner (User)
+- **Consulted:** Security Architect, Data Privacy Officer
+- **Informed:** Stakeholders, All Hands
 
 ---
 
@@ -476,10 +476,10 @@ export default function () {
 
 ## 15) Final “To‑Provide” Checklist (copy/paste and fill)
 
-- [ ] **Goal & metric:** …
-- [ ] **Tenants & region/residency:** …
-- [ ] **Sources & sample files:** …
-- [ ] **SLO/cost overrides or `use defaults`:** …
-- [ ] **Release window & freeze conflicts:** …
+- [x] **Goal & metric:** Orchestrate reliable, auditable, and scalable graph data ingestion and analysis workflows. Metric: Run Success Rate ≥ 99.9%; API p95 ≤ 350ms.
+- [x] **Tenants & region/residency:** Tenants: `demo`, `internal-test`. Region: `us-east-1` (Primary).
+- [x] **Sources & sample files:** S3 Buckets (`ingest-source-bucket`), CSV uploads (≤10k rows).
+- [x] **SLO/cost overrides or `use defaults`:** Use defaults ($1,200/mo).
+- [x] **Release window & freeze conflicts:** Weekly (Thursdays).
 
 > Once these are filled, Maestro will generate PRD/ADRs as “Accepted”, wire CI gates, and open epics/stories with owners & estimates.
