@@ -22,6 +22,8 @@ import {
 
 import { verifyChain, ProvenanceChain } from '../canonical/provenance.js';
 
+import { getAuditLedgerService } from '../services/AuditLedgerServiceManager.js';
+
 /**
  * Protected routes configuration - routes that require provenance
  */
@@ -532,8 +534,19 @@ export function auditProvenanceMiddleware(
       // Log to audit system
       console.log('[AUDIT] Provenance Event:', JSON.stringify(auditEntry));
 
-      // TODO: Send to audit ledger service
-      // await auditLedgerService.log(auditEntry);
+      // Send to audit ledger service (fire and forget - don't await to avoid blocking response)
+      try {
+        const auditService = getAuditLedgerService();
+        // Perform audit in background to avoid blocking the response
+        const auditPromise = auditService.log(auditEntry);
+        // Don't wait for the result - just log errors if they occur
+        auditPromise.catch((auditError) => {
+          console.error('[Provenance] Failed to send to audit ledger service:', auditError);
+        });
+      } catch (auditError) {
+        console.error('[Provenance] Failed to send to audit ledger service:', auditError);
+        // Don't fail the request if audit logging fails - fail open for availability
+      }
     }
 
     next();

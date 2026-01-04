@@ -194,8 +194,42 @@ async function validateAccessPurpose(
       };
     }
 
-    // TODO: Check if user has required role for this purpose
-    // This would involve checking approval_roles against user's roles
+    // Check if user has required role for this purpose
+    // First get user's roles from the database
+    const userRolesResult = await db.query(
+      `SELECT role_name FROM user_roles WHERE user_id = $1`,
+      [userId]
+    );
+
+    const userRoles = userRolesResult.rows.map((row: any) => row.role_name);
+
+    // Check if user has any of the required approval roles
+    let hasRequiredRole = true; // Default to true if no approval roles specified
+    if (purposeConfig.approval_roles && purposeConfig.approval_roles.length > 0) {
+      const requiredRoles = Array.isArray(purposeConfig.approval_roles)
+        ? purposeConfig.approval_roles
+        : [purposeConfig.approval_roles];
+      hasRequiredRole = userRoles.some((userRole: string) =>
+        requiredRoles.some((requiredRole: string) =>
+          userRole === requiredRole || userRole.startsWith(requiredRole)
+        )
+      );
+    }
+
+    if (!hasRequiredRole) {
+      logger.warn({
+        userId,
+        purpose,
+        userRoles,
+        requiredRoles: purposeConfig.approval_roles,
+        tenantId,
+      }, 'User lacks required role for access purpose');
+
+      return {
+        valid: false,
+        reason: `User lacks required role for purpose: ${purpose}`,
+      };
+    }
 
     return {
       valid: true,

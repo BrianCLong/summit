@@ -254,6 +254,15 @@ class IdempotencyManager {
       // Hook response completion to cache result
       this.hookResponseCompletion(req, res, redisKey);
 
+      // Increment request counter for metrics
+      try {
+        const result = await this.redis.incr('idempotency:requests:current_period');
+        // Set expiration for the counter to create rolling period
+        await this.redis.expire('idempotency:requests:current_period', 3600); // 1 hour
+      } catch (redisError) {
+        logger.error('Failed to increment request counter', { redisError });
+      }
+
       logger.debug('Idempotency key accepted', {
         idempotencyKey,
         requestSignature,
@@ -267,6 +276,13 @@ class IdempotencyManager {
         error,
         idempotencyKey: req.get('Idempotency-Key'),
       });
+
+      // Increment error counter for metrics
+      try {
+        await this.redis.incr('idempotency:errors:current_period');
+      } catch (redisError) {
+        logger.error('Failed to increment error counter', { redisError });
+      }
 
       // Fail open - allow request to proceed
       next();
@@ -398,10 +414,19 @@ class IdempotencyManager {
         }
       } while (cursor !== 0);
 
+      // Calculate error rate by checking recent error logs (simplified approach)
+      // In a real implementation, we would track this in Redis or another metrics store
+      const errorCount = await this.redis.get('idempotency:errors:last_period');
+      const totalRequests = await this.redis.get('idempotency:requests:last_period');
+
+      const errorRate = errorCount && totalRequests
+        ? parseInt(errorCount) / parseInt(totalRequests)
+        : 0;
+
       return {
         activeKeys,
         completedKeys,
-        errorRate: 0, // TODO: Track error rate in metrics
+        errorRate,
       };
     } catch (error: any) {
       logger.error('Failed to get idempotency stats', { error });
