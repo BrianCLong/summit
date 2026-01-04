@@ -182,15 +182,33 @@ find . -name "jest.config.*" -o -name "vitest.config.*" | \
 
 ## CI Integration
 
-The `verify:runtime` script can be added to CI as a fast-fail check:
+The `verify:runtime` script has been added to CI as a fast-fail check in `.github/workflows/ci-core.yml`:
 
 ```yaml
-# In .github/workflows/ci-core.yml
+# In verification-suite job
 - name: Verify runtime configuration
   run: pnpm verify:runtime
+
+- name: Run verification scripts
+  run: pnpm verify
 ```
 
 This runs before tests and fails immediately if configuration issues are detected.
+
+## Hanging Test Prevention
+
+Added safety mechanisms to prevent tests from hanging:
+
+1. **detectOpenHandles** (opt-in): `JEST_DETECT_HANDLES=true pnpm test`
+2. **forceExit** in CI: Automatically enabled when `CI=true`
+3. **Cleanup utilities**: `global.testCleanup` for resource management
+
+```javascript
+// Tests can register resources for automatic cleanup
+global.testCleanup.registerServer(httpServer);
+global.testCleanup.registerTimer(intervalId);
+global.testCleanup.registerConnection(dbConn);
+```
 
 ## References
 
