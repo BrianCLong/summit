@@ -179,8 +179,34 @@ This validates:
 **Fix**:
 
 1. Add proper teardown in `afterAll` / `afterEach`
-2. Use `--detectOpenHandles` to identify
+2. Use `--detectOpenHandles` to identify: `JEST_DETECT_HANDLES=true pnpm test`
 3. Add `testTimeout` in jest config (default: 30000ms)
+4. Use the global cleanup utilities (server tests only):
+
+```javascript
+// Register a server for cleanup
+const server = app.listen(3000);
+global.testCleanup.registerServer(server);
+
+// Register a timer for cleanup
+const timerId = setInterval(() => {}, 1000);
+global.testCleanup.registerTimer(timerId);
+
+// Register a connection for cleanup
+const conn = await database.connect();
+global.testCleanup.registerConnection(conn, "close");
+
+// Resources are automatically cleaned up after each test
+```
+
+**Debug with open handle detection**:
+
+```bash
+# Run tests with open handle detection enabled
+JEST_DETECT_HANDLES=true pnpm test:server
+
+# CI automatically uses forceExit to prevent hanging
+```
 
 ### Config Load Failures
 
