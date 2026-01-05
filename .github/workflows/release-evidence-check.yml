@@ -1,0 +1,117 @@
+name: Release Evidence Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to check evidence for (e.g., v1.2.3)'
+        required: true
+        type: string
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Tag
+        id: get_tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          fi
+
+      - name: Output Tag
+        run: echo "Checking evidence for tag -> $TAG"
+
+      - name: Resolve Tag to SHA
+        id: resolve_sha
+        run: |
+          SHA=$(git rev-list -n 1 "$TAG")
+          if [ -z "$SHA" ]; then
+            echo "::error::Could not resolve tag '$TAG' to a commit SHA."
+            exit 1
+          fi
+          echo "Resolved $TAG to SHA -> $SHA"
+          echo "SHA=$SHA" >> $GITHUB_ENV
+
+      - name: Verify Evidence
+        id: verify
+        run: |
+          EVIDENCE_FILE="release-evidence/$TAG.json"
+          EVIDENCE_CONTENT=""
+          FAILURE_REASON=""
+
+          # 1. Check if evidence file exists on the default branch
+          # Use main as the default branch, can be changed if needed
+          if ! git show "origin/main:$EVIDENCE_FILE" > /dev/null 2>&1; then
+            FAILURE_REASON="EVIDENCE_MISSING: The evidence file '$EVIDENCE_FILE' was not found on the main branch."
+            echo "FAIL_REASON=$FAILURE_REASON" >> $GITHUB_ENV
+            echo "$FAILURE_REASON"
+            exit 1
+          fi
+
+          EVIDENCE_CONTENT=$(git show "origin/main:$EVIDENCE_FILE")
+          echo "Successfully retrieved evidence file: $EVIDENCE_FILE"
+
+          # 2. Validate the evidence content
+          DECISION=$(echo "$EVIDENCE_CONTENT" | jq -r .decision)
+          EVIDENCE_TAG=$(echo "$EVIDENCE_CONTENT" | jq -r .tag)
+          EVIDENCE_SHA=$(echo "$EVIDENCE_CONTENT" | jq -r .sha)
+          EXPIRES_AT=$(echo "$EVIDENCE_CONTENT" | jq -r .expires_at)
+          CURRENT_TIMESTAMP=$(date -u +%s)
+          # Grace period of 24 hours (86400 seconds)
+          EXPIRATION_TIMESTAMP=$(date -d "$EXPIRES_AT" +%s 2>/dev/null || echo 0)
+          EFFECTIVE_EXPIRATION=$((EXPIRATION_TIMESTAMP + 86400))
+
+
+          if [[ "$DECISION" != "GO" ]]; then
+            FAILURE_REASON="EVIDENCE_NOT_GO: The decision was '$DECISION', not 'GO'."
+          elif [[ "$EVIDENCE_TAG" != "$TAG" ]]; then
+            FAILURE_REASON="EVIDENCE_TAG_MISMATCH: Evidence tag '$EVIDENCE_TAG' does not match target tag '$TAG'."
+          elif [[ "$EVIDENCE_SHA" != "$SHA" ]]; then
+            FAILURE_REASON="EVIDENCE_SHA_MISMATCH: Evidence SHA '$EVIDENCE_SHA' does not match commit SHA '$SHA'."
+          elif [[ "$EFFECTIVE_EXPIRATION" -lt "$CURRENT_TIMESTAMP" ]]; then
+            FAILURE_REASON="EVIDENCE_EXPIRED: Evidence expired at $EXPIRES_AT (current time is $(date -u))."
+          fi
+
+          if [[ -n "$FAILURE_REASON" ]]; then
+            echo "FAIL_REASON=$FAILURE_REASON" >> $GITHUB_ENV
+            echo "$FAILURE_REASON"
+            exit 1
+          fi
+
+          echo "Evidence is valid."
+
+      - name: Report Summary
+        if: always()
+        run: |
+          echo "# Release Evidence Check Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`$TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit SHA:** \`$SHA\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ steps.verify.outcome }}" == "success" ]]; then
+            echo "## ✅ PASS" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All release evidence checks passed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ FAIL" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Reason:** ${{ env.FAIL_REASON }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> **To fix:** A maintainer may need to regenerate the evidence by re-running the release dry-run or approval workflow." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
