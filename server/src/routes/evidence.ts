@@ -21,6 +21,11 @@ const exportRequestSchema = z.object({
   }),
 });
 
+const exportStatusSchema = z.object({
+  tenantId: z.string().uuid(),
+  windowHours: z.coerce.number().min(1).max(720).default(168),
+});
+
 interface AuthenticatedRequest extends Request {
   user?: {
     id?: string;
@@ -74,16 +79,12 @@ router.post(
 
       // Fetch Audit Events
       const repo = new ProvenanceRepo(getPostgresPool());
-      // ProvenanceRepo.by() doesn't support time range filtering directly in the current signature used in tenants.ts
-      // But we can fetch and filter or update the repo. For now, we fetch recent events as a prototype.
-      // Ideally we should update ProvenanceRepo to support time range.
-      // Using `by` method signature: (purpose, tenantId, entityId, limit, offset, actorTenantId)
-      const events = await repo.by('investigation', tenantId, undefined, 1000, 0, tenantId);
-
-      const filteredEvents = events.filter((e: any) => {
-          const t = new Date(e.created_at || e.createdAt).getTime();
-          return t >= new Date(timeRange.start).getTime() && t <= new Date(timeRange.end).getTime();
-      });
+      const filteredEvents = await repo.byTenant(
+        tenantId,
+        { from: timeRange.start, to: timeRange.end },
+        1000,
+        0,
+      );
 
       // Start Stream
       res.setHeader('Content-Type', 'application/zip');
@@ -155,6 +156,77 @@ router.post(
         }
     }
   }
+);
+
+/**
+ * @route GET /api/evidence/exports/status
+ * @desc Check evidence export readiness for a tenant
+ * @access Protected (Tenant Admin or Platform Admin)
+ */
+router.get(
+  '/exports/status',
+  ensureAuthenticated,
+  ensurePolicy('read', 'evidence'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { tenantId, windowHours } = exportStatusSchema.parse(req.query);
+      const actorId = authReq.user?.id || 'unknown';
+
+      const userTenantId = authReq.user?.tenantId;
+      const isSuperAdmin = authReq.user?.role === 'SUPER_ADMIN';
+      if (!isSuperAdmin && userTenantId !== tenantId) {
+        return res.status(403).json({ success: false, error: 'Forbidden' });
+      }
+
+      const tenant = await tenantService.getTenant(tenantId);
+      if (!tenant) {
+        return res.status(404).json({ success: false, error: 'Tenant not found' });
+      }
+
+      const windowEnd = new Date();
+      const windowStart = new Date(
+        windowEnd.getTime() - windowHours * 60 * 60 * 1000,
+      );
+
+      const repo = new ProvenanceRepo(getPostgresPool());
+      const events = await repo.byTenant(
+        tenantId,
+        { from: windowStart.toISOString(), to: windowEnd.toISOString() },
+        1000,
+        0,
+      );
+
+      const lastEventAt = events.length
+        ? events[0].createdAt || events[0].created_at
+        : null;
+
+      const policyBundleReady = Boolean(tenant.settings?.policy_bundle);
+      const ready = policyBundleReady && events.length > 0;
+
+      return res.json({
+        success: true,
+        data: {
+          tenantId,
+          actorId,
+          windowStart: windowStart.toISOString(),
+          windowEnd: windowEnd.toISOString(),
+          eventCount: events.length,
+          lastEventAt,
+          policyBundleReady,
+          ready,
+        },
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      logger.error('Error in GET /api/evidence/exports/status:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
 );
 
 export default router;

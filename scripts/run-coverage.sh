@@ -36,7 +36,7 @@ echo -e "${GREEN}Running unit tests with coverage...${NC}"
 echo ""
 
 # Use the coverage configuration
-jest --config jest.coverage.config.js --coverage --verbose
+jest --config jest.coverage.config.cjs --coverage --verbose
 
 # Check if tests passed
 if [ $? -eq 0 ]; then
