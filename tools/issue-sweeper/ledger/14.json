@@ -1,0 +1,239 @@
+{
+  "issue_number": 14,
+  "title": "M2: JWT auth (access+refresh) with roles (admin, analyst, viewer)",
+  "url": "https://github.com/BrianCLong/summit/issues/14",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:05Z",
+  "createdAt": "2025-08-12T00:10:05Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15209,
+        "url": "https://github.com/BrianCLong/summit/pull/15209",
+        "mergedAt": null,
+        "title": "Programmatic Governance & External Assurance (Sprint N+14)"
+      },
+      {
+        "number": 14378,
+        "url": "https://github.com/BrianCLong/summit/pull/14378",
+        "mergedAt": "2025-12-23T04:35:18Z",
+        "title": "Bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 13758,
+        "url": "https://github.com/BrianCLong/summit/pull/13758",
+        "mergedAt": "2025-12-20T03:34:16Z",
+        "title": "Add Sprint 14 autonomy and workflow plan"
+      },
+      {
+        "number": 14516,
+        "url": "https://github.com/BrianCLong/summit/pull/14516",
+        "mergedAt": null,
+        "title": "Sprint N+14: Autonomous Agent Expansion with Caps & Safety"
+      },
+      {
+        "number": 13613,
+        "url": "https://github.com/BrianCLong/summit/pull/13613",
+        "mergedAt": "2025-12-16T20:47:55Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /web/retention-dashboard"
+      },
+      {
+        "number": 13606,
+        "url": "https://github.com/BrianCLong/summit/pull/13606",
+        "mergedAt": "2025-12-15T16:29:34Z",
+        "title": "build(deps): bump next from 14.2.33 to 14.2.35 in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 12793,
+        "url": "https://github.com/BrianCLong/summit/pull/12793",
+        "mergedAt": "2025-12-17T22:01:09Z",
+        "title": "docs: refresh sprint 14 plan"
+      },
+      {
+        "number": 13862,
+        "url": "https://github.com/BrianCLong/summit/pull/13862",
+        "mergedAt": "2025-12-20T03:23:44Z",
+        "title": "Add sprint plan for Sep 14–25 2026"
+      },
+      {
+        "number": 13596,
+        "url": "https://github.com/BrianCLong/summit/pull/13596",
+        "mergedAt": "2025-12-13T14:26:33Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 13597,
+        "url": "https://github.com/BrianCLong/summit/pull/13597",
+        "mergedAt": "2025-12-13T14:31:19Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 13848,
+        "url": "https://github.com/BrianCLong/summit/pull/13848",
+        "mergedAt": "2025-12-20T03:44:57Z",
+        "title": "Add sprint plan for Aug 3–14, 2026 (America/Denver)"
+      },
+      {
+        "number": 15180,
+        "url": "https://github.com/BrianCLong/summit/pull/15180",
+        "mergedAt": "2025-12-31T14:21:19Z",
+        "title": "chore(deps): bump zaproxy/action-baseline from 0.14.0 to 0.15.0"
+      },
+      {
+        "number": 12235,
+        "url": "https://github.com/BrianCLong/summit/pull/12235",
+        "mergedAt": "2025-11-23T01:04:50Z",
+        "title": "Bump next from 14.1.0 to 14.2.32 in /web/retention-dashboard"
+      },
+      {
+        "number": 13602,
+        "url": "https://github.com/BrianCLong/summit/pull/13602",
+        "mergedAt": "2025-12-15T09:44:39Z",
+        "title": "deps(docker): bump python from 3.9-slim to 3.14-slim"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 15143,
+        "url": "https://github.com/BrianCLong/summit/pull/15143",
+        "mergedAt": null,
+        "title": "Implement Debt Retirement Engine"
+      },
+      {
+        "number": 12950,
+        "url": "https://github.com/BrianCLong/summit/pull/12950",
+        "mergedAt": "2025-12-17T21:41:50Z",
+        "title": "fix(security): update next.js to 14.2.33 to resolve critical CVEs #43 #38"
+      },
+      {
+        "number": 14833,
+        "url": "https://github.com/BrianCLong/summit/pull/14833",
+        "mergedAt": "2025-12-29T16:12:19Z",
+        "title": "feat: enforce schema compatibility guard"
+      },
+      {
+        "number": 14023,
+        "url": "https://github.com/BrianCLong/summit/pull/14023",
+        "mergedAt": "2025-12-19T22:46:22Z",
+        "title": "Upgrade deepspeed to version 0.15.1"
+      },
+      {
+        "number": 14474,
+        "url": "https://github.com/BrianCLong/summit/pull/14474",
+        "mergedAt": null,
+        "title": "feat: add demo walkthrough page with demo-only gating"
+      },
+      {
+        "number": 13981,
+        "url": "https://github.com/BrianCLong/summit/pull/13981",
+        "mergedAt": "2025-12-20T01:26:59Z",
+        "title": "feat: add adapter executor runtime"
+      },
+      {
+        "number": 12890,
+        "url": "https://github.com/BrianCLong/summit/pull/12890",
+        "mergedAt": "2025-12-04T16:52:42Z",
+        "title": "fix(security): update next.js to 14.2.33 to resolve critical CVEs #43 #38"
+      },
+      {
+        "number": 14115,
+        "url": "https://github.com/BrianCLong/summit/pull/14115",
+        "mergedAt": "2025-12-20T11:02:11Z",
+        "title": "feat: Access Auditing + RFA Flows"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13831,
+        "url": "https://github.com/BrianCLong/summit/pull/13831",
+        "mergedAt": "2025-12-20T11:29:23Z",
+        "title": "chore: add design tokens storybook coverage"
+      },
+      {
+        "number": 12881,
+        "url": "https://github.com/BrianCLong/summit/pull/12881",
+        "mergedAt": "2025-12-17T21:53:23Z",
+        "title": "Harden security defaults"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 14429,
+        "url": "https://github.com/BrianCLong/summit/pull/14429",
+        "mergedAt": null,
+        "title": "feat: add one-command demo up workflow"
+      },
+      {
+        "number": 10182,
+        "url": "https://github.com/BrianCLong/summit/pull/10182",
+        "mergedAt": "2025-10-08T17:14:20Z",
+        "title": "chore(deps): bump next from 14.2.3 to 14.2.32 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 15038,
+        "url": "https://github.com/BrianCLong/summit/pull/15038",
+        "mergedAt": "2025-12-30T22:42:25Z",
+        "title": "Set up project management and delivery tracking"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

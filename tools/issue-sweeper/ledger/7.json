@@ -1,0 +1,230 @@
+{
+  "issue_number": 7,
+  "title": "M0: Add LICENSE, CODE_OF_CONDUCT, CONTRIBUTING, SECURITY.md",
+  "url": "https://github.com/BrianCLong/summit/issues/7",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-11-20T15:11:45Z",
+  "createdAt": "2025-08-12T00:09:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 13727,
+        "url": "https://github.com/BrianCLong/summit/pull/13727",
+        "mergedAt": "2025-12-20T11:44:41Z",
+        "title": "build(deps-dev): Bump storybook from 7.6.20 to 7.6.21"
+      },
+      {
+        "number": 13079,
+        "url": "https://github.com/BrianCLong/summit/pull/13079",
+        "mergedAt": "2025-12-02T11:19:57Z",
+        "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server"
+      },
+      {
+        "number": 14504,
+        "url": "https://github.com/BrianCLong/summit/pull/14504",
+        "mergedAt": "2025-12-27T00:25:54Z",
+        "title": "Sprint N+7: Roadmap Decomposition and Execution Framework"
+      },
+      {
+        "number": 13764,
+        "url": "https://github.com/BrianCLong/summit/pull/13764",
+        "mergedAt": "2025-12-20T03:34:41Z",
+        "title": "docs: add Sprint 7 GA launch plan"
+      },
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 14229,
+        "url": "https://github.com/BrianCLong/summit/pull/14229",
+        "mergedAt": "2025-12-22T08:11:59Z",
+        "title": "Add Sprint N+7 plan and index link"
+      },
+      {
+        "number": 13470,
+        "url": "https://github.com/BrianCLong/summit/pull/13470",
+        "mergedAt": "2025-12-07T02:16:14Z",
+        "title": "deps(npm): bump @babel/runtime from 7.21.0 to 7.28.4"
+      },
+      {
+        "number": 12838,
+        "url": "https://github.com/BrianCLong/summit/pull/12838",
+        "mergedAt": "2025-12-04T15:49:44Z",
+        "title": "Add Sprint 7 extensibility plan"
+      },
+      {
+        "number": 14382,
+        "url": "https://github.com/BrianCLong/summit/pull/14382",
+        "mergedAt": null,
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2"
+      },
+      {
+        "number": 12233,
+        "url": "https://github.com/BrianCLong/summit/pull/12233",
+        "mergedAt": "2025-11-23T00:37:29Z",
+        "title": "Bump nodemailer from 6.10.1 to 7.0.7 in /server"
+      },
+      {
+        "number": 13594,
+        "url": "https://github.com/BrianCLong/summit/pull/13594",
+        "mergedAt": "2025-12-17T03:07:55Z",
+        "title": "Implement Epics 7, 8, 9: ER v2, Reporting, Safety"
+      },
+      {
+        "number": 14387,
+        "url": "https://github.com/BrianCLong/summit/pull/14387",
+        "mergedAt": "2025-12-24T00:04:01Z",
+        "title": "chore(deps): bump langchain-core from 1.0.7 to 1.2.5"
+      },
+      {
+        "number": 15310,
+        "url": "https://github.com/BrianCLong/summit/pull/15310",
+        "mergedAt": "2026-01-01T11:39:41Z",
+        "title": "feat: Implement Information Supply Chain Doctrine and Artifacts"
+      },
+      {
+        "number": 14379,
+        "url": "https://github.com/BrianCLong/summit/pull/14379",
+        "mergedAt": "2025-12-23T04:35:14Z",
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2 in /apps/compliance-console"
+      },
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 12827,
+        "url": "https://github.com/BrianCLong/summit/pull/12827",
+        "mergedAt": "2025-12-17T21:59:26Z",
+        "title": "Sprint 36 Deliverables: Quorum, ER v1.7, Explorer 2.4, Tenant Admin"
+      },
+      {
+        "number": 14635,
+        "url": "https://github.com/BrianCLong/summit/pull/14635",
+        "mergedAt": null,
+        "title": "Sprint 24: IntelGraph MVP Slice"
+      },
+      {
+        "number": 11788,
+        "url": "https://github.com/BrianCLong/summit/pull/11788",
+        "mergedAt": "2025-11-19T23:24:18Z",
+        "title": "chore(deps): bump tar from 7.5.1 to 7.5.2 in /client"
+      },
+      {
+        "number": 14411,
+        "url": "https://github.com/BrianCLong/summit/pull/14411",
+        "mergedAt": "2025-12-25T03:16:04Z",
+        "title": "feat: Batch 21 - Analytics Readiness"
+      },
+      {
+        "number": 11783,
+        "url": "https://github.com/BrianCLong/summit/pull/11783",
+        "mergedAt": "2025-10-24T19:47:04Z",
+        "title": "chore(deps): bump vite from 7.1.7 to 7.1.12 in /services/trr"
+      },
+      {
+        "number": 13840,
+        "url": "https://github.com/BrianCLong/summit/pull/13840",
+        "mergedAt": "2025-12-20T03:42:29Z",
+        "title": "Expand tranche 41-48 implementation blueprint"
+      },
+      {
+        "number": 13907,
+        "url": "https://github.com/BrianCLong/summit/pull/13907",
+        "mergedAt": "2025-12-20T03:15:19Z",
+        "title": "feat: emit policy decisions to audit bus"
+      },
+      {
+        "number": 15265,
+        "url": "https://github.com/BrianCLong/summit/pull/15265",
+        "mergedAt": "2026-01-01T11:43:36Z",
+        "title": "GA Readiness Sweep — Evidence-Backed RC Cut (v2.0.0-rc.1)"
+      },
+      {
+        "number": 14222,
+        "url": "https://github.com/BrianCLong/summit/pull/14222",
+        "mergedAt": "2025-12-22T08:12:20Z",
+        "title": "Implement forward defense orchestration module"
+      },
+      {
+        "number": 15181,
+        "url": "https://github.com/BrianCLong/summit/pull/15181",
+        "mergedAt": "2025-12-31T14:21:22Z",
+        "title": "chore(deps): bump github/codeql-action from 3 to 4"
+      },
+      {
+        "number": 13551,
+        "url": "https://github.com/BrianCLong/summit/pull/13551",
+        "mergedAt": "2025-12-17T03:05:11Z",
+        "title": "chore: update server dependencies for security patches"
+      },
+      {
+        "number": 13310,
+        "url": "https://github.com/BrianCLong/summit/pull/13310",
+        "mergedAt": null,
+        "title": "deps(npm): bump @google-cloud/recommender from 5.0.6 to 7.2.1"
+      },
+      {
+        "number": 14364,
+        "url": "https://github.com/BrianCLong/summit/pull/14364",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "[Epic 1] Golden Path Architecture & Boundaries"
+      },
+      {
+        "number": 13712,
+        "url": "https://github.com/BrianCLong/summit/pull/13712",
+        "mergedAt": "2025-12-20T11:46:54Z",
+        "title": "Summit Internal Command Dashboard"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

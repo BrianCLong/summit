@@ -1,0 +1,59 @@
+{
+  "issue_number": 303,
+  "title": "Setup sentiment analysis pipeline using HuggingFace",
+  "url": "https://github.com/BrianCLong/summit/issues/303",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121349913,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zBGQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-AI",
+      "name": "area-AI",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Relates to AI/NLP/ML"
+    }
+  ],
+  "updatedAt": "2025-08-16T17:52:39Z",
+  "createdAt": "2025-08-16T17:52:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15256,
+        "url": "https://github.com/BrianCLong/summit/pull/15256",
+        "mergedAt": "2026-01-01T08:58:50Z",
+        "title": "feat: strengthen webauthn and deduplication flows"
+      },
+      {
+        "number": 634,
+        "url": "https://github.com/BrianCLong/summit/pull/634",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump globals from 15.15.0 to 16.3.0"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

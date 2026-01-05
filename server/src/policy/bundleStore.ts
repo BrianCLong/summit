@@ -61,6 +61,25 @@ class PolicyBundleStore {
     return this.currentPolicyVersionId ? this.versions.get(this.currentPolicyVersionId) : undefined;
   }
 
+  resolveForTenant(
+    tenantId: string,
+    versionId?: string,
+  ): PolicyBundleVersion | undefined {
+    if (versionId) {
+      const byVersion = this.versions.get(versionId);
+      if (byVersion && byVersion.bundle.tenantId === tenantId) return byVersion;
+    }
+
+    const current = this.getCurrent();
+    if (current && current.bundle.tenantId === tenantId) return current;
+
+    const candidates = Array.from(this.versions.values())
+      .filter((version) => version.bundle.tenantId === tenantId)
+      .sort((a, b) => a.loadedAt.getTime() - b.loadedAt.getTime());
+
+    return candidates.at(-1);
+  }
+
   list(): PolicyBundleVersion[] {
     return Array.from(this.versions.values()).sort((a, b) => a.loadedAt.getTime() - b.loadedAt.getTime());
   }
