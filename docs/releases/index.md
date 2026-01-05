@@ -19,6 +19,7 @@ This index provides quick access to all release-related artifacts, scripts, work
 ## Schemas / Contracts
 
 - [docs/releases/status-schema.md](status-schema.md)
+- [docs/releases/reason-codes.yml](reason-codes.yml)
 
 ## Operator Docs
 
