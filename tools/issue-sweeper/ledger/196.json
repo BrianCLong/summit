@@ -1,0 +1,104 @@
+{
+  "issue_number": 196,
+  "title": "Kubernetes Helm chart for production",
+  "url": "https://github.com/BrianCLong/summit/issues/196",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055903,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnXw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/devops",
+      "name": "devops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055934,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnfg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/kubernetes",
+      "name": "kubernetes",
+      "color": "84b6eb",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055969,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnoQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/helm",
+      "name": "helm",
+      "color": "84b6eb",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056381,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpPQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-30",
+      "name": "due:2025-11-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:54Z",
+  "createdAt": "2025-08-14T04:42:54Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 11911,
+        "url": "https://github.com/BrianCLong/summit/pull/11911",
+        "mergedAt": "2025-11-20T10:25:10Z",
+        "title": "Create Grafana observability dashboard for IntelGraph"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 11895,
+        "url": "https://github.com/BrianCLong/summit/pull/11895",
+        "mergedAt": null,
+        "title": "Build Crisis Management and Emergency Response Platform"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
