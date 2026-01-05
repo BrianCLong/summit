@@ -26,6 +26,36 @@ USAGE
 
 log() { printf "[%s] %s\n" "$(date -Iseconds)" "$*"; }
 
+warn() { printf "[%s] WARN: %s\n" "$(date -Iseconds)" "$*" >&2; }
+
+run_gh() {
+  local description="$1"; shift
+  local output status
+  set +e
+  output=$("$@" 2>&1)
+  status=$?
+  set -e
+  if [[ $status -ne 0 ]]; then
+    warn "$description unavailable ($output)"
+    return 1
+  fi
+  printf "%s" "$output"
+}
+
+safe_jq() {
+  local description="$1"; shift
+  local status
+  set +e
+  jq "$@"
+  status=$?
+  set -e
+  if [[ $status -ne 0 ]]; then
+    warn "$description parsing failed"
+    return 1
+  fi
+  return 0
+}
+
 require_tools() {
   if ! command -v gh >/dev/null 2>&1; then
     echo "error: gh CLI not found. Install from https://cli.github.com/." >&2
@@ -71,10 +101,14 @@ issues_report() {
   section "Open issues by label";
   local labels=("severity:blocker" "severity:high" "release:ga-blocker" "release:ga")
   for label in "${labels[@]}"; do
-    gh issue list --repo "$REPO" --state open --label "$label" --limit 200 --json number,title --jq \
-      '"'"${label}"'" + ": " + (length|tostring)'
+    if ! gh issue list --repo "$REPO" --state open --label "$label" --limit 200 --json number,title --jq \
+      '"'"${label}"'" + ": " + (length|tostring)'; then
+      warn "Issue listing failed for label ${label}; skipping entry"
+    fi
   done
-  gh issue list --repo "$REPO" --state open --limit 0 --json number | jq -r '"total open: " + (length|tostring)'
+  if ! gh issue list --repo "$REPO" --state open --limit 0 --json number | jq -r '"total open: " + (length|tostring)'; then
+    warn "Issue total unavailable"
+  fi
 }
 
 project_report() {
@@ -82,11 +116,14 @@ project_report() {
     section "Project 19"; echo "Skipped (flag --no-project)."; return
   fi
   section "Project 19 snapshot";
-  if ! gh project item-list --owner BrianCLong --number 19 --limit 200 --format json >/dev/null 2>&1; then
-    echo "Project access unavailable; rerun without --no-project to skip."; return
+  local project_json
+  if ! project_json=$(run_gh "Project 19" gh project item-list --owner BrianCLong --number 19 --limit 200 --format json); then
+    echo "Project access unavailable; rerun with --no-project to skip."; return
   fi
-  gh project item-list --owner BrianCLong --number 19 --limit 200 --format json |
-    jq -r '.items[] | {title: .title, type: .type, status: (.fieldValues[]? | select(.field.name=="Status").name)} | "- [" + (.type // "Item") + "] " + (.title // "(untitled)") + " — status: " + (.status // "(unset)")'
+  if ! echo "$project_json" |
+    safe_jq "Project 19" -r '.items[] | {title: .title, type: .type, status: (.fieldValues[]? | select(.field.name=="Status").name)} | "- [" + (.type // "Item") + "] " + (.title // "(untitled)") + " — status: " + (.status // "(unset)")'; then
+    echo "Project data unavailable"; return
+  fi
 }
 
 security_report() {
@@ -104,8 +141,13 @@ security_report() {
 
 workflow_report() {
   section "CI workflows (latest runs)";
-  gh run list --repo "$REPO" --limit 10 --json status,conclusion,name,headBranch,event,updatedAt |
-    jq -r '.[] | "- " + (.name//"(unknown)") + " [" + (.headBranch//"?") + "] " + (.status//"?") + ": " + (.conclusion//"pending") + " (" + (.updatedAt//"?") + ")"'
+  local runs
+  if ! runs=$(run_gh "CI workflow list" gh run list --repo "$REPO" --limit 10 --json status,conclusion,name,headBranch,event,updatedAt); then
+    echo "CI workflow data unavailable"; return
+  fi
+  if ! echo "$runs" | safe_jq "CI workflow list" -r '.[] | "- " + (.name//"(unknown)") + " [" + (.headBranch//"?") + "] " + (.status//"?") + ": " + (.conclusion//"pending") + " (" + (.updatedAt//"?") + ")"'; then
+    echo "CI workflow data unavailable"; return
+  fi
 }
 
 main() {
