@@ -2,6 +2,8 @@
 
 This is the canonical runbook for operators to perform releases.
 
+> **Quick Links:** See the [Release Bundle Artifacts Index](index.md) for a list of all scripts, workflows, and schemas.
+
 ## 1. Overview
 
 - **Artifacts produced:**
