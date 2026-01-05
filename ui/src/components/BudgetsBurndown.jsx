@@ -1,4 +1,10 @@
 import React from 'react';
+import {
+  formatAbsoluteTime,
+  formatCurrency,
+  formatNumber,
+  formatPercent,
+} from '../utils/formatting.js';
 
 const Card = ({ title, children, actions, className = '' }) => (
   <div className={`glass-card rounded-xl shadow-lg bg-white ${className}`} role="region" aria-labelledby={`card-title-${title.replace(/\s+/g, '-').toLowerCase()}`}>
@@ -27,7 +33,7 @@ const BudgetsBurndown = () => {
         {/* Minute Window */}
         <div className="mb-6">
           <h4 className="font-medium text-gray-900 mb-3">
-            Minute Window (reset {nextMinute.toLocaleTimeString()})
+            Minute Window (resets {formatAbsoluteTime(nextMinute, { includeDate: false })})
           </h4>
           <div className="space-y-3">
             <div className="flex items-center space-x-4">
@@ -35,49 +41,57 @@ const BudgetsBurndown = () => {
                 local/llama
               </span>
               <div className="flex-1 bg-gray-200 rounded-full h-4">
-                <div
-                  className="bg-blue-500 h-4 rounded-full"
-                  style={{ width: '23%' }}
-                ></div>
-              </div>
-              <span className="text-sm text-gray-600">
-                14/60 rpm p50 90ms
-              </span>
+              <div
+                className="bg-blue-500 h-4 rounded-full"
+                style={{ width: formatPercent(14, 60) }}
+              ></div>
             </div>
+            <span className="text-sm text-gray-600">
+                {formatNumber(14, { maximumFractionDigits: 0 })}/
+                {formatNumber(60, { maximumFractionDigits: 0 })} rpm • {formatPercent(14, 60)} used
+                {' '}
+                p50 {formatNumber(90, { maximumFractionDigits: 0 })}ms
+            </span>
+          </div>
 
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium w-32 text-gray-900">
                 local/llama-cpu
               </span>
               <div className="flex-1 bg-gray-200 rounded-full h-4">
-                <div
-                  className="bg-green-500 h-4 rounded-full"
-                  style={{ width: '17%' }}
-                ></div>
-              </div>
-              <span className="text-sm text-gray-600">
-                10/60 rpm p50 180ms
-              </span>
+              <div
+                className="bg-green-500 h-4 rounded-full"
+                style={{ width: formatPercent(10, 60) }}
+              ></div>
             </div>
+            <span className="text-sm text-gray-600">
+                {formatNumber(10, { maximumFractionDigits: 0 })}/
+                {formatNumber(60, { maximumFractionDigits: 0 })} rpm • {formatPercent(10, 60)} used
+                {' '}
+                p50 {formatNumber(180, { maximumFractionDigits: 0 })}ms
+            </span>
+          </div>
           </div>
         </div>
 
         {/* Daily Budgets */}
         <div>
           <h4 className="font-medium text-gray-900 mb-3">
-            Daily Budgets (reset 00:00Z)
+            Daily Budgets (resets 00:00 UTC)
           </h4>
           <div className="space-y-3">
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium w-32 text-gray-900">openrouter</span>
               <div className="flex-1 bg-gray-200 rounded-full h-4">
-                <div
-                  className="bg-purple-500 h-4 rounded-full"
-                  style={{ width: '0%' }}
-                ></div>
-              </div>
-              <span className="text-sm text-gray-600">$0 / $10 (0%)</span>
+              <div
+                className="bg-purple-500 h-4 rounded-full"
+                style={{ width: formatPercent(0, 10) }}
+              ></div>
             </div>
+            <span className="text-sm text-gray-600">
+              {formatCurrency(0)} / {formatCurrency(10)} ({formatPercent(0, 10)})
+            </span>
+          </div>
           </div>
         </div>
       </Card>

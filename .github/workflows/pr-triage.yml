@@ -1,0 +1,50 @@
+name: PR Queue Stabilizer
+
+on:
+  schedule:
+    - cron: '0 8 * * 1-5' # Run at 08:00 UTC, Mon-Fri
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: read
+  statuses: read
+
+jobs:
+  triage:
+    name: Triage Open PRs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run PR Triage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p docs/ops/pr-triage
+          npx tsx scripts/ops/pr_triage.ts --out docs/ops/pr-triage/
+
+      - name: Upload Triage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-triage-report
+          path: docs/ops/pr-triage/
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f docs/ops/pr-triage/PR_TRIAGE_REPORT.md ]; then
+            cat docs/ops/pr-triage/PR_TRIAGE_REPORT.md >> $GITHUB_STEP_SUMMARY
+          fi

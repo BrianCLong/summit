@@ -1,0 +1,139 @@
+{
+  "generatedAt": "2026-01-03T07:16:40.814Z",
+  "baseBranch": "main",
+  "prs": [
+    {
+      "number": 101,
+      "title": "feat: add new ingestion pipeline",
+      "author": "dev-1",
+      "labels": [
+        "feature"
+      ],
+      "createdAt": "2026-01-01T07:16:40.813Z",
+      "updatedAt": "2026-01-03T07:16:40.814Z",
+      "mergeableState": "clean",
+      "filesChanged": 12,
+      "additions": 500,
+      "deletions": 20,
+      "baseRefName": "main",
+      "headRefName": "feat/ingestion",
+      "ci": {
+        "status": "SUCCESS",
+        "failingChecks": [],
+        "details": "All passed"
+      },
+      "riskScore": 25,
+      "factorBreakdown": [
+        "File Overlaps (1) (+10)",
+        "Touches Critical Path (+15)"
+      ],
+      "overlap": {
+        "files": [
+          "server/src/ingestion.ts",
+          "package.json"
+        ],
+        "count": 1,
+        "overlappingPrs": [
+          102
+        ]
+      },
+      "recommendedAction": "MERGE_NOW"
+    },
+    {
+      "number": 102,
+      "title": "fix: security policy bypass",
+      "author": "sec-eng",
+      "labels": [
+        "security"
+      ],
+      "createdAt": "2025-12-29T07:16:40.814Z",
+      "updatedAt": "2026-01-03T07:16:40.814Z",
+      "mergeableState": "dirty",
+      "filesChanged": 5,
+      "additions": 50,
+      "deletions": 10,
+      "baseRefName": "main",
+      "headRefName": "fix/security",
+      "ci": {
+        "status": "FAILURE",
+        "failingChecks": [
+          "Security Scan"
+        ],
+        "details": "Security Scan"
+      },
+      "riskScore": 95,
+      "factorBreakdown": [
+        "CI Failure (+40)",
+        "Merge Conflict (+30)",
+        "File Overlaps (1) (+10)",
+        "Touches Critical Path (+15)"
+      ],
+      "overlap": {
+        "files": [
+          "policy/access.rego",
+          "server/src/ingestion.ts"
+        ],
+        "count": 1,
+        "overlappingPrs": [
+          101
+        ]
+      },
+      "recommendedAction": "HOLD"
+    },
+    {
+      "number": 103,
+      "title": "chore: update deps",
+      "author": "bot",
+      "labels": [
+        "dependencies"
+      ],
+      "createdAt": "2026-01-03T06:16:40.814Z",
+      "updatedAt": "2026-01-03T07:16:40.814Z",
+      "mergeableState": "clean",
+      "filesChanged": 2,
+      "additions": 1000,
+      "deletions": 1000,
+      "baseRefName": "main",
+      "headRefName": "chore/deps",
+      "ci": {
+        "status": "SUCCESS",
+        "failingChecks": [],
+        "details": "All passed"
+      },
+      "riskScore": 15,
+      "factorBreakdown": [
+        "Touches Critical Path (+15)"
+      ],
+      "overlap": {
+        "files": [
+          "pnpm-lock.yaml"
+        ],
+        "count": 0,
+        "overlappingPrs": []
+      },
+      "recommendedAction": "MERGE_NOW"
+    }
+  ],
+  "mergeTrain": [
+    {
+      "prNumber": 103,
+      "riskScore": 15,
+      "rationale": "Risk: 15. Touches Critical Path (+15)"
+    },
+    {
+      "prNumber": 101,
+      "riskScore": 25,
+      "rationale": "Risk: 25. File Overlaps (1) (+10), Touches Critical Path (+15)"
+    }
+  ],
+  "hotspots": [
+    {
+      "path": "server/src/ingestion.ts",
+      "overlapCount": 2,
+      "prs": [
+        101,
+        102
+      ]
+    }
+  ]
+}
