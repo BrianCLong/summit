@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-05T02:09:35Z",
-  "revision_note": "Added ramp policy bundle fields, enforcement hooks, and audit receipts for ramp changes",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",

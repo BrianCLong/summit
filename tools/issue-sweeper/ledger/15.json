@@ -1,0 +1,239 @@
+{
+  "issue_number": 15,
+  "title": "M2: Environment config schema validation",
+  "url": "https://github.com/BrianCLong/summit/issues/15",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:06Z",
+  "createdAt": "2025-08-12T00:10:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15213,
+        "url": "https://github.com/BrianCLong/summit/pull/15213",
+        "mergedAt": null,
+        "title": "Platform Evolution & Endgame Readiness (Sprint N+15)"
+      },
+      {
+        "number": 14023,
+        "url": "https://github.com/BrianCLong/summit/pull/14023",
+        "mergedAt": "2025-12-19T22:46:22Z",
+        "title": "Upgrade deepspeed to version 0.15.1"
+      },
+      {
+        "number": 14517,
+        "url": "https://github.com/BrianCLong/summit/pull/14517",
+        "mergedAt": "2025-12-27T00:19:30Z",
+        "title": "Sprint N+15: Multi-Agent Coordination with Shared Budgets"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 13759,
+        "url": "https://github.com/BrianCLong/summit/pull/13759",
+        "mergedAt": "2025-12-20T03:34:19Z",
+        "title": "Add sprint plan for Jul 6–17 2026 (Sprint 15)"
+      },
+      {
+        "number": 14382,
+        "url": "https://github.com/BrianCLong/summit/pull/14382",
+        "mergedAt": null,
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2"
+      },
+      {
+        "number": 13094,
+        "url": "https://github.com/BrianCLong/summit/pull/13094",
+        "mergedAt": "2025-12-02T21:21:46Z",
+        "title": "chore(deps): bump validator from 13.15.20 to 13.15.23 in /sdk/typescript"
+      },
+      {
+        "number": 15180,
+        "url": "https://github.com/BrianCLong/summit/pull/15180",
+        "mergedAt": "2025-12-31T14:21:19Z",
+        "title": "chore(deps): bump zaproxy/action-baseline from 0.14.0 to 0.15.0"
+      },
+      {
+        "number": 12797,
+        "url": "https://github.com/BrianCLong/summit/pull/12797",
+        "mergedAt": "2025-12-17T22:00:19Z",
+        "title": "Add sprint plan for Dec 15–26, 2025"
+      },
+      {
+        "number": 12446,
+        "url": "https://github.com/BrianCLong/summit/pull/12446",
+        "mergedAt": "2025-12-04T17:46:00Z",
+        "title": "Add ultra-prime expansion for wave 15 missions"
+      },
+      {
+        "number": 14379,
+        "url": "https://github.com/BrianCLong/summit/pull/14379",
+        "mergedAt": "2025-12-23T04:35:14Z",
+        "title": "Bump happy-dom from 15.11.7 to 20.0.2 in /apps/compliance-console"
+      },
+      {
+        "number": 11787,
+        "url": "https://github.com/BrianCLong/summit/pull/11787",
+        "mergedAt": "2025-10-29T16:36:04Z",
+        "title": "chore(deps): bump validator from 13.15.15 to 13.15.20 in /sdk/typescript"
+      },
+      {
+        "number": 14377,
+        "url": "https://github.com/BrianCLong/summit/pull/14377",
+        "mergedAt": "2025-12-23T04:35:21Z",
+        "title": "Bump webpack-dev-server from 4.15.2 to 5.2.1 in /apps/web/ingest-wizard"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 12809,
+        "url": "https://github.com/BrianCLong/summit/pull/12809",
+        "mergedAt": "2025-12-04T17:42:00Z",
+        "title": "Add Golden Path Beta sprint plan"
+      },
+      {
+        "number": 14592,
+        "url": "https://github.com/BrianCLong/summit/pull/14592",
+        "mergedAt": null,
+        "title": "docs: add IntelGraph Quickstart deliverable pack"
+      },
+      {
+        "number": 13551,
+        "url": "https://github.com/BrianCLong/summit/pull/13551",
+        "mergedAt": "2025-12-17T03:05:11Z",
+        "title": "chore: update server dependencies for security patches"
+      },
+      {
+        "number": 15151,
+        "url": "https://github.com/BrianCLong/summit/pull/15151",
+        "mergedAt": "2025-12-30T21:29:24Z",
+        "title": "Identify and catalog critical TODOs"
+      },
+      {
+        "number": 14561,
+        "url": "https://github.com/BrianCLong/summit/pull/14561",
+        "mergedAt": "2025-12-27T04:48:07Z",
+        "title": "chore(deps): Bump torch from 2.1.1 to 2.8.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 11954,
+        "url": "https://github.com/BrianCLong/summit/pull/11954",
+        "mergedAt": "2025-11-20T10:20:47Z",
+        "title": "Define and implement codebase maintainability metrics"
+      },
+      {
+        "number": 12085,
+        "url": "https://github.com/BrianCLong/summit/pull/12085",
+        "mergedAt": "2025-11-21T06:30:38Z",
+        "title": "Build data pipeline and ETL infrastructure"
+      },
+      {
+        "number": 12360,
+        "url": "https://github.com/BrianCLong/summit/pull/12360",
+        "mergedAt": "2025-12-18T03:00:29Z",
+        "title": "Sprint 12: Cognitive Security Toolkit"
+      },
+      {
+        "number": 12042,
+        "url": "https://github.com/BrianCLong/summit/pull/12042",
+        "mergedAt": "2025-11-21T03:59:41Z",
+        "title": "Audit and improve CI/CD pipeline performance"
+      },
+      {
+        "number": 12246,
+        "url": "https://github.com/BrianCLong/summit/pull/12246",
+        "mergedAt": "2025-12-18T03:32:23Z",
+        "title": "Set up artifact disclosure pack skeleton"
+      },
+      {
+        "number": 12220,
+        "url": "https://github.com/BrianCLong/summit/pull/12220",
+        "mergedAt": "2025-11-21T16:49:56Z",
+        "title": "docs: add monorepo architecture refactoring plan with ADRs"
+      },
+      {
+        "number": 11879,
+        "url": "https://github.com/BrianCLong/summit/pull/11879",
+        "mergedAt": null,
+        "title": "Create monorepo remediation and dev workflow plan"
+      },
+      {
+        "number": 12251,
+        "url": "https://github.com/BrianCLong/summit/pull/12251",
+        "mergedAt": "2025-12-18T03:31:21Z",
+        "title": "test: add comprehensive test coverage for critical areas"
+      },
+      {
+        "number": 12043,
+        "url": "https://github.com/BrianCLong/summit/pull/12043",
+        "mergedAt": "2025-11-21T03:59:37Z",
+        "title": "Optimize slow database queries with benchmarks"
+      },
+      {
+        "number": 14376,
+        "url": "https://github.com/BrianCLong/summit/pull/14376",
+        "mergedAt": "2025-12-23T04:35:24Z",
+        "title": "Bump esbuild and vitest in /apps/gateway"
+      },
+      {
+        "number": 12709,
+        "url": "https://github.com/BrianCLong/summit/pull/12709",
+        "mergedAt": "2025-12-04T16:26:44Z",
+        "title": "Plan sprint with auditable demo flow"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
