@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
-  "revision_note": "Added Maestro White-Label Kit v1 + Hosted SaaS Beta Readiness sprint issue pack (Feb 2–13, 2026)",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",

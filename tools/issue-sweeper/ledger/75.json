@@ -1,0 +1,239 @@
+{
+  "issue_number": 75,
+  "title": "Integrate Basic OSINT Connector (e.g., WHOIS API)",
+  "url": "https://github.com/BrianCLong/summit/issues/75",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095918371,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizIw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:plugins",
+      "name": "area:plugins",
+      "color": "d93f0b",
+      "default": false,
+      "description": "Plugins area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:59Z",
+  "createdAt": "2025-08-12T04:39:56Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15392,
+        "url": "https://github.com/BrianCLong/summit/pull/15392",
+        "mergedAt": null,
+        "title": "Harden GA coverage and fuzz gates with deterministic turbo segmentation"
+      },
+      {
+        "number": 15172,
+        "url": "https://github.com/BrianCLong/summit/pull/15172",
+        "mergedAt": "2025-12-31T03:31:39Z",
+        "title": "Prepare Summit MVP for general availability"
+      },
+      {
+        "number": 12735,
+        "url": "https://github.com/BrianCLong/summit/pull/12735",
+        "mergedAt": "2025-12-04T15:56:18Z",
+        "title": "Build scenario engine for what-if modeling"
+      },
+      {
+        "number": 12257,
+        "url": "https://github.com/BrianCLong/summit/pull/12257",
+        "mergedAt": "2025-12-18T03:24:25Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 11999,
+        "url": "https://github.com/BrianCLong/summit/pull/11999",
+        "mergedAt": "2025-11-20T15:01:41Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 12048,
+        "url": "https://github.com/BrianCLong/summit/pull/12048",
+        "mergedAt": "2025-11-21T03:59:12Z",
+        "title": "Update and secure project dependencies"
+      },
+      {
+        "number": 11963,
+        "url": "https://github.com/BrianCLong/summit/pull/11963",
+        "mergedAt": null,
+        "title": "Build Knowledge Graph and Entity Resolution Platform"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 12049,
+        "url": "https://github.com/BrianCLong/summit/pull/12049",
+        "mergedAt": "2025-11-21T03:59:08Z",
+        "title": "Add comprehensive tests for new modules"
+      },
+      {
+        "number": 12096,
+        "url": "https://github.com/BrianCLong/summit/pull/12096",
+        "mergedAt": "2025-12-20T11:53:10Z",
+        "title": "Optimize Summit deployment and infrastructure"
+      },
+      {
+        "number": 10157,
+        "url": "https://github.com/BrianCLong/summit/pull/10157",
+        "mergedAt": null,
+        "title": "feat: add orchestrator fast-track router with feature flag"
+      },
+      {
+        "number": 11900,
+        "url": "https://github.com/BrianCLong/summit/pull/11900",
+        "mergedAt": "2025-11-20T10:26:00Z",
+        "title": "Add observability and disaster recovery infrastructure"
+      },
+      {
+        "number": 11907,
+        "url": "https://github.com/BrianCLong/summit/pull/11907",
+        "mergedAt": "2025-11-20T10:25:33Z",
+        "title": "Convert runbooks to DAGs with gates and logs"
+      },
+      {
+        "number": 15256,
+        "url": "https://github.com/BrianCLong/summit/pull/15256",
+        "mergedAt": "2026-01-01T08:58:50Z",
+        "title": "feat: strengthen webauthn and deduplication flows"
+      },
+      {
+        "number": 1286,
+        "url": "https://github.com/BrianCLong/summit/pull/1286",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): comprehensive test strategy hardening"
+      },
+      {
+        "number": 1297,
+        "url": "https://github.com/BrianCLong/summit/pull/1297",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "feat(phase-3): implement comprehensive test strategy hardening"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 10129,
+        "url": "https://github.com/BrianCLong/summit/pull/10129",
+        "mergedAt": null,
+        "title": "feat: add cross-database migration rollback engine"
+      },
+      {
+        "number": 10120,
+        "url": "https://github.com/BrianCLong/summit/pull/10120",
+        "mergedAt": "2025-10-14T08:53:59Z",
+        "title": "feat: Build infrastructure monitoring platform"
+      },
+      {
+        "number": 10127,
+        "url": "https://github.com/BrianCLong/summit/pull/10127",
+        "mergedAt": "2025-10-17T01:51:15Z",
+        "title": "feat: add Liquid Nano pilot bundle"
+      },
+      {
+        "number": 1117,
+        "url": "https://github.com/BrianCLong/summit/pull/1117",
+        "mergedAt": "2025-09-03T01:09:14Z",
+        "title": "feat: implement maestro production readiness features and documentation"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

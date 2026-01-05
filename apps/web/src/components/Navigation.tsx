@@ -78,6 +78,13 @@ const navItems: NavItem[] = [
     action: 'read',
   },
   {
+    name: 'Usage & Cost',
+    href: '/dashboards/usage-cost',
+    icon: BarChart3 as React.ComponentType<{ className?: string }>,
+    resource: 'dashboards',
+    action: 'read',
+  },
+  {
     name: 'Internal Command',
     href: '/internal/command',
     icon: Command as React.ComponentType<{ className?: string }>,
@@ -204,14 +211,14 @@ export function Navigation({ user }: NavigationProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 6).map(item => (
+        {navItems.slice(3, 7).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(6).map(item => (
+        {navItems.slice(7).map(item => (
           <NavItemComponent key={item.href} item={item} />
         ))}
       </div>

@@ -327,7 +327,9 @@
       "Bash(do echo \"Triggering CI for PR #$pr...\")",
       "Bash(gh workflow list:*)",
       "Bash(while read id)",
-      "Bash(do gh run cancel $id)"
+      "Bash(do gh run cancel $id)",
+      "Bash(od:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"Cancelling {}\"\"; gh run cancel {} 2>&1 || true')"
     ],
     "deny": [],
     "ask": []

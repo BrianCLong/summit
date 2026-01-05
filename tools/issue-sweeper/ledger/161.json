@@ -1,0 +1,143 @@
+{
+  "issue_number": 161,
+  "title": "feat: GraphRAG MVP",
+  "url": "https://github.com/BrianCLong/summit/issues/161",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968038,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQJg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P0",
+      "name": "P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968235,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQ6w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/graphrag",
+      "name": "graphrag",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968311,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRNw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/feature",
+      "name": "feature",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981085,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDHQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-09-15",
+      "name": "due:2025-09-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:41:39Z",
+  "createdAt": "2025-08-14T04:04:48Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15293,
+        "url": "https://github.com/BrianCLong/summit/pull/15293",
+        "mergedAt": "2026-01-01T06:31:07Z",
+        "title": "feat: codify partner operating model guardrails"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10085,
+        "url": "https://github.com/BrianCLong/summit/pull/10085",
+        "mergedAt": null,
+        "title": "feat: add policy compliance simulation analytics"
+      },
+      {
+        "number": 10095,
+        "url": "https://github.com/BrianCLong/summit/pull/10095",
+        "mergedAt": "2025-10-14T13:05:57Z",
+        "title": "feat: add data retention policy engine"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1309,
+        "url": "https://github.com/BrianCLong/summit/pull/1309",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Fix docling metrics registration and test scaffolding"
+      },
+      {
+        "number": 1338,
+        "url": "https://github.com/BrianCLong/summit/pull/1338",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/workflows"
+      },
+      {
+        "number": 1337,
+        "url": "https://github.com/BrianCLong/summit/pull/1337",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/docs"
+      },
+      {
+        "number": 1336,
+        "url": "https://github.com/BrianCLong/summit/pull/1336",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/deps"
+      },
+      {
+        "number": 1335,
+        "url": "https://github.com/BrianCLong/summit/pull/1335",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/hardening"
+      },
+      {
+        "number": 1334,
+        "url": "https://github.com/BrianCLong/summit/pull/1334",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Int/features"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
