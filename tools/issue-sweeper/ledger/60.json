@@ -1,0 +1,230 @@
+{
+  "issue_number": 60,
+  "title": "Bootstrap Basic GraphQL Schema and Resolvers",
+  "url": "https://github.com/BrianCLong/summit/issues/60",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T04:37:58Z",
+  "createdAt": "2025-08-12T04:37:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 15392,
+        "url": "https://github.com/BrianCLong/summit/pull/15392",
+        "mergedAt": null,
+        "title": "Harden GA coverage and fuzz gates with deterministic turbo segmentation"
+      },
+      {
+        "number": 14535,
+        "url": "https://github.com/BrianCLong/summit/pull/14535",
+        "mergedAt": null,
+        "title": "Sprint N+60: Customer Outcome Engineering & JTBD Alignment"
+      },
+      {
+        "number": 15261,
+        "url": "https://github.com/BrianCLong/summit/pull/15261",
+        "mergedAt": "2026-01-01T07:29:41Z",
+        "title": "Expand test coverage and fix issues"
+      },
+      {
+        "number": 14909,
+        "url": "https://github.com/BrianCLong/summit/pull/14909",
+        "mergedAt": "2025-12-30T22:48:35Z",
+        "title": "Add operational hardening blueprint"
+      },
+      {
+        "number": 14260,
+        "url": "https://github.com/BrianCLong/summit/pull/14260",
+        "mergedAt": "2025-12-22T08:10:14Z",
+        "title": "Add activation and retention execution plan"
+      },
+      {
+        "number": 14448,
+        "url": "https://github.com/BrianCLong/summit/pull/14448",
+        "mergedAt": "2025-12-25T03:17:36Z",
+        "title": "Sprint N+12: Revenue Maturity & Compliance Expansion"
+      },
+      {
+        "number": 15271,
+        "url": "https://github.com/BrianCLong/summit/pull/15271",
+        "mergedAt": null,
+        "title": "Senior engineer embedded repository work"
+      },
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 15248,
+        "url": "https://github.com/BrianCLong/summit/pull/15248",
+        "mergedAt": null,
+        "title": "docs: align war-room backlog tracking with roadmap"
+      },
+      {
+        "number": 13659,
+        "url": "https://github.com/BrianCLong/summit/pull/13659",
+        "mergedAt": "2025-12-20T03:28:08Z",
+        "title": "chore: harden drop gateway security"
+      },
+      {
+        "number": 14125,
+        "url": "https://github.com/BrianCLong/summit/pull/14125",
+        "mergedAt": "2025-12-20T09:34:33Z",
+        "title": "feat: harden query caching and alerting"
+      },
+      {
+        "number": 13882,
+        "url": "https://github.com/BrianCLong/summit/pull/13882",
+        "mergedAt": "2025-12-20T03:21:27Z",
+        "title": "Create multi-agent orchestration prompt for GA release"
+      },
+      {
+        "number": 14353,
+        "url": "https://github.com/BrianCLong/summit/pull/14353",
+        "mergedAt": null,
+        "title": "Strategic Priority Execution: Integrity, CI, and Governance"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 12038,
+        "url": "https://github.com/BrianCLong/summit/pull/12038",
+        "mergedAt": "2025-11-21T03:59:50Z",
+        "title": "Optimize GraphQL implementation and resolver performance"
+      },
+      {
+        "number": 12091,
+        "url": "https://github.com/BrianCLong/summit/pull/12091",
+        "mergedAt": "2025-11-21T06:30:22Z",
+        "title": "Design multi-layer caching strategy for Summit"
+      },
+      {
+        "number": 12688,
+        "url": "https://github.com/BrianCLong/summit/pull/12688",
+        "mergedAt": "2025-12-04T16:26:46Z",
+        "title": "Implement internationalization and multi-language support"
+      },
+      {
+        "number": 12110,
+        "url": "https://github.com/BrianCLong/summit/pull/12110",
+        "mergedAt": "2025-11-21T07:30:45Z",
+        "title": "Build AI experience marketplace with personalization"
+      },
+      {
+        "number": 12052,
+        "url": "https://github.com/BrianCLong/summit/pull/12052",
+        "mergedAt": "2025-11-21T03:57:15Z",
+        "title": "Implement cost optimization and resource efficiency"
+      },
+      {
+        "number": 12090,
+        "url": "https://github.com/BrianCLong/summit/pull/12090",
+        "mergedAt": "2025-11-21T06:30:24Z",
+        "title": "Security hardening review and vulnerability scan"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 12030,
+        "url": "https://github.com/BrianCLong/summit/pull/12030",
+        "mergedAt": "2025-11-20T15:29:27Z",
+        "title": "Build Advanced Computer Vision Analysis Platform"
+      },
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      },
+      {
+        "number": 15334,
+        "url": "https://github.com/BrianCLong/summit/pull/15334",
+        "mergedAt": "2026-01-01T11:38:19Z",
+        "title": "Delivery of 8 Strategic Innovations"
+      },
+      {
+        "number": 12084,
+        "url": "https://github.com/BrianCLong/summit/pull/12084",
+        "mergedAt": "2025-11-21T06:30:40Z",
+        "title": "Design microservices communication and service mesh"
+      },
+      {
+        "number": 13174,
+        "url": "https://github.com/BrianCLong/summit/pull/13174",
+        "mergedAt": "2025-12-04T15:39:18Z",
+        "title": "Add multi-agent coordination primer and task template"
+      },
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      },
+      {
+        "number": 12027,
+        "url": "https://github.com/BrianCLong/summit/pull/12027",
+        "mergedAt": "2025-11-20T15:29:33Z",
+        "title": "Design audit event schema and database"
+      },
+      {
+        "number": 12051,
+        "url": "https://github.com/BrianCLong/summit/pull/12051",
+        "mergedAt": "2025-11-21T03:57:20Z",
+        "title": "Design comprehensive backup and recovery system"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

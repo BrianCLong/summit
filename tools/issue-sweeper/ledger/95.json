@@ -1,0 +1,239 @@
+{
+  "issue_number": 95,
+  "title": "Implement Basic Entity Modeling in Neo4j",
+  "url": "https://github.com/BrianCLong/summit/issues/95",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9095918281,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiyyQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:database",
+      "name": "area:database",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Database area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:12Z",
+  "createdAt": "2025-08-12T04:40:41Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 15172,
+        "url": "https://github.com/BrianCLong/summit/pull/15172",
+        "mergedAt": "2025-12-31T03:31:39Z",
+        "title": "Prepare Summit MVP for general availability"
+      },
+      {
+        "number": 15248,
+        "url": "https://github.com/BrianCLong/summit/pull/15248",
+        "mergedAt": null,
+        "title": "docs: align war-room backlog tracking with roadmap"
+      },
+      {
+        "number": 14669,
+        "url": "https://github.com/BrianCLong/summit/pull/14669",
+        "mergedAt": null,
+        "title": "chore(ci): add canary promotion gates to multi-region deploy workflow"
+      },
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 13322,
+        "url": "https://github.com/BrianCLong/summit/pull/13322",
+        "mergedAt": "2025-12-04T14:38:56Z",
+        "title": "fix: Resolve Remaining Critical Security Vulnerabilities"
+      },
+      {
+        "number": 12692,
+        "url": "https://github.com/BrianCLong/summit/pull/12692",
+        "mergedAt": "2025-12-04T17:44:52Z",
+        "title": "Financial trading system prompts and documentation"
+      },
+      {
+        "number": 13630,
+        "url": "https://github.com/BrianCLong/summit/pull/13630",
+        "mergedAt": "2025-12-17T01:39:39Z",
+        "title": "Establish observability backbone and monitoring standards"
+      },
+      {
+        "number": 12682,
+        "url": "https://github.com/BrianCLong/summit/pull/12682",
+        "mergedAt": "2025-12-18T01:40:14Z",
+        "title": "Build IntelGraph decision and claims slice"
+      },
+      {
+        "number": 11999,
+        "url": "https://github.com/BrianCLong/summit/pull/11999",
+        "mergedAt": "2025-11-20T15:01:41Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 11896,
+        "url": "https://github.com/BrianCLong/summit/pull/11896",
+        "mergedAt": "2025-11-20T10:26:15Z",
+        "title": "Add GraphRAG with query preview feature"
+      },
+      {
+        "number": 11981,
+        "url": "https://github.com/BrianCLong/summit/pull/11981",
+        "mergedAt": "2025-11-20T15:11:44Z",
+        "title": "Set up Predictive Threat Suite and SLO dashboards"
+      },
+      {
+        "number": 12045,
+        "url": "https://github.com/BrianCLong/summit/pull/12045",
+        "mergedAt": "2025-11-21T03:59:24Z",
+        "title": "Fix flaky tests and improve stability"
+      },
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      },
+      {
+        "number": 12073,
+        "url": "https://github.com/BrianCLong/summit/pull/12073",
+        "mergedAt": null,
+        "title": "Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 11900,
+        "url": "https://github.com/BrianCLong/summit/pull/11900",
+        "mergedAt": "2025-11-20T10:26:00Z",
+        "title": "Add observability and disaster recovery infrastructure"
+      },
+      {
+        "number": 12008,
+        "url": "https://github.com/BrianCLong/summit/pull/12008",
+        "mergedAt": "2025-11-20T14:58:22Z",
+        "title": "Build Advanced Deception Detection System"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 12052,
+        "url": "https://github.com/BrianCLong/summit/pull/12052",
+        "mergedAt": "2025-11-21T03:57:15Z",
+        "title": "Implement cost optimization and resource efficiency"
+      },
+      {
+        "number": 12762,
+        "url": "https://github.com/BrianCLong/summit/pull/12762",
+        "mergedAt": "2025-12-04T15:56:14Z",
+        "title": "Build retention and right-to-be-forgotten engine"
+      },
+      {
+        "number": 12086,
+        "url": "https://github.com/BrianCLong/summit/pull/12086",
+        "mergedAt": null,
+        "title": "Implement comprehensive accessibility improvements"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      },
+      {
+        "number": 11874,
+        "url": "https://github.com/BrianCLong/summit/pull/11874",
+        "mergedAt": null,
+        "title": "Build Resilience Lab with automated chaos drills"
+      },
+      {
+        "number": 11792,
+        "url": "https://github.com/BrianCLong/summit/pull/11792",
+        "mergedAt": null,
+        "title": "fix: resolve GraphQL service regressions"
+      },
+      {
+        "number": 11926,
+        "url": "https://github.com/BrianCLong/summit/pull/11926",
+        "mergedAt": "2025-11-20T10:20:02Z",
+        "title": "Build natural language to graph query translator"
+      },
+      {
+        "number": 925,
+        "url": "https://github.com/BrianCLong/summit/pull/925",
+        "mergedAt": null,
+        "title": "GA: IntelGraph Launch Gates and Docs"
+      },
+      {
+        "number": 10105,
+        "url": "https://github.com/BrianCLong/summit/pull/10105",
+        "mergedAt": "2025-10-14T11:52:58Z",
+        "title": "feat: add govbrief research brief pipeline"
+      },
+      {
+        "number": 931,
+        "url": "https://github.com/BrianCLong/summit/pull/931",
+        "mergedAt": null,
+        "title": "feat: Complete Operation NIGHT MARKET RC Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

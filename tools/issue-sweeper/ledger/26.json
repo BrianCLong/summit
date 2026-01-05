@@ -1,0 +1,248 @@
+{
+  "issue_number": 26,
+  "title": "M0: Remove sensitive files from history and add proper .gitignore",
+  "url": "https://github.com/BrianCLong/summit/issues/26",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:13Z",
+  "createdAt": "2025-08-12T00:15:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15058,
+        "url": "https://github.com/BrianCLong/summit/pull/15058",
+        "mergedAt": "2025-12-30T22:41:15Z",
+        "title": "Add Sprint 26 planning pack"
+      },
+      {
+        "number": 15164,
+        "url": "https://github.com/BrianCLong/summit/pull/15164",
+        "mergedAt": null,
+        "title": "docs: add sprint 26 issue brief"
+      },
+      {
+        "number": 14385,
+        "url": "https://github.com/BrianCLong/summit/pull/14385",
+        "mergedAt": null,
+        "title": "chore(deps): bump marshmallow from 3.26.1 to 3.26.2"
+      },
+      {
+        "number": 15163,
+        "url": "https://github.com/BrianCLong/summit/pull/15163",
+        "mergedAt": "2025-12-30T22:36:49Z",
+        "title": "Sprint 26: Golden Path Quality & Governance Improvements"
+      },
+      {
+        "number": 14017,
+        "url": "https://github.com/BrianCLong/summit/pull/14017",
+        "mergedAt": "2025-12-20T11:09:52Z",
+        "title": "Epic 26: Advanced MLOps Platform Implementation"
+      },
+      {
+        "number": 12351,
+        "url": "https://github.com/BrianCLong/summit/pull/12351",
+        "mergedAt": "2025-12-18T03:02:30Z",
+        "title": "Document Information Warfare Sprints 26-30"
+      },
+      {
+        "number": 12824,
+        "url": "https://github.com/BrianCLong/summit/pull/12824",
+        "mergedAt": "2025-12-04T16:54:06Z",
+        "title": "Sprint 26: GCS Batch Ingestion Connector"
+      },
+      {
+        "number": 13856,
+        "url": "https://github.com/BrianCLong/summit/pull/13856",
+        "mergedAt": "2025-12-20T03:24:12Z",
+        "title": "Add sprint plan for Oct 26–Nov 6 2026 enterprise platform"
+      },
+      {
+        "number": 12797,
+        "url": "https://github.com/BrianCLong/summit/pull/12797",
+        "mergedAt": "2025-12-17T22:00:19Z",
+        "title": "Add sprint plan for Dec 15–26, 2025"
+      },
+      {
+        "number": 12854,
+        "url": "https://github.com/BrianCLong/summit/pull/12854",
+        "mergedAt": "2025-12-04T16:53:24Z",
+        "title": "Add Sprint 26 Plan: Information Environment Mapping"
+      },
+      {
+        "number": 13859,
+        "url": "https://github.com/BrianCLong/summit/pull/13859",
+        "mergedAt": "2025-12-20T03:23:59Z",
+        "title": "Add Q1 2027 revenue engine sprint plan"
+      },
+      {
+        "number": 12809,
+        "url": "https://github.com/BrianCLong/summit/pull/12809",
+        "mergedAt": "2025-12-04T17:42:00Z",
+        "title": "Add Golden Path Beta sprint plan"
+      },
+      {
+        "number": 15010,
+        "url": "https://github.com/BrianCLong/summit/pull/15010",
+        "mergedAt": "2025-12-30T22:44:33Z",
+        "title": "Analyze repository for MVP-4-GA release"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 15263,
+        "url": "https://github.com/BrianCLong/summit/pull/15263",
+        "mergedAt": "2026-01-01T07:29:38Z",
+        "title": "Build user-facing explainability and provenance explorer"
+      },
+      {
+        "number": 15311,
+        "url": "https://github.com/BrianCLong/summit/pull/15311",
+        "mergedAt": "2026-01-01T11:39:37Z",
+        "title": "feat: Establish counter-intelligence framework documentation"
+      },
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 13365,
+        "url": "https://github.com/BrianCLong/summit/pull/13365",
+        "mergedAt": "2025-12-06T09:54:02Z",
+        "title": "build(deps): bump playwright and @playwright/test in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 13079,
+        "url": "https://github.com/BrianCLong/summit/pull/13079",
+        "mergedAt": "2025-12-02T11:19:57Z",
+        "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server"
+      },
+      {
+        "number": 12073,
+        "url": "https://github.com/BrianCLong/summit/pull/12073",
+        "mergedAt": null,
+        "title": "Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 14377,
+        "url": "https://github.com/BrianCLong/summit/pull/14377",
+        "mergedAt": "2025-12-23T04:35:21Z",
+        "title": "Bump webpack-dev-server from 4.15.2 to 5.2.1 in /apps/web/ingest-wizard"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 11854,
+        "url": "https://github.com/BrianCLong/summit/pull/11854",
+        "mergedAt": null,
+        "title": "Analyze Summit platform and create strategic roadmap"
+      },
+      {
+        "number": 595,
+        "url": "https://github.com/BrianCLong/summit/pull/595",
+        "mergedAt": null,
+        "title": "feat: add SLSA4, zk proofs and reputation stubs"
+      },
+      {
+        "number": 606,
+        "url": "https://github.com/BrianCLong/summit/pull/606",
+        "mergedAt": null,
+        "title": "feat: add SLSA4, zk proofs and reputation stubs"
+      },
+      {
+        "number": 1077,
+        "url": "https://github.com/BrianCLong/summit/pull/1077",
+        "mergedAt": "2025-08-29T20:17:32Z",
+        "title": "feat: GA-Core Integration Train - Complete Enterprise Intelligence Platform"
+      },
+      {
+        "number": 13058,
+        "url": "https://github.com/BrianCLong/summit/pull/13058",
+        "mergedAt": "2025-12-04T15:40:49Z",
+        "title": "Add delivery guardrails workflows and release assets"
+      },
+      {
+        "number": 13194,
+        "url": "https://github.com/BrianCLong/summit/pull/13194",
+        "mergedAt": "2025-12-04T15:38:36Z",
+        "title": "Add multimodal fusion pipeline with embeddings"
+      },
+      {
+        "number": 11782,
+        "url": "https://github.com/BrianCLong/summit/pull/11782",
+        "mergedAt": "2025-10-24T19:45:25Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /conductor-ui/frontend"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

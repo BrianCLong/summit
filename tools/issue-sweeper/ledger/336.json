@@ -1,0 +1,68 @@
+{
+  "issue_number": 336,
+  "title": "GDPR and SOC2 Compliance Framework",
+  "url": "https://github.com/BrianCLong/summit/issues/336",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122115570,
+      "node_id": "LA_kwDOPaNncM8AAAACH7hv8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-enterprise-ai",
+      "name": "epic-enterprise-ai",
+      "color": "6C5CE7",
+      "default": false,
+      "description": "Enterprise AI and advanced optimization"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:24:20Z",
+  "createdAt": "2025-08-16T22:24:20Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11906,
+        "url": "https://github.com/BrianCLong/summit/pull/11906",
+        "mergedAt": null,
+        "title": "feat: implement data catalog & governance spine"
+      },
+      {
+        "number": 13107,
+        "url": "https://github.com/BrianCLong/summit/pull/13107",
+        "mergedAt": "2025-12-03T04:34:58Z",
+        "title": "Build governance orchestration for agent fleets"
+      },
+      {
+        "number": 11907,
+        "url": "https://github.com/BrianCLong/summit/pull/11907",
+        "mergedAt": "2025-11-20T10:25:33Z",
+        "title": "Convert runbooks to DAGs with gates and logs"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

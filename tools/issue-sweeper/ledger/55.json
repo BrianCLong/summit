@@ -1,0 +1,239 @@
+{
+  "issue_number": 55,
+  "title": "Security posture: SECURITY.md and Dependabot",
+  "url": "https://github.com/BrianCLong/summit/issues/55",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T02:39:44Z",
+  "createdAt": "2025-08-12T02:37:56Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14538,
+        "url": "https://github.com/BrianCLong/summit/pull/14538",
+        "mergedAt": "2025-12-27T00:22:57Z",
+        "title": "Sprint N+55: Portfolio Pruning & Focus Reinforcement"
+      },
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 13365,
+        "url": "https://github.com/BrianCLong/summit/pull/13365",
+        "mergedAt": "2025-12-06T09:54:02Z",
+        "title": "build(deps): bump playwright and @playwright/test in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 15294,
+        "url": "https://github.com/BrianCLong/summit/pull/15294",
+        "mergedAt": "2026-01-01T05:45:57Z",
+        "title": "Set up autonomous Summit priority system"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 15322,
+        "url": "https://github.com/BrianCLong/summit/pull/15322",
+        "mergedAt": null,
+        "title": "Add truth operations adversarial defense pack"
+      },
+      {
+        "number": 15286,
+        "url": "https://github.com/BrianCLong/summit/pull/15286",
+        "mergedAt": "2026-01-01T05:45:06Z",
+        "title": "Harden usage metering and enforcement"
+      },
+      {
+        "number": 15334,
+        "url": "https://github.com/BrianCLong/summit/pull/15334",
+        "mergedAt": "2026-01-01T11:38:19Z",
+        "title": "Delivery of 8 Strategic Innovations"
+      },
+      {
+        "number": 15285,
+        "url": "https://github.com/BrianCLong/summit/pull/15285",
+        "mergedAt": "2026-01-01T06:35:57Z",
+        "title": "Add severity ledger zero-tolerance CI gate"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 15323,
+        "url": "https://github.com/BrianCLong/summit/pull/15323",
+        "mergedAt": null,
+        "title": "feat: add red-team harness to sim-harness"
+      },
+      {
+        "number": 13113,
+        "url": "https://github.com/BrianCLong/summit/pull/13113",
+        "mergedAt": "2025-12-17T05:38:26Z",
+        "title": "S9 - Threat Modeling Assistant"
+      },
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 11782,
+        "url": "https://github.com/BrianCLong/summit/pull/11782",
+        "mergedAt": "2025-10-24T19:45:25Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /conductor-ui/frontend"
+      },
+      {
+        "number": 1152,
+        "url": "https://github.com/BrianCLong/summit/pull/1152",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @playwright/test from 1.54.2 to 1.55.0 in /server"
+      },
+      {
+        "number": 11779,
+        "url": "https://github.com/BrianCLong/summit/pull/11779",
+        "mergedAt": "2025-10-22T15:51:49Z",
+        "title": "chore(deps): bump playwright and @playwright/test in /client"
+      },
+      {
+        "number": 1188,
+        "url": "https://github.com/BrianCLong/summit/pull/1188",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump @hookform/resolvers from 3.10.0 to 5.2.1"
+      },
+      {
+        "number": 752,
+        "url": "https://github.com/BrianCLong/summit/pull/752",
+        "mergedAt": "2025-08-29T10:38:44Z",
+        "title": "feat: add focus mode scaffolding"
+      },
+      {
+        "number": 1147,
+        "url": "https://github.com/BrianCLong/summit/pull/1147",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps): bump cytoscape-navigator from 1.3.3 to 2.0.2 in /client"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 11795,
+        "url": "https://github.com/BrianCLong/summit/pull/11795",
+        "mergedAt": null,
+        "title": "feat: deliver research integration capabilities"
+      },
+      {
+        "number": 10119,
+        "url": "https://github.com/BrianCLong/summit/pull/10119",
+        "mergedAt": "2025-10-14T10:40:06Z",
+        "title": "feat: Optimize data processing pipelines"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 1353,
+        "url": "https://github.com/BrianCLong/summit/pull/1353",
+        "mergedAt": "2025-09-23T16:45:14Z",
+        "title": "chore(deps): bump axios from 1.11.0 to 1.12.0 in /conductor-ui"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1191,
+        "url": "https://github.com/BrianCLong/summit/pull/1191",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps-dev): bump eslint-config-next from 14.2.32 to 15.5.2"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

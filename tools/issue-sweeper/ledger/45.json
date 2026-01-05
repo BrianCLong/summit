@@ -1,0 +1,248 @@
+{
+  "issue_number": 45,
+  "title": "M6: Sentry integration (client & server) via env",
+  "url": "https://github.com/BrianCLong/summit/issues/45",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:23Z",
+  "createdAt": "2025-08-12T00:15:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14521,
+        "url": "https://github.com/BrianCLong/summit/pull/14521",
+        "mergedAt": "2025-12-27T00:18:03Z",
+        "title": "feat(docs): create role-based customer onboarding paths"
+      },
+      {
+        "number": 13615,
+        "url": "https://github.com/BrianCLong/summit/pull/13615",
+        "mergedAt": "2025-12-16T21:15:36Z",
+        "title": "build(deps): bump golang.org/x/crypto from 0.17.0 to 0.45.0 in /services/retentiond"
+      },
+      {
+        "number": 12263,
+        "url": "https://github.com/BrianCLong/summit/pull/12263",
+        "mergedAt": "2025-12-18T03:23:04Z",
+        "title": "Final Polish: Prompts 41-48 Implementation"
+      },
+      {
+        "number": 14006,
+        "url": "https://github.com/BrianCLong/summit/pull/14006",
+        "mergedAt": "2025-12-19T21:10:25Z",
+        "title": "Update changed-files action version in workflow"
+      },
+      {
+        "number": 12503,
+        "url": "https://github.com/BrianCLong/summit/pull/12503",
+        "mergedAt": "2025-12-18T02:38:25Z",
+        "title": "Extend roadmap with five new defense sprints"
+      },
+      {
+        "number": 11823,
+        "url": "https://github.com/BrianCLong/summit/pull/11823",
+        "mergedAt": "2025-11-20T00:15:25Z",
+        "title": "chore(deps): bump golang.org/x/crypto from 0.17.0 to 0.45.0 in /orchestration/runtime"
+      },
+      {
+        "number": 15142,
+        "url": "https://github.com/BrianCLong/summit/pull/15142",
+        "mergedAt": null,
+        "title": "Review recent changes"
+      },
+      {
+        "number": 15315,
+        "url": "https://github.com/BrianCLong/summit/pull/15315",
+        "mergedAt": null,
+        "title": "Initialize Pilot Design Innovation Sprint artifacts"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 12048,
+        "url": "https://github.com/BrianCLong/summit/pull/12048",
+        "mergedAt": "2025-11-21T03:59:12Z",
+        "title": "Update and secure project dependencies"
+      },
+      {
+        "number": 15322,
+        "url": "https://github.com/BrianCLong/summit/pull/15322",
+        "mergedAt": null,
+        "title": "Add truth operations adversarial defense pack"
+      },
+      {
+        "number": 12021,
+        "url": "https://github.com/BrianCLong/summit/pull/12021",
+        "mergedAt": "2025-11-20T15:29:58Z",
+        "title": "Build Synthetic Data Generation Platform"
+      },
+      {
+        "number": 15324,
+        "url": "https://github.com/BrianCLong/summit/pull/15324",
+        "mergedAt": null,
+        "title": "Add continuity and succession safeguards"
+      },
+      {
+        "number": 15350,
+        "url": "https://github.com/BrianCLong/summit/pull/15350",
+        "mergedAt": null,
+        "title": "docs: add FMCP-TPCE provisional draft and intake updates"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 15316,
+        "url": "https://github.com/BrianCLong/summit/pull/15316",
+        "mergedAt": "2026-01-01T11:39:03Z",
+        "title": "feat: Economic Innovation Sprint artifacts"
+      },
+      {
+        "number": 15287,
+        "url": "https://github.com/BrianCLong/summit/pull/15287",
+        "mergedAt": "2026-01-01T05:49:14Z",
+        "title": "docs: add freeze-certify-release sprint kit"
+      },
+      {
+        "number": 1209,
+        "url": "https://github.com/BrianCLong/summit/pull/1209",
+        "mergedAt": null,
+        "title": "chore(deps): bump cryptography from 42.0.8 to 45.0.7"
+      },
+      {
+        "number": 13058,
+        "url": "https://github.com/BrianCLong/summit/pull/13058",
+        "mergedAt": "2025-12-04T15:40:49Z",
+        "title": "Add delivery guardrails workflows and release assets"
+      },
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      },
+      {
+        "number": 745,
+        "url": "https://github.com/BrianCLong/summit/pull/745",
+        "mergedAt": "2025-08-29T10:53:36Z",
+        "title": "chore(deps): bump @opentelemetry/sdk-node from 0.45.1 to 0.203.0"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 11879,
+        "url": "https://github.com/BrianCLong/summit/pull/11879",
+        "mergedAt": null,
+        "title": "Create monorepo remediation and dev workflow plan"
+      },
+      {
+        "number": 10091,
+        "url": "https://github.com/BrianCLong/summit/pull/10091",
+        "mergedAt": null,
+        "title": "feat: add immutable training capsules for prov-ledger"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 11852,
+        "url": "https://github.com/BrianCLong/summit/pull/11852",
+        "mergedAt": "2025-11-20T09:48:03Z",
+        "title": "Improve developer experience in summit monorepo"
+      },
+      {
+        "number": 10081,
+        "url": "https://github.com/BrianCLong/summit/pull/10081",
+        "mergedAt": "2025-10-14T13:08:07Z",
+        "title": "feat: add explainable multi-cloud meta orchestrator"
+      },
+      {
+        "number": 10128,
+        "url": "https://github.com/BrianCLong/summit/pull/10128",
+        "mergedAt": "2025-10-14T08:39:43Z",
+        "title": "feat: add community engagement toolkit"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
