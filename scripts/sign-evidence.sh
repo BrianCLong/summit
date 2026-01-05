@@ -5,7 +5,7 @@ set -euo pipefail
 # Signs compliance evidence with cosign for verification
 
 EVIDENCE_DIR=${EVIDENCE_DIR:-./evidence/ga}
-OUTPUT_DIR=${OUTPUT_DIR:-$EVIDENCE_DIR}
+OUTPUT_DIR=${OUTPUT_DIR:-$EVIDENCE_DIR/signatures}
 COSIGN_KEY=${COSIGN_KEY:-./keys/cosign.key}
 COSIGN_PUB=${COSIGN_PUB:-./keys/cosign.pub}
 
@@ -17,18 +17,20 @@ NC='\033[0m'
 say() { printf "\n${BLUE}== %s ==${NC}\n" "$*"; }
 pass() { printf "${GREEN}✅ %s${NC}\n" "$*"; }
 
-# Check keys
-check_keys() {
-    if [ ! -f "$COSIGN_KEY" ]; then
-        echo "❌ Private key not found at $COSIGN_KEY"
-        echo "Run ./scripts/sign-bundle.sh to generate keys first"
-        exit 1
-    fi
+sanitize_signature_name() {
+    local file="$1"
+    local relative="${file#${EVIDENCE_DIR}/}"
+    echo "${relative//\//__}"
 }
 
 # Sign evidence
 sign_evidence() {
     local file="$1"
+    local signature_base
+    signature_base="$(sanitize_signature_name "$file")"
+    local signature_path="$OUTPUT_DIR/${signature_base}.sig"
+    local certificate_path="$OUTPUT_DIR/${signature_base}.pem"
+    local attestation_path="$OUTPUT_DIR/${signature_base}.attestation.json"
 
     say "Signing $file"
 
@@ -38,14 +40,18 @@ sign_evidence() {
     # Create signature
     # Mocking cosign if not available for dry run
     if command -v cosign &> /dev/null; then
-        cosign sign-blob --key "$COSIGN_KEY" "$file" --output-signature "${file}.sig"
+        if [ -f "$COSIGN_KEY" ] && [ -s "$COSIGN_KEY" ]; then
+            cosign sign-blob --key "$COSIGN_KEY" "$file" --output-signature "$signature_path"
+        else
+            cosign sign-blob --yes "$file" --output-signature "$signature_path" --output-certificate "$certificate_path"
+        fi
     else
         echo "Mock signing $file"
-        echo "mock-signature" > "${file}.sig"
+        echo "mock-signature" > "$signature_path"
     fi
 
     # Create attestation wrapper (simplified)
-    cat > "${file}.attestation.json" << EOF
+    cat > "$attestation_path" << EOF
 {
   "_type": "https://in-toto.io/Statement/v0.1",
   "subject": [{
@@ -81,6 +87,7 @@ main() {
     fi
 
     mkdir -p "$EVIDENCE_DIR"
+    mkdir -p "$OUTPUT_DIR"
 
     # Find all evidence files (json, xml, log)
     find "$EVIDENCE_DIR" -type f \( -name "*.json" -o -name "*.xml" -o -name "*.log" \) -not -name "*.sig" -not -name "*.attestation.json" | while read -r file; do
