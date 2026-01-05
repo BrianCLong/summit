@@ -1,4 +1,7 @@
 import { create } from 'zustand';
+import { TimeWindow, Granularity, TimezoneMode } from '../types/time-window';
+import { normalizeWindow, createInitialTimeWindow } from '../lib/time-window-utils';
+import { trackGoldenPathStep, trackTimeWindowChange, trackQueryLatency } from '../telemetry/metrics';
 
 export interface Entity {
   id: string;
@@ -19,15 +22,30 @@ export interface Link {
 
 export interface WorkspaceState {
   selectedEntityIds: string[];
-  timeRange: [Date, Date] | null;
+  // Replaced simple [Date, Date] with robust TimeWindow
+  timeWindow: TimeWindow;
+
+  // Data State
+  allEntities: Entity[]; // Master dataset
+  allLinks: Link[]; // Master dataset
+
+  // Filtered State (Derived)
   entities: Entity[];
   links: Link[];
+
+  // Sync State
+  isSyncing: boolean;
+  syncError: string | null;
 
   // Actions
   selectEntity: (id: string) => void;
   deselectEntity: (id: string) => void;
   clearSelection: () => void;
-  setTimeRange: (range: [Date, Date] | null) => void;
+
+  setTimeWindow: (startMs: number, endMs: number, granularity?: Granularity, tzMode?: TimezoneMode, source?: string) => void;
+  retrySync: () => void;
+
+  // Internal or Debug Actions
   setGraphData: (entities: Entity[], links: Link[]) => void;
 }
 
@@ -51,13 +69,23 @@ const generateMockData = () => {
   return { entities, links };
 };
 
-const { entities, links } = generateMockData();
+const { entities: initialEntities, links: initialLinks } = generateMockData();
 
-export const useWorkspaceStore = create<WorkspaceState>((set) => ({
+// Simulated async fetch controller
+let currentFetchController: AbortController | null = null;
+
+export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   selectedEntityIds: [],
-  timeRange: null,
-  entities: entities,
-  links: links,
+  timeWindow: createInitialTimeWindow(),
+
+  allEntities: initialEntities,
+  allLinks: initialLinks,
+
+  entities: initialEntities, // Initially show all, or should be filtered? Let's say all for now until filtered.
+  links: initialLinks,
+
+  isSyncing: false,
+  syncError: null,
 
   selectEntity: (id) => set((state) => ({
     selectedEntityIds: state.selectedEntityIds.includes(id)
@@ -71,7 +99,89 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
 
   clearSelection: () => set({ selectedEntityIds: [] }),
 
-  setTimeRange: (range) => set({ timeRange: range }),
+  setTimeWindow: (startMs, endMs, granularity, tzMode, source = 'unknown') => {
+    const currentState = get();
+    const currentWindow = currentState.timeWindow;
 
-  setGraphData: (entities, links) => set({ entities, links }),
+    // Default to current values if not provided
+    const newGranularity = granularity || currentWindow.granularity;
+    const newTzMode = tzMode || currentWindow.tzMode;
+    const newSeq = currentWindow.seq + 1;
+
+    // Normalize
+    const normalizedWindow = normalizeWindow(startMs, endMs, newGranularity, newTzMode, newSeq);
+
+    // Optimistic update of the window
+    set({ timeWindow: normalizedWindow, isSyncing: true, syncError: null });
+
+    // Report change telemetry
+    trackTimeWindowChange(
+        normalizedWindow.startMs,
+        normalizedWindow.endMs,
+        normalizedWindow.granularity,
+        normalizedWindow.tzMode,
+        source
+    );
+
+    // Abort previous fetch if in flight (Race-proof: AbortController)
+    if (currentFetchController) {
+      currentFetchController.abort();
+    }
+    currentFetchController = new AbortController();
+    const signal = currentFetchController.signal;
+
+    // Simulate async data fetching/filtering
+    // Using a timeout to mimic network latency
+    const LATENCY_MS = 300; // > 250ms to trigger Syncing indicator
+
+    const startTime = performance.now();
+
+    setTimeout(() => {
+      if (signal.aborted) {
+        console.log('Fetch aborted for seq', newSeq);
+        return;
+      }
+
+      try {
+        const { allEntities, allLinks } = get();
+
+        // Filter logic
+        const filteredEntities = allEntities.filter(e => {
+            if (!e.timestamp) return true; // Keep entities without timestamp? Or filter them out? Spec says "derive from shared TimeWindow".
+            const t = new Date(e.timestamp).getTime();
+            return t >= normalizedWindow.startMs && t <= normalizedWindow.endMs;
+        });
+
+        // Filter links: Keep links where both source and target are in filteredEntities
+        const entityIds = new Set(filteredEntities.map(e => e.id));
+        const filteredLinks = allLinks.filter(l =>
+            entityIds.has(l.source) && entityIds.has(l.target)
+        );
+
+        set({
+            entities: filteredEntities,
+            links: filteredLinks,
+            isSyncing: false,
+            syncError: null
+        });
+
+        // Track Latency
+        const duration = performance.now() - startTime;
+        trackQueryLatency('all', duration);
+
+      } catch (err) {
+          if (!signal.aborted) {
+              set({ isSyncing: false, syncError: 'Failed to refresh results' });
+              // Track error if needed, but for now latency
+          }
+      }
+    }, LATENCY_MS);
+  },
+
+  retrySync: () => {
+      const { timeWindow, setTimeWindow } = get();
+      setTimeWindow(timeWindow.startMs, timeWindow.endMs, timeWindow.granularity, timeWindow.tzMode, 'retry');
+  },
+
+  setGraphData: (entities, links) => set({ entities, links, allEntities: entities, allLinks: links }),
 }));
