@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import yaml from 'js-yaml';
 
 // Utils
 function run(cmd) {
@@ -23,8 +24,6 @@ function fail(msg, details = []) {
 // 1. Determine TAG
 const TAG = process.env.TAG || process.env.GITHUB_REF_NAME;
 if (!TAG) {
-  // If run without tag, maybe we can assume checking HEAD if it matches a tag?
-  // But requirement is strict.
   fail('No TAG provided via TAG or GITHUB_REF_NAME env vars.');
 }
 
@@ -39,6 +38,11 @@ if (!match) {
 }
 const versionExpected = match[1];
 
+// Determine Channel
+const isRc = TAG.includes('-rc.');
+const channel = isRc ? 'rc' : 'ga';
+console.log(`ℹ️  Identified channel: ${channel}`);
+
 // 3. Resolve Tag SHA
 const sha = run(`git rev-parse ${TAG}`);
 if (!sha) {
@@ -46,11 +50,12 @@ if (!sha) {
 }
 console.log(`✅ Tag resolved to SHA: ${sha}`);
 
-// 4. Check Ancestry
+// 4. Check Ancestry and Determine Mode
 const defaultBranch = process.env.DEFAULT_BRANCH || 'main';
-
-// Check if origin/<defaultBranch> exists, if not try to fetch
+let mode = null;
 let originRef = `origin/${defaultBranch}`;
+
+// Check default branch ancestry
 if (!run(`git rev-parse --verify ${originRef}`)) {
     console.log(`ℹ️ ${originRef} not found, attempting fetch...`);
     try {
@@ -60,20 +65,76 @@ if (!run(`git rev-parse --verify ${originRef}`)) {
     }
 }
 
-let reachable = false;
 try {
   execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: 'ignore' });
-  reachable = true;
+  mode = 'default-branch';
+  console.log(`✅ Tag is reachable from ${originRef} (mode: default-branch)`);
 } catch (e) {
-  reachable = false;
+  console.log(`ℹ️  Tag is NOT reachable from ${originRef}. Checking series branches...`);
 }
 
-if (!reachable) {
-  fail(`Tag ${TAG} is not reachable from default branch '${originRef}'. Release tags must be on the default branch.`);
-}
-console.log(`✅ Tag is reachable from ${originRef}`);
+// If not on default, check series branches
+if (!mode) {
+  // Logic: Check if reachable from origin/release/vX.Y where X.Y matches tag
+  const majorMinor = versionExpected.split('.').slice(0, 2).join('.');
+  const seriesBranchRef = `origin/release/v${majorMinor}`;
 
-// 5. Version Check
+  if (run(`git rev-parse --verify ${seriesBranchRef}`)) {
+    try {
+      execSync(`git merge-base --is-ancestor ${sha} ${seriesBranchRef}`, { stdio: 'ignore' });
+      mode = 'series-branch';
+      console.log(`✅ Tag is reachable from ${seriesBranchRef} (mode: series-branch)`);
+    } catch (e) {
+      console.log(`ℹ️  Tag is NOT reachable from ${seriesBranchRef}.`);
+    }
+  } else {
+    console.log(`ℹ️  Series branch ${seriesBranchRef} does not exist.`);
+  }
+}
+
+if (!mode) {
+  fail(`Tag ${TAG} is not reachable from default branch (${defaultBranch}) or matching series branch.`);
+}
+
+// 5. Apply Policy
+const POLICY_PATH = join(process.cwd(), 'release-policy.yml');
+let policyApplied = false;
+let policyDecision = 'allowed'; // Default if no policy blocks it
+let policyReason = 'No channel policy defined';
+
+if (existsSync(POLICY_PATH)) {
+  try {
+    const policyContent = readFileSync(POLICY_PATH, 'utf8');
+    const policy = yaml.load(policyContent);
+
+    if (policy.channels && policy.channels[channel]) {
+      const channelConfig = policy.channels[channel];
+      policyApplied = true;
+
+      if (channelConfig.allowed_from) {
+        if (!channelConfig.allowed_from.includes(mode)) {
+          fail(`Policy Violation: Channel '${channel}' is not allowed from mode '${mode}'. Allowed: ${channelConfig.allowed_from.join(', ')}`);
+        } else {
+          policyReason = `Allowed by policy: ${channel} via ${mode}`;
+          console.log(`✅ ${policyReason}`);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn(`⚠️ Failed to load or parse release policy: ${e.message}`);
+  }
+}
+
+// Fallback logic for backward compatibility if no policy applied
+if (!policyApplied) {
+  if (mode !== 'default-branch') {
+     // Historically only default-branch was allowed
+     fail(`Legacy Policy Violation: Release tags must be on the default branch (unless configured in release-policy.yml). Mode: ${mode}`);
+  }
+  console.log(`✅ Allowed by legacy default (default-branch only).`);
+}
+
+// 6. Version Check (Existing logic)
 const mismatches = [];
 
 function checkPackage(path, name) {
@@ -88,15 +149,8 @@ function checkPackage(path, name) {
   }
 }
 
-// Root
 checkPackage('package.json', 'ROOT');
-
-// Workspaces - "best effort" scanning based on repo structure knowledge
-// "packages/*", "client", "server"
-
 const candidates = ['client', 'server'];
-
-// Scan packages/*
 if (existsSync('packages')) {
   const pkgs = readdirSync('packages', { withFileTypes: true });
   for (const dirent of pkgs) {
@@ -105,8 +159,6 @@ if (existsSync('packages')) {
     }
   }
 }
-
-// Check found workspaces
 candidates.forEach(dir => {
   const pkgPath = join(dir, 'package.json');
   checkPackage(pkgPath, dir);
@@ -117,7 +169,7 @@ if (mismatches.length > 0) {
 }
 console.log(`✅ All package versions match ${versionExpected}`);
 
-// 6. Write Output
+// 7. Write Output
 const outputDir = 'dist/release';
 if (!existsSync(outputDir)) {
   mkdirSync(outputDir, { recursive: true });
@@ -127,10 +179,25 @@ const result = {
   tag: TAG,
   sha,
   defaultBranch,
-  reachableFromDefaultBranch: reachable,
+  mode,
+  channel,
+  policyApplied,
+  policyDecision,
   versionExpected,
   mismatches
 };
 
 writeFileSync(join(outputDir, 'preflight.json'), JSON.stringify(result, null, 2));
 console.log(`📝 Wrote preflight results to ${join(outputDir, 'preflight.json')}`);
+
+// Summary for CI
+if (process.env.GITHUB_STEP_SUMMARY) {
+  const summary = [
+    `### Preflight Checks Passed`,
+    `- **Tag**: ${TAG}`,
+    `- **Channel**: ${channel}`,
+    `- **Mode**: ${mode}`,
+    `- **Policy**: ${policyReason}`
+  ].join('\n');
+  appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
+}
