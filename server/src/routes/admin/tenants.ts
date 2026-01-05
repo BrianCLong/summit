@@ -1,32 +1,67 @@
-// @ts-nocheck
-import { Router, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { ensureAuthenticated } from '../../middleware/auth.js';
+import { opaAllow } from '../../policy/opaClient.js';
 import { tenantService, createTenantSchema } from '../../services/TenantService.js';
 import { tenantProvisioningService } from '../../services/tenants/TenantProvisioningService.js';
 import { tenantIsolationGuard } from '../../tenancy/TenantIsolationGuard.js';
 import logger from '../../utils/logger.js';
-import { AuthenticatedRequest } from '../types.js';
 
-const router = Router();
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id?: string;
+    role?: string;
+    tenantId?: string;
+    tenant_id?: string;
+  };
+}
 
-const provisionSchema = createTenantSchema.extend({
-  plan: z.enum(['FREE', 'STARTER', 'PRO', 'ENTERPRISE']).default('STARTER'),
-  environment: z.enum(['prod', 'staging', 'dev']).default('prod'),
-  requestedSeats: z.number().int().min(1).max(10000).optional(),
-  storageEstimateBytes: z.number().int().min(0).optional(),
-});
+const router = express.Router();
 
-router.post('/', ensureAuthenticated, async (req: AuthenticatedRequest, res: Response) => {
+const adminProvisionSchema = createTenantSchema.and(
+  z.object({
+    plan: z.enum(['FREE', 'STARTER', 'PRO', 'ENTERPRISE']).default('ENTERPRISE'),
+    environment: z.enum(['prod', 'staging', 'dev']).default('prod'),
+    requestedSeats: z.number().int().min(1).max(10000).optional(),
+    storageEstimateBytes: z.number().int().min(0).optional(),
+  }),
+);
+
+router.post('/tenants', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const actorId = req.user?.id;
+    const authReq = req as AuthenticatedRequest;
+    const actorId = authReq.user?.id;
+    const actorRole = authReq.user?.role || 'unknown';
     if (!actorId) {
       return res.status(401).json({ success: false, error: 'Unauthorized: No user ID found' });
     }
 
-    const body = provisionSchema.parse(req.body);
-    const tenant = await tenantService.createTenant(body, actorId);
+    const body = adminProvisionSchema.parse(req.body);
 
+    const decision = await opaAllow('tenants/provision', {
+      action: 'tenant.provision',
+      tenant: 'system',
+      resource: 'tenant',
+      user: {
+        id: actorId,
+        roles: [actorRole],
+      },
+      meta: {
+        residency: body.residency,
+        region: body.region,
+        plan: body.plan,
+        environment: body.environment,
+      },
+    });
+
+    if (!decision.allow) {
+      return res.status(403).json({
+        success: false,
+        error: decision.reason || 'Policy denied tenant provisioning',
+      });
+    }
+
+    const tenant = await tenantService.createTenant(body, actorId);
     const provisioning = await tenantProvisioningService.provisionTenant({
       tenant,
       plan: body.plan,
@@ -46,12 +81,12 @@ router.post('/', ensureAuthenticated, async (req: AuthenticatedRequest, res: Res
       userId: actorId,
     };
 
-    // Run isolation guard to ensure defaults are valid
     const policy = tenantIsolationGuard.evaluatePolicy(tenantContext, {
-      action: 'tenant.provision',
+      action: 'tenant.provision.admin',
       environment: body.environment,
       resourceTenantId: tenant.id,
     });
+
     if (!policy.allowed) {
       return res.status(policy.status || 403).json({
         success: false,
@@ -63,22 +98,25 @@ router.post('/', ensureAuthenticated, async (req: AuthenticatedRequest, res: Res
       success: true,
       data: {
         tenant,
+        namespace: provisioning.namespace,
+        partitions: provisioning.partitions,
+        quota: provisioning.quota,
         isolationDefaults: {
           environment: tenantContext.environment,
           privilegeTier: tenantContext.privilegeTier,
           quotas: provisioning.quota,
         },
-        namespace: provisioning.namespace,
-        partitions: provisioning.partitions,
-        quota: provisioning.quota,
       },
       receipts: provisioning.receipts,
+      policy: {
+        opa: decision,
+      },
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
     }
-    logger.error('Tenant provisioning failed', error);
+    logger.error('Admin tenant provisioning failed', error);
     return res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
