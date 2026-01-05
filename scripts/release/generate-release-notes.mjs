@@ -12,20 +12,44 @@ const TAG = process.env.TAG || process.argv[2];
 const OUTPUT_FILE = process.env.OUTPUT_FILE || 'RELEASE_NOTES.md';
 const DIST_DIR = process.env.DIST_DIR || 'dist/release';
 
-if (!TAG) {
-  console.error('Error: TAG argument or environment variable is required.');
-  process.exit(1);
+/**
+ * Groups commits by their conventional commit type.
+ * @param {Array<{subject: string, body: string, hash: string}>} commits - A list of commits.
+ * @returns {object} An object with keys for each commit type.
+ */
+export function groupCommits(commits) {
+  const groups = {
+    'Breaking Changes': [],
+    'Features': [],
+    'Fixes': [],
+    'Other': [],
+  };
+
+  for (const commit of commits) {
+    const { subject } = commit;
+    if (subject.includes('!:')) {
+      groups['Breaking Changes'].push(commit);
+    } else if (subject.startsWith('feat:')) {
+      groups['Features'].push(commit);
+    } else if (subject.startsWith('fix:')) {
+      groups['Fixes'].push(commit);
+    } else {
+      groups['Other'].push(commit);
+    }
+  }
+
+  return groups;
 }
 
 // Ensure dist dir exists
-fs.mkdirSync(DIST_DIR, { recursive: true });
+if (TAG) {
+  fs.mkdirSync(DIST_DIR, { recursive: true });
+}
 
 const extractScript = path.join(__dirname, 'extract-changelog-notes.mjs');
 
 function getLastTag(tag) {
   try {
-    // If tag is v0.0.1, tag^ might fail if it's the first commit or tag.
-    // If it fails, we assume no previous tag.
     return execSync(`git describe --tags --abbrev=0 ${tag}^ 2>/dev/null`).toString().trim();
   } catch (e) {
     return '';
@@ -38,22 +62,20 @@ function getGitRange(tag) {
 }
 
 function generateGitNotes(tag) {
-  // Try using gh api first for nice grouped notes
   try {
-    // Check if gh is available
     try {
-        execSync('command -v gh 2>/dev/null');
+      execSync('command -v gh 2>/dev/null');
     } catch(e) {
-        throw new Error('gh not found');
+      throw new Error('gh not found');
     }
 
     const remoteUrl = execSync('git config --get remote.origin.url').toString().trim();
     let repoInfo = '';
     if (remoteUrl.includes('github.com')) {
-       const match = remoteUrl.match(/[:/]([^/]+)\/([^/.]+)(?:\.git)?$/);
-       if (match) {
-         repoInfo = `${match[1]}/${match[2]}`;
-       }
+      const match = remoteUrl.match(/[:/]([^/]+)\/([^/.]+)(?:\.git)?$/);
+      if (match) {
+        repoInfo = `${match[1]}/${match[2]}`;
+      }
     }
 
     if (repoInfo) {
@@ -65,7 +87,6 @@ function generateGitNotes(tag) {
     // gh failed or not available
   }
 
-  // Fallback to git log
   const range = getGitRange(tag);
   const cmd = `git log --pretty=format:"- %s (%h) - %an" --no-merges "${range}"`;
   try {
@@ -79,25 +100,28 @@ function generateGitNotes(tag) {
 }
 
 function addToStepSummary(message) {
-    if (process.env.GITHUB_STEP_SUMMARY) {
-        try {
-            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, message + '\n');
-        } catch (e) {
-            console.error('Failed to write to GITHUB_STEP_SUMMARY', e);
-        }
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    try {
+      fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, message + '\n');
+    } catch (e) {
+      console.error('Failed to write to GITHUB_STEP_SUMMARY', e);
     }
+  }
 }
 
 function main() {
+  if (!TAG) {
+    console.error('Error: TAG argument or environment variable is required.');
+    process.exit(1);
+  }
+
   console.log(`Generating release notes for ${TAG}...`);
 
-  // 1. Try extraction
   try {
     const extracted = execSync(`node ${extractScript} ${TAG}`, {
       stdio: ['ignore', 'pipe', 'ignore']
     }).toString();
 
-    // If successful (exit code 0), use it
     const date = new Date().toISOString().split('T')[0];
     const header = `# ${TAG} (${date})\n\n`;
     const fullNotes = header + extracted;
@@ -106,7 +130,7 @@ function main() {
 
     let usedPath = 'CHANGELOG.md';
     if (!fs.existsSync('CHANGELOG.md') && fs.existsSync('docs/CHANGELOG.md')) {
-        usedPath = 'docs/CHANGELOG.md';
+      usedPath = 'docs/CHANGELOG.md';
     }
 
     const metadata = {
@@ -135,10 +159,10 @@ function main() {
         source: "git",
         range: range
       };
-       fs.writeFileSync(path.join(DIST_DIR, 'notes-source.json'), JSON.stringify(metadata, null, 2));
-       const msg = `Release notes source: git (${range})`;
-       console.log(msg);
-       addToStepSummary(msg);
+      fs.writeFileSync(path.join(DIST_DIR, 'notes-source.json'), JSON.stringify(metadata, null, 2));
+      const msg = `Release notes source: git (${range})`;
+      console.log(msg);
+      addToStepSummary(msg);
 
     } else {
       console.error("Unexpected error during changelog extraction:", e);
@@ -146,13 +170,15 @@ function main() {
     }
   }
 
-  // Add to SHA256SUMS if possible (append)
   try {
-      const shasum = execSync(`sha256sum ${path.join(DIST_DIR, 'notes-source.json')}`).toString().trim();
-      fs.appendFileSync(path.join(DIST_DIR, 'SHA256SUMS'), shasum + '\n');
+    const shasum = execSync(`sha256sum ${path.join(DIST_DIR, 'notes-source.json')}`).toString().trim();
+    fs.appendFileSync(path.join(DIST_DIR, 'SHA256SUMS'), shasum + '\n');
   } catch (e) {
-      // Ignore
+    // Ignore
   }
 }
 
-main();
+// Only run main when executed directly
+if (TAG && import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}
