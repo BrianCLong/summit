@@ -1,0 +1,62 @@
+{
+  "issue_number": 330,
+  "title": "Mobile AI Insight Generation",
+  "url": "https://github.com/BrianCLong/summit/issues/330",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122099213,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gwDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-ai-analytics",
+      "name": "epic-ai-analytics",
+      "color": "A29BFE",
+      "default": false,
+      "description": "AI analytics and business intelligence"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:20:38Z",
+  "createdAt": "2025-08-16T22:20:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 1189,
+        "url": "https://github.com/BrianCLong/summit/pull/1189",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump stopword from 2.0.8 to 3.1.4"
+      },
+      {
+        "number": 10094,
+        "url": "https://github.com/BrianCLong/summit/pull/10094",
+        "mergedAt": "2025-10-14T13:06:00Z",
+        "title": "feat: add crypto verification pipeline"
+      },
+      {
+        "number": 1182,
+        "url": "https://github.com/BrianCLong/summit/pull/1182",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group with 2 updates"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

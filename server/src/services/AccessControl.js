@@ -47,9 +47,34 @@ const defaultRules = [
   },
 ];
 
+const privilegedActionPrefixes = (
+  process.env.PRIVILEGED_ACTION_PREFIXES ||
+  'mutation:,admin:,policy:,signing:,receipt:,provenance:,drill:,export:'
+)
+  .split(',')
+  .map((entry) => entry.trim())
+  .filter(Boolean);
+
+const signingKeys = [
+  'SIGNING_PRIVATE_KEY',
+  'LEDGER_SIGNING_KEY',
+  'EVIDENCE_SIGNING_KEY',
+];
+
+const isPrivilegedAction = (action) =>
+  privilegedActionPrefixes.some((prefix) => action.startsWith(prefix));
+
+const isSigningAvailable = () =>
+  signingKeys.some((key) => Boolean(process.env[key]));
+
 async function evaluateOPA(action, user, resource = {}, env = {}) {
   const opaUrl = process.env.OPA_URL; // e.g., http://localhost:8181/v1/data/intelgraph/allow
-  if (!opaUrl) return null;
+  if (!opaUrl) {
+    if (isPrivilegedAction(action)) {
+      return { allow: false, reason: 'OPA unavailable for privileged action' };
+    }
+    return null;
+  }
   try {
     const fetch = require('node-fetch');
     const res = await fetch(opaUrl, {
@@ -64,10 +89,17 @@ async function evaluateOPA(action, user, resource = {}, env = {}) {
   } catch (e) {
     // Fallback to rule engine on failure
   }
+  if (isPrivilegedAction(action)) {
+    return { allow: false, reason: 'OPA unavailable for privileged action' };
+  }
   return null;
 }
 
 async function evaluate(action, user, resource = {}, env = {}) {
+  if (isPrivilegedAction(action) && !isSigningAvailable()) {
+    pbacDecisionsTotal.inc({ decision: 'deny' });
+    return { allow: false, reason: 'Signing unavailable for privileged action' };
+  }
   const opa = await evaluateOPA(action, user, resource, env);
   if (opa) {
     pbacDecisionsTotal.inc({ decision: opa.allow ? 'allow' : 'deny' });

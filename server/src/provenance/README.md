@@ -9,6 +9,7 @@ The Provenance Engine V2 provides a tamper-evident, cryptographically verifiable
 3.  **Tamper-Proof Log**: Uses a hash-chain (blockchain-like) structure. Roots are periodically anchored to WORM storage (S3 Object Lock).
 4.  **Cross-Service Attribution**: Tracks the origin service, trace IDs, and upstream events for every change.
 5.  **Audit Integration**: Automatically streams events to the Advanced Audit System.
+6.  **Operational Receipts & Recovery Evidence**: Captures signed receipts and chaos/DR recovery evidence as ledger entries.
 
 ## Architecture
 
@@ -84,9 +85,45 @@ query {
 }
 ```
 
+### 3. Recording Receipts and Recovery Evidence
+
+```typescript
+import { ProvenanceLedgerV2 } from "./provenance/ledger";
+
+const ledger = ProvenanceLedgerV2.getInstance();
+
+await ledger.recordReceiptEvidence({
+  receiptId: "prov_123",
+  entryId: "prov_123",
+  action: "policy:update",
+  actorId: "user-1",
+  tenantId: "tenant-1",
+  resourceId: "policy-42",
+  inputHash: "sha256:...",
+  signature: "base64-signature",
+  signerKeyId: "key-fingerprint",
+  issuedAt: new Date().toISOString(),
+});
+
+await ledger.recordRecoveryEvidence({
+  tenantId: "tenant-1",
+  actorId: "sre-1",
+  evidence: {
+    drillId: "drill-opa-outage-2025-12-31",
+    scenario: "OPA outage",
+    status: "successful",
+    startedAt: new Date().toISOString(),
+    rtoTarget: "15m",
+    rpoTarget: "5m",
+    evidenceArtifacts: ["artifacts/drills/2025-12-31/opa-outage.log"],
+  },
+});
+```
+
 ## Data Model
 
 ### ProvenanceEntry
+
 - `currentHash`: SHA256(prevHash + payload + signature)
 - `witness`: Cryptographic proof that the mutation was valid at time of execution.
 - `payload`: Contains the `JsonPatch` diff.

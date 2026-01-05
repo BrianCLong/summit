@@ -1,0 +1,239 @@
+{
+  "issue_number": 44,
+  "title": "M6: Request logging and /metrics endpoint",
+  "url": "https://github.com/BrianCLong/summit/issues/44",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:19Z",
+  "createdAt": "2025-08-12T00:15:49Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12263,
+        "url": "https://github.com/BrianCLong/summit/pull/12263",
+        "mergedAt": "2025-12-18T03:23:04Z",
+        "title": "Final Polish: Prompts 41-48 Implementation"
+      },
+      {
+        "number": 15299,
+        "url": "https://github.com/BrianCLong/summit/pull/15299",
+        "mergedAt": "2026-01-01T08:08:11Z",
+        "title": "Document next roadmap priorities and agent task spec"
+      },
+      {
+        "number": 15318,
+        "url": "https://github.com/BrianCLong/summit/pull/15318",
+        "mergedAt": null,
+        "title": "Innovative Information Supply Chain: Epistemic Law Engine"
+      },
+      {
+        "number": 15322,
+        "url": "https://github.com/BrianCLong/summit/pull/15322",
+        "mergedAt": null,
+        "title": "Add truth operations adversarial defense pack"
+      },
+      {
+        "number": 15319,
+        "url": "https://github.com/BrianCLong/summit/pull/15319",
+        "mergedAt": "2026-01-01T11:38:50Z",
+        "title": "Add Summit Decision Governance Pilot Documentation"
+      },
+      {
+        "number": 15316,
+        "url": "https://github.com/BrianCLong/summit/pull/15316",
+        "mergedAt": "2026-01-01T11:39:03Z",
+        "title": "feat: Economic Innovation Sprint artifacts"
+      },
+      {
+        "number": 12080,
+        "url": "https://github.com/BrianCLong/summit/pull/12080",
+        "mergedAt": "2025-11-21T06:30:49Z",
+        "title": "Optimize mobile app performance and offline support"
+      },
+      {
+        "number": 13047,
+        "url": "https://github.com/BrianCLong/summit/pull/13047",
+        "mergedAt": "2025-12-17T21:27:44Z",
+        "title": "Data Governance Authority Implementation"
+      },
+      {
+        "number": 1274,
+        "url": "https://github.com/BrianCLong/summit/pull/1274",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @typescript-eslint/parser from 8.43.0 to 8.44.0"
+      },
+      {
+        "number": 15271,
+        "url": "https://github.com/BrianCLong/summit/pull/15271",
+        "mergedAt": null,
+        "title": "Senior engineer embedded repository work"
+      },
+      {
+        "number": 13056,
+        "url": "https://github.com/BrianCLong/summit/pull/13056",
+        "mergedAt": "2025-12-17T21:19:15Z",
+        "title": "Add streamlined CI lanes and runbook"
+      },
+      {
+        "number": 12022,
+        "url": "https://github.com/BrianCLong/summit/pull/12022",
+        "mergedAt": "2025-11-20T15:29:53Z",
+        "title": "Build Advanced Automation and Workflow Engine"
+      },
+      {
+        "number": 1755,
+        "url": "https://github.com/BrianCLong/summit/pull/1755",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump the eslint group with 3 updates"
+      },
+      {
+        "number": 1151,
+        "url": "https://github.com/BrianCLong/summit/pull/1151",
+        "mergedAt": null,
+        "title": "chore(deps): bump argon2 from 0.31.2 to 0.44.0 in /server"
+      },
+      {
+        "number": 1272,
+        "url": "https://github.com/BrianCLong/summit/pull/1272",
+        "mergedAt": "2025-09-19T02:20:40Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/eslint-plugin from 6.21.0 to 8.44.0 in /client"
+      },
+      {
+        "number": 11794,
+        "url": "https://github.com/BrianCLong/summit/pull/11794",
+        "mergedAt": "2025-11-20T21:12:51Z",
+        "title": "Expand zero-cost control plane references across deployment docs"
+      },
+      {
+        "number": 743,
+        "url": "https://github.com/BrianCLong/summit/pull/743",
+        "mergedAt": "2025-08-29T10:34:30Z",
+        "title": "chore(deps): bump @opentelemetry/exporter-prometheus from 0.44.0 to 0.203.0"
+      },
+      {
+        "number": 11842,
+        "url": "https://github.com/BrianCLong/summit/pull/11842",
+        "mergedAt": "2025-11-20T09:48:18Z",
+        "title": "feat: add collaborative investigation realtime workflows"
+      },
+      {
+        "number": 1362,
+        "url": "https://github.com/BrianCLong/summit/pull/1362",
+        "mergedAt": null,
+        "title": "Add coverage tests for prov-ledger service"
+      },
+      {
+        "number": 10097,
+        "url": "https://github.com/BrianCLong/summit/pull/10097",
+        "mergedAt": "2025-10-14T13:05:17Z",
+        "title": "feat: add federated attribution engine"
+      },
+      {
+        "number": 1360,
+        "url": "https://github.com/BrianCLong/summit/pull/1360",
+        "mergedAt": null,
+        "title": "feat(er): deliver explainable entity resolution service"
+      },
+      {
+        "number": 10119,
+        "url": "https://github.com/BrianCLong/summit/pull/10119",
+        "mergedAt": "2025-10-14T10:40:06Z",
+        "title": "feat: Optimize data processing pipelines"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 10128,
+        "url": "https://github.com/BrianCLong/summit/pull/10128",
+        "mergedAt": "2025-10-14T08:39:43Z",
+        "title": "feat: add community engagement toolkit"
+      },
+      {
+        "number": 631,
+        "url": "https://github.com/BrianCLong/summit/pull/631",
+        "mergedAt": null,
+        "title": "chore(deps): bump tqdm from 4.66.1 to 4.67.1"
+      },
+      {
+        "number": 1290,
+        "url": "https://github.com/BrianCLong/summit/pull/1290",
+        "mergedAt": "2025-09-20T16:30:04Z",
+        "title": "Phase 7: Canary Deployment & GA Release v2025.09.19"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 1332,
+        "url": "https://github.com/BrianCLong/summit/pull/1332",
+        "mergedAt": "2025-09-23T06:25:42Z",
+        "title": "feat: deliver universal ai fabric slice"
+      },
+      {
+        "number": 734,
+        "url": "https://github.com/BrianCLong/summit/pull/734",
+        "mergedAt": null,
+        "title": "chore(deps): bump numpy from 1.24.3 to 2.0.2"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

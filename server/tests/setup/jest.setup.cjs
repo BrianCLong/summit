@@ -314,8 +314,68 @@ jest.mock('prom-client', () => {
 });
 
 
+// Cleanup registry for managing open handles
+const cleanupRegistry = {
+  resources: new Set(),
+  register(resource, cleanup) {
+    const entry = { resource, cleanup };
+    this.resources.add(entry);
+    return () => this.resources.delete(entry);
+  },
+  async cleanupAll() {
+    const promises = [];
+    for (const entry of this.resources) {
+      try {
+        const result = entry.cleanup();
+        if (result instanceof Promise) {
+          promises.push(result.catch(e => console.error('Cleanup error:', e)));
+        }
+      } catch (e) {
+        console.error('Cleanup error:', e);
+      }
+    }
+    await Promise.all(promises);
+    this.resources.clear();
+  }
+};
+
+// Export cleanup utilities for tests
+global.testCleanup = {
+  // Register a resource for cleanup at end of test
+  register: (resource, cleanup) => cleanupRegistry.register(resource, cleanup),
+
+  // Register a server for cleanup
+  registerServer: (server) => {
+    return cleanupRegistry.register(server, () => {
+      return new Promise((resolve) => {
+        server.close(() => resolve());
+        // Force resolve after timeout to prevent hanging
+        setTimeout(resolve, 1000);
+      });
+    });
+  },
+
+  // Register a timer for cleanup
+  registerTimer: (timerId) => {
+    return cleanupRegistry.register(timerId, () => {
+      clearTimeout(timerId);
+      clearInterval(timerId);
+    });
+  },
+
+  // Register a connection for cleanup
+  registerConnection: (conn, closeMethod = 'close') => {
+    return cleanupRegistry.register(conn, () => {
+      if (conn && typeof conn[closeMethod] === 'function') {
+        return conn[closeMethod]();
+      }
+    });
+  },
+};
+
 // Clean up after each test
-afterEach(() => {
+afterEach(async () => {
   jest.clearAllMocks();
   jest.clearAllTimers();
+  await cleanupRegistry.cleanupAll();
 });
