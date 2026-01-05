@@ -12,7 +12,10 @@ export type QuotaReason =
   | 'evidence_exceeded'
   | 'export_exceeded'
   | 'jobs_exceeded'
-  | 'api_rate_exceeded';
+  | 'api_rate_exceeded'
+  | 'concurrent_runs_exceeded'
+  | 'step_throughput_exceeded'
+  | 'receipt_backlog_exceeded';
 
 export interface QuotaCheckResult {
   allowed: boolean;
@@ -42,14 +45,14 @@ export class QuotaService {
     bytes: number,
     fingerprint?: string,
   ): QuotaCheckResult {
-      if (!this.isEnabled()) {
-        return {
-          allowed: true,
-          limit: Infinity,
-          used: 0,
-          remaining: Infinity,
-        };
-      }
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+      };
+    }
 
     const limits = getTenantQuota(tenantId);
     const used = this.store.incrementDeterministic(
@@ -197,6 +200,103 @@ export class QuotaService {
 
   completeJob(tenantId: string, delta = 1): number {
     return this.store.decrementJobConcurrency(tenantId, delta);
+  }
+
+  checkRunConcurrency(
+    tenantId: string,
+    currentRuns: number,
+    delta = 1,
+  ): QuotaCheckResult {
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: currentRuns,
+        remaining: Infinity,
+      };
+    }
+
+    const limits = getTenantQuota(tenantId);
+    const projected = currentRuns + delta;
+    const allowed = projected <= limits.runConcurrency;
+    const remaining = Math.max(0, limits.runConcurrency - projected);
+    return {
+      allowed,
+      limit: limits.runConcurrency,
+      used: projected,
+      remaining,
+      reason: allowed ? undefined : 'concurrent_runs_exceeded',
+    };
+  }
+
+  checkStepThroughput(tenantId: string): QuotaCheckResult {
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+        retryAfterMs: 0,
+      };
+    }
+
+    const limits = getTenantQuota(tenantId);
+    const window = this.store.trackStepThroughput(tenantId, minute);
+    const allowed = window.count <= limits.stepThroughputPerMinute;
+    const remaining = Math.max(0, limits.stepThroughputPerMinute - window.count);
+    const resetAt = window.windowStart + minute;
+    const retryAfterMs = allowed ? 0 : Math.max(0, resetAt - Date.now());
+
+    return {
+      allowed,
+      limit: limits.stepThroughputPerMinute,
+      used: window.count,
+      remaining,
+      reason: allowed ? undefined : 'step_throughput_exceeded',
+      retryAfterMs,
+    };
+  }
+
+  reserveReceiptBacklog(tenantId: string): QuotaCheckResult & { reserved: boolean } {
+    if (!this.isEnabled()) {
+      return {
+        allowed: true,
+        limit: Infinity,
+        used: 0,
+        remaining: Infinity,
+        reserved: false,
+      };
+    }
+
+    const limits = getTenantQuota(tenantId);
+    const current = this.store.getCounter(tenantId).receiptBacklog;
+    const projected = current + 1;
+    const allowed = projected <= limits.receiptBacklog;
+
+    if (!allowed) {
+      return {
+        allowed: false,
+        limit: limits.receiptBacklog,
+        used: current,
+        remaining: Math.max(0, limits.receiptBacklog - current),
+        reason: 'receipt_backlog_exceeded',
+        reserved: false,
+      };
+    }
+
+    const used = this.store.incrementReceiptBacklog(tenantId, 1);
+    return {
+      allowed: true,
+      limit: limits.receiptBacklog,
+      used,
+      remaining: Math.max(0, limits.receiptBacklog - used),
+      reason: undefined,
+      reserved: true,
+    };
+  }
+
+  releaseReceiptBacklog(tenantId: string, delta = 1): number {
+    return this.store.decrementReceiptBacklog(tenantId, delta);
   }
 
   checkApiRequest(tenantId: string): QuotaCheckResult {

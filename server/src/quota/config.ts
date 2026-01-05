@@ -6,6 +6,9 @@ export interface TenantQuotaConfig {
   exportCount?: number;
   jobConcurrency?: number;
   apiRatePerMinute?: number;
+  runConcurrency?: number;
+  stepThroughputPerMinute?: number;
+  receiptBacklog?: number;
 }
 
 export type TenantQuotaMap = Record<string, TenantQuotaConfig>;
@@ -17,6 +20,9 @@ const TenantQuotaSchema = z.record(
     exportCount: z.number().optional(),
     jobConcurrency: z.number().optional(),
     apiRatePerMinute: z.number().optional(),
+    runConcurrency: z.number().optional(),
+    stepThroughputPerMinute: z.number().optional(),
+    receiptBacklog: z.number().optional(),
   }),
 );
 
@@ -26,6 +32,9 @@ const UNLIMITED_QUOTA: Required<TenantQuotaConfig> = {
   exportCount: Infinity,
   jobConcurrency: Infinity,
   apiRatePerMinute: Infinity,
+  runConcurrency: Infinity,
+  stepThroughputPerMinute: Infinity,
+  receiptBacklog: Infinity,
 };
 
 let cachedQuotas: TenantQuotaMap | null = null;

@@ -1,6 +1,9 @@
 import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import { SigningService } from './SigningService.js';
 import { createHash } from 'crypto';
+import { quotaService } from '../quota/service.js';
+import { quotaPolicyRules, QuotaPolicyError } from '../policies/quota.js';
+import { emitQuotaDenialReceipt } from './quota/emit-quota-denial-receipt.js';
 
 export interface Receipt {
   id: string; // usually the ledger entry ID
@@ -36,57 +39,94 @@ export class ReceiptService {
    * Generates a signed receipt for an action.
    * This also logs the action to the Provenance Ledger if it hasn't been logged yet.
    */
-  public async generateReceipt(params: {
-    action: string;
-    actor: { id: string; tenantId: string };
-    resource: string;
-    input: any;
-    policyDecisionId?: string;
-  }): Promise<Receipt> {
+  public async generateReceipt(
+    params: {
+      action: string;
+      actor: { id: string; tenantId: string };
+      resource: string;
+      input: any;
+      policyDecisionId?: string;
+    },
+    options?: { bypassQuota?: boolean },
+  ): Promise<Receipt> {
     const { action, actor, resource, input, policyDecisionId } = params;
+    const enforceQuota = !options?.bypassQuota;
+    const backlogReservation = enforceQuota
+      ? quotaService.reserveReceiptBacklog(actor.tenantId)
+      : {
+          allowed: true,
+          reserved: false,
+          limit: Infinity,
+          used: 0,
+          remaining: Infinity,
+        };
+
+    if (!backlogReservation.allowed) {
+      const denialReceipt = await emitQuotaDenialReceipt({
+        tenantId: actor.tenantId,
+        actorId: actor.id,
+        ruleKey: 'receiptBacklog',
+        decision: backlogReservation,
+        resource: resource,
+        metadata: { action },
+      });
+      const error = new QuotaPolicyError(
+        'Receipt backlog quota exceeded',
+        quotaPolicyRules.receiptBacklog,
+        backlogReservation,
+      );
+      error.receipt = denialReceipt;
+      throw error;
+    }
 
     // 1. Calculate input hash
     const inputStr = typeof input === 'string' ? input : JSON.stringify(input);
     const inputHash = createHash('sha256').update(inputStr).digest('hex');
 
-    // 2. Append to Ledger (this is the "truth" store)
-    const entry = await this.ledger.appendEntry({
-      action,
-      actorId: actor.id,
-      tenantId: actor.tenantId,
-      resource,
-      details: { inputHash, policyDecisionId }, // stored in 'details' which maps to metadata or payload
-      timestamp: new Date().toISOString()
-    } as any);
-    const entryId = entry.id;
+    try {
+      // 2. Append to Ledger (this is the "truth" store)
+      const entry = await this.ledger.appendEntry({
+        action,
+        actorId: actor.id,
+        tenantId: actor.tenantId,
+        resource,
+        details: { inputHash, policyDecisionId }, // stored in 'details' which maps to metadata or payload
+        timestamp: new Date().toISOString()
+      } as any);
+      const entryId = entry.id;
 
-    // 3. Create the canonical receipt string to sign
-    const timestamp = new Date().toISOString();
-    const receiptCanonical = [
-      entryId,
-      timestamp,
-      action,
-      actor.id,
-      actor.tenantId,
-      resource,
-      inputHash,
-      policyDecisionId || ''
-    ].join('|');
+      // 3. Create the canonical receipt string to sign
+      const timestamp = new Date().toISOString();
+      const receiptCanonical = [
+        entryId,
+        timestamp,
+        action,
+        actor.id,
+        actor.tenantId,
+        resource,
+        inputHash,
+        policyDecisionId || ''
+      ].join('|');
 
-    // 4. Sign it
-    const signature = this.signer.sign(receiptCanonical);
+      // 4. Sign it
+      const signature = this.signer.sign(receiptCanonical);
 
-    return {
-      id: entryId,
-      timestamp,
-      action,
-      actor: actor.id,
-      resource,
-      inputHash,
-      policyDecisionId,
-      signature,
-      signerKeyId: this.signer.getPublicKey().slice(0, 32) + '...' // simplified ID
-    };
+      return {
+        id: entryId,
+        timestamp,
+        action,
+        actor: actor.id,
+        resource,
+        inputHash,
+        policyDecisionId,
+        signature,
+        signerKeyId: this.signer.getPublicKey().slice(0, 32) + '...' // simplified ID
+      };
+    } finally {
+      if (backlogReservation.reserved) {
+        quotaService.releaseReceiptBacklog(actor.tenantId, 1);
+      }
+    }
   }
 
   public async getReceipt(id: string): Promise<Receipt | null> {
