@@ -16,13 +16,19 @@ export interface Run {
   id: string;
   user: UserRef;
   createdAt: string;
+  updatedAt?: string;
+  startedAt?: string;
+  completedAt?: string;
+  status?: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled';
   requestText: string;
+  tenantId?: string;
 }
 
 export interface Task {
   id: string;
   runId: string;
   parentTaskId?: string;
+  tenantId?: string;
   status: TaskStatus;
   agent: AgentRef;
   kind: 'plan' | 'action' | 'subworkflow' | 'graph.analysis';
@@ -42,6 +48,16 @@ export interface Artifact {
   label: string;
   data: unknown; // or a typed union if you want stricter types
   createdAt: string;
+}
+
+export interface RunSummary {
+  id: string;
+  status?: string;
+  tenantId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  stepCount: number;
+  receiptCount: number;
 }
 
 export interface CostSample {

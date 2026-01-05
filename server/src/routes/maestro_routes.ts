@@ -164,6 +164,21 @@ export function buildMaestroRouter(
     resourceType: 'maestro/run',
     resolveResourceId: (req) => req.params.runId,
   });
+  const enforceRunListPolicy = createMaestroOPAEnforcer(opa, DEFAULT_POLICY_PATH, {
+    action: 'maestro.run.read',
+    resourceType: 'maestro/run',
+    resolveResourceId: (req) =>
+      (req.query.tenant as string) ||
+      (req as any).user?.tenantId ||
+      (req as any).user?.tenant_id,
+    buildResourceAttributes: (req) => ({
+      tenantId:
+        (req.query.tenant as string) ||
+        (req as any).user?.tenantId ||
+        (req as any).user?.tenant_id,
+      status: req.query.status,
+    }),
+  });
   const enforceTaskReadPolicy = createMaestroOPAEnforcer(opa, DEFAULT_POLICY_PATH, {
     action: 'maestro.task.read',
     resourceType: 'maestro/task',
@@ -184,8 +199,49 @@ export function buildMaestroRouter(
         });
       }
 
-      const result = await maestro.runPipeline(userId, requestText);
+      const tenantId =
+        (req as any).user?.tenantId ||
+        (req as any).user?.tenant_id ||
+        (req.headers['x-tenant-id'] as string | undefined);
+      const result = await maestro.runPipeline(userId, requestText, {
+        tenantId,
+      });
       return res.json(result);
+    } catch (e: any) {
+      next(e);
+    }
+  });
+
+  // GET /api/maestro/runs?tenant=&status= – list run summaries
+  router.get('/runs', enforceRunListPolicy, async (req, res, next) => {
+    try {
+      const principalTenant =
+        (req as any).user?.tenantId || (req as any).user?.tenant_id;
+      const tenantId =
+        (req.query.tenant as string) ||
+        principalTenant ||
+        (req.headers['x-tenant-id'] as string | undefined);
+      if (principalTenant && tenantId && tenantId !== principalTenant) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          reason: 'tenant_mismatch',
+        });
+      }
+
+      const status = req.query.status as string | undefined;
+      const limit = Math.min(
+        Number.parseInt(req.query.limit as string, 10) || 50,
+        200,
+      );
+      const items = await queries.getRunSummaries(tenantId, status, limit);
+      const sanitized = items.map((item) => {
+        const { requestText: _requestText, ...rest } = item as {
+          requestText?: string;
+          [key: string]: unknown;
+        };
+        return rest;
+      });
+      return res.json({ items: sanitized });
     } catch (e: any) {
       next(e);
     }
