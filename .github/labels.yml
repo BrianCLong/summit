@@ -19,121 +19,121 @@
 # Standard set of labels for Summit repo
 # Use with actions/labeler or a label sync tool
 
-- name: 'type: bug'
-  color: 'd73a4a'
-  description: 'Something isn''t working'
-- name: 'type: feature'
-  color: 'a2eeef'
-  description: 'New feature or request'
-- name: 'type: docs'
-  color: '0075ca'
-  description: 'Improvements or additions to documentation'
-- name: 'type: chores'
-  color: 'a4f6a9'
-  description: 'Maintenance, dependencies, tooling'
-- name: 'type: security'
-  color: 'e99695'
-  description: 'Security vulnerability or hardening'
+- name: "type: bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+- name: "type: feature"
+  color: "a2eeef"
+  description: "New feature or request"
+- name: "type: docs"
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+- name: "type: chores"
+  color: "a4f6a9"
+  description: "Maintenance, dependencies, tooling"
+- name: "type: security"
+  color: "e99695"
+  description: "Security vulnerability or hardening"
 
-- name: 'priority: critical'
-  color: 'b60205'
-  description: 'Must handle immediately'
-- name: 'priority: high'
-  color: 'ff0000'
-  description: 'Important for next release'
-- name: 'priority: medium'
-  color: 'fbca04'
-  description: 'Normal priority'
-- name: 'priority: low'
-  description: 'Monthly operational hygiene tasks'
+- name: "priority: critical"
+  color: "b60205"
+  description: "Must handle immediately"
+- name: "priority: high"
+  color: "ff0000"
+  description: "Important for next release"
+- name: "priority: medium"
+  color: "fbca04"
+  description: "Normal priority"
+- name: "priority: low"
+  description: "Monthly operational hygiene tasks"
 
 - name: needs-canary-plan
-  color: '0b7285'
-  description: 'Requires a documented canary and rollback plan before merge'
+  color: "0b7285"
+  description: "Requires a documented canary and rollback plan before merge"
 
 - name: migration-gate
-  color: 'e11d48'
-  description: 'Schema-impacting change that must clear the migration gate'
+  color: "e11d48"
+  description: "Schema-impacting change that must clear the migration gate"
 
-- name: 'cadence:weekly'
-  color: '5319e7'
-  description: 'Weekly recurring tasks'
+- name: "cadence:weekly"
+  color: "5319e7"
+  description: "Weekly recurring tasks"
 
-- name: 'cadence:monthly'
-  color: '5319e7'
-  description: 'Monthly recurring tasks'
+- name: "cadence:monthly"
+  color: "5319e7"
+  description: "Monthly recurring tasks"
 
-- name: 'priority:high'
-  color: 'b60205'
-  description: 'High priority items'
+- name: "priority:high"
+  color: "b60205"
+  description: "High priority items"
 
-- name: 'priority:normal'
-  color: 'c2e0c6'
-  description: 'Nice to have'
+- name: "priority:normal"
+  color: "c2e0c6"
+  description: "Nice to have"
 
-- name: 'status: blocked'
-  color: '000000'
-  description: 'Waiting on something else'
-- name: 'status: in-review'
-  color: 'feceea'
-  description: 'Currently being reviewed'
-- name: 'status: needs-triage'
-  color: 'ffffff'
-  description: 'Needs initial review/categorization'
+- name: "status: blocked"
+  color: "000000"
+  description: "Waiting on something else"
+- name: "status: in-review"
+  color: "feceea"
+  description: "Currently being reviewed"
+- name: "status: needs-triage"
+  color: "ffffff"
+  description: "Needs initial review/categorization"
 
-- name: 'area: frontend'
-  color: '1d76db'
-  description: 'Frontend/UI code'
-- name: 'area: backend'
-  color: '5319e7'
-  description: 'Backend/API code'
-- name: 'area: devops'
-  color: '0052cc'
-  description: 'CI/CD, Infrastructure, Docker'
-- name: 'area: data'
-  color: 'bfdadc'
-  description: 'Database, migration, data integrity'
+- name: "area: frontend"
+  color: "1d76db"
+  description: "Frontend/UI code"
+- name: "area: backend"
+  color: "5319e7"
+  description: "Backend/API code"
+- name: "area: devops"
+  color: "0052cc"
+  description: "CI/CD, Infrastructure, Docker"
+- name: "area: data"
+  color: "bfdadc"
+  description: "Database, migration, data integrity"
 
-- name: 'needs-canary-plan'
-  color: 'bfd4f2'
-  description: 'Requires a canary deployment plan before merge'
-- name: 'migration-gate'
-  color: 'd93f0b'
-  description: 'Contains database migrations, requires verification'
+- name: "needs-canary-plan"
+  color: "bfd4f2"
+  description: "Requires a canary deployment plan before merge"
+- name: "migration-gate"
+  color: "d93f0b"
+  description: "Contains database migrations, requires verification"
 - name: security
-  color: '6610f2'
-  description: 'Security-related tasks'
+  color: "6610f2"
+  description: "Security-related tasks"
 
 # Ops hardening week 1 labels
 - name: needs-canary-plan
-  color: 'CC9900'
+  color: "CC9900"
   description: Canary plan required before merge
 - name: migration-gate
-  color: '5319e7'
+  color: "5319e7"
   description: DB/contract migration present — gate applies
 - name: ops/preview
-  color: '0e8a16'
+  color: "0e8a16"
   description: Preview environment work
 - name: ops/release-train
-  color: '1f77b4'
+  color: "1f77b4"
   description: Release train tasks
 - name: risk/high
-  color: 'd73a4a'
+  color: "d73a4a"
   description: Elevated risk change
 - name: type/runbook
-  color: 'c2e0c6'
+  color: "c2e0c6"
   description: Documentation/runbook
 
 # Backport labels
 - name: backport/needed
-  color: '3e4b9e'
-  description: 'Indicates a PR should be backported'
+  color: "3e4b9e"
+  description: "Indicates a PR should be backported"
 - name: backport/done
-  color: '0e8a16'
-  description: 'Backport has been successfully applied'
+  color: "0e8a16"
+  description: "Backport has been successfully applied"
 - name: backport/release-0.3
-  color: '5319e7'
-  description: 'Backport target: release 0.3'
+  color: "5319e7"
+  description: "Backport target: release 0.3"
 - name: backport/release-0.4
-  color: '5319e7'
-  description: 'Backport target: release 0.4'
+  color: "5319e7"
+  description: "Backport target: release 0.4"
