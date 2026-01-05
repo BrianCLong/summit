@@ -115,6 +115,7 @@ import retentionRouter from './routes/retention.js';
 import drRouter from './routes/dr.js';
 import reportingRouter from './routes/reporting.js';
 import policyProfilesRouter from './routes/policy-profiles.js';
+import policyProposalsRouter from './routes/policy-proposals.js';
 import evidenceRouter from './routes/evidence.js';
 import masteryRouter from './routes/mastery.js';
 import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
@@ -441,6 +442,7 @@ export const createApp = async () => {
   app.use('/api', exportsRouter);
   app.use('/api', retentionRouter);
   app.use('/api/policy-profiles', policyProfilesRouter);
+  app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
   app.use('/dr', drRouter);
   app.use('/', opsRouter);
