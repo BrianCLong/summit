@@ -1,0 +1,122 @@
+{
+  "issue_number": 190,
+  "title": "Interactive 3D graph visualization",
+  "url": "https://github.com/BrianCLong/summit/issues/190",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055797,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHm9Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/visualization",
+      "name": "visualization",
+      "color": "a2eeef",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056381,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpPQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-30",
+      "name": "due:2025-11-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:38Z",
+  "createdAt": "2025-08-14T04:42:38Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15251,
+        "url": "https://github.com/BrianCLong/summit/pull/15251",
+        "mergedAt": null,
+        "title": "Refine server test execution and CI dependency locking"
+      },
+      {
+        "number": 12305,
+        "url": "https://github.com/BrianCLong/summit/pull/12305",
+        "mergedAt": "2025-11-27T00:19:42Z",
+        "title": "Bump node-forge from 1.3.1 to 1.3.2 in /conductor-ui"
+      },
+      {
+        "number": 11924,
+        "url": "https://github.com/BrianCLong/summit/pull/11924",
+        "mergedAt": "2025-11-20T10:20:18Z",
+        "title": "Build Case Spaces with audit logs and access prompts"
+      },
+      {
+        "number": 1361,
+        "url": "https://github.com/BrianCLong/summit/pull/1361",
+        "mergedAt": null,
+        "title": "feat: enforce cost guard query budgets"
+      },
+      {
+        "number": 1339,
+        "url": "https://github.com/BrianCLong/summit/pull/1339",
+        "mergedAt": "2025-09-23T11:13:29Z",
+        "title": "Add policy-aware workcell runtime and gateway integration"
+      },
+      {
+        "number": 1332,
+        "url": "https://github.com/BrianCLong/summit/pull/1332",
+        "mergedAt": "2025-09-23T06:25:42Z",
+        "title": "feat: deliver universal ai fabric slice"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 1259,
+        "url": "https://github.com/BrianCLong/summit/pull/1259",
+        "mergedAt": null,
+        "title": "Merge conflict-free branches and PRs into main"
+      },
+      {
+        "number": 1265,
+        "url": "https://github.com/BrianCLong/summit/pull/1265",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "Chore/husky v9 cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

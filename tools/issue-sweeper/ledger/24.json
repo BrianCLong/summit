@@ -1,0 +1,230 @@
+{
+  "issue_number": 24,
+  "title": "Docs: Create docs/roadmap.md and link from README",
+  "url": "https://github.com/BrianCLong/summit/issues/24",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:18Z",
+  "createdAt": "2025-08-12T00:10:18Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14635,
+        "url": "https://github.com/BrianCLong/summit/pull/14635",
+        "mergedAt": null,
+        "title": "Sprint 24: IntelGraph MVP Slice"
+      },
+      {
+        "number": 15401,
+        "url": "https://github.com/BrianCLong/summit/pull/15401",
+        "mergedAt": null,
+        "title": "Fix supply chain and security workflow gates"
+      },
+      {
+        "number": 14428,
+        "url": "https://github.com/BrianCLong/summit/pull/14428",
+        "mergedAt": "2025-12-25T03:45:19Z",
+        "title": "Demo Slice: Skeleton and Control Page (Dec 24)"
+      },
+      {
+        "number": 14114,
+        "url": "https://github.com/BrianCLong/summit/pull/14114",
+        "mergedAt": "2025-12-20T07:25:37Z",
+        "title": "Epic 24: Advanced Multi-Region Deployment & DR"
+      },
+      {
+        "number": 14754,
+        "url": "https://github.com/BrianCLong/summit/pull/14754",
+        "mergedAt": "2025-12-29T17:10:19Z",
+        "title": "docs: add 24–36 month strategic options & scenarios (MVP-3-GA)"
+      },
+      {
+        "number": 15392,
+        "url": "https://github.com/BrianCLong/summit/pull/15392",
+        "mergedAt": null,
+        "title": "Harden GA coverage and fuzz gates with deterministic turbo segmentation"
+      },
+      {
+        "number": 13858,
+        "url": "https://github.com/BrianCLong/summit/pull/13858",
+        "mergedAt": "2025-12-20T03:24:04Z",
+        "title": "Add Sprint 24 plan for Nov 9–20 2026"
+      },
+      {
+        "number": 12666,
+        "url": "https://github.com/BrianCLong/summit/pull/12666",
+        "mergedAt": "2025-12-04T18:41:51Z",
+        "title": "Add implementation blueprint for prompts 17-24"
+      },
+      {
+        "number": 15182,
+        "url": "https://github.com/BrianCLong/summit/pull/15182",
+        "mergedAt": "2025-12-31T14:21:25Z",
+        "title": "chore(deps): bump actions/upload-artifact from 4 to 6"
+      },
+      {
+        "number": 14484,
+        "url": "https://github.com/BrianCLong/summit/pull/14484",
+        "mergedAt": null,
+        "title": "docs: platform governance and long-horizon roadmap"
+      },
+      {
+        "number": 14573,
+        "url": "https://github.com/BrianCLong/summit/pull/14573",
+        "mergedAt": "2025-12-27T05:27:34Z",
+        "title": "chore(deps): Bump black from 23.12.0 to 24.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 14532,
+        "url": "https://github.com/BrianCLong/summit/pull/14532",
+        "mergedAt": "2025-12-27T00:21:07Z",
+        "title": "Sprint N+51: Long-Horizon Strategy & Platform Evolution"
+      },
+      {
+        "number": 13793,
+        "url": "https://github.com/BrianCLong/summit/pull/13793",
+        "mergedAt": "2025-12-20T11:36:24Z",
+        "title": "Add Sprint 9 Scale & Efficiency plan"
+      },
+      {
+        "number": 15132,
+        "url": "https://github.com/BrianCLong/summit/pull/15132",
+        "mergedAt": "2025-12-30T21:20:21Z",
+        "title": "chore(deps): bump actions/checkout from 3 to 6"
+      },
+      {
+        "number": 12335,
+        "url": "https://github.com/BrianCLong/summit/pull/12335",
+        "mergedAt": "2025-12-18T03:06:23Z",
+        "title": "Add dependency graph for roadmap prompts"
+      },
+      {
+        "number": 13837,
+        "url": "https://github.com/BrianCLong/summit/pull/13837",
+        "mergedAt": "2025-12-20T11:28:20Z",
+        "title": "feat: add merge train freeze guard with opa overrides"
+      },
+      {
+        "number": 12673,
+        "url": "https://github.com/BrianCLong/summit/pull/12673",
+        "mergedAt": "2025-12-04T16:26:50Z",
+        "title": "docs: expand companyos wave3 delivery plan"
+      },
+      {
+        "number": 12687,
+        "url": "https://github.com/BrianCLong/summit/pull/12687",
+        "mergedAt": "2025-12-04T15:56:24Z",
+        "title": "Implement multi-tenant security and authorization layer"
+      },
+      {
+        "number": 12239,
+        "url": "https://github.com/BrianCLong/summit/pull/12239",
+        "mergedAt": "2025-12-18T03:33:50Z",
+        "title": "Build geo-temporal graph co-presence detection"
+      },
+      {
+        "number": 11765,
+        "url": "https://github.com/BrianCLong/summit/pull/11765",
+        "mergedAt": "2025-10-17T17:42:08Z",
+        "title": "Add JIW Vol. 24 Issue 3 insight brief"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 15181,
+        "url": "https://github.com/BrianCLong/summit/pull/15181",
+        "mergedAt": "2025-12-31T14:21:22Z",
+        "title": "chore(deps): bump github/codeql-action from 3 to 4"
+      },
+      {
+        "number": 15038,
+        "url": "https://github.com/BrianCLong/summit/pull/15038",
+        "mergedAt": "2025-12-30T22:42:25Z",
+        "title": "Set up project management and delivery tracking"
+      },
+      {
+        "number": 1314,
+        "url": "https://github.com/BrianCLong/summit/pull/1314",
+        "mergedAt": null,
+        "title": "docs: refresh sprint 24 plan"
+      },
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 12508,
+        "url": "https://github.com/BrianCLong/summit/pull/12508",
+        "mergedAt": "2025-12-02T18:52:46Z",
+        "title": "Create comprehensive 96-prompt engineering roadmap"
+      },
+      {
+        "number": 15325,
+        "url": "https://github.com/BrianCLong/summit/pull/15325",
+        "mergedAt": null,
+        "title": "feat: add doctrine spine and enforcement guardrails"
+      },
+      {
+        "number": 12749,
+        "url": "https://github.com/BrianCLong/summit/pull/12749",
+        "mergedAt": "2025-12-04T15:56:16Z",
+        "title": "Create Claude prompts for IntelGraph roadmap"
+      },
+      {
+        "number": 12170,
+        "url": "https://github.com/BrianCLong/summit/pull/12170",
+        "mergedAt": "2025-11-21T08:24:54Z",
+        "title": "Design defensive SIGINT telemetry system"
+      },
+      {
+        "number": 15133,
+        "url": "https://github.com/BrianCLong/summit/pull/15133",
+        "mergedAt": null,
+        "title": "chore(deps): bump aws-actions/configure-aws-credentials from 4 to 5"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
