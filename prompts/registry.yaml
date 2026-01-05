@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: partner-demo-tenant-bootstrap
+    version: v1
+    path: prompts/partner-demo-tenant-bootstrap.md
+    sha256: bcd8043b9a5890175ceb45357d8a978548b7823f2124a51bedd8dbf687f84df7
+    description: Demo tenant bootstrap, evidence export readiness, admin UI trigger, and partner quick-start updates.
+    scope:
+      paths:
+        - server/src/services/tenants/
+        - server/src/routes/
+        - server/src/repos/
+        - apps/web/
+        - docs/
+      domains:
+        - tenancy
+        - evidence
+        - admin
+        - ui
+        - docs
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

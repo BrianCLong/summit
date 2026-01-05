@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-02T15:00:00Z",
+  "revision_note": "Added demo tenant bootstrap seeds, evidence export readiness checks, and admin UI trigger for partner quick-start",
   "initiatives": [
     {
       "id": "A",

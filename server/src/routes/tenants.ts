@@ -10,6 +10,7 @@ import { getPostgresPool } from '../config/database.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 import provisionRouter from './tenants/provision.js';
+import { demoTenantBootstrapService } from '../services/tenants/DemoTenantBootstrapService.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -117,6 +118,40 @@ router.post('/', ensureAuthenticated, ensurePolicy('create', 'tenant'), async (r
     }
   }
 });
+
+/**
+ * @route POST /api/tenants/demo
+ * @desc Create a demo tenant with seeded workflows
+ * @access Protected (Admin only)
+ */
+router.post(
+  '/demo',
+  ensureAuthenticated,
+  ensurePolicy('create', 'tenant'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const actorId = authReq.user?.id;
+      if (!actorId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+
+      const role = authReq.user?.role || '';
+      const isAdmin = ['SUPER_ADMIN', 'ADMIN', 'PLATFORM_ADMIN', 'admin'].includes(
+        role,
+      );
+      if (!isAdmin) {
+        return res.status(403).json({ success: false, error: 'Forbidden' });
+      }
+
+      const result = await demoTenantBootstrapService.bootstrap(actorId);
+      return res.status(201).json({ success: true, data: result });
+    } catch (error: any) {
+      logger.error('Error in POST /api/tenants/demo:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
 
 /**
  * @route GET /api/tenants/:id
