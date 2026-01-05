@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from '
 import { resolve, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { createHash } from 'node:crypto';
+import { ReleaseBundleError } from './lib/errors.mjs';
 
 const options = {
   path: { type: 'string', default: 'dist/release' },
@@ -48,6 +49,46 @@ function getSha256(filePath) {
     return hashSum.digest('hex');
 }
 
+const SUPPORTED_MAJOR_VERSION = 1;
+
+function checkCompatibility(bundleIndex) {
+  if (!bundleIndex || typeof bundleIndex.schemaVersion !== 'string') {
+    return {
+      compatible: false,
+      message: 'schemaVersion field is missing or not a string in bundle-index.json',
+      code: 'MISSING_FIELD',
+      details: { field: 'schemaVersion' }
+    };
+  }
+
+  const bundleMajor = parseInt(bundleIndex.schemaVersion.split('.')[0], 10);
+  if (isNaN(bundleMajor)) {
+    return {
+      compatible: false,
+      message: `Could not parse major version from schemaVersion: "${bundleIndex.schemaVersion}"`,
+      code: 'INVALID_ENUM'
+    };
+  }
+
+  if (bundleMajor > SUPPORTED_MAJOR_VERSION) {
+    return {
+      compatible: false,
+      message: `Unsupported schema major version. Bundle has ${bundleMajor}, script supports ${SUPPORTED_MAJOR_VERSION}.`,
+      code: 'SCHEMA_MAJOR_UNSUPPORTED',
+      details: { bundleVersion: bundleIndex.schemaVersion, supportedVersion: `${SUPPORTED_MAJOR_VERSION}.x.x` }
+    };
+  }
+
+  return { compatible: true, message: 'Schema version is compatible.' };
+}
+
+function assertCompatible(bundleIndex) {
+    const result = checkCompatibility(bundleIndex);
+    if (!result.compatible) {
+        throw new ReleaseBundleError(result.code, result.message, result.details);
+    }
+}
+
 // Helper to list all files recursively
 function getFiles(dir) {
     let files = [];
@@ -65,6 +106,21 @@ function getFiles(dir) {
 }
 
 try {
+    // 0. Compatibility Check
+    const compatScript = join(process.cwd(), 'scripts/release/check-bundle-compatibility.mjs');
+    if (existsSync(compatScript)) {
+        console.log('Running compatibility check...');
+        try {
+            const { execSync } = await import('node:child_process');
+            execSync(`node "${compatScript}" --dir "${BUNDLE_DIR}" --strict`, { stdio: 'inherit' });
+            addCheck('Compatibility check passed');
+        } catch (e) {
+             addError('COMPATIBILITY_CHECK_FAILED', 'Compatibility check failed');
+        }
+    } else {
+        console.warn('⚠️ Compatibility script not found, skipping check.');
+    }
+
     // 1. Load SHA256SUMS (Canonical Truth)
     const sumsPath = join(BUNDLE_DIR, 'SHA256SUMS');
     if (!existsSync(sumsPath)) {
@@ -135,7 +191,15 @@ try {
     const indexPath = join(BUNDLE_DIR, 'bundle-index.json');
     if (existsSync(indexPath)) {
         try {
-            const indexJson = JSON.parse(readFileSync(indexPath, 'utf-8'));
+            let indexJson;
+            try {
+                indexJson = JSON.parse(readFileSync(indexPath, 'utf-8'));
+            } catch (e) {
+                throw new ReleaseBundleError('INVALID_JSON', `Failed to parse bundle-index.json: ${e.message}`, { originalError: e.message });
+            }
+
+            assertCompatible(indexJson); // This will throw on major version mismatch
+
             if (indexJson.files && Array.isArray(indexJson.files)) {
                 RESULTS.fileCounts.indexCount = indexJson.files.length;
                 indexJson.files.forEach(f => {
@@ -178,7 +242,11 @@ try {
             }
 
         } catch (e) {
-            addError('INDEX_PARSE_ERROR', `Failed to parse bundle-index.json: ${e.message}`);
+            // Let ReleaseBundleError propagate to the main handler, otherwise wrap it.
+            if (e instanceof ReleaseBundleError) {
+                throw e;
+            }
+            addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);
         }
     }
 
@@ -223,7 +291,7 @@ try {
                  }
              }
         } catch (e) {
-             addError('PROV_PARSE_ERROR', `Failed to parse provenance.json: ${e.message}`);
+             throw new ReleaseBundleError('INVALID_JSON', `Failed to parse provenance.json: ${e.message}`);
         }
     }
 
@@ -238,7 +306,11 @@ try {
     }
 
 } catch (e) {
-    addError('INTERNAL_ERROR', e.message);
+    if (e instanceof ReleaseBundleError) {
+        addError(e.code, e.message);
+    } else {
+        addError('INTERNAL_ERROR', e.message);
+    }
 }
 
 RESULTS.ok = RESULTS.errors.length === 0;

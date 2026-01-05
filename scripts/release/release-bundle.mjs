@@ -213,6 +213,18 @@ async function main() {
   writeFileSync(join(DIST_RELEASE, 'release-manifest.json'), JSON.stringify(manifest, null, 2));
   console.log('   Wrote release-manifest.json');
 
+  // 6x. Compatibility Check (Gate)
+  console.log('\n🛡️  Running Compatibility Check...');
+  const compatScript = resolveScript('check-bundle-compatibility.mjs');
+  if (compatScript) {
+      try {
+          run(`node ${compatScript} --dir ${DIST_RELEASE} --strict`);
+      } catch (e) {
+          console.error("❌ Compatibility check failed.");
+          process.exit(1);
+      }
+  }
+
   // 6d. Checksums
   console.log('\n🔏 Generating Checksums...');
   try {

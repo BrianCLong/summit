@@ -18,6 +18,16 @@ Example (`release-manifest.json`):
 }
 ```
 
+## Compatibility Gate
+
+The release pipeline enforces a compatibility check to protect downstream tooling.
+
+*   **Supported Major Version**: `1.x.x` (currently).
+*   **Behavior**: If any key artifact (`release-manifest.json`, `provenance.json`, etc.) declares a `schemaVersion` with a different major version (e.g., `2.0.0`), the release verification will fail.
+*   **Result**: The check generates `dist/release/compatibility.json` describing the result.
+
+Breaking changes to the schema format will require bumping the major version, which will intentionally break compatibility with existing 1.x-based tooling until they are updated to support the new version.
+
 ## `bundle-index.json`
 
 The `bundle-index.json` file is the recommended entry point for programmatically consuming the release bundle. It provides a manifest of all files in the bundle, their checksums, and pointers to key artifacts.

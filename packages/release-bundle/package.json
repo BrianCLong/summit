@@ -1,31 +1,19 @@
 {
-  "name": "@summit/release-bundle",
-  "version": "0.0.1",
-  "type": "module",
-  "description": "SDK for parsing and loading release bundles",
+  "name": "@intelgraph/release-bundle",
+  "version": "1.0.0",
+  "description": "Typed models, parsers, and loaders for release bundle artifacts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "browser": "./dist/core.js",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./node": {
-      "import": "./dist/node.js",
-      "default": "./dist/node.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
+  "type": "module",
   "scripts": {
     "build": "tsc",
-    "test:bundle": "node scripts/validate-browser-build.mjs"
+    "test": "node --test dist/__tests__/*.test.js"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@types/node": "^18.0.0",
-    "esbuild": "^0.25.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.3.3",
+    "@types/node": "^20.0.0"
   }
 }
