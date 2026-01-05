@@ -44,6 +44,7 @@ runs:
       shell: bash
       run: |
         if [ -f scripts/preflight.sh ]; then
+          chmod +x scripts/preflight.sh
           ./scripts/preflight.sh "${{ inputs.tag }}"
         else
           echo "⚠️ scripts/preflight.sh not found, skipping."
@@ -56,6 +57,7 @@ runs:
           echo "⚠️ Freeze check overridden. Reason: ${{ inputs.override_reason }}"
         else
           if [ -f scripts/check-freeze.sh ]; then
+            chmod +x scripts/check-freeze.sh
             ./scripts/check-freeze.sh
           fi
         fi
@@ -84,15 +86,21 @@ runs:
       id: bundle
       shell: bash
       run: |
-        OUTPUT_DIR="release-evidence"
+        OUTPUT_DIR="dist/release"
+        mkdir -p "$OUTPUT_DIR"
         VERSION="${{ inputs.tag }}"
-        # Strip 'v' prefix if needed by script, but script usually handles it or takes raw.
-        # scripts/bundle-release-evidence.sh uses the argument as version.
+
+        if [ ! -f scripts/bundle-release-evidence.sh ]; then
+          echo "❌ Error: scripts/bundle-release-evidence.sh not found!"
+          exit 1
+        fi
 
         # Ensure scripts are executable
         chmod +x scripts/bundle-release-evidence.sh
 
         echo "📦 Running bundle script..."
+        echo "Dry Run: ${{ inputs.dry_run }}"
+
         ./scripts/bundle-release-evidence.sh "$VERSION" "summit-platform" "${{ github.sha }}" "$OUTPUT_DIR"
 
         # Determine paths based on script logic
@@ -113,9 +121,8 @@ runs:
         MANIFEST="${{ steps.bundle.outputs.manifest_path }}"
         if [ -f scripts/verify-evidence-bundle.ts ]; then
           echo "🔍 Verifying bundle manifest: $MANIFEST"
-          # Install tsx if not present (or assume environment has it via pnpm setup)
-          # We'll try npx tsx
-          npx tsx scripts/verify-evidence-bundle.ts "$MANIFEST"
+          # Use -y to avoid interactive prompts
+          npx -y tsx scripts/verify-evidence-bundle.ts "$MANIFEST"
         else
           echo "⚠️ verification script not found."
         fi
@@ -128,3 +135,4 @@ runs:
         echo "- **Channel**: ${{ steps.classify.outputs.channel }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Previous Tag**: ${{ steps.prev_tag.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Bundle**: ${{ steps.bundle.outputs.bundle_path }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Dry Run**: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY

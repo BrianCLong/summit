@@ -15,6 +15,11 @@ This action standardizes the release process by:
 **Example Usage in Workflow:**
 
 ```yaml
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Create Release Bundle
         id: bundle
         uses: ./.github/actions/release-bundle

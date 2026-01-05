@@ -4,6 +4,19 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry Run"
+        type: boolean
+        default: true
+      override_freeze:
+        description: "Override Freeze"
+        type: boolean
+        default: false
+      override_reason:
+        description: "Reason for override"
+        type: string
 
 permissions:
   contents: write
@@ -103,7 +116,9 @@ jobs:
         uses: ./.github/actions/release-bundle
         with:
           tag: ${{ github.ref_name }}
-          dry_run: false
+          dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+          override_freeze: ${{ github.event_name == 'workflow_dispatch' && inputs.override_freeze || false }}
+          override_reason: ${{ github.event_name == 'workflow_dispatch' && inputs.override_reason || '' }}
 
       - name: Generate Release Notes
         id: notes
@@ -111,6 +126,7 @@ jobs:
           echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == false) }}
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.bundle.outputs.bundle_path }}
