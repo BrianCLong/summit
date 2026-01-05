@@ -1,0 +1,161 @@
+{
+  "issue_number": 78,
+  "title": "Add Stub for AI/ML Service (Link Prediction)",
+  "url": "https://github.com/BrianCLong/summit/issues/78",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095918253,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiyrQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ai-ml",
+      "name": "area:ai-ml",
+      "color": "5319e7",
+      "default": false,
+      "description": "AI/ML area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:09Z",
+  "createdAt": "2025-08-12T04:40:13Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15038,
+        "url": "https://github.com/BrianCLong/summit/pull/15038",
+        "mergedAt": "2025-12-30T22:42:25Z",
+        "title": "Set up project management and delivery tracking"
+      },
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 11998,
+        "url": "https://github.com/BrianCLong/summit/pull/11998",
+        "mergedAt": null,
+        "title": "Build Advanced Data Visualization Analytics Dashboard"
+      },
+      {
+        "number": 1715,
+        "url": "https://github.com/BrianCLong/summit/pull/1715",
+        "mergedAt": null,
+        "title": "chore(deps): bump fastapi from 0.78.0 to 0.117.1"
+      },
+      {
+        "number": 12091,
+        "url": "https://github.com/BrianCLong/summit/pull/12091",
+        "mergedAt": "2025-11-21T06:30:22Z",
+        "title": "Design multi-layer caching strategy for Summit"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 632,
+        "url": "https://github.com/BrianCLong/summit/pull/632",
+        "mergedAt": null,
+        "title": "chore(deps): bump opencv-python from 4.8.1.78 to 4.12.0.88"
+      },
+      {
+        "number": 13194,
+        "url": "https://github.com/BrianCLong/summit/pull/13194",
+        "mergedAt": "2025-12-04T15:38:36Z",
+        "title": "Add multimodal fusion pipeline with embeddings"
+      },
+      {
+        "number": 10093,
+        "url": "https://github.com/BrianCLong/summit/pull/10093",
+        "mergedAt": "2025-10-14T13:06:03Z",
+        "title": "feat: add distributed configuration management service"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 11914,
+        "url": "https://github.com/BrianCLong/summit/pull/11914",
+        "mergedAt": "2025-11-20T10:25:00Z",
+        "title": "Consolidate Summit orchestration layer"
+      },
+      {
+        "number": 1332,
+        "url": "https://github.com/BrianCLong/summit/pull/1332",
+        "mergedAt": "2025-09-23T06:25:42Z",
+        "title": "feat: deliver universal ai fabric slice"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

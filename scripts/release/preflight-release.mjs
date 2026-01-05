@@ -1,169 +1,136 @@
-import { execSync } from 'child_process';
-import { readFileSync, existsSync } from 'fs';
-import { resolve, dirname, sep } from 'path';
+import { execSync } from 'node:child_process';
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-const TAG = process.env.TAG;
-const DEFAULT_BRANCH = process.env.DEFAULT_BRANCH || 'main';
-
-if (!TAG) {
-  console.error('Error: TAG environment variable is required.');
-  process.exit(1);
-}
-
-console.log(`Preflight Release Check`);
-console.log(`Tag: ${TAG}`);
-console.log(`Default Branch: ${DEFAULT_BRANCH}`);
-
-// 1. Tag format check
-const versionRegex = /^v(\d+\.\d+\.\d+(-rc\.\d+)?)$/;
-const match = TAG.match(versionRegex);
-
-if (!match) {
-  console.error(`Error: Tag "${TAG}" does not match format vX.Y.Z or vX.Y.Z-rc.N`);
-  process.exit(1);
-}
-
-const targetVersion = match[1]; // e.g. 1.2.3 or 1.2.3-rc.1
-const isRc = targetVersion.includes('-rc.');
-// For comparison, we usually want the base version, but the requirement says:
-// "Ensure the tag version matches repo version(s)"
-// Usually if tag is v1.2.3-rc.1, package.json might be 1.2.3-rc.1 OR 1.2.3.
-// The instructions say: "Extract X.Y.Z from tag (strip v, ignore -rc.* when comparing)"
-// This suggests if tag is v1.2.3-rc.1, we expect package.json to be 1.2.3?
-// Or maybe it means "ignore -rc.*" as in "handle it appropriately".
-// Let's re-read: "Extract X.Y.Z from tag (strip v, ignore -rc.* when comparing)"
-// This implies if tag is v4.0.0-rc.1, the repo version is likely 4.0.0?
-// OR it means strict semver comparison where we look at the core version?
-// Let's look at existing package.json: "4.0.4".
-// If I tag v4.0.4, it matches.
-// If I tag v4.0.5-rc.1, does package.json have 4.0.5-rc.1 or 4.0.5?
-// Usually lerna/changesets bump the version in package.json to the exact version being released.
-// So if tag is v4.0.5-rc.1, package.json should probably be 4.0.5-rc.1.
-// BUT the instruction says "ignore -rc.* when comparing".
-// This might mean: Tag v1.2.3-rc.1 validates against package.json 1.2.3.
-// Let's assume strict equality first, and if that fails, check if stripping RC helps match "repo's canonical version".
-// Actually, let's look at the instruction carefully:
-// "Extract X.Y.Z from tag (strip v, ignore -rc.* when comparing)"
-// This suggests the repo might stay at X.Y.Z while we cut RCs?
-// Or maybe it means we only care about the major.minor.patch matching?
-// I will implement:
-// cleanTagVersion = targetVersion.split('-')[0]
-// Check if packageVersion starts with cleanTagVersion.
-// Or better: try exact match first. If fail, and isRc, try matching base.
-// Wait, "ignore -rc.* when comparing" sounds like:
-// Tag: v1.0.0-rc.1 -> Base: 1.0.0.
-// Package: 1.0.0.
-// Match? Yes.
-// Let's stick to that interpretation: Check if package version *contains* the X.Y.Z part.
-// Actually, easiest is:
-// const tagCore = targetVersion.split('-')[0];
-// const pkgCore = pkgVersion.split('-')[0];
-// if (tagCore !== pkgCore) fail.
-
-const tagCore = targetVersion.split('-')[0];
-
-console.log(`Target Version Core: ${tagCore}`);
-
-// 2. Tag exists locally and resolves to a commit
-try {
-  const tagSha = execSync(`git rev-list -n 1 ${TAG}`, { encoding: 'utf8' }).trim();
-  console.log(`Tag SHA: ${tagSha}`);
-
-  // 3. Commit reachable from default branch
-  // We need to fetch origin default branch to be sure we have the history.
-  // The workflow command will do fetch, but we might need to be sure.
-  // The user script instructions say:
-  // "git fetch origin <defaultBranch> --depth=1 (or full if needed)"
-  // "git merge-base --is-ancestor <tagSha> origin/<defaultBranch> must succeed"
-
-  // Note: execSync throws if command fails (non-zero exit code).
-  // merge-base --is-ancestor returns 0 if true, 1 if false.
-
-  console.log(`Checking reachability from origin/${DEFAULT_BRANCH}...`);
-  // Ensure we have the branch ref.
-  // Note: Workflow should handle fetch-depth: 0, but we can fetch to be safe.
-  // We avoid --depth=1 to ensure we have enough history for merge-base if the tag is not at the tip.
+// Utils
+function run(cmd) {
   try {
-    execSync(`git fetch origin ${DEFAULT_BRANCH}`, { stdio: 'ignore' });
+    return execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
   } catch (e) {
-      console.warn(`Warning: Could not fetch origin/${DEFAULT_BRANCH}. Assuming it exists locally or continuing.`);
+    return null;
   }
+}
 
-  try {
-      execSync(`git merge-base --is-ancestor ${tagSha} origin/${DEFAULT_BRANCH}`);
-      console.log(`✓ Commit is reachable from ${DEFAULT_BRANCH}`);
-  } catch (error) {
-      console.error(`Error: Commit ${tagSha} is NOT reachable from origin/${DEFAULT_BRANCH}`);
-      process.exit(1);
+function fail(msg, details = []) {
+  console.error(`❌ Preflight Check Failed: ${msg}`);
+  if (details.length) {
+    console.error('Details:');
+    details.forEach(d => console.error(`  - ${d}`));
   }
-
-} catch (error) {
-  if (error.message.includes('not reachable')) throw error; // rethrow if it was the reachability check
-  console.error(`Error: Tag ${TAG} not found or invalid.`);
   process.exit(1);
 }
 
-// 4. Version consistency
-console.log('Checking version consistency...');
-
-// Check root package.json
-let rootPkg;
-try {
-    const rootPkgContent = readFileSync('package.json', 'utf8');
-    rootPkg = JSON.parse(rootPkgContent);
-} catch (e) {
-    console.error('Error: Could not read root package.json');
-    process.exit(1);
+// 1. Determine TAG
+const TAG = process.env.TAG || process.env.GITHUB_REF_NAME;
+if (!TAG) {
+  // If run without tag, maybe we can assume checking HEAD if it matches a tag?
+  // But requirement is strict.
+  fail('No TAG provided via TAG or GITHUB_REF_NAME env vars.');
 }
 
-const rootVersion = rootPkg.version;
-const rootVersionCore = rootVersion.split('-')[0];
+console.log(`🔍 Checking release preflight for tag: ${TAG}`);
 
-if (rootVersionCore !== tagCore) {
-    console.error(`Error: Root package.json version (${rootVersion}) does not match tag version core (${tagCore})`);
-    process.exit(1);
+// 2. Parse/Validate Tag
+// Allowed: vX.Y.Z or vX.Y.Z-rc.N
+const tagRegex = /^v(\d+\.\d+\.\d+)(?:-rc\.\d+)?$/;
+const match = TAG.match(tagRegex);
+if (!match) {
+  fail(`Invalid tag format: ${TAG}. Expected vX.Y.Z or vX.Y.Z-rc.N`);
 }
-console.log(`✓ Root package.json matches (${rootVersion})`);
+const versionExpected = match[1];
 
-// Check workspace packages
-// Find all package.json files
-const allPackageFiles = execSync('git ls-files "**/package.json"', { encoding: 'utf8' })
-    .trim()
-    .split('\n')
-    .filter(f => f !== 'package.json' && !f.includes('node_modules') && !f.includes('test/'));
+// 3. Resolve Tag SHA
+const sha = run(`git rev-parse ${TAG}`);
+if (!sha) {
+  fail(`Tag ${TAG} not found.`);
+}
+console.log(`✅ Tag resolved to SHA: ${sha}`);
 
-const mismatches = [];
+// 4. Check Ancestry
+const defaultBranch = process.env.DEFAULT_BRANCH || 'main';
 
-for (const pkgFile of allPackageFiles) {
+// Check if origin/<defaultBranch> exists, if not try to fetch
+let originRef = `origin/${defaultBranch}`;
+if (!run(`git rev-parse --verify ${originRef}`)) {
+    console.log(`ℹ️ ${originRef} not found, attempting fetch...`);
     try {
-        const content = readFileSync(pkgFile, 'utf8');
-        const pkg = JSON.parse(content);
-
-        // Skip private packages if they don't have a version or we don't care?
-        // Instruction: "confirm **all** are either: exactly X.Y.Z, or (allowed) use "version": "0.0.0" / "workspace:*""
-
-        if (!pkg.version) continue; // Skip if no version (e.g. some test fixture or private pkg without version)
-
-        const pkgVer = pkg.version;
-        if (pkgVer === '0.0.0') continue; // Allowed
-        if (pkgVer === 'workspace:*') continue; // Allowed
-
-        const pkgVerCore = pkgVer.split('-')[0];
-
-        if (pkgVerCore !== tagCore) {
-            mismatches.push({ file: pkgFile, version: pkgVer });
-        }
-
+        execSync(`git fetch origin ${defaultBranch} --depth=1`, { stdio: 'inherit' });
     } catch (e) {
-        console.warn(`Warning: Could not parse ${pkgFile}`);
+        console.warn(`⚠️ Failed to fetch origin/${defaultBranch}. Ancestry check might fail if ref is missing.`);
     }
 }
 
-if (mismatches.length > 0) {
-    console.error(`Error: Found ${mismatches.length} version mismatches:`);
-    mismatches.forEach(m => console.error(` - ${m.file}: ${m.version} (expected core ${tagCore})`));
-    process.exit(1);
+let reachable = false;
+try {
+  execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: 'ignore' });
+  reachable = true;
+} catch (e) {
+  reachable = false;
 }
 
-console.log(`✓ Verified ${allPackageFiles.length} workspace packages.`);
-console.log(`\nSUCCESS: Tag ${TAG} is valid, reachable, and versions match.`);
+if (!reachable) {
+  fail(`Tag ${TAG} is not reachable from default branch '${originRef}'. Release tags must be on the default branch.`);
+}
+console.log(`✅ Tag is reachable from ${originRef}`);
+
+// 5. Version Check
+const mismatches = [];
+
+function checkPackage(path, name) {
+  if (!existsSync(path)) return;
+  try {
+    const pkg = JSON.parse(readFileSync(path, 'utf8'));
+    if (pkg.version !== versionExpected) {
+      mismatches.push(`${name} (${path}): ${pkg.version} != ${versionExpected}`);
+    }
+  } catch (e) {
+    mismatches.push(`${name} (${path}): Failed to parse package.json`);
+  }
+}
+
+// Root
+checkPackage('package.json', 'ROOT');
+
+// Workspaces - "best effort" scanning based on repo structure knowledge
+// "packages/*", "client", "server"
+
+const candidates = ['client', 'server'];
+
+// Scan packages/*
+if (existsSync('packages')) {
+  const pkgs = readdirSync('packages', { withFileTypes: true });
+  for (const dirent of pkgs) {
+    if (dirent.isDirectory()) {
+        candidates.push(join('packages', dirent.name));
+    }
+  }
+}
+
+// Check found workspaces
+candidates.forEach(dir => {
+  const pkgPath = join(dir, 'package.json');
+  checkPackage(pkgPath, dir);
+});
+
+if (mismatches.length > 0) {
+  fail(`Version mismatch detected. Tag version ${versionExpected} does not match:`, mismatches);
+}
+console.log(`✅ All package versions match ${versionExpected}`);
+
+// 6. Write Output
+const outputDir = 'dist/release';
+if (!existsSync(outputDir)) {
+  mkdirSync(outputDir, { recursive: true });
+}
+
+const result = {
+  tag: TAG,
+  sha,
+  defaultBranch,
+  reachableFromDefaultBranch: reachable,
+  versionExpected,
+  mismatches
+};
+
+writeFileSync(join(outputDir, 'preflight.json'), JSON.stringify(result, null, 2));
+console.log(`📝 Wrote preflight results to ${join(outputDir, 'preflight.json')}`);
