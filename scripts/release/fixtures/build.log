@@ -1,4 +1,0 @@
-> build
-> npm run build:client && npm run build:server
-
-Done in 3.00s.

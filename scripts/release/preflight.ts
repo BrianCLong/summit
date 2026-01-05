@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import crypto from 'node:crypto';
 
 // --- Configuration ---
 
@@ -13,7 +14,6 @@ interface Config {
   mode: 'live' | 'offline';
   fixturesDir?: string;
   outputDir: string;
-  failOnP1: boolean;
 }
 
 const PARITY_CHAIN = [
@@ -58,14 +58,10 @@ function parseArgs(): Config {
   const fixturesArg = args.find(a => a.startsWith('--fixturesDir='));
   const fixturesDir = fixturesArg ? path.resolve(ROOT_DIR, fixturesArg.split('=')[1]) : undefined;
 
-  const failOnP1Arg = args.find(a => a.startsWith('--fail-on-p1='));
-  // Default to true if not specified, or parse value
-  const failOnP1 = failOnP1Arg ? failOnP1Arg.split('=')[1] === 'true' : true;
-
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const outputDir = path.join(ROOT_DIR, 'evidence', 'release-preflight', timestamp);
 
-  return { mode, fixturesDir, outputDir, failOnP1 };
+  return { mode, fixturesDir, outputDir };
 }
 
 function ensureDir(dir: string) {
@@ -135,6 +131,7 @@ function scanLogForSignatures(logContent: string) {
 
   for (const regex of SIGNATURES.P0) {
     if (regex.test(logContent)) {
+      // Simplistic match, in reality we might want the specific line
       const match = logContent.match(regex);
       if (match) results.p0.push(match[0]);
     }
@@ -156,7 +153,6 @@ async function main() {
   const config = parseArgs();
   console.log(`[Preflight] Mode: ${config.mode}`);
   console.log(`[Preflight] Output: ${config.outputDir}`);
-  console.log(`[Preflight] Fail on P1: ${config.failOnP1}`);
 
   ensureDir(config.outputDir);
   ensureDir(path.join(config.outputDir, 'logs'));
@@ -170,6 +166,8 @@ async function main() {
   let workspaceScripts = {};
   if (config.mode === 'live') {
     try {
+      // Heuristic: just read root package.json for now, assuming that's what is requested
+      // The prompt says "inventory scripts... workspace-scripts.json"
       const pkg = JSON.parse(fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8'));
       workspaceScripts = pkg.scripts || {};
     } catch (e) {
@@ -199,9 +197,15 @@ async function main() {
       const fixtureLog = path.join(config.fixturesDir!, `${step.stage}.log`);
       if (fs.existsSync(fixtureLog)) {
         fs.copyFileSync(fixtureLog, logPath);
+        // Simulate exit code based on log content signatures or separate metadata?
+        // Prompt says: "offline: reads fixture logs and produces the same outputs"
+        // We will infer success/fail from the log content or just assume 0 if not specified.
+        // Actually, let's scan the log for P0 to determine the "virtual" exit code.
+        const content = fs.readFileSync(logPath, 'utf8');
+        // Simple heuristic: if we see "FAIL" or similar in our P0 signatures, code=1
+        // But for "Command failed with exit code", that won't be in the log output usually (it's from the runner).
+        // Let's rely on signatures.
       } else {
-        // We do NOT write a log if it's missing in offline mode, to properly test the "missing fixture" case if needed.
-        // Or we write a placeholder.
         fs.writeFileSync(logPath, `[OFFLINE] No fixture found for ${step.stage}`);
       }
     }
@@ -209,11 +213,13 @@ async function main() {
     const logContent = fs.existsSync(logPath) ? fs.readFileSync(logPath, 'utf8') : '';
     const signatures = scanLogForSignatures(logContent);
 
+    // In live mode, 'code' is the process exit code.
+    // In offline mode, 'code' needs to be derived.
     if (config.mode === 'offline') {
       if (signatures.p0.length > 0) code = 1;
     }
 
-    // Force P0 signature if exit code was non-zero
+    // Force P0 signature if exit code was non-zero (for Live mode mostly)
     if (code !== 0 && signatures.p0.length === 0) {
       signatures.p0.push(`Process exited with code ${code}`);
     }
@@ -235,7 +241,7 @@ async function main() {
   }
 
   if (hasP0) exitCode = 1;
-  else if (hasP1 && config.failOnP1) exitCode = 2;
+  else if (hasP1) exitCode = 2;
 
   // 5. Artifact Generation
   const summary = {

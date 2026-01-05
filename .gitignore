@@ -352,4 +352,3 @@ eval-artifacts/
 artifacts/agent-lab
 bin/
 .evidence/
-evidence/release-preflight
