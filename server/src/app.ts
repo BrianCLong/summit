@@ -43,6 +43,7 @@ import narrativeSimulationRouter from './routes/narrative-sim.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
+import policyManagementRouter from './routes/policies/policy-management.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
@@ -375,6 +376,8 @@ export const createApp = async () => {
 
   // Other routes
   // app.use('/api/policy', policyRouter);
+  app.use('/api/policies', policyManagementRouter);
+  app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
   app.use('/api', monitoringBackpressureRouter);
