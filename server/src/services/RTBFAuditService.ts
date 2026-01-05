@@ -11,6 +11,7 @@ import { EventEmitter } from 'events';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import logger from '../utils/logger.js';
 import { tracer, type Span } from '../utils/tracing.js';
+import { enforceRampDecisionForTenant } from '../policy/ramp.js';
 import { DatabaseService } from './DatabaseService.js';
 import type { RTBFJob, RTBFTarget } from './RTBFJobService.js';
 
@@ -1298,6 +1299,13 @@ export class RTBFAuditService extends EventEmitter {
     endDate: Date,
     format: 'json' | 'csv' | 'xml' = 'json',
   ): Promise<string> {
+    enforceRampDecisionForTenant({
+      tenantId,
+      action: 'EXPORT',
+      workflow: 'rtbf_audit',
+      key: `${tenantId}:${startDate.toISOString()}:${endDate.toISOString()}:${format}`,
+    });
+
     const auditData = await this.getAuditDataForPeriod(
       tenantId,
       startDate,

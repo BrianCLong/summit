@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-02T10:45:00Z",
-  "revision_note": "Added policy profile manifests, assignment receipts, and provenance replay hooks",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",
@@ -75,8 +75,8 @@
           "name": "Policy-as-Code Engine",
           "status": "rc-ready",
           "owner": "Jules",
-          "evidence": "PolicyEngine.ts, PolicyManagementService.ts, PolicySimulatorService.ts exist and functional; profile manifest + assignment flow added",
-          "notes": "Policy re-evaluation at execute time added 2025-12-30; profile manifests + assignment receipts recorded in provenance"
+          "evidence": "PolicyEngine.ts, PolicyManagementService.ts, PolicySimulatorService.ts exist and functional; OPA integration verified",
+          "notes": "Policy re-evaluation at execute time added 2025-12-30"
         },
         {
           "id": "C2",

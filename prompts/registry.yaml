@@ -13,12 +13,14 @@ prompts:
         - docs/ga/
         - artifacts/
         - metrics/
+        - observability/
         - .github/
       domains:
         - governance
         - ci
         - provenance
         - quality
+        - observability
     verification:
       tiers_required:
         - A
@@ -28,25 +30,25 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: policy-profile-assignments
+  - id: runbooks-docs-update
     version: v1
-    path: prompts/governance/policy-profile-assignments.md
-    sha256: 6bb4769bb8723f60093eee17b09ef954c7005be41802694f7100c6745d710fa4
-    description: Policy profile manifests, assignment receipts, provenance replay, and simulation binding.
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
     scope:
       paths:
-        - server/src/policies/
-        - server/src/services/policy-profiles/
-        - server/src/routes/
-        - server/src/provenance/
-        - docs/
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
       domains:
+        - documentation
+        - operations
         - governance
-        - provenance
-        - policy
     verification:
       tiers_required:
-        - B
+        - C
       debt_budget:
         permitted: 0
         retirement_target: 0

@@ -7,8 +7,9 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
-    "verify": "tsx scripts/verify.ts",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
+    "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
@@ -23,6 +24,7 @@
     "test:web": "cd apps/web && npm test",
     "test:e2e": "npx playwright test",
     "test:a11y-gate": "pnpm exec playwright test -c playwright.a11y-keyboard.config.ts",
+    "test:release-scripts": "node --test scripts/release/__tests__/*.test.mjs",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
@@ -40,6 +42,7 @@
     "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
     "lint": "eslint . && (ruff check . || true)",
+    "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
     "lint:strict": "eslint . && (ruff check . || true)",
     "security:check": "node scripts/security-check.js",
     "lint:server": "cd server && npm run lint",
@@ -72,6 +75,11 @@
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "release:cut-branch": "node scripts/release/cut-release-branch.mjs",
+    "release:bundle": "node scripts/release/release-bundle.mjs",
+    "release:schema:validate": "node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict",
+    "release:verify": "node scripts/release/verify-release-bundle.mjs",
+    "release:diff": "node scripts/release/diff-bundles.mjs",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
@@ -85,7 +93,6 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },
   "keywords": [
@@ -150,6 +157,7 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.50.1",
     "uuid": "^13.0.0",
+    "vitest": "^4.0.16",
     "zod": "^4.2.1"
   },
   "lint-staged": {
@@ -196,8 +204,6 @@
     "@jest/globals": "^30.2.0",
     "@mui/material": "^7.3.6",
     "@radix-ui/react-slider": "^1.3.6",
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
     "apollo-server-express": "^3.13.0",
     "axios": "^1.11.0",
     "cbor": "^9.0.2",

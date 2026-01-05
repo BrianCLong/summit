@@ -41,6 +41,7 @@ export function maestroAuthzMiddleware(
         ...req.params,
         ...req.query,
       },
+      subjectAttributes: (req as any).user?.attributes || {},
       sessionContext: {
         ipAddress: req.ip,
         userAgent: req.get('User-Agent'),
@@ -76,6 +77,8 @@ export function maestroAuthzMiddleware(
           ...decisionLog,
           decision: 'deny',
           reason: decision.reason,
+          policyBundleVersion: decision.policyBundleVersion,
+          attrsUsed: decision.attrsUsed,
         });
 
         return res.status(403).json({
@@ -91,6 +94,8 @@ export function maestroAuthzMiddleware(
         ...decisionLog,
         decision: 'allow',
         reason: decision.reason,
+        policyBundleVersion: decision.policyBundleVersion,
+        attrsUsed: decision.attrsUsed,
       });
 
       return next();
