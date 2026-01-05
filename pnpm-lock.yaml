@@ -160,6 +160,9 @@ importers:
       body-parser:
         specifier: ^2.2.1
         version: 2.2.1
+      commander:
+        specifier: ^12.1.0
+        version: 12.1.0
       concurrently:
         specifier: ^9.2.0
         version: 9.2.1
