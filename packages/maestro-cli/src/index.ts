@@ -22,6 +22,7 @@ import { LogsCommand } from './commands/logs';
 import { ConfigCommand } from './commands/config';
 import { TemplateCommand } from './commands/template';
 import { registerDsarCommands } from './commands/dsar';
+import { registerReleaseCommands } from './commands/release';
 
 const program = new Command();
 
@@ -203,6 +204,9 @@ program
 
 // Register DSAR commands
 registerDsarCommands(program);
+
+// Register Release commands
+registerReleaseCommands(program);
 
 // Development commands
 const devCommand = new Command('dev').description('Development utilities');
