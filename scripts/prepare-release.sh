@@ -268,130 +268,24 @@ extract_breaking_changes() {
        "${CHANGELOG_FILE}" || echo "No breaking changes in this release"
 }
 
-# Generate release notes template
+# Generate release notes
 generate_release_notes() {
   local version="$1"
-  local breaking_changes
+  local tag="v${version}"
 
   log_info "Generating release notes..."
 
-  # Extract breaking changes
-  breaking_changes=$(extract_breaking_changes)
+  # Create output directory for metadata
+  mkdir -p "${PROJECT_ROOT}/dist/release"
 
-  # Create release notes
-  cat > "${RELEASE_NOTES_FILE}" << EOF
-# Release v${version}
-
-> Generated on $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-
-## 📋 What's Changed
-
-See [CHANGELOG.md](./CHANGELOG.md) for detailed changes.
-
-## ⚠️ Breaking Changes
-
-${breaking_changes}
-
-## 📦 Installation
-
-### Docker Images
-
-\`\`\`bash
-# Pull API service
-docker pull ghcr.io/brianelong/summit/api:${version}
-
-# Pull Web service
-docker pull ghcr.io/brianelong/summit/web:${version}
-
-# Pull Worker service
-docker pull ghcr.io/brianelong/summit/worker:${version}
-\`\`\`
-
-### Helm Chart
-
-\`\`\`bash
-# Add repository
-helm repo add intelgraph https://charts.intelgraph.io
-
-# Install/upgrade
-helm upgrade --install intelgraph intelgraph/intelgraph \\
-  --version ${version} \\
-  --namespace intelgraph-production
-\`\`\`
-
-## 🚀 Deployment
-
-### Staging Deployment (Automatic)
-
-Staging deployment will trigger automatically after release creation.
-
-Monitor at: https://github.com/BrianCLong/summit/actions
-
-### Production Deployment (Manual Approval Required)
-
-\`\`\`bash
-# Via GitHub CLI
-gh workflow run deploy-production.yml -f version=${version}
-
-# Via GitHub UI
-# Navigate to Actions → Deploy to Production → Run workflow
-\`\`\`
-
-**Important:** Production deployment requires manual approval from authorized personnel.
-
-## ✅ Verification
-
-### Health Checks
-
-\`\`\`bash
-# Check API health
-curl https://intelgraph.io/health
-
-# Check version endpoint
-curl https://intelgraph.io/api/version
-# Expected: {"version": "${version}"}
-
-# Run smoke tests
-./scripts/smoke-tests.sh https://intelgraph.io
-\`\`\`
-
-### Monitoring
-
-- **Grafana Dashboard:** https://grafana.intelgraph.io/d/releases
-- **Logs:** \`kubectl logs -n intelgraph-production -l version=${version}\`
-- **Metrics:** Check error rates and latency in Prometheus
-
-## 🔄 Rollback
-
-If issues are detected:
-
-\`\`\`bash
-# Automatic rollback (triggered by health check failures)
-# Or manual rollback:
-./scripts/rollback-deployment.sh production
-
-# Rollback to specific version
-./scripts/rollback-deployment.sh production v<previous-version>
-\`\`\`
-
-## 📚 Documentation
-
-- [Release Process](./docs/deployment/RELEASE_PROCESS.md)
-- [Feature Flags Guide](./docs/deployment/FEATURE_FLAGS.md)
-- [Migration Guide](./docs/deployment/MIGRATION_v${version}.md)
-
-## 🐛 Known Issues
-
-Check the [GitHub Issues](https://github.com/BrianCLong/summit/issues?q=is%3Aissue+is%3Aopen+label%3Av${version}) for known issues with this release.
-
-## 👥 Contributors
-
-Thank you to all contributors who made this release possible!
-
----
-
-**Full Changelog**: https://github.com/BrianCLong/summit/compare/v<previous>...v${version}
-EOF
+  # Use the Node.js generator script
+  TAG="${tag}" \
+  DIST_DIR="${PROJECT_ROOT}/dist/release" \
+  OUTPUT_FILE="${RELEASE_NOTES_FILE}" \
+  node "${SCRIPT_DIR}/release/generate-release-notes.mjs" || {
+    log_error "Failed to generate release notes"
+    return 3
+  }
 
   log_success "Release notes generated: ${RELEASE_NOTES_FILE}"
 }
