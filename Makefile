@@ -1,6 +1,8 @@
 # Summit Platform Makefile
 # Standardized commands for Development and Operations
 
+include Makefile.merge-train
+
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
 .PHONY: db-migrate db-seed sbom k6
