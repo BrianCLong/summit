@@ -184,6 +184,8 @@ graph LR
 6. Update package.json
 7. Commit version bump
 
+**Note:** If `CHANGELOG.md` (or `docs/CHANGELOG.md`) includes a section for the tag, it will be used for release notes. Otherwise, notes are generated from commits.
+
 **Outputs:**
 - New version number
 - Git tag (e.g., `v1.2.3`)

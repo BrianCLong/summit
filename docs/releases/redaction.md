@@ -5,16 +5,19 @@ The release bundle generator supports an optional **redaction mode** to strip or
 ## Redaction Modes
 
 ### `none` (Default)
+
 No redaction is applied. The bundle contains full internal details, including repository URLs, run IDs, and usernames.
 
 ### `safe-share`
+
 This mode strips specific sensitive fields to produce a "safe" version of the bundle.
 
 **Fields Redacted:**
-* **Run Metadata:** `run.url`, `run.id`, `workflow`, `runAttempt`
-* **Repository Info:** `repoUrl`, `GITHUB_REPOSITORY`
-* **Identity:** Actor/usernames in provenance data
-* **Remote URLs:** Links to compare views or internal systems
+
+- **Run Metadata:** `run.url`, `run.id`, `workflow`, `runAttempt`
+- **Repository Info:** `repoUrl`, `GITHUB_REPOSITORY`
+- **Identity:** Actor/usernames in provenance data
+- **Remote URLs:** Links to compare views or internal systems
 
 **Replacement Strategy:**
 Sensitive values are replaced with placeholders like `"<redacted>"` or `"<redacted:run-url>"`.
@@ -44,9 +47,6 @@ When redaction is applied, a `redaction.json` file is added to the bundle:
   "schemaVersion": "1.0.0",
   "mode": "safe-share",
   "appliedAt": "2023-10-27T10:00:00.000Z",
-  "filesRedacted": [
-    "release-manifest.json",
-    "provenance.json"
-  ]
+  "filesRedacted": ["release-manifest.json", "provenance.json"]
 }
 ```

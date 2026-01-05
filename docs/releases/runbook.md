@@ -126,7 +126,8 @@ pnpm release:diff -- --a ./dist/release-v1 --b ./dist/release-v2
 ```
 
 This will output:
-*   Added/removed files
-*   Files with changed checksums
-*   Meaningful JSON differences (ignoring timestamps)
-*   Schema version warnings
+
+- Added/removed files
+- Files with changed checksums
+- Meaningful JSON differences (ignoring timestamps)
+- Schema version warnings
