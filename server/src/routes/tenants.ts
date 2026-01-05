@@ -10,6 +10,7 @@ import { getPostgresPool } from '../config/database.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 import provisionRouter from './tenants/provision.js';
+import { policyActionGate } from '../middleware/policy-action-gate.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -273,6 +274,15 @@ router.get(
   '/:id/audit/export',
   ensureAuthenticated,
   ensureTenantScope,
+  policyActionGate({
+    action: 'export_receipts',
+    resource: 'tenant_audit',
+    resolveResourceId: (req) => req.params.id,
+    buildResourceAttributes: (req) => ({
+      tenantId: req.params.id,
+      exportType: 'tenant_audit',
+    }),
+  }),
   policyGate(),
   ensurePolicy('read', 'tenant'),
   async (req: Request, res: Response) => {
