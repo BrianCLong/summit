@@ -1,0 +1,239 @@
+{
+  "issue_number": 256,
+  "title": "Persisted GraphQL queries & CDN caching",
+  "url": "https://github.com/BrianCLong/summit/issues/256",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9107968276,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/performance",
+      "name": "performance",
+      "color": "D93F0B",
+      "default": false,
+      "description": "Perf/Load"
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:46Z",
+  "createdAt": "2025-08-14T04:54:46Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14216,
+        "url": "https://github.com/BrianCLong/summit/pull/14216",
+        "mergedAt": null,
+        "title": "🛡️ Sentinel: [HIGH] Fix missing GitHub webhook signature verification"
+      },
+      {
+        "number": 14993,
+        "url": "https://github.com/BrianCLong/summit/pull/14993",
+        "mergedAt": "2025-12-30T22:45:21Z",
+        "title": "Receipt Integrity: Canonicalization and Hashing"
+      },
+      {
+        "number": 15106,
+        "url": "https://github.com/BrianCLong/summit/pull/15106",
+        "mergedAt": "2025-12-30T22:38:00Z",
+        "title": "GA Release Candidate Init: Auth Hardening & Tracking"
+      },
+      {
+        "number": 14475,
+        "url": "https://github.com/BrianCLong/summit/pull/14475",
+        "mergedAt": null,
+        "title": "🛡️ Sentinel: [HIGH] Fix unauthenticated GitHub webhooks"
+      },
+      {
+        "number": 15002,
+        "url": "https://github.com/BrianCLong/summit/pull/15002",
+        "mergedAt": null,
+        "title": "Feat: Federated Campaign Radar Service"
+      },
+      {
+        "number": 15031,
+        "url": "https://github.com/BrianCLong/summit/pull/15031",
+        "mergedAt": "2025-12-30T22:42:45Z",
+        "title": "Add deterministic idempotency key derivation for finance postings"
+      },
+      {
+        "number": 15021,
+        "url": "https://github.com/BrianCLong/summit/pull/15021",
+        "mergedAt": "2025-12-30T22:44:07Z",
+        "title": "Add offline bundle verification script"
+      },
+      {
+        "number": 14771,
+        "url": "https://github.com/BrianCLong/summit/pull/14771",
+        "mergedAt": null,
+        "title": "feat(audit): automate evidence catalog generation + OPA drift checks and CI enforcement"
+      },
+      {
+        "number": 13071,
+        "url": "https://github.com/BrianCLong/summit/pull/13071",
+        "mergedAt": "2025-12-04T16:51:43Z",
+        "title": "feat(collaboration): implement case spaces with immutable audit trail"
+      },
+      {
+        "number": 12631,
+        "url": "https://github.com/BrianCLong/summit/pull/12631",
+        "mergedAt": "2025-12-18T01:56:42Z",
+        "title": "fix: harden graphql persisted allowlist"
+      },
+      {
+        "number": 13288,
+        "url": "https://github.com/BrianCLong/summit/pull/13288",
+        "mergedAt": "2025-12-17T06:10:18Z",
+        "title": "Advanced Cyber Deception Platform"
+      },
+      {
+        "number": 14531,
+        "url": "https://github.com/BrianCLong/summit/pull/14531",
+        "mergedAt": "2025-12-27T00:18:59Z",
+        "title": "feat: add hash-chained audit ledger with verification endpoint"
+      },
+      {
+        "number": 11904,
+        "url": "https://github.com/BrianCLong/summit/pull/11904",
+        "mergedAt": "2025-11-20T10:25:38Z",
+        "title": "Set up Security Autopilot for Summit repoCreate pull request"
+      },
+      {
+        "number": 11933,
+        "url": "https://github.com/BrianCLong/summit/pull/11933",
+        "mergedAt": "2025-11-20T10:10:20Z",
+        "title": "Build backup and disaster recovery framework"
+      },
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 12509,
+        "url": "https://github.com/BrianCLong/summit/pull/12509",
+        "mergedAt": "2025-12-18T02:37:16Z",
+        "title": "Implement case spaces with ABAC/RBAC and audit"
+      },
+      {
+        "number": 12051,
+        "url": "https://github.com/BrianCLong/summit/pull/12051",
+        "mergedAt": "2025-11-21T03:57:20Z",
+        "title": "Design comprehensive backup and recovery system"
+      },
+      {
+        "number": 12709,
+        "url": "https://github.com/BrianCLong/summit/pull/12709",
+        "mergedAt": "2025-12-04T16:26:44Z",
+        "title": "Plan sprint with auditable demo flow"
+      },
+      {
+        "number": 12037,
+        "url": "https://github.com/BrianCLong/summit/pull/12037",
+        "mergedAt": "2025-11-21T03:59:55Z",
+        "title": "Build configuration management system for Summit"
+      },
+      {
+        "number": 12000,
+        "url": "https://github.com/BrianCLong/summit/pull/12000",
+        "mergedAt": null,
+        "title": "feat: Advanced Audit & Compliance System"
+      },
+      {
+        "number": 12683,
+        "url": "https://github.com/BrianCLong/summit/pull/12683",
+        "mergedAt": "2025-12-18T01:40:00Z",
+        "title": "Build provenance and claim ledger service"
+      },
+      {
+        "number": 12762,
+        "url": "https://github.com/BrianCLong/summit/pull/12762",
+        "mergedAt": "2025-12-04T15:56:14Z",
+        "title": "Build retention and right-to-be-forgotten engine"
+      },
+      {
+        "number": 12774,
+        "url": "https://github.com/BrianCLong/summit/pull/12774",
+        "mergedAt": "2025-12-04T17:47:31Z",
+        "title": "Build evidence bundle and briefing pipeline"
+      },
+      {
+        "number": 11990,
+        "url": "https://github.com/BrianCLong/summit/pull/11990",
+        "mergedAt": "2025-11-20T15:01:47Z",
+        "title": "Implement Provenance and Claim Ledger Service"
+      },
+      {
+        "number": 12027,
+        "url": "https://github.com/BrianCLong/summit/pull/12027",
+        "mergedAt": "2025-11-20T15:29:33Z",
+        "title": "Design audit event schema and database"
+      },
+      {
+        "number": 12502,
+        "url": "https://github.com/BrianCLong/summit/pull/12502",
+        "mergedAt": "2025-12-18T02:39:41Z",
+        "title": "Deepfake detection and defense mechanisms"
+      },
+      {
+        "number": 12104,
+        "url": "https://github.com/BrianCLong/summit/pull/12104",
+        "mergedAt": "2025-12-20T11:52:55Z",
+        "title": "Build Organized Crime Intelligence Platform"
+      },
+      {
+        "number": 12038,
+        "url": "https://github.com/BrianCLong/summit/pull/12038",
+        "mergedAt": "2025-11-21T03:59:50Z",
+        "title": "Optimize GraphQL implementation and resolver performance"
+      },
+      {
+        "number": 11924,
+        "url": "https://github.com/BrianCLong/summit/pull/11924",
+        "mergedAt": "2025-11-20T10:20:18Z",
+        "title": "Build Case Spaces with audit logs and access prompts"
+      },
+      {
+        "number": 11764,
+        "url": "https://github.com/BrianCLong/summit/pull/11764",
+        "mergedAt": "2025-10-17T17:50:12Z",
+        "title": "security: update torch to 2.8.0 to address CVE vulnerabilities"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

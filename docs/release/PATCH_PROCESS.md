@@ -39,6 +39,7 @@ All patches must originate from the `GA-TAG` (the exact commit of the GA release
 ### 3.2 Release Tagging
 *   Patches increment the `PATCH` version (e.g., `v1.0.0` -> `v1.0.1`).
 *   Tag convention: `v{MAJOR}.{MINOR}.{PATCH}`.
+*   **Release Source**: Patch releases may be tagged directly on the `release/X.Y` branch. The preflight check will accept tags reachable from either the default branch or the matching series branch (e.g., tag `v1.0.1` on `release/1.0`).
 
 ## 4. Verification Requirements
 

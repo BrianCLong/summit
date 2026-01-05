@@ -170,10 +170,14 @@ export function GlobalSearch() {
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
       <div className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl">
-        <Command className="rounded-lg border shadow-md bg-popover">
+        <Command
+          className="rounded-lg border shadow-md bg-popover"
+          label="Global Search"
+        >
           <div className="flex items-center border-b px-3">
-            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
             <Command.Input
+              aria-label="Search query"
               placeholder="Search entities, investigations, alerts..."
               value={query}
               onValueChange={setQuery}

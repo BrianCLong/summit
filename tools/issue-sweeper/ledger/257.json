@@ -1,0 +1,80 @@
+{
+  "issue_number": 257,
+  "title": "Data importers: STIX/TAXII & CSV bulk",
+  "url": "https://github.com/BrianCLong/summit/issues/257",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9108055783,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHm5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/OSINT",
+      "name": "OSINT",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055864,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnOA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/integration",
+      "name": "integration",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:48Z",
+  "createdAt": "2025-08-14T04:54:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 709,
+        "url": "https://github.com/BrianCLong/summit/pull/709",
+        "mergedAt": "2025-08-21T00:35:08Z",
+        "title": "feat: IntelGraph GA Foundation - Complete Architecture Implementation"
+      },
+      {
+        "number": 1303,
+        "url": "https://github.com/BrianCLong/summit/pull/1303",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "fix: align mcp core test tooling and lock handling"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
