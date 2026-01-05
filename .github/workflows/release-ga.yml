@@ -28,6 +28,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test Release Scripts
+        run: pnpm -w test:release-scripts
+
       - name: Run Server Tests
         run: pnpm test:server
         continue-on-error: false
