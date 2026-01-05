@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: tenant-provisioning-admin
+    version: v1
+    path: prompts/tasks/tenant-provisioning-admin.md
+    sha256: 7696419125bcaac3048bc984983cd60b38da029f006301aca3fee15e01c8d4fa
+    description: Governed tenant provisioning with OPA enforcement, provenance receipts, and identity contracts.
+    scope:
+      paths:
+        - server/src/services/tenants/
+        - server/src/routes/
+        - server/src/provenance/
+        - server/src/services/identity/
+        - docs/
+      domains:
+        - tenancy
+        - provenance
+        - policy
+        - identity
+        - docs
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
