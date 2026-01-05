@@ -1,0 +1,89 @@
+{
+  "issue_number": 162,
+  "title": "feat: connectors - CSV/S3",
+  "url": "https://github.com/BrianCLong/summit/issues/162",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968038,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQJg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P0",
+      "name": "P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968264,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRCA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ingest",
+      "name": "ingest",
+      "color": "c5def5",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968311,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRNw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/feature",
+      "name": "feature",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981085,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDHQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-09-15",
+      "name": "due:2025-09-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:41:42Z",
+  "createdAt": "2025-08-14T04:04:50Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 1342,
+        "url": "https://github.com/BrianCLong/summit/pull/1342",
+        "mergedAt": "2025-09-23T11:03:45Z",
+        "title": "feat: extend linearx orchestration manifest"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,248 @@
+{
+  "issue_number": 41,
+  "title": "M4: CSV upload → graph import (upsert)",
+  "url": "https://github.com/BrianCLong/summit/issues/41",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051669,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5lQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ingest",
+      "name": "area:ingest",
+      "color": "ededed",
+      "default": false,
+      "description": "Data ingestion"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:08Z",
+  "createdAt": "2025-08-12T00:15:46Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14811,
+        "url": "https://github.com/BrianCLong/summit/pull/14811",
+        "mergedAt": "2025-12-29T05:01:36Z",
+        "title": "Feature 41: SSO via SAML/OIDC"
+      },
+      {
+        "number": 13840,
+        "url": "https://github.com/BrianCLong/summit/pull/13840",
+        "mergedAt": "2025-12-20T03:42:29Z",
+        "title": "Expand tranche 41-48 implementation blueprint"
+      },
+      {
+        "number": 14524,
+        "url": "https://github.com/BrianCLong/summit/pull/14524",
+        "mergedAt": "2025-12-27T00:20:04Z",
+        "title": "Sprint N+41: Global Availability & Disaster Recovery Framework"
+      },
+      {
+        "number": 13860,
+        "url": "https://github.com/BrianCLong/summit/pull/13860",
+        "mergedAt": "2025-12-20T03:23:53Z",
+        "title": "Add implementation plan for features 41-48"
+      },
+      {
+        "number": 12263,
+        "url": "https://github.com/BrianCLong/summit/pull/12263",
+        "mergedAt": "2025-12-18T03:23:04Z",
+        "title": "Final Polish: Prompts 41-48 Implementation"
+      },
+      {
+        "number": 14375,
+        "url": "https://github.com/BrianCLong/summit/pull/14375",
+        "mergedAt": "2025-12-23T04:35:28Z",
+        "title": "Bump playwright from 1.41.1 to 1.55.1 in /services/reporting"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 12394,
+        "url": "https://github.com/BrianCLong/summit/pull/12394",
+        "mergedAt": "2025-12-04T16:28:20Z",
+        "title": "Add Wave 6 satellite service blueprints"
+      },
+      {
+        "number": 15311,
+        "url": "https://github.com/BrianCLong/summit/pull/15311",
+        "mergedAt": "2026-01-01T11:39:37Z",
+        "title": "feat: Establish counter-intelligence framework documentation"
+      },
+      {
+        "number": 15281,
+        "url": "https://github.com/BrianCLong/summit/pull/15281",
+        "mergedAt": "2026-01-01T06:57:20Z",
+        "title": "feat: add opa cache hit metrics"
+      },
+      {
+        "number": 15332,
+        "url": "https://github.com/BrianCLong/summit/pull/15332",
+        "mergedAt": "2026-01-01T11:38:30Z",
+        "title": "Ontology Engine v2: Execution Runtime & Governance"
+      },
+      {
+        "number": 13058,
+        "url": "https://github.com/BrianCLong/summit/pull/13058",
+        "mergedAt": "2025-12-04T15:40:49Z",
+        "title": "Add delivery guardrails workflows and release assets"
+      },
+      {
+        "number": 1069,
+        "url": "https://github.com/BrianCLong/summit/pull/1069",
+        "mergedAt": "2025-08-29T15:51:42Z",
+        "title": "docs: describe temporal intelligence layer"
+      },
+      {
+        "number": 1264,
+        "url": "https://github.com/BrianCLong/summit/pull/1264",
+        "mergedAt": "2025-09-15T09:26:43Z",
+        "title": "Jest: remove malformed jest.config.cjs; use package.json config"
+      },
+      {
+        "number": 291,
+        "url": "https://github.com/BrianCLong/summit/pull/291",
+        "mergedAt": "2025-08-16T06:36:17Z",
+        "title": "feat: serve client build"
+      },
+      {
+        "number": 1147,
+        "url": "https://github.com/BrianCLong/summit/pull/1147",
+        "mergedAt": "2025-09-17T10:32:40Z",
+        "title": "chore(deps): bump cytoscape-navigator from 1.3.3 to 2.0.2 in /client"
+      },
+      {
+        "number": 1179,
+        "url": "https://github.com/BrianCLong/summit/pull/1179",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/parser from 6.21.0 to 8.42.0 in /client"
+      },
+      {
+        "number": 1173,
+        "url": "https://github.com/BrianCLong/summit/pull/1173",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @typescript-eslint/eslint-plugin from 6.21.0 to 8.42.0 in /server"
+      },
+      {
+        "number": 11852,
+        "url": "https://github.com/BrianCLong/summit/pull/11852",
+        "mergedAt": "2025-11-20T09:48:03Z",
+        "title": "Improve developer experience in summit monorepo"
+      },
+      {
+        "number": 10208,
+        "url": "https://github.com/BrianCLong/summit/pull/10208",
+        "mergedAt": "2025-10-15T03:46:45Z",
+        "title": "ci(actions): repo-wide resilience—cron jitter, concurrency, backlog guard, and matrix caps"
+      },
+      {
+        "number": 11875,
+        "url": "https://github.com/BrianCLong/summit/pull/11875",
+        "mergedAt": "2025-11-20T14:33:52Z",
+        "title": "Build Extensions and Ecosystem Framework"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 1328,
+        "url": "https://github.com/BrianCLong/summit/pull/1328",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(cli): add ig-detect rule validation CLI"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 1117,
+        "url": "https://github.com/BrianCLong/summit/pull/1117",
+        "mergedAt": "2025-09-03T01:09:14Z",
+        "title": "feat: implement maestro production readiness features and documentation"
+      },
+      {
+        "number": 1250,
+        "url": "https://github.com/BrianCLong/summit/pull/1250",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "PRD v24 – 01/10 – API plumbing"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
