@@ -71,6 +71,9 @@ Major architectural changes are reviewed by our internal "Council of Solvers" (a
 ## 📦 Release Cadence & CI/CD
 
 - **Release Captain**: Our automated Release Captain ("Jules") manages the merge train and release tagging.
+- **Releasing**: We use an automated GitHub Actions workflow for releases.
+  - **To cut a release**: Simply push a tag (e.g., `git tag v1.0.0 && git push origin v1.0.0`). The workflow will test, generate artifacts (manifest, checksums, notes), and publish a GitHub Release.
+  - **Manual Trigger**: You can also trigger the "GA Release Atomic" workflow manually via the GitHub Actions UI and specify a tag.
 - **Sprints**: We operate on a sprint cadence (currently Q4 2025 Strategic Sprints).
 - **CI Gates**:
   - **Fast Lane**: Lint & Unit tests (blocking).
