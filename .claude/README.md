@@ -39,6 +39,8 @@ make ga           # Runs full GA gate with evidence collection
 | `ga` lint fails         | Code style issues                | `pnpm lint:fix` or `make format`           |
 | `ga` test fails         | Broken tests                     | Run `pnpm test -- --verbose` for details   |
 
+**When `make ga` fails:** Use the [GA Red Playbook](playbooks/ga-red-playbook.md) for detailed triage, or run `/ga-triage` for guided diagnosis.
+
 ---
 
 ## Repo Map
@@ -199,8 +201,9 @@ make db-seed          # Seed test data
 
 ## Resources
 
-- [Workflow Templates](.claude/workflows/) - Repeatable PR workflows
-- [Areas Map](.claude/areas.md) - Intent-to-directory mapping
+- [Workflow Templates](workflows/) - Repeatable PR workflows
+- [GA Red Playbook](playbooks/ga-red-playbook.md) - When `make ga` fails
+- [Areas Map](areas.md) - Intent-to-directory mapping
 - [Evidence Template](../.prbodies/claude-evidence.md) - PR body template
 - [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) - System architecture
 - [docs/ONBOARDING.md](../docs/ONBOARDING.md) - Developer onboarding
