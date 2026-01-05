@@ -51,17 +51,58 @@ const guardrailSchema = (z as any).object({
   requireJustification: (z as any).boolean().default(false),
 });
 
+const tenantIsolationSchema = (z as any).object({
+  enabled: (z as any).boolean().default(true),
+  allowCrossTenant: (z as any).boolean().default(false),
+  actions: (z as any).array((z as any).string()).default([]),
+});
+
+const quotaLimitSchema = (z as any).object({
+  limit: (z as any).number().int().positive(),
+  period: (z as any).enum(['hour', 'day', 'week', 'month']).default('day'),
+});
+
+const quotasSchema = (z as any).object({
+  actions: (z as any).record(quotaLimitSchema).default({}),
+});
+
+const rampRuleSchema = (z as any).object({
+  maxPercent: (z as any).number().min(0).max(100),
+});
+
+const rampsSchema = (z as any).object({
+  actions: (z as any).record(rampRuleSchema).default({}),
+});
+
+const freezeWindowSchema = (z as any).object({
+  id: (z as any).string(),
+  start: (z as any).string(),
+  end: (z as any).string(),
+  actions: (z as any).array((z as any).string()).optional(),
+  description: (z as any).string().optional(),
+});
+
+const dualControlSchema = (z as any).object({
+  actions: (z as any).array((z as any).string()).default(['delete']),
+  minApprovals: (z as any).number().int().min(2).default(2),
+});
+
 const baseProfileSchema = (z as any).object({
   id: (z as any).string(),
   version: (z as any).string(),
   regoPackage: (z as any).string(),
   entrypoints: (z as any).array((z as any).string()).min(1),
   guardrails: guardrailSchema.default({}),
+  tenantIsolation: tenantIsolationSchema.default({}),
   crossTenant: crossTenantSchema.default({
     mode: 'deny',
     allow: [],
     requireAgreements: true,
   }),
+  quotas: quotasSchema.default({}),
+  ramps: rampsSchema.default({}),
+  freezeWindows: (z as any).array(freezeWindowSchema).default([]),
+  dualControl: dualControlSchema.default({}),
   rules: (z as any).array(policyRuleSchema).min(1),
 });
 
@@ -96,6 +137,14 @@ export const policySimulationInputSchema = (z as any).object({
   action: (z as any).string(),
   purpose: (z as any).string().optional(),
   justification: (z as any).string().optional(),
+  requestTime: (z as any).string().optional(),
+  approvals: (z as any).number().int().nonnegative().optional(),
+  rampPercent: (z as any).number().min(0).max(100).optional(),
+  quotaUsage: (z as any)
+    .object({
+      actions: (z as any).record((z as any).number().int().nonnegative()).default({}),
+    })
+    .optional(),
 });
 
 export type PolicySimulationInput = z.infer<typeof policySimulationInputSchema>;
@@ -202,6 +251,19 @@ function ruleMatches(
   return true;
 }
 
+function actionMatches(actions: string[] | undefined, action: string): boolean {
+  if (!actions || actions.length === 0) return true;
+  return actions.includes(action);
+}
+
+function isWithinFreezeWindow(requestTime: string, window: z.infer<typeof freezeWindowSchema>) {
+  const start = Date.parse(window.start);
+  const end = Date.parse(window.end);
+  const target = Date.parse(requestTime);
+  if (Number.isNaN(start) || Number.isNaN(end) || Number.isNaN(target)) return false;
+  return target >= start && target <= end;
+}
+
 export function simulatePolicyDecision(
   bundle: TenantPolicyBundle,
   input: PolicySimulationInput,
@@ -211,6 +273,19 @@ export function simulatePolicyDecision(
   const evaluationPath: string[] = [];
 
   if (input.subjectTenantId !== input.resourceTenantId) {
+    if (
+      profile.tenantIsolation.enabled &&
+      actionMatches(profile.tenantIsolation.actions, input.action) &&
+      !profile.tenantIsolation.allowCrossTenant
+    ) {
+      return {
+        allow: false,
+        reason: 'tenant isolation enforced for cross-tenant access',
+        overlaysApplied: applied,
+        evaluationPath,
+      };
+    }
+
     if (profile.crossTenant.mode === 'deny') {
       return {
         allow: false,
@@ -261,6 +336,50 @@ export function simulatePolicyDecision(
   if (profile.guardrails.requireJustification && !input.justification) {
     allow = false;
     reason = 'justification is required by guardrails';
+  }
+
+  if (input.requestTime) {
+    const activeWindow = profile.freezeWindows.find((window) => {
+      if (!actionMatches(window.actions, input.action)) return false;
+      return isWithinFreezeWindow(input.requestTime!, window);
+    });
+    if (activeWindow) {
+      allow = false;
+      reason = `action frozen by window:${activeWindow.id}`;
+      evaluationPath.push(`freeze:${activeWindow.id}`);
+    }
+  }
+
+  const quotaRule = profile.quotas.actions[input.action];
+  if (quotaRule) {
+    const used = input.quotaUsage?.actions?.[input.action] ?? 0;
+    if (used >= quotaRule.limit) {
+      allow = false;
+      reason = `quota exceeded for ${input.action} (${used}/${quotaRule.limit} per ${quotaRule.period})`;
+      evaluationPath.push(`quota:${input.action}`);
+    }
+  }
+
+  const rampRule = profile.ramps.actions[input.action];
+  if (rampRule) {
+    if (input.rampPercent === undefined) {
+      allow = false;
+      reason = `ramp percent required for ${input.action}`;
+      evaluationPath.push(`ramp:${input.action}`);
+    } else if (input.rampPercent > rampRule.maxPercent) {
+      allow = false;
+      reason = `ramp blocked for ${input.action} (${input.rampPercent}% > ${rampRule.maxPercent}%)`;
+      evaluationPath.push(`ramp:${input.action}`);
+    }
+  }
+
+  if (actionMatches(profile.dualControl.actions, input.action)) {
+    const approvals = input.approvals ?? 0;
+    if (approvals < profile.dualControl.minApprovals) {
+      allow = false;
+      reason = `dual-control approvals required (${approvals}/${profile.dualControl.minApprovals})`;
+      evaluationPath.push(`dual-control:${input.action}`);
+    }
   }
 
   return { allow, reason, overlaysApplied: applied, evaluationPath };
