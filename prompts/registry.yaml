@@ -13,12 +13,14 @@ prompts:
         - docs/ga/
         - artifacts/
         - metrics/
+        - observability/
         - .github/
       domains:
         - governance
         - ci
         - provenance
         - quality
+        - observability
     verification:
       tiers_required:
         - A
@@ -28,33 +30,25 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: support-impersonation-health-bundle
+  - id: runbooks-docs-update
     version: v1
-    path: prompts/support-impersonation-health-bundle.md
-    sha256: c994b19a63f4aa6fc25e509c68fb7898b5d92845e005f345204175624a574903
-    description: Policy-gated support impersonation and tenant health bundle export with receipts and redaction.
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
     scope:
       paths:
-        - server/src/services/support/
-        - server/src/policies/
-        - server/src/provenance/
-        - server/src/routes/support-center.ts
-        - server/src/lib/featureFlags.ts
-        - apps/web/src/pages/HelpPage.tsx
-        - docs/support/
+        - docs/runbooks/
         - docs/roadmap/STATUS.json
-        - prompts/support-impersonation-health-bundle.md
         - agents/examples/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
       domains:
-        - support
+        - documentation
+        - operations
         - governance
-        - provenance
-        - security
-        - frontend
-        - docs
     verification:
       tiers_required:
-        - B
+        - C
       debt_budget:
         permitted: 0
         retirement_target: 0

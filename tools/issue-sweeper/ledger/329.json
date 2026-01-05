@@ -1,0 +1,68 @@
+{
+  "issue_number": 329,
+  "title": "Cross-Platform AI Analytics Dashboard",
+  "url": "https://github.com/BrianCLong/summit/issues/329",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122099213,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gwDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-ai-analytics",
+      "name": "epic-ai-analytics",
+      "color": "A29BFE",
+      "default": false,
+      "description": "AI analytics and business intelligence"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:20:32Z",
+  "createdAt": "2025-08-16T22:20:32Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15132,
+        "url": "https://github.com/BrianCLong/summit/pull/15132",
+        "mergedAt": "2025-12-30T21:20:21Z",
+        "title": "chore(deps): bump actions/checkout from 3 to 6"
+      },
+      {
+        "number": 1189,
+        "url": "https://github.com/BrianCLong/summit/pull/1189",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump stopword from 2.0.8 to 3.1.4"
+      },
+      {
+        "number": 631,
+        "url": "https://github.com/BrianCLong/summit/pull/631",
+        "mergedAt": null,
+        "title": "chore(deps): bump tqdm from 4.66.1 to 4.67.1"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

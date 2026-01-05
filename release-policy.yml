@@ -1,0 +1,35 @@
+default_branch: main
+
+freeze:
+  enabled: true
+  timezone: America/Denver
+  windows:
+    - name: "Weekend freeze"
+      rrule: "FREQ=WEEKLY;BYDAY=SA,SU"
+      active: true
+
+    - name: "New Year freeze"
+      start: "2025-12-31T00:00:00"
+      end:   "2026-01-02T23:59:59"
+      active: true
+
+override:
+  allowed: true
+  require_reason: true
+  reason_min_len: 20
+
+channels:
+  rc:
+    allowed_from:
+      - default-branch
+    require_evidence: false
+  ga:
+    allowed_from:
+      - default-branch
+      - series-branch
+    require_evidence: false
+  patch:
+    # patch is really ga on series branch; included for clarity
+    allowed_from:
+      - series-branch
+    require_evidence: false

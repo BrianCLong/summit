@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-10T00:00:00Z",
-  "revision_note": "Added policy-gated support impersonation and tenant health bundle export tracking",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",

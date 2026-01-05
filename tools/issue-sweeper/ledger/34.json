@@ -1,0 +1,248 @@
+{
+  "issue_number": 34,
+  "title": "M2: GraphQL schema for User, Investigation, Entity, Relationship",
+  "url": "https://github.com/BrianCLong/summit/issues/34",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051573,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5NQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:graphql",
+      "name": "area:graphql",
+      "color": "ededed",
+      "default": false,
+      "description": "GraphQL"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-11-20T10:21:02Z",
+  "createdAt": "2025-08-12T00:15:36Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14523,
+        "url": "https://github.com/BrianCLong/summit/pull/14523",
+        "mergedAt": "2025-12-27T00:19:58Z",
+        "title": "Sprint N+34: Continuous Optimization Loop"
+      },
+      {
+        "number": 13252,
+        "url": "https://github.com/BrianCLong/summit/pull/13252",
+        "mergedAt": "2025-12-04T17:11:32Z",
+        "title": "Add Sprint 34 Plan (Apr 27-May 8, 2026)"
+      },
+      {
+        "number": 14378,
+        "url": "https://github.com/BrianCLong/summit/pull/14378",
+        "mergedAt": "2025-12-23T04:35:18Z",
+        "title": "Bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 13606,
+        "url": "https://github.com/BrianCLong/summit/pull/13606",
+        "mergedAt": "2025-12-15T16:29:34Z",
+        "title": "build(deps): bump next from 14.2.33 to 14.2.35 in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 13613,
+        "url": "https://github.com/BrianCLong/summit/pull/13613",
+        "mergedAt": "2025-12-16T20:47:55Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /web/retention-dashboard"
+      },
+      {
+        "number": 14694,
+        "url": "https://github.com/BrianCLong/summit/pull/14694",
+        "mergedAt": "2025-12-27T21:05:11Z",
+        "title": "docs: add MVP-3 GA orchestration plan and update roadmap timestamp"
+      },
+      {
+        "number": 13597,
+        "url": "https://github.com/BrianCLong/summit/pull/13597",
+        "mergedAt": "2025-12-13T14:31:19Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 13596,
+        "url": "https://github.com/BrianCLong/summit/pull/13596",
+        "mergedAt": "2025-12-13T14:26:33Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      },
+      {
+        "number": 13097,
+        "url": "https://github.com/BrianCLong/summit/pull/13097",
+        "mergedAt": "2025-12-03T04:42:47Z",
+        "title": "Upgrade to agentic semantic RAG with knowledge graphs"
+      },
+      {
+        "number": 15007,
+        "url": "https://github.com/BrianCLong/summit/pull/15007",
+        "mergedAt": "2025-12-30T22:44:44Z",
+        "title": "Build provenance and integrity gateway for communications"
+      },
+      {
+        "number": 15322,
+        "url": "https://github.com/BrianCLong/summit/pull/15322",
+        "mergedAt": null,
+        "title": "Add truth operations adversarial defense pack"
+      },
+      {
+        "number": 15313,
+        "url": "https://github.com/BrianCLong/summit/pull/15313",
+        "mergedAt": "2026-01-01T11:39:29Z",
+        "title": "Establish Institutional Continuity Framework"
+      },
+      {
+        "number": 15324,
+        "url": "https://github.com/BrianCLong/summit/pull/15324",
+        "mergedAt": null,
+        "title": "Add continuity and succession safeguards"
+      },
+      {
+        "number": 15334,
+        "url": "https://github.com/BrianCLong/summit/pull/15334",
+        "mergedAt": "2026-01-01T11:38:19Z",
+        "title": "Delivery of 8 Strategic Innovations"
+      },
+      {
+        "number": 1761,
+        "url": "https://github.com/BrianCLong/summit/pull/1761",
+        "mergedAt": "2025-09-29T21:59:55Z",
+        "title": "chore(deps): bump sharp from 0.33.5 to 0.34.4"
+      },
+      {
+        "number": 15327,
+        "url": "https://github.com/BrianCLong/summit/pull/15327",
+        "mergedAt": null,
+        "title": "feat: enforce agent attestations and diff risk gates"
+      },
+      {
+        "number": 12502,
+        "url": "https://github.com/BrianCLong/summit/pull/12502",
+        "mergedAt": "2025-12-18T02:39:41Z",
+        "title": "Deepfake detection and defense mechanisms"
+      },
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      },
+      {
+        "number": 13140,
+        "url": "https://github.com/BrianCLong/summit/pull/13140",
+        "mergedAt": "2025-12-03T03:09:11Z",
+        "title": "G8 Relationship Pattern Detector"
+      },
+      {
+        "number": 13113,
+        "url": "https://github.com/BrianCLong/summit/pull/13113",
+        "mergedAt": "2025-12-17T05:38:26Z",
+        "title": "S9 - Threat Modeling Assistant"
+      },
+      {
+        "number": 15256,
+        "url": "https://github.com/BrianCLong/summit/pull/15256",
+        "mergedAt": "2026-01-01T08:58:50Z",
+        "title": "feat: strengthen webauthn and deduplication flows"
+      },
+      {
+        "number": 13044,
+        "url": "https://github.com/BrianCLong/summit/pull/13044",
+        "mergedAt": "2025-12-17T21:30:47Z",
+        "title": "Security Boundary Expansion"
+      },
+      {
+        "number": 1357,
+        "url": "https://github.com/BrianCLong/summit/pull/1357",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore(deps): bump transformers from 4.34.1 to 4.53.0 in /_salvage_from_refs/RC1/server"
+      },
+      {
+        "number": 1149,
+        "url": "https://github.com/BrianCLong/summit/pull/1149",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump eslint from 9.33.0 to 9.34.0 in /server"
+      },
+      {
+        "number": 731,
+        "url": "https://github.com/BrianCLong/summit/pull/731",
+        "mergedAt": null,
+        "title": "chore(deps): bump uvicorn[standard] from 0.24.0 to 0.35.0"
+      },
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 11854,
+        "url": "https://github.com/BrianCLong/summit/pull/11854",
+        "mergedAt": null,
+        "title": "Analyze Summit platform and create strategic roadmap"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 10119,
+        "url": "https://github.com/BrianCLong/summit/pull/10119",
+        "mergedAt": "2025-10-14T10:40:06Z",
+        "title": "feat: Optimize data processing pipelines"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

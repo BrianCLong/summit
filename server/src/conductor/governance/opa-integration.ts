@@ -4,6 +4,9 @@
 import axios from 'axios';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import crypto from 'crypto';
+import logger from '../../utils/logger.js';
+import { policyBundleStore } from '../../policy/bundleStore.js';
+import { advancedAuditSystem } from '../../audit/index.js';
 
 export interface PolicyContext {
   tenantId: string;
@@ -12,22 +15,28 @@ export interface PolicyContext {
   action: string;
   resource: string;
   resourceAttributes?: Record<string, unknown>;
+  subjectAttributes?: Record<string, unknown>;
   sessionContext?: {
     ipAddress?: string;
     userAgent?: string;
     timestamp: number;
     sessionId?: string;
+    traceId?: string;
   };
   businessContext?: {
     costCenter?: string;
     businessUnit?: string;
     project?: string;
   };
+  policyVersion?: string;
 }
 
 export interface PolicyDecision {
   allow: boolean;
   reason: string;
+  reasons?: string[];
+  attrsUsed?: string[];
+  policyBundleVersion?: string;
   conditions?: string[];
   tags?: string[];
   auditLog?: {
@@ -82,6 +91,8 @@ class OpaPolicyEngine {
     context: PolicyContext,
   ): Promise<PolicyDecision> {
     const startTime = Date.now();
+    const policyBundleVersion = this.resolvePolicyBundleVersion(context);
+    let cacheHit = false;
 
     try {
       // Check cache first
@@ -92,7 +103,19 @@ class OpaPolicyEngine {
         prometheusConductorMetrics.recordOperationalEvent(
           'opa_cache_hit',
         );
-        return cached.decision;
+        cacheHit = true;
+        const decision = {
+          ...cached.decision,
+          policyBundleVersion,
+        };
+        await this.recordPolicyDecision(
+          policyName,
+          context,
+          decision,
+          policyBundleVersion,
+          cacheHit,
+        );
+        return decision;
       }
 
       // Prepare OPA input
@@ -118,10 +141,17 @@ class OpaPolicyEngine {
       );
 
       const decision = this.parseOpaResponse(response.data);
+      const enrichedDecision = {
+        ...decision,
+        policyBundleVersion,
+      };
 
       // Cache the decision
       const ttl = decision.allow ? 60_000 /* 1m */ : 300_000; /* 5m */
-      this.policyCache.set(cacheKey, { decision, expiry: Date.now() + ttl });
+      this.policyCache.set(cacheKey, {
+        decision: enrichedDecision,
+        expiry: Date.now() + ttl,
+      });
 
       // Record metrics
       prometheusConductorMetrics.recordOperationalEvent(
@@ -132,7 +162,15 @@ class OpaPolicyEngine {
         Date.now() - startTime,
       );
 
-      return decision;
+      await this.recordPolicyDecision(
+        policyName,
+        context,
+        enrichedDecision,
+        policyBundleVersion,
+        cacheHit,
+      );
+
+      return enrichedDecision;
     } catch (error: any) {
       console.error('OPA policy evaluation failed:', error);
 
@@ -141,9 +179,12 @@ class OpaPolicyEngine {
       );
 
       // Fail-safe: deny by default
-      return {
+      const decision = {
         allow: false,
         reason: `Policy evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        reasons: ['opa_error'],
+        attrsUsed: this.defaultAttrsUsed(context),
+        policyBundleVersion,
         auditLog: {
           logLevel: 'error',
           message: 'OPA policy evaluation failure',
@@ -152,6 +193,16 @@ class OpaPolicyEngine {
           },
         },
       };
+
+      await this.recordPolicyDecision(
+        policyName,
+        context,
+        decision,
+        policyBundleVersion,
+        cacheHit,
+      );
+
+      return decision;
     }
   }
 
@@ -207,28 +258,145 @@ class OpaPolicyEngine {
    * Parse OPA response
    */
   private parseOpaResponse(opaResponse: any): PolicyDecision {
-    const result = opaResponse.result || {};
+    const result = opaResponse.result;
+
+    if (typeof result === 'boolean') {
+      return {
+        allow: result,
+        reason: result ? 'allowed' : 'denied',
+        reasons: [result ? 'allowed' : 'denied'],
+        attrsUsed: [],
+        conditions: [],
+        tags: [],
+      };
+    }
+
+    const resolved = result || {};
 
     return {
-      allow: result.allow || false,
-      reason: result.reason || 'No reason provided',
-      conditions: result.conditions || [],
-      tags: result.tags || [],
-      auditLog: result.audit_log
+      allow: resolved.allow || false,
+      reason: resolved.reason || 'No reason provided',
+      reasons: resolved.reasons || (resolved.reason ? [resolved.reason] : []),
+      attrsUsed: resolved.attrs_used || resolved.attrsUsed || [],
+      conditions: resolved.conditions || [],
+      tags: resolved.tags || [],
+      auditLog: resolved.audit_log
         ? {
-          logLevel: result.audit_log.level || 'info',
-          message: result.audit_log.message || 'Policy evaluation',
-          metadata: result.audit_log.metadata || {},
+          logLevel: resolved.audit_log.level || 'info',
+          message: resolved.audit_log.message || 'Policy evaluation',
+          metadata: resolved.audit_log.metadata || {},
         }
         : undefined,
-      dataFilters: result.data_filters
+      dataFilters: resolved.data_filters
         ? {
-          tenantScope: result.data_filters.tenant_scope || [],
-          fieldMask: result.data_filters.field_mask || [],
-          rowLevelFilters: result.data_filters.row_level_filters || {},
+          tenantScope: resolved.data_filters.tenant_scope || [],
+          fieldMask: resolved.data_filters.field_mask || [],
+          rowLevelFilters: resolved.data_filters.row_level_filters || {},
         }
         : undefined,
     };
+  }
+
+  private resolvePolicyBundleVersion(context: PolicyContext): string {
+    try {
+      const resolved = policyBundleStore.resolve(context.policyVersion);
+      return resolved.versionId;
+    } catch (_error) {
+      return process.env.OPA_POLICY_VERSION || 'unknown';
+    }
+  }
+
+  private defaultAttrsUsed(context: PolicyContext): string[] {
+    const attributes = new Set<string>(['tenantId', 'role', 'action', 'resource']);
+    if (context.resourceAttributes) attributes.add('resourceAttributes');
+    if (context.subjectAttributes) attributes.add('subjectAttributes');
+    return Array.from(attributes);
+  }
+
+  private async recordPolicyDecision(
+    policyName: string,
+    context: PolicyContext,
+    decision: PolicyDecision,
+    policyBundleVersion: string,
+    cacheHit: boolean,
+  ): Promise<void> {
+    const reasons =
+      decision.reasons && decision.reasons.length > 0
+        ? decision.reasons
+        : decision.reason
+          ? [decision.reason]
+          : [];
+    const attrsUsed =
+      decision.attrsUsed && decision.attrsUsed.length > 0
+        ? decision.attrsUsed
+        : this.defaultAttrsUsed(context);
+
+    const correlationId =
+      context.sessionContext?.traceId ||
+      context.sessionContext?.sessionId ||
+      crypto.randomUUID();
+
+    logger.info(
+      {
+        policy_bundle_version: policyBundleVersion,
+        decision: decision.allow ? 'allow' : 'deny',
+        reasons,
+        attrs_used: attrsUsed,
+        policy: policyName,
+        tenantId: context.tenantId,
+        userId: context.userId,
+        action: context.action,
+        resource: context.resource,
+        cacheHit,
+      },
+      'OPA policy decision recorded',
+    );
+
+    try {
+      await advancedAuditSystem.recordEvent({
+        eventType: 'policy_decision',
+        level: decision.allow ? 'info' : 'warn',
+        correlationId,
+        tenantId: context.tenantId,
+        serviceId: 'opa-policy-engine',
+        action: context.action,
+        outcome: decision.allow ? 'success' : 'failure',
+        message: 'OPA policy decision recorded',
+        details: {
+          policy: policyName,
+          policy_bundle_version: policyBundleVersion,
+          decision: decision.allow ? 'allow' : 'deny',
+          reasons,
+          attrs_used: attrsUsed,
+          cacheHit,
+          input: {
+            tenantId: context.tenantId,
+            userId: context.userId,
+            role: context.role,
+            action: context.action,
+            resource: context.resource,
+            resourceAttributes: context.resourceAttributes,
+            subjectAttributes: context.subjectAttributes,
+          },
+        },
+        complianceRelevant: true,
+        complianceFrameworks: ['SOC2'],
+        userId: context.userId,
+        resourceType: context.resource,
+        resourceId:
+          (context.resourceAttributes?.id as string | undefined) ||
+          (context.resourceAttributes?.runId as string | undefined),
+      });
+    } catch (error: any) {
+      logger.error(
+        {
+          error: error instanceof Error ? error.message : String(error),
+          policy: policyName,
+          tenantId: context.tenantId,
+        },
+        'Failed to write policy decision audit event',
+      );
+    }
   }
 
   /**
