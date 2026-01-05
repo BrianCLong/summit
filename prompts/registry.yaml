@@ -28,3 +28,28 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: policy-profile-assignments
+    version: v1
+    path: prompts/governance/policy-profile-assignments.md
+    sha256: 6bb4769bb8723f60093eee17b09ef954c7005be41802694f7100c6745d710fa4
+    description: Policy profile manifests, assignment receipts, provenance replay, and simulation binding.
+    scope:
+      paths:
+        - server/src/policies/
+        - server/src/services/policy-profiles/
+        - server/src/routes/
+        - server/src/provenance/
+        - docs/
+      domains:
+        - governance
+        - provenance
+        - policy
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
