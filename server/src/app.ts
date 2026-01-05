@@ -123,6 +123,7 @@ import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
+import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
@@ -375,6 +376,7 @@ export const createApp = async () => {
   // Other routes
   // app.use('/api/policy', policyRouter);
   app.use('/api/receipts', receiptsRouter);
+  app.use('/api/brand-packs', brandPackRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
   app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);

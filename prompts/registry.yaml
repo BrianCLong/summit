@@ -28,3 +28,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: brand-pack-runtime-theming
+    version: v1
+    path: prompts/tasks/brand-pack-runtime-theming.md
+    sha256: 212b1403926eee702edc4d83b7befe3a68f3c87aa9c7cee15d4d3ac8055877c1
+    description: Tenant-aware brand pack pipeline with runtime Switchboard theming, receipts, and audit logging.
+    scope:
+      paths:
+        - server/src/app.ts
+        - server/src/services/brand-packs/
+        - server/src/provenance/
+        - server/src/audit/
+        - apps/web/
+        - docs/
+        - agents/examples/
+        - prompts/
+      domains:
+        - theming
+        - provenance
+        - audit
+        - web
+        - server
+        - docs
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
