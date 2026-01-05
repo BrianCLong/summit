@@ -6,6 +6,9 @@ const mockTenantService = {
   updateSettings: jest.fn(),
   disableTenant: jest.fn(),
   createTenant: jest.fn(),
+  listTenants: jest.fn(),
+  getTenant: jest.fn(),
+  rollbackSettings: jest.fn(),
 };
 
 let currentUser: any = {
@@ -30,6 +33,22 @@ jest.mock('../../middleware/auth.js', () => ({
 
 const ensurePolicy = jest.fn((_action: string, _resource: string) => (_req: any, _res: any, next: any) => next());
 jest.mock('../../middleware/abac.js', () => ({ ensurePolicy }));
+
+const mockApplyProfile = jest.fn();
+jest.mock('../../services/PolicyProfileService.js', () => ({
+  policyProfileService: {
+    applyProfile: mockApplyProfile,
+  },
+}));
+
+const mockSetTenantPlan = jest.fn();
+const mockSetTenantOverride = jest.fn();
+jest.mock('../../lib/resources/QuotaConfig.js', () => ({
+  quotaConfigService: {
+    setTenantPlan: mockSetTenantPlan,
+    setTenantOverride: mockSetTenantOverride,
+  },
+}));
 
 const mockRepoBy = jest.fn();
 jest.mock('../../repos/ProvenanceRepo.js', () => ({
@@ -72,6 +91,19 @@ describe('tenants routes', () => {
       slug: 'acme',
       residency: 'US',
     });
+    mockTenantService.listTenants.mockResolvedValue([
+      { id: 'tenant-1', name: 'Acme', slug: 'acme' },
+    ]);
+    mockTenantService.getTenant.mockResolvedValue({
+      id: 'tenant-1',
+      name: 'Acme',
+      slug: 'acme',
+      settings: { policy_profile: 'baseline' },
+    });
+    mockTenantService.rollbackSettings.mockResolvedValue({
+      tenant: { id: 'tenant-1', settings: { theme: 'light' } },
+      rolledBackTo: { id: 'history-1' },
+    });
     mockRepoBy.mockResolvedValue([{ id: 'event-1' }]);
   });
 
@@ -90,7 +122,12 @@ describe('tenants routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.settings.theme).toBe('dark');
     expect(res.body.receipt.action).toBe('TENANT_SETTINGS_UPDATED');
-    expect(mockTenantService.updateSettings).toHaveBeenCalledWith('tenant-1', { theme: 'dark' }, 'user-1');
+    expect(mockTenantService.updateSettings).toHaveBeenCalledWith(
+      'tenant-1',
+      { theme: 'dark' },
+      'user-1',
+      'settings_update',
+    );
   });
 
   it('disables tenant with receipt', async () => {
@@ -113,5 +150,40 @@ describe('tenants routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual([{ id: 'event-1' }]);
     expect(res.body.receipt.action).toBe('TENANT_AUDIT_VIEWED');
+  });
+
+  it('lists tenants for super admin', async () => {
+    currentUser = { id: 'admin-1', role: 'SUPER_ADMIN', tenantId: 'tenant-1' };
+    const res = await request(app).get('/api/tenants');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual([{ id: 'tenant-1', name: 'Acme', slug: 'acme' }]);
+  });
+
+  it('applies policy profile with receipt', async () => {
+    const res = await request(app)
+      .post('/api/tenants/tenant-1/policy-profile')
+      .send({ profileId: 'strict' });
+    expect(res.status).toBe(200);
+    expect(mockApplyProfile).toHaveBeenCalledWith('tenant-1', 'strict', 'user-1');
+    expect(res.body.receipt.action).toBe('TENANT_POLICY_PROFILE_APPLIED');
+  });
+
+  it('updates quotas with receipt', async () => {
+    const res = await request(app)
+      .post('/api/tenants/tenant-1/quotas')
+      .send({ plan: 'standard', overrides: { api_rpm: 9000 } });
+    expect(res.status).toBe(200);
+    expect(mockSetTenantPlan).toHaveBeenCalledWith('tenant-1', 'standard');
+    expect(mockSetTenantOverride).toHaveBeenCalledWith('tenant-1', { api_rpm: 9000 });
+    expect(res.body.receipt.action).toBe('TENANT_QUOTAS_UPDATED');
+  });
+
+  it('rolls back settings with receipt', async () => {
+    const res = await request(app)
+      .post('/api/tenants/tenant-1/settings/rollback')
+      .send({ reason: 'undo' });
+    expect(res.status).toBe(200);
+    expect(mockTenantService.rollbackSettings).toHaveBeenCalledWith('tenant-1', 'user-1', 'undo');
+    expect(res.body.receipt.action).toBe('TENANT_SETTINGS_ROLLBACK');
   });
 });
