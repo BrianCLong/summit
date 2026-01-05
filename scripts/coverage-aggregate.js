@@ -5,9 +5,10 @@
  * Enforces 80% lines / 75% branches across entire IntelGraph monorepo
  */
 
-const fs = require('fs');
-const path = require('path');
-const { glob } = require('glob');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
 
 const THRESHOLDS = {
   lines: 80,
@@ -16,15 +17,93 @@ const THRESHOLDS = {
   statements: 80,
 };
 
-async function findCoverageFiles() {
-  // Find all coverage-summary.json files across the monorepo
-  const coverageFiles = await glob('**/coverage/coverage-summary.json', {
-    ignore: ['node_modules/**', '**/node_modules/**'],
-    cwd: process.cwd(),
-  });
+const DEFAULT_SCOPE = 'all';
+const DEFAULT_BASE_REF = 'origin/main';
 
-  console.log(`Found ${coverageFiles.length} coverage files:`, coverageFiles);
-  return coverageFiles;
+function normalizePath(filePath) {
+  return path.relative(process.cwd(), filePath).split(path.sep).join('/');
+}
+
+function workspaceFromPath(filePath) {
+  const normalized = normalizePath(filePath);
+  const [first, second] = normalized.split('/');
+
+  if (first === 'packages' && second) return `${first}/${second}`;
+  if (first) return first;
+  return 'root';
+}
+
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const options = {
+    scope: process.env.COVERAGE_SCOPE || DEFAULT_SCOPE,
+    baseRef: process.env.COVERAGE_BASE_REF || DEFAULT_BASE_REF,
+  };
+
+  for (const arg of args) {
+    if (arg.startsWith('--scope=')) {
+      options.scope = arg.replace('--scope=', '');
+    }
+    if (arg.startsWith('--base=')) {
+      options.baseRef = arg.replace('--base=', '');
+    }
+  }
+
+  return options;
+}
+
+function listChangedWorkspaces(baseRef) {
+  try {
+    const diff = execSync(`git diff --name-only ${baseRef}...HEAD`, {
+      encoding: 'utf8',
+    });
+
+    const workspaces = new Set();
+
+    diff
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .forEach((line) => {
+        const workspace = workspaceFromPath(line);
+        if (workspace) workspaces.add(workspace);
+      });
+
+    return Array.from(workspaces);
+  } catch (error) {
+    console.warn(
+      `⚠️  Unable to determine changed workspaces from ${baseRef}: ${error.message}`,
+    );
+    return [];
+  }
+}
+
+async function findCoverageFiles() {
+  const seen = [];
+
+  function walk(currentPath) {
+    const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (entry.name === 'node_modules') continue;
+      const fullPath = path.join(currentPath, entry.name);
+
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (
+        entry.isFile() &&
+        entry.name === 'coverage-summary.json' &&
+        fullPath.includes(`${path.sep}coverage${path.sep}`)
+      ) {
+        seen.push(fullPath);
+      }
+    }
+  }
+
+  walk(process.cwd());
+
+  console.log(`Found ${seen.length} coverage files:`, seen.map(normalizePath));
+  return seen;
 }
 
 function readCoverageFile(filePath) {
@@ -94,59 +173,114 @@ function checkThresholds(percentages) {
   return { results, passed };
 }
 
-function generateReport(aggregated, thresholdResults) {
+function generateReport(overall, workspaceReports, scopeInfo) {
   console.log('\n📊 IntelGraph Repo-wide Coverage Report');
-  console.log('=' * 50);
+  console.log('='.repeat(50));
 
-  console.log('\n📈 Coverage Summary:');
-  Object.keys(aggregated.percentages).forEach((metric) => {
-    const percentage = aggregated.percentages[metric];
-    const { total, covered } = aggregated.totals[metric];
+  if (scopeInfo?.filteredWorkspaces?.length) {
+    console.log(
+      `➡️  Scope: changed workspaces only (${scopeInfo.filteredWorkspaces.join(', ')}) based on ${scopeInfo.baseRef}`,
+    );
+  }
+
+  console.log('\n📈 Workspace Coverage:');
+  workspaceReports.forEach((report) => {
+    console.log(`- ${report.workspace}`);
+    Object.keys(report.aggregated.percentages).forEach((metric) => {
+      const percentage = report.aggregated.percentages[metric];
+      const { total, covered } = report.aggregated.totals[metric];
+      console.log(
+        `    ${metric.padEnd(12)}: ${percentage.toFixed(2)}% (${covered}/${total})`,
+      );
+    });
+
+    report.thresholdResults.results.forEach((result) => {
+      console.log(
+        `    ${result.status} ${result.metric.padEnd(10)} ${result.actual}% (min ${result.threshold}%)`,
+      );
+    });
+  });
+
+  console.log('\n📈 Aggregated Summary:');
+  Object.keys(overall.aggregated.percentages).forEach((metric) => {
+    const percentage = overall.aggregated.percentages[metric];
+    const { total, covered } = overall.aggregated.totals[metric];
     console.log(
       `  ${metric.padEnd(12)}: ${percentage.toFixed(2)}% (${covered}/${total})`,
     );
   });
 
   console.log('\n🎯 Threshold Compliance:');
-  thresholdResults.results.forEach((result) => {
+  overall.thresholdResults.results.forEach((result) => {
     console.log(
       `  ${result.status} ${result.metric.padEnd(12)}: ${result.actual}% (required: ${result.threshold}%)`,
     );
   });
 
-  console.log(
-    `\n🎯 Overall Status: ${thresholdResults.passed ? '✅ PASSED' : '❌ FAILED'}`,
+  const failingWorkspaces = workspaceReports.filter(
+    (report) => !report.thresholdResults.passed,
   );
 
-  if (!thresholdResults.passed) {
+  if (failingWorkspaces.length) {
+    console.log('\n❌ Failing workspaces:');
+    failingWorkspaces.forEach((report) => {
+      const failedMetrics = report.thresholdResults.results
+        .filter((result) => !result.passed)
+        .map(
+          (result) => `${result.metric} ${result.actual}% (<${result.threshold}%)`,
+        )
+        .join(', ');
+      console.log(`  - ${report.workspace}: ${failedMetrics}`);
+    });
+  }
+
+  console.log(
+    `\n🎯 Overall Status: ${overall.thresholdResults.passed ? '✅ PASSED' : '❌ FAILED'}`,
+  );
+
+  if (!overall.thresholdResults.passed) {
     console.log(
       '\n❌ Coverage thresholds not met. Please improve test coverage.',
     );
     console.log('   Required: 80% lines, 75% branches minimum');
   }
 
-  return thresholdResults.passed;
+  return overall.thresholdResults.passed && failingWorkspaces.length === 0;
 }
 
-function generateJunitXml(thresholdResults) {
-  const testCount = thresholdResults.results.length;
-  const failureCount = thresholdResults.results.filter((r) => !r.passed).length;
+function generateJunitXml(workspaceReports) {
+  const testCount = workspaceReports.reduce(
+    (total, report) => total + report.thresholdResults.results.length,
+    0,
+  );
+  const failureCount = workspaceReports.reduce(
+    (total, report) =>
+      total + report.thresholdResults.results.filter((r) => !r.passed).length,
+    0,
+  );
+
+  const workspaceXml = workspaceReports
+    .map((report) => {
+      const workspaceCases = report.thresholdResults.results
+        .map((result) => {
+          if (result.passed) {
+            return `    <testcase name="${report.workspace} coverage ${result.metric}" classname="Coverage" time="0"/>`;
+          }
+          return `    <testcase name="${report.workspace} coverage ${result.metric}" classname="Coverage" time="0">
+      <failure message="Coverage below threshold">${result.metric}: ${result.actual}% &lt; ${result.threshold}%</failure>
+    </testcase>`;
+        })
+        .join('\n');
+
+      return `  <testsuite name="${report.workspace}" tests="${report.thresholdResults.results.length}" failures="${report.thresholdResults.results.filter((r) => !r.passed).length}" time="0">
+${workspaceCases}
+  </testsuite>`;
+    })
+    .join('\n');
 
   const junit = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="Coverage Thresholds" tests="${testCount}" failures="${failureCount}" time="0">
-  <testsuite name="Repo-wide Coverage" tests="${testCount}" failures="${failureCount}" time="0">
-    ${thresholdResults.results
-      .map((result) => {
-        if (result.passed) {
-          return `    <testcase name="Coverage ${result.metric}" classname="Coverage" time="0"/>`;
-        } else {
-          return `    <testcase name="Coverage ${result.metric}" classname="Coverage" time="0">
-      <failure message="Coverage below threshold">${result.metric}: ${result.actual}% &lt; ${result.threshold}%</failure>
-    </testcase>`;
-        }
-      })
-      .join('\n')}
-  </testsuite>
+${workspaceXml}
 </testsuites>`;
 
   fs.writeFileSync('coverage-junit.xml', junit);
@@ -155,6 +289,7 @@ function generateJunitXml(thresholdResults) {
 
 async function main() {
   try {
+    const options = parseArgs();
     console.log('🔍 Scanning for coverage files...');
     const coverageFiles = await findCoverageFiles();
 
@@ -165,21 +300,69 @@ async function main() {
       process.exit(1);
     }
 
-    console.log('📊 Reading and aggregating coverage data...');
-    const coverageDataList = coverageFiles
-      .map(readCoverageFile)
-      .filter((data) => data !== null);
+    const normalizedFiles = coverageFiles.map(normalizePath).sort();
+
+    const coverageDataList = normalizedFiles
+      .map((filePath) => ({
+        path: filePath,
+        workspace: workspaceFromPath(filePath),
+        data: readCoverageFile(filePath),
+      }))
+      .filter((entry) => entry.data !== null);
 
     if (coverageDataList.length === 0) {
       console.error('❌ No valid coverage data found.');
       process.exit(1);
     }
 
-    const aggregated = aggregateCoverage(coverageDataList);
-    const thresholdResults = checkThresholds(aggregated.percentages);
+    const changedWorkspaces =
+      options.scope === 'changed' ? listChangedWorkspaces(options.baseRef) : [];
 
-    const passed = generateReport(aggregated, thresholdResults);
-    generateJunitXml(thresholdResults);
+    const scopedCoverageData =
+      changedWorkspaces.length > 0
+        ? coverageDataList.filter((entry) =>
+            changedWorkspaces.includes(entry.workspace),
+          )
+        : coverageDataList;
+
+    if (scopedCoverageData.length === 0) {
+      console.error(
+        '❌ No coverage data found for the selected scope. Run coverage for the changed workspaces or adjust COVERAGE_SCOPE.',
+      );
+      process.exit(1);
+    }
+
+    const workspaceReports = Array.from(
+      scopedCoverageData.reduce((acc, entry) => {
+        const list = acc.get(entry.workspace) || [];
+        list.push(entry.data);
+        acc.set(entry.workspace, list);
+        return acc;
+      }, new Map()),
+    )
+      .map(([workspace, workspaceCoverage]) => ({
+        workspace,
+        aggregated: aggregateCoverage(workspaceCoverage),
+      }))
+      .map((report) => ({
+        ...report,
+        thresholdResults: checkThresholds(report.aggregated.percentages),
+      }))
+      .sort((a, b) => a.workspace.localeCompare(b.workspace));
+
+    const overallCoverage = aggregateCoverage(
+      scopedCoverageData.map((entry) => entry.data),
+    );
+    const overall = {
+      aggregated: overallCoverage,
+      thresholdResults: checkThresholds(overallCoverage.percentages),
+    };
+
+    const passed = generateReport(overall, workspaceReports, {
+      filteredWorkspaces: changedWorkspaces,
+      baseRef: options.baseRef,
+    });
+    generateJunitXml(workspaceReports);
 
     process.exit(passed ? 0 : 1);
   } catch (error) {
@@ -188,8 +371,19 @@ async function main() {
   }
 }
 
-if (require.main === module) {
+const currentFilePath = fileURLToPath(import.meta.url);
+const invokedFilePath = process.argv[1]
+  ? path.resolve(process.argv[1])
+  : undefined;
+
+if (invokedFilePath && currentFilePath === invokedFilePath) {
   main();
 }
 
-module.exports = { aggregateCoverage, checkThresholds, THRESHOLDS };
+export {
+  aggregateCoverage,
+  checkThresholds,
+  THRESHOLDS,
+  workspaceFromPath,
+  normalizePath,
+};
