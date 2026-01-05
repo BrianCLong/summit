@@ -142,6 +142,12 @@ importers:
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
+      '@types/minimatch':
+        specifier: ^6.0.0
+        version: 6.0.0
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.3
       '@types/uuid':
         specifier: ^11.0.0
         version: 11.0.0
@@ -217,6 +223,9 @@ importers:
       markdownlint-cli:
         specifier: ^0.45.0
         version: 0.45.0
+      minimatch:
+        specifier: ^10.1.1
+        version: 10.1.1
       pg-mem:
         specifier: ^3.0.5
         version: 3.0.5

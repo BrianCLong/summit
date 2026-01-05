@@ -1,0 +1,65 @@
+name: Mega PR Containment
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR Number to analyze'
+        required: true
+        type: string
+      generate_patches:
+        description: 'Generate patch files (experimental)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  analyze-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for patch generation if used
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Containment Analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FLAGS=""
+          if [ "${{ inputs.generate_patches }}" = "true" ]; then
+            FLAGS="--patches"
+          fi
+
+          # Create output directory
+          mkdir -p artifacts/pr-containment/${{ inputs.pr_number }}
+
+          npx tsx scripts/ops/mega_pr_containment.ts \
+            --pr ${{ inputs.pr_number }} \
+            --out artifacts/pr-containment/${{ inputs.pr_number }} \
+            $FLAGS
+
+      - name: Upload Analysis Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mega-pr-${{ inputs.pr_number }}-plan
+          path: artifacts/pr-containment/${{ inputs.pr_number }}
+          retention-days: 14
