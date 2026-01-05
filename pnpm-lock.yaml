@@ -169,6 +169,9 @@ importers:
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
+      glob:
+        specifier: '>=11.1.0'
+        version: 13.0.0
       globals:
         specifier: ^15.15.0
         version: 15.15.0

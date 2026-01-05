@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
-    "verify": "tsx scripts/verify.ts",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
@@ -83,9 +83,12 @@
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "ops:readiness": "tsx scripts/ops/readiness-check.ts",
+    "ops:readiness:report": "tsx scripts/ops/readiness-check.ts > docs/ops/READINESS_REPORT.md",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "ci:parity": "tsx scripts/ci/ci-parity.ts",
+    "ci:verify": "tsx scripts/ci/verify-green-contract.ts",
     "prepare": "husky"
   },
   "keywords": [
@@ -132,6 +135,7 @@
     "eslint-plugin-react-refresh": "^0.4.26",
     "eventemitter3": "^5.0.1",
     "express": "^5.2.1",
+    "glob": ">=11.1.0",
     "globals": "^15.15.0",
     "helmet": "^8.1.0",
     "husky": "^9.1.7",
