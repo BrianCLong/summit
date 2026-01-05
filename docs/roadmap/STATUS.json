@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-05T02:08:52Z",
+  "revision_note": "Added tenant usage exports and usage/cost dashboard coverage",
   "initiatives": [
     {
       "id": "A",
