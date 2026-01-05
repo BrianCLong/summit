@@ -59,3 +59,21 @@ After the workflow completes:
 1.  Download `release-bundle.tar.gz` from the GitHub Release.
 2.  Verify signatures using `cosign verify-blob`.
 3.  Inspect `evidence/` for test and policy proofs.
+
+### GitHub Check: Release Evidence Check
+
+To support branch protection rules, a separate, lightweight GitHub workflow (`release-evidence-check.yml`) runs on tag creation or manual dispatch. This check provides a clear "pass/fail" status in pull requests and branch protection settings.
+
+-   **Purpose**: Verifies that a valid, non-expired "GO" decision has been formally recorded in `release-evidence/<TAG>.json` *before* the release can be finalized.
+-   **Check Name**: `Release Evidence Check`
+
+#### Troubleshooting Failures
+
+If the "Release Evidence Check" fails, the reason will be in the check's summary logs. Common failures include:
+
+-   `EVIDENCE_MISSING`: The `release-evidence/<TAG>.json` file was not found. This usually means the pre-release approval workflow was not run or failed.
+-   `EVIDENCE_NOT_GO`: The evidence file exists, but the `decision` field is not set to `"GO"`.
+-   `EVIDENCE_SHA_MISMATCH`: The commit SHA in the evidence file does not match the SHA of the tag.
+-   `EVIDENCE_EXPIRED`: The evidence was generated too long ago and is considered stale.
+
+**To fix:** A maintainer must re-run the Maestro dry-run or the relevant approval workflow to regenerate the evidence file with the correct contents for the target tag.
