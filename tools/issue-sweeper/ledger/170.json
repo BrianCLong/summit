@@ -1,0 +1,92 @@
+{
+  "issue_number": 170,
+  "title": "ops: docker parity",
+  "url": "https://github.com/BrianCLong/summit/issues/170",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968377,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCReQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/ops",
+      "name": "ops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981108,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDNA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-09-30",
+      "name": "due:2025-09-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:02Z",
+  "createdAt": "2025-08-14T04:05:09Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12088,
+        "url": "https://github.com/BrianCLong/summit/pull/12088",
+        "mergedAt": "2025-11-21T06:30:32Z",
+        "title": "Audit and consolidate project dependencies"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10089,
+        "url": "https://github.com/BrianCLong/summit/pull/10089",
+        "mergedAt": "2025-10-14T13:07:17Z",
+        "title": "feat: add semantic pii mapping engine"
+      },
+      {
+        "number": 10087,
+        "url": "https://github.com/BrianCLong/summit/pull/10087",
+        "mergedAt": "2025-10-14T13:07:24Z",
+        "title": "feat: introduce maestro conductor meta-agent"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

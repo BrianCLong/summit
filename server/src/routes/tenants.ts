@@ -10,7 +10,7 @@ import { getPostgresPool } from '../config/database.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 import provisionRouter from './tenants/provision.js';
-import { policyActionGate } from '../middleware/policy-action-gate.js';
+import { tenantUsageService } from '../services/TenantUsageService.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -34,6 +34,10 @@ const disableSchema = z.object({
 const auditQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(200).default(50),
   offset: z.coerce.number().min(0).default(0),
+});
+
+const usageQuerySchema = z.object({
+  range: z.string().optional(),
 });
 
 router.use('/provision', provisionRouter);
@@ -246,6 +250,36 @@ router.post(
 );
 
 router.get(
+  '/:id/usage',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('read', 'tenant'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const tenantId = req.params.id;
+      const { range } = usageQuerySchema.parse(req.query);
+      const usage = await tenantUsageService.getTenantUsage(tenantId, range);
+      return res.json({
+        success: true,
+        data: usage,
+        receipt: buildReceipt('TENANT_USAGE_VIEWED', tenantId, authReq.user?.id || 'unknown'),
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message.startsWith('Invalid range')) {
+        return res.status(400).json({ success: false, error: error.message });
+      }
+      logger.error('Error in GET /api/tenants/:id/usage:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.get(
   '/:id/audit',
   ensureAuthenticated,
   ensureTenantScope,
@@ -274,15 +308,6 @@ router.get(
   '/:id/audit/export',
   ensureAuthenticated,
   ensureTenantScope,
-  policyActionGate({
-    action: 'export_receipts',
-    resource: 'tenant_audit',
-    resolveResourceId: (req) => req.params.id,
-    buildResourceAttributes: (req) => ({
-      tenantId: req.params.id,
-      exportType: 'tenant_audit',
-    }),
-  }),
   policyGate(),
   ensurePolicy('read', 'tenant'),
   async (req: Request, res: Response) => {

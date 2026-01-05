@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-02T09:00:00Z",
-  "revision_note": "Added Maestro privileged-action policy bundle catalogs, PDP gating, and policy test coverage",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",

@@ -24,3 +24,31 @@ jest-haste-map: duplicate manual mock found: entityMocks
 
       at _log (../node_modules/.pnpm/dotenv@17.2.3/node_modules/dotenv/lib/main.js:142:11)
 
+FAIL tests/services/VectorStoreService.test.ts
+  ● Test suite failed to run
+
+    [96mtests/services/VectorStoreService.test.ts[0m:[93m34[0m:[93m57[0m - [91merror[0m[90m TS2345: [0mArgument of type 'any[]' is not assignable to parameter of type 'never'.
+
+    [7m34[0m     mockGenerateEmbedding = jest.fn().mockResolvedValue(new Array(3072).fill(0.1));
+    [7m  [0m [91m                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [96mtests/services/VectorStoreService.test.ts[0m:[93m35[0m:[93m58[0m - [91merror[0m[90m TS2345: [0mArgument of type 'any[][]' is not assignable to parameter of type 'never'.
+
+    [7m35[0m     mockGenerateEmbeddings = jest.fn().mockResolvedValue([
+    [7m  [0m [91m                                                         ~[0m
+    [7m36[0m         new Array(3072).fill(0.1),
+    [7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m37[0m         new Array(3072).fill(0.2)
+    [7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m38[0m     ]);
+    [7m  [0m [91m~~~~~[0m
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        258.912 s
+Ran all test suites matching /tests\/services\/VectorStoreService.test.ts/i.
+🧹 Starting Jest Global Teardown...
+🗑️ Cleaning up temporary directories...
+🔌 Closing global connections...
+✅ Jest Global Teardown completed successfully
+ ELIFECYCLE  Test failed. See above for more details.
