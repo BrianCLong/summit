@@ -13,12 +13,14 @@ prompts:
         - docs/ga/
         - artifacts/
         - metrics/
+        - observability/
         - .github/
       domains:
         - governance
         - ci
         - provenance
         - quality
+        - observability
     verification:
       tiers_required:
         - A
@@ -28,31 +30,25 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: brand-pack-runtime-theming
+  - id: runbooks-docs-update
     version: v1
-    path: prompts/tasks/brand-pack-runtime-theming.md
-    sha256: 212b1403926eee702edc4d83b7befe3a68f3c87aa9c7cee15d4d3ac8055877c1
-    description: Tenant-aware brand pack pipeline with runtime Switchboard theming, receipts, and audit logging.
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
     scope:
       paths:
-        - server/src/app.ts
-        - server/src/services/brand-packs/
-        - server/src/provenance/
-        - server/src/audit/
-        - apps/web/
-        - docs/
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
         - agents/examples/
-        - prompts/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
       domains:
-        - theming
-        - provenance
-        - audit
-        - web
-        - server
-        - docs
+        - documentation
+        - operations
+        - governance
     verification:
       tiers_required:
-        - B
+        - C
       debt_budget:
         permitted: 0
         retirement_target: 0

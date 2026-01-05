@@ -43,6 +43,7 @@ import narrativeSimulationRouter from './routes/narrative-sim.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
+import policyManagementRouter from './routes/policies/policy-management.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
@@ -101,6 +102,7 @@ import ontologyRouter from './routes/ontology.js';
 import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
+import tenantUsageRouter from './routes/tenants/usage.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
 import analyticsRouter from './routes/analytics.js';
@@ -375,6 +377,8 @@ export const createApp = async () => {
 
   // Other routes
   // app.use('/api/policy', policyRouter);
+  app.use('/api/policies', policyManagementRouter);
+  app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
   app.use('/api/brand-packs', brandPackRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
@@ -415,6 +419,7 @@ export const createApp = async () => {
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/costs', resourceCostsRouter);
   app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
+  app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
   app.use('/api/query-replay', queryReplayRouter);
   app.use('/api/correctness', correctnessProgramRouter);
