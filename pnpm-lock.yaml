@@ -142,9 +142,6 @@ importers:
       body-parser:
         specifier: ^2.2.1
         version: 2.2.1
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.2
       concurrently:
         specifier: ^9.2.0
         version: 9.2.1
@@ -172,9 +169,6 @@ importers:
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
-      glob:
-        specifier: '>=11.1.0'
-        version: 13.0.0
       globals:
         specifier: ^15.15.0
         version: 15.15.0

@@ -3,6 +3,7 @@ import addFormats from 'ajv-formats';
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, basename, extname } from 'path';
 import { parseArgs } from 'util';
+import { ReleaseBundleError } from './lib/errors.mjs';
 
 const options = {
   dir: { type: 'string', default: 'dist/release' },
@@ -67,16 +68,22 @@ async function main() {
       const valid = validate(data);
 
       if (!valid) {
-        console.error(`❌ Validation failed for ${artifactName}:`);
-        console.error(`   ${validate.errors[0].instancePath} ${validate.errors[0].message}`);
-        failureCount++;
+        throw new ReleaseBundleError(
+          'SCHEMA_INVALID',
+          `Schema validation failed for ${artifactName}: ${validate.errors[0].instancePath} ${validate.errors[0].message}`,
+          validate.errors
+        );
       } else {
-        // console.log(`✅ ${artifactName} passed`);
         successCount++;
       }
 
     } catch (e) {
-      console.error(`❌ Error processing ${artifactName}: ${e.message}`);
+      if (e instanceof ReleaseBundleError) {
+        console.error(`❌ [${e.code}] Error processing ${artifactName}: ${e.message}`);
+        if (e.details) console.error(`   Details: ${JSON.stringify(e.details)}`);
+      } else {
+        console.error(`❌ Error processing ${artifactName}: ${e.message}`);
+      }
       failureCount++;
     }
   }
