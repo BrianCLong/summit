@@ -1,0 +1,170 @@
+{
+  "issue_number": 116,
+  "title": "Audit and Harden Docker Configurations",
+  "url": "https://github.com/BrianCLong/summit/issues/116",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:15:29Z",
+  "createdAt": "2025-08-12T04:41:12Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15280,
+        "url": "https://github.com/BrianCLong/summit/pull/15280",
+        "mergedAt": "2026-01-01T07:12:05Z",
+        "title": "feat: add advisory lock to billing close"
+      },
+      {
+        "number": 11912,
+        "url": "https://github.com/BrianCLong/summit/pull/11912",
+        "mergedAt": null,
+        "title": "Implement structured logging with correlation IDs"
+      },
+      {
+        "number": 10142,
+        "url": "https://github.com/BrianCLong/summit/pull/10142",
+        "mergedAt": "2025-10-14T08:36:31Z",
+        "title": "feat: add chaos orchestration framework"
+      },
+      {
+        "number": 10092,
+        "url": "https://github.com/BrianCLong/summit/pull/10092",
+        "mergedAt": "2025-10-14T13:06:07Z",
+        "title": "feat: build intelligent anomaly detection engine"
+      },
+      {
+        "number": 10126,
+        "url": "https://github.com/BrianCLong/summit/pull/10126",
+        "mergedAt": "2025-10-14T08:39:46Z",
+        "title": "feat: add PerfTrace Jira automation toolkit"
+      },
+      {
+        "number": 1341,
+        "url": "https://github.com/BrianCLong/summit/pull/1341",
+        "mergedAt": "2025-09-23T11:06:24Z",
+        "title": "Harden policy and SLO gates for Maestro stabilization"
+      },
+      {
+        "number": 1313,
+        "url": "https://github.com/BrianCLong/summit/pull/1313",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: add workflow modeling validation suites"
+      },
+      {
+        "number": 1715,
+        "url": "https://github.com/BrianCLong/summit/pull/1715",
+        "mergedAt": null,
+        "title": "chore(deps): bump fastapi from 0.78.0 to 0.117.1"
+      },
+      {
+        "number": 10079,
+        "url": "https://github.com/BrianCLong/summit/pull/10079",
+        "mergedAt": null,
+        "title": "[P0][Delta] Fix CI failures - gitleaks, contract-tests, python deps"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 1303,
+        "url": "https://github.com/BrianCLong/summit/pull/1303",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "fix: align mcp core test tooling and lock handling"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

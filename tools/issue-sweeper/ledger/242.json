@@ -1,0 +1,89 @@
+{
+  "issue_number": 242,
+  "title": "Notifications: Preferences & digests",
+  "url": "https://github.com/BrianCLong/summit/issues/242",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9108055729,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/real-time",
+      "name": "real-time",
+      "color": "1d76db",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:25Z",
+  "createdAt": "2025-08-14T04:54:25Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 11841,
+        "url": "https://github.com/BrianCLong/summit/pull/11841",
+        "mergedAt": "2025-11-20T09:48:29Z",
+        "title": "feat: implement IntelGraph ML benchmarking and auto-tuning stack"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 1221,
+        "url": "https://github.com/BrianCLong/summit/pull/1221",
+        "mergedAt": null,
+        "title": "Sprint v0.5 – Guarded Rail"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

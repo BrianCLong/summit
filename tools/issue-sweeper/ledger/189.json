@@ -1,0 +1,158 @@
+{
+  "issue_number": 189,
+  "title": "Load testing and optimization",
+  "url": "https://github.com/BrianCLong/summit/issues/189",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968276,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/performance",
+      "name": "performance",
+      "color": "D93F0B",
+      "default": false,
+      "description": "Perf/Load"
+    },
+    {
+      "id": 9107968405,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRlQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/testing",
+      "name": "testing",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056323,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpAw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-01",
+      "name": "due:2025-11-01",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:36Z",
+  "createdAt": "2025-08-14T04:42:36Z",
+  "classification": "perf",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 11789,
+        "url": "https://github.com/BrianCLong/summit/pull/11789",
+        "mergedAt": "2025-11-20T21:13:08Z",
+        "title": "docs: capture deepagent mvp deliverable"
+      },
+      {
+        "number": 15349,
+        "url": "https://github.com/BrianCLong/summit/pull/15349",
+        "mergedAt": "2026-01-01T09:42:36Z",
+        "title": "feat: MVP-4 GA Security Tests and ESM Fixes"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

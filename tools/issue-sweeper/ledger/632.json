@@ -1,0 +1,59 @@
+{
+  "issue_number": 632,
+  "title": "chore(deps): bump opencv-python from 4.8.1.78 to 4.12.0.88",
+  "url": "https://github.com/BrianCLong/summit/pull/632",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9133974250,
+      "node_id": "LA_kwDOPaNncM8AAAACIG1i6g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/python",
+      "name": "python",
+      "color": "2b67c6",
+      "default": false,
+      "description": "Pull requests that update python code"
+    }
+  ],
+  "updatedAt": "2025-08-19T09:20:39Z",
+  "createdAt": "2025-08-19T08:06:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15341,
+        "url": "https://github.com/BrianCLong/summit/pull/15341",
+        "mergedAt": "2026-01-01T08:47:02Z",
+        "title": "Implement adversarial resistance and truth defense"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -60,6 +60,55 @@ function parsePolicy(content) {
   return policy;
 }
 
+/**
+ * Checks if a given timestamp is within a release freeze window.
+ * @param {object} policy - The release freeze policy.
+ * @param {string} nowIsoInTzOrComparable - The timestamp to check, in ISO 8601 format.
+ * @returns {boolean} True if the timestamp is within a freeze window, false otherwise.
+ */
+export function isFrozen(policy, nowIsoInTzOrComparable) {
+  const now = new Date(nowIsoInTzOrComparable);
+
+  // Check for weekend freezes in UTC to ensure deterministic behavior
+  const dayOfWeek = now.toLocaleString('en-US', { weekday: 'long', timeZone: 'UTC' });
+  if (policy.weekends && policy.weekends.includes(dayOfWeek)) {
+    return true;
+  }
+
+  // Check for explicit date range freezes
+  if (policy.ranges) {
+    for (const range of policy.ranges) {
+      const from = new Date(range.from);
+      const to = new Date(range.to);
+      if (now >= from && now <= to) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Validates a release freeze override.
+ * @param {object} policy - The release freeze policy.
+ * @param {boolean} override - Whether an override is being attempted.
+ * @param {string} reason - The reason for the override.
+ * @returns {void} Throws an error if the override is invalid.
+ */
+export function validateOverride(policy, override, reason) {
+  if (!override) {
+    return;
+  }
+
+  const minLength = policy.overrideMinLength || 1;
+  if (!reason || reason.length < minLength) {
+    throw new Error(
+      `Override reason must be at least ${minLength} characters long.`
+    );
+  }
+}
+
 async function main() {
   let exitCode = 0;
   try {
@@ -113,7 +162,7 @@ async function main() {
     };
     const currentRRuleDay = rruleDayMap[weekday];
 
-    let isFrozen = false;
+    let isFrozenNow = false;
     let matchedWindow = null;
 
     if (policy.freeze.enabled) {
@@ -125,7 +174,7 @@ async function main() {
           if (match) {
             const days = match[1].split(',');
             if (days.includes(currentRRuleDay)) {
-              isFrozen = true;
+              isFrozenNow = true;
               matchedWindow = window.name;
               break;
             }
@@ -134,7 +183,7 @@ async function main() {
 
         if (window.start && window.end) {
           if (nowWallTimeISO >= window.start && nowWallTimeISO <= window.end) {
-            isFrozen = true;
+            isFrozenNow = true;
             matchedWindow = window.name;
             break;
           }
@@ -143,7 +192,7 @@ async function main() {
     }
 
     const result = {
-      frozen: isFrozen,
+      frozen: isFrozenNow,
       matched: matchedWindow,
       override: false,
       at: now.toISOString(),
@@ -152,7 +201,7 @@ async function main() {
 
     let summaryMessage = '';
 
-    if (isFrozen) {
+    if (isFrozenNow) {
       if (override && policy.override.allowed) {
         if (policy.override.require_reason) {
           if (!overrideReason || overrideReason.length < policy.override.reason_min_len) {
@@ -200,4 +249,7 @@ async function main() {
   }
 }
 
-main();
+// Only run main when executed directly (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}
