@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
@@ -24,6 +27,9 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+
+      - name: Preflight Release
+        run: node scripts/release/preflight-release.mjs
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
