@@ -29,6 +29,9 @@ const SupplyChainDashboard = React.lazy(
 const AdvancedDashboardPage = React.lazy(
   () => import('@/pages/dashboards/AdvancedDashboardPage')
 )
+const UsageCostDashboard = React.lazy(
+  () => import('@/pages/dashboards/UsageCostDashboard')
+)
 const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
@@ -173,6 +176,10 @@ function App() {
                       <Route
                         path="dashboards/advanced"
                         element={<AdvancedDashboardPage />}
+                      />
+                      <Route
+                        path="dashboards/usage-cost"
+                        element={<UsageCostDashboard />}
                       />
                       <Route
                         path="internal/command"

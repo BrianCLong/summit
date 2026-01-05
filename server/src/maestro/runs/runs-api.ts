@@ -15,10 +15,10 @@ import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
 import { flagService } from '../../services/FlagService.js';
 import { MaestroEvents } from '../../realtime/maestro.js';
-import { getPostgresPool } from '../../config/database.js';
-import { RedactionService } from '../../redaction/redact.js';
-import { tenantService } from '../../services/TenantService.js';
-import { evidenceProvenanceService } from '../evidence/provenance-service.js';
+import {
+  policyActionGate,
+  evaluatePolicyAction,
+} from '../../middleware/policy-action-gate.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -29,11 +29,6 @@ router.use(maestroAuthzMiddleware({ resource: 'runs' }));
 // In a real application, Redis client would be injected or managed globally
 const redisClient = new Redis(); // This should be a proper Redis client instance
 const budgetController = createBudgetController(redisClient);
-const redactionService = new RedactionService();
-const evidenceRedactionPolicy = {
-  rules: ['pii', 'financial', 'sensitive'],
-  redactionMask: '[REDACTED]',
-};
 
 const emitRunStatus = async (
   tenantId: string,
@@ -96,7 +91,18 @@ router.get('/runs', authorize('run_maestro'), async (req, res) => {
 });
 
 // POST /runs - Create a new run
-router.post('/runs', authorize('run_maestro'), async (req, res) => {
+router.post(
+  '/runs',
+  policyActionGate({
+    action: 'start_run',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.body?.pipeline_id,
+    buildResourceAttributes: (req) => ({
+      pipelineId: req.body?.pipeline_id,
+    }),
+  }),
+  authorize('run_maestro'),
+  async (req, res) => {
   // Kill Switch Check
   if (flagService.getFlag('DISABLE_MAESTRO_RUNS')) {
       return res.status(503).json({ error: 'Maestro run creation is currently disabled due to maintenance or high load.' });
@@ -231,105 +237,6 @@ router.get('/runs/:id', authorize('run_maestro'), async (req, res) => {
   }
 });
 
-// GET /runs/:id/evidence-bundle - Evidence bundle with receipts + hashes
-router.get(
-  '/runs/:id/evidence-bundle',
-  authorize('run_maestro'),
-  async (req, res) => {
-    try {
-      const tenantId = (req.context as RequestContext).tenantId;
-      const runId = req.params.id;
-      const run = await runsRepo.getRunForTenant(runId, tenantId);
-      if (!run) {
-        return res.status(404).json({ error: 'Run not found' });
-      }
-
-      const pool = getPostgresPool();
-
-      const { rows: receiptRows } = await pool.query(
-        `SELECT ea.id, ea.sha256_hash, ea.created_at, eac.content
-         FROM evidence_artifacts ea
-         LEFT JOIN evidence_artifact_content eac ON eac.artifact_id = ea.id
-         WHERE ea.run_id = $1 AND ea.artifact_type = 'receipt'
-         ORDER BY ea.created_at ASC`,
-        [runId],
-      );
-
-      const receipts = receiptRows
-        .map((row: any) => {
-          if (!row.content) {
-            return null;
-          }
-          try {
-            return JSON.parse(row.content.toString('utf8'));
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean);
-
-      const redactedReceipts = await Promise.all(
-        receipts.map((receipt: any) =>
-          redactionService.redactObject(receipt, evidenceRedactionPolicy, tenantId, {
-            purpose: 'maestro.evidence_bundle',
-            runId,
-          }),
-        ),
-      );
-
-      const { rows: sbomRows } = await pool.query(
-        `SELECT id, sha256_hash, created_at
-         FROM evidence_artifacts
-         WHERE run_id = $1 AND artifact_type = 'sbom'
-         ORDER BY created_at ASC`,
-        [runId],
-      );
-
-      const tenant = await tenantService.getTenant(tenantId);
-      const policyBundleVersion =
-        tenant?.settings?.policy_bundle?.version ||
-        tenant?.settings?.policy_bundle?.id ||
-        process.env.POLICY_BUNDLE_VERSION ||
-        'unknown';
-
-      const receiptChain = await evidenceProvenanceService.verifyReceiptChain(
-        runId,
-      );
-
-      res.json({
-        runId,
-        generatedAt: new Date().toISOString(),
-        policyBundleVersion,
-        hashes: {
-          receipts: receiptRows.map((row: any) => ({
-            id: row.id,
-            sha256: row.sha256_hash,
-            createdAt: row.created_at,
-          })),
-          sboms: sbomRows.map((row: any) => ({
-            id: row.id,
-            sha256: row.sha256_hash,
-            createdAt: row.created_at,
-          })),
-        },
-        receipts: redactedReceipts,
-        sbomRefs: sbomRows.map((row: any) => ({
-          id: row.id,
-          sha256: row.sha256_hash,
-          createdAt: row.created_at,
-        })),
-        receiptChain,
-        redaction: {
-          policy: evidenceRedactionPolicy,
-        },
-      });
-    } catch (error: any) {
-      console.error('Error fetching evidence bundle:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  },
-);
-
 // PUT /runs/:id - Update a run
 router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
   try {
@@ -342,6 +249,35 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
     }
 
     const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
+
+    if (validation.data.status === 'cancelled') {
+      const decision = await evaluatePolicyAction({
+        action: 'cancel_run',
+        resource: 'maestro_run',
+        tenantId,
+        userId: (req as any).user?.id,
+        role: (req as any).user?.role,
+        resourceAttributes: {
+          runId: req.params.id,
+          status: validation.data.status,
+        },
+        subjectAttributes: (req as any).user?.attributes || {},
+        sessionContext: {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          timestamp: Date.now(),
+          sessionId: (req as any).sessionID,
+        },
+      });
+
+      if (!decision.allow) {
+        return res.status(403).json({
+          error: 'Forbidden',
+          reason: decision.reason,
+          decision,
+        });
+      }
+    }
 
     // Calculate duration if both start and end times provided
     if (validation.data.started_at && validation.data.completed_at) {
@@ -367,7 +303,18 @@ router.put('/runs/:id', authorize('run_maestro'), async (req, res) => {
 });
 
 // DELETE /runs/:id - Delete a run
-router.delete('/runs/:id', authorize('run_maestro'), async (req, res) => {
+router.delete(
+  '/runs/:id',
+  policyActionGate({
+    action: 'delete_run',
+    resource: 'maestro_run',
+    resolveResourceId: (req) => req.params.id,
+    buildResourceAttributes: (req) => ({
+      runId: req.params.id,
+    }),
+  }),
+  authorize('run_maestro'),
+  async (req, res) => {
     try {
       const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
       const deleted = await runsRepo.delete(req.params.id, tenantId); // Pass tenantId

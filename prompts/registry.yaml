@@ -28,29 +28,25 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: maestro-provenance-receipts
+  - id: runbooks-docs-update
     version: v1
-    path: prompts/engineering/maestro-provenance-receipts.md
-    sha256: 3c4637161ddf1eaa797aea60875d9dea184ef1f4368ce76f3c6890212cdced8c
-    description: Emit, sign, and export Maestro provenance receipts with verification tests.
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
     scope:
       paths:
-        - server/src/maestro/
-        - server/src/redaction/
-        - server/tests/maestro/
-        - PROVENANCE_SCHEMA.md
-        - provenance/
+        - docs/runbooks/
         - docs/roadmap/STATUS.json
-        - prompts/engineering/
         - agents/examples/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
       domains:
-        - provenance
+        - documentation
+        - operations
         - governance
-        - maestro
-        - evidence
     verification:
       tiers_required:
-        - B
+        - C
       debt_budget:
         permitted: 0
         retirement_target: 0

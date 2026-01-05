@@ -1,0 +1,239 @@
+{
+  "issue_number": 30,
+  "title": "M0: Add .editorconfig, Prettier, ESLint, and pre-commit hooks",
+  "url": "https://github.com/BrianCLong/summit/issues/30",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:28Z",
+  "createdAt": "2025-08-12T00:15:31Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15368,
+        "url": "https://github.com/BrianCLong/summit/pull/15368",
+        "mergedAt": null,
+        "title": "Automate issue triage labeling"
+      },
+      {
+        "number": 14776,
+        "url": "https://github.com/BrianCLong/summit/pull/14776",
+        "mergedAt": null,
+        "title": "Sprint N+30: Continuous Assurance Framework"
+      },
+      {
+        "number": 14004,
+        "url": "https://github.com/BrianCLong/summit/pull/14004",
+        "mergedAt": "2025-12-20T01:56:53Z",
+        "title": "Epic 30: Data Governance & Quality Platform"
+      },
+      {
+        "number": 12351,
+        "url": "https://github.com/BrianCLong/summit/pull/12351",
+        "mergedAt": "2025-12-18T03:02:30Z",
+        "title": "Document Information Warfare Sprints 26-30"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 12815,
+        "url": "https://github.com/BrianCLong/summit/pull/12815",
+        "mergedAt": "2025-12-04T16:20:37Z",
+        "title": "Add sprint plan for Mar 30–Apr 10 2026"
+      },
+      {
+        "number": 14909,
+        "url": "https://github.com/BrianCLong/summit/pull/14909",
+        "mergedAt": "2025-12-30T22:48:35Z",
+        "title": "Add operational hardening blueprint"
+      },
+      {
+        "number": 14906,
+        "url": "https://github.com/BrianCLong/summit/pull/14906",
+        "mergedAt": "2025-12-30T22:48:42Z",
+        "title": "Add mobile architecture reset and release safety blueprint"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 14260,
+        "url": "https://github.com/BrianCLong/summit/pull/14260",
+        "mergedAt": "2025-12-22T08:10:14Z",
+        "title": "Add activation and retention execution plan"
+      },
+      {
+        "number": 14995,
+        "url": "https://github.com/BrianCLong/summit/pull/14995",
+        "mergedAt": "2025-12-30T22:45:11Z",
+        "title": "feat(xai): Graph-XAI v0.2 - Bookmarks & Causal Traces"
+      },
+      {
+        "number": 13765,
+        "url": "https://github.com/BrianCLong/summit/pull/13765",
+        "mergedAt": "2025-12-20T03:34:50Z",
+        "title": "Update Sprint 8 growth and expansion plan"
+      },
+      {
+        "number": 15204,
+        "url": "https://github.com/BrianCLong/summit/pull/15204",
+        "mergedAt": "2026-01-01T11:46:55Z",
+        "title": "feat: add platform stewardship and long-horizon governance"
+      },
+      {
+        "number": 13815,
+        "url": "https://github.com/BrianCLong/summit/pull/13815",
+        "mergedAt": "2025-12-20T03:40:18Z",
+        "title": "Add referrer policy and XSS filter to security middleware"
+      },
+      {
+        "number": 13882,
+        "url": "https://github.com/BrianCLong/summit/pull/13882",
+        "mergedAt": "2025-12-20T03:21:27Z",
+        "title": "Create multi-agent orchestration prompt for GA release"
+      },
+      {
+        "number": 13897,
+        "url": "https://github.com/BrianCLong/summit/pull/13897",
+        "mergedAt": "2025-12-20T03:20:12Z",
+        "title": "Implement policy-gated approvals for high-risk operations"
+      },
+      {
+        "number": 14023,
+        "url": "https://github.com/BrianCLong/summit/pull/14023",
+        "mergedAt": "2025-12-19T22:46:22Z",
+        "title": "Upgrade deepspeed to version 0.15.1"
+      },
+      {
+        "number": 14015,
+        "url": "https://github.com/BrianCLong/summit/pull/14015",
+        "mergedAt": "2025-12-19T21:35:03Z",
+        "title": "Update Pillow version to 10.3.0"
+      },
+      {
+        "number": 14014,
+        "url": "https://github.com/BrianCLong/summit/pull/14014",
+        "mergedAt": "2025-12-19T21:27:26Z",
+        "title": "Update python-jose version to 3.4.0"
+      },
+      {
+        "number": 14009,
+        "url": "https://github.com/BrianCLong/summit/pull/14009",
+        "mergedAt": "2025-12-19T21:17:18Z",
+        "title": "Update nltk version to 3.9 in requirements.txt"
+      },
+      {
+        "number": 14006,
+        "url": "https://github.com/BrianCLong/summit/pull/14006",
+        "mergedAt": "2025-12-19T21:10:25Z",
+        "title": "Update changed-files action version in workflow"
+      },
+      {
+        "number": 14448,
+        "url": "https://github.com/BrianCLong/summit/pull/14448",
+        "mergedAt": "2025-12-25T03:17:36Z",
+        "title": "Sprint N+12: Revenue Maturity & Compliance Expansion"
+      },
+      {
+        "number": 13879,
+        "url": "https://github.com/BrianCLong/summit/pull/13879",
+        "mergedAt": "2025-12-20T03:21:48Z",
+        "title": "Create multi-agent release prompt for MVP to GA"
+      },
+      {
+        "number": 14022,
+        "url": "https://github.com/BrianCLong/summit/pull/14022",
+        "mergedAt": "2025-12-19T22:40:03Z",
+        "title": "Upgrade python-multipart to version 0.0.18"
+      },
+      {
+        "number": 15142,
+        "url": "https://github.com/BrianCLong/summit/pull/15142",
+        "mergedAt": null,
+        "title": "Review recent changes"
+      },
+      {
+        "number": 13623,
+        "url": "https://github.com/BrianCLong/summit/pull/13623",
+        "mergedAt": "2025-12-17T01:48:33Z",
+        "title": "Implement content-aware data loss prevention controls"
+      },
+      {
+        "number": 13625,
+        "url": "https://github.com/BrianCLong/summit/pull/13625",
+        "mergedAt": "2025-12-17T01:39:27Z",
+        "title": "Build executive dashboard and KPI tracking system"
+      },
+      {
+        "number": 15290,
+        "url": "https://github.com/BrianCLong/summit/pull/15290",
+        "mergedAt": "2026-01-01T05:46:03Z",
+        "title": "Add Claude Code prompt for priority work"
+      },
+      {
+        "number": 14362,
+        "url": "https://github.com/BrianCLong/summit/pull/14362",
+        "mergedAt": "2025-12-22T07:15:17Z",
+        "title": "docs: add GLM-4.6 to catalog"
+      },
+      {
+        "number": 14021,
+        "url": "https://github.com/BrianCLong/summit/pull/14021",
+        "mergedAt": "2025-12-19T22:35:08Z",
+        "title": "Upgrade paddlepaddle to version 2.6.2"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

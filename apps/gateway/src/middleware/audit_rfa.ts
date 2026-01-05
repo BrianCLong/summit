@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-// @ts-ignore
-import { emitAudit } from '../../../../libs/audit/node/index';
+import { emitAudit } from '@intelgraph/audit/index';
 import { trace } from '@opentelemetry/api';
 import * as fs from 'fs';
 import * as path from 'path';
