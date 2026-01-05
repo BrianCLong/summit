@@ -28,3 +28,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: chaos-drills-policy-signing
+    version: v1
+    path: prompts/chaos-drills-policy-signing-v1.md
+    sha256: 167c9301775bec3f94c24f1aa7883a1b3ba839d2a8279be7024dc196fafde583
+    description: Chaos drill scenarios, fail-closed policy/signing safeguards, and provenance receipts/recovery evidence.
+    scope:
+      paths:
+        - drills/
+        - server/src/services/
+        - server/src/provenance/
+        - docs/
+        - agents/examples/
+        - prompts/
+      domains:
+        - resilience
+        - governance
+        - provenance
+        - security
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
