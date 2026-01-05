@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run release process without publishing to GitHub Releases"
+        type: boolean
+        default: false
+        required: false
 
 permissions:
   contents: write
@@ -93,8 +100,34 @@ jobs:
 
       - name: Create Evidence Bundle
         run: |
-          mkdir -p release-assets
-          tar -czf release-assets/evidence.tar.gz evidence/
+          mkdir -p dist/release
+          tar -czf dist/release/evidence.tar.gz evidence/
+
+      - name: Check for Release Directory
+        id: check_dir
+        if: always()
+        run: |
+          if [ -d "dist/release" ]; then
+            echo "has_release_dir=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_release_dir=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Release Artifact
+        if: always() && steps.check_dir.outputs.has_release_dir == 'true'
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: release-bundle-${{ github.ref_name }}-${{ github.run_id }}
+          path: dist/release/**
+          retention-days: 14
+
+      - name: Release Summary
+        if: always() && steps.check_dir.outputs.has_release_dir == 'true'
+        run: |
+          echo "### Release Artifacts Uploaded 📦" >> $GITHUB_STEP_SUMMARY
+          echo "Artifact Name: \`release-bundle-${{ github.ref_name }}-${{ github.run_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Files uploaded:" >> $GITHUB_STEP_SUMMARY
+          ls dist/release | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
 
       - name: Generate Release Notes
         id: notes
@@ -102,9 +135,10 @@ jobs:
           echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
+        if: github.event_name == 'push' || inputs.dry_run == false
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/evidence.tar.gz
+          files: dist/release/evidence.tar.gz
           body: ${{ steps.notes.outputs.notes }}
           draft: false
           prerelease: false
