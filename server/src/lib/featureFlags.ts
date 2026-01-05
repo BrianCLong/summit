@@ -69,6 +69,16 @@ const FLAG_CATALOG: Record<string, FeatureFlagDefinition> = {
     defaultValue: false,
     description: 'Enables the release criteria engine for case exports.',
   },
+  'support.impersonation': {
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Enables policy-gated support impersonation flows.',
+  },
+  'support.healthBundle': {
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Enables export of tenant health bundles with redaction.',
+  },
   'SUSPICIOUS_DETECT_ENABLED': {
     type: 'boolean',
     defaultValue: false,

@@ -55,6 +55,28 @@ To restore the PostgreSQL relational database, execute the following script, pro
 - **Example:** `./scripts/restore/postgres_restore.sh ./backups/postgres/postgres-backup-20231027123456.sql`
 - **Description:** This script stops the PostgreSQL container, removes its data volume (simulating data loss and ensuring a clean state), restarts the service to re-initialize the volume, copies the `.sql` file into the container, and then uses `psql` to restore the database.
 
+## Restore Drill Validation (RTO/RPO)
+
+Run a restore drill after the restore steps to assert **RTO ≤ 60 minutes** and
+**RPO ≤ 15 minutes**, aligned to the Summit Readiness Assertion
+(`docs/SUMMIT_READINESS_ASSERTION.md`).
+
+1. Capture timestamps:
+   - `backup_timestamp`: time of the last successful backup used for the restore.
+   - `restore_start`: when the restore work began.
+   - `restore_end`: when the restore completed and services were ready for validation.
+2. Generate the drill evidence artifact:
+
+```bash
+./scripts/restore/restore_drill.sh \
+  --backup-timestamp "2026-01-01T11:45:00Z" \
+  --restore-start "2026-01-01T12:00:00Z" \
+  --restore-end "2026-01-01T12:35:00Z"
+```
+
+The script writes a JSON evidence artifact to `evidence/restore-drills/` and exits
+non-zero if thresholds are not met.
+
 ## Post-Restore Verification
 
 After performing the restore operations, it is crucial to verify the integrity of the restored data and the functionality of the IntelGraph system.
