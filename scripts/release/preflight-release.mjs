@@ -48,6 +48,9 @@ console.log(`✅ Tag resolved to SHA: ${sha}`);
 
 // 4. Check Ancestry
 const defaultBranch = process.env.DEFAULT_BRANCH || 'main';
+let ancestryAcceptedVia = 'none';
+let series = null;
+let seriesBranch = null;
 
 // Check if origin/<defaultBranch> exists, if not try to fetch
 let originRef = `origin/${defaultBranch}`;
@@ -60,18 +63,46 @@ if (!run(`git rev-parse --verify ${originRef}`)) {
     }
 }
 
-let reachable = false;
+let reachableFromDefault = false;
 try {
   execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: 'ignore' });
-  reachable = true;
+  reachableFromDefault = true;
 } catch (e) {
-  reachable = false;
+  reachableFromDefault = false;
 }
 
-if (!reachable) {
-  fail(`Tag ${TAG} is not reachable from default branch '${originRef}'. Release tags must be on the default branch.`);
+if (reachableFromDefault) {
+  ancestryAcceptedVia = 'default';
+  console.log(`✅ Tag is reachable from ${originRef}`);
+} else {
+  console.log(`ℹ️ Tag not reachable from ${originRef}, checking for series branch match...`);
+  // Check if it is a series branch case
+  // versionExpected is X.Y.Z
+  const seriesMatch = versionExpected.match(/^(\d+\.\d+)\.\d+$/);
+  if (seriesMatch) {
+    series = seriesMatch[1];
+    seriesBranch = `release/${series}`;
+    const seriesRef = `origin/${seriesBranch}`;
+
+    // Check if series branch exists
+    if (run(`git rev-parse --verify ${seriesRef}`)) {
+       // Check reachability
+       try {
+          execSync(`git merge-base --is-ancestor ${sha} ${seriesRef}`, { stdio: 'ignore' });
+          ancestryAcceptedVia = 'series';
+          console.log(`✅ Tag is reachable from ${seriesRef}`);
+       } catch (e) {
+          console.log(`❌ Tag not reachable from ${seriesRef}`);
+       }
+    } else {
+      console.log(`ℹ️ Series branch ${seriesRef} does not exist.`);
+    }
+  }
 }
-console.log(`✅ Tag is reachable from ${originRef}`);
+
+if (ancestryAcceptedVia === 'none') {
+  fail(`Tag ${TAG} is not reachable from default branch '${originRef}' or valid series branch.`);
+}
 
 // 5. Version Check
 const mismatches = [];
@@ -127,7 +158,10 @@ const result = {
   tag: TAG,
   sha,
   defaultBranch,
-  reachableFromDefaultBranch: reachable,
+  reachableFromDefaultBranch: ancestryAcceptedVia === 'default', // Keep for backward compat
+  ancestryAcceptedVia,
+  series,
+  seriesBranch,
   versionExpected,
   mismatches
 };
