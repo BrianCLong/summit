@@ -1,26 +1,28 @@
 # Post-GA Migration Status
 
-Generated: 2026-01-05T23:21:22Z
+Generated: 2026-01-05T23:51:40Z
 
 ## Summary
 
 | Metric                              | Count   |
 | ----------------------------------- | ------- |
-| Total Conflicting PRs               | 0       |
-| Labeled `blocked:unrelated-history` | 129     |
-| Labeled `needs:recreated-pr`        | 117     |
-| Labeled `superseded`                | 21      |
-| Labeled `post-ga:migration`         | 134     |
-| **Remaining to Process**            | **-21** |
+| Total Conflicting PRs               | 2       |
+| Labeled `blocked:unrelated-history` | 119     |
+| Labeled `needs:recreated-pr`        | 109     |
+| Labeled `superseded`                | 18      |
+| Labeled `post-ga:migration`         | 124     |
+| **Remaining to Process**            | **-16** |
 
 ## Progress
+
+`[████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]` 900% superseded
 
 ## By Author (Top 10)
 
 | Author                | Conflicting PRs |
 | --------------------- | --------------- |
-| BrianCLong            | 95              |
-| app/google-labs-jules | 33              |
+| BrianCLong            | 94              |
+| app/google-labs-jules | 26              |
 
 ## By Age (Oldest First)
 
@@ -42,7 +44,7 @@ Generated: 2026-01-05T23:21:22Z
 | #15379 | 3d  | Update ADMIN-CONFIG.md and enable DB pool configur...  |
 | #15380 | 3d  | Sprint 2026.02: Hard Gates and Safer Defaults...       |
 | #15381 | 3d  | Enhance Storage, Caching and DR Infrastructure...      |
-| #15383 | 2d  | Build automated issue sweeper runner...                |
+| #15383 | 3d  | Build automated issue sweeper runner...                |
 | #15384 | 2d  | Prepare MVP-4 release for general availability...      |
 | #15391 | 2d  | Include missing server sources in tsconfig...          |
 | #15392 | 2d  | Harden GA coverage and fuzz gates with determinist...  |
