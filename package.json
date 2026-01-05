@@ -77,6 +77,7 @@
     "release": "changeset version && changeset publish",
     "release:bundle": "node scripts/release/release-bundle.mjs",
     "release:verify": "node scripts/release/verify-release-bundle.mjs",
+    "release:diff": "node scripts/release/diff-bundles.mjs",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",

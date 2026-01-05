@@ -108,3 +108,17 @@ Maestro Conductor and other tools can parse these files from the release artifac
 *   `preflight.json`: Results of version and ancestry checks.
 
 Parse these JSON files for automated "go/no-go" decisions.
+
+## 10. Debugging Bundles
+
+To compare two release bundles (e.g., to investigate regressions or verify changes):
+
+```bash
+pnpm release:diff -- --a ./dist/release-v1 --b ./dist/release-v2
+```
+
+This will output:
+*   Added/removed files
+*   Files with changed checksums
+*   Meaningful JSON differences (ignoring timestamps)
+*   Schema version warnings
