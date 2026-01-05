@@ -4,9 +4,21 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.2.3)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry Run? (Skip release creation)'
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: write
+  pull-requests: write
   packages: write
   id-token: write # For OIDC/Cosign if needed
 
@@ -75,6 +87,10 @@ jobs:
     permissions:
       contents: write
       packages: write
+      pull-requests: write
+    env:
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -99,11 +115,36 @@ jobs:
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          NOTES="GA Release ${RELEASE_TAG} (SLSA L3 Compliant)"
+          echo "notes=$NOTES" >> $GITHUB_OUTPUT
+          echo "$NOTES" > release-notes.md
+
+      - name: Generate Release Summary
+        run: node scripts/release/create-release-artifacts.mjs
+
+      - name: Publish Job Summary
+        run: cat dist/release/release-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR (Dry Run)
+        if: env.DRY_RUN == 'true' && github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Try to find PR number associated with this branch
+          PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+
+          if [ -n "$PR_NUM" ]; then
+            echo "Commenting on PR #$PR_NUM"
+            gh pr comment "$PR_NUM" -F dist/release/release-report.md || echo "Failed to comment on PR"
+          else
+            echo "No PR found for branch ${{ github.ref_name }}"
+          fi
 
       - name: Create GitHub Release
+        if: env.DRY_RUN == 'false'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
           files: release-assets/evidence.tar.gz
           body: ${{ steps.notes.outputs.notes }}
           draft: false
