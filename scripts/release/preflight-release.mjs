@@ -23,8 +23,6 @@ function fail(msg, details = []) {
 // 1. Determine TAG
 const TAG = process.env.TAG || process.env.GITHUB_REF_NAME;
 if (!TAG) {
-  // If run without tag, maybe we can assume checking HEAD if it matches a tag?
-  // But requirement is strict.
   fail('No TAG provided via TAG or GITHUB_REF_NAME env vars.');
 }
 
@@ -32,12 +30,15 @@ console.log(`🔍 Checking release preflight for tag: ${TAG}`);
 
 // 2. Parse/Validate Tag
 // Allowed: vX.Y.Z or vX.Y.Z-rc.N
-const tagRegex = /^v(\d+\.\d+\.\d+)(?:-rc\.\d+)?$/;
+const tagRegex = /^v(\d+)\.(\d+)\.(\d+)(?:-rc\.\d+)?$/;
 const match = TAG.match(tagRegex);
 if (!match) {
   fail(`Invalid tag format: ${TAG}. Expected vX.Y.Z or vX.Y.Z-rc.N`);
 }
-const versionExpected = match[1];
+const versionExpected = `${match[1]}.${match[2]}.${match[3]}`; // Reconstruct X.Y.Z without rc
+const major = match[1];
+const minor = match[2];
+const series = `${major}.${minor}`;
 
 // 3. Resolve Tag SHA
 const sha = run(`git rev-parse ${TAG}`);
@@ -48,30 +49,55 @@ console.log(`✅ Tag resolved to SHA: ${sha}`);
 
 // 4. Check Ancestry
 const defaultBranch = process.env.DEFAULT_BRANCH || 'main';
+const releaseBranchPrefix = process.env.RELEASE_BRANCH_PREFIX || 'release/';
 
-// Check if origin/<defaultBranch> exists, if not try to fetch
-let originRef = `origin/${defaultBranch}`;
-if (!run(`git rev-parse --verify ${originRef}`)) {
-    console.log(`ℹ️ ${originRef} not found, attempting fetch...`);
+// Resolve refs
+const defaultBranchRef = `origin/${defaultBranch}`;
+const seriesBranchRef = `origin/${releaseBranchPrefix}${series}`;
+
+// Ensure refs exist or fetch them
+const refsToCheck = [defaultBranchRef, seriesBranchRef];
+refsToCheck.forEach(ref => {
+  if (!run(`git rev-parse --verify ${ref}`)) {
+    console.log(`ℹ️ ${ref} not found, attempting fetch...`);
     try {
-        execSync(`git fetch origin ${defaultBranch} --depth=1`, { stdio: 'inherit' });
+      // Try to fetch the specific branch name from ref string (e.g. origin/main -> main)
+      const branchName = ref.replace('origin/', '');
+      execSync(`git fetch origin ${branchName} --depth=1`, { stdio: 'inherit' });
     } catch (e) {
-        console.warn(`⚠️ Failed to fetch origin/${defaultBranch}. Ancestry check might fail if ref is missing.`);
+      console.warn(`⚠️ Failed to fetch ${ref}. Ancestry check for this branch might fail.`);
     }
-}
+  }
+});
 
-let reachable = false;
+let reachableFromDefault = false;
 try {
-  execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: 'ignore' });
-  reachable = true;
+  execSync(`git merge-base --is-ancestor ${sha} ${defaultBranchRef}`, { stdio: 'ignore' });
+  reachableFromDefault = true;
 } catch (e) {
-  reachable = false;
+  reachableFromDefault = false;
 }
 
-if (!reachable) {
-  fail(`Tag ${TAG} is not reachable from default branch '${originRef}'. Release tags must be on the default branch.`);
+let reachableFromSeries = false;
+try {
+  execSync(`git merge-base --is-ancestor ${sha} ${seriesBranchRef}`, { stdio: 'ignore' });
+  reachableFromSeries = true;
+} catch (e) {
+  reachableFromSeries = false;
 }
-console.log(`✅ Tag is reachable from ${originRef}`);
+
+// Decision Logic
+let ancestryAcceptedVia = 'none';
+
+if (reachableFromDefault) {
+  ancestryAcceptedVia = 'default';
+  console.log(`✅ Tag is reachable from default branch ${defaultBranchRef}`);
+} else if (reachableFromSeries) {
+  ancestryAcceptedVia = 'series';
+  console.log(`✅ Tag is reachable from series branch ${seriesBranchRef}`);
+} else {
+  fail(`Tag ${TAG} is not reachable from default branch '${defaultBranchRef}' OR series branch '${seriesBranchRef}'.`);
+}
 
 // 5. Version Check
 const mismatches = [];
@@ -92,8 +118,6 @@ function checkPackage(path, name) {
 checkPackage('package.json', 'ROOT');
 
 // Workspaces - "best effort" scanning based on repo structure knowledge
-// "packages/*", "client", "server"
-
 const candidates = ['client', 'server'];
 
 // Scan packages/*
@@ -127,10 +151,29 @@ const result = {
   tag: TAG,
   sha,
   defaultBranch,
-  reachableFromDefaultBranch: reachable,
+  candidateSeriesBranch: `${releaseBranchPrefix}${series}`,
+  reachableFromDefaultBranch: reachableFromDefault,
+  reachableFromSeriesBranch: reachableFromSeries,
+  ancestryAcceptedVia,
   versionExpected,
   mismatches
 };
 
 writeFileSync(join(outputDir, 'preflight.json'), JSON.stringify(result, null, 2));
 console.log(`📝 Wrote preflight results to ${join(outputDir, 'preflight.json')}`);
+
+// 7. Step Summary (for GitHub Actions)
+if (process.env.GITHUB_STEP_SUMMARY) {
+  const summary = `
+### Release Preflight Check Passed ✅
+
+- **Tag**: \`${TAG}\`
+- **Ancestry**: Accepted via **${ancestryAcceptedVia === 'default' ? `default branch \`${defaultBranch}\`` : `series branch \`${releaseBranchPrefix}${series}\``}**
+- **Version**: \`${versionExpected}\`
+  `.trim();
+  try {
+    writeFileSync(process.env.GITHUB_STEP_SUMMARY, summary, { flag: 'a' });
+  } catch (e) {
+    console.warn('⚠️ Failed to write GITHUB_STEP_SUMMARY');
+  }
+}
