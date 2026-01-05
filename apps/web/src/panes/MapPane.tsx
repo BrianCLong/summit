@@ -219,7 +219,7 @@ const MarkerLayer = ({
 };
 
 export const MapPane = () => {
-  const { entities, selectedEntityIds, selectEntity } = useWorkspaceStore();
+  const { entities, selectedEntityIds, selectEntity, isSyncing, syncError, retrySync } = useWorkspaceStore();
 
   const [clusteringEnabled, setClusteringEnabled] = useState(
     CLUSTERING_FEATURE_ENABLED,
@@ -227,6 +227,19 @@ export const MapPane = () => {
   const [zoomLevel, setZoomLevel] = useState(2);
   const [page, setPage] = useState(1);
   const pageSize = MAP_PAGE_SIZE;
+
+  // Syncing indicator logic
+  const [showSyncing, setShowSyncing] = useState(false);
+  useEffect(() => {
+      let timer: NodeJS.Timeout;
+      if (isSyncing) {
+          timer = setTimeout(() => setShowSyncing(true), 250);
+      } else {
+          setShowSyncing(false);
+      }
+      return () => clearTimeout(timer);
+  }, [isSyncing]);
+
 
   const markers = useMemo(() => {
     return entities.filter(e => e.lat && e.lng);
@@ -274,6 +287,28 @@ export const MapPane = () => {
       <div className="absolute top-2 left-2 z-[1000] bg-slate-900/80 backdrop-blur px-3 py-1 rounded text-xs font-mono text-cyan-400 border border-cyan-900/50">
         GEOSPATIAL INTELLIGENCE
       </div>
+
+      {/* Syncing Indicator */}
+      {showSyncing && (
+            <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-[2000] bg-yellow-500/80 text-black px-2 py-1 rounded text-xs font-bold animate-pulse">
+                Syncing...
+            </div>
+      )}
+
+      {/* Error Banner */}
+      {syncError && (
+             <div className="absolute top-12 left-1/2 transform -translate-x-1/2 z-[3000] bg-red-900/90 border border-red-500 text-white px-4 py-3 rounded shadow-lg flex flex-col items-center gap-2">
+                 <div className="font-bold text-sm">Couldn’t refresh results</div>
+                 <div className="text-xs">Your selected time range is unchanged.</div>
+                 <button
+                    onClick={retrySync}
+                    className="bg-red-700 hover:bg-red-600 px-3 py-1 rounded text-xs font-semibold transition-colors"
+                 >
+                     Retry
+                 </button>
+             </div>
+      )}
+
       <MapContainer
         center={[20, 0]}
         zoom={2}

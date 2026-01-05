@@ -84,18 +84,27 @@ importers:
       prom-client:
         specifier: ^15.1.3
         version: 15.1.3
+      react-monaco-editor:
+        specifier: ^0.59.0
+        version: 0.59.0(monaco-editor@0.55.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       redis:
         specifier: ^5.8.1
         version: 5.10.0
       supertest:
         specifier: ^7.1.4
         version: 7.1.4
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       ws:
         specifier: '>=8.17.1'
         version: 8.18.3
       xlsx:
         specifier: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
         version: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
+      zustand:
+        specifier: ^5.0.9
+        version: 5.0.9(@types/react@19.2.7)(immer@11.1.0)(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.11.0
@@ -46556,6 +46565,13 @@ packages:
       maplibre-gl:
         optional: true
 
+  react-monaco-editor@0.59.0:
+    resolution: {integrity: sha512-SggqfZCdUauNk7GI0388bk5n25zYsQ1ai1i+VhxAgwbCH+MTGl7L1fBNTJ6V+oXeUApf+bpzikprHJEZm9J/zA==}
+    peerDependencies:
+      monaco-editor: ^0.52.0
+      react: '>=16.8.0 <20.0.0'
+      react-dom: '>=16.8.0 <20.0.0'
+
   react-native-audio-recorder-player@3.6.14:
     resolution: {integrity: sha512-F6SvHbuLvsbhBytR4+vaGIL6LFqC1cnB+SX3v191aHNvGDt63BX56w/Y19nIzxaLnG0b0vbxx/UZ1nzIvDyqWA==}
     deprecated: This package has been deprecated. Please use react-native-nitro-sound instead.
@@ -72813,14 +72829,23 @@ snapshots:
       msw: 2.12.4(@types/node@20.19.27)(typescript@5.9.3)
       vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.16
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
       msw: 2.12.4(@types/node@22.19.3)(typescript@5.9.3)
-      vite: 7.2.6(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+    dependencies:
+      '@vitest/spy': 4.0.16
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      msw: 2.12.4(@types/node@25.0.3)(typescript@5.9.3)
+      vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -87520,6 +87545,12 @@ snapshots:
     optionalDependencies:
       mapbox-gl: 3.17.0
 
+  react-monaco-editor@0.59.0(monaco-editor@0.55.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+    dependencies:
+      monaco-editor: 0.55.1
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+
   react-native-audio-recorder-player@3.6.14(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@19.2.7)(react@19.2.1))(react@19.2.1):
     dependencies:
       hyochan-welcome: 1.0.1
@@ -93307,7 +93338,7 @@ snapshots:
   vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@22.19.3)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
-      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@22.19.3)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.16
       '@vitest/runner': 4.0.16
       '@vitest/snapshot': 4.0.16
@@ -93387,7 +93418,7 @@ snapshots:
   vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@25.0.3)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
-      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.16
       '@vitest/runner': 4.0.16
       '@vitest/snapshot': 4.0.16
