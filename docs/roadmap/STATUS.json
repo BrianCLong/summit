@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-05T02:06:45Z",
+  "revision_note": "Added billing export snapshots and webhook outbox documentation",
   "initiatives": [
     {
       "id": "A",
