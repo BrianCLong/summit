@@ -67,6 +67,36 @@ git push -u origin recreate/<topic>
 3. Once the new PR is merged, close the old PR as **superseded**
 4. Add comment to old PR: "Closed as superseded by #<newPR>"
 
+## Important: Include "Supersedes #<oldPR>" in Your Description
+
+When opening your recreated PR, **include one of these phrases in the description**:
+
+- `Supersedes #1234`
+- `Recreates #1234`
+- `Replaces #1234`
+
+This enables automated linking between old and new PRs. Our tooling will:
+
+1. Detect the reference in your new PR
+2. Add the `post-ga:migration` label to your new PR
+3. Add the `superseded` label to the old PR
+4. Post comments linking both PRs together
+
+**Example PR description:**
+
+```markdown
+## Summary
+
+This PR implements XYZ feature.
+
+Supersedes #1234 due to repo history restructure.
+
+## Changes
+
+- Added foo
+- Updated bar
+```
+
 ## Labels
 
 PRs affected by unrelated histories will be labeled:
@@ -76,6 +106,7 @@ PRs affected by unrelated histories will be labeled:
 | `blocked:unrelated-history` | Cannot merge due to unrelated git histories        |
 | `needs:recreated-pr`        | Author needs to recreate PR from current main      |
 | `post-ga:migration`         | Post-GA migration item, not part of active release |
+| `superseded`                | This PR has been superseded by a recreated PR      |
 
 ## For Maintainers
 
@@ -90,6 +121,48 @@ Use the triage script to identify and label affected PRs:
 # Actually apply labels and post comments
 ./scripts/maintainers/triage-unrelated-history-prs.sh --apply
 ```
+
+### Supersedes Detector
+
+When authors recreate PRs with "Supersedes #<old>" references, run the detector to link them:
+
+```bash
+# Dry run (default) - shows what would be linked
+./scripts/maintainers/migration-supersedes.sh
+
+# Actually apply labels and post comments
+./scripts/maintainers/migration-supersedes.sh --apply
+```
+
+This script:
+
+- Scans open PRs for "Supersedes #", "Recreates #", "Replaces #" patterns
+- Adds `post-ga:migration` label to the new PR
+- Adds `superseded` label to the old PR
+- Posts linking comments on both PRs
+- **Never auto-closes PRs** (closing requires manual action)
+
+### Migration Status Report
+
+Generate a report of migration progress:
+
+```bash
+# Print to terminal
+./scripts/maintainers/migration-report.sh
+
+# Write to markdown file
+./scripts/maintainers/migration-report.sh --out docs/migration/MIGRATION_STATUS.md
+
+# Output as JSON
+./scripts/maintainers/migration-report.sh --json
+```
+
+Report includes:
+
+- Total counts by label
+- PRs by author (top 10)
+- PRs by age (oldest first)
+- Progress percentage
 
 ### Standard Comment Template
 
