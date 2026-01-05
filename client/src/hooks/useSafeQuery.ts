@@ -35,7 +35,6 @@ export function useSafeQuery<T = any>({
           await new Promise((r) => setTimeout(r, 10));
           if (!signal.aborted) setData(mock);
         } else if (fetcher) {
-          // Assuming the fetcher can accept a signal
           const res = await fetcher({ signal });
           if (!signal.aborted) setData(res);
         } else {
