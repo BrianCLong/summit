@@ -29,17 +29,20 @@ IntelGraph uses a fully automated CI/CD pipeline with semantic versioning, autom
 Breaking changes that require migration guides.
 
 **Triggers:**
+
 - Commit with `BREAKING CHANGE:` in footer
 - Major API changes
 - Database schema breaking changes
 
 **Process:**
+
 1. Create release notes with migration guide
 2. Deploy to staging for extensive testing
 3. Schedule production deployment with maintenance window
 4. Provide rollback plan
 
 **Example Commit:**
+
 ```
 feat: new authentication system
 
@@ -53,16 +56,19 @@ BREAKING CHANGE: All API clients must update to use OAuth2 flow
 New features, backward compatible.
 
 **Triggers:**
+
 - Commits with `feat:` prefix
 - New functionality
 - Performance improvements
 
 **Process:**
+
 1. Automated release creation
 2. Deploy to staging automatically
 3. Deploy to production after approval
 
 **Example Commit:**
+
 ```
 feat: add real-time collaboration features
 
@@ -74,15 +80,18 @@ Implements WebSocket-based collaborative editing
 Bug fixes and minor improvements.
 
 **Triggers:**
+
 - Commits with `fix:` prefix
 - Bug fixes
 - Security patches
 
 **Process:**
+
 1. Automated release creation
 2. Fast-track to production for critical fixes
 
 **Example Commit:**
+
 ```
 fix: resolve memory leak in graph query optimizer
 
@@ -114,6 +123,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types:**
+
 - `feat`: New feature (→ MINOR)
 - `fix`: Bug fix (→ PATCH)
 - `perf`: Performance improvement (→ PATCH)
@@ -164,6 +174,7 @@ graph LR
 **Triggers:** Push to `main`, `beta`, or `alpha` branches
 
 **Steps:**
+
 - Checkout code
 - Install dependencies
 - Run linters
@@ -176,6 +187,7 @@ graph LR
 **Workflow:** `.github/workflows/semantic-release.yml`
 
 **Steps:**
+
 1. Analyze commits since last release
 2. Determine version bump (major/minor/patch)
 3. Generate changelog
@@ -187,6 +199,7 @@ graph LR
 **Note:** If `CHANGELOG.md` (or `docs/CHANGELOG.md`) includes a section for the tag, it will be used for release notes. Otherwise, notes are generated from commits.
 
 **Outputs:**
+
 - New version number
 - Git tag (e.g., `v1.2.3`)
 - Release notes
@@ -197,6 +210,7 @@ graph LR
 **Workflow:** `.github/workflows/docker-build-multiarch.yml`
 
 **Features:**
+
 - Multi-architecture builds (amd64, arm64)
 - Layer caching for fast builds
 - Security scanning with Trivy
@@ -204,6 +218,7 @@ graph LR
 - Push to GitHub Container Registry
 
 **Image Tags:**
+
 ```
 ghcr.io/brianelong/summit/api:1.2.3
 ghcr.io/brianelong/summit/api:1.2.3-abc1234
@@ -218,6 +233,7 @@ ghcr.io/brianelong/summit/api:stable
 **Automatically triggers** after successful release.
 
 **Steps:**
+
 1. Pull versioned Docker images
 2. Deploy to staging EKS cluster
 3. Run health checks
@@ -233,6 +249,7 @@ ghcr.io/brianelong/summit/api:stable
 **Requires manual approval** via GitHub Environments.
 
 **Steps:**
+
 1. Validate version tag exists
 2. Request manual approval
 3. Run pre-deployment checks
@@ -312,6 +329,7 @@ git commit -m "chore: remove real-time-collaboration feature flag"
 ### Overview
 
 Blue-green deployment maintains two identical production environments:
+
 - **Blue**: Current production version
 - **Green**: New version being deployed
 
@@ -320,6 +338,7 @@ Traffic switches from blue to green only after validation.
 ### Process
 
 1. **Deploy to Green Environment**
+
    ```bash
    ./scripts/blue-green-deploy.sh production v1.2.3
    ```
@@ -344,12 +363,14 @@ Traffic switches from blue to green only after validation.
 ### Rollback
 
 **Automatic rollback** triggers if:
+
 - Health checks fail
 - Error rate > 5%
 - Response time > 2x baseline
 - Manual rollback requested
 
 **Manual rollback:**
+
 ```bash
 ./scripts/rollback-deployment.sh production
 ```
@@ -359,6 +380,7 @@ Traffic switches from blue to green only after validation.
 ### Automatic Rollback
 
 Triggers automatically on:
+
 - Failed health checks
 - High error rates
 - Failed smoke tests
@@ -486,11 +508,13 @@ Run after every deployment:
 **Symptom:** Push to main doesn't create a release
 
 **Possible Causes:**
+
 1. No conventional commits since last release
 2. Only `chore`/`docs` commits (don't trigger release)
 3. CI tests failing
 
 **Solution:**
+
 ```bash
 # Check commit messages
 git log --oneline v1.2.2..HEAD
@@ -507,6 +531,7 @@ gh run list --workflow=semantic-release.yml
 **Symptom:** Deployment to staging fails
 
 **Debug:**
+
 ```bash
 # Check pod status
 kubectl -n intelgraph-staging get pods
@@ -522,6 +547,7 @@ kubectl -n intelgraph-staging describe deployment api
 ```
 
 **Common Issues:**
+
 - Image pull errors (check registry access)
 - Resource limits (check cluster capacity)
 - Configuration errors (check secrets)
@@ -532,6 +558,7 @@ kubectl -n intelgraph-staging describe deployment api
 **Symptom:** Production deployment waiting for approval
 
 **Action:**
+
 1. Verify staging deployment successful
 2. Review deployment plan in GitHub Actions
 3. Check #deployments Slack channel for notifications
@@ -542,6 +569,7 @@ kubectl -n intelgraph-staging describe deployment api
 **Symptom:** Deployment succeeded but health checks fail
 
 **Debug:**
+
 ```bash
 # Port forward to pod
 kubectl -n intelgraph-production port-forward deployment/api 8080:4000
@@ -559,6 +587,7 @@ kubectl -n intelgraph-production logs -f deployment/api
 **Symptom:** Rollback command fails
 
 **Debug:**
+
 ```bash
 # Check Helm release history
 helm history intelgraph -n intelgraph-production
