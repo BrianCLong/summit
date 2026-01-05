@@ -8,7 +8,7 @@
  */
 
 import { getPostgresPool } from '../db/postgres.js';
-import logger from '../utils/logger.js';
+import logger from '../config/logger.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 
 export interface PartitionConfig {
@@ -21,14 +21,14 @@ export interface PartitionConfig {
 
 const MANAGED_TABLES: PartitionConfig[] = [
   {
-    tableName: 'audit_events',
+    tableName: 'audit_events_partitioned',
     partitionBy: 'RANGE',
-    column: 'created_at',
+    column: 'timestamp', // Updated to match AdvancedAuditSystem schema
     interval: '1 month',
     retention: '1 year'
   },
   {
-    tableName: 'telemetry_events',
+    tableName: 'telemetry_events_partitioned',
     partitionBy: 'RANGE',
     column: 'timestamp',
     interval: '1 day',
@@ -60,7 +60,7 @@ export class TablePartitioningService {
       }
       logger.info('Table partition maintenance completed.');
     } catch (error) {
-      logger.error('Partition maintenance failed', error);
+      logger.error({ error }, 'Partition maintenance failed');
       throw error;
     } finally {
       client.release();
@@ -69,22 +69,16 @@ export class TablePartitioningService {
 
   private async maintainTable(client: any, config: PartitionConfig): Promise<void> {
     try {
-      // 1. Ensure parent table is partitioned (idempotent-ish check)
-      // Note: converting an existing table to partitioned is complex and manual.
-      // We assume the table is already partitioned or we are initializing a new system.
-      // If table exists but isn't partitioned, we skip and log warning.
       const isPartitioned = await this.checkIfPartitioned(client, config.tableName);
       if (!isPartitioned) {
-         logger.warn(`Table ${config.tableName} is not partitioned. Skipping maintenance. Please migrate manually.`);
+         logger.warn(`Table ${config.tableName} is not partitioned. Skipping maintenance.`);
          return;
       }
 
-      // 2. Create partitions for next period (e.g. next month)
       if (config.partitionBy === 'RANGE' && config.interval) {
         await this.createRangePartitions(client, config);
       }
 
-      // 3. Drop old partitions based on retention
       if (config.retention) {
         await this.enforceRetention(client, config);
       }
@@ -103,15 +97,25 @@ export class TablePartitioningService {
   }
 
   private async createRangePartitions(client: any, config: PartitionConfig): Promise<void> {
-    const nextDate = new Date();
-    // Look ahead 2 intervals to be safe
+    // Start from current date
+    let targetDate = new Date();
+
+    // Normalize to start of interval
+    if (config.interval?.includes('month')) {
+        targetDate.setDate(1);
+        targetDate.setHours(0,0,0,0);
+    } else if (config.interval?.includes('day')) {
+        targetDate.setHours(0,0,0,0);
+    }
+
+    // Look ahead 3 intervals
     for (let i = 0; i < 3; i++) {
-        const partitionName = this.getPartitionName(config.tableName, nextDate, config.interval!);
-        const { start, end } = this.getRangeBounds(nextDate, config.interval!);
+        const { start, end } = this.getRangeBounds(targetDate, config.interval!);
+        const partitionName = this.getPartitionName(config.tableName, start, config.interval!);
 
         const exists = await this.partitionExists(client, partitionName);
         if (!exists) {
-            logger.info(`Creating partition ${partitionName} (${start} to ${end})`);
+            logger.info(`Creating partition ${partitionName} (${start.toISOString()} to ${end.toISOString()})`);
             await client.query(`
                 CREATE TABLE IF NOT EXISTS "${partitionName}"
                 PARTITION OF "${config.tableName}"
@@ -120,17 +124,45 @@ export class TablePartitioningService {
             this.metrics.incrementCounter('partitions_created_total', { table: config.tableName });
         }
 
-        // Advance date
-        this.advanceDate(nextDate, config.interval!);
+        // Advance
+        this.advanceDate(targetDate, config.interval!);
     }
   }
 
   private async enforceRetention(client: any, config: PartitionConfig): Promise<void> {
-      // Find partitions older than retention
-      // This implementation depends on naming convention or querying pg_class/pg_inherits
-      // For safety, we'll just log candidate drops for now unless explicitly enabled
-      // TODO: Implement safe drop logic
-      logger.info(`Retention policy check for ${config.tableName}: ${config.retention} (Dry Run)`);
+      // Retention Logic
+      const cutoff = new Date();
+      if (config.retention?.includes('year')) {
+          cutoff.setFullYear(cutoff.getFullYear() - 1);
+      } else if (config.retention?.includes('days')) {
+          const days = parseInt(config.retention.split(' ')[0]);
+          cutoff.setDate(cutoff.getDate() - days);
+      }
+
+      const partitions = await client.query(`
+          SELECT
+              child.relname as partition_name,
+              pg_get_expr(child.relpartbound, child.oid) as partition_bound
+          FROM pg_inherits
+          JOIN pg_class parent ON pg_inherits.inhparent = parent.oid
+          JOIN pg_class child ON pg_inherits.inhrelid = child.oid
+          WHERE parent.relname = $1
+      `, [config.tableName]);
+
+      for (const row of partitions.rows) {
+          const bound = row.partition_bound;
+          const match = bound.match(/TO \('([^']+)'\)/);
+          if (match) {
+              const endDateStr = match[1];
+              const endDate = new Date(endDateStr);
+
+              if (endDate < cutoff) {
+                  logger.info(`Dropping partition ${row.partition_name} (End: ${endDate.toISOString()} < Cutoff: ${cutoff.toISOString()})`);
+                  await client.query(`DROP TABLE "${row.partition_name}"`);
+                  this.metrics.incrementCounter('partitions_dropped_total', { table: config.tableName });
+              }
+          }
+      }
   }
 
   private async partitionExists(client: any, partitionName: string): Promise<boolean> {
@@ -156,13 +188,14 @@ export class TablePartitioningService {
       if (interval.includes('month')) {
           start.setDate(1);
           start.setHours(0,0,0,0);
-          end.setMonth(end.getMonth() + 1);
+
           end.setDate(1);
           end.setHours(0,0,0,0);
+          end.setMonth(end.getMonth() + 1);
       } else if (interval.includes('day')) {
           start.setHours(0,0,0,0);
-          end.setDate(end.getDate() + 1);
           end.setHours(0,0,0,0);
+          end.setDate(end.getDate() + 1);
       }
 
       return { start, end };

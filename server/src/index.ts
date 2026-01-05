@@ -24,6 +24,8 @@ import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
 import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
+import { tablePartitioningService } from './services/TablePartitioningService.js';
+import { CronJob } from 'cron';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
@@ -166,6 +168,20 @@ const startServer = async () => {
 
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+
+    // Run Table Partitioning Maintenance (Daily at midnight)
+    new CronJob(
+      '0 0 * * *',
+      () => {
+        tablePartitioningService.runMaintenance()
+          .catch(err => logger.error('Failed to run table partition maintenance', err));
+      },
+      null,
+      true,
+      'UTC'
+    );
+    // Run immediately on startup to ensure coverage
+    tablePartitioningService.runMaintenance().catch(err => logger.error('Failed to run table partition maintenance', err));
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();

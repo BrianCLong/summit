@@ -13,8 +13,8 @@
  * );
  */
 
-import { getRedisClient } from '../config/database.js';
-import logger from '../utils/logger.js';
+import { getRedisClient } from '../db/redis.js';
+import logger from '../config/logger.js';
 
 export class RedisQueryCache {
   private defaultTtl = 60; // 1 minute
