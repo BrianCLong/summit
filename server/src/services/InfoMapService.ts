@@ -31,7 +31,7 @@ export class InfoMapService {
     this.logger.info('Seeding InfoMap mock data...');
     const types = ['media_outlet', 'social_platform', 'forum', 'influencer'] as const;
 
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 1000; i++) {
       const id = `node-${i}`;
       this.nodes.set(id, {
         id,
