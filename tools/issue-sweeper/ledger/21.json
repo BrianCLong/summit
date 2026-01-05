@@ -1,0 +1,239 @@
+{
+  "issue_number": 21,
+  "title": "M5: Louvain community detection (experimental)",
+  "url": "https://github.com/BrianCLong/summit/issues/21",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051714,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5wg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:graph-analytics",
+      "name": "area:graph-analytics",
+      "color": "ededed",
+      "default": false,
+      "description": "Graph analytics"
+    },
+    {
+      "id": 9095051767,
+      "node_id": "LA_kwDOPaNncM8AAAACHht59w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/experimental",
+      "name": "experimental",
+      "color": "ededed",
+      "default": false,
+      "description": "Experimental"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:14Z",
+  "createdAt": "2025-08-12T00:10:14Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14411,
+        "url": "https://github.com/BrianCLong/summit/pull/14411",
+        "mergedAt": "2025-12-25T03:16:04Z",
+        "title": "feat: Batch 21 - Analytics Readiness"
+      },
+      {
+        "number": 12328,
+        "url": "https://github.com/BrianCLong/summit/pull/12328",
+        "mergedAt": "2025-12-18T03:07:57Z",
+        "title": "Sprint 21: Influence Channel Profiling Service"
+      },
+      {
+        "number": 13854,
+        "url": "https://github.com/BrianCLong/summit/pull/13854",
+        "mergedAt": "2025-12-20T03:24:19Z",
+        "title": "Add sprint 21 plan for Sep 28–Oct 9 2026"
+      },
+      {
+        "number": 12805,
+        "url": "https://github.com/BrianCLong/summit/pull/12805",
+        "mergedAt": "2025-12-04T17:42:09Z",
+        "title": "Add Sprint 21 ecosystem & enterprise plan"
+      },
+      {
+        "number": 13727,
+        "url": "https://github.com/BrianCLong/summit/pull/13727",
+        "mergedAt": "2025-12-20T11:44:41Z",
+        "title": "build(deps-dev): Bump storybook from 7.6.20 to 7.6.21"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 13470,
+        "url": "https://github.com/BrianCLong/summit/pull/13470",
+        "mergedAt": "2025-12-07T02:16:14Z",
+        "title": "deps(npm): bump @babel/runtime from 7.21.0 to 7.28.4"
+      },
+      {
+        "number": 14098,
+        "url": "https://github.com/BrianCLong/summit/pull/14098",
+        "mergedAt": "2025-12-20T07:27:00Z",
+        "title": "Improve map clustering ergonomics and deterministic geo ordering"
+      },
+      {
+        "number": 12302,
+        "url": "https://github.com/BrianCLong/summit/pull/12302",
+        "mergedAt": "2025-12-18T03:12:08Z",
+        "title": "Add geopolitical analysis master prompts"
+      },
+      {
+        "number": 13061,
+        "url": "https://github.com/BrianCLong/summit/pull/13061",
+        "mergedAt": "2025-12-01T23:28:53Z",
+        "title": "chore(deps): bump express from 4.21.2 to 4.22.1 in /services/admin-automation"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 12316,
+        "url": "https://github.com/BrianCLong/summit/pull/12316",
+        "mergedAt": "2025-12-05T17:14:01Z",
+        "title": "Add Dirk IG prompt library wave 3"
+      },
+      {
+        "number": 12681,
+        "url": "https://github.com/BrianCLong/summit/pull/12681",
+        "mergedAt": "2025-12-04T17:44:53Z",
+        "title": "Implement canonical graph model and core APIs"
+      },
+      {
+        "number": 12088,
+        "url": "https://github.com/BrianCLong/summit/pull/12088",
+        "mergedAt": "2025-11-21T06:30:32Z",
+        "title": "Audit and consolidate project dependencies"
+      },
+      {
+        "number": 14557,
+        "url": "https://github.com/BrianCLong/summit/pull/14557",
+        "mergedAt": "2025-12-27T04:15:25Z",
+        "title": "chore(deps): Bump requests from 2.31.0 to 2.32.4 in /predictive_threat_suite"
+      },
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      },
+      {
+        "number": 11780,
+        "url": "https://github.com/BrianCLong/summit/pull/11780",
+        "mergedAt": "2025-10-22T15:53:11Z",
+        "title": "chore(deps-dev): bump vite from 4.5.14 to 5.4.21 in /client"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 11940,
+        "url": "https://github.com/BrianCLong/summit/pull/11940",
+        "mergedAt": "2025-11-20T10:24:24Z",
+        "title": "Build geospatial intelligence and mapping system"
+      },
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 15319,
+        "url": "https://github.com/BrianCLong/summit/pull/15319",
+        "mergedAt": "2026-01-01T11:38:50Z",
+        "title": "Add Summit Decision Governance Pilot Documentation"
+      },
+      {
+        "number": 15313,
+        "url": "https://github.com/BrianCLong/summit/pull/15313",
+        "mergedAt": "2026-01-01T11:39:29Z",
+        "title": "Establish Institutional Continuity Framework"
+      },
+      {
+        "number": 13145,
+        "url": "https://github.com/BrianCLong/summit/pull/13145",
+        "mergedAt": "2025-12-03T03:05:23Z",
+        "title": "Query Replay Engine"
+      },
+      {
+        "number": 1307,
+        "url": "https://github.com/BrianCLong/summit/pull/1307",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "chore: back-merge v2025.09.21-mega-merge to main"
+      },
+      {
+        "number": 15329,
+        "url": "https://github.com/BrianCLong/summit/pull/15329",
+        "mergedAt": null,
+        "title": "Add phase 4 innovation PRDs and governance prompt"
+      },
+      {
+        "number": 13310,
+        "url": "https://github.com/BrianCLong/summit/pull/13310",
+        "mergedAt": null,
+        "title": "deps(npm): bump @google-cloud/recommender from 5.0.6 to 7.2.1"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 1321,
+        "url": "https://github.com/BrianCLong/summit/pull/1321",
+        "mergedAt": "2025-09-23T06:53:27Z",
+        "title": "chore(deps): bump express from 4.21.2 to 5.1.0"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
