@@ -91,21 +91,46 @@ jobs:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
+      - name: Classify Release Tag
+        id: classify
+        run: |
+          node scripts/release/classify-tag.mjs ${{ github.ref_name }}
+          CHANNEL=$(jq -r .channel dist/release/channel.json)
+          IS_RC=$([ "$CHANNEL" == "rc" ] && echo "true" || echo "false")
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "prerelease=$IS_RC" >> $GITHUB_OUTPUT
+
+          # Add to Step Summary
+          echo "## Release Classification" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Channel**: $CHANNEL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prerelease**: $IS_RC" >> $GITHUB_STEP_SUMMARY
+          if [ "$CHANNEL" == "rc" ]; then
+            echo "ℹ️ RC tags publish prereleases." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ GA tags publish normal releases." >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Create Evidence Bundle
         run: |
           mkdir -p release-assets
           tar -czf release-assets/evidence.tar.gz evidence/
 
+      - name: Generate Release Artifacts
+        run: node scripts/release/create-release-artifacts.mjs
+
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          echo "notes=Release ${{ github.ref_name }} (Channel: ${{ steps.classify.outputs.channel }})" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/evidence.tar.gz
+          files: |
+            release-assets/evidence.tar.gz
+            dist/release/*
           body: ${{ steps.notes.outputs.notes }}
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.classify.outputs.prerelease }}
           generate_release_notes: true
