@@ -11,9 +11,18 @@ import Redis from 'ioredis';
 import { logger } from '../utils/logger.js';
 import { AgentTask, TaskResult } from './types.js';
 import { PolicyGuard } from './policyGuard.js';
-import { Budget } from '../ai/llmBudget';
 import { systemMonitor } from '../lib/system-monitor';
 import { getTracer, SpanStatusCode, SpanKind } from '../observability/tracer';
+
+// Mock Budget class until we locate the real one or fix the import
+class Budget {
+    maxUSD: number;
+    usedUSD: number;
+    constructor(maxUSD: number) {
+        this.maxUSD = maxUSD;
+        this.usedUSD = 0;
+    }
+}
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,

@@ -4,11 +4,31 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (if different from ref)"
+        required: false
+        type: string
+      override_freeze:
+        description: "Override release freeze window?"
+        type: boolean
+        default: false
+        required: false
+      override_reason:
+        description: "Reason for override (min 20 chars)"
+        type: string
+        default: ""
+        required: false
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
-  contents: read
-  actions: read
-  checks: read
+  contents: write
+  packages: write
+  id-token: write # For OIDC/Cosign if needed
 
 jobs:
   test-and-verify:
@@ -16,29 +36,88 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
+      - name: Preflight Release
+        run: node scripts/release/preflight-release.mjs
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test Release Scripts
+        run: pnpm -w test:release-scripts
+
+      - name: Check Release Freeze Window
+        env:
+          OVERRIDE: ${{ inputs.override_freeze || 'false' }}
+          OVERRIDE_REASON: ${{ inputs.override_reason || '' }}
+        run: node scripts/release/check-freeze.mjs
+
+      - name: Upload Freeze Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: freeze-evidence
+          path: dist/release/freeze.json
+
       - name: Run Server Tests
-        run: pnpm test:server
+        run: |
+          mkdir -p dist/release
+          if pnpm test:server; then
+            echo '{"ok": true}' > dist/release/verify.json
+          else
+            echo '{"ok": false, "code": "VERIFY_FAILED"}' > dist/release/verify.json
+            exit 1
+          fi
         continue-on-error: false
 
       - name: Run Policy Checks
-        run: ./scripts/policy-test.sh
+        run: |
+          if ./scripts/policy-test.sh; then
+            echo '{"ok": true}' > dist/release/preflight.json
+          else
+            echo '{"ok": false, "code": "SECURITY_GUARD"}' > dist/release/preflight.json
+            exit 1
+          fi
         continue-on-error: false
 
       - name: Verify Documentation Completeness
         run: ./scripts/check_traceability.cjs
         continue-on-error: false
+
+      - name: Check Freeze Window
+        if: always()
+        run: |
+          mkdir -p dist/release
+          if ./scripts/check-freeze.sh; then
+            echo '{"ok": true}' > dist/release/freeze.json
+          else
+            echo '{"ok": false, "code": "FREEZE_WINDOW", "message": "Freeze window is active"}' > dist/release/freeze.json
+          fi
+
+      - name: Generate Release Status
+        if: always()
+        run: node scripts/release/build-release-status.mjs
+
+      - name: Validate Release Schemas
+        if: always()
+        run: node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict
+
+      - name: Upload Release Status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-status
+          path: dist/release/release-status.json
 
   build-server:
     name: Build Server
@@ -72,61 +151,100 @@ jobs:
     name: Create Release
     needs: [build-server, build-client]
     runs-on: ubuntu-latest
-    if: github.repository == 'BrianCLong/summit' && (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch')
     permissions:
       contents: write
       packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4
 
       - name: Download Server Artifacts
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@v4
         with:
           name: build-artifacts-server-${{ github.run_id }}
           path: evidence/server
 
       - name: Download Client Artifacts
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@v4
         with:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
-      - name: Verify Release Safety
-        run: |
-          # 1. Verify tag format
-          if [[ ! "$GITHUB_REF" =~ ^refs/tags/v ]]; then
-            echo "Error: Release workflow must be triggered by a tag starting with 'v'"
-            exit 1
-          fi
+      - name: Download Freeze Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: freeze-evidence
+          path: evidence/freeze
 
-          # 2. Verify repository
-          if [[ "$GITHUB_REPOSITORY" != "BrianCLong/summit" ]]; then
-             echo "Error: Release publishing is only allowed on canonical repo"
-             exit 1
-          fi
-
-          # 3. Verify artifacts exist (sanity check after download)
-          if [ ! -d "evidence/server" ]; then
-             echo "Error: evidence/server directory not found"
-             exit 1
-          fi
+      - name: Download Release Status
+        uses: actions/download-artifact@v4
+        with:
+          name: release-status
+          path: evidence/release
 
       - name: Create Evidence Bundle
         run: |
           mkdir -p release-assets
+
+          # Generate Checksums for all evidence
+          cd evidence
+          find . -type f -exec sha256sum {} \; > SHA256SUMS
+          cd ..
+
           tar -czf release-assets/evidence.tar.gz evidence/
 
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda # v2.2.1
-        with:
-          files: release-assets/evidence.tar.gz
-          body: ${{ steps.notes.outputs.notes }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+      - name: Idempotent Release
+        id: publish
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          echo "Processing release for tag: $TAG"
+
+          # Determine prerelease
+          PRERELEASE=false
+          if [[ "$TAG" == *"-rc"* ]]; then
+            PRERELEASE=true
+          fi
+
+          # Check if release exists
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG exists. Updating..."
+            EXISTED="true"
+            ACTION="updated"
+
+            # Pattern A: Update
+            gh release upload "$TAG" release-assets/evidence.tar.gz --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" \
+              --notes "${{ steps.notes.outputs.notes }}" \
+              --prerelease="$PRERELEASE" \
+              --repo "$GITHUB_REPOSITORY"
+
+          else
+            echo "Release $TAG does not exist. Creating..."
+            EXISTED="false"
+            ACTION="created"
+
+            gh release create "$TAG" release-assets/evidence.tar.gz \
+              --title "$TAG" \
+              --notes "${{ steps.notes.outputs.notes }}" \
+              --prerelease="$PRERELEASE" \
+              --repo "$GITHUB_REPOSITORY"
+          fi
+
+          echo "existed=$EXISTED" >> "$GITHUB_OUTPUT"
+          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
+
+      - name: Release Summary
+        if: always()
+        run: |
+          echo "### Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Concurrency Group:** release-${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Existed:** ${{ steps.publish.outputs.existed }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action Taken:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY

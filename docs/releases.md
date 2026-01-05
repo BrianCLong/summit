@@ -1,10 +1,17 @@
-# Release Workflow Documentation
+# Release Policy and Freeze Windows
 
-## Security Hardening
+This document outlines how to manage the release policy, including the configuration of release freeze windows.
 
-The release workflow (`release-ga.yml`) includes several security hardening measures:
+## Editing the Release Policy
 
-*   **Least Privilege:** Token permissions are explicitly set to read-only by default, with write permissions granted only to the specific release job that requires them.
-*   **SHA Pinning:** All third-party actions are pinned to specific immutable commit SHAs to prevent supply-chain attacks via tag hijacking.
-*   **Fork Guard:** The release publishing step is explicitly disabled on forks to prevent accidental unauthorized releases.
-*   **Safety Checks:** The workflow verifies the tag format and repository identity before attempting to publish.
+The release policy is defined in the `release-policy.yml` file at the root of the repository. This file controls various aspects of the release process, including the default release branch and release freeze windows.
+
+### Validating the Policy
+
+Before committing any changes to `release-policy.yml`, it is important to validate the file to ensure it is well-formed. You can do this by running the following command:
+
+```bash
+pnpm lint:release-policy
+```
+
+This command will check the syntax and structure of the file and report any errors.

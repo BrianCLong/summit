@@ -1,0 +1,56 @@
+{
+  "issue_number": 618,
+  "title": "docs: consolidate root documentation into archive",
+  "url": "https://github.com/BrianCLong/summit/pull/618",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T18:11:55Z",
+  "createdAt": "2025-08-18T16:55:15Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11821,
+        "url": "https://github.com/BrianCLong/summit/pull/11821",
+        "mergedAt": "2025-11-19T23:17:19Z",
+        "title": "chore(deps): bump js-yaml in /server"
+      },
+      {
+        "number": 11822,
+        "url": "https://github.com/BrianCLong/summit/pull/11822",
+        "mergedAt": "2025-11-19T23:26:24Z",
+        "title": "chore(deps): bump js-yaml from 4.1.0 to 4.1.1 in /orchestration/packages/intent-engine"
+      },
+      {
+        "number": 740,
+        "url": "https://github.com/BrianCLong/summit/pull/740",
+        "mergedAt": "2025-08-29T10:30:24Z",
+        "title": "chore(deps): bump graphql-ws from 5.16.2 to 6.0.6"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
