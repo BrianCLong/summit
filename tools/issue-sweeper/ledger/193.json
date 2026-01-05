@@ -1,0 +1,110 @@
+{
+  "issue_number": 193,
+  "title": "OSINT data integration",
+  "url": "https://github.com/BrianCLong/summit/issues/193",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055783,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHm5w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/OSINT",
+      "name": "OSINT",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055864,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnOA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/integration",
+      "name": "integration",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056381,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpPQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-30",
+      "name": "due:2025-11-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:46Z",
+  "createdAt": "2025-08-14T04:42:46Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14400,
+        "url": "https://github.com/BrianCLong/summit/pull/14400",
+        "mergedAt": "2025-12-24T03:26:31Z",
+        "title": "Implement Backup Inventory and Policy Checks (Prompt 193)"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 13100,
+        "url": "https://github.com/BrianCLong/summit/pull/13100",
+        "mergedAt": "2025-12-17T05:44:46Z",
+        "title": "S7 — Enhanced OPA Policy Playground"
+      },
+      {
+        "number": 13144,
+        "url": "https://github.com/BrianCLong/summit/pull/13144",
+        "mergedAt": "2025-12-03T03:05:56Z",
+        "title": "C1 — Reproducible Build Verifier"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

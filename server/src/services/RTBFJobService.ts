@@ -12,6 +12,7 @@ import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import logger from '../utils/logger.js';
 import { tracer } from '../observability/telemetry.js';
+import { enforceRampDecisionForTenant } from '../policy/ramp.js';
 import { DatabaseService } from './DatabaseService.js';
 import type { Span } from '@opentelemetry/api';
 
@@ -529,6 +530,13 @@ export class RTBFJobService extends EventEmitter {
         });
 
         try {
+          enforceRampDecisionForTenant({
+            tenantId: request.tenantId,
+            action: 'START',
+            workflow: 'rtbf_request',
+            key: request.id,
+          });
+
           // Validate request
           const validationResult = await this.validateRequest(request);
           if (!validationResult.valid) {
@@ -1105,6 +1113,13 @@ export class RTBFJobService extends EventEmitter {
     if (job.status === 'completed' || job.status === 'failed') {
       return false;
     }
+
+    enforceRampDecisionForTenant({
+      tenantId: job.tenantId,
+      action: 'CANCEL',
+      workflow: 'rtbf_request',
+      key: jobId,
+    });
 
     job.status = 'cancelled';
     job.processing.errors.push(`Cancelled: ${reason}`);

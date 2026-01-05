@@ -1,0 +1,74 @@
+{
+  "issue_number": 503,
+  "title": "feat: enable k8s autoscaling and monitoring",
+  "url": "https://github.com/BrianCLong/summit/pull/503",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T22:33:22Z",
+  "createdAt": "2025-08-17T19:17:05Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14992,
+        "url": "https://github.com/BrianCLong/summit/pull/14992",
+        "mergedAt": "2025-12-30T22:45:24Z",
+        "title": "feat: add backpressure mechanism to ingestion entrypoint"
+      },
+      {
+        "number": 14631,
+        "url": "https://github.com/BrianCLong/summit/pull/14631",
+        "mergedAt": "2025-12-27T06:20:36Z",
+        "title": "Server: Add feature-flag kill switch framework and admin route"
+      },
+      {
+        "number": 13356,
+        "url": "https://github.com/BrianCLong/summit/pull/13356",
+        "mergedAt": "2025-12-17T04:54:39Z",
+        "title": "Backpressure & Load Shedding Implementation"
+      },
+      {
+        "number": 13377,
+        "url": "https://github.com/BrianCLong/summit/pull/13377",
+        "mergedAt": "2025-12-17T05:04:14Z",
+        "title": "docs: Service dependency map & failure-mode taxonomy (phase 1)"
+      },
+      {
+        "number": 12882,
+        "url": "https://github.com/BrianCLong/summit/pull/12882",
+        "mergedAt": "2025-12-01T15:41:59Z",
+        "title": "Add AI governance and edge-first value proposition"
+      },
+      {
+        "number": 13098,
+        "url": "https://github.com/BrianCLong/summit/pull/13098",
+        "mergedAt": "2025-12-03T01:54:50Z",
+        "title": "Harden Summit security with RBAC and audit trails"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

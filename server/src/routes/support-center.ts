@@ -12,6 +12,7 @@ import { supportCenterService } from '../support/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
+import { supportImpersonationService, tenantHealthBundleService } from '../services/support/index.js';
 
 const router = Router();
 
@@ -84,6 +85,23 @@ const AddMessageSchema = z.object({
 
 const VoteSchema = z.object({
   helpful: z.boolean(),
+});
+
+const ImpersonationStartSchema = z.object({
+  targetUserId: z.string().min(1),
+  targetTenantId: z.string().min(1),
+  reason: z.string().min(5).max(2000),
+  ticketId: z.string().optional(),
+});
+
+const ImpersonationStopSchema = z.object({
+  sessionId: z.string().min(1),
+  reason: z.string().min(5).max(2000),
+});
+
+const TenantHealthBundleSchema = z.object({
+  tenantId: z.string().min(1),
+  reason: z.string().min(5).max(2000),
 });
 
 /**
@@ -212,6 +230,101 @@ router.get(
       const result = await supportCenterService.getFAQs({
         category: category as any,
         locale,
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * Start support impersonation
+ * POST /api/v1/support/impersonation/start
+ */
+router.post(
+  '/impersonation/start',
+  ensureAuthenticated,
+  requireFeatureFlag('support.impersonation'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payload = ImpersonationStartSchema.parse(req.body);
+      const actor = {
+        id: req.user?.id as string,
+        role: req.user?.role as string,
+        tenantId: (req.user?.tenantId || req.user?.defaultTenantId) as string,
+        email: req.user?.email as string | undefined,
+      };
+
+      const result = await supportImpersonationService.startImpersonation({
+        actor,
+        targetUserId: payload.targetUserId,
+        targetTenantId: payload.targetTenantId,
+        reason: payload.reason,
+        ticketId: payload.ticketId,
+      });
+
+      res.status(201).json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * Stop support impersonation
+ * POST /api/v1/support/impersonation/stop
+ */
+router.post(
+  '/impersonation/stop',
+  ensureAuthenticated,
+  requireFeatureFlag('support.impersonation'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payload = ImpersonationStopSchema.parse(req.body);
+      const actor = {
+        id: req.user?.id as string,
+        role: req.user?.role as string,
+        tenantId: (req.user?.tenantId || req.user?.defaultTenantId) as string,
+        email: req.user?.email as string | undefined,
+      };
+
+      const result = await supportImpersonationService.stopImpersonation({
+        actor,
+        sessionId: payload.sessionId,
+        reason: payload.reason,
+      });
+
+      res.json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * Export tenant health bundle
+ * POST /api/v1/support/tenant-health-bundle
+ */
+router.post(
+  '/tenant-health-bundle',
+  ensureAuthenticated,
+  requireFeatureFlag('support.healthBundle'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const payload = TenantHealthBundleSchema.parse(req.body);
+      const actor = {
+        id: req.user?.id as string,
+        role: req.user?.role as string,
+        tenantId: (req.user?.tenantId || req.user?.defaultTenantId) as string,
+        email: req.user?.email as string | undefined,
+      };
+
+      const result = await tenantHealthBundleService.exportBundle({
+        actor,
+        tenantId: payload.tenantId,
+        reason: payload.reason,
       });
 
       res.json(result);

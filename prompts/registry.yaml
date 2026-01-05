@@ -13,18 +13,45 @@ prompts:
         - docs/ga/
         - artifacts/
         - metrics/
+        - observability/
         - .github/
       domains:
         - governance
         - ci
         - provenance
         - quality
+        - observability
     verification:
       tiers_required:
         - A
       debt_budget:
         permitted: 0
         retirement_target: 1
+    allowed_operations:
+      - create
+      - edit
+  - id: runbooks-docs-update
+    version: v1
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
+    scope:
+      paths:
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - operations
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
     allowed_operations:
       - create
       - edit
