@@ -28,3 +28,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: maestro-provenance-receipts
+    version: v1
+    path: prompts/engineering/maestro-provenance-receipts.md
+    sha256: 3c4637161ddf1eaa797aea60875d9dea184ef1f4368ce76f3c6890212cdced8c
+    description: Emit, sign, and export Maestro provenance receipts with verification tests.
+    scope:
+      paths:
+        - server/src/maestro/
+        - server/src/redaction/
+        - server/tests/maestro/
+        - PROVENANCE_SCHEMA.md
+        - provenance/
+        - docs/roadmap/STATUS.json
+        - prompts/engineering/
+        - agents/examples/
+      domains:
+        - provenance
+        - governance
+        - maestro
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
