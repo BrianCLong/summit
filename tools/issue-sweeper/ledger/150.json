@@ -1,0 +1,124 @@
+{
+  "issue_number": 150,
+  "title": "RBAC with JWT",
+  "url": "https://github.com/BrianCLong/summit/issues/150",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-08-13T17:08:38Z",
+  "createdAt": "2025-08-13T17:08:38Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13357,
+        "url": "https://github.com/BrianCLong/summit/pull/13357",
+        "mergedAt": "2025-12-17T04:54:41Z",
+        "title": "Audit: Missing Surfaces Matrix & Report"
+      },
+      {
+        "number": 13296,
+        "url": "https://github.com/BrianCLong/summit/pull/13296",
+        "mergedAt": "2025-12-17T05:55:45Z",
+        "title": "fix: Jest ESM configuration and test suite updates"
+      },
+      {
+        "number": 15038,
+        "url": "https://github.com/BrianCLong/summit/pull/15038",
+        "mergedAt": "2025-12-30T22:42:25Z",
+        "title": "Set up project management and delivery tracking"
+      },
+      {
+        "number": 12146,
+        "url": "https://github.com/BrianCLong/summit/pull/12146",
+        "mergedAt": "2025-11-21T08:02:38Z",
+        "title": "Improve test coverage"
+      },
+      {
+        "number": 11952,
+        "url": "https://github.com/BrianCLong/summit/pull/11952",
+        "mergedAt": "2025-11-20T10:21:28Z",
+        "title": "Address documentation and onboarding tech debt"
+      },
+      {
+        "number": 15255,
+        "url": "https://github.com/BrianCLong/summit/pull/15255",
+        "mergedAt": "2026-01-01T07:29:52Z",
+        "title": "feat: enforce api auth and rbac protections"
+      },
+      {
+        "number": 12369,
+        "url": "https://github.com/BrianCLong/summit/pull/12369",
+        "mergedAt": "2025-12-18T02:58:57Z",
+        "title": "Build case management and workflow engine"
+      },
+      {
+        "number": 12089,
+        "url": "https://github.com/BrianCLong/summit/pull/12089",
+        "mergedAt": "2025-11-21T06:30:29Z",
+        "title": "Triage and consolidate open pull requests"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 12049,
+        "url": "https://github.com/BrianCLong/summit/pull/12049",
+        "mergedAt": "2025-11-21T03:59:08Z",
+        "title": "Add comprehensive tests for new modules"
+      },
+      {
+        "number": 12073,
+        "url": "https://github.com/BrianCLong/summit/pull/12073",
+        "mergedAt": null,
+        "title": "Build performance optimization and scaling infrastructure"
+      },
+      {
+        "number": 13106,
+        "url": "https://github.com/BrianCLong/summit/pull/13106",
+        "mergedAt": "2025-12-03T04:36:27Z",
+        "title": "Add spectrum analysis and sensor fusion integration"
+      },
+      {
+        "number": 11923,
+        "url": "https://github.com/BrianCLong/summit/pull/11923",
+        "mergedAt": "2025-11-20T10:04:27Z",
+        "title": "Build Advanced Visualization and Dashboard System"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 1266,
+        "url": "https://github.com/BrianCLong/summit/pull/1266",
+        "mergedAt": "2025-09-16T22:05:41Z",
+        "title": "chore(ci): finalization kit + protections"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

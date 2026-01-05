@@ -1,0 +1,50 @@
+{
+  "issue_number": 337,
+  "title": "AI Model Security and Adversarial Defense",
+  "url": "https://github.com/BrianCLong/summit/issues/337",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122115570,
+      "node_id": "LA_kwDOPaNncM8AAAACH7hv8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-enterprise-ai",
+      "name": "epic-enterprise-ai",
+      "color": "6C5CE7",
+      "default": false,
+      "description": "Enterprise AI and advanced optimization"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:24:26Z",
+  "createdAt": "2025-08-16T22:24:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15258,
+        "url": "https://github.com/BrianCLong/summit/pull/15258",
+        "mergedAt": "2026-01-01T07:29:50Z",
+        "title": "Predictive Analytics and Multi-Agent Negotiation"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

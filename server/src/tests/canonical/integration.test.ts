@@ -20,10 +20,11 @@ import {
   verifyManifest,
 } from '../../canonical';
 import migrate from '../../migrations/021_canonical_entities_bitemporal';
-import { BaseCanonicalEntity } from '../../canonical/types';
+import { CanonicalEntity } from '../../canonical/types';
 
 // Define generic PersonEntity for testing
-interface PersonEntity extends BaseCanonicalEntity {
+interface PersonEntity extends CanonicalEntity {
+  version: number;
   name: {
     full: string;
     given: string;

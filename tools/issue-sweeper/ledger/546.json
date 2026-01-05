@@ -1,0 +1,116 @@
+{
+  "issue_number": 546,
+  "title": "refactor: streamline core deployment",
+  "url": "https://github.com/BrianCLong/summit/pull/546",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-29T18:13:20Z",
+  "createdAt": "2025-08-18T00:21:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 119,
+        "url": "https://github.com/BrianCLong/summit/pull/119",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump concurrently from 8.2.2 to 9.2.0"
+      },
+      {
+        "number": 1190,
+        "url": "https://github.com/BrianCLong/summit/pull/1190",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump tailwind-merge from 2.6.0 to 3.3.1"
+      },
+      {
+        "number": 615,
+        "url": "https://github.com/BrianCLong/summit/pull/615",
+        "mergedAt": "2025-08-18T14:31:47Z",
+        "title": "chore(deps): bump web-vitals from 3.5.2 to 5.1.0 in /client"
+      },
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 9795,
+        "url": "https://github.com/BrianCLong/summit/pull/9795",
+        "mergedAt": null,
+        "title": "Fix/bulk import lockfile sync"
+      },
+      {
+        "number": 9800,
+        "url": "https://github.com/BrianCLong/summit/pull/9800",
+        "mergedAt": null,
+        "title": "feat(monitoring): Enable error-budget monitoring and Maestro metrics export (EO-1, EO-2)"
+      },
+      {
+        "number": 9796,
+        "url": "https://github.com/BrianCLong/summit/pull/9796",
+        "mergedAt": "2025-10-03T03:51:08Z",
+        "title": "fix: sync lockfile for CI bulk import"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 11774,
+        "url": "https://github.com/BrianCLong/summit/pull/11774",
+        "mergedAt": "2025-10-20T11:06:07Z",
+        "title": "chore(deps): bump the js-dependencies group with 144 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
