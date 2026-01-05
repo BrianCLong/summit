@@ -6,6 +6,8 @@ import App from './App'
 import config from './config'
 import './index.css'
 import reportWebVitals from './reportWebVitals';
+import { TenantProvider } from './contexts/TenantContext'
+import { BrandPackProvider } from './contexts/BrandPackContext'
 
 // Start MSW for development
 async function enableMocking() {
@@ -24,7 +26,11 @@ enableMocking().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <Provider store={store}>
-        <App />
+        <TenantProvider>
+          <BrandPackProvider>
+            <App />
+          </BrandPackProvider>
+        </TenantProvider>
       </Provider>
     </React.StrictMode>
   )

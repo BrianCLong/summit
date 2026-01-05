@@ -1,4 +1,5 @@
 import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
+import type { ReceiptEvidence } from '../provenance/types.js';
 import { SigningService } from './SigningService.js';
 import { createHash } from 'crypto';
 
@@ -75,8 +76,7 @@ export class ReceiptService {
 
     // 4. Sign it
     const signature = this.signer.sign(receiptCanonical);
-
-    return {
+    const receipt: Receipt = {
       id: entryId,
       timestamp,
       action,
@@ -87,6 +87,24 @@ export class ReceiptService {
       signature,
       signerKeyId: this.signer.getPublicKey().slice(0, 32) + '...' // simplified ID
     };
+
+    const receiptEvidence: ReceiptEvidence = {
+      receiptId: receipt.id,
+      entryId,
+      action,
+      actorId: actor.id,
+      tenantId: actor.tenantId,
+      resourceId: resource,
+      inputHash,
+      policyDecisionId,
+      signature,
+      signerKeyId: receipt.signerKeyId,
+      issuedAt: timestamp
+    };
+
+    await this.ledger.recordReceiptEvidence(receiptEvidence);
+
+    return receipt;
   }
 
   public async getReceipt(id: string): Promise<Receipt | null> {

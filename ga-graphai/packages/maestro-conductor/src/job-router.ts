@@ -2,6 +2,7 @@ import type {
   AssetDescriptor,
   AssetPerformanceSnapshot,
   JobSpec,
+  PolicyDecision,
   PolicyHook,
   RoutingDecision,
   RoutingPlan,
@@ -95,11 +96,19 @@ export class JobRouter {
 
       let allowed = true;
       const reasoning: string[] = [];
+      const policyDecisions: PolicyDecision[] = [];
       for (const hook of policyHooks) {
         const result = await hook.evaluate({
           asset,
           job,
           intent: 'job-routing',
+        });
+        policyDecisions.push({
+          hookId: hook.id,
+          allowed: result.allowed,
+          reason: result.reason,
+          obligations: result.obligations,
+          directives: result.directives,
         });
         if (!result.allowed) {
           allowed = false;
@@ -180,6 +189,7 @@ export class JobRouter {
         estimatedCostPerHour: cost,
         compliance,
         reasoning,
+        policyDecisions,
       });
     }
 

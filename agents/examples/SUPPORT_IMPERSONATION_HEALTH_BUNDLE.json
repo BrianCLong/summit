@@ -1,0 +1,44 @@
+{
+  "task_id": "SUPPORT_IMPERSONATION_HEALTH_BUNDLE",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "support-impersonation-health-bundle",
+    "version": "v1",
+    "sha256": "c994b19a63f4aa6fc25e509c68fb7898b5d92845e005f345204175624a574903",
+    "path": "prompts/support-impersonation-health-bundle.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/services/support/",
+      "server/src/policies/",
+      "server/src/provenance/",
+      "server/src/routes/support-center.ts",
+      "server/src/lib/featureFlags.ts",
+      "apps/web/src/pages/HelpPage.tsx",
+      "docs/support/",
+      "docs/roadmap/STATUS.json",
+      "prompts/support-impersonation-health-bundle.md",
+      "agents/examples/SUPPORT_IMPERSONATION_HEALTH_BUNDLE.json"
+    ],
+    "domains": ["support", "governance", "provenance", "security", "frontend", "docs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["scripts/check-boundaries.cjs", "make smoke"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Policy-gated impersonation flow emits receipts in provenance ledger",
+    "Tenant health bundle export enforces redaction rules",
+    "Support UI entry and documentation updated"
+  ],
+  "stop_conditions": [
+    "Policy engine denies allowlisted action",
+    "Provenance receipt signing secret missing in production",
+    "Sandbox violation alert"
+  ]
+}
