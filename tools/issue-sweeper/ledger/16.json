@@ -1,0 +1,230 @@
+{
+  "issue_number": 16,
+  "title": "M3: Frontend auth (login/logout) and token storage",
+  "url": "https://github.com/BrianCLong/summit/issues/16",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:08Z",
+  "createdAt": "2025-08-12T00:10:08Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14621,
+        "url": "https://github.com/BrianCLong/summit/pull/14621",
+        "mergedAt": "2025-12-27T06:08:01Z",
+        "title": "Sprint N+16: Autonomous Evaluation & Self-Testing Harness"
+      },
+      {
+        "number": 14182,
+        "url": "https://github.com/BrianCLong/summit/pull/14182",
+        "mergedAt": "2025-12-22T08:29:10Z",
+        "title": "Add MVP-3 GA epics 13-16 addendum"
+      },
+      {
+        "number": 15131,
+        "url": "https://github.com/BrianCLong/summit/pull/15131",
+        "mergedAt": "2025-12-30T21:30:53Z",
+        "title": "chore(deps): bump napi from 2.16.17 to 3.3.0"
+      },
+      {
+        "number": 12865,
+        "url": "https://github.com/BrianCLong/summit/pull/12865",
+        "mergedAt": "2025-12-04T15:48:46Z",
+        "title": "docs: add sprint 16 plan"
+      },
+      {
+        "number": 15128,
+        "url": "https://github.com/BrianCLong/summit/pull/15128",
+        "mergedAt": "2025-12-30T22:23:16Z",
+        "title": "chore(deps): bump napi-derive from 2.16.13 to 3.4.1"
+      },
+      {
+        "number": 13779,
+        "url": "https://github.com/BrianCLong/summit/pull/13779",
+        "mergedAt": "2025-12-20T03:35:31Z",
+        "title": "docs: refresh Feb 16–27 2026 sprint plan for enterprise readiness"
+      },
+      {
+        "number": 12665,
+        "url": "https://github.com/BrianCLong/summit/pull/12665",
+        "mergedAt": "2025-12-18T01:44:28Z",
+        "title": "Add delivery blueprint for council wishbook prompts #9–#16"
+      },
+      {
+        "number": 12807,
+        "url": "https://github.com/BrianCLong/summit/pull/12807",
+        "mergedAt": "2025-12-04T16:26:38Z",
+        "title": "Add sprint plan for Jan 5–16, 2026"
+      },
+      {
+        "number": 12814,
+        "url": "https://github.com/BrianCLong/summit/pull/12814",
+        "mergedAt": "2025-12-04T17:41:49Z",
+        "title": "docs: update sprint plan for Feb 16–27 2026"
+      },
+      {
+        "number": 15047,
+        "url": "https://github.com/BrianCLong/summit/pull/15047",
+        "mergedAt": null,
+        "title": "Add sprint plan for Greenline + Evidence"
+      },
+      {
+        "number": 14499,
+        "url": "https://github.com/BrianCLong/summit/pull/14499",
+        "mergedAt": "2025-12-27T00:25:38Z",
+        "title": "Add wave16 security batch plan"
+      },
+      {
+        "number": 13847,
+        "url": "https://github.com/BrianCLong/summit/pull/13847",
+        "mergedAt": "2025-12-20T03:44:50Z",
+        "title": "Add sprint plan for Jul 20–31, 2026"
+      },
+      {
+        "number": 13764,
+        "url": "https://github.com/BrianCLong/summit/pull/13764",
+        "mergedAt": "2025-12-20T03:34:41Z",
+        "title": "docs: add Sprint 7 GA launch plan"
+      },
+      {
+        "number": 14292,
+        "url": "https://github.com/BrianCLong/summit/pull/14292",
+        "mergedAt": "2025-12-22T08:08:20Z",
+        "title": "feat: add graph analytics pipeline to psc-runner"
+      },
+      {
+        "number": 15173,
+        "url": "https://github.com/BrianCLong/summit/pull/15173",
+        "mergedAt": "2025-12-31T03:32:00Z",
+        "title": "Partner Console v1 and Evidence Export"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 12831,
+        "url": "https://github.com/BrianCLong/summit/pull/12831",
+        "mergedAt": "2025-12-17T21:58:55Z",
+        "title": "Self-Serve Tenant Creation"
+      },
+      {
+        "number": 14564,
+        "url": "https://github.com/BrianCLong/summit/pull/14564",
+        "mergedAt": "2025-12-27T04:47:57Z",
+        "title": "chore(deps): Bump pillow from 10.1.0 to 10.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13322,
+        "url": "https://github.com/BrianCLong/summit/pull/13322",
+        "mergedAt": "2025-12-04T14:38:56Z",
+        "title": "fix: Resolve Remaining Critical Security Vulnerabilities"
+      },
+      {
+        "number": 12906,
+        "url": "https://github.com/BrianCLong/summit/pull/12906",
+        "mergedAt": "2025-12-17T21:45:54Z",
+        "title": "Fix Local Dev Servers & Manual Screenshot"
+      },
+      {
+        "number": 13327,
+        "url": "https://github.com/BrianCLong/summit/pull/13327",
+        "mergedAt": "2025-12-04T15:26:10Z",
+        "title": "fix: eliminate final 2 critical vulnerabilities - achieve 100% critical security"
+      },
+      {
+        "number": 12508,
+        "url": "https://github.com/BrianCLong/summit/pull/12508",
+        "mergedAt": "2025-12-02T18:52:46Z",
+        "title": "Create comprehensive 96-prompt engineering roadmap"
+      },
+      {
+        "number": 13635,
+        "url": "https://github.com/BrianCLong/summit/pull/13635",
+        "mergedAt": "2025-12-17T04:30:31Z",
+        "title": "build(deps): bump prismjs and react-syntax-highlighter in /client"
+      },
+      {
+        "number": 14376,
+        "url": "https://github.com/BrianCLong/summit/pull/14376",
+        "mergedAt": "2025-12-23T04:35:24Z",
+        "title": "Bump esbuild and vitest in /apps/gateway"
+      },
+      {
+        "number": 11975,
+        "url": "https://github.com/BrianCLong/summit/pull/11975",
+        "mergedAt": "2025-11-20T11:01:16Z",
+        "title": "Implement Summit agentic automation framework"
+      },
+      {
+        "number": 13634,
+        "url": "https://github.com/BrianCLong/summit/pull/13634",
+        "mergedAt": "2025-12-17T02:55:59Z",
+        "title": "build(deps): bump esbuild and vitest in /services/nl-cypher"
+      },
+      {
+        "number": 13633,
+        "url": "https://github.com/BrianCLong/summit/pull/13633",
+        "mergedAt": "2025-12-17T02:12:47Z",
+        "title": "build(deps): bump esbuild and vitest in /services/ai-nlq"
+      },
+      {
+        "number": 11952,
+        "url": "https://github.com/BrianCLong/summit/pull/11952",
+        "mergedAt": "2025-11-20T10:21:28Z",
+        "title": "Address documentation and onboarding tech debt"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 1538,
+        "url": "https://github.com/BrianCLong/summit/pull/1538",
+        "mergedAt": "2025-11-21T04:02:01Z",
+        "title": "feat: add federated t-secure metrics aggregator"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

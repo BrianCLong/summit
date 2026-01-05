@@ -71,6 +71,10 @@ const config: Config = {
   errorOnDeprecated: true,
   transformIgnorePatterns: ['node_modules/(?!(.*\.mjs$))'],
   maxWorkers: process.env.CI ? 2 : '50%',
+  // Open handle detection - helps identify hanging tests
+  detectOpenHandles: process.env.JEST_DETECT_HANDLES === 'true',
+  // Force exit after tests complete (CI safety net for orphan handles)
+  forceExit: process.env.CI === 'true',
 };
 
 export default config;

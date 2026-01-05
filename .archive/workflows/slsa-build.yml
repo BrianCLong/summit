@@ -250,12 +250,6 @@ jobs:
 
       - name: Create release bundle
         run: |
-          # Create a release bundle with all attestations
-          tar -czf maestro-v04-release-bundle.tar.gz \
-            sbom.json sbom.spdx.json \
-            vulnerability-report.json \
-            provenance.json vuln-predicate.json
-
           # Generate release manifest
           cat > release-manifest.json <<EOF
           {
@@ -265,7 +259,7 @@ jobs:
             "created": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "attestations": {
               "sbom": "sbom.spdx.json",
-              "vulnerabilities": "vulnerability-report.json", 
+              "vulnerabilities": "vulnerability-report.json",
               "provenance": "provenance.json"
             },
             "signatures": {
@@ -280,10 +274,42 @@ jobs:
           }
           EOF
 
+          # Prepare release directory
+          mkdir -p dist/release
+          cp release-manifest.json sbom.json sbom.spdx.json vulnerability-report.json provenance.json vuln-predicate.json dist/release/
+          touch dist/release/release-status.json
+          touch dist/release/release-notes.md
+
+          # Add schema versions to JSON artifacts
+          chmod +x scripts/release/add-schema-version.mjs
+          scripts/release/add-schema-version.mjs dist/release "release-manifest.json,provenance.json,vulnerability-report.json,vuln-predicate.json,release-status.json"
+
+          # Create the bundle index
+          chmod +x scripts/release/build-bundle-index.mjs
+          scripts/release/build-bundle-index.mjs dist/release
+
+          # Create a release bundle with all attestations and the index
+          tar -czf maestro-v04-release-bundle.tar.gz \
+            dist/release/
+
+          # Generate SHA256SUMS
+          (cd dist/release && sha256sum * > SHA256SUMS)
+
+          # Update Step Summary
+          echo "### Release Bundle Index" >> $GITHUB_STEP_SUMMARY
+          echo "Generated \`dist/release/bundle-index.json\` with $(jq '.files | length' dist/release/bundle-index.json) files." >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          head -n 5 dist/release/SHA256SUMS >> $GITHUB_STEP_SUMMARY
+          echo "..." >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
           name: maestro-v04-release
           path: |
             maestro-v04-release-bundle.tar.gz
-            release-manifest.json
+            dist/release/bundle-index.json
+            dist/release/release-manifest.json
+            dist/release/SHA256SUMS
