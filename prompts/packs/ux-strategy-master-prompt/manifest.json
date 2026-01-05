@@ -1,0 +1,17 @@
+{
+  "id": "ux-strategy-master-prompt",
+  "version": "1.0.0",
+  "description": "Imported from legacy structure: ux-strategy-master-prompt",
+  "model_config": {
+    "model": "gpt-4",
+    "temperature": 0.0
+  },
+  "vars": {},
+  "guardrails": {
+    "tags": [
+      "agentic",
+      "legacy"
+    ]
+  },
+  "template_path": "template.md"
+}
