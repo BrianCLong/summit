@@ -8,6 +8,29 @@ This runbook describes the process for cutting a General Availability (GA) relea
 - Permission to push tags to the repository.
 - `gh` CLI tool (optional, for checking release status).
 
+## Tag Safety Guidelines
+**Recommendation:** Always use annotated tags for releases.
+
+*   **Annotated Tag (Preferred):**
+    ```bash
+    git tag -a v1.0.0 -m "Release v1.0.0"
+    ```
+    *Why?* Stores a full object with tagger name, email, and date.
+
+*   **Signed Tag (Optional but Recommended):**
+    ```bash
+    git tag -s v1.0.0 -m "Release v1.0.0"
+    ```
+    *Why?* Provides cryptographic proof of the tagger's identity.
+
+*   **Lightweight Tag (Avoid for Releases):**
+    ```bash
+    git tag v1.0.0
+    ```
+    *Why?* Just a pointer to a commit, lacks metadata.
+
+The release pipeline now runs a **Tag Safety Check** which reports on these properties.
+
 ## Process
 
 ### 1. Cut GA Tag
