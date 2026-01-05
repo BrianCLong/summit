@@ -55,3 +55,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: companyos-sprint-04
+    version: v1
+    path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
+    sha256: 434a88382afaa83775ef9055171b2095acb3595b82566da8c0e2a21d1625dac2
+    description: Plan and record the CompanyOS Sprint 04 execution brief and roadmap status update.
+    scope:
+      paths:
+        - sprint/
+        - docs/roadmap/STATUS.json
+        - prompts/companyos/
+        - agents/examples/
+      domains:
+        - companyos
+        - sprint-planning
+        - roadmap
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
