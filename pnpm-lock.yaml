@@ -7885,8 +7885,8 @@ importers:
         specifier: file:../maestro-core
         version: file:packages/maestro-core(@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0))(pg@8.16.3)
       chalk:
-        specifier: ^5.6.2
-        version: 5.6.2
+        specifier: ^4.1.2
+        version: 4.1.2
       commander:
         specifier: ^14.0.1
         version: 14.0.2
@@ -7900,8 +7900,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.1
       ora:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^5.4.1
+        version: 5.4.1
       pg:
         specifier: ^8.11.0
         version: 8.16.3
@@ -7916,8 +7916,8 @@ importers:
         specifier: ^9.0.9
         version: 9.0.9
       '@types/jest':
-        specifier: ^30.0.0
-        version: 30.0.0
+        specifier: ^29.5.12
+        version: 29.5.14
       '@types/js-yaml':
         specifier: ^4.0.0
         version: 4.0.9
@@ -7937,11 +7937,11 @@ importers:
         specifier: ^9.39.1
         version: 9.39.1(jiti@2.6.1)
       jest:
-        specifier: ^30.2.0
-        version: 30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
-        specifier: ^29.4.5
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
+        specifier: ^29.4.6
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -37455,10 +37455,6 @@ packages:
     resolution: {integrity: sha512-ywqV+5MmyL4E7ybXgKys4DugZbX0FC6LnwrhjuykIjnK9k8OQacQ7axGKnjDXWNhns0xot3bZI5h55H8yo9cJg==}
     engines: {node: '>=6'}
 
-  cli-spinners@3.3.0:
-    resolution: {integrity: sha512-/+40ljC3ONVnYIttjMWrlL51nItDAbBrq2upN8BPyvGU/2n5Oxw3tbNwORCaNuNqLJnxGqOfjUuhsv7l5Q4IsQ==}
-    engines: {node: '>=18.20'}
-
   cli-table3@0.6.3:
     resolution: {integrity: sha512-w5Jac5SykAeZJKntOxJCrm63Eg5/4dhMWIcuTbo9rpE+brgaSZo0RuNJZeOyMgsUdhDeojvgyQLmjI+K50ZGyg==}
     engines: {node: 10.* || >= 12.*}
@@ -43304,10 +43300,6 @@ packages:
     resolution: {integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==}
     engines: {node: '>=18'}
 
-  log-symbols@7.0.1:
-    resolution: {integrity: sha512-ja1E3yCr9i/0hmBVaM0bfwDjnGy8I/s6PP4DFp+yP+a+mrHO4Rm7DtmnqROTUkHIkqffC84YY7AeqX6oFk0WFg==}
-    engines: {node: '>=18'}
-
   log-update@4.0.0:
     resolution: {integrity: sha512-9fkkDevMefjg0mmzWFBW8YkFP91OrizzkW3diF7CpG+S2EYdy4+TVfGwz1zeF8x7hCx1ovSPTOE9Ngib74qqUg==}
     engines: {node: '>=10'}
@@ -45014,10 +45006,6 @@ packages:
   ora@8.2.0:
     resolution: {integrity: sha512-weP+BZ8MVNnlCm8c0Qdc1WSWq4Qn7I+9CJGm7Qali6g44e/PUzbjNqJX5NJ9ljlNMosfJvg1fKEGILklK9cwnw==}
     engines: {node: '>=18'}
-
-  ora@9.0.0:
-    resolution: {integrity: sha512-m0pg2zscbYgWbqRR6ABga5c3sZdEon7bSgjnlXC64kxtxLOyjRcbbUkLj7HFyy/FTD+P2xdBWu8snGhYI0jc4A==}
-    engines: {node: '>=20'}
 
   orval@7.17.2:
     resolution: {integrity: sha512-6+drCVVWNukdX+ytFPOC2UJ51gv0kGAPch7cTQYxO7VsGwdZ1DiZhYozdGehwu6QeVvAszPhPlh4uLq53k0x+w==}
@@ -75237,8 +75225,6 @@ snapshots:
 
   cli-spinners@2.9.2: {}
 
-  cli-spinners@3.3.0: {}
-
   cli-table3@0.6.3:
     dependencies:
       string-width: 4.2.3
@@ -83460,11 +83446,6 @@ snapshots:
       chalk: 5.6.2
       is-unicode-supported: 1.3.0
 
-  log-symbols@7.0.1:
-    dependencies:
-      is-unicode-supported: 2.1.0
-      yoctocolors: 2.1.2
-
   log-update@4.0.0:
     dependencies:
       ansi-escapes: 4.3.2
@@ -85754,18 +85735,6 @@ snapshots:
       log-symbols: 6.0.0
       stdin-discarder: 0.2.2
       string-width: 7.2.0
-      strip-ansi: 7.1.2
-
-  ora@9.0.0:
-    dependencies:
-      chalk: 5.6.2
-      cli-cursor: 5.0.0
-      cli-spinners: 3.3.0
-      is-interactive: 2.0.0
-      is-unicode-supported: 2.1.0
-      log-symbols: 7.0.1
-      stdin-discarder: 0.2.2
-      string-width: 8.1.0
       strip-ansi: 7.1.2
 
   orval@7.17.2(openapi-types@12.1.3)(typescript@5.9.3):
