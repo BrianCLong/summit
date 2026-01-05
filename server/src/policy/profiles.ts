@@ -17,6 +17,11 @@ export const StrictProfile: TenantPolicyBundle = {
       allow: [],
       requireAgreements: true,
     },
+    ramp: {
+      enabled: false,
+      defaultAllowPercentage: 100,
+      rules: [],
+    },
     rules: [
       {
         id: 'allow-read-own',
@@ -48,6 +53,11 @@ export const BalancedProfile: TenantPolicyBundle = {
       allow: [],
       requireAgreements: true,
     },
+    ramp: {
+      enabled: false,
+      defaultAllowPercentage: 100,
+      rules: [],
+    },
     rules: [
       {
         id: 'allow-standard-ops',
@@ -78,6 +88,11 @@ export const FastOpsProfile: TenantPolicyBundle = {
       mode: 'allowlist',
       allow: [], // Dynamic
       requireAgreements: false,
+    },
+    ramp: {
+      enabled: false,
+      defaultAllowPercentage: 100,
+      rules: [],
     },
     rules: [
       {

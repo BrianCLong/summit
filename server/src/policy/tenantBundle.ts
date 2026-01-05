@@ -51,6 +51,21 @@ const guardrailSchema = (z as any).object({
   requireJustification: (z as any).boolean().default(false),
 });
 
+const rampRuleSchema = (z as any).object({
+  id: (z as any).string().optional(),
+  description: (z as any).string().optional(),
+  action: (z as any).string(),
+  workflow: (z as any).string().optional(),
+  allowPercentage: (z as any).number().min(0).max(100),
+});
+
+const rampConfigSchema = (z as any).object({
+  enabled: (z as any).boolean().default(false),
+  defaultAllowPercentage: (z as any).number().min(0).max(100).default(100),
+  rules: (z as any).array(rampRuleSchema).default([]),
+  salt: (z as any).string().optional(),
+});
+
 const baseProfileSchema = (z as any).object({
   id: (z as any).string(),
   version: (z as any).string(),
@@ -61,6 +76,11 @@ const baseProfileSchema = (z as any).object({
     mode: 'deny',
     allow: [],
     requireAgreements: true,
+  }),
+  ramp: rampConfigSchema.default({
+    enabled: false,
+    defaultAllowPercentage: 100,
+    rules: [],
   }),
   rules: (z as any).array(policyRuleSchema).min(1),
 });
