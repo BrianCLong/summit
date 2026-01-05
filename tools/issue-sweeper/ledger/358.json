@@ -1,0 +1,77 @@
+{
+  "issue_number": 358,
+  "title": "Exoplanet Habitability Assessment AI",
+  "url": "https://github.com/BrianCLong/summit/issues/358",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122128940,
+      "node_id": "LA_kwDOPaNncM8AAAACH7ikLA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-interplanetary-ai",
+      "name": "epic-interplanetary-ai",
+      "color": "4ECDC4",
+      "default": false,
+      "description": "Interplanetary AI and space computing"
+    },
+    {
+      "id": 9360062798,
+      "node_id": "LA_kwDOPaNncM8AAAACLec5Tg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/stale",
+      "name": "stale",
+      "color": "e4e669",
+      "default": false,
+      "description": "PR with no activity for 30 days"
+    }
+  ],
+  "updatedAt": "2025-09-28T01:09:39Z",
+  "createdAt": "2025-08-16T22:29:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11898,
+        "url": "https://github.com/BrianCLong/summit/pull/11898",
+        "mergedAt": null,
+        "title": "Unify apps with graph timeline map interface"
+      },
+      {
+        "number": 13183,
+        "url": "https://github.com/BrianCLong/summit/pull/13183",
+        "mergedAt": "2025-12-04T15:39:03Z",
+        "title": "Build graph explorer UI with Tailwind and shadcn"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 13188,
+        "url": "https://github.com/BrianCLong/summit/pull/13188",
+        "mergedAt": "2025-12-04T15:38:53Z",
+        "title": "Build cross-platform TypeScript CLI for graph queries"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

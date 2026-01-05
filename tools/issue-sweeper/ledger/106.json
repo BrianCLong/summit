@@ -1,0 +1,143 @@
+{
+  "issue_number": 106,
+  "title": "Add PWA Support for Mobile Responsiveness",
+  "url": "https://github.com/BrianCLong/summit/issues/106",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095918502,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizpg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:enhancement",
+      "name": "type:enhancement",
+      "color": "FBCA04",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095918587,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiz-w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P3",
+      "name": "priority:P3",
+      "color": "fbca04",
+      "default": false,
+      "description": "Medium"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:52Z",
+  "createdAt": "2025-08-12T04:40:58Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12271,
+        "url": "https://github.com/BrianCLong/summit/pull/12271",
+        "mergedAt": "2025-12-18T03:20:00Z",
+        "title": "Geopolitical Master Prompts Implementation"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13112,
+        "url": "https://github.com/BrianCLong/summit/pull/13112",
+        "mergedAt": "2025-12-03T03:30:25Z",
+        "title": "Implement Narrative Drift Detection"
+      },
+      {
+        "number": 15349,
+        "url": "https://github.com/BrianCLong/summit/pull/15349",
+        "mergedAt": "2026-01-01T09:42:36Z",
+        "title": "feat: MVP-4 GA Security Tests and ESM Fixes"
+      },
+      {
+        "number": 11881,
+        "url": "https://github.com/BrianCLong/summit/pull/11881",
+        "mergedAt": null,
+        "title": "Fix devcontainer setup for F5 start"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 10082,
+        "url": "https://github.com/BrianCLong/summit/pull/10082",
+        "mergedAt": "2025-10-14T13:08:04Z",
+        "title": "Add real-time narrative simulation engine"
+      },
+      {
+        "number": 10128,
+        "url": "https://github.com/BrianCLong/summit/pull/10128",
+        "mergedAt": "2025-10-14T08:39:43Z",
+        "title": "feat: add community engagement toolkit"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

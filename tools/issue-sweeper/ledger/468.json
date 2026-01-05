@@ -1,0 +1,56 @@
+{
+  "issue_number": 468,
+  "title": "feat: add cognitive twin service",
+  "url": "https://github.com/BrianCLong/summit/pull/468",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:34:59Z",
+  "createdAt": "2025-08-17T19:04:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11773,
+        "url": "https://github.com/BrianCLong/summit/pull/11773",
+        "mergedAt": "2025-11-16T21:51:34Z",
+        "title": "fix: Achieve zero TypeScript and ESLint no-undef errors + build improvements"
+      },
+      {
+        "number": 276,
+        "url": "https://github.com/BrianCLong/summit/pull/276",
+        "mergedAt": null,
+        "title": "fix: clean up test placeholders and config"
+      },
+      {
+        "number": 11896,
+        "url": "https://github.com/BrianCLong/summit/pull/11896",
+        "mergedAt": "2025-11-20T10:26:15Z",
+        "title": "Add GraphRAG with query preview feature"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

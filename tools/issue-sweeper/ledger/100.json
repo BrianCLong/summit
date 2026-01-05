@@ -1,0 +1,248 @@
+{
+  "issue_number": 100,
+  "title": "Audit and Harden Docker Configurations",
+  "url": "https://github.com/BrianCLong/summit/issues/100",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:14:31Z",
+  "createdAt": "2025-08-12T04:40:47Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15411,
+        "url": "https://github.com/BrianCLong/summit/pull/15411",
+        "mergedAt": null,
+        "title": "Harden graph analytics query bounds"
+      },
+      {
+        "number": 15261,
+        "url": "https://github.com/BrianCLong/summit/pull/15261",
+        "mergedAt": "2026-01-01T07:29:41Z",
+        "title": "Expand test coverage and fix issues"
+      },
+      {
+        "number": 13327,
+        "url": "https://github.com/BrianCLong/summit/pull/13327",
+        "mergedAt": "2025-12-04T15:26:10Z",
+        "title": "fix: eliminate final 2 critical vulnerabilities - achieve 100% critical security"
+      },
+      {
+        "number": 13882,
+        "url": "https://github.com/BrianCLong/summit/pull/13882",
+        "mergedAt": "2025-12-20T03:21:27Z",
+        "title": "Create multi-agent orchestration prompt for GA release"
+      },
+      {
+        "number": 15172,
+        "url": "https://github.com/BrianCLong/summit/pull/15172",
+        "mergedAt": "2025-12-31T03:31:39Z",
+        "title": "Prepare Summit MVP for general availability"
+      },
+      {
+        "number": 13815,
+        "url": "https://github.com/BrianCLong/summit/pull/13815",
+        "mergedAt": "2025-12-20T03:40:18Z",
+        "title": "Add referrer policy and XSS filter to security middleware"
+      },
+      {
+        "number": 13897,
+        "url": "https://github.com/BrianCLong/summit/pull/13897",
+        "mergedAt": "2025-12-20T03:20:12Z",
+        "title": "Implement policy-gated approvals for high-risk operations"
+      },
+      {
+        "number": 15328,
+        "url": "https://github.com/BrianCLong/summit/pull/15328",
+        "mergedAt": null,
+        "title": "feat: add counter-intel osint playbook and tooling"
+      },
+      {
+        "number": 14023,
+        "url": "https://github.com/BrianCLong/summit/pull/14023",
+        "mergedAt": "2025-12-19T22:46:22Z",
+        "title": "Upgrade deepspeed to version 0.15.1"
+      },
+      {
+        "number": 14015,
+        "url": "https://github.com/BrianCLong/summit/pull/14015",
+        "mergedAt": "2025-12-19T21:35:03Z",
+        "title": "Update Pillow version to 10.3.0"
+      },
+      {
+        "number": 14014,
+        "url": "https://github.com/BrianCLong/summit/pull/14014",
+        "mergedAt": "2025-12-19T21:27:26Z",
+        "title": "Update python-jose version to 3.4.0"
+      },
+      {
+        "number": 14009,
+        "url": "https://github.com/BrianCLong/summit/pull/14009",
+        "mergedAt": "2025-12-19T21:17:18Z",
+        "title": "Update nltk version to 3.9 in requirements.txt"
+      },
+      {
+        "number": 14006,
+        "url": "https://github.com/BrianCLong/summit/pull/14006",
+        "mergedAt": "2025-12-19T21:10:25Z",
+        "title": "Update changed-files action version in workflow"
+      },
+      {
+        "number": 13880,
+        "url": "https://github.com/BrianCLong/summit/pull/13880",
+        "mergedAt": "2025-12-20T03:21:44Z",
+        "title": "MAE Release Captain Automation setup"
+      },
+      {
+        "number": 14555,
+        "url": "https://github.com/BrianCLong/summit/pull/14555",
+        "mergedAt": "2025-12-27T03:31:19Z",
+        "title": "feat(ui): add copy-to-clipboard button in Maestro Run Console"
+      },
+      {
+        "number": 14116,
+        "url": "https://github.com/BrianCLong/summit/pull/14116",
+        "mergedAt": "2025-12-20T10:15:24Z",
+        "title": "Epic 27: Real-Time Event Streaming & Data Pipeline Platform"
+      },
+      {
+        "number": 13879,
+        "url": "https://github.com/BrianCLong/summit/pull/13879",
+        "mergedAt": "2025-12-20T03:21:48Z",
+        "title": "Create multi-agent release prompt for MVP to GA"
+      },
+      {
+        "number": 12685,
+        "url": "https://github.com/BrianCLong/summit/pull/12685",
+        "mergedAt": "2025-12-04T18:41:52Z",
+        "title": "Implement graph analytics with XAI explanations"
+      },
+      {
+        "number": 13322,
+        "url": "https://github.com/BrianCLong/summit/pull/13322",
+        "mergedAt": "2025-12-04T14:38:56Z",
+        "title": "fix: Resolve Remaining Critical Security Vulnerabilities"
+      },
+      {
+        "number": 14022,
+        "url": "https://github.com/BrianCLong/summit/pull/14022",
+        "mergedAt": "2025-12-19T22:40:03Z",
+        "title": "Upgrade python-multipart to version 0.0.18"
+      },
+      {
+        "number": 14516,
+        "url": "https://github.com/BrianCLong/summit/pull/14516",
+        "mergedAt": null,
+        "title": "Sprint N+14: Autonomous Agent Expansion with Caps & Safety"
+      },
+      {
+        "number": 13326,
+        "url": "https://github.com/BrianCLong/summit/pull/13326",
+        "mergedAt": "2025-12-04T15:03:30Z",
+        "title": "fix: eliminate all moderate-severity vulnerabilities"
+      },
+      {
+        "number": 14021,
+        "url": "https://github.com/BrianCLong/summit/pull/14021",
+        "mergedAt": "2025-12-19T22:35:08Z",
+        "title": "Upgrade paddlepaddle to version 2.6.2"
+      },
+      {
+        "number": 13101,
+        "url": "https://github.com/BrianCLong/summit/pull/13101",
+        "mergedAt": "2025-12-17T05:44:01Z",
+        "title": "Add Multi-Tenant Boundary Stress Test Engine"
+      },
+      {
+        "number": 13627,
+        "url": "https://github.com/BrianCLong/summit/pull/13627",
+        "mergedAt": "2025-12-17T01:39:32Z",
+        "title": "Create future history log for platform decisions"
+      },
+      {
+        "number": 13659,
+        "url": "https://github.com/BrianCLong/summit/pull/13659",
+        "mergedAt": "2025-12-20T03:28:08Z",
+        "title": "chore: harden drop gateway security"
+      },
+      {
+        "number": 13881,
+        "url": "https://github.com/BrianCLong/summit/pull/13881",
+        "mergedAt": "2025-12-20T03:21:40Z",
+        "title": "Implement ETL backpressure and replay system"
+      },
+      {
+        "number": 13375,
+        "url": "https://github.com/BrianCLong/summit/pull/13375",
+        "mergedAt": "2025-12-17T04:52:11Z",
+        "title": "ops: Platform Health Score (Phase 1)"
+      },
+      {
+        "number": 13135,
+        "url": "https://github.com/BrianCLong/summit/pull/13135",
+        "mergedAt": "2025-12-03T03:11:01Z",
+        "title": "Implement Supernode Suppression heuristics"
+      },
+      {
+        "number": 11889,
+        "url": "https://github.com/BrianCLong/summit/pull/11889",
+        "mergedAt": "2025-11-20T11:02:19Z",
+        "title": "Generate master planning docs from markdown files"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,0 +1,230 @@
+{
+  "issue_number": 25,
+  "title": "Docs: ADR-0001 — Define MVP-0 scope and constraints",
+  "url": "https://github.com/BrianCLong/summit/issues/25",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:19Z",
+  "createdAt": "2025-08-12T00:10:19Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15121,
+        "url": "https://github.com/BrianCLong/summit/pull/15121",
+        "mergedAt": "2025-12-30T22:37:05Z",
+        "title": "Sprint 25 Strategic Plan & Agent Prompt"
+      },
+      {
+        "number": 14514,
+        "url": "https://github.com/BrianCLong/summit/pull/14514",
+        "mergedAt": "2025-12-27T00:19:06Z",
+        "title": "Sprint N+25: Incident Response & Resilience"
+      },
+      {
+        "number": 13857,
+        "url": "https://github.com/BrianCLong/summit/pull/13857",
+        "mergedAt": "2025-12-20T03:24:09Z",
+        "title": "Add blueprint for prompts 25-32"
+      },
+      {
+        "number": 13862,
+        "url": "https://github.com/BrianCLong/summit/pull/13862",
+        "mergedAt": "2025-12-20T03:23:44Z",
+        "title": "Add sprint plan for Sep 14–25 2026"
+      },
+      {
+        "number": 13601,
+        "url": "https://github.com/BrianCLong/summit/pull/13601",
+        "mergedAt": "2025-12-15T09:35:23Z",
+        "title": "deps(docker): bump node from 20-alpine to 25-alpine"
+      },
+      {
+        "number": 13264,
+        "url": "https://github.com/BrianCLong/summit/pull/13264",
+        "mergedAt": "2025-12-17T06:22:57Z",
+        "title": "Sprint 25 Hardening: GraphQL Gateway, Admin UI, and Safety Controls"
+      },
+      {
+        "number": 12726,
+        "url": "https://github.com/BrianCLong/summit/pull/12726",
+        "mergedAt": "2025-12-05T17:14:39Z",
+        "title": "Deepen 23rd-order guidance for prompts 25-32 plan"
+      },
+      {
+        "number": 15109,
+        "url": "https://github.com/BrianCLong/summit/pull/15109",
+        "mergedAt": null,
+        "title": "docs: plan sprint25 provenance and predictive analytics"
+      },
+      {
+        "number": 12853,
+        "url": "https://github.com/BrianCLong/summit/pull/12853",
+        "mergedAt": "2025-12-04T15:49:08Z",
+        "title": "Add GA Launch sprint plan (May 25–Jun 5, 2026)"
+      },
+      {
+        "number": 13756,
+        "url": "https://github.com/BrianCLong/summit/pull/13756",
+        "mergedAt": "2025-12-20T03:34:07Z",
+        "title": "docs: refresh Sprint 12 maturity & moat plan"
+      },
+      {
+        "number": 12640,
+        "url": "https://github.com/BrianCLong/summit/pull/12640",
+        "mergedAt": "2025-12-18T01:55:47Z",
+        "title": "Add CCE enclave scaffolding"
+      },
+      {
+        "number": 12232,
+        "url": "https://github.com/BrianCLong/summit/pull/12232",
+        "mergedAt": "2025-11-23T03:25:02Z",
+        "title": "Draft ICP document and top accounts strategy"
+      },
+      {
+        "number": 12701,
+        "url": "https://github.com/BrianCLong/summit/pull/12701",
+        "mergedAt": "2025-12-16T15:45:53Z",
+        "title": "docs: enrich companyos wave4 pack"
+      },
+      {
+        "number": 13327,
+        "url": "https://github.com/BrianCLong/summit/pull/13327",
+        "mergedAt": "2025-12-04T15:26:10Z",
+        "title": "fix: eliminate final 2 critical vulnerabilities - achieve 100% critical security"
+      },
+      {
+        "number": 12042,
+        "url": "https://github.com/BrianCLong/summit/pull/12042",
+        "mergedAt": "2025-11-21T03:59:41Z",
+        "title": "Audit and improve CI/CD pipeline performance"
+      },
+      {
+        "number": 12508,
+        "url": "https://github.com/BrianCLong/summit/pull/12508",
+        "mergedAt": "2025-12-02T18:52:46Z",
+        "title": "Create comprehensive 96-prompt engineering roadmap"
+      },
+      {
+        "number": 12220,
+        "url": "https://github.com/BrianCLong/summit/pull/12220",
+        "mergedAt": "2025-11-21T16:49:56Z",
+        "title": "docs: add monorepo architecture refactoring plan with ADRs"
+      },
+      {
+        "number": 12251,
+        "url": "https://github.com/BrianCLong/summit/pull/12251",
+        "mergedAt": "2025-12-18T03:31:21Z",
+        "title": "test: add comprehensive test coverage for critical areas"
+      },
+      {
+        "number": 15315,
+        "url": "https://github.com/BrianCLong/summit/pull/15315",
+        "mergedAt": null,
+        "title": "Initialize Pilot Design Innovation Sprint artifacts"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      },
+      {
+        "number": 15172,
+        "url": "https://github.com/BrianCLong/summit/pull/15172",
+        "mergedAt": "2025-12-31T03:31:39Z",
+        "title": "Prepare Summit MVP for general availability"
+      },
+      {
+        "number": 12685,
+        "url": "https://github.com/BrianCLong/summit/pull/12685",
+        "mergedAt": "2025-12-04T18:41:52Z",
+        "title": "Implement graph analytics with XAI explanations"
+      },
+      {
+        "number": 13053,
+        "url": "https://github.com/BrianCLong/summit/pull/13053",
+        "mergedAt": "2025-12-17T21:22:02Z",
+        "title": "Security: Fix dependency vulnerabilities and document findings"
+      },
+      {
+        "number": 12883,
+        "url": "https://github.com/BrianCLong/summit/pull/12883",
+        "mergedAt": "2025-12-04T15:48:27Z",
+        "title": "Build IntelGraph decision and claims slice"
+      },
+      {
+        "number": 15352,
+        "url": "https://github.com/BrianCLong/summit/pull/15352",
+        "mergedAt": "2026-01-01T10:50:33Z",
+        "title": "Add CCR poisoning detection ADR and roadmap update"
+      },
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 13626,
+        "url": "https://github.com/BrianCLong/summit/pull/13626",
+        "mergedAt": "2025-12-17T01:32:59Z",
+        "title": "Prepare CompanyOS for external pilot launch"
+      },
+      {
+        "number": 11971,
+        "url": "https://github.com/BrianCLong/summit/pull/11971",
+        "mergedAt": null,
+        "title": "Analyze test coverage gaps automatically"
+      },
+      {
+        "number": 13346,
+        "url": "https://github.com/BrianCLong/summit/pull/13346",
+        "mergedAt": "2025-12-05T17:34:11Z",
+        "title": "build(deps): bump jws from 3.2.2 to 3.2.3 in /deepagent-mvp"
+      },
+      {
+        "number": 15286,
+        "url": "https://github.com/BrianCLong/summit/pull/15286",
+        "mergedAt": "2026-01-01T05:45:06Z",
+        "title": "Harden usage metering and enforcement"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
