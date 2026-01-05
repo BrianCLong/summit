@@ -206,6 +206,7 @@ function useDurableCaseExportJob(args: UseCaseExportJobArgs, paramsHash: string,
     } finally {
       stopPolling()
       updateStatus(jobKey, 'canceled')
+      recordTelemetryEvent('export_canceled', job.jobId, job.startedAt)
     }
   }, [caseId, getJob, jobKey, stopPolling, tenantId, updateStatus])
 

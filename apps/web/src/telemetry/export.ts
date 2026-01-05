@@ -1,7 +1,11 @@
 import { recordAudit } from './audit'
-import { getTelemetryContext } from './metrics'
+import { getTelemetryContext, trackSwitchboardEvent } from './metrics'
 
-type ExportEvent = 'export_started' | 'export_completed' | 'export_failed'
+type ExportEvent =
+  | 'export_started'
+  | 'export_completed'
+  | 'export_failed'
+  | 'export_canceled'
 
 export async function recordTelemetryEvent(event: ExportEvent, jobId: string, startedAt?: string) {
   const context = getTelemetryContext()
@@ -20,6 +24,7 @@ export async function recordTelemetryEvent(event: ExportEvent, jobId: string, st
       headers: { 'Content-Type': 'application/json', 'x-correlation-id': context.sessionId },
       body: JSON.stringify(payload),
     })
+    await trackSwitchboardEvent(event, { jobId }, durationMs ? { durationMs } : undefined)
   } catch (err) {
     console.warn('Failed to record telemetry', err)
   }

@@ -13,25 +13,32 @@ export type GoldenPathStep =
   | 'results_viewed';
 
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type SwitchboardEvent =
+  | 'export_started'
+  | 'export_completed'
+  | 'export_failed'
+  | 'export_canceled'
+  | 'approval_requested'
+  | 'approval_voted';
 
 // Generate or retrieve session correlation ID
 const getSessionId = () => {
-    let sid = sessionStorage.getItem('summit_session_id');
-    if (!sid) {
-        sid = crypto.randomUUID();
-        sessionStorage.setItem('summit_session_id', sid);
-    }
-    return sid;
+  let sid = sessionStorage.getItem('summit_session_id');
+  if (!sid) {
+    sid = crypto.randomUUID();
+    sessionStorage.setItem('summit_session_id', sid);
+  }
+  return sid;
 };
 
 // Generate or retrieve device ID
 const getDeviceId = () => {
-    let did = localStorage.getItem('summit_device_id');
-    if (!did) {
-        did = crypto.randomUUID();
-        localStorage.setItem('summit_device_id', did);
-    }
-    return did;
+  let did = localStorage.getItem('summit_device_id');
+  if (!did) {
+    did = crypto.randomUUID();
+    localStorage.setItem('summit_device_id', did);
+  }
+  return did;
 };
 
 /**
@@ -57,9 +64,9 @@ export const trackGoldenPathStep = async (
         event: 'golden_path_step',
         labels: { step, status },
         context: {
-            sessionId: getSessionId(),
-            deviceId: getDeviceId(),
-            url: window.location.href
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
+          url: window.location.href
         }
       }),
     });
@@ -109,8 +116,8 @@ export const reportError = async (
         },
         payload: errorData,
         context: {
-            sessionId: getSessionId(),
-            deviceId: getDeviceId(),
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
         }
       }),
     });
@@ -120,7 +127,33 @@ export const reportError = async (
   }
 };
 
+export const trackSwitchboardEvent = async (
+  event: SwitchboardEvent,
+  labels: Record<string, string | number> = {},
+  payload?: Record<string, unknown>
+) => {
+  try {
+    const context = getTelemetryContext();
+    recordAudit('switchboard_event', { event, labels, payload });
+    await fetch('/api/monitoring/telemetry/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-correlation-id': context.sessionId,
+      },
+      body: JSON.stringify({
+        event: 'switchboard_event',
+        labels: { event, ...labels },
+        payload,
+        context,
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to track switchboard event:', error);
+  }
+};
+
 export const getTelemetryContext = () => ({
-    sessionId: getSessionId(),
-    deviceId: getDeviceId(),
+  sessionId: getSessionId(),
+  deviceId: getDeviceId(),
 });
