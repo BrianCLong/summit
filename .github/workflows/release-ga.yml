@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (if different from ref)'
+        required: false
+        type: string
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -75,6 +85,8 @@ jobs:
     permissions:
       contents: write
       packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -99,13 +111,53 @@ jobs:
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release-assets/evidence.tar.gz
-          body: ${{ steps.notes.outputs.notes }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+      - name: Idempotent Release
+        id: publish
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          echo "Processing release for tag: $TAG"
+
+          # Determine prerelease
+          PRERELEASE=false
+          if [[ "$TAG" == *"-rc"* ]]; then
+            PRERELEASE=true
+          fi
+
+          # Check if release exists
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG exists. Updating..."
+            EXISTED="true"
+            ACTION="updated"
+
+            # Pattern A: Update
+            gh release upload "$TAG" release-assets/evidence.tar.gz --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" \
+              --notes "${{ steps.notes.outputs.notes }}" \
+              --prerelease="$PRERELEASE" \
+              --repo "$GITHUB_REPOSITORY"
+
+          else
+            echo "Release $TAG does not exist. Creating..."
+            EXISTED="false"
+            ACTION="created"
+
+            gh release create "$TAG" release-assets/evidence.tar.gz \
+              --title "$TAG" \
+              --notes "${{ steps.notes.outputs.notes }}" \
+              --prerelease="$PRERELEASE" \
+              --repo "$GITHUB_REPOSITORY"
+          fi
+
+          echo "existed=$EXISTED" >> "$GITHUB_OUTPUT"
+          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
+
+      - name: Release Summary
+        if: always()
+        run: |
+          echo "### Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Concurrency Group:** release-${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Existed:** ${{ steps.publish.outputs.existed }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action Taken:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY
