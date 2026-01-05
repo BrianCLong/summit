@@ -78,6 +78,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for git describe in composite action
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Download Server Artifacts
         uses: actions/download-artifact@v4
@@ -91,10 +98,12 @@ jobs:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
-      - name: Create Evidence Bundle
-        run: |
-          mkdir -p release-assets
-          tar -czf release-assets/evidence.tar.gz evidence/
+      - name: Create Release Bundle
+        id: bundle
+        uses: ./.github/actions/release-bundle
+        with:
+          tag: ${{ github.ref_name }}
+          dry_run: false
 
       - name: Generate Release Notes
         id: notes
@@ -104,8 +113,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/evidence.tar.gz
+          files: ${{ steps.bundle.outputs.bundle_path }}
           body: ${{ steps.notes.outputs.notes }}
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.bundle.outputs.channel == 'rc' }}
           generate_release_notes: true
