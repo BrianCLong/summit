@@ -1,0 +1,107 @@
+{
+  "issue_number": 307,
+  "title": "User Preference System for InsightPanel",
+  "url": "https://github.com/BrianCLong/summit/issues/307",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121350247,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zCZw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-UX",
+      "name": "area-UX",
+      "color": "cfd3d7",
+      "default": false,
+      "description": "Frontend insights/UI"
+    },
+    {
+      "id": 9121485382,
+      "node_id": "LA_kwDOPaNncM8AAAACH67SRg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-personalization",
+      "name": "epic-personalization",
+      "color": "FF6B6B",
+      "default": false,
+      "description": "Insight personalization and customization"
+    },
+    {
+      "id": 9121486304,
+      "node_id": "LA_kwDOPaNncM8AAAACH67V4A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-7",
+      "name": "sprint-7",
+      "color": "A29BFE",
+      "default": false,
+      "description": "Sprint 7: Insight Experience Polish & Scaling"
+    }
+  ],
+  "updatedAt": "2025-08-16T18:32:41Z",
+  "createdAt": "2025-08-16T18:32:41Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15142,
+        "url": "https://github.com/BrianCLong/summit/pull/15142",
+        "mergedAt": null,
+        "title": "Review recent changes"
+      },
+      {
+        "number": 11897,
+        "url": "https://github.com/BrianCLong/summit/pull/11897",
+        "mergedAt": "2025-11-20T10:26:10Z",
+        "title": "Add XAI overlay service for model metrics"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 11896,
+        "url": "https://github.com/BrianCLong/summit/pull/11896",
+        "mergedAt": "2025-11-20T10:26:15Z",
+        "title": "Add GraphRAG with query preview feature"
+      },
+      {
+        "number": 11914,
+        "url": "https://github.com/BrianCLong/summit/pull/11914",
+        "mergedAt": "2025-11-20T10:25:00Z",
+        "title": "Consolidate Summit orchestration layer"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 13106,
+        "url": "https://github.com/BrianCLong/summit/pull/13106",
+        "mergedAt": "2025-12-03T04:36:27Z",
+        "title": "Add spectrum analysis and sensor fusion integration"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

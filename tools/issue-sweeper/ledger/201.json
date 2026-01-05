@@ -1,0 +1,167 @@
+{
+  "issue_number": 201,
+  "title": "End-to-end testing with Playwright",
+  "url": "https://github.com/BrianCLong/summit/issues/201",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968405,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRlQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/testing",
+      "name": "testing",
+      "color": "0e8a16",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981145,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDWQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-10-30",
+      "name": "due:2025-10-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056108,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHoLA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/e2e",
+      "name": "e2e",
+      "color": "5319e7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:43:06Z",
+  "createdAt": "2025-08-14T04:43:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 15327,
+        "url": "https://github.com/BrianCLong/summit/pull/15327",
+        "mergedAt": null,
+        "title": "feat: enforce agent attestations and diff risk gates"
+      },
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      },
+      {
+        "number": 13119,
+        "url": "https://github.com/BrianCLong/summit/pull/13119",
+        "mergedAt": "2025-12-17T05:37:58Z",
+        "title": "Implement Time-Series Intelligence Model for Entity Forecasting"
+      },
+      {
+        "number": 13120,
+        "url": "https://github.com/BrianCLong/summit/pull/13120",
+        "mergedAt": "2025-12-03T01:33:12Z",
+        "title": "Agent-based Trend Forecaster for Narrative Simulation"
+      },
+      {
+        "number": 13117,
+        "url": "https://github.com/BrianCLong/summit/pull/13117",
+        "mergedAt": "2025-12-03T01:35:51Z",
+        "title": "PsyOps Narrative Simulator: Propagation & Suppression"
+      },
+      {
+        "number": 13109,
+        "url": "https://github.com/BrianCLong/summit/pull/13109",
+        "mergedAt": "2025-12-03T00:15:40Z",
+        "title": "Harden Summit inputs against security threats"
+      },
+      {
+        "number": 13115,
+        "url": "https://github.com/BrianCLong/summit/pull/13115",
+        "mergedAt": "2025-12-03T01:37:10Z",
+        "title": "feat: Implement PredictiveRelationshipService for edge inference"
+      },
+      {
+        "number": 745,
+        "url": "https://github.com/BrianCLong/summit/pull/745",
+        "mergedAt": "2025-08-29T10:53:36Z",
+        "title": "chore(deps): bump @opentelemetry/sdk-node from 0.45.1 to 0.203.0"
+      },
+      {
+        "number": 743,
+        "url": "https://github.com/BrianCLong/summit/pull/743",
+        "mergedAt": "2025-08-29T10:34:30Z",
+        "title": "chore(deps): bump @opentelemetry/exporter-prometheus from 0.44.0 to 0.203.0"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 629,
+        "url": "https://github.com/BrianCLong/summit/pull/629",
+        "mergedAt": null,
+        "title": "chore(deps): bump keybert from 0.8.3 to 0.9.0"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 11892,
+        "url": "https://github.com/BrianCLong/summit/pull/11892",
+        "mergedAt": null,
+        "title": "Build Counterintelligence Operations Platform"
+      },
+      {
+        "number": 13166,
+        "url": "https://github.com/BrianCLong/summit/pull/13166",
+        "mergedAt": "2025-12-04T15:39:25Z",
+        "title": "Fix Jest ESM config, update CI, and resolve conflicts"
+      },
+      {
+        "number": 13076,
+        "url": "https://github.com/BrianCLong/summit/pull/13076",
+        "mergedAt": "2025-12-03T05:15:02Z",
+        "title": "Fix Jest ESM Configuration and Test Execution"
+      },
+      {
+        "number": 11923,
+        "url": "https://github.com/BrianCLong/summit/pull/11923",
+        "mergedAt": "2025-11-20T10:04:27Z",
+        "title": "Build Advanced Visualization and Dashboard System"
+      },
+      {
+        "number": 741,
+        "url": "https://github.com/BrianCLong/summit/pull/741",
+        "mergedAt": "2025-08-29T10:29:33Z",
+        "title": "chore(deps): bump @opentelemetry/exporter-jaeger from 1.30.1 to 2.0.1"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

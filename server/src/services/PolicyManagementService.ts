@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { Policy, PolicyRule, PolicyAction, Stage } from '../governance/types.js';
 import { createDataEnvelope, DataEnvelope, GovernanceResult } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
+import { enforceRampDecisionForTenant } from '../policy/ramp.js';
 
 // ============================================================================
 // Extended Policy Types for Management
@@ -884,6 +885,13 @@ export class PolicyManagementService {
     try {
       await client.query('BEGIN');
       const now = new Date().toISOString();
+
+      enforceRampDecisionForTenant({
+        tenantId,
+        action: 'APPROVE',
+        workflow: 'policy_management',
+        key: policyId,
+      });
 
       const result = await client.query(
         `UPDATE managed_policies

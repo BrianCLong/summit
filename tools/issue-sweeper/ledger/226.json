@@ -1,0 +1,116 @@
+{
+  "issue_number": 226,
+  "title": "NLP: PII redaction and data governance",
+  "url": "https://github.com/BrianCLong/summit/issues/226",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342705,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn8cQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/AI",
+      "name": "AI",
+      "color": "bfdadc",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9108055754,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmyg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/NLP",
+      "name": "NLP",
+      "color": "6f42c1",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108075749,
+      "node_id": "LA_kwDOPaNncM8AAAACHuI05Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/compliance",
+      "name": "compliance",
+      "color": "cfd3d7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:00Z",
+  "createdAt": "2025-08-14T04:54:00Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 1296,
+        "url": "https://github.com/BrianCLong/summit/pull/1296",
+        "mergedAt": "2025-09-21T02:01:25Z",
+        "title": "feat(automation): Weekly Repository Hygiene Workflow"
+      },
+      {
+        "number": 11904,
+        "url": "https://github.com/BrianCLong/summit/pull/11904",
+        "mergedAt": "2025-11-20T10:25:38Z",
+        "title": "Set up Security Autopilot for Summit repoCreate pull request"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 1146,
+        "url": "https://github.com/BrianCLong/summit/pull/1146",
+        "mergedAt": "2025-09-19T04:54:20Z",
+        "title": "chore(deps): bump react-speech-recognition from 3.10.0 to 4.0.1 in /client"
+      },
+      {
+        "number": 11888,
+        "url": "https://github.com/BrianCLong/summit/pull/11888",
+        "mergedAt": "2025-11-20T10:26:20Z",
+        "title": "Implement comprehensive API documentation system"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

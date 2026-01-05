@@ -1,0 +1,230 @@
+{
+  "issue_number": 6,
+  "title": "M0: Update README to reflect MVP-0 truth and move extras to Roadmap",
+  "url": "https://github.com/BrianCLong/summit/issues/6",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-12-19T21:34:19Z",
+  "createdAt": "2025-08-12T00:09:54Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15413,
+        "url": "https://github.com/BrianCLong/summit/pull/15413",
+        "mergedAt": null,
+        "title": "feat(web): polish GlobalSearch UX and add tests"
+      },
+      {
+        "number": 15380,
+        "url": "https://github.com/BrianCLong/summit/pull/15380",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults"
+      },
+      {
+        "number": 15358,
+        "url": "https://github.com/BrianCLong/summit/pull/15358",
+        "mergedAt": null,
+        "title": "Create patent-grade MCP protocol innovations"
+      },
+      {
+        "number": 13727,
+        "url": "https://github.com/BrianCLong/summit/pull/13727",
+        "mergedAt": "2025-12-20T11:44:41Z",
+        "title": "build(deps-dev): Bump storybook from 7.6.20 to 7.6.21"
+      },
+      {
+        "number": 14641,
+        "url": "https://github.com/BrianCLong/summit/pull/14641",
+        "mergedAt": "2025-12-27T07:02:15Z",
+        "title": "Sprint 6: Hard Quota Enforcement & Operator Overrides"
+      },
+      {
+        "number": 14503,
+        "url": "https://github.com/BrianCLong/summit/pull/14503",
+        "mergedAt": "2025-12-27T00:25:51Z",
+        "title": "Sprint N+6: Sustained Velocity with Guardrails"
+      },
+      {
+        "number": 14284,
+        "url": "https://github.com/BrianCLong/summit/pull/14284",
+        "mergedAt": "2025-12-22T08:08:44Z",
+        "title": "Add Sprint N+6 execution plan"
+      },
+      {
+        "number": 13763,
+        "url": "https://github.com/BrianCLong/summit/pull/13763",
+        "mergedAt": "2025-12-20T03:34:35Z",
+        "title": "Add Sprint 6 fundability issue map"
+      },
+      {
+        "number": 15132,
+        "url": "https://github.com/BrianCLong/summit/pull/15132",
+        "mergedAt": "2025-12-30T21:20:21Z",
+        "title": "chore(deps): bump actions/checkout from 3 to 6"
+      },
+      {
+        "number": 14362,
+        "url": "https://github.com/BrianCLong/summit/pull/14362",
+        "mergedAt": "2025-12-22T07:15:17Z",
+        "title": "docs: add GLM-4.6 to catalog"
+      },
+      {
+        "number": 14021,
+        "url": "https://github.com/BrianCLong/summit/pull/14021",
+        "mergedAt": "2025-12-19T22:35:08Z",
+        "title": "Upgrade paddlepaddle to version 2.6.2"
+      },
+      {
+        "number": 15182,
+        "url": "https://github.com/BrianCLong/summit/pull/15182",
+        "mergedAt": "2025-12-31T14:21:25Z",
+        "title": "chore(deps): bump actions/upload-artifact from 4 to 6"
+      },
+      {
+        "number": 13314,
+        "url": "https://github.com/BrianCLong/summit/pull/13314",
+        "mergedAt": null,
+        "title": "deps(npm): bump turbo from 2.6.1 to 2.6.2"
+      },
+      {
+        "number": 12332,
+        "url": "https://github.com/BrianCLong/summit/pull/12332",
+        "mergedAt": "2025-12-18T03:07:03Z",
+        "title": "Sprint 6: Documentation & Developer Onboarding"
+      },
+      {
+        "number": 15179,
+        "url": "https://github.com/BrianCLong/summit/pull/15179",
+        "mergedAt": "2025-12-31T14:21:16Z",
+        "title": "chore(deps): bump notify from 6.1.1 to 8.2.0"
+      },
+      {
+        "number": 14092,
+        "url": "https://github.com/BrianCLong/summit/pull/14092",
+        "mergedAt": "2025-12-20T07:27:39Z",
+        "title": "Create COALITION_READINESS.md constitution for Epics 4-6"
+      },
+      {
+        "number": 13560,
+        "url": "https://github.com/BrianCLong/summit/pull/13560",
+        "mergedAt": "2025-12-07T22:16:26Z",
+        "title": "build(deps-dev): bump vitest from 1.6.0 to 1.6.1 in /ga-graphai"
+      },
+      {
+        "number": 13759,
+        "url": "https://github.com/BrianCLong/summit/pull/13759",
+        "mergedAt": "2025-12-20T03:34:19Z",
+        "title": "Add sprint plan for Jul 6–17 2026 (Sprint 15)"
+      },
+      {
+        "number": 12836,
+        "url": "https://github.com/BrianCLong/summit/pull/12836",
+        "mergedAt": "2025-12-04T15:49:49Z",
+        "title": "Add Sprint 6 Maestro Conductor plan"
+      },
+      {
+        "number": 12394,
+        "url": "https://github.com/BrianCLong/summit/pull/12394",
+        "mergedAt": "2025-12-04T16:28:20Z",
+        "title": "Add Wave 6 satellite service blueprints"
+      },
+      {
+        "number": 13856,
+        "url": "https://github.com/BrianCLong/summit/pull/13856",
+        "mergedAt": "2025-12-20T03:24:12Z",
+        "title": "Add sprint plan for Oct 26–Nov 6 2026 enterprise platform"
+      },
+      {
+        "number": 12842,
+        "url": "https://github.com/BrianCLong/summit/pull/12842",
+        "mergedAt": "2025-12-04T15:49:35Z",
+        "title": "Add Sprint 6 hosted SaaS hardening plan"
+      },
+      {
+        "number": 13321,
+        "url": "https://github.com/BrianCLong/summit/pull/13321",
+        "mergedAt": "2025-12-17T05:48:32Z",
+        "title": "Fix Jest ESM Configuration and CI Stability (Gap 6)"
+      },
+      {
+        "number": 14595,
+        "url": "https://github.com/BrianCLong/summit/pull/14595",
+        "mergedAt": "2025-12-27T05:49:06Z",
+        "title": "chore(deps): Bump urllib3 from 2.5.0 to 2.6.0 in /modules/connector-sdk-s3csv"
+      },
+      {
+        "number": 14759,
+        "url": "https://github.com/BrianCLong/summit/pull/14759",
+        "mergedAt": "2025-12-29T17:10:16Z",
+        "title": "docs: add sprint plan for feb 23 2026"
+      },
+      {
+        "number": 14980,
+        "url": "https://github.com/BrianCLong/summit/pull/14980",
+        "mergedAt": null,
+        "title": "Add R3 disinfo demo fixture and decisions"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 14829,
+        "url": "https://github.com/BrianCLong/summit/pull/14829",
+        "mergedAt": "2025-12-29T16:13:49Z",
+        "title": "feat(security): Scaffold SCIM Service and Secret Rotation API"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

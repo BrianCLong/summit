@@ -1,0 +1,116 @@
+{
+  "issue_number": 512,
+  "title": "feat: add entity filter panel",
+  "url": "https://github.com/BrianCLong/summit/pull/512",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T22:34:41Z",
+  "createdAt": "2025-08-17T21:19:48Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 11904,
+        "url": "https://github.com/BrianCLong/summit/pull/11904",
+        "mergedAt": "2025-11-20T10:25:38Z",
+        "title": "Set up Security Autopilot for Summit repoCreate pull request"
+      },
+      {
+        "number": 15134,
+        "url": "https://github.com/BrianCLong/summit/pull/15134",
+        "mergedAt": null,
+        "title": "chore(deps): bump actions/github-script from 7 to 8"
+      },
+      {
+        "number": 12024,
+        "url": "https://github.com/BrianCLong/summit/pull/12024",
+        "mergedAt": "2025-11-20T15:29:43Z",
+        "title": "Implement quantum-resistant cryptography and algorithms"
+      },
+      {
+        "number": 13185,
+        "url": "https://github.com/BrianCLong/summit/pull/13185",
+        "mergedAt": "2025-12-17T05:27:53Z",
+        "title": "Add STIX 2.1 bundle exporter with secure sharing"
+      },
+      {
+        "number": 12684,
+        "url": "https://github.com/BrianCLong/summit/pull/12684",
+        "mergedAt": "2025-12-04T15:56:25Z",
+        "title": "Build ingestion wizard and ETL connectors"
+      },
+      {
+        "number": 10041,
+        "url": "https://github.com/BrianCLong/summit/pull/10041",
+        "mergedAt": null,
+        "title": "feat: launch global provenance graph"
+      },
+      {
+        "number": 11909,
+        "url": "https://github.com/BrianCLong/summit/pull/11909",
+        "mergedAt": "2025-11-20T10:25:19Z",
+        "title": "Build offline kit with CRDT sync and proofs"
+      },
+      {
+        "number": 11901,
+        "url": "https://github.com/BrianCLong/summit/pull/11901",
+        "mergedAt": "2025-11-20T10:25:49Z",
+        "title": "Build proof-carrying publishing with disclosure packager"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 615,
+        "url": "https://github.com/BrianCLong/summit/pull/615",
+        "mergedAt": "2025-08-18T14:31:47Z",
+        "title": "chore(deps): bump web-vitals from 3.5.2 to 5.1.0 in /client"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 119,
+        "url": "https://github.com/BrianCLong/summit/pull/119",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump concurrently from 8.2.2 to 9.2.0"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -1,88 +1,43 @@
-import { getSortedTags, parseTag, compareTags } from './semver-tags.mjs';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+// scripts/release/find-prev-tag.mjs
 
-export function findPreviousTag(current, allTags) {
-  let prevTag = null;
+import { compareTags, parseTag } from './semver-tags.mjs';
 
-  if (current.isGa) {
-    // For GA vX.Y.Z: previous = latest GA < vX.Y.Z
-    for (let i = allTags.length - 1; i >= 0; i--) {
-      const t = allTags[i];
-      if (t.isGa && compareTags(t, current) < 0) {
-        prevTag = t;
-        break;
-      }
-    }
+/**
+ * Finds the previous tag from a list of all tags.
+ * @param {string} currentTag - The tag for which to find the previous version.
+ * @param {string[]} allTags - A list of all tags in the repository.
+ * @returns {string | null} The previous tag, or null if not found.
+ */
+export function findPreviousTag(currentTag, allTags) {
+  const parsedCurrentTag = parseTag(currentTag);
+  const sortedTags = [...allTags].sort(compareTags);
+  const currentIndex = sortedTags.indexOf(currentTag);
 
-    // Fallback: ignore RC unless no GA exists
-    if (!prevTag) {
-       for (let i = allTags.length - 1; i >= 0; i--) {
-          const t = allTags[i];
-          if (compareTags(t, current) < 0) {
-            prevTag = t;
-            break;
-          }
-        }
-    }
-  } else {
-    // For RC vX.Y.Z-rc.N
-    const targetPrevRc = (current.rc || 0) - 1;
+  if (currentIndex === -1) {
+    throw new Error('Current tag not found in the list of all tags.');
+  }
 
-    if (targetPrevRc >= 1) {
-       const expectedPrev = `v${current.major}.${current.minor}.${current.patch}-rc.${targetPrevRc}`;
-       const found = allTags.find(t => t.original === expectedPrev);
-       if (found) {
-         prevTag = found;
-       }
-    }
+  if (currentIndex === 0) {
+    return null;
+  }
 
-    if (!prevTag) {
-      // else latest GA < X.Y.Z
-      for (let i = allTags.length - 1; i >= 0; i--) {
-          const t = allTags[i];
-          if (t.isGa && compareTags(t, current) < 0) {
-            prevTag = t;
-            break;
-          }
+  // If the current tag is an RC, the previous tag is simply the one before it in the sorted list.
+  if (parsedCurrentTag.channel === 'rc') {
+    return sortedTags[currentIndex - 1];
+  }
+
+  // If the current tag is a GA release, we need to find the most recent GA tag before it,
+  // ignoring any RCs for the current version.
+  if (parsedCurrentTag.channel === 'ga') {
+    const previousTags = sortedTags.slice(0, currentIndex);
+    for (let i = previousTags.length - 1; i >= 0; i--) {
+      const tag = previousTags[i];
+      const parsedTag = parseTag(tag);
+      if (parsedTag.channel === 'ga') {
+        return tag;
       }
     }
   }
-  return prevTag;
-}
 
-const __filename = fileURLToPath(import.meta.url);
-const isMainModule = process.argv[1] === __filename;
-
-if (isMainModule) {
-  const currentTagStr = process.argv[2];
-  if (!currentTagStr) {
-    console.error("Usage: node find-prev-tag.mjs <TAG>");
-    process.exit(1);
-  }
-
-  const current = parseTag(currentTagStr);
-  if (!current) {
-    console.error(`Invalid tag format: ${currentTagStr}`);
-    process.exit(1);
-  }
-
-  const allTags = getSortedTags();
-  const prevTag = findPreviousTag(current, allTags);
-
-  const result = {
-    current: currentTagStr,
-    previous: prevTag ? prevTag.original : null
-  };
-
-  if (result.previous) {
-    console.log(result.previous);
-  }
-
-  const distDir = path.resolve('dist/release');
-  if (!fs.existsSync(distDir)) {
-    fs.mkdirSync(distDir, { recursive: true });
-  }
-  fs.writeFileSync(path.join(distDir, 'prev-tag.json'), JSON.stringify(result, null, 2));
+  return null; // No previous GA tag found
 }

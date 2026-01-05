@@ -1,0 +1,56 @@
+{
+  "issue_number": 583,
+  "title": "feat: add GitHub velocity distance script",
+  "url": "https://github.com/BrianCLong/summit/pull/583",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:23:36Z",
+  "createdAt": "2025-08-18T02:34:13Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15259,
+        "url": "https://github.com/BrianCLong/summit/pull/15259",
+        "mergedAt": "2026-01-01T07:29:47Z",
+        "title": "Expand autonomous agent capabilities and governance"
+      },
+      {
+        "number": 13183,
+        "url": "https://github.com/BrianCLong/summit/pull/13183",
+        "mergedAt": "2025-12-04T15:39:03Z",
+        "title": "Build graph explorer UI with Tailwind and shadcn"
+      },
+      {
+        "number": 615,
+        "url": "https://github.com/BrianCLong/summit/pull/615",
+        "mergedAt": "2025-08-18T14:31:47Z",
+        "title": "chore(deps): bump web-vitals from 3.5.2 to 5.1.0 in /client"
+      },
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

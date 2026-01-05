@@ -1,0 +1,248 @@
+{
+  "issue_number": 51,
+  "title": "Neo4j dev container: enforce non-default password & GDS plugin",
+  "url": "https://github.com/BrianCLong/summit/issues/51",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051602,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:neo4j",
+      "name": "area:neo4j",
+      "color": "5319e7",
+      "default": false,
+      "description": "Graph DB"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T02:39:38Z",
+  "createdAt": "2025-08-12T02:37:53Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14532,
+        "url": "https://github.com/BrianCLong/summit/pull/14532",
+        "mergedAt": "2025-12-27T00:21:07Z",
+        "title": "Sprint N+51: Long-Horizon Strategy & Platform Evolution"
+      },
+      {
+        "number": 13599,
+        "url": "https://github.com/BrianCLong/summit/pull/13599",
+        "mergedAt": "2025-12-15T09:30:03Z",
+        "title": "deps(docker): bump aquasec/trivy from 0.51.1 to 0.68.1"
+      },
+      {
+        "number": 13697,
+        "url": "https://github.com/BrianCLong/summit/pull/13697",
+        "mergedAt": "2025-12-20T03:30:54Z",
+        "title": "Align release train 2025-W51 tracker and Promise Tracker health"
+      },
+      {
+        "number": 13308,
+        "url": "https://github.com/BrianCLong/summit/pull/13308",
+        "mergedAt": null,
+        "title": "fix: Update Critical Security Vulnerabilities"
+      },
+      {
+        "number": 15353,
+        "url": "https://github.com/BrianCLong/summit/pull/15353",
+        "mergedAt": "2026-01-01T11:36:52Z",
+        "title": "Implement Comprehensive Monitoring and Observability"
+      },
+      {
+        "number": 15335,
+        "url": "https://github.com/BrianCLong/summit/pull/15335",
+        "mergedAt": null,
+        "title": "docs: add innovation delivery execution pack"
+      },
+      {
+        "number": 13841,
+        "url": "https://github.com/BrianCLong/summit/pull/13841",
+        "mergedAt": "2025-12-20T11:27:58Z",
+        "title": "Implement repository hygiene enforcement for large files (>50MB)"
+      },
+      {
+        "number": 13322,
+        "url": "https://github.com/BrianCLong/summit/pull/13322",
+        "mergedAt": "2025-12-04T14:38:56Z",
+        "title": "fix: Resolve Remaining Critical Security Vulnerabilities"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 15328,
+        "url": "https://github.com/BrianCLong/summit/pull/15328",
+        "mergedAt": null,
+        "title": "feat: add counter-intel osint playbook and tooling"
+      },
+      {
+        "number": 12013,
+        "url": "https://github.com/BrianCLong/summit/pull/12013",
+        "mergedAt": "2025-11-20T14:58:18Z",
+        "title": "Build biometric identity intelligence platform"
+      },
+      {
+        "number": 1719,
+        "url": "https://github.com/BrianCLong/summit/pull/1719",
+        "mergedAt": null,
+        "title": "chore(deps): bump aquasec/trivy from 0.51.1 to 0.66.0"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 11784,
+        "url": "https://github.com/BrianCLong/summit/pull/11784",
+        "mergedAt": "2025-10-27T10:54:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 21 updates"
+      },
+      {
+        "number": 11911,
+        "url": "https://github.com/BrianCLong/summit/pull/11911",
+        "mergedAt": "2025-11-20T10:25:10Z",
+        "title": "Create Grafana observability dashboard for IntelGraph"
+      },
+      {
+        "number": 15133,
+        "url": "https://github.com/BrianCLong/summit/pull/15133",
+        "mergedAt": null,
+        "title": "chore(deps): bump aws-actions/configure-aws-credentials from 4 to 5"
+      },
+      {
+        "number": 11795,
+        "url": "https://github.com/BrianCLong/summit/pull/11795",
+        "mergedAt": null,
+        "title": "feat: deliver research integration capabilities"
+      },
+      {
+        "number": 1352,
+        "url": "https://github.com/BrianCLong/summit/pull/1352",
+        "mergedAt": "2025-09-23T06:56:06Z",
+        "title": "chore(deps): bump parse-url from 6.0.5 to 8.1.0"
+      },
+      {
+        "number": 10121,
+        "url": "https://github.com/BrianCLong/summit/pull/10121",
+        "mergedAt": "2025-10-14T08:53:53Z",
+        "title": "feat: Optimize database connection pooling"
+      },
+      {
+        "number": 13183,
+        "url": "https://github.com/BrianCLong/summit/pull/13183",
+        "mergedAt": "2025-12-04T15:39:03Z",
+        "title": "Build graph explorer UI with Tailwind and shadcn"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 1331,
+        "url": "https://github.com/BrianCLong/summit/pull/1331",
+        "mergedAt": "2025-09-23T17:10:18Z",
+        "title": "feat: add crystal orchestration services"
+      },
+      {
+        "number": 1717,
+        "url": "https://github.com/BrianCLong/summit/pull/1717",
+        "mergedAt": null,
+        "title": "chore(deps): bump redis from 4.3.4 to 6.4.0"
+      },
+      {
+        "number": 1333,
+        "url": "https://github.com/BrianCLong/summit/pull/1333",
+        "mergedAt": "2025-09-23T06:25:39Z",
+        "title": "feat: scaffold ig-rl reinforcement learning service"
+      },
+      {
+        "number": 1191,
+        "url": "https://github.com/BrianCLong/summit/pull/1191",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps-dev): bump eslint-config-next from 14.2.32 to 15.5.2"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
