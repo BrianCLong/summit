@@ -1,0 +1,239 @@
+{
+  "issue_number": 13,
+  "title": "M2: Neo4j constraints and indexes bootstrap",
+  "url": "https://github.com/BrianCLong/summit/issues/13",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051602,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:neo4j",
+      "name": "area:neo4j",
+      "color": "5319e7",
+      "default": false,
+      "description": "Graph DB"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:04Z",
+  "createdAt": "2025-08-12T00:10:04Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13757,
+        "url": "https://github.com/BrianCLong/summit/pull/13757",
+        "mergedAt": "2025-12-20T03:34:12Z",
+        "title": "docs: refresh sprint 13 privacy-safe plan"
+      },
+      {
+        "number": 14182,
+        "url": "https://github.com/BrianCLong/summit/pull/14182",
+        "mergedAt": "2025-12-22T08:29:10Z",
+        "title": "Add MVP-3 GA epics 13-16 addendum"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 12451,
+        "url": "https://github.com/BrianCLong/summit/pull/12451",
+        "mergedAt": "2025-12-18T02:49:11Z",
+        "title": "docs: capture wave 13 mission scopes"
+      },
+      {
+        "number": 13600,
+        "url": "https://github.com/BrianCLong/summit/pull/13600",
+        "mergedAt": "2025-12-15T09:33:12Z",
+        "title": "deps(docker): bump nvidia/cuda from 13.0.0-devel-ubuntu22.04 to 13.1.0-devel-ubuntu22.04"
+      },
+      {
+        "number": 13220,
+        "url": "https://github.com/BrianCLong/summit/pull/13220",
+        "mergedAt": "2025-12-17T06:41:20Z",
+        "title": "feat: Implement Tier-13 Agentic Control Plane"
+      },
+      {
+        "number": 15128,
+        "url": "https://github.com/BrianCLong/summit/pull/15128",
+        "mergedAt": "2025-12-30T22:23:16Z",
+        "title": "chore(deps): bump napi-derive from 2.16.13 to 3.4.1"
+      },
+      {
+        "number": 13094,
+        "url": "https://github.com/BrianCLong/summit/pull/13094",
+        "mergedAt": "2025-12-02T21:21:46Z",
+        "title": "chore(deps): bump validator from 13.15.20 to 13.15.23 in /sdk/typescript"
+      },
+      {
+        "number": 12449,
+        "url": "https://github.com/BrianCLong/summit/pull/12449",
+        "mergedAt": "2025-12-18T02:49:37Z",
+        "title": "Add ultra-prime wave 13 prompt expansion"
+      },
+      {
+        "number": 13577,
+        "url": "https://github.com/BrianCLong/summit/pull/13577",
+        "mergedAt": "2025-12-17T03:07:03Z",
+        "title": "Epic #13: Cost-Based Graph Optimizer & Incremental Materialized Subgraphs"
+      },
+      {
+        "number": 12796,
+        "url": "https://github.com/BrianCLong/summit/pull/12796",
+        "mergedAt": "2025-12-04T17:42:44Z",
+        "title": "Add Sprint 13 security and CI blockers plan"
+      },
+      {
+        "number": 12795,
+        "url": "https://github.com/BrianCLong/summit/pull/12795",
+        "mergedAt": "2025-12-04T17:42:47Z",
+        "title": "Add Sprint 13 security and CI blockers plan"
+      },
+      {
+        "number": 12828,
+        "url": "https://github.com/BrianCLong/summit/pull/12828",
+        "mergedAt": "2025-12-04T16:53:52Z",
+        "title": "Update Sprint Plan for Mar 2-13 2026"
+      },
+      {
+        "number": 12800,
+        "url": "https://github.com/BrianCLong/summit/pull/12800",
+        "mergedAt": "2025-12-04T17:42:32Z",
+        "title": "Add Design Partner Scale-Up sprint plan (Feb 2–13, 2026)"
+      },
+      {
+        "number": 13793,
+        "url": "https://github.com/BrianCLong/summit/pull/13793",
+        "mergedAt": "2025-12-20T11:36:24Z",
+        "title": "Add Sprint 9 Scale & Efficiency plan"
+      },
+      {
+        "number": 13773,
+        "url": "https://github.com/BrianCLong/summit/pull/13773",
+        "mergedAt": "2025-12-20T03:35:12Z",
+        "title": "docs: refresh Sprint 4 CompanyOS + Switchboard plan"
+      },
+      {
+        "number": 14507,
+        "url": "https://github.com/BrianCLong/summit/pull/14507",
+        "mergedAt": "2025-12-27T00:47:35Z",
+        "title": "feat(ci): Post-Compliance Hardening & Drift Prevention"
+      },
+      {
+        "number": 11787,
+        "url": "https://github.com/BrianCLong/summit/pull/11787",
+        "mergedAt": "2025-10-29T16:36:04Z",
+        "title": "chore(deps): bump validator from 13.15.15 to 13.15.20 in /sdk/typescript"
+      },
+      {
+        "number": 12506,
+        "url": "https://github.com/BrianCLong/summit/pull/12506",
+        "mergedAt": "2025-12-18T02:37:44Z",
+        "title": "Plan additional defensive security sprints"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 12274,
+        "url": "https://github.com/BrianCLong/summit/pull/12274",
+        "mergedAt": "2025-12-18T03:19:19Z",
+        "title": "feat: Compliance tooling and Observability enhancements"
+      },
+      {
+        "number": 13301,
+        "url": "https://github.com/BrianCLong/summit/pull/13301",
+        "mergedAt": "2025-12-17T05:53:02Z",
+        "title": "LCH-101: Self-Serve Signup & Email Verification"
+      },
+      {
+        "number": 12439,
+        "url": "https://github.com/BrianCLong/summit/pull/12439",
+        "mergedAt": "2025-12-06T23:30:12Z",
+        "title": "Add certification badges to connector registry manifest"
+      },
+      {
+        "number": 12048,
+        "url": "https://github.com/BrianCLong/summit/pull/12048",
+        "mergedAt": "2025-11-21T03:59:12Z",
+        "title": "Update and secure project dependencies"
+      },
+      {
+        "number": 12360,
+        "url": "https://github.com/BrianCLong/summit/pull/12360",
+        "mergedAt": "2025-12-18T03:00:29Z",
+        "title": "Sprint 12: Cognitive Security Toolkit"
+      },
+      {
+        "number": 12077,
+        "url": "https://github.com/BrianCLong/summit/pull/12077",
+        "mergedAt": "2025-11-21T06:30:56Z",
+        "title": "Stabilize codebase and enforce compliance"
+      },
+      {
+        "number": 11786,
+        "url": "https://github.com/BrianCLong/summit/pull/11786",
+        "mergedAt": "2025-10-29T16:33:23Z",
+        "title": "chore(deps): bump keras from 2.13.1 to 3.12.0 in /server"
+      },
+      {
+        "number": 11946,
+        "url": "https://github.com/BrianCLong/summit/pull/11946",
+        "mergedAt": null,
+        "title": "Build multi-source data fusion ETL pipeline"
+      },
+      {
+        "number": 13310,
+        "url": "https://github.com/BrianCLong/summit/pull/13310",
+        "mergedAt": null,
+        "title": "deps(npm): bump @google-cloud/recommender from 5.0.6 to 7.2.1"
+      },
+      {
+        "number": 1728,
+        "url": "https://github.com/BrianCLong/summit/pull/1728",
+        "mergedAt": null,
+        "title": "chore(deps): bump nvidia/cuda from 13.0.0-devel-ubuntu22.04 to 13.0.1-devel-ubuntu22.04"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

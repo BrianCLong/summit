@@ -1,0 +1,239 @@
+{
+  "issue_number": 28,
+  "title": "M0: Update README to reflect MVP-0 truth and move extras to Roadmap",
+  "url": "https://github.com/BrianCLong/summit/issues/28",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:21Z",
+  "createdAt": "2025-08-12T00:15:29Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14365,
+        "url": "https://github.com/BrianCLong/summit/pull/14365",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "Task 28.1: SBOM generation and documentation"
+      },
+      {
+        "number": 14131,
+        "url": "https://github.com/BrianCLong/summit/pull/14131",
+        "mergedAt": "2025-12-20T10:11:53Z",
+        "title": "Epic 28: FinOps Platform – Cost Visibility, Policies, Optimization"
+      },
+      {
+        "number": 13850,
+        "url": "https://github.com/BrianCLong/summit/pull/13850",
+        "mergedAt": "2025-12-20T03:45:05Z",
+        "title": "Add sprint plan for Aug 17–28 2026"
+      },
+      {
+        "number": 13291,
+        "url": "https://github.com/BrianCLong/summit/pull/13291",
+        "mergedAt": "2025-12-04T07:12:16Z",
+        "title": "Sprint 28: Sharding, Analytics, Governance"
+      },
+      {
+        "number": 13854,
+        "url": "https://github.com/BrianCLong/summit/pull/13854",
+        "mergedAt": "2025-12-20T03:24:19Z",
+        "title": "Add sprint 21 plan for Sep 28–Oct 9 2026"
+      },
+      {
+        "number": 12833,
+        "url": "https://github.com/BrianCLong/summit/pull/12833",
+        "mergedAt": "2025-12-17T21:58:27Z",
+        "title": "Sprint 28: Pilot to Proof Backend Services"
+      },
+      {
+        "number": 12777,
+        "url": "https://github.com/BrianCLong/summit/pull/12777",
+        "mergedAt": "2025-12-18T00:37:42Z",
+        "title": "MCP+ v1: Goose-Learned Velocity 2025-11-28"
+      },
+      {
+        "number": 15168,
+        "url": "https://github.com/BrianCLong/summit/pull/15168",
+        "mergedAt": null,
+        "title": "Add CompanyOS Data Spine sprint plan and governance scaffolding"
+      },
+      {
+        "number": 13470,
+        "url": "https://github.com/BrianCLong/summit/pull/13470",
+        "mergedAt": "2025-12-07T02:16:14Z",
+        "title": "deps(npm): bump @babel/runtime from 7.21.0 to 7.28.4"
+      },
+      {
+        "number": 14756,
+        "url": "https://github.com/BrianCLong/summit/pull/14756",
+        "mergedAt": null,
+        "title": "docs: add MVP-3-GA external audit dry-run deliverables"
+      },
+      {
+        "number": 13471,
+        "url": "https://github.com/BrianCLong/summit/pull/13471",
+        "mergedAt": "2025-12-07T02:16:04Z",
+        "title": "deps(npm): bump express from 5.1.0 to 5.2.0"
+      },
+      {
+        "number": 12692,
+        "url": "https://github.com/BrianCLong/summit/pull/12692",
+        "mergedAt": "2025-12-04T17:44:52Z",
+        "title": "Financial trading system prompts and documentation"
+      },
+      {
+        "number": 15250,
+        "url": "https://github.com/BrianCLong/summit/pull/15250",
+        "mergedAt": "2026-01-01T07:29:56Z",
+        "title": "feat: harden help desk integrations"
+      },
+      {
+        "number": 12251,
+        "url": "https://github.com/BrianCLong/summit/pull/12251",
+        "mergedAt": "2025-12-18T03:31:21Z",
+        "title": "test: add comprehensive test coverage for critical areas"
+      },
+      {
+        "number": 15311,
+        "url": "https://github.com/BrianCLong/summit/pull/15311",
+        "mergedAt": "2026-01-01T11:39:37Z",
+        "title": "feat: Establish counter-intelligence framework documentation"
+      },
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 15351,
+        "url": "https://github.com/BrianCLong/summit/pull/15351",
+        "mergedAt": null,
+        "title": "Add SH-MCP provisional patent draft and prompt registration"
+      },
+      {
+        "number": 15320,
+        "url": "https://github.com/BrianCLong/summit/pull/15320",
+        "mergedAt": "2026-01-01T11:38:44Z",
+        "title": "Market Entry Innovation Sprint Artifacts"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13110,
+        "url": "https://github.com/BrianCLong/summit/pull/13110",
+        "mergedAt": "2025-12-17T05:42:57Z",
+        "title": "S8 - Security Regression Replay Harness"
+      },
+      {
+        "number": 1210,
+        "url": "https://github.com/BrianCLong/summit/pull/1210",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump neo4j from 4.4.1 to 5.28.2"
+      },
+      {
+        "number": 14620,
+        "url": "https://github.com/BrianCLong/summit/pull/14620",
+        "mergedAt": "2025-12-27T06:04:45Z",
+        "title": "chore(deps-dev): Bump werkzeug from 3.1.3 to 3.1.4 in /modules/connector-sdk-s3csv"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 11761,
+        "url": "https://github.com/BrianCLong/summit/pull/11761",
+        "mergedAt": "2025-10-17T04:01:09Z",
+        "title": "chore: update pre-commit hooks and fix configuration"
+      },
+      {
+        "number": 12235,
+        "url": "https://github.com/BrianCLong/summit/pull/12235",
+        "mergedAt": "2025-11-23T01:04:50Z",
+        "title": "Bump next from 14.1.0 to 14.2.32 in /web/retention-dashboard"
+      },
+      {
+        "number": 13058,
+        "url": "https://github.com/BrianCLong/summit/pull/13058",
+        "mergedAt": "2025-12-04T15:40:49Z",
+        "title": "Add delivery guardrails workflows and release assets"
+      },
+      {
+        "number": 13635,
+        "url": "https://github.com/BrianCLong/summit/pull/13635",
+        "mergedAt": "2025-12-17T04:30:31Z",
+        "title": "build(deps): bump prismjs and react-syntax-highlighter in /client"
+      },
+      {
+        "number": 10092,
+        "url": "https://github.com/BrianCLong/summit/pull/10092",
+        "mergedAt": "2025-10-14T13:06:07Z",
+        "title": "feat: build intelligent anomaly detection engine"
+      },
+      {
+        "number": 11902,
+        "url": "https://github.com/BrianCLong/summit/pull/11902",
+        "mergedAt": "2025-11-20T10:25:44Z",
+        "title": "Build Cyber Threat Intelligence Platform"
+      },
+      {
+        "number": 291,
+        "url": "https://github.com/BrianCLong/summit/pull/291",
+        "mergedAt": "2025-08-16T06:36:17Z",
+        "title": "feat: serve client build"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

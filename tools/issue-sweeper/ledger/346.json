@@ -1,0 +1,44 @@
+{
+  "issue_number": 346,
+  "title": "Artificial General Intelligence Research Framework",
+  "url": "https://github.com/BrianCLong/summit/issues/346",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122126345,
+      "node_id": "LA_kwDOPaNncM8AAAACH7iaCQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-next-gen-ai",
+      "name": "epic-next-gen-ai",
+      "color": "FF6B6B",
+      "default": false,
+      "description": "Next-generation AI and quantum computing"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:28:22Z",
+  "createdAt": "2025-08-16T22:28:22Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13195,
+        "url": "https://github.com/BrianCLong/summit/pull/13195",
+        "mergedAt": "2025-12-04T15:56:11Z",
+        "title": "Deploy Harbor proxy for air-gapped image pulls"
+      },
+      {
+        "number": 11918,
+        "url": "https://github.com/BrianCLong/summit/pull/11918",
+        "mergedAt": "2025-11-20T10:21:01Z",
+        "title": "Build mobile apps for iOS and Android"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
