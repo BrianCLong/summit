@@ -19,6 +19,8 @@
 - [ ] **Monitor Workflow**: Watch the `GA Release` GitHub Action.
     - [ ] Build steps passed.
     - [ ] SOC Control Tests passed.
+    - [ ] Reproducibility Check passed (or warned).
+    - [ ] Vulnerability Scan passed (no Criticals).
     - [ ] SBOM generation succeeded.
     - [ ] Signing succeeded.
 - [ ] **Verify Artifacts**: Check the GitHub Release page for:
@@ -31,6 +33,8 @@
 
 - [ ] **Download Evidence Bundle**: Extract `evidence-bundle.tar.gz`.
 - [ ] **Check SOC Results**: Read `SOC_VERIFICATION.txt` inside the bundle. It must say "pass".
+- [ ] **Check Vulnerability Report**: Read `VULN_REPORT.txt`. Confirm no unapproved High/Criticals.
+- [ ] **Check Reproducibility**: Read `REPRODUCIBILITY.txt`. Confirm build is deterministic (or waiver note attached).
 - [ ] **Verify Signature**: Run the verification command from `EVIDENCE.md`.
     ```bash
     cosign verify-blob --certificate <cert> --signature <sig> <artifact>
