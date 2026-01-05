@@ -10,6 +10,11 @@ on:
         description: "Tag to release (if different from ref)"
         required: false
         type: string
+      dry_run:
+        description: "Dry Run? (Skip release creation, show summary only)"
+        required: true
+        default: true
+        type: boolean
       override_freeze:
         description: "Override release freeze window?"
         type: boolean
@@ -27,6 +32,7 @@ concurrency:
 
 permissions:
   contents: write
+  pull-requests: write
   packages: write
   id-token: write # For OIDC/Cosign if needed
 
@@ -154,8 +160,11 @@ jobs:
     permissions:
       contents: write
       packages: write
+      pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -238,9 +247,33 @@ jobs:
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          NOTES="GA Release ${RELEASE_TAG} (SLSA L3 Compliant)"
+          echo "notes=$NOTES" >> $GITHUB_OUTPUT
+          echo "$NOTES" > release-notes.md
+
+      - name: Generate Release Summary
+        run: node scripts/release/create-release-artifacts.mjs
+
+      - name: Publish Job Summary
+        run: cat dist/release/release-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR (Dry Run)
+        if: env.DRY_RUN == 'true' && github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Try to find PR number associated with this branch
+          PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+
+          if [ -n "$PR_NUM" ]; then
+            echo "Commenting on PR #$PR_NUM"
+            gh pr comment "$PR_NUM" -F dist/release/release-report.md || echo "Failed to comment on PR"
+          else
+            echo "No PR found for branch ${{ github.ref_name }}"
+          fi
 
       - name: Idempotent Release
+        if: env.DRY_RUN == 'false'
         id: publish
         run: |
           TAG="${{ inputs.tag || github.ref_name }}"
