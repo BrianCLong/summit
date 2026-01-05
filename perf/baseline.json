@@ -1,0 +1,5 @@
+{
+  "api_latency_p95": 200,
+  "api_throughput_rps": 50,
+  "queue_throughput_rps": 100
+}
