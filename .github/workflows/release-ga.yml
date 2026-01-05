@@ -184,10 +184,50 @@ jobs:
         run: |
           mkdir -p release-assets
 
-          # Generate Checksums for all evidence
+          # Generate Checksums for all evidence (This creates evidence/SHA256SUMS)
+          # Use deterministic sorting to ensure stable hash
           cd evidence
-          find . -type f -exec sha256sum {} \; > SHA256SUMS
+          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
           cd ..
+
+          # Verify Evidence Linkage
+          # We compare the digest of the generated artifacts (SHA256SUMS) against the
+          # committed evidence file in release-evidence/<TAG>.json
+
+          TAG="${{ inputs.tag || github.ref_name }}"
+          # Strip refs/tags/ prefix if present
+          TAG="${TAG#refs/tags/}"
+
+          REPO_EVIDENCE="release-evidence/${TAG}.json"
+
+          if [ -f "$REPO_EVIDENCE" ]; then
+            echo "Verifying linkage against committed evidence: $REPO_EVIDENCE"
+
+            # Compute digest of the FRESH SHA256SUMS (generated in previous step)
+            # Note: SHA256SUMS is in the 'evidence/' directory
+            ACTUAL_DIGEST=$(sha256sum evidence/SHA256SUMS | awk '{print $1}')
+
+            # Validate the committed evidence file structure
+            node scripts/release/validate-evidence.mjs --evidence "$REPO_EVIDENCE"
+
+            # Check for mismatch
+            EXPECTED_DIGEST=$(jq -r .bundle.digest "$REPO_EVIDENCE")
+
+            if [ "$ACTUAL_DIGEST" != "$EXPECTED_DIGEST" ]; then
+              echo "❌ EVIDENCE_BUNDLE_DIGEST_MISMATCH"
+              echo "Expected: $EXPECTED_DIGEST"
+              echo "Actual:   $ACTUAL_DIGEST"
+
+              # Emit failure report
+              echo '{"ok": false, "digestMatched": false, "expectedDigest": "'"$EXPECTED_DIGEST"'", "actualDigest": "'"$ACTUAL_DIGEST"'"}' > evidence/evidence-check.json
+              exit 1
+            else
+              echo "✅ Evidence bundle digest matched: $ACTUAL_DIGEST"
+              echo '{"ok": true, "digestMatched": true, "expectedDigest": "'"$EXPECTED_DIGEST"'", "actualDigest": "'"$ACTUAL_DIGEST"'"}' > evidence/evidence-check.json
+            fi
+          else
+            echo "⚠️ No committed evidence found at $REPO_EVIDENCE, skipping linkage check."
+          fi
 
           tar -czf release-assets/evidence.tar.gz evidence/
 
