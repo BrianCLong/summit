@@ -1,0 +1,101 @@
+{
+  "issue_number": 165,
+  "title": "db: Postgres migrations",
+  "url": "https://github.com/BrianCLong/summit/issues/165",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9107968038,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQJg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P0",
+      "name": "P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968280,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRGA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/database",
+      "name": "database",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107968301,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRLQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/postgres",
+      "name": "postgres",
+      "color": "0052cc",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981085,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDHQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-09-15",
+      "name": "due:2025-09-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:41:49Z",
+  "createdAt": "2025-08-14T04:04:57Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 13111,
+        "url": "https://github.com/BrianCLong/summit/pull/13111",
+        "mergedAt": "2025-12-17T05:38:55Z",
+        "title": "API Authorization Matrix Generator & Enforcement"
+      },
+      {
+        "number": 1360,
+        "url": "https://github.com/BrianCLong/summit/pull/1360",
+        "mergedAt": null,
+        "title": "feat(er): deliver explainable entity resolution service"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 13184,
+        "url": "https://github.com/BrianCLong/summit/pull/13184",
+        "mergedAt": "2025-12-04T15:39:00Z",
+        "title": "Build promise tracking and production delivery system"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

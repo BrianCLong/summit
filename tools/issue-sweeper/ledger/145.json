@@ -1,0 +1,106 @@
+{
+  "issue_number": 145,
+  "title": "Real-Time Collaboration",
+  "url": "https://github.com/BrianCLong/summit/issues/145",
+  "state": "open",
+  "labels": [],
+  "updatedAt": "2025-08-13T17:08:36Z",
+  "createdAt": "2025-08-13T17:08:36Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15126,
+        "url": "https://github.com/BrianCLong/summit/pull/15126",
+        "mergedAt": "2025-12-30T21:31:10Z",
+        "title": "chore(deps): bump the minor-and-patch group with 4 updates"
+      },
+      {
+        "number": 15332,
+        "url": "https://github.com/BrianCLong/summit/pull/15332",
+        "mergedAt": "2026-01-01T11:38:30Z",
+        "title": "Ontology Engine v2: Execution Runtime & Governance"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 11841,
+        "url": "https://github.com/BrianCLong/summit/pull/11841",
+        "mergedAt": "2025-11-20T09:48:29Z",
+        "title": "feat: implement IntelGraph ML benchmarking and auto-tuning stack"
+      },
+      {
+        "number": 11926,
+        "url": "https://github.com/BrianCLong/summit/pull/11926",
+        "mergedAt": "2025-11-20T10:20:02Z",
+        "title": "Build natural language to graph query translator"
+      },
+      {
+        "number": 10095,
+        "url": "https://github.com/BrianCLong/summit/pull/10095",
+        "mergedAt": "2025-10-14T13:05:57Z",
+        "title": "feat: add data retention policy engine"
+      },
+      {
+        "number": 10208,
+        "url": "https://github.com/BrianCLong/summit/pull/10208",
+        "mergedAt": "2025-10-15T03:46:45Z",
+        "title": "ci(actions): repo-wide resilience—cron jitter, concurrency, backlog guard, and matrix caps"
+      },
+      {
+        "number": 10105,
+        "url": "https://github.com/BrianCLong/summit/pull/10105",
+        "mergedAt": "2025-10-14T11:52:58Z",
+        "title": "feat: add govbrief research brief pipeline"
+      },
+      {
+        "number": 10114,
+        "url": "https://github.com/BrianCLong/summit/pull/10114",
+        "mergedAt": "2025-10-14T10:40:23Z",
+        "title": "feat: harden intelgraph helm security controls"
+      },
+      {
+        "number": 1292,
+        "url": "https://github.com/BrianCLong/summit/pull/1292",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm order and cache setup"
+      },
+      {
+        "number": 1291,
+        "url": "https://github.com/BrianCLong/summit/pull/1291",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "fix: workflow pnpm compatibility and topicality.co domains"
+      },
+      {
+        "number": 1311,
+        "url": "https://github.com/BrianCLong/summit/pull/1311",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate zero spend routing"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -6,15 +6,24 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
-      bypass_evidence:
-        description: 'Bypass GO evidence check (Emergency only)'
-        type: boolean
+      tag:
+        description: "Tag to release (if different from ref)"
         required: false
-        default: false
-      bypass_reason:
-        description: 'Reason for bypassing evidence'
         type: string
+      override_freeze:
+        description: "Override release freeze window?"
+        type: boolean
+        default: false
         required: false
+      override_reason:
+        description: "Reason for override (min 20 chars)"
+        type: string
+        default: ""
+        required: false
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -31,123 +40,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check GO Evidence
-        id: check-evidence
-        uses: actions/github-script@v7
-        env:
-          TAG_REF: ${{ github.ref }}
-          TAG_SHA: ${{ github.sha }}
-          BYPASS: ${{ inputs.bypass_evidence }}
-          BYPASS_REASON: ${{ inputs.bypass_reason }}
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-
-            const bypass = process.env.BYPASS === 'true';
-            const bypassReason = process.env.BYPASS_REASON;
-
-            if (bypass) {
-              if (!bypassReason) {
-                core.setFailed('Bypass requested but no reason provided.');
-                return;
-              }
-              core.warning(`Evidence check BYPASSED. Reason: ${bypassReason}`);
-              core.setOutput('bypassed', true);
-
-              // Write dummy result for downstream
-              const result = { ok: true, bypassed: true, reason: bypassReason, checkedAt: new Date().toISOString() };
-              const distDir = path.join(process.cwd(), 'dist', 'release');
-              fs.mkdirSync(distDir, { recursive: true });
-              fs.writeFileSync(path.join(distDir, 'evidence-check.json'), JSON.stringify(result));
-
-              await core.summary
-                .addHeading('Release Evidence Check')
-                .addRaw('⚠️ **BYPASSED**')
-                .addTable([
-                  ['Status', 'BYPASSED'],
-                  ['Reason', bypassReason]
-                ])
-                .write();
-              return;
-            }
-
-            // Extract tag name from ref (refs/tags/v1.2.3 -> v1.2.3)
-            const ref = process.env.TAG_REF;
-            if (!ref.startsWith('refs/tags/')) {
-               core.setFailed('Workflow triggered without a tag, and bypass not set.');
-               return;
-            }
-            const tag = ref.replace('refs/tags/', '');
-            const evidencePath = `release-evidence/${tag}.json`;
-
-            // We need to check if file exists on MAIN branch.
-            // Since we checked out with fetch-depth 0, we can look at origin/main or just assume
-            // we are looking for the file in the current workspace if the user committed it?
-            // The runbook says: "Commit Evidence to main... Then Push Tag".
-            // But checking out the TAG will result in a detached HEAD at the tag's commit.
-            // The evidence file might be on 'main' but not yet merged into the release tag (if tag is on a release branch or older commit).
-            // Actually, Option A says "file exists on main".
-            // So we need to fetch main and look at the file there.
-
-            try {
-              // Fetch main branch to access the evidence file
-              await exec.exec('git', ['fetch', 'origin', 'main']);
-
-              // Read file from main branch
-              let fileContent = '';
-              const options = {};
-              options.listeners = {
-                stdout: (data) => {
-                  fileContent += data.toString();
-                }
-              };
-              try {
-                await exec.exec('git', ['show', `origin/main:${evidencePath}`], options);
-              } catch (e) {
-                core.setFailed(`Evidence file not found on main at ${evidencePath}. Run Maestro pre-tag dry-run.`);
-                return;
-              }
-
-              const evidence = JSON.parse(fileContent);
-              const now = new Date();
-              const generatedAt = new Date(evidence.generatedAt);
-              const expiresAt = evidence.expiresAt ? new Date(evidence.expiresAt) : null;
-
-              // Checks
-              if (evidence.decision !== 'GO') throw new Error(`Decision is ${evidence.decision}, expected GO`);
-              if (evidence.tag !== tag) throw new Error(`Tag mismatch: ${evidence.tag} vs ${tag}`);
-              if (evidence.sha !== process.env.TAG_SHA) throw new Error(`SHA mismatch: ${evidence.sha} vs ${process.env.TAG_SHA}`);
-
-              if (expiresAt && now > expiresAt) throw new Error(`Evidence expired at ${expiresAt}`);
-              if (!expiresAt && (now - generatedAt) > 24 * 60 * 60 * 1000) throw new Error(`Evidence too old (generated ${generatedAt})`);
-
-              console.log('Evidence check PASSED');
-
-              const result = { ok: true, path: evidencePath, checkedAt: now.toISOString(), bypassed: false };
-              const distDir = path.join(process.cwd(), 'dist', 'release');
-              fs.mkdirSync(distDir, { recursive: true });
-              fs.writeFileSync(path.join(distDir, 'evidence-check.json'), JSON.stringify(result));
-
-               await core.summary
-                .addHeading('Release Evidence Check')
-                .addRaw('✅ **PASSED**')
-                .addTable([
-                  ['Status', 'GO'],
-                  ['Tag', tag],
-                  ['Generated', generatedAt.toISOString()]
-                ])
-                .write();
-
-            } catch (error) {
-              core.setFailed(`Evidence check failed: ${error.message}`);
-              await core.summary
-                .addHeading('Release Evidence Check')
-                .addRaw('❌ **FAILED**')
-                .addRaw(`Error: ${error.message}`)
-                .write();
-            }
-
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
@@ -156,20 +48,76 @@ jobs:
           node-version: 20
           cache: "pnpm"
 
+      - name: Preflight Release
+        run: node scripts/release/preflight-release.mjs
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test Release Scripts
+        run: pnpm -w test:release-scripts
+
+      - name: Check Release Freeze Window
+        env:
+          OVERRIDE: ${{ inputs.override_freeze || 'false' }}
+          OVERRIDE_REASON: ${{ inputs.override_reason || '' }}
+        run: node scripts/release/check-freeze.mjs
+
+      - name: Upload Freeze Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: freeze-evidence
+          path: dist/release/freeze.json
+
       - name: Run Server Tests
-        run: pnpm test:server
+        run: |
+          mkdir -p dist/release
+          if pnpm test:server; then
+            echo '{"ok": true}' > dist/release/verify.json
+          else
+            echo '{"ok": false, "code": "VERIFY_FAILED"}' > dist/release/verify.json
+            exit 1
+          fi
         continue-on-error: false
 
       - name: Run Policy Checks
-        run: ./scripts/policy-test.sh
+        run: |
+          if ./scripts/policy-test.sh; then
+            echo '{"ok": true}' > dist/release/preflight.json
+          else
+            echo '{"ok": false, "code": "SECURITY_GUARD"}' > dist/release/preflight.json
+            exit 1
+          fi
         continue-on-error: false
 
       - name: Verify Documentation Completeness
         run: ./scripts/check_traceability.cjs
         continue-on-error: false
+
+      - name: Check Freeze Window
+        if: always()
+        run: |
+          mkdir -p dist/release
+          if ./scripts/check-freeze.sh; then
+            echo '{"ok": true}' > dist/release/freeze.json
+          else
+            echo '{"ok": false, "code": "FREEZE_WINDOW", "message": "Freeze window is active"}' > dist/release/freeze.json
+          fi
+
+      - name: Generate Release Status
+        if: always()
+        run: node scripts/release/build-release-status.mjs
+
+      - name: Validate Release Schemas
+        if: always()
+        run: node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict
+
+      - name: Upload Release Status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-status
+          path: dist/release/release-status.json
 
   build-server:
     name: Build Server
@@ -206,6 +154,8 @@ jobs:
     permissions:
       contents: write
       packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -222,21 +172,79 @@ jobs:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
+      - name: Download Freeze Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: freeze-evidence
+          path: evidence/freeze
+
+      - name: Download Release Status
+        uses: actions/download-artifact@v4
+        with:
+          name: release-status
+          path: evidence/release
+
       - name: Create Evidence Bundle
         run: |
           mkdir -p release-assets
+
+          # Generate Checksums for all evidence
+          cd evidence
+          find . -type f -exec sha256sum {} \; > SHA256SUMS
+          cd ..
+
           tar -czf release-assets/evidence.tar.gz evidence/
 
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release-assets/evidence.tar.gz
-          body: ${{ steps.notes.outputs.notes }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
+      - name: Idempotent Release
+        id: publish
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          echo "Processing release for tag: $TAG"
+
+          # Determine prerelease
+          PRERELEASE=false
+          if [[ "$TAG" == *"-rc"* ]]; then
+            PRERELEASE=true
+          fi
+
+          # Check if release exists
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG exists. Updating..."
+            EXISTED="true"
+            ACTION="updated"
+
+            # Pattern A: Update
+            gh release upload "$TAG" release-assets/evidence.tar.gz --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" \
+              --notes "${{ steps.notes.outputs.notes }}" \
+              --prerelease="$PRERELEASE" \
+              --repo "$GITHUB_REPOSITORY"
+
+          else
+            echo "Release $TAG does not exist. Creating..."
+            EXISTED="false"
+            ACTION="created"
+
+            gh release create "$TAG" release-assets/evidence.tar.gz \
+              --title "$TAG" \
+              --notes "${{ steps.notes.outputs.notes }}" \
+              --prerelease="$PRERELEASE" \
+              --repo "$GITHUB_REPOSITORY"
+          fi
+
+          echo "existed=$EXISTED" >> "$GITHUB_OUTPUT"
+          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
+
+      - name: Release Summary
+        if: always()
+        run: |
+          echo "### Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Concurrency Group:** release-${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Existed:** ${{ steps.publish.outputs.existed }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action Taken:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY

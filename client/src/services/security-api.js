@@ -10,6 +10,16 @@
 
 const API_BASE = '/api/security';
 
+export class SensitiveContextError extends Error {
+  constructor(message, required = [], details = {}) {
+    super(message);
+    this.name = 'SensitiveContextError';
+    this.code = 'SENSITIVE_CONTEXT_REQUIRED';
+    this.required = required;
+    this.details = details;
+  }
+}
+
 /**
  * Get auth headers
  */
@@ -27,6 +37,15 @@ const getHeaders = () => {
 const handleResponse = async (response) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+
+    if (error.code === 'SENSITIVE_CONTEXT_REQUIRED') {
+      throw new SensitiveContextError(
+        error.message || 'Additional context is required',
+        error.required || [],
+        error,
+      );
+    }
+
     throw new Error(error.error || error.message || `HTTP ${response.status}`);
   }
   return response.json();
@@ -149,11 +168,18 @@ export const PIIDetectionAPI = {
   /**
    * Scan data for PII
    */
-  async scan(data, type = 'object', includeValue = false) {
+  async scan(data, type = 'object', includeValue = false, context = {}) {
+    const headers = {
+      ...getHeaders(),
+      ...(context.purpose ? { 'x-purpose': context.purpose } : {}),
+      ...(context.justification ? { 'x-justification': context.justification } : {}),
+      ...(context.caseId ? { 'x-case-id': context.caseId } : {}),
+    };
+
     const response = await fetch(`${API_BASE}/pii/scan`, {
       method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ data, type, includeValue }),
+      headers,
+      body: JSON.stringify({ data, type, includeValue, ...context }),
     });
     return handleResponse(response);
   },

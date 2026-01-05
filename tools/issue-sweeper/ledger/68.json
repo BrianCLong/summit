@@ -1,0 +1,185 @@
+{
+  "issue_number": 68,
+  "title": "Audit and Harden Docker Configurations",
+  "url": "https://github.com/BrianCLong/summit/issues/68",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-11-28T04:48:45Z",
+  "createdAt": "2025-08-12T04:39:22Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13599,
+        "url": "https://github.com/BrianCLong/summit/pull/13599",
+        "mergedAt": "2025-12-15T09:30:03Z",
+        "title": "deps(docker): bump aquasec/trivy from 0.51.1 to 0.68.1"
+      },
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 12091,
+        "url": "https://github.com/BrianCLong/summit/pull/12091",
+        "mergedAt": "2025-11-21T06:30:22Z",
+        "title": "Design multi-layer caching strategy for Summit"
+      },
+      {
+        "number": 12008,
+        "url": "https://github.com/BrianCLong/summit/pull/12008",
+        "mergedAt": "2025-11-20T14:58:22Z",
+        "title": "Build Advanced Deception Detection System"
+      },
+      {
+        "number": 12030,
+        "url": "https://github.com/BrianCLong/summit/pull/12030",
+        "mergedAt": "2025-11-20T15:29:27Z",
+        "title": "Build Advanced Computer Vision Analysis Platform"
+      },
+      {
+        "number": 1083,
+        "url": "https://github.com/BrianCLong/summit/pull/1083",
+        "mergedAt": "2025-08-31T01:16:06Z",
+        "title": "🎯 FINAL CI CONSOLIDATION - 4-Lane Excellence (68 → 4 workflows)"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 13185,
+        "url": "https://github.com/BrianCLong/summit/pull/13185",
+        "mergedAt": "2025-12-17T05:27:53Z",
+        "title": "Add STIX 2.1 bundle exporter with secure sharing"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 1328,
+        "url": "https://github.com/BrianCLong/summit/pull/1328",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(cli): add ig-detect rule validation CLI"
+      },
+      {
+        "number": 1081,
+        "url": "https://github.com/BrianCLong/summit/pull/1081",
+        "mergedAt": "2025-08-30T15:41:55Z",
+        "title": "chore(repo): baseline cleanup & CI hardening"
+      },
+      {
+        "number": 13190,
+        "url": "https://github.com/BrianCLong/summit/pull/13190",
+        "mergedAt": "2025-12-04T15:38:47Z",
+        "title": "Build resilient multi-LLM orchestrator with governance"
+      },
+      {
+        "number": 11922,
+        "url": "https://github.com/BrianCLong/summit/pull/11922",
+        "mergedAt": "2025-11-20T10:05:25Z",
+        "title": "Build real-time streaming analytics pipeline"
+      },
+      {
+        "number": 10127,
+        "url": "https://github.com/BrianCLong/summit/pull/10127",
+        "mergedAt": "2025-10-17T01:51:15Z",
+        "title": "feat: add Liquid Nano pilot bundle"
+      },
+      {
+        "number": 13164,
+        "url": "https://github.com/BrianCLong/summit/pull/13164",
+        "mergedAt": "2025-12-17T05:35:09Z",
+        "title": "Resolve merge conflicts via rebase"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 1301,
+        "url": "https://github.com/BrianCLong/summit/pull/1301",
+        "mergedAt": "2025-09-23T06:38:37Z",
+        "title": "IntelGraph salvage: total recapture → promote key artifacts"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
