@@ -271,6 +271,31 @@ class SmokeTest {
   }
 
   async run() {
+    // Hook console to detect noise
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+    let consoleNoiseDetected = false;
+
+    // Whitelist for known benign logs if any (currently empty)
+    const allowedLogs = [];
+
+    console.error = (...args) => {
+        const msg = args.map(a => String(a)).join(' ');
+        if (!allowedLogs.some(p => msg.includes(p))) {
+            consoleNoiseDetected = true;
+            // We still print it but maybe prefix or track it
+        }
+        originalConsoleError.apply(console, args);
+    };
+
+    console.warn = (...args) => {
+        const msg = args.map(a => String(a)).join(' ');
+        if (!allowedLogs.some(p => msg.includes(p))) {
+             consoleNoiseDetected = true;
+        }
+        originalConsoleWarn.apply(console, args);
+    };
+
     await this.log(
       '🚀 Starting IntelGraph Comprehensive Smoke Test Suite',
       'info',
@@ -533,6 +558,25 @@ class SmokeTest {
       await this.log(`API response time: ${responseTime}ms`, 'info');
     });
 
+    // Phase 7.1: Ops / System Health Verification
+    await this.test('System Health Endpoint Check', async () => {
+       const response = await axios.get(`${config.apiBaseUrl}/ops/system-health`, {
+           timeout: 5000,
+           validateStatus: null // We want to inspect status
+       });
+
+       if (response.status !== 200) {
+           throw new Error(`System health endpoint returned ${response.status}`);
+       }
+
+       const health = response.data;
+       if (!health.invariants || !health.safetyState) {
+           throw new Error('System health payload is missing required fields');
+       }
+
+       await this.log('System health endpoint verified', 'info');
+    });
+
     // Phase 7.5: Enterprise Feature Verification
     await this.test('Verify Narrative Simulation Active', async () => {
       try {
@@ -590,7 +634,15 @@ class SmokeTest {
       successRate === '100.0' ? 'success' : 'warning',
     );
 
-    if (this.results.failed === 0) {
+    if (consoleNoiseDetected) {
+        await this.log(
+            '\n⚠️ Console noise (error/warn) detected during run. This is a failure condition for GA stability.',
+            'error'
+        );
+        this.results.failed++; // Count this as a failure
+    }
+
+    if (this.results.failed === 0 && !consoleNoiseDetected) {
       await this.log(
         '\n🎉 All smoke tests passed! Golden path is working correctly.',
         'success',

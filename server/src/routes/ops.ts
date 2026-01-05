@@ -8,6 +8,10 @@ import logger from '../config/logger.js';
 import { evidenceIntegrityService } from '../evidence/integrity-service.js';
 import { policyHotReloadService } from '../policy/hotReloadService.js';
 import { policyBundleStore } from '../policy/bundleStore.js';
+import { SystemHealthService } from '../services/SystemHealthService.js';
+import { simulatePolicyDecision, policySimulationInputSchema, overlayContextSchema } from '../policy/tenantBundle.js';
+import { Profiles } from '../policy/profiles.js';
+import { z } from 'zod';
 
 const router = Router();
 const backupService = new BackupService();
@@ -19,6 +23,56 @@ const isHotReloadEnabled = () =>
 // Protected by 'admin' role (assuming ensureRole middleware checks for this)
 // For now, we'll keep it open or assume the caller handles auth if not strictly enforced here in the prototype
 // In production: router.use(ensureRole('admin'));
+
+/**
+ * @route GET /ops/system-health
+ * @description Get system health status
+ */
+router.get('/system-health', async (req, res) => {
+    try {
+        const health = await SystemHealthService.getInstance().getSystemHealth();
+        res.json(health);
+    } catch (error: any) {
+        logger.error('Failed to get system health', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+/**
+ * @route POST /ops/policy-simulator
+ * @description Safe policy simulation (inputs-only)
+ */
+router.post('/policy-simulator', async (req, res) => {
+    try {
+        const input = policySimulationInputSchema.parse(req.body);
+        const context = req.body.context ? overlayContextSchema.parse(req.body.context) : undefined;
+
+        // Force inputs-only mode by strictly controlling the bundle used (no DB overlays)
+        // We use the strict profile by default for simulation
+        let bundle = Profiles.strict;
+        if ((req.body as any).profile === 'balanced') bundle = Profiles.balanced;
+        if ((req.body as any).profile === 'fast_ops') bundle = Profiles.fast_ops;
+
+        // Ensure we are NOT loading from DB or checking external state
+        // simulatePolicyDecision is purely functional based on inputs and the provided bundle
+        const result = simulatePolicyDecision(bundle, input, context);
+
+        res.json({
+            ...result,
+            metadata: {
+                simulationMode: 'inputs-only',
+                profileUsed: bundle.baseProfile.id
+            }
+        });
+    } catch (error: any) {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ error: 'Invalid input', details: error.errors });
+        } else {
+            logger.error('Policy simulation failed', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+});
 
 /**
  * @route POST /ops/maintenance
