@@ -13,6 +13,7 @@ global:
 rule_files:
   - 'alerts.yml'
   - 'alerting-rules.yml'
+  - 'alerting-governance.yml'
   - 'rules/adapters.rules.yml'
 
 # Alertmanager configuration

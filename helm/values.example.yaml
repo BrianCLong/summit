@@ -24,6 +24,18 @@ signingKey:
   secretName: signer-key
   secretKey: private.pem
   mountPath: /etc/signer
+opa:
+  url: https://opa.example.com
+notary:
+  url: https://notary.example.com
+  keySecret: notary-signer-key
+  trustStoreSecret: notary-trust-store
+graph:
+  endpoint: http://neo4j.example.internal:7474
+secrets:
+  opaTokenSecret: opa-access-token
+  notaryTokenSecret: notary-access-token
+  graphCredentialsSecret: neo4j-auth
 serviceMonitor:
   enabled: true
   interval: 15s

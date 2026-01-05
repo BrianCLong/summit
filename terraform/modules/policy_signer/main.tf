@@ -7,6 +7,13 @@ locals {
     signer_key_id = var.signer_key_id
     alerts_version = var.alerts_version
     dashboards_path = var.dashboards_path
+    opa_url       = var.opa_url
+    notary = {
+      url        = var.notary_url
+      key_secret = var.notary_key_secret
+    }
+    graph_endpoint = var.graph_endpoint
+    secrets_prefix = var.secrets_prefix
   }
 }
 

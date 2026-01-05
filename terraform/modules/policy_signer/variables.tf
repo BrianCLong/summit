@@ -36,3 +36,33 @@ variable "dashboards_path" {
   type        = string
   default     = "grafana/dashboards"
 }
+
+variable "opa_url" {
+  description = "OPA base URL for policy evaluation"
+  type        = string
+  default     = "http://opa.intelgraph.local:8181"
+}
+
+variable "notary_url" {
+  description = "Notary service URL for signing verification"
+  type        = string
+  default     = "https://notary.intelgraph.local"
+}
+
+variable "notary_key_secret" {
+  description = "Secret reference for notary signing key"
+  type        = string
+  default     = "notary-signer-key"
+}
+
+variable "graph_endpoint" {
+  description = "Graph API endpoint for signer metadata"
+  type        = string
+  default     = "http://neo4j.intelgraph.local:7474"
+}
+
+variable "secrets_prefix" {
+  description = "Secrets manager prefix for signer-related secrets"
+  type        = string
+  default     = "/intelgraph/dev"
+}
