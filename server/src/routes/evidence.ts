@@ -8,6 +8,7 @@ import { ProvenanceRepo } from '../repos/ProvenanceRepo.js';
 import { getPostgresPool } from '../config/database.js';
 import { tenantService } from '../services/TenantService.js';
 import { provenanceLedger } from '../provenance/ledger.js';
+import { exportEvidencePayload } from '../provenance/evidenceExport.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 
@@ -85,6 +86,11 @@ router.post(
           return t >= new Date(timeRange.start).getTime() && t <= new Date(timeRange.end).getTime();
       });
 
+      const evidencePayload = await exportEvidencePayload(tenantId, {
+        start: new Date(timeRange.start),
+        end: new Date(timeRange.end),
+      });
+
       // Start Stream
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader(
@@ -109,12 +115,36 @@ router.post(
         generatedAt: new Date().toISOString(),
         actorId,
         eventCount: filteredEvents.length,
+        accessLogCount: evidencePayload.accessLogs.length,
+        adminChangeReceiptCount: evidencePayload.adminChangeReceipts.length,
+        policyVersionCount: evidencePayload.policyVersions.length,
+        drReceiptCount: evidencePayload.drReceipts.length,
         policyProfile: tenant.settings?.policy_profile || 'unknown',
       };
       archive.append(JSON.stringify(metadata, null, 2), { name: 'metadata.json' });
 
       // Add Events
       archive.append(JSON.stringify(filteredEvents, null, 2), { name: 'audit_events.json' });
+
+      archive.append(
+        JSON.stringify(evidencePayload.accessLogs, null, 2),
+        { name: 'access_logs.json' },
+      );
+
+      archive.append(
+        JSON.stringify(evidencePayload.adminChangeReceipts, null, 2),
+        { name: 'admin_change_receipts.json' },
+      );
+
+      archive.append(
+        JSON.stringify(evidencePayload.policyVersions, null, 2),
+        { name: 'policy_versions.json' },
+      );
+
+      archive.append(
+        JSON.stringify(evidencePayload.drReceipts, null, 2),
+        { name: 'dr_receipts.json' },
+      );
 
       // Add Policy Bundle (Snapshot)
       if (tenant.settings?.policy_bundle) {
