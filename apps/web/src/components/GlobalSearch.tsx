@@ -198,14 +198,14 @@ export function GlobalSearch() {
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" onClick={closeSearch}>
       <div className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <Command className="rounded-xl border shadow-md bg-popover overflow-hidden" loop>
+        <Command className="rounded-xl border shadow-md bg-popover overflow-hidden" loop shouldFilter={false}>
           <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Command.Input
               placeholder="Search entities, investigations, alerts..."
               value={query}
               onValueChange={setQuery}
-              className="flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 h-12 bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
               autoFocus
               aria-label="Global search"
             />
