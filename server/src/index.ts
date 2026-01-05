@@ -29,6 +29,7 @@ const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
 import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
+import './services/ramp/AutoRampReducer.js';
 
 const startServer = async () => {
   const sdk = initTelemetry('intelgraph-server');

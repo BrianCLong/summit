@@ -75,6 +75,7 @@ This package deploys a production-grade OpenTelemetry-first stack with Prometheu
   - Mesh error budget burn (>2% 5xx over 15m) and missing scrape targets.
   - Correlation coverage (<95%), Vector log shipping errors, profiling ingestion stalls, and audit pipeline gaps.
 - Wire alerts to Alertmanager routes with ownership metadata and ticket automation.
+- Auto-ramp response: `docs/observability/runbooks/slo-ramp-reducer.md` defines SLO-to-ramp behavior and rollback steps.
 
 ## Runbook (Deploy & Validate)
 
