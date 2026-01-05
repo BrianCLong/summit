@@ -28,3 +28,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: support-impersonation-health-bundle
+    version: v1
+    path: prompts/support-impersonation-health-bundle.md
+    sha256: c994b19a63f4aa6fc25e509c68fb7898b5d92845e005f345204175624a574903
+    description: Policy-gated support impersonation and tenant health bundle export with receipts and redaction.
+    scope:
+      paths:
+        - server/src/services/support/
+        - server/src/policies/
+        - server/src/provenance/
+        - server/src/routes/support-center.ts
+        - server/src/lib/featureFlags.ts
+        - apps/web/src/pages/HelpPage.tsx
+        - docs/support/
+        - docs/roadmap/STATUS.json
+        - prompts/support-impersonation-health-bundle.md
+        - agents/examples/
+      domains:
+        - support
+        - governance
+        - provenance
+        - security
+        - frontend
+        - docs
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
