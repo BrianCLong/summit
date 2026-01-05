@@ -100,7 +100,7 @@ fi
 # Get counts
 get_pr_count() {
   local query="$1"
-  gh pr list --state open --search "$query" --json number -q 'length'
+  gh pr list --state open --limit 500 --search "$query" --json number -q 'length'
 }
 
 # Get PRs with details

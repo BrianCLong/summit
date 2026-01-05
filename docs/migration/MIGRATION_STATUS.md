@@ -1,17 +1,17 @@
 # Post-GA Migration Status
 
-Generated: 2026-01-05T15:36:15Z
+Generated: 2026-01-05T15:40:25Z
 
 ## Summary
 
 | Metric                              | Count   |
 | ----------------------------------- | ------- |
-| Total Conflicting PRs               | 138     |
-| Labeled `blocked:unrelated-history` | 30      |
-| Labeled `needs:recreated-pr`        | 30      |
+| Total Conflicting PRs               | 137     |
+| Labeled `blocked:unrelated-history` | 139     |
+| Labeled `needs:recreated-pr`        | 139     |
 | Labeled `superseded`                | 0       |
-| Labeled `post-ga:migration`         | 30      |
-| **Remaining to Process**            | **138** |
+| Labeled `post-ga:migration`         | 139     |
+| **Remaining to Process**            | **137** |
 
 ## Progress
 
