@@ -1,0 +1,197 @@
+{
+  "issue_number": 72,
+  "title": "Create Roadmap Document for MVP and Beyond",
+  "url": "https://github.com/BrianCLong/summit/issues/72",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051495,
+      "node_id": "LA_kwDOPaNncM8AAAACHht45w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:docs",
+      "name": "type:docs",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Docs"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095068559,
+      "node_id": "LA_kwDOPaNncM8AAAACHhu7jw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:docs",
+      "name": "area:docs",
+      "color": "ededed",
+      "default": false,
+      "description": "Docs area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:49Z",
+  "createdAt": "2025-08-12T04:39:52Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12670,
+        "url": "https://github.com/BrianCLong/summit/pull/12670",
+        "mergedAt": "2025-12-18T01:43:59Z",
+        "title": "Add execution guides for prompts #65–#72"
+      },
+      {
+        "number": 14694,
+        "url": "https://github.com/BrianCLong/summit/pull/14694",
+        "mergedAt": "2025-12-27T21:05:11Z",
+        "title": "docs: add MVP-3 GA orchestration plan and update roadmap timestamp"
+      },
+      {
+        "number": 12513,
+        "url": "https://github.com/BrianCLong/summit/pull/12513",
+        "mergedAt": "2025-12-18T02:36:30Z",
+        "title": "Add Identity Intrusion Simulation Capability"
+      },
+      {
+        "number": 12457,
+        "url": "https://github.com/BrianCLong/summit/pull/12457",
+        "mergedAt": "2025-12-18T02:48:07Z",
+        "title": "docs: outline wave9 capability missions"
+      },
+      {
+        "number": 12508,
+        "url": "https://github.com/BrianCLong/summit/pull/12508",
+        "mergedAt": "2025-12-02T18:52:46Z",
+        "title": "Create comprehensive 96-prompt engineering roadmap"
+      },
+      {
+        "number": 1541,
+        "url": "https://github.com/BrianCLong/summit/pull/1541",
+        "mergedAt": null,
+        "title": "feat: add freshness scoring library and reranking middleware"
+      },
+      {
+        "number": 11969,
+        "url": "https://github.com/BrianCLong/summit/pull/11969",
+        "mergedAt": "2025-11-20T11:01:31Z",
+        "title": "Build Intelligence Operations Command Platform"
+      },
+      {
+        "number": 15300,
+        "url": "https://github.com/BrianCLong/summit/pull/15300",
+        "mergedAt": "2026-01-01T08:02:09Z",
+        "title": "Restore JWT security coverage with ESM-safe mocks"
+      },
+      {
+        "number": 15271,
+        "url": "https://github.com/BrianCLong/summit/pull/15271",
+        "mergedAt": null,
+        "title": "Senior engineer embedded repository work"
+      },
+      {
+        "number": 13057,
+        "url": "https://github.com/BrianCLong/summit/pull/13057",
+        "mergedAt": "2025-12-04T15:40:52Z",
+        "title": "ci: add golden path gate workflow"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 13194,
+        "url": "https://github.com/BrianCLong/summit/pull/13194",
+        "mergedAt": "2025-12-04T15:38:36Z",
+        "title": "Add multimodal fusion pipeline with embeddings"
+      },
+      {
+        "number": 931,
+        "url": "https://github.com/BrianCLong/summit/pull/931",
+        "mergedAt": null,
+        "title": "feat: Complete Operation NIGHT MARKET RC Hardening"
+      },
+      {
+        "number": 1308,
+        "url": "https://github.com/BrianCLong/summit/pull/1308",
+        "mergedAt": "2025-09-23T06:26:26Z",
+        "title": "feat: orchestrate web llm automation workflows"
+      },
+      {
+        "number": 11901,
+        "url": "https://github.com/BrianCLong/summit/pull/11901",
+        "mergedAt": "2025-11-20T10:25:49Z",
+        "title": "Build proof-carrying publishing with disclosure packager"
+      },
+      {
+        "number": 1358,
+        "url": "https://github.com/BrianCLong/summit/pull/1358",
+        "mergedAt": null,
+        "title": "test: expand policy reasoner coverage"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 1260,
+        "url": "https://github.com/BrianCLong/summit/pull/1260",
+        "mergedAt": null,
+        "title": "Rebrand: integrate feature/rename-summit into merge/all-to-main-20250915-022508"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      },
+      {
+        "number": 1309,
+        "url": "https://github.com/BrianCLong/summit/pull/1309",
+        "mergedAt": "2025-09-23T06:17:03Z",
+        "title": "Fix docling metrics registration and test scaffolding"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

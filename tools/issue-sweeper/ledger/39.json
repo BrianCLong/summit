@@ -1,0 +1,239 @@
+{
+  "issue_number": 39,
+  "title": "M3: Investigations list/create/detail views",
+  "url": "https://github.com/BrianCLong/summit/issues/39",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:01Z",
+  "createdAt": "2025-08-12T00:15:43Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15388,
+        "url": "https://github.com/BrianCLong/summit/pull/15388",
+        "mergedAt": null,
+        "title": "fix(ci): pin supply-chain tools and apply security fix"
+      },
+      {
+        "number": 12776,
+        "url": "https://github.com/BrianCLong/summit/pull/12776",
+        "mergedAt": "2025-12-18T00:38:53Z",
+        "title": "Add API documentation with OpenAPI"
+      },
+      {
+        "number": 12088,
+        "url": "https://github.com/BrianCLong/summit/pull/12088",
+        "mergedAt": "2025-11-21T06:30:32Z",
+        "title": "Audit and consolidate project dependencies"
+      },
+      {
+        "number": 13365,
+        "url": "https://github.com/BrianCLong/summit/pull/13365",
+        "mergedAt": "2025-12-06T09:54:02Z",
+        "title": "build(deps): bump playwright and @playwright/test in /intelgraph-mvp/ui"
+      },
+      {
+        "number": 15332,
+        "url": "https://github.com/BrianCLong/summit/pull/15332",
+        "mergedAt": "2026-01-01T11:38:30Z",
+        "title": "Ontology Engine v2: Execution Runtime & Governance"
+      },
+      {
+        "number": 11846,
+        "url": "https://github.com/BrianCLong/summit/pull/11846",
+        "mergedAt": "2025-11-20T09:36:34Z",
+        "title": "fix: rerun neo4j migrations after recovery"
+      },
+      {
+        "number": 15317,
+        "url": "https://github.com/BrianCLong/summit/pull/15317",
+        "mergedAt": "2026-01-01T11:38:59Z",
+        "title": "Ecosystem Entry Innovation Sprint Documentation"
+      },
+      {
+        "number": 15323,
+        "url": "https://github.com/BrianCLong/summit/pull/15323",
+        "mergedAt": null,
+        "title": "feat: add red-team harness to sim-harness"
+      },
+      {
+        "number": 11815,
+        "url": "https://github.com/BrianCLong/summit/pull/11815",
+        "mergedAt": "2025-11-10T13:08:11Z",
+        "title": "chore(deps): bump the js-dependencies group with 34 updates"
+      },
+      {
+        "number": 1275,
+        "url": "https://github.com/BrianCLong/summit/pull/1275",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @opentelemetry/sdk-node from 0.39.1 to 0.205.0"
+      },
+      {
+        "number": 13117,
+        "url": "https://github.com/BrianCLong/summit/pull/13117",
+        "mergedAt": "2025-12-03T01:35:51Z",
+        "title": "PsyOps Narrative Simulator: Propagation & Suppression"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 10171,
+        "url": "https://github.com/BrianCLong/summit/pull/10171",
+        "mergedAt": "2025-10-14T08:06:19Z",
+        "title": "ci(deploy-preview): replace 7-char short SHA with full or --short=12"
+      },
+      {
+        "number": 13046,
+        "url": "https://github.com/BrianCLong/summit/pull/13046",
+        "mergedAt": "2025-12-17T21:28:30Z",
+        "title": "Provenance Engine V2 - Full Lineage & Witnessing"
+      },
+      {
+        "number": 1169,
+        "url": "https://github.com/BrianCLong/summit/pull/1169",
+        "mergedAt": null,
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.39.4 to 0.62.2 in /server"
+      },
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 1179,
+        "url": "https://github.com/BrianCLong/summit/pull/1179",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps-dev): bump @typescript-eslint/parser from 6.21.0 to 8.42.0 in /client"
+      },
+      {
+        "number": 11842,
+        "url": "https://github.com/BrianCLong/summit/pull/11842",
+        "mergedAt": "2025-11-20T09:48:18Z",
+        "title": "feat: add collaborative investigation realtime workflows"
+      },
+      {
+        "number": 11880,
+        "url": "https://github.com/BrianCLong/summit/pull/11880",
+        "mergedAt": "2025-11-20T14:33:22Z",
+        "title": "Set up GitHub Actions CI/CD pipeline"
+      },
+      {
+        "number": 10129,
+        "url": "https://github.com/BrianCLong/summit/pull/10129",
+        "mergedAt": null,
+        "title": "feat: add cross-database migration rollback engine"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 1173,
+        "url": "https://github.com/BrianCLong/summit/pull/1173",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump @typescript-eslint/eslint-plugin from 6.21.0 to 8.42.0 in /server"
+      },
+      {
+        "number": 13182,
+        "url": "https://github.com/BrianCLong/summit/pull/13182",
+        "mergedAt": "2025-12-04T15:39:06Z",
+        "title": "Build SIGINT dashboard with live waveform visualization"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 1269,
+        "url": "https://github.com/BrianCLong/summit/pull/1269",
+        "mergedAt": "2025-09-19T02:20:34Z",
+        "title": "chore(deps-dev): bump ts-jest from 29.4.1 to 29.4.2"
+      },
+      {
+        "number": 1322,
+        "url": "https://github.com/BrianCLong/summit/pull/1322",
+        "mergedAt": "2025-09-23T06:10:11Z",
+        "title": "chore(deps): bump @opentelemetry/auto-instrumentations-node from 0.63.0 to 0.64.1"
+      },
+      {
+        "number": 10128,
+        "url": "https://github.com/BrianCLong/summit/pull/10128",
+        "mergedAt": "2025-10-14T08:39:43Z",
+        "title": "feat: add community engagement toolkit"
+      },
+      {
+        "number": 1250,
+        "url": "https://github.com/BrianCLong/summit/pull/1250",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "PRD v24 – 01/10 – API plumbing"
+      },
+      {
+        "number": 13106,
+        "url": "https://github.com/BrianCLong/summit/pull/13106",
+        "mergedAt": "2025-12-03T04:36:27Z",
+        "title": "Add spectrum analysis and sensor fusion integration"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
