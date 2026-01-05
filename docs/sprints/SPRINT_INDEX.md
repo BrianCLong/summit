@@ -255,6 +255,7 @@ Located in `/october2025/`
 | Sprint       | File                                  | Focus           | Dates               |
 | ------------ | ------------------------------------- | --------------- | ------------------- |
 | **IG v1.01** | `sprint_2026_01_05_intelgraph_v_1.md` | Foundation      | Jan 5-16, 2026      |
+| **Sprint 01**| `sprint_01_legitimacy_as_leverage.md` | Governance/Legitimacy | Jan 5-16, 2026 |
 | **IG v1.02** | `sprint_2026_01_19_intelgraph_v_1.md` | Core features   | Jan 19-30, 2026     |
 | **IG v1.03** | `sprint_2026_02_02_intelgraph_v_1.md` | Integration     | Feb 2-13, 2026      |
 | **IG v1.04** | `sprint_2026_02_16_intelgraph_v_1.md` | Refinement      | Feb 16-27, 2026     |
