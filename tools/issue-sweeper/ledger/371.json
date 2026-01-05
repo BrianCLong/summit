@@ -1,0 +1,68 @@
+{
+  "issue_number": 371,
+  "title": "feat: wire insight approval ui",
+  "url": "https://github.com/BrianCLong/summit/pull/371",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T04:50:49Z",
+  "createdAt": "2025-08-17T02:57:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10159,
+        "url": "https://github.com/BrianCLong/summit/pull/10159",
+        "mergedAt": null,
+        "title": "docs: enhance AGENTS.md with orchestration improvements for agent coordination"
+      },
+      {
+        "number": 693,
+        "url": "https://github.com/BrianCLong/summit/pull/693",
+        "mergedAt": "2025-08-29T10:39:48Z",
+        "title": "feat: add basic geospatial services and map UI"
+      },
+      {
+        "number": 484,
+        "url": "https://github.com/BrianCLong/summit/pull/484",
+        "mergedAt": "2025-08-18T03:28:36Z",
+        "title": "feat: automate roadmap updates"
+      },
+      {
+        "number": 11907,
+        "url": "https://github.com/BrianCLong/summit/pull/11907",
+        "mergedAt": "2025-11-20T10:25:33Z",
+        "title": "Convert runbooks to DAGs with gates and logs"
+      },
+      {
+        "number": 635,
+        "url": "https://github.com/BrianCLong/summit/pull/635",
+        "mergedAt": null,
+        "title": "chore(deps-dev): bump jest-watch-typeahead from 2.2.2 to 3.0.1"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

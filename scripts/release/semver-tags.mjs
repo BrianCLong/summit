@@ -1,82 +1,68 @@
-import { execSync } from 'node:child_process';
+// scripts/release/semver-tags.mjs
 
 /**
- * Parses a tag string into a semver object.
- * Returns null if the tag doesn't match the supported formats.
- * Supported formats:
- * - GA: vX.Y.Z
- * - RC: vX.Y.Z-rc.N
+ * Parses a git tag into its components.
+ * @param {string} tag - The git tag (e.g., "v1.2.3", "v1.2.3-rc.4").
+ * @returns {{major: number, minor: number, patch: number, channel: 'ga' | 'rc', rc?: number}}
  */
 export function parseTag(tag) {
-  // GA: vX.Y.Z
-  const gaMatch = tag.match(/^v(\d+)\.(\d+)\.(\d+)$/);
-  if (gaMatch) {
-    return {
-      raw: tag,
-      major: parseInt(gaMatch[1], 10),
-      minor: parseInt(gaMatch[2], 10),
-      patch: parseInt(gaMatch[3], 10),
-      channel: 'ga',
-      rc: null
-    };
+  if (!tag.startsWith('v')) {
+    throw new Error(`Invalid tag format: ${tag}. Must start with 'v'.`);
   }
 
-  // RC: vX.Y.Z-rc.N
-  const rcMatch = tag.match(/^v(\d+)\.(\d+)\.(\d+)-rc\.(\d+)$/);
-  if (rcMatch) {
-    return {
-      raw: tag,
-      major: parseInt(rcMatch[1], 10),
-      minor: parseInt(rcMatch[2], 10),
-      patch: parseInt(rcMatch[3], 10),
-      channel: 'rc',
-      rc: parseInt(rcMatch[4], 10)
-    };
+  const tagWithoutV = tag.slice(1);
+  const parts = tagWithoutV.split('-rc.');
+
+  const [major, minor, patch] = parts[0].split('.').map(Number);
+
+  if (isNaN(major) || isNaN(minor) || isNaN(patch)) {
+    throw new Error(`Invalid tag format: ${tag}. Could not parse version numbers.`);
   }
 
-  return null;
+  if (parts.length > 1) {
+    const rc = Number(parts[1]);
+    if (isNaN(rc)) {
+      throw new Error(`Invalid tag format: ${tag}. Could not parse RC number.`);
+    }
+    return { major, minor, patch, channel: 'rc', rc };
+  }
+
+  return { major, minor, patch, channel: 'ga' };
 }
 
 /**
- * Compares two parsed semver objects.
- * Returns:
- * - positive if a > b
- * - negative if a < b
- * - 0 if equal
+ * Compares two tags for semantic versioning order.
+ * @param {string} a - The first tag.
+ * @param {string} b - The second tag.
+ * @returns {number} -1 if a < b, 0 if a === b, 1 if a > b.
  */
 export function compareTags(a, b) {
-  if (a.major !== b.major) return a.major - b.major;
-  if (a.minor !== b.minor) return a.minor - b.minor;
-  if (a.patch !== b.patch) return a.patch - b.patch;
+  const tagA = parseTag(a);
+  const tagB = parseTag(b);
 
-  // Same X.Y.Z
-  // GA > RC
-  if (a.channel === 'ga' && b.channel === 'rc') return 1;
-  if (a.channel === 'rc' && b.channel === 'ga') return -1;
-
-  // Both RC: compare rc number
-  if (a.channel === 'rc' && b.channel === 'rc') {
-    return a.rc - b.rc;
+  if (tagA.major !== tagB.major) {
+    return tagA.major > tagB.major ? 1 : -1;
+  }
+  if (tagA.minor !== tagB.minor) {
+    return tagA.minor > tagB.minor ? 1 : -1;
+  }
+  if (tagA.patch !== tagB.patch) {
+    return tagA.patch > tagB.patch ? 1 : -1;
   }
 
-  return 0; // Both GA (shouldn't happen with unique tags)
-}
-
-/**
- * Lists all tags matching v* and returns sorted parsed objects.
- */
-export function listSortedTags() {
-  try {
-    const output = execSync('git tag --list "v*"', { encoding: 'utf8' });
-    const tags = output.trim().split('\n')
-      .map(t => t.trim())
-      .filter(t => t)
-      .map(parseTag)
-      .filter(t => t !== null)
-      .sort(compareTags);
-    return tags;
-  } catch (error) {
-    console.error('Error listing tags:', error);
-    return [];
+  // GA release is > than RC release
+  if (tagA.channel === 'ga' && tagB.channel === 'rc') {
+    return 1;
   }
+  if (tagA.channel === 'rc' && tagB.channel === 'ga') {
+    return -1;
+  }
+
+  if (tagA.channel === 'rc' && tagB.channel === 'rc') {
+    if (tagA.rc !== tagB.rc) {
+      return tagA.rc > tagB.rc ? 1 : -1;
+    }
+  }
+
+  return 0;
 }

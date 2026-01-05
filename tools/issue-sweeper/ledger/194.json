@@ -1,0 +1,140 @@
+{
+  "issue_number": 194,
+  "title": "Threat intelligence feeds",
+  "url": "https://github.com/BrianCLong/summit/issues/194",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9107968112,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQcA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P2",
+      "name": "P2",
+      "color": "fbca04",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055864,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnOA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/integration",
+      "name": "integration",
+      "color": "0366d6",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056381,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpPQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-30",
+      "name": "due:2025-11-30",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:49Z",
+  "createdAt": "2025-08-14T04:42:49Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 12220,
+        "url": "https://github.com/BrianCLong/summit/pull/12220",
+        "mergedAt": "2025-11-21T16:49:56Z",
+        "title": "docs: add monorepo architecture refactoring plan with ADRs"
+      },
+      {
+        "number": 11954,
+        "url": "https://github.com/BrianCLong/summit/pull/11954",
+        "mergedAt": "2025-11-20T10:20:47Z",
+        "title": "Define and implement codebase maintainability metrics"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10085,
+        "url": "https://github.com/BrianCLong/summit/pull/10085",
+        "mergedAt": null,
+        "title": "feat: add policy compliance simulation analytics"
+      },
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 629,
+        "url": "https://github.com/BrianCLong/summit/pull/629",
+        "mergedAt": null,
+        "title": "chore(deps): bump keybert from 0.8.3 to 0.9.0"
+      },
+      {
+        "number": 11878,
+        "url": "https://github.com/BrianCLong/summit/pull/11878",
+        "mergedAt": null,
+        "title": "Consolidate CLI and assistant tools into Summit CLI"
+      },
+      {
+        "number": 11917,
+        "url": "https://github.com/BrianCLong/summit/pull/11917",
+        "mergedAt": "2025-11-20T10:21:06Z",
+        "title": "Build collaborative intelligence platform with workspaces"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
