@@ -43,6 +43,11 @@ This sequence is our contract. If it passes, your environment is healthy.
 - Fill out the PR template completely.
 - Ensure all CI checks pass (Lint, Unit, Golden Path).
 
+### 4. Release Rules
+- Releases are only cut from `main`.
+- Tags must be `vX.Y.Z` or `vX.Y.Z-rc.N`.
+- Tag versions must match the `package.json` versions in the repository.
+
 ## 🤖 Guidelines for External Contributors (Bots & Co-authors)
 
 We welcome contributions from AI agents and automated systems. To reduce friction and ensure safety, please follow these rules:

@@ -17,6 +17,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch Tags
+        run: git fetch --tags origin
+
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
@@ -24,6 +30,12 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+
+      - name: Preflight Release Check
+        run: node scripts/release/preflight-release.mjs
+        env:
+          TAG: ${{ github.ref_name }}
+          DEFAULT_BRANCH: main
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
