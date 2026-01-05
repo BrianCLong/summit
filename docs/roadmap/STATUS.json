@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-05T02:08:52Z",
-  "revision_note": "Added tenant usage exports and usage/cost dashboard coverage",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",

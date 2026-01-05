@@ -1,0 +1,50 @@
+{
+  "issue_number": 328,
+  "title": "Shared AI Model Training Sessions",
+  "url": "https://github.com/BrianCLong/summit/issues/328",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122099213,
+      "node_id": "LA_kwDOPaNncM8AAAACH7gwDQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-ai-analytics",
+      "name": "epic-ai-analytics",
+      "color": "A29BFE",
+      "default": false,
+      "description": "AI analytics and business intelligence"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:20:25Z",
+  "createdAt": "2025-08-16T22:20:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 611,
+        "url": "https://github.com/BrianCLong/summit/pull/611",
+        "mergedAt": "2025-08-18T13:55:46Z",
+        "title": "chore(deps-dev): bump eslint-config-prettier from 9.1.2 to 10.1.8 in /client"
+      },
+      {
+        "number": 1189,
+        "url": "https://github.com/BrianCLong/summit/pull/1189",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump stopword from 2.0.8 to 3.1.4"
+      },
+      {
+        "number": 11927,
+        "url": "https://github.com/BrianCLong/summit/pull/11927",
+        "mergedAt": null,
+        "title": "Build workflow orchestration and task scheduling"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
