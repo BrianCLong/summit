@@ -1,0 +1,230 @@
+{
+  "issue_number": 18,
+  "title": "M3: Graph viewer (Cytoscape) with basic layout",
+  "url": "https://github.com/BrianCLong/summit/issues/18",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051532,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5DA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:frontend",
+      "name": "area:frontend",
+      "color": "ededed",
+      "default": false,
+      "description": "Frontend work"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:10:10Z",
+  "createdAt": "2025-08-12T00:10:10Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14764,
+        "url": "https://github.com/BrianCLong/summit/pull/14764",
+        "mergedAt": null,
+        "title": "Sprint 18: Switchboard Hosted SaaS Hardening & Onboarding"
+      },
+      {
+        "number": 14513,
+        "url": "https://github.com/BrianCLong/summit/pull/14513",
+        "mergedAt": null,
+        "title": "Sprint N+18: Agent Orchestration UX & Observability"
+      },
+      {
+        "number": 14355,
+        "url": "https://github.com/BrianCLong/summit/pull/14355",
+        "mergedAt": "2025-12-22T08:05:10Z",
+        "title": "Add Epics 10-18 Jira Import Artifacts"
+      },
+      {
+        "number": 13874,
+        "url": "https://github.com/BrianCLong/summit/pull/13874",
+        "mergedAt": "2025-12-20T11:26:02Z",
+        "title": "Epic 18: Report/PDF Generation Hardening Starter"
+      },
+      {
+        "number": 14356,
+        "url": "https://github.com/BrianCLong/summit/pull/14356",
+        "mergedAt": "2025-12-22T08:05:07Z",
+        "title": "Add Jira CSV import for Epics 10-18"
+      },
+      {
+        "number": 14750,
+        "url": "https://github.com/BrianCLong/summit/pull/14750",
+        "mergedAt": null,
+        "title": "docs: add 12–18 month investment thesis and capital plan"
+      },
+      {
+        "number": 14022,
+        "url": "https://github.com/BrianCLong/summit/pull/14022",
+        "mergedAt": "2025-12-19T22:40:03Z",
+        "title": "Upgrade python-multipart to version 0.0.18"
+      },
+      {
+        "number": 13491,
+        "url": "https://github.com/BrianCLong/summit/pull/13491",
+        "mergedAt": "2025-12-17T04:52:58Z",
+        "title": "Sprint 18 Package: Prov-Ledger Beta & Scaffolding"
+      },
+      {
+        "number": 12812,
+        "url": "https://github.com/BrianCLong/summit/pull/12812",
+        "mergedAt": "2025-12-04T17:41:52Z",
+        "title": "Add Sprint 18 plan for Feb 9–20 2026"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 13409,
+        "url": "https://github.com/BrianCLong/summit/pull/13409",
+        "mergedAt": "2025-12-06T23:03:03Z",
+        "title": "ai: LLM budget enforcement & quotas (initial rollout)"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 14767,
+        "url": "https://github.com/BrianCLong/summit/pull/14767",
+        "mergedAt": null,
+        "title": "Sprint 12: Ask IntelGraph v1.1, Storybuilder, and Admin Ops"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 12680,
+        "url": "https://github.com/BrianCLong/summit/pull/12680",
+        "mergedAt": "2025-12-18T01:40:28Z",
+        "title": "Set up artifact disclosure pack skeleton"
+      },
+      {
+        "number": 15319,
+        "url": "https://github.com/BrianCLong/summit/pull/15319",
+        "mergedAt": "2026-01-01T11:38:50Z",
+        "title": "Add Summit Decision Governance Pilot Documentation"
+      },
+      {
+        "number": 15151,
+        "url": "https://github.com/BrianCLong/summit/pull/15151",
+        "mergedAt": "2025-12-30T21:29:24Z",
+        "title": "Identify and catalog critical TODOs"
+      },
+      {
+        "number": 13197,
+        "url": "https://github.com/BrianCLong/summit/pull/13197",
+        "mergedAt": "2025-12-17T05:27:25Z",
+        "title": "Satellite imagery fusion into Neo4j with change detection"
+      },
+      {
+        "number": 1372,
+        "url": "https://github.com/BrianCLong/summit/pull/1372",
+        "mergedAt": null,
+        "title": "ci: pin Node 18.20.4; run Jest in-band"
+      },
+      {
+        "number": 12506,
+        "url": "https://github.com/BrianCLong/summit/pull/12506",
+        "mergedAt": "2025-12-18T02:37:44Z",
+        "title": "Plan additional defensive security sprints"
+      },
+      {
+        "number": 15337,
+        "url": "https://github.com/BrianCLong/summit/pull/15337",
+        "mergedAt": "2026-01-01T11:37:44Z",
+        "title": "Security Hardening: Container, CI/CD, and Production Config"
+      },
+      {
+        "number": 13416,
+        "url": "https://github.com/BrianCLong/summit/pull/13416",
+        "mergedAt": "2025-12-17T04:45:49Z",
+        "title": "safety: HITL approvals for risky automations (initial flow)"
+      },
+      {
+        "number": 13736,
+        "url": "https://github.com/BrianCLong/summit/pull/13736",
+        "mergedAt": "2025-12-20T03:32:42Z",
+        "title": "build(deps-dev): bump vite from 4.5.14 to 5.4.21 in /frontend"
+      },
+      {
+        "number": 11854,
+        "url": "https://github.com/BrianCLong/summit/pull/11854",
+        "mergedAt": null,
+        "title": "Analyze Summit platform and create strategic roadmap"
+      },
+      {
+        "number": 12503,
+        "url": "https://github.com/BrianCLong/summit/pull/12503",
+        "mergedAt": "2025-12-18T02:38:25Z",
+        "title": "Extend roadmap with five new defense sprints"
+      },
+      {
+        "number": 12121,
+        "url": "https://github.com/BrianCLong/summit/pull/12121",
+        "mergedAt": "2025-11-21T07:41:58Z",
+        "title": "Build government procurement automation engine"
+      },
+      {
+        "number": 13315,
+        "url": "https://github.com/BrianCLong/summit/pull/13315",
+        "mergedAt": null,
+        "title": "deps(npm): bump @google-cloud/billing from 4.6.0 to 5.1.1"
+      },
+      {
+        "number": 1541,
+        "url": "https://github.com/BrianCLong/summit/pull/1541",
+        "mergedAt": null,
+        "title": "feat: add freshness scoring library and reranking middleware"
+      },
+      {
+        "number": 1373,
+        "url": "https://github.com/BrianCLong/summit/pull/1373",
+        "mergedAt": null,
+        "title": "ci: add nightly docker-enabled integration workflow"
+      },
+      {
+        "number": 15320,
+        "url": "https://github.com/BrianCLong/summit/pull/15320",
+        "mergedAt": "2026-01-01T11:38:44Z",
+        "title": "Market Entry Innovation Sprint Artifacts"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

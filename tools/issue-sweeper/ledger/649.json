@@ -1,0 +1,46 @@
+{
+  "issue_number": 649,
+  "title": "Release/0.9.0 mvp beta",
+  "url": "https://github.com/BrianCLong/summit/pull/649",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:50Z",
+  "createdAt": "2025-08-19T23:19:45Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 10041,
+        "url": "https://github.com/BrianCLong/summit/pull/10041",
+        "mergedAt": null,
+        "title": "feat: launch global provenance graph"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 740,
+        "url": "https://github.com/BrianCLong/summit/pull/740",
+        "mergedAt": "2025-08-29T10:30:24Z",
+        "title": "chore(deps): bump graphql-ws from 5.16.2 to 6.0.6"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

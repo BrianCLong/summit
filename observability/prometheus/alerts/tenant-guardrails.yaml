@@ -54,3 +54,135 @@ groups:
             before hard throttles or denials trigger.
           runbook_url: "https://runbooks.summit.io/finops/tenant-quota"
           dashboard_url: "/d/qos-tenant-health"
+
+      - alert: TenantCostBudgetWarning
+        expr: |
+          tenant:cost_usd_24h
+            / max by (tenant) (mc_tenant_budget_limit_usd)
+            > 0.8
+        for: 30m
+        labels:
+          severity: warning
+          category: finops
+          service: cost-guard
+        annotations:
+          summary: "Tenant cost above 80% of daily budget"
+          description: |
+            Tenant {{ $labels.tenant }} has consumed {{ $value | humanizePercentage }}
+            of the daily budget in the last 24h. Review workload mix and apply guardrails.
+          runbook_url: "https://runbooks.summit.io/finops/tenant-cost-budget"
+          dashboard_url: "/d/finops-cost-guard"
+
+      - alert: TenantCostBudgetCritical
+        expr: |
+          tenant:cost_usd_24h
+            / max by (tenant) (mc_tenant_budget_limit_usd)
+            > 0.95
+        for: 15m
+        labels:
+          severity: critical
+          category: finops
+          service: cost-guard
+        annotations:
+          summary: "Tenant cost above 95% of daily budget"
+          description: |
+            Tenant {{ $labels.tenant }} has consumed {{ $value | humanizePercentage }}
+            of the daily budget in the last 24h. Enforce budget controls immediately.
+          runbook_url: "https://runbooks.summit.io/finops/tenant-cost-budget"
+          dashboard_url: "/d/finops-cost-guard"
+
+      - alert: TenantQuotaBreachDetected
+        expr: |
+          sum by (tenant, quota_type) (increase(tenant_quota_breach_total[15m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+          category: quota
+          service: quota-control
+        annotations:
+          summary: "Tenant quota breach detected"
+          description: |
+            Tenant {{ $labels.tenant }} breached quota {{ $labels.quota_type }}
+            in the last 15 minutes. Investigate enforcement and client behavior.
+          runbook_url: "https://runbooks.summit.io/finops/tenant-quota"
+          dashboard_url: "/d/qos-tenant-health"
+
+      - alert: TenantRampStateStalled
+        expr: |
+          max by (tenant, state) (tenant_ramp_state{state=~"paused|rollback|failed"}) > 0
+        for: 20m
+        labels:
+          severity: warning
+          category: rollout
+          service: release-control
+        annotations:
+          summary: "Tenant ramp state stalled"
+          description: |
+            Tenant {{ $labels.tenant }} is stuck in {{ $labels.state }} ramp state
+            for more than 20m. Validate rollout gates and remediation steps.
+          runbook_url: "https://runbooks.summit.io/release/tenant-ramp"
+          dashboard_url: "/d/qos-tenant-health"
+
+      - alert: TenantPurgeQueueBacklog
+        expr: |
+          max by (tenant, queue) (purge_queue_depth) > 1000
+        for: 30m
+        labels:
+          severity: warning
+          category: data-retention
+          service: purge
+        annotations:
+          summary: "Tenant purge queue backlog growing"
+          description: |
+            Tenant {{ $labels.tenant }} purge queue {{ $labels.queue }} exceeds 1k
+            items for over 30m. Validate purge workers and retention jobs.
+          runbook_url: "https://runbooks.summit.io/data-retention/purge-queue"
+          dashboard_url: "/d/qos-tenant-health"
+
+      - alert: TenantPurgeQueueBacklogCritical
+        expr: |
+          max by (tenant, queue) (purge_queue_depth) > 5000
+        for: 15m
+        labels:
+          severity: critical
+          category: data-retention
+          service: purge
+        annotations:
+          summary: "Tenant purge queue backlog critical"
+          description: |
+            Tenant {{ $labels.tenant }} purge queue {{ $labels.queue }} exceeds 5k
+            items. Take immediate action to prevent retention violations.
+          runbook_url: "https://runbooks.summit.io/data-retention/purge-queue"
+          dashboard_url: "/d/qos-tenant-health"
+
+      - alert: TenantRestoreFreshnessStale
+        expr: |
+          tenant:restore_freshness_seconds > 7 * 24 * 60 * 60
+        for: 2h
+        labels:
+          severity: warning
+          category: resilience
+          service: restore
+        annotations:
+          summary: "Tenant restore freshness beyond 7 days"
+          description: |
+            Tenant {{ $labels.tenant }} has not completed a restore validation for
+            more than 7 days. Schedule a restore drill to refresh evidence.
+          runbook_url: "https://runbooks.summit.io/resilience/restore-drill"
+          dashboard_url: "/d/qos-tenant-health"
+
+      - alert: TenantRestoreFreshnessCritical
+        expr: |
+          tenant:restore_freshness_seconds > 14 * 24 * 60 * 60
+        for: 1h
+        labels:
+          severity: critical
+          category: resilience
+          service: restore
+        annotations:
+          summary: "Tenant restore freshness beyond 14 days"
+          description: |
+            Tenant {{ $labels.tenant }} has not completed a restore validation for
+            more than 14 days. Escalate and block risky changes.
+          runbook_url: "https://runbooks.summit.io/resilience/restore-drill"
+          dashboard_url: "/d/qos-tenant-health"

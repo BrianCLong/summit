@@ -1,0 +1,131 @@
+{
+  "issue_number": 124,
+  "title": "War Room Graph Sync",
+  "url": "https://github.com/BrianCLong/summit/issues/124",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343056,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn90A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/mvp1",
+      "name": "mvp1",
+      "color": "0e8a16",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103343158,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn-Ng",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/realtime",
+      "name": "realtime",
+      "color": "fef2c0",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103361891,
+      "node_id": "LA_kwDOPaNncM8AAAACHppHYw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:collaboration",
+      "name": "area:collaboration",
+      "color": "c5def5",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-13T09:25:15Z",
+  "createdAt": "2025-08-13T09:20:25Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 13147,
+        "url": "https://github.com/BrianCLong/summit/pull/13147",
+        "mergedAt": "2025-12-17T05:36:38Z",
+        "title": "Add C7 Resource Leak Detector"
+      },
+      {
+        "number": 10043,
+        "url": "https://github.com/BrianCLong/summit/pull/10043",
+        "mergedAt": "2025-10-04T22:43:37Z",
+        "title": "feat(web): add MC health monitoring dashboard utilities"
+      },
+      {
+        "number": 10119,
+        "url": "https://github.com/BrianCLong/summit/pull/10119",
+        "mergedAt": "2025-10-14T10:40:06Z",
+        "title": "feat: Optimize data processing pipelines"
+      },
+      {
+        "number": 10122,
+        "url": "https://github.com/BrianCLong/summit/pull/10122",
+        "mergedAt": "2025-10-14T08:53:50Z",
+        "title": "feat: add influence mining extractor pipeline"
+      },
+      {
+        "number": 11874,
+        "url": "https://github.com/BrianCLong/summit/pull/11874",
+        "mergedAt": null,
+        "title": "Build Resilience Lab with automated chaos drills"
+      },
+      {
+        "number": 13193,
+        "url": "https://github.com/BrianCLong/summit/pull/13193",
+        "mergedAt": "2025-12-04T15:38:38Z",
+        "title": "Build React Native mobile app with OSINT dashboard"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

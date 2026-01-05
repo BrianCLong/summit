@@ -1,0 +1,31 @@
+{
+  "roles": {
+    "admin": {
+      "actions": [
+        "start_run",
+        "cancel_run",
+        "approve_step",
+        "override",
+        "export_receipts",
+        "delete_run"
+      ],
+      "attributes_required": []
+    },
+    "operator": {
+      "actions": ["start_run", "cancel_run"],
+      "attributes_required": []
+    },
+    "approver": {
+      "actions": ["approve_step"],
+      "attributes_required": []
+    },
+    "sre": {
+      "actions": ["override", "cancel_run"],
+      "attributes_required": []
+    },
+    "auditor": {
+      "actions": ["export_receipts"],
+      "attributes_required": []
+    }
+  }
+}
