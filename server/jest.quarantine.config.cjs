@@ -1,12 +1,12 @@
-
-import baseConfig from './jest.config.js';
+/** @type {import('jest').Config} */
+const baseConfig = require('./jest.config.cjs');
 
 /**
  * Jest Configuration for Quarantine (Flaky Tests)
- * 
+ *
  * This runs ONLY files ending in .flaky.test.ts
  */
-export default {
+module.exports = {
     ...baseConfig,
     testMatch: [
         '<rootDir>/tests/**/*.flaky.test.ts',
