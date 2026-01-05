@@ -1,0 +1,56 @@
+{
+  "issue_number": 527,
+  "title": "feat: add stego matrix visualization",
+  "url": "https://github.com/BrianCLong/summit/pull/527",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-17T22:35:50Z",
+  "createdAt": "2025-08-17T21:21:44Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13989,
+        "url": "https://github.com/BrianCLong/summit/pull/13989",
+        "mergedAt": "2025-12-20T01:37:20Z",
+        "title": "feat: add abac authorization guards"
+      },
+      {
+        "number": 15259,
+        "url": "https://github.com/BrianCLong/summit/pull/15259",
+        "mergedAt": "2026-01-01T07:29:47Z",
+        "title": "Expand autonomous agent capabilities and governance"
+      },
+      {
+        "number": 15341,
+        "url": "https://github.com/BrianCLong/summit/pull/15341",
+        "mergedAt": "2026-01-01T08:47:02Z",
+        "title": "Implement adversarial resistance and truth defense"
+      },
+      {
+        "number": 615,
+        "url": "https://github.com/BrianCLong/summit/pull/615",
+        "mergedAt": "2025-08-18T14:31:47Z",
+        "title": "chore(deps): bump web-vitals from 3.5.2 to 5.1.0 in /client"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

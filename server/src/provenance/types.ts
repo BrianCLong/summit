@@ -83,6 +83,9 @@ export interface ProvenanceEntry {
     userAgent?: string;
     sessionId?: string;
     requestId?: string;
+    policyDecisionId?: string;
+    policyVersion?: string;
+    complianceMode?: boolean;
     purpose?: string;
     classification?: string[];
     // V2 Extensions stored in metadata for backward compatibility
