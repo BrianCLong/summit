@@ -81,6 +81,44 @@ export class ProvenanceRepo {
     };
   }
 
+  private buildTenantWhere(
+    filter: ProvenanceFilter | undefined,
+    options: { timeColumn: string; searchColumns?: string[] },
+  ) {
+    const where: string[] = [];
+    const params: any[] = [];
+
+    if (filter?.from) {
+      where.push(
+        `(${options.timeColumn} >= $${params.push(filter.from)})`,
+      );
+    }
+    if (filter?.to) {
+      where.push(
+        `(${options.timeColumn} <= $${params.push(filter.to)})`,
+      );
+    }
+    if (filter?.contains && filter.contains.trim().length >= 3) {
+      const c = filter.contains.trim();
+      const searchColumns =
+        options.searchColumns && options.searchColumns.length
+          ? options.searchColumns
+          : ['metadata', 'resource_data', 'new_values', 'old_values'];
+      const searchConditions = searchColumns.map(
+        (column) => `COALESCE(${column}::text,'') ILIKE '%' || $${params.push(c)} || '%'`,
+      );
+      where.push(`(
+        COALESCE(action,'') || ' ' || COALESCE(target_type,'') || ' ' || COALESCE(resource_type,'') ILIKE '%' || $${params.push(c)} || '%' OR
+        ${searchConditions.join(' OR ')}
+      )`);
+    }
+
+    return {
+      where: where.length ? `WHERE ${where.join(' AND ')}` : '',
+      params,
+    };
+  }
+
   private mapRow(r: any) {
     // Normalize to API shape
     const createdAt = r.created_at || r.timestamp || new Date();
@@ -168,6 +206,11 @@ export class ProvenanceRepo {
 
       if (tenantId) {
         addQuery(
+          'SELECT id, action, resource_type, resource_id, details AS metadata, timestamp AS created_at, tenant_id FROM audit_events',
+          'ORDER BY COALESCE(created_at, NOW()) DESC',
+          true,
+        );
+        addQuery(
           'SELECT id, action, target_type, target_id, metadata, created_at, tenant_id FROM audit_events',
           'ORDER BY COALESCE(created_at, NOW()) DESC',
           true,
@@ -183,6 +226,11 @@ export class ProvenanceRepo {
           true,
         );
       } else {
+        addQuery(
+          'SELECT id, action, resource_type, resource_id, details AS metadata, timestamp AS created_at FROM audit_events',
+          'ORDER BY COALESCE(created_at, NOW()) DESC',
+          false,
+        );
         addQuery(
           'SELECT id, action, target_type, target_id, metadata, created_at FROM audit_events',
           'ORDER BY COALESCE(created_at, NOW()) DESC',
@@ -207,6 +255,78 @@ export class ProvenanceRepo {
           if (mapped.length) return mapped;
         } catch (e: any) {
           // try next shape
+          continue;
+        }
+      }
+      return [];
+    } finally {
+      client.release();
+    }
+  }
+
+  async byTenant(
+    tenantId: string,
+    filter?: ProvenanceFilter,
+    first = 1000,
+    offset = 0,
+  ) {
+    const client = await this.pg.connect();
+    try {
+      const queries: Array<{
+        sql: string;
+        params: any[];
+        timeColumn: string;
+        searchColumns: string[];
+      }> = [
+        {
+          sql: `SELECT id, action, resource_type, resource_id, details AS metadata, timestamp AS created_at, tenant_id
+            FROM audit_events`,
+          params: [],
+          timeColumn: 'timestamp',
+          searchColumns: ['details'],
+        },
+        {
+          sql: `SELECT id, action, target_type, target_id, metadata, created_at, tenant_id
+            FROM audit_events`,
+          params: [],
+          timeColumn: 'created_at',
+          searchColumns: ['metadata'],
+        },
+        {
+          sql: `SELECT id, action, resource_type, resource_id, resource_data, old_values, new_values, investigation_id, timestamp, tenant_id
+            FROM audit_events`,
+          params: [],
+          timeColumn: 'timestamp',
+          searchColumns: ['resource_data', 'old_values', 'new_values'],
+        },
+        {
+          sql: `SELECT id, source, subject_type, subject_id, note, created_at, tenant_id
+            FROM provenance`,
+          params: [],
+          timeColumn: 'created_at',
+          searchColumns: ['note'],
+        },
+      ];
+
+      for (const query of queries) {
+        const { where, params } = this.buildTenantWhere(filter, {
+          timeColumn: query.timeColumn,
+          searchColumns: query.searchColumns,
+        });
+        const scopedWhere = this.appendTenantScope(where, params, tenantId);
+        const { clause, params: withPaging } = this.withPaging(
+          scopedWhere.params,
+          first,
+          offset,
+        );
+        try {
+          const res = await client.query(
+            `${query.sql} ${scopedWhere.where} ORDER BY ${query.timeColumn} DESC${clause}`,
+            withPaging,
+          );
+          const mapped = res?.rows?.map(this.mapRow) ?? [];
+          if (mapped.length) return mapped;
+        } catch (e: any) {
           continue;
         }
       }
