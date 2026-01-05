@@ -184,6 +184,21 @@ jobs:
           name: release-status
           path: evidence/release
 
+      - name: Classify Release Tag
+        id: classify
+        run: |
+          node scripts/release/classify-tag.mjs ${{ inputs.tag || github.ref_name }}
+          CHANNEL=$(jq -r .channel dist/release/channel.json)
+          IS_RC=$([ "$CHANNEL" == "rc" ] && echo "true" || echo "false")
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "prerelease=$IS_RC" >> $GITHUB_OUTPUT
+
+          # Add to Step Summary
+          echo "## Release Classification" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: ${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Channel**: $CHANNEL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prerelease**: $IS_RC" >> $GITHUB_STEP_SUMMARY
+
       - name: Create Evidence Bundle
         run: |
           mkdir -p release-assets
@@ -238,19 +253,20 @@ jobs:
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          CHANNEL="${{ steps.classify.outputs.channel }}"
+          TAG="${{ inputs.tag || github.ref_name }}"
+          if [ "$CHANNEL" == "rc" ]; then
+            echo "notes=Release Candidate $TAG (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          else
+            echo "notes=GA Release $TAG (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Idempotent Release
         id: publish
         run: |
           TAG="${{ inputs.tag || github.ref_name }}"
-          echo "Processing release for tag: $TAG"
-
-          # Determine prerelease
-          PRERELEASE=false
-          if [[ "$TAG" == *"-rc"* ]]; then
-            PRERELEASE=true
-          fi
+          PRERELEASE="${{ steps.classify.outputs.prerelease }}"
+          echo "Processing release for tag: $TAG (prerelease=$PRERELEASE)"
 
           # Check if release exists
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
@@ -285,6 +301,7 @@ jobs:
         run: |
           echo "### Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "- **Tag:** ${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Concurrency Group:** release-${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Channel:** ${{ steps.classify.outputs.channel }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Prerelease:** ${{ steps.classify.outputs.prerelease }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Existed:** ${{ steps.publish.outputs.existed }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Action Taken:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY
