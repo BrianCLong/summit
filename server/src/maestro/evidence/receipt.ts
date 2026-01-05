@@ -28,6 +28,7 @@ export interface RunRow {
   status?: string;
   started_at?: string;
   ended_at?: string;
+  tenant_id?: string;
 }
 
 export interface RunEventRow {

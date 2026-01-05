@@ -22,24 +22,58 @@ import { provenanceLedger } from '../../provenance/ledger.js';
 const router = express.Router();
 const metrics = prometheusConductorMetrics as any;
 
-const inlineContentKey = (artifactId: string) =>
-  `inline://evidence_artifact_content/${artifactId}`;
+const inlineContentKey = (tenantId: string, artifactId: string) =>
+  `inline://tenants/${tenantId}/evidence_artifact_content/${artifactId}`;
 
-async function loadRunContext(runId: string): Promise<{
-  run?: RunRow;
-  events: RunEventRow[];
-  artifacts: EvidenceArtifactRow[];
-}> {
+const resolveTenantId = (req: express.Request): string | null => {
+  const headerTenant = req.headers['x-tenant-id'];
+  const tenantId =
+    req.user?.tenantId ||
+    req.user?.tenant_id ||
+    (typeof headerTenant === 'string' ? headerTenant : null);
+  return tenantId || null;
+};
+
+async function loadRunForTenant(
+  runId: string,
+  tenantId: string,
+): Promise<{ run?: RunRow; forbidden: boolean }> {
   const pool = getPostgresPool();
   const { rows: runRows } = await pool.query<RunRow>(
-    `SELECT id, runbook, status, started_at, ended_at FROM run WHERE id=$1`,
+    `SELECT id, runbook, status, started_at, ended_at, tenant_id
+       FROM run
+      WHERE id=$1`,
     [runId],
   );
 
   if (!runRows.length) {
-    return { events: [], artifacts: [] };
+    return { forbidden: false };
   }
 
+  const run = runRows[0];
+  if (!run.tenant_id || run.tenant_id !== tenantId) {
+    return { forbidden: true };
+  }
+
+  return { run, forbidden: false };
+}
+
+async function loadRunContext(
+  runId: string,
+  tenantId: string,
+): Promise<{
+  run?: RunRow;
+  events: RunEventRow[];
+  artifacts: EvidenceArtifactRow[];
+  forbidden: boolean;
+}> {
+  const { run, forbidden } = await loadRunForTenant(runId, tenantId);
+
+  if (!run) {
+    return { events: [], artifacts: [], forbidden };
+  }
+
+  const pool = getPostgresPool();
   const { rows: eventRows } = await pool.query<RunEventRow>(
     `SELECT kind, payload, ts FROM run_event WHERE run_id=$1 ORDER BY ts ASC`,
     [runId],
@@ -53,7 +87,7 @@ async function loadRunContext(runId: string): Promise<{
     [runId],
   );
 
-  return { run: runRows[0], events: eventRows, artifacts: artifactRows };
+  return { run, events: eventRows, artifacts: artifactRows, forbidden };
 }
 
 router.post(
@@ -67,6 +101,7 @@ router.post(
     );
     try {
       const { runId } = req.body || {};
+      const tenantId = resolveTenantId(req);
       if (!runId) {
         usageLedger.recordUsage({
           operationName: 'conductor.receipt.create',
@@ -82,9 +117,32 @@ router.post(
           .status(400)
           .json({ success: false, error: 'runId is required' });
       }
+      if (!tenantId) {
+        usageLedger.recordUsage({
+          operationName: 'conductor.receipt.create',
+          tenantId: req?.user?.tenantId,
+          userId: req?.user?.userId || req?.user?.sub,
+          timestamp: new Date(),
+          requestSizeBytes,
+          success: false,
+          statusCode: 400,
+          errorCategory: 'validation',
+        });
+        return res
+          .status(400)
+          .json({ success: false, error: 'tenantId is required' });
+      }
 
-      const { run, events, artifacts } = await loadRunContext(runId);
+      const { run, events, artifacts, forbidden } = await loadRunContext(
+        runId,
+        tenantId,
+      );
 
+      if (forbidden) {
+        return res
+          .status(403)
+          .json({ success: false, error: 'Run not accessible for tenant' });
+      }
       if (!run) {
         return res.status(404).json({ success: false, error: 'Run not found' });
       }
@@ -134,7 +192,13 @@ router.post(
         `INSERT INTO evidence_artifacts
          (id, run_id, artifact_type, s3_key, sha256_hash, size_bytes, created_at)
          VALUES ($1, $2, 'receipt', $3, $4, $5, now())`,
-        [artifactId, runId, inlineContentKey(artifactId), sha256Hash, receiptBuffer.length],
+        [
+          artifactId,
+          runId,
+          inlineContentKey(tenantId, artifactId),
+          sha256Hash,
+          receiptBuffer.length,
+        ],
       );
 
       await pool.query(
@@ -178,8 +242,26 @@ router.get(
   async (req, res) => {
     try {
       const { runId } = req.params;
-      const pool = getPostgresPool();
+      const tenantId = resolveTenantId(req);
 
+      if (!tenantId) {
+        return res
+          .status(400)
+          .json({ success: false, error: 'tenantId is required' });
+      }
+
+      const { run, forbidden } = await loadRunForTenant(runId, tenantId);
+
+      if (forbidden) {
+        return res
+          .status(403)
+          .json({ success: false, error: 'Run not accessible for tenant' });
+      }
+      if (!run) {
+        return res.status(404).json({ success: false, error: 'Run not found' });
+      }
+
+      const pool = getPostgresPool();
       const { rows: artifactRows } = await pool.query<EvidenceArtifactRow>(
         `SELECT id FROM evidence_artifacts
          WHERE run_id=$1 AND artifact_type='receipt'
@@ -265,6 +347,7 @@ router.post('/export', async (req, res) => {
       includeArtifacts = true,
       sign = true,
     } = req.body;
+    const tenantId = resolveTenantId(req);
 
     if (!runId) {
       return res.status(400).json({
@@ -272,11 +355,32 @@ router.post('/export', async (req, res) => {
         code: 'MISSING_RUN_ID',
       });
     }
+    if (!tenantId) {
+      return res.status(400).json({
+        error: 'tenantId is required',
+        code: 'MISSING_TENANT_ID',
+      });
+    }
+
+    const runLookup = await loadRunForTenant(runId, tenantId);
+    if (runLookup.forbidden) {
+      return res.status(403).json({
+        error: 'Run not accessible for tenant',
+        code: 'TENANT_SCOPE_VIOLATION',
+      });
+    }
+    if (!runLookup.run) {
+      return res.status(404).json({
+        error: 'Run not found',
+        code: 'RUN_NOT_FOUND',
+      });
+    }
 
     // Generate evidence bundle
     const evidenceBundle = await generateEvidenceBundle(runId, nodeId, {
       includeArtifacts,
       format,
+      tenantId,
     });
 
     // Sign the bundle if requested
@@ -545,6 +649,8 @@ async function generateEvidenceBundle(
   nodeId?: string,
   options: any = {},
 ): Promise<EvidenceBundle> {
+  const resolvedTenantId =
+    typeof options.tenantId === 'string' ? options.tenantId : 'unknown';
   const bundleId = `evidence-${runId}-${nodeId || 'full'}-${Date.now()}`;
 
   // In production, fetch from run database
@@ -571,7 +677,7 @@ async function generateEvidenceBundle(
     query: 'Analyze the security implications of...',
     context: {
       userId: 'user-123',
-      tenantId: 'tenant-abc',
+      tenantId: resolvedTenantId,
       sensitivity: 'internal',
       urgency: 'medium',
     },

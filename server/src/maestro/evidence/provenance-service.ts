@@ -6,6 +6,7 @@ import { otelService } from '../../middleware/observability/otel-tracing.js';
 export interface EvidenceArtifact {
   id?: string;
   runId: string;
+  tenantId?: string;
   artifactType:
     | 'sbom'
     | 'attestation'
@@ -45,6 +46,14 @@ export class EvidenceProvenanceService {
     );
   }
 
+  private resolveTenantId(artifact: EvidenceArtifact): string {
+    const metadataTenant =
+      typeof artifact.metadata?.tenantId === 'string'
+        ? artifact.metadata.tenantId
+        : undefined;
+    return artifact.tenantId || metadataTenant || 'unknown';
+  }
+
   private generateSigningKey(): string {
     // In production, this should be from AWS KMS or similar
     return crypto.randomBytes(32).toString('hex');
@@ -78,11 +87,12 @@ export class EvidenceProvenanceService {
       const shouldInline =
         artifact.artifactType === 'receipt' ||
         contentBuffer.length <= this.inlineThreshold;
+      const tenantId = this.resolveTenantId(artifact);
 
       // S3 key with content-addressable naming
       const s3Key = shouldInline
-        ? `inline://evidence_artifact_content/${artifactId}`
-        : `evidence/${artifact.runId}/${artifact.artifactType}/${artifactId}-${sha256Hash.slice(0, 16)}`;
+        ? `inline://tenants/${tenantId}/evidence_artifact_content/${artifactId}`
+        : `tenants/${tenantId}/evidence/${artifact.runId}/${artifact.artifactType}/${artifactId}-${sha256Hash.slice(0, 16)}`;
 
       // Upload to S3 with Object Lock
       // const uploadCommand = new PutObjectCommand({

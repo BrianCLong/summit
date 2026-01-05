@@ -76,7 +76,7 @@ describe('POST /ops/evidence/verify', () => {
         run_id: 'run-1',
         artifact_type: 'log',
         sha256_hash: inlineHash,
-        s3_key: 'inline://evidence_artifact_content/inline-1',
+        s3_key: 'inline://tenants/tenant-1/evidence_artifact_content/inline-1',
         created_at: new Date('2024-01-01T00:00:00Z'),
       },
       {
@@ -132,7 +132,8 @@ describe('POST /ops/evidence/verify', () => {
 
     const content = Buffer.from('expected-content');
     const hash = crypto.createHash('sha256').update(content).digest('hex');
-    const inlineKey = 'inline://evidence_artifact_content/inline-1';
+    const inlineKey =
+      'inline://tenants/tenant-1/evidence_artifact_content/inline-1';
 
     const artifacts = [
       {
@@ -176,4 +177,3 @@ describe('POST /ops/evidence/verify', () => {
     expect(incidentMock).not.toHaveBeenCalled();
   });
 });
-

@@ -6,7 +6,7 @@ import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { openIncident } from '../incident.js';
 
-const INLINE_PREFIX = 'inline://evidence_artifact_content/';
+const INLINE_PREFIX = 'inline://';
 
 export type EvidenceMismatchType = 'missing_content' | 'hash_mismatch';
 

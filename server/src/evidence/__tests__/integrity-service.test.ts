@@ -50,7 +50,7 @@ describe('EvidenceIntegrityService', () => {
         run_id: 'run-1',
         artifact_type: 'log',
         sha256_hash: inlineHash,
-        s3_key: 'inline://evidence_artifact_content/inline-1',
+        s3_key: 'inline://tenants/tenant-1/evidence_artifact_content/inline-1',
         created_at: new Date('2024-01-01T00:00:00Z'),
       },
       {
@@ -108,7 +108,7 @@ describe('EvidenceIntegrityService', () => {
         run_id: 'run-9',
         artifact_type: 'receipt',
         sha256_hash: hash,
-        s3_key: 'inline://evidence_artifact_content/inline-1',
+        s3_key: 'inline://tenants/tenant-1/evidence_artifact_content/inline-1',
         created_at: new Date('2024-01-01T01:00:00Z'),
       },
     ];

@@ -11,7 +11,11 @@ import { evidenceRoutes } from '../evidence-routes.js';
 jest.mock('../../auth/rbac-middleware.js', () => {
   const allow = (permission: string) => (req: any, res: any, next: any) => {
     if (req.headers[`x-allow-${permission}`]) {
-      req.user = { userId: 'user-1', permissions: [permission] };
+      req.user = {
+        userId: 'user-1',
+        tenantId: req.headers['x-tenant-id'] || 'tenant-1',
+        permissions: [permission],
+      };
       return next();
     }
     return res.status(403).json({ error: 'Insufficient permissions', required: permission });
@@ -75,6 +79,7 @@ describe('evidence receipt routes', () => {
       status: 'COMPLETED',
       started_at: '2024-01-01T00:00:00Z',
       ended_at: '2024-01-01T01:00:00Z',
+      tenant_id: 'tenant-1',
     };
     const events = [
       {
@@ -106,6 +111,7 @@ describe('evidence receipt routes', () => {
     const res = await request(app)
       .post('/api/conductor/evidence/receipt')
       .set('x-allow-evidence:create', '1')
+      .set('x-tenant-id', 'tenant-1')
       .send({ runId: 'run-1' });
 
     expect(res.status).toBe(200);
@@ -137,7 +143,8 @@ describe('evidence receipt routes', () => {
 
     const res = await request(app)
       .get('/api/conductor/evidence/receipt/run-1')
-      .set('x-allow-evidence:read', '1');
+      .set('x-allow-evidence:read', '1')
+      .set('x-tenant-id', 'tenant-1');
 
     expect(res.status).toBe(200);
     expect(res.body.data.receipt).toEqual(receipt);
@@ -148,7 +155,8 @@ describe('evidence receipt routes', () => {
 
     const res = await request(app)
       .get('/api/conductor/evidence/receipt/run-unknown')
-      .set('x-allow-evidence:read', '1');
+      .set('x-allow-evidence:read', '1')
+      .set('x-tenant-id', 'tenant-1');
 
     expect(res.status).toBe(404);
   });
