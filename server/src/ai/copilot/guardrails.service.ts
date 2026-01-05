@@ -233,6 +233,7 @@ export class GuardrailsService {
     const errorFailed = results.some(
       (r: any) => !r.passed && r.severity === 'error',
     );
+    console.log('Guardrails Debug: criticalFailed', criticalFailed, 'Results:', JSON.stringify(results.map((r: any) => ({ name: r.name, passed: r.passed, severity: r.severity }))));
 
     const checks: GuardrailCheck = {
       passed: allPassed,

@@ -1,0 +1,149 @@
+{
+  "issue_number": 91,
+  "title": "Integrate Basic OSINT Connector (e.g., WHOIS API)",
+  "url": "https://github.com/BrianCLong/summit/issues/91",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095918371,
+      "node_id": "LA_kwDOPaNncM8AAAACHiizIw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:plugins",
+      "name": "area:plugins",
+      "color": "d93f0b",
+      "default": false,
+      "description": "Plugins area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:59Z",
+  "createdAt": "2025-08-12T04:40:33Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13218,
+        "url": "https://github.com/BrianCLong/summit/pull/13218",
+        "mergedAt": "2025-12-04T15:29:30Z",
+        "title": "Add threat hunting workflows with auto-remediation"
+      },
+      {
+        "number": 12885,
+        "url": "https://github.com/BrianCLong/summit/pull/12885",
+        "mergedAt": "2025-12-04T15:48:24Z",
+        "title": "Build air-gapped deployment with security controls"
+      },
+      {
+        "number": 15328,
+        "url": "https://github.com/BrianCLong/summit/pull/15328",
+        "mergedAt": null,
+        "title": "feat: add counter-intel osint playbook and tooling"
+      },
+      {
+        "number": 15129,
+        "url": "https://github.com/BrianCLong/summit/pull/15129",
+        "mergedAt": "2025-12-30T21:37:18Z",
+        "title": "chore(deps): bump config from 0.13.4 to 0.15.19"
+      },
+      {
+        "number": 13191,
+        "url": "https://github.com/BrianCLong/summit/pull/13191",
+        "mergedAt": "2025-12-04T15:38:44Z",
+        "title": "Deploy anomaly detection for OSINT threat streams"
+      },
+      {
+        "number": 11790,
+        "url": "https://github.com/BrianCLong/summit/pull/11790",
+        "mergedAt": "2025-11-20T21:13:02Z",
+        "title": "docs: add targeted high-priority bug fix prompt"
+      },
+      {
+        "number": 10123,
+        "url": "https://github.com/BrianCLong/summit/pull/10123",
+        "mergedAt": "2025-10-14T08:40:19Z",
+        "title": "feat: add narrative simulation engine core"
+      },
+      {
+        "number": 1361,
+        "url": "https://github.com/BrianCLong/summit/pull/1361",
+        "mergedAt": null,
+        "title": "feat: enforce cost guard query budgets"
+      },
+      {
+        "number": 10116,
+        "url": "https://github.com/BrianCLong/summit/pull/10116",
+        "mergedAt": "2025-10-14T10:40:16Z",
+        "title": "chore: harden security compliance pipeline"
+      },
+      {
+        "number": 11925,
+        "url": "https://github.com/BrianCLong/summit/pull/11925",
+        "mergedAt": "2025-11-20T10:20:13Z",
+        "title": "Build Ingest Wizard and ETL Assistant backend"
+      },
+      {
+        "number": 11908,
+        "url": "https://github.com/BrianCLong/summit/pull/11908",
+        "mergedAt": "2025-11-20T10:25:29Z",
+        "title": "Establish charts as deployment golden path"
+      },
+      {
+        "number": 11919,
+        "url": "https://github.com/BrianCLong/summit/pull/11919",
+        "mergedAt": "2025-11-20T10:05:41Z",
+        "title": "Build Advanced Data Integration and ETL Platform"
+      },
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

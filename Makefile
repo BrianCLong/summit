@@ -232,6 +232,31 @@ secrets/lint:
 	@echo "Running OPA checks"
 	@conftest test --policy .ci/policies --namespace secrets --all-namespaces
 
+# --- Claude Code CLI Development ---
+
+.PHONY: claude-preflight
+claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit tests)
+	@echo "🔍 Running Claude preflight checks..."
+	@echo ""
+	@echo "Step 1/3: Linting..."
+	@pnpm -w exec eslint . --quiet 2>/dev/null || { echo "❌ Lint failed. Run 'pnpm lint:fix' to auto-fix."; exit 1; }
+	@echo "✅ Lint passed"
+	@echo ""
+	@echo "Step 2/3: Type checking..."
+	@pnpm -C server typecheck 2>/dev/null || { echo "❌ Typecheck failed. Run 'pnpm typecheck' for details."; exit 1; }
+	@echo "✅ Typecheck passed"
+	@echo ""
+	@echo "Step 3/3: Unit tests..."
+	@pnpm -C server test:unit --passWithNoTests 2>/dev/null || { echo "❌ Tests failed. Run 'pnpm test -- --verbose' for details."; exit 1; }
+	@echo "✅ Unit tests passed"
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "✅ Preflight complete! Next step:"
+	@echo ""
+	@echo "   make ga"
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
 # --- GA Hardening ---
 
 .PHONY: ga ga-verify
