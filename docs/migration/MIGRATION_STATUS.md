@@ -1,28 +1,28 @@
 # Post-GA Migration Status
 
-Generated: 2026-01-05T15:40:25Z
+Generated: 2026-01-05T16:36:06Z
 
 ## Summary
 
-| Metric                              | Count   |
-| ----------------------------------- | ------- |
-| Total Conflicting PRs               | 137     |
-| Labeled `blocked:unrelated-history` | 139     |
-| Labeled `needs:recreated-pr`        | 139     |
-| Labeled `superseded`                | 0       |
-| Labeled `post-ga:migration`         | 139     |
-| **Remaining to Process**            | **137** |
+| Metric                              | Count |
+| ----------------------------------- | ----- |
+| Total Conflicting PRs               | 7     |
+| Labeled `blocked:unrelated-history` | 136   |
+| Labeled `needs:recreated-pr`        | 136   |
+| Labeled `superseded`                | 2     |
+| Labeled `post-ga:migration`         | 138   |
+| **Remaining to Process**            | **5** |
 
 ## Progress
 
-`[██░░░░░░░░░░░░░░░░░░░░]` 0% superseded
+`[█████░░░░░░░░░░░░░░░]` 28% superseded
 
 ## By Author (Top 10)
 
 | Author                | Conflicting PRs |
 | --------------------- | --------------- |
-| BrianCLong            | 97              |
-| app/google-labs-jules | 41              |
+| BrianCLong            | 96              |
+| app/google-labs-jules | 37              |
 
 ## By Age (Oldest First)
 
@@ -41,13 +41,13 @@ Generated: 2026-01-05T15:40:25Z
 | #15375 | 3d  | feat: Release Automation & Evidence Bundle...          |
 | #15376 | 3d  | Sprint 2026.01: GA Rails + Audit Pack Implementati...  |
 | #15377 | 3d  | Prepare MVP-4 release for general availability...      |
-| #15378 | 3d  | Workstream A1: Strict Issue Intake & Triage Automa...  |
 | #15379 | 3d  | Update ADMIN-CONFIG.md and enable DB pool configur...  |
 | #15380 | 3d  | Sprint 2026.02: Hard Gates and Safer Defaults...       |
 | #15381 | 2d  | Enhance Storage, Caching and DR Infrastructure...      |
 | #15383 | 2d  | Build automated issue sweeper runner...                |
 | #15384 | 2d  | Prepare MVP-4 release for general availability...      |
 | #15391 | 2d  | Include missing server sources in tsconfig...          |
+| #15392 | 2d  | Harden GA coverage and fuzz gates with determinist...  |
 
 ## Next Steps
 
