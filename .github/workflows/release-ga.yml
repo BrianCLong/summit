@@ -48,16 +48,50 @@ jobs:
         run: pnpm -w test:release-scripts
 
       - name: Run Server Tests
-        run: pnpm test:server
+        run: |
+          mkdir -p dist/release
+          if pnpm test:server; then
+            echo '{"ok": true}' > dist/release/verify.json
+          else
+            echo '{"ok": false, "code": "VERIFY_FAILED"}' > dist/release/verify.json
+            exit 1
+          fi
         continue-on-error: false
 
       - name: Run Policy Checks
-        run: ./scripts/policy-test.sh
+        run: |
+          if ./scripts/policy-test.sh; then
+            echo '{"ok": true}' > dist/release/preflight.json
+          else
+            echo '{"ok": false, "code": "SECURITY_GUARD"}' > dist/release/preflight.json
+            exit 1
+          fi
         continue-on-error: false
 
       - name: Verify Documentation Completeness
         run: ./scripts/check_traceability.cjs
         continue-on-error: false
+
+      - name: Check Freeze Window
+        if: always()
+        run: |
+          mkdir -p dist/release
+          if ./scripts/check-freeze.sh; then
+            echo '{"ok": true}' > dist/release/freeze.json
+          else
+            echo '{"ok": false, "code": "FREEZE_WINDOW", "message": "Freeze window is active"}' > dist/release/freeze.json
+          fi
+
+      - name: Generate Release Status
+        if: always()
+        run: node scripts/release/build-release-status.mjs
+
+      - name: Upload Release Status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-status
+          path: dist/release/release-status.json
 
   build-server:
     name: Build Server
@@ -112,9 +146,21 @@ jobs:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
+      - name: Download Release Status
+        uses: actions/download-artifact@v4
+        with:
+          name: release-status
+          path: evidence/release
+
       - name: Create Evidence Bundle
         run: |
           mkdir -p release-assets
+
+          # Generate Checksums for all evidence
+          cd evidence
+          find . -type f -exec sha256sum {} \; > SHA256SUMS
+          cd ..
+
           tar -czf release-assets/evidence.tar.gz evidence/
 
       - name: Generate Release Notes
