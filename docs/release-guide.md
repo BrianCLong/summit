@@ -2,6 +2,8 @@
 
 This guide describes the process for creating a new point release (e.g., v4.0.1) for Summit MVP-4-GA.
 
+> **See [docs/releases/runbook.md](releases/runbook.md) for the full checklist, gates, and troubleshooting steps.**
+
 ## Prerequisites
 - Clean git working directory.
 - `pnpm` installed.
