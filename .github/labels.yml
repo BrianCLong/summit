@@ -123,3 +123,17 @@
 - name: type/runbook
   color: 'c2e0c6'
   description: Documentation/runbook
+
+# Backport labels
+- name: backport/needed
+  color: '3e4b9e'
+  description: 'Indicates a PR should be backported'
+- name: backport/done
+  color: '0e8a16'
+  description: 'Backport has been successfully applied'
+- name: backport/release-0.3
+  color: '5319e7'
+  description: 'Backport target: release 0.3'
+- name: backport/release-0.4
+  color: '5319e7'
+  description: 'Backport target: release 0.4'
