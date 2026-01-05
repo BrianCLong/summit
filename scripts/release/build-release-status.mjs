@@ -91,6 +91,29 @@ function main() {
     }
   }
 
+  // Determine backport context
+  let backportContext = null;
+  const preflight = readJson('preflight.json');
+  if (preflight) {
+    if (preflight.ancestryAcceptedVia === 'series') {
+      backportContext = {
+        mode: 'series-branch',
+        series: preflight.series,
+        seriesBranch: preflight.seriesBranch,
+        ancestryAcceptedVia: 'series'
+      };
+    } else if (preflight.ancestryAcceptedVia === 'default' || preflight.reachableFromDefaultBranch) {
+      backportContext = {
+        mode: 'default-branch',
+        ancestryAcceptedVia: 'default'
+      };
+    }
+  }
+
+  if (backportContext) {
+    statusObj.backportContext = backportContext;
+  }
+
   if (allOk) {
     statusObj.status = 'ready';
   } else {
@@ -117,6 +140,7 @@ function main() {
   if (process.env.GITHUB_STEP_SUMMARY) {
     try {
       const summaryMd = `### Release Status: ${statusObj.status.toUpperCase()}\n` +
+        `**Ancestry source:** ${statusObj.backportContext ? (statusObj.backportContext.mode === 'series-branch' ? `series (${statusObj.backportContext.seriesBranch})` : 'default (main)') : 'unknown'}\n` +
         (statusObj.blockedReasons.length > 0 ?
           `**Blocked Reasons:**\n${statusObj.blockedReasons.map(r => `- \`${r.code}\`: ${r.message}`).join('\n')}\n` :
           'All checks passed. Release is ready.\n');

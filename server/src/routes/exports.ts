@@ -2,6 +2,8 @@ import express from 'express';
 import crypto from 'crypto';
 import { exportData } from '../analytics/exports/ExportController.js';
 import { WatermarkVerificationService } from '../exports/WatermarkVerificationService.js';
+import { sensitiveContextMiddleware } from '../middleware/sensitive-context.js';
+import { highRiskApprovalMiddleware } from '../middleware/high-risk-approval.js';
 
 const router = express.Router();
 const watermarkVerificationService = new WatermarkVerificationService();
@@ -31,7 +33,12 @@ router.post('/sign-manifest', async (req, res) => {
   }
 });
 
-router.post('/analytics/export', exportData);
+router.post(
+  '/analytics/export',
+  sensitiveContextMiddleware,
+  highRiskApprovalMiddleware,
+  exportData,
+);
 
 router.post('/exports/:id/verify-watermark', async (req, res) => {
   if (process.env.WATERMARK_VERIFY !== 'true') {
