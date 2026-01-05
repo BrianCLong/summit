@@ -1,17 +1,17 @@
 # Post-GA Migration Status
 
-Generated: 2026-01-05T17:01:33Z
+Generated: 2026-01-05T23:21:22Z
 
 ## Summary
 
-| Metric                              | Count  |
-| ----------------------------------- | ------ |
-| Total Conflicting PRs               | 0      |
-| Labeled `blocked:unrelated-history` | 136    |
-| Labeled `needs:recreated-pr`        | 136    |
-| Labeled `superseded`                | 2      |
-| Labeled `post-ga:migration`         | 136    |
-| **Remaining to Process**            | **-2** |
+| Metric                              | Count   |
+| ----------------------------------- | ------- |
+| Total Conflicting PRs               | 0       |
+| Labeled `blocked:unrelated-history` | 129     |
+| Labeled `needs:recreated-pr`        | 117     |
+| Labeled `superseded`                | 21      |
+| Labeled `post-ga:migration`         | 134     |
+| **Remaining to Process**            | **-21** |
 
 ## Progress
 
@@ -19,14 +19,14 @@ Generated: 2026-01-05T17:01:33Z
 
 | Author                | Conflicting PRs |
 | --------------------- | --------------- |
-| BrianCLong            | 96              |
-| app/google-labs-jules | 37              |
+| BrianCLong            | 95              |
+| app/google-labs-jules | 33              |
 
 ## By Age (Oldest First)
 
 | PR     | Age | Title                                                  |
 | ------ | --- | ------------------------------------------------------ |
-| #15356 | 3d  | feat: add memory layer package...                      |
+| #15356 | 4d  | feat: add memory layer package...                      |
 | #15362 | 3d  | docs: add contribution playbooks and clarify relea...  |
 | #15363 | 3d  | Enhance onboarding compose presets and hooks...        |
 | #15364 | 3d  | Add GraphQL throughput benchmarks for Neo4j and Po...  |
@@ -41,7 +41,7 @@ Generated: 2026-01-05T17:01:33Z
 | #15377 | 3d  | Prepare MVP-4 release for general availability...      |
 | #15379 | 3d  | Update ADMIN-CONFIG.md and enable DB pool configur...  |
 | #15380 | 3d  | Sprint 2026.02: Hard Gates and Safer Defaults...       |
-| #15381 | 2d  | Enhance Storage, Caching and DR Infrastructure...      |
+| #15381 | 3d  | Enhance Storage, Caching and DR Infrastructure...      |
 | #15383 | 2d  | Build automated issue sweeper runner...                |
 | #15384 | 2d  | Prepare MVP-4 release for general availability...      |
 | #15391 | 2d  | Include missing server sources in tsconfig...          |
