@@ -84,6 +84,11 @@ const FLAG_CATALOG: Record<string, FeatureFlagDefinition> = {
     defaultValue: false,
     description: 'Enables detection and auditing of suspicious payloads in receipt ingestion.',
   },
+  'release-readiness-dashboard': {
+    type: 'boolean',
+    defaultValue: true,
+    description: 'Enables the Release Readiness & Evidence Explorer dashboard for GA verification.',
+  },
 };
 
 const envOverrides = parseOverrideString(
