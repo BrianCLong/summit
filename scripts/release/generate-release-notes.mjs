@@ -1,215 +1,184 @@
 #!/usr/bin/env node
 
-import { execSync } from 'node:child_process';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Configuration
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const TAG = process.env.TAG || process.argv[2];
-const PREV_TAG_ARG = process.env.PREV_TAG || process.argv[3];
-const MAX_COMMITS = process.env.MAX_COMMITS || 500;
-const OUTPUT_DIR = resolve('dist/release');
-const OUTPUT_FILE = join(OUTPUT_DIR, 'release-notes.md');
+const OUTPUT_FILE = process.env.OUTPUT_FILE || 'RELEASE_NOTES.md';
+const DIST_DIR = process.env.DIST_DIR || 'dist/release';
 
-if (!TAG) {
-  console.error('Error: TAG is required (via env TAG or first argument)');
-  process.exit(1);
-}
+/**
+ * Groups commits by their conventional commit type.
+ * @param {Array<{subject: string, body: string, hash: string}>} commits - A list of commits.
+ * @returns {object} An object with keys for each commit type.
+ */
+export function groupCommits(commits) {
+  const groups = {
+    'Breaking Changes': [],
+    'Features': [],
+    'Fixes': [],
+    'Other': [],
+  };
 
-// Helpers
-function runGit(command) {
-  try {
-    return execSync(command, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 }).trim();
-  } catch (error) {
-    return null;
-  }
-}
-
-function ensureDir(dir) {
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-}
-
-function getRepoUrl() {
-  if (process.env.GITHUB_REPOSITORY) {
-    return `https://github.com/${process.env.GITHUB_REPOSITORY}`;
-  }
-  try {
-    const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf8' }).trim();
-    if (remoteUrl.startsWith('git@github.com:')) {
-      return `https://github.com/${remoteUrl.replace('git@github.com:', '').replace('.git', '')}`;
+  for (const commit of commits) {
+    const { subject } = commit;
+    if (subject.includes('!:')) {
+      groups['Breaking Changes'].push(commit);
+    } else if (subject.startsWith('feat:')) {
+      groups['Features'].push(commit);
+    } else if (subject.startsWith('fix:')) {
+      groups['Fixes'].push(commit);
+    } else {
+      groups['Other'].push(commit);
     }
-    if (remoteUrl.endsWith('.git')) {
-      return remoteUrl.slice(0, -4);
-    }
-    return remoteUrl;
+  }
+
+  return groups;
+}
+
+// Ensure dist dir exists
+if (TAG) {
+  fs.mkdirSync(DIST_DIR, { recursive: true });
+}
+
+const extractScript = path.join(__dirname, 'extract-changelog-notes.mjs');
+
+function getLastTag(tag) {
+  try {
+    return execSync(`git describe --tags --abbrev=0 ${tag}^ 2>/dev/null`).toString().trim();
   } catch (e) {
     return '';
   }
 }
 
-const REPO_URL = getRepoUrl();
+function getGitRange(tag) {
+  const lastTag = getLastTag(tag);
+  return lastTag ? `${lastTag}..${tag}` : tag;
+}
 
-// 1. Determine Range
-let prevTag = PREV_TAG_ARG;
-if (!prevTag) {
-  const tagCommit = runGit(`git rev-list -n 1 "${TAG}"`);
-  if (tagCommit) {
-    const prev = runGit(`git describe --abbrev=0 --tags --match "v*" "${TAG}^" 2>/dev/null`);
-    if (prev) {
-      prevTag = prev;
+function generateGitNotes(tag) {
+  try {
+    try {
+      execSync('command -v gh 2>/dev/null');
+    } catch(e) {
+      throw new Error('gh not found');
+    }
+
+    const remoteUrl = execSync('git config --get remote.origin.url').toString().trim();
+    let repoInfo = '';
+    if (remoteUrl.includes('github.com')) {
+      const match = remoteUrl.match(/[:/]([^/]+)\/([^/.]+)(?:\.git)?$/);
+      if (match) {
+        repoInfo = `${match[1]}/${match[2]}`;
+      }
+    }
+
+    if (repoInfo) {
+      const cmd = `gh api -X POST "repos/${repoInfo}/releases/generate-notes" -f tag_name="${tag}" --jq .body`;
+      const notes = execSync(cmd).toString();
+      return { notes, source: 'git-gh-api', range: getGitRange(tag) };
+    }
+  } catch (e) {
+    // gh failed or not available
+  }
+
+  const range = getGitRange(tag);
+  const cmd = `git log --pretty=format:"- %s (%h) - %an" --no-merges "${range}"`;
+  try {
+    const notes = execSync(cmd).toString();
+    const body = `## Changes\n\n${notes}`;
+    return { notes: body, source: 'git-log', range };
+  } catch (e) {
+    console.error("Failed to generate git log notes");
+    return { notes: "No release notes available.", source: 'git-failed', range: '' };
+  }
+}
+
+function addToStepSummary(message) {
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    try {
+      fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, message + '\n');
+    } catch (e) {
+      console.error('Failed to write to GITHUB_STEP_SUMMARY', e);
     }
   }
 }
 
-console.log(`Generating release notes for ${TAG}...`);
-if (prevTag) {
-  console.log(`Comparing against previous tag: ${prevTag}`);
-} else {
-  console.log(`No previous tag found. Listing last ${MAX_COMMITS} commits.`);
-}
+function main() {
+  if (!TAG) {
+    console.error('Error: TAG argument or environment variable is required.');
+    process.exit(1);
+  }
 
-// 2. Extract Commits
-let logCommand;
-if (prevTag) {
-  logCommand = `git log "${prevTag}..${TAG}" --pretty=format:"%H%n%s%n%b%n---COMMIT_DELIMITER---"`;
-} else {
-  logCommand = `git log "${TAG}" -n ${MAX_COMMITS} --pretty=format:"%H%n%s%n%b%n---COMMIT_DELIMITER---"`;
-}
+  console.log(`Generating release notes for ${TAG}...`);
 
-const rawLog = runGit(logCommand);
-if (!rawLog) {
-  console.error('Error: Failed to retrieve git log.');
-  process.exit(1);
-}
+  try {
+    const extracted = execSync(`node ${extractScript} ${TAG}`, {
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).toString();
 
-const commits = rawLog.split('\n---COMMIT_DELIMITER---\n').filter(c => c.trim()).map(raw => {
-  const lines = raw.trim().split('\n');
-  const hash = lines[0];
-  const subject = lines[1];
-  const body = lines.slice(2).join('\n');
-  const shortHash = hash.substring(0, 7);
-  return { hash, shortHash, subject, body };
-});
+    const date = new Date().toISOString().split('T')[0];
+    const header = `# ${TAG} (${date})\n\n`;
+    const fullNotes = header + extracted;
 
-// 3. Parse Conventional Commits
-const TYPE_MAP = {
-  feat: '✨ Features',
-  fix: '🐛 Fixes',
-  perf: '⚡ Performance',
-  refactor: '🛠 Refactors',
-  docs: '📚 Docs',
-  test: '🧪 Tests',
-  build: '🔧 Build / CI',
-  ci: '🔧 Build / CI',
-  chore: '🧹 Chores',
-  revert: '↩️ Reverts'
-};
+    fs.writeFileSync(OUTPUT_FILE, fullNotes);
 
-const ORDER = [
-  '🚨 Breaking Changes',
-  '✨ Features',
-  '🐛 Fixes',
-  '⚡ Performance',
-  '🛠 Refactors',
-  '📚 Docs',
-  '🧪 Tests',
-  '🔧 Build / CI',
-  '🧹 Chores',
-  '↩️ Reverts',
-  'Other'
-];
-
-const groups = {};
-ORDER.forEach(g => groups[g] = []);
-
-const ccRegex = /^([a-z]+)(?:\(([^)]+)\))?(!?):\s+(.+)$/;
-
-commits.forEach(commit => {
-  const { subject, body, shortHash } = commit;
-
-  let isBreaking = false;
-  let type = 'Other';
-  let scope = null;
-  let cleanSubject = subject;
-
-  const match = subject.match(ccRegex);
-
-  if (match) {
-    const rawType = match[1];
-    const rawScope = match[2];
-    const breakingMark = match[3];
-    const rawSubject = match[4];
-
-    if (TYPE_MAP[rawType]) {
-      type = TYPE_MAP[rawType];
+    let usedPath = 'CHANGELOG.md';
+    if (!fs.existsSync('CHANGELOG.md') && fs.existsSync('docs/CHANGELOG.md')) {
+      usedPath = 'docs/CHANGELOG.md';
     }
 
-    scope = rawScope;
-    cleanSubject = rawSubject;
+    const metadata = {
+      schemaVersion: "1.0.0",
+      tag: TAG,
+      source: "changelog",
+      path: usedPath
+    };
 
-    if (breakingMark === '!') {
-      isBreaking = true;
+    fs.writeFileSync(path.join(DIST_DIR, 'notes-source.json'), JSON.stringify(metadata, null, 2));
+    const msg = "Release notes source: changelog (" + usedPath + ")";
+    console.log(msg);
+    addToStepSummary(msg);
+
+  } catch (e) {
+    if (e.status === 3) {
+      console.log("Changelog section not found. Falling back to git generation.");
+
+      const { notes, source, range } = generateGitNotes(TAG);
+
+      fs.writeFileSync(OUTPUT_FILE, notes);
+
+      const metadata = {
+        schemaVersion: "1.0.0",
+        tag: TAG,
+        source: "git",
+        range: range
+      };
+      fs.writeFileSync(path.join(DIST_DIR, 'notes-source.json'), JSON.stringify(metadata, null, 2));
+      const msg = `Release notes source: git (${range})`;
+      console.log(msg);
+      addToStepSummary(msg);
+
+    } else {
+      console.error("Unexpected error during changelog extraction:", e);
+      process.exit(1);
     }
   }
 
-  if (body.includes('BREAKING CHANGE:') || body.includes('BREAKING-CHANGE:')) {
-    isBreaking = true;
+  try {
+    const shasum = execSync(`sha256sum ${path.join(DIST_DIR, 'notes-source.json')}`).toString().trim();
+    fs.appendFileSync(path.join(DIST_DIR, 'SHA256SUMS'), shasum + '\n');
+  } catch (e) {
+    // Ignore
   }
-
-  const entry = {
-    scope,
-    subject: cleanSubject,
-    hash: shortHash,
-    rawSubject: subject
-  };
-
-  if (isBreaking) {
-    groups['🚨 Breaking Changes'].push(entry);
-  } else {
-    groups[type].push(entry);
-  }
-});
-
-// 4. Generate Markdown
-const lines = [];
-const date = new Date().toISOString().split('T')[0];
-
-lines.push(`# Release Notes: ${TAG}`);
-lines.push('');
-lines.push(`> **Date:** ${date}`);
-if (prevTag && REPO_URL) {
-  lines.push(`> **Compare:** [${prevTag}...${TAG}](${REPO_URL}/compare/${prevTag}...${TAG})`);
-} else if (prevTag) {
-  lines.push(`> **Compare:** ${prevTag}...${TAG}`);
 }
-lines.push('');
 
-lines.push(`**${commits.length} commits** included.`);
-lines.push('');
-
-ORDER.forEach(groupName => {
-  const entries = groups[groupName];
-  if (entries.length === 0) return;
-
-  lines.push(`## ${groupName}`);
-  lines.push('');
-
-  entries.forEach(entry => {
-    let line = '- ';
-    if (entry.scope) {
-      line += `**${entry.scope}:** `;
-    }
-    line += `${entry.subject} (${entry.hash})`;
-    lines.push(line);
-  });
-  lines.push('');
-});
-
-const content = lines.join('\n');
-
-// 5. Write Output
-ensureDir(OUTPUT_DIR);
-writeFileSync(OUTPUT_FILE, content);
-console.log(`Release notes written to ${OUTPUT_FILE}`);
+// Only run main when executed directly
+if (TAG && import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}
