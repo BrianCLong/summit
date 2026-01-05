@@ -29,6 +29,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      - name: Check CJS files use CommonJS syntax
+        run: pnpm lint:cjs
       - run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
   verify:
@@ -71,7 +73,10 @@ jobs:
           node-version: "20"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:${{ matrix.test-suite }}
+      - name: Run tests (deterministic TZ)
+        run: pnpm test:${{ matrix.test-suite }}
+        env:
+          TZ: UTC
       - name: Run API authz e2e tests
         if: matrix.test-suite == 'integration'
         run: pnpm --filter @intelgraph/api test
