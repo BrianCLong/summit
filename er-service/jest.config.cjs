@@ -1,0 +1,37 @@
+/** @type {import('jest').Config} */
+module.exports = {
+  preset: 'ts-jest/presets/default-esm',
+  testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  transform: {
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: {
+          target: 'ES2022',
+          module: 'ES2022',
+          moduleResolution: 'bundler',
+        },
+      },
+    ],
+  },
+  testMatch: ['**/tests/**/*.test.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/**/*.d.ts',
+    '!src/index.ts',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+  },
+  setupFilesAfterEnv: ['jest-extended/all'],
+};

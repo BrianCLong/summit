@@ -1,0 +1,52 @@
+{
+  "issue_number": 624,
+  "title": "Feature/apply engineering standards",
+  "url": "https://github.com/BrianCLong/summit/pull/624",
+  "state": "closed",
+  "labels": [],
+  "updatedAt": "2025-08-29T10:39:49Z",
+  "createdAt": "2025-08-18T22:29:27Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13099,
+        "url": "https://github.com/BrianCLong/summit/pull/13099",
+        "mergedAt": "2025-12-03T01:50:28Z",
+        "title": "Implement SLSA L3 compliance with cosign and OIDC"
+      },
+      {
+        "number": 12296,
+        "url": "https://github.com/BrianCLong/summit/pull/12296",
+        "mergedAt": "2025-11-25T20:34:22Z",
+        "title": "Bump body-parser from 2.2.0 to 2.2.1 in /conductor-ui/backend"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

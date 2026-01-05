@@ -1,0 +1,110 @@
+{
+  "issue_number": 172,
+  "title": "sec: RBAC/ABAC groundwork",
+  "url": "https://github.com/BrianCLong/summit/issues/172",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9107981132,
+      "node_id": "LA_kwDOPaNncM8AAAACHuDDTA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-10-15",
+      "name": "due:2025-10-15",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:43:11Z",
+  "createdAt": "2025-08-14T04:06:32Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15331,
+        "url": "https://github.com/BrianCLong/summit/pull/15331",
+        "mergedAt": "2026-01-01T11:38:35Z",
+        "title": "feat: initialize Ontology Engine architecture and artifacts"
+      },
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 1359,
+        "url": "https://github.com/BrianCLong/summit/pull/1359",
+        "mergedAt": null,
+        "title": "feat: add nlq engine with sandbox endpoints"
+      },
+      {
+        "number": 10130,
+        "url": "https://github.com/BrianCLong/summit/pull/10130",
+        "mergedAt": "2025-10-14T08:36:34Z",
+        "title": "feat: introduce synthetic event booster framework"
+      },
+      {
+        "number": 11877,
+        "url": "https://github.com/BrianCLong/summit/pull/11877",
+        "mergedAt": "2025-11-20T14:33:29Z",
+        "title": "Build GraphQL schema governance and validation"
+      },
+      {
+        "number": 11916,
+        "url": "https://github.com/BrianCLong/summit/pull/11916",
+        "mergedAt": "2025-11-20T10:21:11Z",
+        "title": "Wire CompanyOS for internal operations"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      },
+      {
+        "number": 1259,
+        "url": "https://github.com/BrianCLong/summit/pull/1259",
+        "mergedAt": null,
+        "title": "Merge conflict-free branches and PRs into main"
+      },
+      {
+        "number": 1265,
+        "url": "https://github.com/BrianCLong/summit/pull/1265",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "Chore/husky v9 cleanup"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

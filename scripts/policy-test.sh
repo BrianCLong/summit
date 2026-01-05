@@ -40,7 +40,9 @@ cd "$ROOT"
 # Check if directories exist before running tests
 TEST_PATHS=""
 if [ -d "policy/abac" ]; then TEST_PATHS="$TEST_PATHS policy/abac"; fi
+if [ -d "policy/maestro" ]; then TEST_PATHS="$TEST_PATHS policy/maestro"; fi
 if [ -d "policy/tests" ]; then TEST_PATHS="$TEST_PATHS policy/tests"; fi
+if [ -d "policy_tests" ]; then TEST_PATHS="$TEST_PATHS policy_tests"; fi
 if [ -d "policies/tests" ]; then TEST_PATHS="$TEST_PATHS policies/tests"; fi
 if [ -d "policies/bundles" ]; then TEST_PATHS="$TEST_PATHS policies/bundles"; fi
 

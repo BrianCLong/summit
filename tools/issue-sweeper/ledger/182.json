@@ -1,0 +1,125 @@
+{
+  "issue_number": 182,
+  "title": "Real-time collaborative investigation",
+  "url": "https://github.com/BrianCLong/summit/issues/182",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9074767070,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX03g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/enhancement",
+      "name": "enhancement",
+      "color": "a2eeef",
+      "default": true,
+      "description": "New feature or request"
+    },
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9107968073,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCQSQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/P1",
+      "name": "P1",
+      "color": "ff8c00",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108055729,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHmsQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/real-time",
+      "name": "real-time",
+      "color": "1d76db",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108056323,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHpAw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/due:2025-11-01",
+      "name": "due:2025-11-01",
+      "color": "ededed",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:42:18Z",
+  "createdAt": "2025-08-14T04:28:37Z",
+  "classification": "feature",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14562,
+        "url": "https://github.com/BrianCLong/summit/pull/14562",
+        "mergedAt": "2025-12-27T04:48:04Z",
+        "title": "chore(deps): Bump python-multipart from 0.0.6 to 0.0.18 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 15183,
+        "url": "https://github.com/BrianCLong/summit/pull/15183",
+        "mergedAt": "2025-12-31T14:21:27Z",
+        "title": "chore(deps): bump snyk/actions from 0.4.0 to 1.0.0"
+      },
+      {
+        "number": 10114,
+        "url": "https://github.com/BrianCLong/summit/pull/10114",
+        "mergedAt": "2025-10-14T10:40:23Z",
+        "title": "feat: harden intelgraph helm security controls"
+      },
+      {
+        "number": 1339,
+        "url": "https://github.com/BrianCLong/summit/pull/1339",
+        "mergedAt": "2025-09-23T11:13:29Z",
+        "title": "Add policy-aware workcell runtime and gateway integration"
+      },
+      {
+        "number": 13192,
+        "url": "https://github.com/BrianCLong/summit/pull/13192",
+        "mergedAt": "2025-12-04T15:38:41Z",
+        "title": "Add HUMINT source management and debrief workflows"
+      },
+      {
+        "number": 1219,
+        "url": "https://github.com/BrianCLong/summit/pull/1219",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps): bump the minor-and-patch group across 1 directory with 56 updates"
+      },
+      {
+        "number": 1284,
+        "url": "https://github.com/BrianCLong/summit/pull/1284",
+        "mergedAt": "2025-09-20T08:06:31Z",
+        "title": "feat(release): enterprise-grade repo consolidation and golden ci pipeline"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

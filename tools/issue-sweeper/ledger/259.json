@@ -1,0 +1,80 @@
+{
+  "issue_number": 259,
+  "title": "Level-of-detail & GPU instancing for 10k+ nodes",
+  "url": "https://github.com/BrianCLong/summit/issues/259",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342986,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn9ig",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/frontend",
+      "name": "frontend",
+      "color": "A2EEEF",
+      "default": false,
+      "description": "UI/E2E"
+    },
+    {
+      "id": 9107968276,
+      "node_id": "LA_kwDOPaNncM8AAAACHuCRFA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/performance",
+      "name": "performance",
+      "color": "D93F0B",
+      "default": false,
+      "description": "Perf/Load"
+    },
+    {
+      "id": 9108055797,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHm9Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/visualization",
+      "name": "visualization",
+      "color": "a2eeef",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-08-14T04:54:51Z",
+  "createdAt": "2025-08-14T04:54:51Z",
+  "classification": "perf",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13148,
+        "url": "https://github.com/BrianCLong/summit/pull/13148",
+        "mergedAt": "2025-12-17T05:36:11Z",
+        "title": "C6 — CI Time Budget Enforcer"
+      },
+      {
+        "number": 13106,
+        "url": "https://github.com/BrianCLong/summit/pull/13106",
+        "mergedAt": "2025-12-03T04:36:27Z",
+        "title": "Add spectrum analysis and sensor fusion integration"
+      },
+      {
+        "number": 13165,
+        "url": "https://github.com/BrianCLong/summit/pull/13165",
+        "mergedAt": "2025-12-17T05:34:42Z",
+        "title": "Unified prompt governance dashboard 1"
+      },
+      {
+        "number": 13179,
+        "url": "https://github.com/BrianCLong/summit/pull/13179",
+        "mergedAt": "2025-12-04T15:39:15Z",
+        "title": "Plan evaluation-first platform architecture"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

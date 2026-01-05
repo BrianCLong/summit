@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-05T02:16:44Z",
-  "revision_note": "Added restore drill evidence workflow and RTO/RPO validation",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",

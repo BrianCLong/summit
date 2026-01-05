@@ -1,0 +1,68 @@
+{
+  "issue_number": 562,
+  "title": "feat: add audit middleware and export endpoint",
+  "url": "https://github.com/BrianCLong/summit/pull/562",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9117168626,
+      "node_id": "LA_kwDOPaNncM8AAAACH2zz8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/codex",
+      "name": "codex",
+      "color": "ededed",
+      "default": false,
+      "description": null
+    }
+  ],
+  "updatedAt": "2025-08-18T03:27:10Z",
+  "createdAt": "2025-08-18T01:19:27Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 13098,
+        "url": "https://github.com/BrianCLong/summit/pull/13098",
+        "mergedAt": "2025-12-03T01:54:50Z",
+        "title": "Harden Summit security with RBAC and audit trails"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 13139,
+        "url": "https://github.com/BrianCLong/summit/pull/13139",
+        "mergedAt": "2025-12-03T03:09:44Z",
+        "title": "Visualization Load Balancer: Adaptive Rendering for GraphCanvas"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      },
+      {
+        "number": 1171,
+        "url": "https://github.com/BrianCLong/summit/pull/1171",
+        "mergedAt": "2025-09-17T10:32:39Z",
+        "title": "chore(deps): bump body-parser from 1.20.3 to 2.2.0 in /server"
+      },
+      {
+        "number": 13153,
+        "url": "https://github.com/BrianCLong/summit/pull/13153",
+        "mergedAt": "2025-12-03T05:44:28Z",
+        "title": "Optimize Build Caching"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
