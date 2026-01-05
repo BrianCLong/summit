@@ -4,6 +4,17 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      bypass_evidence:
+        description: 'Bypass GO evidence check (Emergency only)'
+        type: boolean
+        required: false
+        default: false
+      bypass_reason:
+        description: 'Reason for bypassing evidence'
+        type: string
+        required: false
 
 permissions:
   contents: write
@@ -17,6 +28,126 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check GO Evidence
+        id: check-evidence
+        uses: actions/github-script@v7
+        env:
+          TAG_REF: ${{ github.ref }}
+          TAG_SHA: ${{ github.sha }}
+          BYPASS: ${{ inputs.bypass_evidence }}
+          BYPASS_REASON: ${{ inputs.bypass_reason }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const bypass = process.env.BYPASS === 'true';
+            const bypassReason = process.env.BYPASS_REASON;
+
+            if (bypass) {
+              if (!bypassReason) {
+                core.setFailed('Bypass requested but no reason provided.');
+                return;
+              }
+              core.warning(`Evidence check BYPASSED. Reason: ${bypassReason}`);
+              core.setOutput('bypassed', true);
+
+              // Write dummy result for downstream
+              const result = { ok: true, bypassed: true, reason: bypassReason, checkedAt: new Date().toISOString() };
+              const distDir = path.join(process.cwd(), 'dist', 'release');
+              fs.mkdirSync(distDir, { recursive: true });
+              fs.writeFileSync(path.join(distDir, 'evidence-check.json'), JSON.stringify(result));
+
+              await core.summary
+                .addHeading('Release Evidence Check')
+                .addRaw('⚠️ **BYPASSED**')
+                .addTable([
+                  ['Status', 'BYPASSED'],
+                  ['Reason', bypassReason]
+                ])
+                .write();
+              return;
+            }
+
+            // Extract tag name from ref (refs/tags/v1.2.3 -> v1.2.3)
+            const ref = process.env.TAG_REF;
+            if (!ref.startsWith('refs/tags/')) {
+               core.setFailed('Workflow triggered without a tag, and bypass not set.');
+               return;
+            }
+            const tag = ref.replace('refs/tags/', '');
+            const evidencePath = `release-evidence/${tag}.json`;
+
+            // We need to check if file exists on MAIN branch.
+            // Since we checked out with fetch-depth 0, we can look at origin/main or just assume
+            // we are looking for the file in the current workspace if the user committed it?
+            // The runbook says: "Commit Evidence to main... Then Push Tag".
+            // But checking out the TAG will result in a detached HEAD at the tag's commit.
+            // The evidence file might be on 'main' but not yet merged into the release tag (if tag is on a release branch or older commit).
+            // Actually, Option A says "file exists on main".
+            // So we need to fetch main and look at the file there.
+
+            try {
+              // Fetch main branch to access the evidence file
+              await exec.exec('git', ['fetch', 'origin', 'main']);
+
+              // Read file from main branch
+              let fileContent = '';
+              const options = {};
+              options.listeners = {
+                stdout: (data) => {
+                  fileContent += data.toString();
+                }
+              };
+              try {
+                await exec.exec('git', ['show', `origin/main:${evidencePath}`], options);
+              } catch (e) {
+                core.setFailed(`Evidence file not found on main at ${evidencePath}. Run Maestro pre-tag dry-run.`);
+                return;
+              }
+
+              const evidence = JSON.parse(fileContent);
+              const now = new Date();
+              const generatedAt = new Date(evidence.generatedAt);
+              const expiresAt = evidence.expiresAt ? new Date(evidence.expiresAt) : null;
+
+              // Checks
+              if (evidence.decision !== 'GO') throw new Error(`Decision is ${evidence.decision}, expected GO`);
+              if (evidence.tag !== tag) throw new Error(`Tag mismatch: ${evidence.tag} vs ${tag}`);
+              if (evidence.sha !== process.env.TAG_SHA) throw new Error(`SHA mismatch: ${evidence.sha} vs ${process.env.TAG_SHA}`);
+
+              if (expiresAt && now > expiresAt) throw new Error(`Evidence expired at ${expiresAt}`);
+              if (!expiresAt && (now - generatedAt) > 24 * 60 * 60 * 1000) throw new Error(`Evidence too old (generated ${generatedAt})`);
+
+              console.log('Evidence check PASSED');
+
+              const result = { ok: true, path: evidencePath, checkedAt: now.toISOString(), bypassed: false };
+              const distDir = path.join(process.cwd(), 'dist', 'release');
+              fs.mkdirSync(distDir, { recursive: true });
+              fs.writeFileSync(path.join(distDir, 'evidence-check.json'), JSON.stringify(result));
+
+               await core.summary
+                .addHeading('Release Evidence Check')
+                .addRaw('✅ **PASSED**')
+                .addTable([
+                  ['Status', 'GO'],
+                  ['Tag', tag],
+                  ['Generated', generatedAt.toISOString()]
+                ])
+                .write();
+
+            } catch (error) {
+              core.setFailed(`Evidence check failed: ${error.message}`);
+              await core.summary
+                .addHeading('Release Evidence Check')
+                .addRaw('❌ **FAILED**')
+                .addRaw(`Error: ${error.message}`)
+                .write();
+            }
+
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
