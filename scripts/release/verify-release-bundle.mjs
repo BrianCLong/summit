@@ -65,6 +65,21 @@ function getFiles(dir) {
 }
 
 try {
+    // 0. Compatibility Check
+    const compatScript = join(process.cwd(), 'scripts/release/check-bundle-compatibility.mjs');
+    if (existsSync(compatScript)) {
+        console.log('Running compatibility check...');
+        try {
+            const { execSync } = await import('node:child_process');
+            execSync(`node "${compatScript}" --dir "${BUNDLE_DIR}" --strict`, { stdio: 'inherit' });
+            addCheck('Compatibility check passed');
+        } catch (e) {
+             addError('COMPATIBILITY_CHECK_FAILED', 'Compatibility check failed');
+        }
+    } else {
+        console.warn('⚠️ Compatibility script not found, skipping check.');
+    }
+
     // 1. Load SHA256SUMS (Canonical Truth)
     const sumsPath = join(BUNDLE_DIR, 'SHA256SUMS');
     if (!existsSync(sumsPath)) {

@@ -39,6 +39,7 @@ async function buildBundleIndex(dir) {
     sbom: 'sbom.spdx.json',
     provenance: 'provenance.json',
     checksums: 'SHA256SUMS',
+    compatibility: 'compatibility.json',
   };
 
   for (const [key, file] of Object.entries(pointerCandidates)) {
