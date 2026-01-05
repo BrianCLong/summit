@@ -1,0 +1,122 @@
+{
+  "issue_number": 309,
+  "title": "Custom Insight Templates System",
+  "url": "https://github.com/BrianCLong/summit/issues/309",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9103342816,
+      "node_id": "LA_kwDOPaNncM8AAAACHpn84A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/backend",
+      "name": "backend",
+      "color": "1d76db",
+      "default": false,
+      "description": null
+    },
+    {
+      "id": 9121349718,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zAVg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type-feature",
+      "name": "type-feature",
+      "color": "0075ca",
+      "default": false,
+      "description": "Feature development"
+    },
+    {
+      "id": 9121350247,
+      "node_id": "LA_kwDOPaNncM8AAAACH6zCZw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area-UX",
+      "name": "area-UX",
+      "color": "cfd3d7",
+      "default": false,
+      "description": "Frontend insights/UI"
+    },
+    {
+      "id": 9121485382,
+      "node_id": "LA_kwDOPaNncM8AAAACH67SRg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-personalization",
+      "name": "epic-personalization",
+      "color": "FF6B6B",
+      "default": false,
+      "description": "Insight personalization and customization"
+    },
+    {
+      "id": 9121486304,
+      "node_id": "LA_kwDOPaNncM8AAAACH67V4A",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/sprint-7",
+      "name": "sprint-7",
+      "color": "A29BFE",
+      "default": false,
+      "description": "Sprint 7: Insight Experience Polish & Scaling"
+    }
+  ],
+  "updatedAt": "2025-08-16T18:33:06Z",
+  "createdAt": "2025-08-16T18:33:06Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15344,
+        "url": "https://github.com/BrianCLong/summit/pull/15344",
+        "mergedAt": "2026-01-01T08:46:52Z",
+        "title": "Create execution plan for Summit to GA"
+      },
+      {
+        "number": 11233,
+        "url": "https://github.com/BrianCLong/summit/pull/11233",
+        "mergedAt": "2025-10-16T16:05:19Z",
+        "title": "fix/msw vector adapter typings"
+      },
+      {
+        "number": 11851,
+        "url": "https://github.com/BrianCLong/summit/pull/11851",
+        "mergedAt": "2025-11-20T09:48:39Z",
+        "title": "Explore LLM guardrails and model security standards"
+      },
+      {
+        "number": 611,
+        "url": "https://github.com/BrianCLong/summit/pull/611",
+        "mergedAt": "2025-08-18T13:55:46Z",
+        "title": "chore(deps-dev): bump eslint-config-prettier from 9.1.2 to 10.1.8 in /client"
+      },
+      {
+        "number": 709,
+        "url": "https://github.com/BrianCLong/summit/pull/709",
+        "mergedAt": "2025-08-21T00:35:08Z",
+        "title": "feat: IntelGraph GA Foundation - Complete Architecture Implementation"
+      },
+      {
+        "number": 11817,
+        "url": "https://github.com/BrianCLong/summit/pull/11817",
+        "mergedAt": "2025-11-17T10:00:40Z",
+        "title": "chore(deps): bump the js-dependencies group with 41 updates"
+      },
+      {
+        "number": 13186,
+        "url": "https://github.com/BrianCLong/summit/pull/13186",
+        "mergedAt": "2025-12-04T15:38:58Z",
+        "title": "Implement federated learning for distributed OSINT training"
+      },
+      {
+        "number": 11872,
+        "url": "https://github.com/BrianCLong/summit/pull/11872",
+        "mergedAt": "2025-11-20T14:34:03Z",
+        "title": "Build autotriage engine for issues and bugs"
+      },
+      {
+        "number": 1304,
+        "url": "https://github.com/BrianCLong/summit/pull/1304",
+        "mergedAt": "2025-09-21T20:01:54Z",
+        "title": "Build Platform v0.3.0 - CI/CD + Supply-Chain Hardening"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

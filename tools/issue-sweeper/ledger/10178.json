@@ -1,0 +1,40 @@
+{
+  "issue_number": 10178,
+  "title": "ci(core): safe auto-update of stale PR branches",
+  "url": "https://github.com/BrianCLong/summit/pull/10178",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9278618962,
+      "node_id": "LA_kwDOPaNncM8AAAACKQx9Ug",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/risk:low",
+      "name": "risk:low",
+      "color": "BFDADC",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9456882017,
+      "node_id": "LA_kwDOPaNncM8AAAACM6yRYQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/needs-owner-review",
+      "name": "needs-owner-review",
+      "color": "D93F0B",
+      "default": false,
+      "description": "High-touch PR awaiting owner confirmation"
+    }
+  ],
+  "updatedAt": "2025-10-14T06:16:23Z",
+  "createdAt": "2025-10-08T14:12:40Z",
+  "classification": "unknown",
+  "solved_status": "not_solved",
+  "evidence": {
+    "prs": [],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "d1bc04ce-0157-48fe-b52e-2a1c4d85379b"
+}

@@ -1,0 +1,248 @@
+{
+  "issue_number": 32,
+  "title": "M1: Enable Dependabot and secret scanning",
+  "url": "https://github.com/BrianCLong/summit/issues/32",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:11:35Z",
+  "createdAt": "2025-08-12T00:15:34Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14522,
+        "url": "https://github.com/BrianCLong/summit/pull/14522",
+        "mergedAt": "2025-12-27T00:19:51Z",
+        "title": "Sprint N+32: Cost Governance & FinOps Automation"
+      },
+      {
+        "number": 13857,
+        "url": "https://github.com/BrianCLong/summit/pull/13857",
+        "mergedAt": "2025-12-20T03:24:09Z",
+        "title": "Add blueprint for prompts 25-32"
+      },
+      {
+        "number": 14557,
+        "url": "https://github.com/BrianCLong/summit/pull/14557",
+        "mergedAt": "2025-12-27T04:15:25Z",
+        "title": "chore(deps): Bump requests from 2.31.0 to 2.32.4 in /predictive_threat_suite"
+      },
+      {
+        "number": 12282,
+        "url": "https://github.com/BrianCLong/summit/pull/12282",
+        "mergedAt": "2025-12-18T03:17:46Z",
+        "title": "Expand production-ready 32-prompt master roadmap"
+      },
+      {
+        "number": 14378,
+        "url": "https://github.com/BrianCLong/summit/pull/14378",
+        "mergedAt": "2025-12-23T04:35:18Z",
+        "title": "Bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 12726,
+        "url": "https://github.com/BrianCLong/summit/pull/12726",
+        "mergedAt": "2025-12-05T17:14:39Z",
+        "title": "Deepen 23rd-order guidance for prompts 25-32 plan"
+      },
+      {
+        "number": 13613,
+        "url": "https://github.com/BrianCLong/summit/pull/13613",
+        "mergedAt": "2025-12-16T20:47:55Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /web/retention-dashboard"
+      },
+      {
+        "number": 13259,
+        "url": "https://github.com/BrianCLong/summit/pull/13259",
+        "mergedAt": "2025-12-17T06:23:52Z",
+        "title": "Sprint 32 Deliverables: Billing GA, API v1.1, ER v1.3, Explorer 2.0"
+      },
+      {
+        "number": 13596,
+        "url": "https://github.com/BrianCLong/summit/pull/13596",
+        "mergedAt": "2025-12-13T14:26:33Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /october2025/companyos-switchboard"
+      },
+      {
+        "number": 13597,
+        "url": "https://github.com/BrianCLong/summit/pull/13597",
+        "mergedAt": "2025-12-13T14:31:19Z",
+        "title": "build(deps): bump next from 14.2.32 to 14.2.35 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 12235,
+        "url": "https://github.com/BrianCLong/summit/pull/12235",
+        "mergedAt": "2025-11-23T01:04:50Z",
+        "title": "Bump next from 14.1.0 to 14.2.32 in /web/retention-dashboard"
+      },
+      {
+        "number": 12701,
+        "url": "https://github.com/BrianCLong/summit/pull/12701",
+        "mergedAt": "2025-12-16T15:45:53Z",
+        "title": "docs: enrich companyos wave4 pack"
+      },
+      {
+        "number": 15251,
+        "url": "https://github.com/BrianCLong/summit/pull/15251",
+        "mergedAt": null,
+        "title": "Refine server test execution and CI dependency locking"
+      },
+      {
+        "number": 12307,
+        "url": "https://github.com/BrianCLong/summit/pull/12307",
+        "mergedAt": "2025-12-18T03:11:14Z",
+        "title": "Revival: GraphQL Security & Performance Overhaul"
+      },
+      {
+        "number": 15311,
+        "url": "https://github.com/BrianCLong/summit/pull/15311",
+        "mergedAt": "2026-01-01T11:39:37Z",
+        "title": "feat: Establish counter-intelligence framework documentation"
+      },
+      {
+        "number": 1538,
+        "url": "https://github.com/BrianCLong/summit/pull/1538",
+        "mergedAt": "2025-11-21T04:02:01Z",
+        "title": "feat: add federated t-secure metrics aggregator"
+      },
+      {
+        "number": 15313,
+        "url": "https://github.com/BrianCLong/summit/pull/15313",
+        "mergedAt": "2026-01-01T11:39:29Z",
+        "title": "Establish Institutional Continuity Framework"
+      },
+      {
+        "number": 15151,
+        "url": "https://github.com/BrianCLong/summit/pull/15151",
+        "mergedAt": "2025-12-30T21:29:24Z",
+        "title": "Identify and catalog critical TODOs"
+      },
+      {
+        "number": 1409,
+        "url": "https://github.com/BrianCLong/summit/pull/1409",
+        "mergedAt": "2025-11-20T22:29:58Z",
+        "title": "Add chaos resiliency testing assets"
+      },
+      {
+        "number": 1723,
+        "url": "https://github.com/BrianCLong/summit/pull/1723",
+        "mergedAt": null,
+        "title": "chore(deps): bump requests from 2.31.0 to 2.32.4 in /server"
+      },
+      {
+        "number": 10243,
+        "url": "https://github.com/BrianCLong/summit/pull/10243",
+        "mergedAt": "2025-10-16T05:43:40Z",
+        "title": "chore(deps): bump next from 13.5.4 to 14.2.32 in /adversarial-misinfo-defense-platform/web"
+      },
+      {
+        "number": 15337,
+        "url": "https://github.com/BrianCLong/summit/pull/15337",
+        "mergedAt": "2026-01-01T11:37:44Z",
+        "title": "Security Hardening: Container, CI/CD, and Production Config"
+      },
+      {
+        "number": 10182,
+        "url": "https://github.com/BrianCLong/summit/pull/10182",
+        "mergedAt": "2025-10-08T17:14:20Z",
+        "title": "chore(deps): bump next from 14.2.3 to 14.2.32 in /intelgraph-mcp/shootout-ui"
+      },
+      {
+        "number": 9797,
+        "url": "https://github.com/BrianCLong/summit/pull/9797",
+        "mergedAt": "2025-10-03T03:57:04Z",
+        "title": "chore(deps): bump next from 14.2.5 to 14.2.32 in /october2025/companyos-switchboard/apps/web"
+      },
+      {
+        "number": 11961,
+        "url": "https://github.com/BrianCLong/summit/pull/11961",
+        "mergedAt": "2025-11-20T11:02:01Z",
+        "title": "Build Data Warehouse and Analytics Platform"
+      },
+      {
+        "number": 762,
+        "url": "https://github.com/BrianCLong/summit/pull/762",
+        "mergedAt": "2025-08-29T10:39:48Z",
+        "title": "🚀 CI/CD Stabilization: Fix 32 Blocked PRs"
+      },
+      {
+        "number": 1191,
+        "url": "https://github.com/BrianCLong/summit/pull/1191",
+        "mergedAt": "2025-09-15T03:55:40Z",
+        "title": "chore(deps-dev): bump eslint-config-next from 14.2.32 to 15.5.2"
+      },
+      {
+        "number": 15326,
+        "url": "https://github.com/BrianCLong/summit/pull/15326",
+        "mergedAt": null,
+        "title": "Add redteam harness module and scenarios"
+      },
+      {
+        "number": 10047,
+        "url": "https://github.com/BrianCLong/summit/pull/10047",
+        "mergedAt": "2025-10-04T22:43:15Z",
+        "title": "feat: add strategic counter-antifragile network agent"
+      },
+      {
+        "number": 12305,
+        "url": "https://github.com/BrianCLong/summit/pull/12305",
+        "mergedAt": "2025-11-27T00:19:42Z",
+        "title": "Bump node-forge from 1.3.1 to 1.3.2 in /conductor-ui"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

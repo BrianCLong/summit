@@ -5,23 +5,18 @@
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator';
-import { HuntFinding, HypothesisGenerationOutput, QueryGenerationOutput, ResultAnalysisOutput } from '../types';
+import { HuntFinding } from '../types';
+import { HypothesisGenerationOutput, QueryGenerationOutput, ResultAnalysisOutput } from '../LLMChainExecutor';
 import type {
   GeneratedCypherQuery,
   HuntContext,
   HuntConfiguration,
   ThreatHypothesis,
   EnrichedFinding,
-  HuntFinding,
   LLMChainResult,
   QueryValidationStatus,
   RemediationPlan,
 } from '../types';
-import type {
-  HypothesisGenerationOutput,
-  QueryGenerationOutput,
-  ResultAnalysisOutput,
-} from '../LLMChainExecutor';
 
 
 
@@ -37,7 +32,7 @@ jest.mock('../../config/logger', () => ({
 
 
 // Mock AutoRemediationHooks to prevent singleton instantiation with unmocked logger
-jest.mock('../AutoRemediationHooks', () => {
+jest.mock('../AutoRemediationHooks.js', () => {
   const EventEmitter = require('events').EventEmitter;
   const plans: RemediationPlan[] = [];
 
@@ -91,79 +86,91 @@ jest.mock('../../graph/neo4j.js', () => ({
   ]),
 }));
 
+const mockCypherTemplateEngineFactory = () => ({
+  initialize: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  generateQuery: jest.fn(),
+  getAllTemplates: jest.fn().mockReturnValue([]),
+  validateQuery: jest.fn((query: string) => {
+    const upperQuery = query.toUpperCase();
+    let isValid = true;
+    let isReadOnly = true;
+    let hasLimit = /\bLIMIT\s+\d+/i.test(query);
+    let complexity = 10;
+    if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
+      isValid = false;
+      isReadOnly = false;
+    }
+    if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
+    if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+    return { isValid, isReadOnly, hasLimit, complexity, estimatedCost: complexity * 10 };
+  }),
+  ensureLimit: jest.fn((query: string, limit: number = 100) => {
+    if (/\bLIMIT\s+\d+/i.test(query)) return query;
+    return `${query.trim()} LIMIT ${limit}`;
+  }),
+});
+
 // Mock other hunting modules that may have singletons
-jest.mock('../CypherTemplateEngine', () => {
-  const mockCypherTemplateEngine = {
-    initialize: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
-    generateQuery: jest.fn(),
-    getAllTemplates: jest.fn<() => any[]>().mockReturnValue([]),
-    validateQuery: jest.fn((query: string) => {
-      const upperQuery = query.toUpperCase();
-      let isValid = true;
-      let isReadOnly = true;
-      let hasLimit = /\bLIMIT\s+\d+/i.test(query);
-      let complexity = 10; // Default complexity
-
-      if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
-        isValid = false;
-        isReadOnly = false;
-      }
-
-      // Simple complexity estimation for mock
-      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
-      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
-
-      return { isValid, isReadOnly, hasLimit, complexity };
-    }),
-    ensureLimit: jest.fn((query: string, limit: number = 100) => {
-      if (/\bLIMIT\s+\d+/i.test(query)) {
-        return query;
-      }
-      return `${query.trim()} LIMIT ${limit}`;
-    }),
-  };
-  return {
-    cypherTemplateEngine: mockCypherTemplateEngine,
-    CypherTemplateEngine: jest.fn(() => mockCypherTemplateEngine),
-  };
-});
 jest.mock('../CypherTemplateEngine.js', () => {
-  const mockCypherTemplateEngine = {
-    initialize: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
-    generateQuery: jest.fn(),
-    getAllTemplates: jest.fn<() => any[]>().mockReturnValue([]),
-    validateQuery: jest.fn((query: string) => {
-      const upperQuery = query.toUpperCase();
-      let isValid = true;
-      let isReadOnly = true;
-      let hasLimit = /\bLIMIT\s+\d+/i.test(query);
-      let complexity = 10; // Default complexity
-
-      if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
-        isValid = false;
-        isReadOnly = false;
-      }
-
-      // Simple complexity estimation for mock
-      if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
-      if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
-
-      return { isValid, isReadOnly, hasLimit, complexity };
-    }),
-    ensureLimit: jest.fn((query: string, limit: number = 100) => {
-      if (/\bLIMIT\s+\d+/i.test(query)) {
-        return query;
-      }
-      return `${query.trim()} LIMIT ${limit}`;
-    }),
+  const engine = {
+    initialize: jest.fn < async() => Promise < void>> ().mockResolvedValue(undefined),
+      generateQuery: jest.fn(),
+        getAllTemplates: jest.fn().mockReturnValue([]),
+          validateQuery: jest.fn((query: string) => {
+            const upperQuery = query.toUpperCase();
+            let isValid = true;
+            let isReadOnly = true;
+            let hasLimit = /\bLIMIT\s+\d+/i.test(query);
+            let complexity = 10;
+            if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
+              isValid = false;
+              isReadOnly = false;
+            }
+            if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
+            if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+            return { isValid, isReadOnly, hasLimit, complexity, estimatedCost: complexity * 10 };
+          }),
+            ensureLimit: jest.fn((query: string, limit: number = 100) => {
+              if (/\bLIMIT\s+\d+/i.test(query)) return query;
+              return `${query.trim()} LIMIT ${limit}`;
+            }),
   };
-  return {
-    cypherTemplateEngine: mockCypherTemplateEngine,
-    CypherTemplateEngine: jest.fn(() => mockCypherTemplateEngine),
+return {
+  cypherTemplateEngine: engine,
+  CypherTemplateEngine: jest.fn(() => engine),
+};
+});
+jest.mock('../CypherTemplateEngine', () => {
+  const engine = {
+    initialize: jest.fn < async() => Promise < void>> ().mockResolvedValue(undefined),
+      generateQuery: jest.fn(),
+        getAllTemplates: jest.fn().mockReturnValue([]),
+          validateQuery: jest.fn((query: string) => {
+            const upperQuery = query.toUpperCase();
+            let isValid = true;
+            let isReadOnly = true;
+            let hasLimit = /\bLIMIT\s+\d+/i.test(query);
+            let complexity = 10;
+            if (upperQuery.includes('DELETE') || upperQuery.includes('SET') || upperQuery.includes('CREATE') || upperQuery.includes('MERGE')) {
+              isValid = false;
+              isReadOnly = false;
+            }
+            if ((query.match(/MATCH/gi) || []).length > 1) complexity = 20;
+            if ((query.match(/\*\d*\.\./gi) || []).length > 0) complexity = 30;
+            return { isValid, isReadOnly, hasLimit, complexity, estimatedCost: complexity * 10 };
+          }),
+            ensureLimit: jest.fn((query: string, limit: number = 100) => {
+              if (/\bLIMIT\s+\d+/i.test(query)) return query;
+              return `${query.trim()} LIMIT ${limit}`;
+            }),
   };
+return {
+  cypherTemplateEngine: engine,
+  CypherTemplateEngine: jest.fn(() => engine),
+};
 });
 
-jest.mock('../LLMChainExecutor', () => {
+jest.mock('../LLMChainExecutor.js', () => {
   const EventEmitter = require('events').EventEmitter;
   const mockExecutor = Object.assign(new EventEmitter(), {
     initialize: jest.fn((provider: any) => {
@@ -528,7 +535,7 @@ describe('ThreatHuntingOrchestrator', () => {
 
     it('should emit phase_started events during execution', async () => {
       const phases: string[] = [];
-      orchestrator.on('phase_started', (event) => {
+      orchestrator.on('phase_started', (event: any) => {
         phases.push(event.data.phase);
       });
 
@@ -723,7 +730,7 @@ describe('LLMChainExecutor', () => {
           ctiSources: [],
           osintSources: [],
         },
-      } as HuntContext;
+      } as unknown as HuntContext;
 
       await executor.generateHypotheses(context);
 
@@ -857,7 +864,7 @@ describe('AutoRemediationHooks', () => {
 
       await hooks.approvePlan(plan.id, 'test-user');
 
-      const updatedPlan = hooks.getActivePlans().find((p) => p.id === plan.id);
+      const updatedPlan = hooks.getActivePlans().find((p: any) => p.id === plan.id);
       expect(updatedPlan?.status).toBe('approved');
       expect(updatedPlan?.approvedBy).toBe('test-user');
     });
@@ -876,7 +883,7 @@ describe('AutoRemediationHooks', () => {
 
       // The created plan should be in pending approvals
       expect(Array.isArray(pending)).toBe(true);
-      const ourPlan = pending.find((p) => p.id === plan.id);
+      const ourPlan = pending.find((p: any) => p.id === plan.id);
       expect(ourPlan).toBeDefined();
       expect(ourPlan?.status).toBe('pending_approval');
     });

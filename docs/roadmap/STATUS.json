@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-03T04:30:00Z",
-  "revision_note": "Added governed sensitive-access guardrails and append-only audit coverage for PII and exports",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",
@@ -81,10 +81,14 @@
         {
           "id": "C2",
           "name": "Immutable Audit Log",
-          "status": "partial",
+          "status": "incomplete",
           "owner": "Jules",
-          "evidence": "Append-only audit store now backs sensitive-context and high-risk action enforcement for PII scans and exports",
-          "blockers": ["No tamper-proof verification", "No centralized log aggregation"],
+          "evidence": "Audit services exist but logging is console-only (BaseAgentArchetype.ts:343-352)",
+          "blockers": [
+            "Need persistent append-only storage",
+            "No tamper-proof verification",
+            "No centralized log aggregation"
+          ],
           "target_completion": "Sprint N+1 (CRITICAL for GA)"
         },
         {
@@ -146,8 +150,8 @@
   ],
   "summary": {
     "rc_ready": 2,
-    "partial": 3,
-    "incomplete": 1,
+    "partial": 2,
+    "incomplete": 2,
     "not_started": 6,
     "total": 12,
     "ga_blockers": ["C2: Immutable Audit Log must be completed for GA compliance"]
