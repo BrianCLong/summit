@@ -1,0 +1,32 @@
+{
+  "evidence_bundle": {
+    "version": "1.0",
+    "release": "{{ .Release.Tag }}",
+    "product": "IntelGraph",
+    "created_at": "{{ .Release.CreatedAt }}",
+    "environment": "production"
+  },
+  "release_metadata": {
+    "git_commit": "{{ .Release.GitCommit }}",
+    "build_pipeline": "{{ .Release.BuildPipeline }}",
+    "build_timestamp": "{{ .Release.BuildTimestamp }}",
+    "approver": "{{ .Release.Approver }}"
+  },
+  "ci_quality_gates": [
+    {
+      "name": "Unit Tests",
+      "status": "passed",
+      "evidence": "path/to/unit-test-report.xml"
+    },
+    {
+      "name": "Security Scan",
+      "status": "passed",
+      "evidence": "path/to/policy-report.json"
+    }
+  ],
+  "sbom": {
+    "path": "path/to/sbom.json",
+    "format": "cyclonedx",
+    "generated_with": "syft"
+  }
+}

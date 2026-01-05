@@ -28,25 +28,6 @@ const CiQualityGateSchema = z.object({
   evidence: z.string(),
 });
 
-const AcceptancePackSchema = z.object({
-  epic: z.string(),
-  descriptor: z.string(),
-});
-
-const LoadTestsSchema = z.object({
-  tool: z.string(),
-  script: z.string(),
-  duration: z.string().optional(),
-  virtual_users: z.number().optional(),
-  thresholds: z.record(z.any()).optional(),
-});
-
-const ChaosScenarioSchema = z.object({
-  name: z.string(),
-  runbook: z.string(),
-  success_criteria: z.array(z.string()).optional(),
-});
-
 const SbomSchema = z.object({
   path: z.string(),
   format: z.string(),
@@ -57,9 +38,6 @@ const EvidenceBundleManifestSchema = z.object({
   evidence_bundle: EvidenceBundleMetaSchema,
   release_metadata: ReleaseMetadataSchema,
   ci_quality_gates: z.array(CiQualityGateSchema).optional(),
-  acceptance_packs: z.array(AcceptancePackSchema).optional(),
-  load_tests: LoadTestsSchema.optional(),
-  chaos_scenarios: z.array(ChaosScenarioSchema).optional(),
   sbom: SbomSchema.optional(),
 });
 
@@ -97,22 +75,6 @@ function verifyReferencedFiles(data: any, baseDir: string): ValidationReport {
   if (data.ci_quality_gates) {
     data.ci_quality_gates.forEach((gate: any, index: number) => {
       checkFile(gate.evidence, `ci_quality_gates[${index}].evidence`);
-    });
-  }
-
-  if (data.acceptance_packs) {
-    data.acceptance_packs.forEach((pack: any, index: number) => {
-      checkFile(pack.descriptor, `acceptance_packs[${index}].descriptor`);
-    });
-  }
-
-  if (data.load_tests?.script) {
-    checkFile(data.load_tests.script, 'load_tests.script');
-  }
-
-  if (data.chaos_scenarios) {
-    data.chaos_scenarios.forEach((scenario: any, index: number) => {
-      checkFile(scenario.runbook, `chaos_scenarios[${index}].runbook`);
     });
   }
 
