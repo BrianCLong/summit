@@ -60,6 +60,30 @@ git push -u origin recreate/<topic>
 # Description: "Supersedes #<oldPR> due to repo history restructure."
 ```
 
+### Using the Recreation Helper Script
+
+For convenience, use the helper script to automate branch setup:
+
+```bash
+# Dry run - see what would happen
+./scripts/migration/recreate-pr.sh --old-pr 15400 --old-branch feature/my-feature
+
+# Actually create the branch and attempt cherry-picks
+./scripts/migration/recreate-pr.sh --old-pr 15400 --old-branch feature/my-feature --apply
+
+# If you know the exact commit range
+./scripts/migration/recreate-pr.sh --old-pr 15400 --old-branch feature/my-feature \
+  --start abc123 --end def456 --apply
+```
+
+The script will:
+
+1. Create a new branch `recreate/pr-<num>-<slug>` from `origin/main`
+2. Attempt to cherry-pick commits from the old branch
+3. Print next steps (test, push, open PR)
+
+**Note:** The script never pushes or opens PRs automatically - you retain full control.
+
 ### After Recreation
 
 1. Open the new PR referencing the old one
