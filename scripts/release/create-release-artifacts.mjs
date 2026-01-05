@@ -34,7 +34,20 @@ try {
 // If a CHANGELOG.md file exists, we might consider appending it, but usually generated notes are specific to the release.
 // We'll leave this as-is for now, respecting the "otherwise keep commit-based notes as canonical" clause.
 
-// 3. Update Step Summary
+// 3. Run Compatibility Check (generates compatibility.json)
+const compatScript = resolve(process.cwd(), 'scripts/release/check-bundle-compatibility.mjs');
+if (existsSync(compatScript)) {
+  console.log('Running compatibility check...');
+  try {
+    // Assuming artifacts are in dist/release, which is the default for the script
+    execSync(`node "${compatScript}" --strict`, { stdio: 'inherit' });
+  } catch (e) {
+    console.error('Compatibility check failed.');
+    process.exit(1);
+  }
+}
+
+// 4. Update Step Summary
 if (GITHUB_STEP_SUMMARY && existsSync(GITHUB_STEP_SUMMARY)) {
   const notesPath = resolve('dist/release/release-notes.md');
   if (existsSync(notesPath)) {
