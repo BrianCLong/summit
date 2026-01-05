@@ -133,3 +133,5 @@ export interface InformedByEdge {
 export interface HasPolicyEdge {
   type: 'HAS_POLICY';
 }
+
+export * from './maestro-schema';
