@@ -47,10 +47,22 @@ export class PostgresMeterRepository {
           quantity = event.bytes;
           unit = 'bytes';
           break;
+        case MeterEventKind.STORAGE_BYTES_WRITTEN:
+          quantity = event.bytes;
+          unit = 'bytes';
+          break;
         case MeterEventKind.USER_SEAT_ACTIVE:
           quantity = event.seatCount ?? 1;
           unit = 'seats';
           metadata = { ...metadata, userId: event.userId };
+          break;
+        case MeterEventKind.RUN_STARTED:
+        case MeterEventKind.STEP_EXECUTED:
+        case MeterEventKind.APPROVAL_DECISION:
+        case MeterEventKind.RECEIPT_EMITTED:
+        case MeterEventKind.EVIDENCE_EXPORTED:
+          quantity = 1;
+          unit = 'count';
           break;
       }
 

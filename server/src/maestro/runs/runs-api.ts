@@ -15,6 +15,7 @@ import { maestroAuthzMiddleware } from '../../middleware/maestro-authz.js';
 import { recordEndpointResult } from '../../observability/reliability-metrics.js';
 import { flagService } from '../../services/FlagService.js';
 import { MaestroEvents } from '../../realtime/maestro.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -146,6 +147,20 @@ router.post('/runs', authorize('run_maestro'), async (req, res) => {
       ...validation.data,
       tenant_id: tenantId,
     }); // Pass tenantId
+
+    await meteringEmitter.emitRunStarted({
+      tenantId,
+      runId: run.id,
+      pipelineName: validation.data.pipeline_name,
+      source: 'maestro.runs.api',
+      actorType: (req as any).user ? 'user' : 'system',
+      workflowType: validation.data.pipeline_name,
+      correlationId: run.id,
+      metadata: {
+        pipeline_id: validation.data.pipeline_id,
+        executor_id: validation.data.executor_id,
+      },
+    });
 
     // Enqueue the run in the scheduler
     await scheduler.enqueueRun(run.id, tenantId);

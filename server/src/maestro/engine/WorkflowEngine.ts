@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { metrics } from '../../observability/metrics.js';
 import logger from '../../utils/logger.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 export interface WorkflowDefinition {
   id: string;
@@ -100,6 +101,21 @@ export class WorkflowEngine {
               (Date.now() - stepStartTime) / 1000
             );
           }
+
+          await meteringEmitter.emitStepExecuted({
+            tenantId,
+            runId: context.runId,
+            stepId: step.id,
+            status: 'success',
+            tool: step.tool,
+            source: 'maestro.workflow.engine',
+            actorType: 'system',
+            workflowType: definition.id,
+            correlationId: `${context.runId}:${step.id}`,
+            metadata: {
+              step_tool: step.tool,
+            },
+          });
         } catch (err: any) {
           logger.error({ stepId: step.id, error: err.message, runId: context.runId }, 'Step failed');
           context.steps[step.id] = { error: err.message, status: 'failed' };
@@ -111,6 +127,22 @@ export class WorkflowEngine {
               (Date.now() - stepStartTime) / 1000
             );
           }
+
+          await meteringEmitter.emitStepExecuted({
+            tenantId,
+            runId: context.runId,
+            stepId: step.id,
+            status: 'failed',
+            tool: step.tool,
+            source: 'maestro.workflow.engine',
+            actorType: 'system',
+            workflowType: definition.id,
+            correlationId: `${context.runId}:${step.id}`,
+            metadata: {
+              step_tool: step.tool,
+              error: err.message,
+            },
+          });
           throw err; // Stop execution on failure for now
         }
       }

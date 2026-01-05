@@ -28,3 +28,27 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: metering-events-run-step-approval
+    version: v1
+    path: prompts/agent-tasks/metering-events-run-step-approval.md
+    sha256: abcdbd81292c62d8718bf4cf4eee7f3b3ba5ea68569d1f848d1d535f135fcb01
+    description: Metering events for workflow lifecycle run/step/approval/receipt/export/storage paths.
+    scope:
+      paths:
+        - server/src/
+        - docs/roadmap/STATUS.json
+        - prompts/agent-tasks/
+        - agents/examples/
+      domains:
+        - metering
+        - maestro
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

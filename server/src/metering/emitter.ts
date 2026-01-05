@@ -1,5 +1,6 @@
 import logger from '../utils/logger';
 import { meteringPipeline } from './pipeline';
+import { buildMeteringMetadata } from './metadata.js';
 import { MeterEvent, MeterEventKind } from './schema';
 
 export class MeteringEmitter {
@@ -149,6 +150,184 @@ export class MeteringEmitter {
       correlationId: input.correlationId,
       idempotencyKey: input.idempotencyKey,
       metadata: input.metadata,
+    });
+  }
+
+  async emitRunStarted(input: {
+    tenantId: string;
+    runId: string;
+    pipelineName?: string;
+    source: string;
+    actorType: string;
+    workflowType: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.RUN_STARTED,
+      tenantId: input.tenantId,
+      runId: input.runId,
+      pipelineName: input.pipelineName,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: buildMeteringMetadata({
+        tenantId: input.tenantId,
+        actorType: input.actorType,
+        workflowType: input.workflowType,
+        extra: input.metadata,
+      }),
+    });
+  }
+
+  async emitStepExecuted(input: {
+    tenantId: string;
+    runId: string;
+    stepId: string;
+    status: 'success' | 'failed';
+    tool?: string;
+    source: string;
+    actorType: string;
+    workflowType: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.STEP_EXECUTED,
+      tenantId: input.tenantId,
+      runId: input.runId,
+      stepId: input.stepId,
+      status: input.status,
+      tool: input.tool,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: buildMeteringMetadata({
+        tenantId: input.tenantId,
+        actorType: input.actorType,
+        workflowType: input.workflowType,
+        extra: input.metadata,
+      }),
+    });
+  }
+
+  async emitApprovalDecision(input: {
+    tenantId: string;
+    runId: string;
+    stepId: string;
+    decision: 'approved' | 'declined';
+    userId?: string;
+    source: string;
+    actorType: string;
+    workflowType: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.APPROVAL_DECISION,
+      tenantId: input.tenantId,
+      runId: input.runId,
+      stepId: input.stepId,
+      decision: input.decision,
+      userId: input.userId,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: buildMeteringMetadata({
+        tenantId: input.tenantId,
+        actorType: input.actorType,
+        workflowType: input.workflowType,
+        extra: input.metadata,
+      }),
+    });
+  }
+
+  async emitReceiptEmitted(input: {
+    tenantId: string;
+    runId: string;
+    receiptId: string;
+    artifactId: string;
+    source: string;
+    actorType: string;
+    workflowType: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.RECEIPT_EMITTED,
+      tenantId: input.tenantId,
+      runId: input.runId,
+      receiptId: input.receiptId,
+      artifactId: input.artifactId,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: buildMeteringMetadata({
+        tenantId: input.tenantId,
+        actorType: input.actorType,
+        workflowType: input.workflowType,
+        extra: input.metadata,
+      }),
+    });
+  }
+
+  async emitEvidenceExported(input: {
+    tenantId: string;
+    runId: string;
+    evidenceCount?: number;
+    source: string;
+    actorType: string;
+    workflowType: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.EVIDENCE_EXPORTED,
+      tenantId: input.tenantId,
+      runId: input.runId,
+      evidenceCount: input.evidenceCount,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: buildMeteringMetadata({
+        tenantId: input.tenantId,
+        actorType: input.actorType,
+        workflowType: input.workflowType,
+        extra: input.metadata,
+      }),
+    });
+  }
+
+  async emitStorageBytesWritten(input: {
+    tenantId: string;
+    bytes: number;
+    storagePath?: string;
+    source: string;
+    actorType: string;
+    workflowType: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.STORAGE_BYTES_WRITTEN,
+      tenantId: input.tenantId,
+      bytes: input.bytes,
+      storagePath: input.storagePath,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: buildMeteringMetadata({
+        tenantId: input.tenantId,
+        actorType: input.actorType,
+        workflowType: input.workflowType,
+        extra: input.metadata,
+      }),
     });
   }
 
