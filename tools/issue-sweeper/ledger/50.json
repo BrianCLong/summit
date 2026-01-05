@@ -1,0 +1,230 @@
+{
+  "issue_number": 50,
+  "title": "GraphQL: minimal schema+resolver skeleton",
+  "url": "https://github.com/BrianCLong/summit/issues/50",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051542,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5Fg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:backend",
+      "name": "area:backend",
+      "color": "0052cc",
+      "default": false,
+      "description": "Server/GraphQL/DB"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T02:39:37Z",
+  "createdAt": "2025-08-12T02:37:52Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 14780,
+        "url": "https://github.com/BrianCLong/summit/pull/14780",
+        "mergedAt": "2025-12-29T05:02:18Z",
+        "title": "Sprint N+50: Complexity Reduction & Systems Simplification"
+      },
+      {
+        "number": 15383,
+        "url": "https://github.com/BrianCLong/summit/pull/15383",
+        "mergedAt": null,
+        "title": "Build automated issue sweeper runner"
+      },
+      {
+        "number": 15125,
+        "url": "https://github.com/BrianCLong/summit/pull/15125",
+        "mergedAt": "2025-12-30T21:20:48Z",
+        "title": "chore(deps): bump mikefarah/yq from 4.30.8 to 4.50.1"
+      },
+      {
+        "number": 15348,
+        "url": "https://github.com/BrianCLong/summit/pull/15348",
+        "mergedAt": "2026-01-01T09:53:05Z",
+        "title": "Improve cost and operational efficiency"
+      },
+      {
+        "number": 13882,
+        "url": "https://github.com/BrianCLong/summit/pull/13882",
+        "mergedAt": "2025-12-20T03:21:27Z",
+        "title": "Create multi-agent orchestration prompt for GA release"
+      },
+      {
+        "number": 15098,
+        "url": "https://github.com/BrianCLong/summit/pull/15098",
+        "mergedAt": "2025-12-30T13:12:23Z",
+        "title": "Wire Jules Copilot MVP-4 Prompt into GraphRAG Runner"
+      },
+      {
+        "number": 13815,
+        "url": "https://github.com/BrianCLong/summit/pull/13815",
+        "mergedAt": "2025-12-20T03:40:18Z",
+        "title": "Add referrer policy and XSS filter to security middleware"
+      },
+      {
+        "number": 13897,
+        "url": "https://github.com/BrianCLong/summit/pull/13897",
+        "mergedAt": "2025-12-20T03:20:12Z",
+        "title": "Implement policy-gated approvals for high-risk operations"
+      },
+      {
+        "number": 14023,
+        "url": "https://github.com/BrianCLong/summit/pull/14023",
+        "mergedAt": "2025-12-19T22:46:22Z",
+        "title": "Upgrade deepspeed to version 0.15.1"
+      },
+      {
+        "number": 14015,
+        "url": "https://github.com/BrianCLong/summit/pull/14015",
+        "mergedAt": "2025-12-19T21:35:03Z",
+        "title": "Update Pillow version to 10.3.0"
+      },
+      {
+        "number": 14014,
+        "url": "https://github.com/BrianCLong/summit/pull/14014",
+        "mergedAt": "2025-12-19T21:27:26Z",
+        "title": "Update python-jose version to 3.4.0"
+      },
+      {
+        "number": 14009,
+        "url": "https://github.com/BrianCLong/summit/pull/14009",
+        "mergedAt": "2025-12-19T21:17:18Z",
+        "title": "Update nltk version to 3.9 in requirements.txt"
+      },
+      {
+        "number": 14006,
+        "url": "https://github.com/BrianCLong/summit/pull/14006",
+        "mergedAt": "2025-12-19T21:10:25Z",
+        "title": "Update changed-files action version in workflow"
+      },
+      {
+        "number": 13880,
+        "url": "https://github.com/BrianCLong/summit/pull/13880",
+        "mergedAt": "2025-12-20T03:21:44Z",
+        "title": "MAE Release Captain Automation setup"
+      },
+      {
+        "number": 13879,
+        "url": "https://github.com/BrianCLong/summit/pull/13879",
+        "mergedAt": "2025-12-20T03:21:48Z",
+        "title": "Create multi-agent release prompt for MVP to GA"
+      },
+      {
+        "number": 14022,
+        "url": "https://github.com/BrianCLong/summit/pull/14022",
+        "mergedAt": "2025-12-19T22:40:03Z",
+        "title": "Upgrade python-multipart to version 0.0.18"
+      },
+      {
+        "number": 14516,
+        "url": "https://github.com/BrianCLong/summit/pull/14516",
+        "mergedAt": null,
+        "title": "Sprint N+14: Autonomous Agent Expansion with Caps & Safety"
+      },
+      {
+        "number": 14755,
+        "url": "https://github.com/BrianCLong/summit/pull/14755",
+        "mergedAt": null,
+        "title": "docs: add MVP-3-GA org design governance model"
+      },
+      {
+        "number": 14021,
+        "url": "https://github.com/BrianCLong/summit/pull/14021",
+        "mergedAt": "2025-12-19T22:35:08Z",
+        "title": "Upgrade paddlepaddle to version 2.6.2"
+      },
+      {
+        "number": 14380,
+        "url": "https://github.com/BrianCLong/summit/pull/14380",
+        "mergedAt": "2025-12-23T04:35:02Z",
+        "title": "⚡ Bolt: Optimize SimilarityService batching"
+      },
+      {
+        "number": 13627,
+        "url": "https://github.com/BrianCLong/summit/pull/13627",
+        "mergedAt": "2025-12-17T01:39:32Z",
+        "title": "Create future history log for platform decisions"
+      },
+      {
+        "number": 15333,
+        "url": "https://github.com/BrianCLong/summit/pull/15333",
+        "mergedAt": null,
+        "title": "Innovation Sprint Delivery: 8 Strategic Features"
+      },
+      {
+        "number": 13881,
+        "url": "https://github.com/BrianCLong/summit/pull/13881",
+        "mergedAt": "2025-12-20T03:21:40Z",
+        "title": "Implement ETL backpressure and replay system"
+      },
+      {
+        "number": 14013,
+        "url": "https://github.com/BrianCLong/summit/pull/14013",
+        "mergedAt": "2025-12-20T11:10:25Z",
+        "title": "feat: Resilience & Error Handling (Circuit Breakers, Retries, Error Boundaries)"
+      },
+      {
+        "number": 12846,
+        "url": "https://github.com/BrianCLong/summit/pull/12846",
+        "mergedAt": "2025-12-04T15:49:29Z",
+        "title": "Add 90-day gap-closure plan for B2B SaaS and agencies"
+      },
+      {
+        "number": 13626,
+        "url": "https://github.com/BrianCLong/summit/pull/13626",
+        "mergedAt": "2025-12-17T01:32:59Z",
+        "title": "Prepare CompanyOS for external pilot launch"
+      },
+      {
+        "number": 15152,
+        "url": "https://github.com/BrianCLong/summit/pull/15152",
+        "mergedAt": "2025-12-30T21:23:12Z",
+        "title": "Fix repository issues and improve governance"
+      },
+      {
+        "number": 15141,
+        "url": "https://github.com/BrianCLong/summit/pull/15141",
+        "mergedAt": null,
+        "title": "Fix all Jest test errors"
+      },
+      {
+        "number": 15139,
+        "url": "https://github.com/BrianCLong/summit/pull/15139",
+        "mergedAt": null,
+        "title": "Fix all Vite build errors"
+      },
+      {
+        "number": 12521,
+        "url": "https://github.com/BrianCLong/summit/pull/12521",
+        "mergedAt": "2025-12-18T02:34:06Z",
+        "title": "IntelEvo Dual-Track: Prototype and Paper Artifacts"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

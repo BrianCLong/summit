@@ -1,0 +1,149 @@
+{
+  "issue_number": 71,
+  "title": "Implement Basic Entity Modeling in Neo4j",
+  "url": "https://github.com/BrianCLong/summit/issues/71",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    },
+    {
+      "id": 9095918281,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiyyQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:database",
+      "name": "area:database",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Database area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:12:44Z",
+  "createdAt": "2025-08-12T04:39:51Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11954,
+        "url": "https://github.com/BrianCLong/summit/pull/11954",
+        "mergedAt": "2025-11-20T10:20:47Z",
+        "title": "Define and implement codebase maintainability metrics"
+      },
+      {
+        "number": 13147,
+        "url": "https://github.com/BrianCLong/summit/pull/13147",
+        "mergedAt": "2025-12-17T05:36:38Z",
+        "title": "Add C7 Resource Leak Detector"
+      },
+      {
+        "number": 13173,
+        "url": "https://github.com/BrianCLong/summit/pull/13173",
+        "mergedAt": "2025-12-04T15:39:21Z",
+        "title": "Harden triplet runtime with adversarial attestation moats"
+      },
+      {
+        "number": 10116,
+        "url": "https://github.com/BrianCLong/summit/pull/10116",
+        "mergedAt": "2025-10-14T10:40:16Z",
+        "title": "chore: harden security compliance pipeline"
+      },
+      {
+        "number": 13180,
+        "url": "https://github.com/BrianCLong/summit/pull/13180",
+        "mergedAt": "2025-12-04T15:39:12Z",
+        "title": "Build AI governance metrics dashboard with analytics"
+      },
+      {
+        "number": 1310,
+        "url": "https://github.com/BrianCLong/summit/pull/1310",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate multi-llm cooperation fabric"
+      },
+      {
+        "number": 10202,
+        "url": "https://github.com/BrianCLong/summit/pull/10202",
+        "mergedAt": "2025-10-14T21:56:26Z",
+        "title": "ops(merge-train): triage + hotspot + auto-resolve + docs"
+      },
+      {
+        "number": 1355,
+        "url": "https://github.com/BrianCLong/summit/pull/1355",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "chore: add hardened ci guardrails"
+      },
+      {
+        "number": 11879,
+        "url": "https://github.com/BrianCLong/summit/pull/11879",
+        "mergedAt": null,
+        "title": "Create monorepo remediation and dev workflow plan"
+      },
+      {
+        "number": 1311,
+        "url": "https://github.com/BrianCLong/summit/pull/1311",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat: orchestrate zero spend routing"
+      },
+      {
+        "number": 1204,
+        "url": "https://github.com/BrianCLong/summit/pull/1204",
+        "mergedAt": null,
+        "title": "chore(deps): bump the minor-and-patch group with 70 updates"
+      },
+      {
+        "number": 1312,
+        "url": "https://github.com/BrianCLong/summit/pull/1312",
+        "mergedAt": "2025-09-24T04:15:51Z",
+        "title": "feat(conductor): harden build orchestration fabric"
+      },
+      {
+        "number": 1283,
+        "url": "https://github.com/BrianCLong/summit/pull/1283",
+        "mergedAt": null,
+        "title": "feat: Maestro vNext - Complete AI-Augmented CI/CD Platform"
+      },
+      {
+        "number": 1083,
+        "url": "https://github.com/BrianCLong/summit/pull/1083",
+        "mergedAt": "2025-08-31T01:16:06Z",
+        "title": "🎯 FINAL CI CONSOLIDATION - 4-Lane Excellence (68 → 4 workflows)"
+      },
+      {
+        "number": 1285,
+        "url": "https://github.com/BrianCLong/summit/pull/1285",
+        "mergedAt": "2025-09-20T08:06:30Z",
+        "title": "feat(release): enterprise ci/cd foundation - clean slate"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

@@ -13,12 +13,14 @@ prompts:
         - docs/ga/
         - artifacts/
         - metrics/
+        - observability/
         - .github/
       domains:
         - governance
         - ci
         - provenance
         - quality
+        - observability
     verification:
       tiers_required:
         - A
@@ -28,27 +30,25 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: partner-demo-tenant-bootstrap
+  - id: runbooks-docs-update
     version: v1
-    path: prompts/partner-demo-tenant-bootstrap.md
-    sha256: bcd8043b9a5890175ceb45357d8a978548b7823f2124a51bedd8dbf687f84df7
-    description: Demo tenant bootstrap, evidence export readiness, admin UI trigger, and partner quick-start updates.
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
     scope:
       paths:
-        - server/src/services/tenants/
-        - server/src/routes/
-        - server/src/repos/
-        - apps/web/
-        - docs/
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
       domains:
-        - tenancy
-        - evidence
-        - admin
-        - ui
-        - docs
+        - documentation
+        - operations
+        - governance
     verification:
       tiers_required:
-        - B
+        - C
       debt_budget:
         permitted: 0
         retirement_target: 0

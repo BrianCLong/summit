@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-02T15:00:00Z",
-  "revision_note": "Added demo tenant bootstrap seeds, evidence export readiness checks, and admin UI trigger for partner quick-start",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",

@@ -139,6 +139,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify runtime configuration
+        run: pnpm verify:runtime
+
       - name: Run verification scripts
         run: pnpm verify
 

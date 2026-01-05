@@ -1,0 +1,68 @@
+{
+  "issue_number": 254,
+  "title": "Backups & disaster recovery runbook",
+  "url": "https://github.com/BrianCLong/summit/issues/254",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9108055903,
+      "node_id": "LA_kwDOPaNncM8AAAACHuHnXw",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/devops",
+      "name": "devops",
+      "color": "d4c5f9",
+      "default": false,
+      "description": ""
+    },
+    {
+      "id": 9108075749,
+      "node_id": "LA_kwDOPaNncM8AAAACHuI05Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/compliance",
+      "name": "compliance",
+      "color": "cfd3d7",
+      "default": false,
+      "description": ""
+    }
+  ],
+  "updatedAt": "2025-12-19T20:15:13Z",
+  "createdAt": "2025-08-14T04:54:44Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 359,
+        "url": "https://github.com/BrianCLong/summit/pull/359",
+        "mergedAt": "2025-08-17T04:51:16Z",
+        "title": "feat: implement advanced ML infrastructure with GPU acceleration and …"
+      },
+      {
+        "number": 1277,
+        "url": "https://github.com/BrianCLong/summit/pull/1277",
+        "mergedAt": "2025-09-19T02:20:58Z",
+        "title": "feat: Add Sprint 25 Day-1 deliverables"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

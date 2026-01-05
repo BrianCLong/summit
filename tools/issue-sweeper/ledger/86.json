@@ -1,0 +1,197 @@
+{
+  "issue_number": 86,
+  "title": "Add Stub for AI/ML Service (Link Prediction)",
+  "url": "https://github.com/BrianCLong/summit/issues/86",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9074767063,
+      "node_id": "LA_kwDOPaNncM8AAAACHOX01w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/duplicate",
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "default": true,
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "id": 9095051441,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4sQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:feature",
+      "name": "type:feature",
+      "color": "0052CC",
+      "default": false,
+      "description": "Auto-generated label"
+    },
+    {
+      "id": 9095051842,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Qg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P2",
+      "name": "priority:P2",
+      "color": "ededed",
+      "default": false,
+      "description": "Normal priority"
+    },
+    {
+      "id": 9095918253,
+      "node_id": "LA_kwDOPaNncM8AAAACHiiyrQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:ai-ml",
+      "name": "area:ai-ml",
+      "color": "5319e7",
+      "default": false,
+      "description": "AI/ML area"
+    }
+  ],
+  "updatedAt": "2025-08-12T05:13:40Z",
+  "createdAt": "2025-08-12T04:40:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15249,
+        "url": "https://github.com/BrianCLong/summit/pull/15249",
+        "mergedAt": null,
+        "title": "Add phased roadmap for items 60-95"
+      },
+      {
+        "number": 15278,
+        "url": "https://github.com/BrianCLong/summit/pull/15278",
+        "mergedAt": "2026-01-01T05:13:20Z",
+        "title": "Add agent launch runbook for TS build remediation"
+      },
+      {
+        "number": 15286,
+        "url": "https://github.com/BrianCLong/summit/pull/15286",
+        "mergedAt": "2026-01-01T05:45:06Z",
+        "title": "Harden usage metering and enforcement"
+      },
+      {
+        "number": 15300,
+        "url": "https://github.com/BrianCLong/summit/pull/15300",
+        "mergedAt": "2026-01-01T08:02:09Z",
+        "title": "Restore JWT security coverage with ESM-safe mocks"
+      },
+      {
+        "number": 13147,
+        "url": "https://github.com/BrianCLong/summit/pull/13147",
+        "mergedAt": "2025-12-17T05:36:38Z",
+        "title": "Add C7 Resource Leak Detector"
+      },
+      {
+        "number": 15342,
+        "url": "https://github.com/BrianCLong/summit/pull/15342",
+        "mergedAt": "2026-01-01T08:47:00Z",
+        "title": "Create eight new product requirement documents"
+      },
+      {
+        "number": 13113,
+        "url": "https://github.com/BrianCLong/summit/pull/13113",
+        "mergedAt": "2025-12-17T05:38:26Z",
+        "title": "S9 - Threat Modeling Assistant"
+      },
+      {
+        "number": 11911,
+        "url": "https://github.com/BrianCLong/summit/pull/11911",
+        "mergedAt": "2025-11-20T10:25:10Z",
+        "title": "Create Grafana observability dashboard for IntelGraph"
+      },
+      {
+        "number": 1348,
+        "url": "https://github.com/BrianCLong/summit/pull/1348",
+        "mergedAt": "2025-09-23T06:24:52Z",
+        "title": "docs: capture patent-grade maestro vnext features"
+      },
+      {
+        "number": 11852,
+        "url": "https://github.com/BrianCLong/summit/pull/11852",
+        "mergedAt": "2025-11-20T09:48:03Z",
+        "title": "Improve developer experience in summit monorepo"
+      },
+      {
+        "number": 13163,
+        "url": "https://github.com/BrianCLong/summit/pull/13163",
+        "mergedAt": "2025-12-17T05:35:41Z",
+        "title": "Jules/security fixes"
+      },
+      {
+        "number": 10103,
+        "url": "https://github.com/BrianCLong/summit/pull/10103",
+        "mergedAt": "2025-10-14T11:53:04Z",
+        "title": "feat: add zero-touch compliance enforcement system"
+      },
+      {
+        "number": 10120,
+        "url": "https://github.com/BrianCLong/summit/pull/10120",
+        "mergedAt": "2025-10-14T08:53:59Z",
+        "title": "feat: Build infrastructure monitoring platform"
+      },
+      {
+        "number": 11916,
+        "url": "https://github.com/BrianCLong/summit/pull/11916",
+        "mergedAt": "2025-11-20T10:21:11Z",
+        "title": "Wire CompanyOS for internal operations"
+      },
+      {
+        "number": 11913,
+        "url": "https://github.com/BrianCLong/summit/pull/11913",
+        "mergedAt": "2025-11-20T10:25:05Z",
+        "title": "Improve test coverage and organization"
+      },
+      {
+        "number": 632,
+        "url": "https://github.com/BrianCLong/summit/pull/632",
+        "mergedAt": null,
+        "title": "chore(deps): bump opencv-python from 4.8.1.78 to 4.12.0.88"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 11921,
+        "url": "https://github.com/BrianCLong/summit/pull/11921",
+        "mergedAt": "2025-11-20T10:05:31Z",
+        "title": "Build Advanced NLP and Text Analytics Platform"
+      },
+      {
+        "number": 1279,
+        "url": "https://github.com/BrianCLong/summit/pull/1279",
+        "mergedAt": null,
+        "title": "feat(ga): artifacts pack for v1.0.0"
+      },
+      {
+        "number": 13042,
+        "url": "https://github.com/BrianCLong/summit/pull/13042",
+        "mergedAt": "2025-12-01T19:17:12Z",
+        "title": "chore: Finalize CI/CD consolidation and cleanup"
+      },
+      {
+        "number": 1278,
+        "url": "https://github.com/BrianCLong/summit/pull/1278",
+        "mergedAt": "2025-09-19T02:28:07Z",
+        "title": "feat: Sprint 25 Day-1 Deliverables"
+      },
+      {
+        "number": 1300,
+        "url": "https://github.com/BrianCLong/summit/pull/1300",
+        "mergedAt": "2025-09-23T06:47:22Z",
+        "title": "Total Recapture: enterprise-ready green merge to main"
+      },
+      {
+        "number": 1280,
+        "url": "https://github.com/BrianCLong/summit/pull/1280",
+        "mergedAt": "2025-09-18T05:21:24Z",
+        "title": "feat(ga): CI/ops hardening (conflict-free from ga-core)"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}
