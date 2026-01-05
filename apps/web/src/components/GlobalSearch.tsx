@@ -263,7 +263,10 @@ export function GlobalSearch() {
             )}
           </Command.List>
 
-          <div className="border-t px-3 py-2 text-xs text-muted-foreground">
+          <div
+            className="border-t px-3 py-2 text-xs text-muted-foreground"
+            aria-hidden="true"
+          >
             <div className="flex items-center justify-between">
               <span>Press Enter to select, Esc to close</span>
               <div className="flex items-center gap-1">
