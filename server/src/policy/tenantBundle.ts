@@ -51,12 +51,24 @@ const guardrailSchema = (z as any).object({
   requireJustification: (z as any).boolean().default(false),
 });
 
+const freezeWindowSchema = (z as any).object({
+  id: (z as any).string(),
+  description: (z as any).string().optional(),
+  startsAt: (z as any).string(),
+  endsAt: (z as any).string(),
+  timezone: (z as any).string().optional(),
+  privilegedActions: (z as any).array((z as any).string()).default([]),
+  requireBreakGlass: (z as any).boolean().default(true),
+  requireReceipt: (z as any).boolean().default(true),
+});
+
 const baseProfileSchema = (z as any).object({
   id: (z as any).string(),
   version: (z as any).string(),
   regoPackage: (z as any).string(),
   entrypoints: (z as any).array((z as any).string()).min(1),
   guardrails: guardrailSchema.default({}),
+  freezeWindows: (z as any).array(freezeWindowSchema).default([]),
   crossTenant: crossTenantSchema.default({
     mode: 'deny',
     allow: [],
@@ -96,6 +108,9 @@ export const policySimulationInputSchema = (z as any).object({
   action: (z as any).string(),
   purpose: (z as any).string().optional(),
   justification: (z as any).string().optional(),
+  timestamp: (z as any).string().optional(),
+  breakGlass: (z as any).boolean().optional(),
+  breakGlassReceiptId: (z as any).string().optional(),
 });
 
 export type PolicySimulationInput = z.infer<typeof policySimulationInputSchema>;
@@ -209,6 +224,45 @@ export function simulatePolicyDecision(
 ): PolicySimulationResult {
   const { profile, applied } = materializeProfile(bundle, ctx);
   const evaluationPath: string[] = [];
+  const now = input.timestamp ? new Date(input.timestamp) : new Date();
+
+  for (const window of profile.freezeWindows || []) {
+    const start = new Date(window.startsAt);
+    const end = new Date(window.endsAt);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      continue;
+    }
+    if (now < start || now > end) {
+      continue;
+    }
+    const privilegedActions =
+      window.privilegedActions && window.privilegedActions.length > 0
+        ? window.privilegedActions
+        : ['write', 'update', 'delete', 'ingest'];
+    if (!privilegedActions.includes(input.action)) {
+      continue;
+    }
+    if (window.requireBreakGlass !== false && !input.breakGlass) {
+      evaluationPath.push(`freeze-window:${window.id}`);
+      return {
+        allow: false,
+        reason: `Privileged operation blocked during freeze window ${window.id}`,
+        overlaysApplied: applied,
+        evaluationPath,
+      };
+    }
+    if (window.requireReceipt !== false && !input.breakGlassReceiptId) {
+      evaluationPath.push(`freeze-window:${window.id}:receipt-required`);
+      return {
+        allow: false,
+        reason: `Break-glass receipt required for freeze override (${window.id})`,
+        overlaysApplied: applied,
+        evaluationPath,
+      };
+    }
+    evaluationPath.push(`freeze-window:${window.id}:break-glass`);
+    break;
+  }
 
   if (input.subjectTenantId !== input.resourceTenantId) {
     if (profile.crossTenant.mode === 'deny') {

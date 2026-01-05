@@ -16,6 +16,7 @@ const BASELINE_PROFILE: TenantPolicyBundle['baseProfile'] = {
     requirePurpose: false,
     requireJustification: false,
   },
+  freezeWindows: [],
   crossTenant: {
     mode: 'deny',
     allow: [],
@@ -44,6 +45,7 @@ const STRICT_PROFILE: TenantPolicyBundle['baseProfile'] = {
     requirePurpose: true,
     requireJustification: true,
   },
+  freezeWindows: [],
   crossTenant: {
     mode: 'deny',
     allow: [],
@@ -72,6 +74,7 @@ const CUSTOM_PROFILE: TenantPolicyBundle['baseProfile'] = {
     requirePurpose: false,
     requireJustification: false,
   },
+  freezeWindows: [],
   crossTenant: {
     mode: 'allowlist',
     allow: [],
