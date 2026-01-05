@@ -1,4 +1,4 @@
-import { randomUUID as uuidv4 } from 'node:crypto';
+import { createHmac, createHash, randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import { Pool } from 'pg';
 import {
@@ -9,6 +9,7 @@ import {
   RTBFDryRunResults,
   StorageSystem,
   RetentionRecord,
+  PurgeManifest,
 } from './types.js';
 import { DataRetentionRepository } from './repository.js';
 import { PolicyEvaluator } from './policyEvaluator.js';
@@ -38,6 +39,10 @@ export class RTBFOrchestrator {
   private readonly policyEvaluator: PolicyEvaluator;
   private readonly redactionEngine: RedactionEngine;
   private readonly auditLogger: RetentionAuditLogger;
+  private readonly requiredApprovals: number;
+  private readonly approvalDelayMs: number;
+  private readonly signingKey: string;
+  private readonly signatureAlgorithm: string;
   private readonly cypherRunner?: (
     cypher: string,
     params?: Record<string, any>,
@@ -54,6 +59,10 @@ export class RTBFOrchestrator {
     redactionEngine?: RedactionEngine;
     auditLogger?: RetentionAuditLogger;
     runCypher?: (cypher: string, params?: Record<string, any>) => Promise<any>;
+    requiredApprovals?: number;
+    approvalDelayMs?: number;
+    signingKey?: string;
+    signatureAlgorithm?: string;
   }) {
     this.pool = options.pool;
     this.repository =
@@ -69,6 +78,15 @@ export class RTBFOrchestrator {
         this.logger.info(event, 'Retention audit event');
       },
     };
+    this.requiredApprovals = options.requiredApprovals ?? 2;
+    this.approvalDelayMs =
+      options.approvalDelayMs ??
+      Number(process.env.RTBF_APPROVAL_DELAY_MS ?? 60 * 60 * 1000);
+    this.signingKey =
+      options.signingKey ??
+      process.env.RTBF_PURGE_MANIFEST_KEY ??
+      'development-key';
+    this.signatureAlgorithm = options.signatureAlgorithm ?? 'HMAC-SHA256';
     this.cypherRunner = options.runCypher;
   }
 
@@ -236,25 +254,81 @@ export class RTBFOrchestrator {
       throw new Error(`Request ${requestId} is not pending approval`);
     }
 
+    const approvals = request.approval?.approvals ?? [];
+    if (approvals.some((approval) => approval.actorId === approvedBy)) {
+      throw new Error(
+        `Request ${requestId} already approved by ${approvedBy}`,
+      );
+    }
+
+    const approvalEntry = {
+      actorId: approvedBy,
+      approvedAt: new Date(),
+      notes,
+    };
+    const nextApprovals = [...approvals, approvalEntry];
+    const uniqueApprovers = new Set(
+      nextApprovals.map((approval) => approval.actorId),
+    );
+
     request.approval = {
       ...request.approval,
-      approvedBy,
-      approvedAt: new Date(),
+      approvals: nextApprovals,
+      requiredApprovals: this.requiredApprovals,
+    };
+
+    if (uniqueApprovers.size < this.requiredApprovals) {
+      this.addAuditEvent(request, 'request.approval.recorded', approvedBy, {
+        notes,
+        approvals: nextApprovals.length,
+        requiredApprovals: this.requiredApprovals,
+      });
+
+      await this.persistRequest(request);
+
+      this.logger.info(
+        { requestId: request.id, approvedBy, approvals: nextApprovals.length },
+        'RTBF request approval recorded',
+      );
+      return;
+    }
+
+    const approvedAt = new Date();
+    const executeAfter =
+      this.approvalDelayMs > 0
+        ? new Date(approvedAt.getTime() + this.approvalDelayMs)
+        : approvedAt;
+
+    request.approval = {
+      ...request.approval,
+      approvedBy: Array.from(uniqueApprovers),
+      approvedAt,
       approvalNotes: notes,
+      executeAfter,
+      requiredApprovals: this.requiredApprovals,
     };
 
     this.updateRequestState(request, 'approved');
-    this.addAuditEvent(request, 'request.approved', approvedBy, { notes });
+    this.addAuditEvent(request, 'request.approved', approvedBy, {
+      notes,
+      executeAfter,
+    });
+
+    if (executeAfter.getTime() > Date.now()) {
+      this.addAuditEvent(request, 'execution.delayed', approvedBy, {
+        executeAfter,
+      });
+    }
 
     await this.persistRequest(request);
 
     this.logger.info(
-      { requestId: request.id, approvedBy },
+      { requestId: request.id, approvedBy, executeAfter },
       'RTBF request approved',
     );
 
-    // Auto-execute if not dry-run
-    if (!request.dryRun) {
+    // Auto-execute if not dry-run and delay has elapsed
+    if (!request.dryRun && executeAfter.getTime() <= Date.now()) {
       await this.executeRequest(requestId, approvedBy);
     }
   }
@@ -303,6 +377,17 @@ export class RTBFOrchestrator {
       throw new Error(`Request ${requestId} is not approved`);
     }
 
+    const executeAfter = request.approval?.executeAfter;
+    if (executeAfter && executeAfter.getTime() > Date.now()) {
+      this.addAuditEvent(request, 'execution.blocked', executedBy, {
+        executeAfter,
+      });
+      await this.persistRequest(request);
+      throw new Error(
+        `Request ${requestId} cannot execute until ${executeAfter.toISOString()}`,
+      );
+    }
+
     this.updateRequestState(request, 'executing');
     this.addAuditEvent(request, 'execution.started', executedBy, {});
 
@@ -335,6 +420,16 @@ export class RTBFOrchestrator {
         request.execution.completedAt = new Date();
         this.addAuditEvent(request, 'execution.completed', executedBy, {
           jobCount: jobs.length,
+        });
+
+        const manifest = this.createPurgeManifest(request, jobs);
+        const tenantId = manifest.tenantId;
+        await this.repository.storePurgeManifest(tenantId, manifest);
+        request.execution.purgeManifestId = manifest.id;
+        request.execution.purgeManifest = manifest;
+        this.addAuditEvent(request, 'purge.manifest.generated', executedBy, {
+          manifestId: manifest.id,
+          tenantId,
         });
       }
 
@@ -588,6 +683,73 @@ export class RTBFOrchestrator {
     }
 
     return jobs;
+  }
+
+  private createPurgeManifest(
+    request: RTBFRequest,
+    jobs: RTBFJob[],
+  ): PurgeManifest {
+    const tenantId = this.resolveTenantId(request);
+    const createdAt = new Date();
+    const approvals = request.approval?.approvals ?? [];
+    const totals = {
+      totalJobs: jobs.length,
+      totalRecordsAffected: jobs.reduce(
+        (sum, job) => sum + (job.execution.recordsAffected ?? 0),
+        0,
+      ),
+      completedAt: request.execution?.completedAt,
+    };
+
+    const manifestBase = {
+      id: uuidv4(),
+      requestId: request.id,
+      tenantId,
+      createdAt,
+      executeAfter: request.approval?.executeAfter,
+      scope: request.scope,
+      deletionType: request.deletionType,
+      target: request.target,
+      approvals,
+      jobs: jobs.map((job) => ({
+        id: job.id,
+        storageSystem: job.storageSystem,
+        operation: job.operation.type,
+        recordsAffected: job.execution.recordsAffected,
+      })),
+      totals,
+    };
+
+    const hash = createHash('sha256')
+      .update(JSON.stringify(manifestBase))
+      .digest('hex');
+    const signature = createHmac('sha256', this.signingKey)
+      .update(hash)
+      .digest('hex');
+
+    return {
+      ...manifestBase,
+      signature,
+      signatureAlgorithm: this.signatureAlgorithm,
+      hash,
+    };
+  }
+
+  private resolveTenantId(request: RTBFRequest): string {
+    if (request.tenantId) {
+      return request.tenantId;
+    }
+
+    if (request.target.datasetIds) {
+      for (const datasetId of request.target.datasetIds) {
+        const record = this.repository.getRecord(datasetId);
+        if (record?.metadata.tenantId) {
+          return record.metadata.tenantId;
+        }
+      }
+    }
+
+    return 'unknown';
   }
 
   /**

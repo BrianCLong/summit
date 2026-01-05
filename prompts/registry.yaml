@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: rtbf-dual-approval
+    version: v1
+    path: prompts/tasks/rtbf-dual-approval.md
+    sha256: adac8aeb4799dd08a82e4fa5781e341eb00e0f8a481c649600369031e6aef1bf
+    description: Dual-actor RTBF approval, delayed execution, and signed purge manifest storage.
+    scope:
+      paths:
+        - server/src/governance/retention/
+        - server/src/db/retention/
+        - docs/roadmap/STATUS.json
+      domains:
+        - governance
+        - retention
+        - compliance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

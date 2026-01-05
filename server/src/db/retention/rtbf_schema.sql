@@ -8,6 +8,7 @@
 -- 4. provenance_tombstones - Cryptographic proofs of deleted data
 -- 5. hash_stubs - Hash stubs for redacted fields
 -- 6. provenance_chains - Provenance chains for RTBF operations
+-- 7. rtbf_purge_manifests - Signed purge manifests per tenant
 
 -- =============================================================================
 -- Data Retention Records
@@ -134,6 +135,30 @@ COMMENT ON COLUMN rtbf_requests.justification IS 'Legal/business justification';
 COMMENT ON COLUMN rtbf_requests.approval IS 'Approval workflow state';
 COMMENT ON COLUMN rtbf_requests.execution IS 'Execution tracking (job IDs, timestamps)';
 COMMENT ON COLUMN rtbf_requests.audit_events IS 'Complete audit trail for the request';
+
+-- =============================================================================
+-- RTBF Purge Manifests
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS rtbf_purge_manifests (
+    id TEXT PRIMARY KEY,
+    tenant_id TEXT NOT NULL,
+    request_id TEXT NOT NULL REFERENCES rtbf_requests(id),
+    manifest JSONB NOT NULL,
+    signature TEXT NOT NULL,
+    signature_algorithm TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_rtbf_purge_manifests_tenant
+    ON rtbf_purge_manifests(tenant_id);
+
+CREATE INDEX idx_rtbf_purge_manifests_request
+    ON rtbf_purge_manifests(request_id);
+
+COMMENT ON TABLE rtbf_purge_manifests IS 'Signed purge manifests stored per tenant partition key';
+COMMENT ON COLUMN rtbf_purge_manifests.tenant_id IS 'Tenant partition key for purge manifests';
+COMMENT ON COLUMN rtbf_purge_manifests.manifest IS 'Signed purge manifest payload';
 
 -- =============================================================================
 -- Provenance Tombstones
