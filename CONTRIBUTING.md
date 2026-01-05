@@ -70,6 +70,7 @@ Major architectural changes are reviewed by our internal "Council of Solvers" (a
 
 ## 📦 Release Cadence & CI/CD
 
+- **Release Preflight**: Releases must be cut from the `main` branch. The tag version must match the version in `package.json` and all workspaces exactly.
 - **Release Captain**: Our automated Release Captain ("Jules") manages the merge train and release tagging.
 - **Sprints**: We operate on a sprint cadence (currently Q4 2025 Strategic Sprints).
 - **CI Gates**:
