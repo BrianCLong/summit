@@ -84,6 +84,23 @@ make smoke
 Production promotions must pass the canary gates in `.github/workflows/deploy-multi-region.yml`.
 The gate runs **after deployment** and **before promotion** and blocks promotion on failure.
 
+## Supply Chain Verification (Deployment Blocking)
+
+Deployments must verify the container signature and SBOM attestations before any region rollout.
+`.github/workflows/deploy-multi-region.yml` runs `scripts/ci/verify-sbom-signature.sh` as a
+pre-deploy gate that fails closed if verification fails and emits a compliance receipt.
+
+Receipt artifacts:
+
+- Path: `artifacts/compliance-receipts/supply-chain-verification-<timestamp>.json`
+- Artifact name: `supply-chain-compliance-receipts`
+
+Local verification example:
+
+```bash
+scripts/ci/verify-sbom-signature.sh ghcr.io/org/app@sha256:...
+```
+
 ### Metrics Gate (Prometheus)
 
 - **Error rate**: `< 1%` over 5 minutes.

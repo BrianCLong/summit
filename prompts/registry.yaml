@@ -13,12 +13,14 @@ prompts:
         - docs/ga/
         - artifacts/
         - metrics/
+        - observability/
         - .github/
       domains:
         - governance
         - ci
         - provenance
         - quality
+        - observability
     verification:
       tiers_required:
         - A
@@ -28,27 +30,25 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: chaos-drills-policy-signing
+  - id: runbooks-docs-update
     version: v1
-    path: prompts/chaos-drills-policy-signing-v1.md
-    sha256: 167c9301775bec3f94c24f1aa7883a1b3ba839d2a8279be7024dc196fafde583
-    description: Chaos drill scenarios, fail-closed policy/signing safeguards, and provenance receipts/recovery evidence.
+    path: prompts/docs/runbooks-update@v1.md
+    sha256: d8fa2fa89f5bb30b954a8fc1735794033cd55be52bc8aedce76dcb57948fac11
+    description: Add or update operational runbooks with policy and receipt evidence steps.
     scope:
       paths:
-        - drills/
-        - server/src/services/
-        - server/src/provenance/
-        - docs/
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
         - agents/examples/
-        - prompts/
+        - prompts/docs/runbooks-update@v1.md
+        - prompts/registry.yaml
       domains:
-        - resilience
+        - documentation
+        - operations
         - governance
-        - provenance
-        - security
     verification:
       tiers_required:
-        - B
+        - C
       debt_budget:
         permitted: 0
         retirement_target: 0

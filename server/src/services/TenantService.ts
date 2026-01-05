@@ -51,6 +51,88 @@ export interface Tenant {
   updatedAt: Date;
 }
 
+const SETTINGS_HISTORY_KEY = 'settings_history';
+const SETTINGS_HISTORY_LIMIT = 10;
+
+interface SettingsHistoryEntry {
+  id: string;
+  timestamp: string;
+  actorId: string;
+  reason: string;
+  settings: Record<string, unknown>;
+}
+
+function sanitizeSettingsSnapshot(
+  settings: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  const snapshot = { ...(settings || {}) } as Record<string, unknown>;
+  delete snapshot[SETTINGS_HISTORY_KEY];
+  return snapshot;
+}
+
+export function buildSettingsWithHistory(
+  currentSettings: Record<string, unknown> | null | undefined,
+  updates: Record<string, unknown>,
+  actorId: string,
+  reason: string,
+): { settings: Record<string, unknown>; historyEntry: SettingsHistoryEntry } {
+  const sanitizedCurrent = sanitizeSettingsSnapshot(currentSettings);
+  const history = Array.isArray(currentSettings?.[SETTINGS_HISTORY_KEY])
+    ? (currentSettings?.[SETTINGS_HISTORY_KEY] as SettingsHistoryEntry[])
+    : [];
+  const historyEntry: SettingsHistoryEntry = {
+    id: randomUUID(),
+    timestamp: new Date().toISOString(),
+    actorId,
+    reason,
+    settings: sanitizedCurrent,
+  };
+  const nextHistory = [historyEntry, ...history].slice(0, SETTINGS_HISTORY_LIMIT);
+  const sanitizedUpdates = { ...updates } as Record<string, unknown>;
+  delete sanitizedUpdates[SETTINGS_HISTORY_KEY];
+  return {
+    settings: {
+      ...sanitizedCurrent,
+      ...sanitizedUpdates,
+      [SETTINGS_HISTORY_KEY]: nextHistory,
+    },
+    historyEntry,
+  };
+}
+
+export function buildRollbackSettings(
+  currentSettings: Record<string, unknown> | null | undefined,
+  actorId: string,
+  reason: string,
+): {
+  settings: Record<string, unknown>;
+  rolledBackTo: SettingsHistoryEntry;
+} {
+  const history = Array.isArray(currentSettings?.[SETTINGS_HISTORY_KEY])
+    ? (currentSettings?.[SETTINGS_HISTORY_KEY] as SettingsHistoryEntry[])
+    : [];
+  if (!history.length) {
+    throw new Error('No rollback history available');
+  }
+  const [latest, ...rest] = history;
+  const sanitizedCurrent = sanitizeSettingsSnapshot(currentSettings);
+  const rollbackEntry: SettingsHistoryEntry = {
+    id: randomUUID(),
+    timestamp: new Date().toISOString(),
+    actorId,
+    reason,
+    settings: sanitizedCurrent,
+  };
+  const nextHistory = [rollbackEntry, ...rest].slice(0, SETTINGS_HISTORY_LIMIT);
+  return {
+    settings: {
+      ...(latest.settings || {}),
+      [SETTINGS_HISTORY_KEY]: nextHistory,
+    },
+    rolledBackTo: latest,
+  };
+}
+
 export class TenantService {
   private static instance: TenantService;
   private metrics: PrometheusMetrics;
@@ -227,6 +309,7 @@ export class TenantService {
     tenantId: string,
     settings: Record<string, any>,
     actorId: string,
+    reason = 'settings_update',
   ): Promise<Tenant> {
     const pool = getPostgresPool();
     const client = await pool.connect();
@@ -238,10 +321,12 @@ export class TenantService {
         throw new Error('Tenant not found');
       }
 
-      const mergedSettings = {
-        ...(existing.rows[0].settings || {}),
-        ...settings,
-      };
+      const { settings: mergedSettings } = buildSettingsWithHistory(
+        existing.rows[0].settings || {},
+        settings,
+        actorId,
+        reason,
+      );
 
       const result = await client.query(
         'UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
@@ -256,6 +341,7 @@ export class TenantService {
         metadata: {
           tenantId,
           updatedKeys: Object.keys(settings),
+          reason,
           settingsHash: createHash('sha256')
             .update(JSON.stringify(mergedSettings))
             .digest('hex'),
@@ -328,6 +414,56 @@ export class TenantService {
     } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to disable tenant', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async rollbackSettings(
+    tenantId: string,
+    actorId: string,
+    reason = 'settings_rollback',
+  ): Promise<{ tenant: Tenant; rolledBackTo: SettingsHistoryEntry }> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const { settings: mergedSettings, rolledBackTo } = buildRollbackSettings(
+        existing.rows[0].settings || {},
+        actorId,
+        reason,
+      );
+
+      const result = await client.query(
+        'UPDATE tenants SET settings = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [mergedSettings, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_SETTINGS_ROLLBACK',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          reason,
+          rolledBackTo: rolledBackTo.id,
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return { tenant, rolledBackTo };
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to rollback tenant settings', error);
       throw error;
     } finally {
       client.release();

@@ -1,0 +1,239 @@
+{
+  "issue_number": 10,
+  "title": "M1: Enable Dependabot and secret scanning",
+  "url": "https://github.com/BrianCLong/summit/issues/10",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9095051513,
+      "node_id": "LA_kwDOPaNncM8AAAACHht4-Q",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/security",
+      "name": "security",
+      "color": "B60205",
+      "default": false,
+      "description": "Security/Policy"
+    },
+    {
+      "id": 9095051636,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5dA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:devops/ci",
+      "name": "area:devops/ci",
+      "color": "0e8a16",
+      "default": false,
+      "description": "Infra, CI/CD"
+    },
+    {
+      "id": 9095051648,
+      "node_id": "LA_kwDOPaNncM8AAAACHht5gA",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/area:security",
+      "name": "area:security",
+      "color": "BFD4F2",
+      "default": false,
+      "description": "Security-related documentation/action"
+    },
+    {
+      "id": 9095051813,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6JQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P0",
+      "name": "priority:P0",
+      "color": "d73a4a",
+      "default": false,
+      "description": "Highest priority"
+    }
+  ],
+  "updatedAt": "2025-12-19T22:35:15Z",
+  "createdAt": "2025-08-12T00:10:00Z",
+  "classification": "security",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15405,
+        "url": "https://github.com/BrianCLong/summit/pull/15405",
+        "mergedAt": null,
+        "title": "chore: pin pnpm runtime in CI and document project 19 queue"
+      },
+      {
+        "number": 15406,
+        "url": "https://github.com/BrianCLong/summit/pull/15406",
+        "mergedAt": null,
+        "title": "fix(ci): unblock GA by fixing supply-chain workflow pnpm configuration"
+      },
+      {
+        "number": 14363,
+        "url": "https://github.com/BrianCLong/summit/pull/14363",
+        "mergedAt": "2025-12-22T07:56:12Z",
+        "title": "Task 10.1: IP & licensing inventory"
+      },
+      {
+        "number": 14506,
+        "url": "https://github.com/BrianCLong/summit/pull/14506",
+        "mergedAt": "2025-12-27T00:26:21Z",
+        "title": "Sprint N+10: Security Posture & Threat Modeling"
+      },
+      {
+        "number": 14564,
+        "url": "https://github.com/BrianCLong/summit/pull/14564",
+        "mergedAt": "2025-12-27T04:47:57Z",
+        "title": "chore(deps): Bump pillow from 10.1.0 to 10.3.0 in /services/deepfake-detection-service"
+      },
+      {
+        "number": 14355,
+        "url": "https://github.com/BrianCLong/summit/pull/14355",
+        "mergedAt": "2025-12-22T08:05:10Z",
+        "title": "Add Epics 10-18 Jira Import Artifacts"
+      },
+      {
+        "number": 14444,
+        "url": "https://github.com/BrianCLong/summit/pull/14444",
+        "mergedAt": "2025-12-25T04:19:44Z",
+        "title": "Initialize Sprint N+10 artifacts and data models"
+      },
+      {
+        "number": 14015,
+        "url": "https://github.com/BrianCLong/summit/pull/14015",
+        "mergedAt": "2025-12-19T21:35:03Z",
+        "title": "Update Pillow version to 10.3.0"
+      },
+      {
+        "number": 14542,
+        "url": "https://github.com/BrianCLong/summit/pull/14542",
+        "mergedAt": "2025-12-27T00:37:32Z",
+        "title": "Sync 10 commits from TopicalityLLC/summit to BrianCLong/summit"
+      },
+      {
+        "number": 14356,
+        "url": "https://github.com/BrianCLong/summit/pull/14356",
+        "mergedAt": "2025-12-22T08:05:07Z",
+        "title": "Add Jira CSV import for Epics 10-18"
+      },
+      {
+        "number": 13338,
+        "url": "https://github.com/BrianCLong/summit/pull/13338",
+        "mergedAt": "2025-12-05T16:56:52Z",
+        "title": "Gap 10: ODNI & IC Go-to-Market Alignment"
+      },
+      {
+        "number": 15410,
+        "url": "https://github.com/BrianCLong/summit/pull/15410",
+        "mergedAt": null,
+        "title": "chore: enforce secret scanning gate"
+      },
+      {
+        "number": 12815,
+        "url": "https://github.com/BrianCLong/summit/pull/12815",
+        "mergedAt": "2025-12-04T16:20:37Z",
+        "title": "Add sprint plan for Mar 30–Apr 10 2026"
+      },
+      {
+        "number": 11818,
+        "url": "https://github.com/BrianCLong/summit/pull/11818",
+        "mergedAt": "2025-11-18T16:06:39Z",
+        "title": "chore(deps): bump glob from 10.4.5 to 10.5.0 in /apps/web"
+      },
+      {
+        "number": 15353,
+        "url": "https://github.com/BrianCLong/summit/pull/15353",
+        "mergedAt": "2026-01-01T11:36:52Z",
+        "title": "Implement Comprehensive Monitoring and Observability"
+      },
+      {
+        "number": 14539,
+        "url": "https://github.com/BrianCLong/summit/pull/14539",
+        "mergedAt": "2025-12-26T23:53:10Z",
+        "title": "chore(deps): Bump github.com/go-chi/chi/v5 from 5.0.10 to 5.2.2 in /services/q3c"
+      },
+      {
+        "number": 14893,
+        "url": "https://github.com/BrianCLong/summit/pull/14893",
+        "mergedAt": "2025-12-30T22:49:11Z",
+        "title": "Add disinfo response sprint plan and Day 1 deliverables"
+      },
+      {
+        "number": 15275,
+        "url": "https://github.com/BrianCLong/summit/pull/15275",
+        "mergedAt": "2026-01-01T05:13:41Z",
+        "title": "Add GA operator handbook and incident runbooks"
+      },
+      {
+        "number": 14380,
+        "url": "https://github.com/BrianCLong/summit/pull/14380",
+        "mergedAt": "2025-12-23T04:35:02Z",
+        "title": "⚡ Bolt: Optimize SimilarityService batching"
+      },
+      {
+        "number": 14834,
+        "url": "https://github.com/BrianCLong/summit/pull/14834",
+        "mergedAt": "2025-12-29T16:12:13Z",
+        "title": "test: strengthen graph guardrail fuzzing"
+      },
+      {
+        "number": 15184,
+        "url": "https://github.com/BrianCLong/summit/pull/15184",
+        "mergedAt": "2025-12-31T14:21:30Z",
+        "title": "chore(deps): bump docker/setup-buildx-action from 2 to 3"
+      },
+      {
+        "number": 15151,
+        "url": "https://github.com/BrianCLong/summit/pull/15151",
+        "mergedAt": "2025-12-30T21:29:24Z",
+        "title": "Identify and catalog critical TODOs"
+      },
+      {
+        "number": 12233,
+        "url": "https://github.com/BrianCLong/summit/pull/12233",
+        "mergedAt": "2025-11-23T00:37:29Z",
+        "title": "Bump nodemailer from 6.10.1 to 7.0.7 in /server"
+      },
+      {
+        "number": 13765,
+        "url": "https://github.com/BrianCLong/summit/pull/13765",
+        "mergedAt": "2025-12-20T03:34:50Z",
+        "title": "Update Sprint 8 growth and expansion plan"
+      },
+      {
+        "number": 11781,
+        "url": "https://github.com/BrianCLong/summit/pull/11781",
+        "mergedAt": "2025-10-24T19:43:12Z",
+        "title": "chore(deps): bump hono from 4.10.2 to 4.10.3 in /webapp"
+      },
+      {
+        "number": 15180,
+        "url": "https://github.com/BrianCLong/summit/pull/15180",
+        "mergedAt": "2025-12-31T14:21:19Z",
+        "title": "chore(deps): bump zaproxy/action-baseline from 0.14.0 to 0.15.0"
+      },
+      {
+        "number": 11778,
+        "url": "https://github.com/BrianCLong/summit/pull/11778",
+        "mergedAt": "2025-10-22T15:49:03Z",
+        "title": "chore(deps): bump hono from 4.9.10 to 4.10.2 in /webapp"
+      },
+      {
+        "number": 14854,
+        "url": "https://github.com/BrianCLong/summit/pull/14854",
+        "mergedAt": "2025-12-29T19:43:49Z",
+        "title": "fix: resolve linting errors across project files"
+      },
+      {
+        "number": 14229,
+        "url": "https://github.com/BrianCLong/summit/pull/14229",
+        "mergedAt": "2025-12-22T08:11:59Z",
+        "title": "Add Sprint N+7 plan and index link"
+      },
+      {
+        "number": 13079,
+        "url": "https://github.com/BrianCLong/summit/pull/13079",
+        "mergedAt": "2025-12-02T11:19:57Z",
+        "title": "chore(deps): bump nodemailer from 7.0.7 to 7.0.11 in /server"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

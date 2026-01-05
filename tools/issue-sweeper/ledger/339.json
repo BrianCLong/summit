@@ -1,0 +1,56 @@
+{
+  "issue_number": 339,
+  "title": "Predictive Analytics and Forecasting Engine",
+  "url": "https://github.com/BrianCLong/summit/issues/339",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122115570,
+      "node_id": "LA_kwDOPaNncM8AAAACH7hv8g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-enterprise-ai",
+      "name": "epic-enterprise-ai",
+      "color": "6C5CE7",
+      "default": false,
+      "description": "Enterprise AI and advanced optimization"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:24:39Z",
+  "createdAt": "2025-08-16T22:24:39Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11841,
+        "url": "https://github.com/BrianCLong/summit/pull/11841",
+        "mergedAt": "2025-11-20T09:48:29Z",
+        "title": "feat: implement IntelGraph ML benchmarking and auto-tuning stack"
+      },
+      {
+        "number": 13183,
+        "url": "https://github.com/BrianCLong/summit/pull/13183",
+        "mergedAt": "2025-12-04T15:39:03Z",
+        "title": "Build graph explorer UI with Tailwind and shadcn"
+      },
+      {
+        "number": 11894,
+        "url": "https://github.com/BrianCLong/summit/pull/11894",
+        "mergedAt": null,
+        "title": "Build Advanced Attribution and Identity Resolution Platform"
+      },
+      {
+        "number": 10080,
+        "url": "https://github.com/BrianCLong/summit/pull/10080",
+        "mergedAt": null,
+        "title": "🎃 October 2025 Master Plan - Final Delivery"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

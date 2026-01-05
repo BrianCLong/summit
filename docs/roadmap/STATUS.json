@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-02T09:00:00Z",
-  "revision_note": "Recorded chaos drill scenarios, fail-closed guardrails, and provenance receipt/recovery evidence",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",
