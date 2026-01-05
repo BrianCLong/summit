@@ -1,0 +1,62 @@
+name: PR Conflict Forecast
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Daily at 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  forecast:
+    name: Conflict Forecast
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Using standard setup steps instead of reusable workflow to have more control in this single file context,
+      # but mirroring the reusable logic.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "10.0.0"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Forecast Script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx tsx scripts/ops/pr_conflict_forecast.ts
+
+      - name: Upload Forecast Report (JSON)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-conflict-forecast-json
+          path: docs/ops/pr-forecast/PR_CONFLICT_FORECAST.json
+          retention-days: 7
+
+      - name: Upload Forecast Report (Markdown)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-conflict-forecast-md
+          path: docs/ops/pr-forecast/PR_CONFLICT_FORECAST.md
+          retention-days: 7
+
+      - name: Workflow Summary
+        if: always()
+        run: |
+          if [ -f docs/ops/pr-forecast/PR_CONFLICT_FORECAST.md ]; then
+            cat docs/ops/pr-forecast/PR_CONFLICT_FORECAST.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Report generation failed." >> $GITHUB_STEP_SUMMARY
+          fi
