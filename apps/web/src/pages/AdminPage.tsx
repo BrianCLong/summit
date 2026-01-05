@@ -6,6 +6,7 @@ import { trackGoldenPathStep } from '@/telemetry/metrics'
 import { markStepComplete } from '@/lib/activation'
 import { ContextualNudge } from '@/components/activation/ContextualNudge'
 import MergeRollbackPanel from '@/components/admin/MergeRollbackPanel'
+import DataExportTools from '@/components/admin/DataExportTools'
 
 export default function AdminPage() {
   const handleCreateTenant = () => {
@@ -38,6 +39,9 @@ export default function AdminPage() {
       />
       <div className="mt-8">
         <MergeRollbackPanel />
+      </div>
+      <div className="mt-8">
+        <DataExportTools />
       </div>
     </div>
   )

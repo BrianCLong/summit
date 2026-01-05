@@ -17,11 +17,22 @@ export type ExportArtifact =
   | 'attestations'
   | 'policy-reports';
 
+type ExportRedactionPolicy = ReturnType<
+  RedactionService['createRedactionPolicy']
+>;
+
+export type DisclosureScope = 'internal' | 'partner' | 'public';
+
 export interface DisclosureExportRequest {
   tenantId: string;
   startTime: Date;
   endTime: Date;
   artifacts: ExportArtifact[];
+  disclosure: {
+    scope: DisclosureScope;
+    allowedFields?: string[];
+  };
+  retentionDays: number;
   callbackUrl?: string;
 }
 
@@ -45,6 +56,11 @@ export interface DisclosureExportJob {
   sha256?: string;
   error?: string;
   claimSet?: any;
+  disclosure?: {
+    scope: DisclosureScope;
+    allowedFields?: string[];
+  };
+  retentionDays?: number;
 }
 
 interface InternalJob extends DisclosureExportJob {
@@ -72,8 +88,132 @@ const requestSchema = z.object({
   artifacts: z
     .array(z.enum(['audit-trail', 'sbom', 'attestations', 'policy-reports']))
     .optional(),
+  disclosure: z
+    .object({
+      scope: z.enum(['internal', 'partner', 'public']).default('internal'),
+      allowedFields: z.array(z.string()).optional(),
+    })
+    .optional(),
   callbackUrl: z.string().url().optional(),
 });
+
+const DEFAULT_RETENTION_DAYS = 365;
+
+const DISCLOSURE_POLICIES: Record<
+  DisclosureScope,
+  {
+    scope: DisclosureScope;
+    allowedArtifacts: ExportArtifact[];
+    redactionRules: Array<'pii' | 'sensitive' | 'financial'>;
+    allowedFields?: string[];
+  }
+> = {
+  internal: {
+    scope: 'internal',
+    allowedArtifacts: DEFAULT_ARTIFACTS,
+    redactionRules: ['pii', 'sensitive', 'financial'],
+  },
+  partner: {
+    scope: 'partner',
+    allowedArtifacts: ['audit-trail', 'sbom', 'policy-reports'],
+    redactionRules: ['pii', 'sensitive'],
+    allowedFields: [
+      'id',
+      'event_type',
+      'action',
+      'resource_type',
+      'resource_id',
+      'status',
+      'created_at',
+      'policy',
+      'decision',
+      'user_id',
+      'tenant_id',
+    ],
+  },
+  public: {
+    scope: 'public',
+    allowedArtifacts: ['sbom', 'policy-reports'],
+    redactionRules: ['pii', 'sensitive', 'financial'],
+    allowedFields: [
+      'id',
+      'event_type',
+      'action',
+      'resource_type',
+      'status',
+      'created_at',
+      'policy',
+      'decision',
+    ],
+  },
+};
+
+export function resolveDisclosurePolicy(
+  scope: DisclosureScope,
+): (typeof DISCLOSURE_POLICIES)[DisclosureScope] {
+  return DISCLOSURE_POLICIES[scope] ?? DISCLOSURE_POLICIES.internal;
+}
+
+export function applyDisclosurePolicy(args: {
+  requestedArtifacts: ExportArtifact[];
+  disclosureScope: DisclosureScope;
+  requestedAllowedFields?: string[];
+}) {
+  const policy = resolveDisclosurePolicy(args.disclosureScope);
+  const requested = args.requestedArtifacts.length
+    ? args.requestedArtifacts
+    : policy.allowedArtifacts;
+  const artifacts = requested.filter((artifact) =>
+    policy.allowedArtifacts.includes(artifact),
+  );
+  const policyAllowlist = policy.allowedFields;
+  const requestedAllowlist = args.requestedAllowedFields;
+  const allowedFields = policyAllowlist
+    ? requestedAllowlist && requestedAllowlist.length
+      ? requestedAllowlist.filter((field) => policyAllowlist.includes(field))
+      : policyAllowlist
+    : requestedAllowlist;
+  return {
+    artifacts,
+    allowedFields,
+    redactionRules: policy.redactionRules,
+    scope: policy.scope,
+  };
+}
+
+export function enforceRetentionWindow(args: {
+  startTime: Date;
+  endTime: Date;
+  retentionDays: number;
+  now?: Date;
+}) {
+  const now = args.now ?? new Date();
+  const retentionMs = args.retentionDays * 24 * 60 * 60 * 1000;
+  const earliestAllowed = new Date(now.getTime() - retentionMs);
+  if (args.startTime < earliestAllowed) {
+    throw new Error('retention_window_exceeded');
+  }
+  if (args.endTime < args.startTime) {
+    throw new Error('end_before_start');
+  }
+}
+
+async function resolveTenantRetentionDays(tenantId: string): Promise<number> {
+  const pool = getPostgresPool();
+  try {
+    const result = await pool.query(
+      'SELECT export_retention_days FROM tenants WHERE tenant_id = $1',
+      [tenantId],
+    );
+    const value = Number(result.rows[0]?.export_retention_days);
+    if (Number.isFinite(value) && value > 0) {
+      return value;
+    }
+  } catch (error: any) {
+    console.warn('Failed to resolve tenant retention policy', error?.message);
+  }
+  return DEFAULT_RETENTION_DAYS;
+}
 
 async function ensureDir(dir: string): Promise<void> {
   await fs.mkdir(dir, { recursive: true });
@@ -119,15 +259,31 @@ export class DisclosureExportService {
       throw new Error('invalid_time_range');
     }
 
-    if (parsed.endTime <= parsed.startTime) {
-      throw new Error('end_before_start');
-    }
+    const retentionDays = await resolveTenantRetentionDays(parsed.tenantId);
+    enforceRetentionWindow({
+      startTime: parsed.startTime,
+      endTime: parsed.endTime,
+      retentionDays,
+    });
 
     const diffDays =
       (parsed.endTime.getTime() - parsed.startTime.getTime()) /
       (1000 * 60 * 60 * 24);
     if (diffDays > MAX_WINDOW_DAYS) {
       throw new Error('window_too_large');
+    }
+
+    const disclosureScope = parsed.disclosure?.scope ?? 'internal';
+    const disclosurePolicy = applyDisclosurePolicy({
+      requestedArtifacts: parsed.artifacts?.length
+        ? parsed.artifacts
+        : DEFAULT_ARTIFACTS,
+      disclosureScope,
+      requestedAllowedFields: parsed.disclosure?.allowedFields,
+    });
+
+    if (disclosurePolicy.artifacts.length === 0) {
+      throw new Error('no_allowed_artifacts');
     }
 
     const jobId = randomUUID();
@@ -146,9 +302,12 @@ export class DisclosureExportService {
         tenantId: parsed.tenantId,
         startTime: parsed.startTime,
         endTime: parsed.endTime,
-        artifacts: parsed.artifacts?.length
-          ? parsed.artifacts
-          : DEFAULT_ARTIFACTS,
+        artifacts: disclosurePolicy.artifacts,
+        disclosure: {
+          scope: disclosurePolicy.scope,
+          allowedFields: disclosurePolicy.allowedFields,
+        },
+        retentionDays,
         callbackUrl: parsed.callbackUrl,
       },
       workingDir,
@@ -205,13 +364,21 @@ export class DisclosureExportService {
 
     try {
       const pool = getPostgresPool();
-      const {
-        tenantId,
-        startTime,
-        endTime,
-        artifacts: requestedArtifacts,
-        callbackUrl,
-      } = job.request;
+    const {
+      tenantId,
+      startTime,
+      endTime,
+      artifacts: requestedArtifacts,
+      callbackUrl,
+      disclosure,
+    } = job.request;
+    const disclosurePolicy = resolveDisclosurePolicy(disclosure.scope);
+    const redactionPolicy = this.redaction.createRedactionPolicy(
+      disclosurePolicy.redactionRules,
+      {
+        allowedFields: disclosure.allowedFields,
+      },
+    );
 
       if (requestedArtifacts.includes('audit-trail')) {
         const result = await this.collectAuditTrail({
@@ -219,6 +386,7 @@ export class DisclosureExportService {
           pool,
           startTime,
           endTime,
+          redactionPolicy,
         });
         artifacts.push({
           name: 'audit-trail.json',
@@ -257,6 +425,7 @@ export class DisclosureExportService {
           pool,
           startTime,
           endTime,
+          redactionPolicy,
         });
         if (result) {
           artifacts.push({
@@ -277,6 +446,7 @@ export class DisclosureExportService {
           pool,
           startTime,
           endTime,
+          redactionPolicy,
         });
         if (result) {
           artifacts.push({
@@ -345,6 +515,8 @@ export class DisclosureExportService {
         start: job.request.startTime.toISOString(),
         end: job.request.endTime.toISOString(),
       },
+      disclosure: job.request.disclosure,
+      retentionDays: job.request.retentionDays,
       artifacts: artifactHashes,
       warnings,
       createdAt: new Date().toISOString(),
@@ -357,6 +529,8 @@ export class DisclosureExportService {
         start: job.request.startTime.toISOString(),
         end: job.request.endTime.toISOString(),
       },
+      disclosure: job.request.disclosure,
+      retentionDays: job.request.retentionDays,
       artifacts: artifactHashes,
       warnings,
       signature,
@@ -395,11 +569,13 @@ export class DisclosureExportService {
     pool,
     startTime,
     endTime,
+    redactionPolicy,
   }: {
     job: InternalJob;
     pool: any;
     startTime: Date;
     endTime: Date;
+    redactionPolicy: ExportRedactionPolicy;
   }) {
     const { rows } = await pool.query(
       `SELECT * FROM audit_events
@@ -420,9 +596,7 @@ export class DisclosureExportService {
     for (const row of selected) {
       const clean = await this.redaction.redactObject(
         row,
-        {
-          rules: ['pii', 'sensitive', 'financial'],
-        },
+        redactionPolicy,
         job.tenantId,
         { jobId: job.id },
       );
@@ -497,11 +671,13 @@ export class DisclosureExportService {
     pool,
     startTime,
     endTime,
+    redactionPolicy,
   }: {
     job: InternalJob;
     pool: any;
     startTime: Date;
     endTime: Date;
+    redactionPolicy: ExportRedactionPolicy;
   }) {
     const { rows } = await pool.query(
       `SELECT policy, decision, created_at, user_id
@@ -520,9 +696,7 @@ export class DisclosureExportService {
     for (const row of rows) {
       const clean = await this.redaction.redactObject(
         row,
-        {
-          rules: ['pii', 'sensitive'],
-        },
+        redactionPolicy,
         job.tenantId,
         { jobId: job.id, artifact: 'policy' },
       );
@@ -549,11 +723,13 @@ export class DisclosureExportService {
     pool,
     startTime,
     endTime,
+    redactionPolicy,
   }: {
     job: InternalJob;
     pool: any;
     startTime: Date;
     endTime: Date;
+    redactionPolicy: ExportRedactionPolicy;
   }) {
     const { rows } = await pool.query(
       `SELECT attestation, created_at
@@ -568,13 +744,25 @@ export class DisclosureExportService {
       return null;
     }
 
-    const attestations = rows.map((row: any) => ({
-      createdAt:
-        row.created_at instanceof Date
-          ? row.created_at.toISOString()
-          : row.created_at,
-      attestation: row.attestation,
-    }));
+    const attestations: Array<{
+      createdAt: string;
+      attestation: any;
+    }> = [];
+    for (const row of rows) {
+      const attestation = await this.redaction.redactObject(
+        row.attestation,
+        redactionPolicy,
+        job.tenantId,
+        { jobId: job.id, artifact: 'attestation' },
+      );
+      attestations.push({
+        createdAt:
+          row.created_at instanceof Date
+            ? row.created_at.toISOString()
+            : row.created_at,
+        attestation,
+      });
+    }
 
     const filePath = path.join(job.workingDir, 'attestations.json');
     await this.writeJsonObject(filePath, {
@@ -646,6 +834,8 @@ export class DisclosureExportService {
       sha256: job.sha256,
       error: job.error,
       claimSet: job.claimSet,
+      disclosure: job.request.disclosure,
+      retentionDays: job.request.retentionDays,
     };
   }
 }

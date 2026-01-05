@@ -58,7 +58,9 @@ router.post('/export', async (req, res) => {
   } catch (error: any) {
     const status =
       error?.message === 'window_too_large' ||
-      error?.message === 'end_before_start'
+      error?.message === 'end_before_start' ||
+      error?.message === 'retention_window_exceeded' ||
+      error?.message === 'no_allowed_artifacts'
         ? 400
         : 500;
     return res
