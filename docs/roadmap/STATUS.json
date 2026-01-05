@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-02-02T18:00:00Z",
+  "revision_note": "Hardened report determinism and provenance footer rendering for GA export readiness",
   "initiatives": [
     {
       "id": "A",

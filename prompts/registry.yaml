@@ -28,3 +28,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: companyos-sprint-03
+    version: v1
+    path: prompts/companyos-sprint-03.md
+    sha256: 5d103d8b50f4340bdbabf9670f72e14cf2fc58f7e3839fe659535d8ab9db419d
+    description: Deterministic report output and provenance footer hardening for CompanyOS Sprint 03.
+    scope:
+      paths:
+        - server/src/services/
+        - docs/roadmap/
+        - prompts/
+      domains:
+        - governance
+        - export
+        - determinism
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

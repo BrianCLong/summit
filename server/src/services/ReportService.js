@@ -15,6 +15,89 @@ class ReportService {
     fs.mkdirSync(this.outputDir, { recursive: true });
   }
 
+  resolveReportTimestamp(metadata = {}) {
+    const candidate =
+      metadata.generatedAt ||
+      metadata.deterministicTimestamp ||
+      metadata.reportTimestamp;
+    if (!candidate) {
+      return new Date();
+    }
+    const parsed = new Date(candidate);
+    if (Number.isNaN(parsed.getTime())) {
+      return new Date();
+    }
+    return parsed;
+  }
+
+  formatTimestampForFilename(date) {
+    return date.toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  }
+
+  normalizeValue(value) {
+    if (Array.isArray(value)) {
+      return value.map((item) => this.normalizeValue(item));
+    }
+    if (value && typeof value === 'object') {
+      return Object.keys(value)
+        .sort()
+        .reduce((acc, key) => {
+          acc[key] = this.normalizeValue(value[key]);
+          return acc;
+        }, {});
+    }
+    return value;
+  }
+
+  stableStringify(value) {
+    return JSON.stringify(this.normalizeValue(value), null, 2);
+  }
+
+  normalizeReportCollections(findings = [], evidence = [], gaps = [], metadata = {}) {
+    if (!metadata || metadata.deterministic !== true) {
+      return { findings, evidence, gaps };
+    }
+    const keyForItem = (item) => {
+      if (typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean') {
+        return String(item);
+      }
+      return this.stableStringify(item);
+    };
+    const sortItems = (items) =>
+      [...items].sort((a, b) => keyForItem(a).localeCompare(keyForItem(b)));
+    return {
+      findings: sortItems(findings || []),
+      evidence: sortItems(evidence || []),
+      gaps: sortItems(gaps || []),
+    };
+  }
+
+  resolveProvenance(metadata = {}) {
+    const provenance = metadata.provenance || {};
+    const deferred = 'Deferred pending source';
+    return {
+      buildVersion:
+        metadata.buildVersion ||
+        provenance.buildVersion ||
+        process.env.BUILD_VERSION ||
+        deferred,
+      policyBundleHash:
+        metadata.policyBundleHash ||
+        provenance.policyBundleHash ||
+        process.env.POLICY_BUNDLE_HASH ||
+        deferred,
+      exportHash:
+        metadata.exportHash ||
+        provenance.exportHash ||
+        metadata.bundleHash ||
+        deferred,
+      timeWindow:
+        metadata.timeWindow ||
+        provenance.timeWindow ||
+        deferred,
+    };
+  }
+
   async generateHTMLReport({
     investigationId,
     title,
@@ -47,21 +130,23 @@ class ReportService {
         });
     }
 
-    const now = new Date();
+    const reportTimestamp = this.resolveReportTimestamp(metadata);
+    const generatedAt = reportTimestamp.toISOString();
     const safeTitle = (
       title || `investigation-${investigationId || 'general'}`
     ).replace(/[^a-z0-9-_]+/gi, '-');
-    const filename = `${safeTitle}-${now.toISOString().slice(0, 19).replace(/[:T]/g, '-')}.html`;
+    const filename = `${safeTitle}-${this.formatTimestampForFilename(reportTimestamp)}.html`;
     const filePath = path.join(this.outputDir, filename);
 
+    const normalized = this.normalizeReportCollections(findings, evidence, gaps, metadata);
     const html = this.renderHTML({
       investigationId,
       title: title || 'Investigation Report',
-      findings,
-      evidence,
+      findings: normalized.findings,
+      evidence: normalized.evidence,
       metadata,
-      gaps,
-      generatedAt: now.toISOString(),
+      gaps: normalized.gaps,
+      generatedAt,
     });
     fs.writeFileSync(filePath, html, 'utf-8');
     this.logger && this.logger.info('Report generated', { filePath });
@@ -141,24 +226,23 @@ class ReportService {
         });
     }
 
-    const now = new Date();
+    const reportTimestamp = this.resolveReportTimestamp(metadata);
+    const generatedAt = reportTimestamp.toISOString();
     const safeTitle = (
       title || `investigation-${investigationId || 'general'}`
     ).replace(/[^a-z0-9-_]+/gi, '-');
-    const filename = `${safeTitle}-${now
-      .toISOString()
-      .slice(0, 19)
-      .replace(/[:T]/g, '-')}.md`;
+    const filename = `${safeTitle}-${this.formatTimestampForFilename(reportTimestamp)}.md`;
     const filePath = path.join(this.outputDir, filename);
 
+    const normalized = this.normalizeReportCollections(findings, evidence, gaps, metadata);
     const markdown = this.renderMarkdown({
       investigationId,
       title: title || 'Investigation Report',
-      findings,
-      evidence,
+      findings: normalized.findings,
+      evidence: normalized.evidence,
       metadata,
-      gaps,
-      generatedAt: now.toISOString(),
+      gaps: normalized.gaps,
+      generatedAt,
     });
     fs.writeFileSync(filePath, markdown, 'utf-8');
     this.logger && this.logger.info('Markdown report generated', { filePath });
@@ -175,9 +259,10 @@ class ReportService {
     metadata = {},
     format = 'pdf',
   }) {
-    const now = new Date();
+    const reportTimestamp = this.resolveReportTimestamp(metadata);
+    const generatedAt = reportTimestamp.toISOString();
     const safeTitle = `${title.replace(/[^a-z0-9-_]+/gi, '-')}-${period}`;
-    const filenameBase = `${safeTitle}-${now.toISOString().slice(0, 19).replace(/[:T]/g, '-')}`;
+    const filenameBase = `${safeTitle}-${this.formatTimestampForFilename(reportTimestamp)}`;
 
     const html = this.renderESGHTML({
       title,
@@ -186,7 +271,7 @@ class ReportService {
       social,
       governance,
       metadata,
-      generatedAt: now.toISOString(),
+      generatedAt,
     });
 
     const htmlPath = path.join(this.outputDir, `${filenameBase}.html`);
@@ -263,6 +348,8 @@ class ReportService {
     zip = false,
   }) {
     let primary;
+    const reportTimestamp = this.resolveReportTimestamp(metadata);
+    const generatedAt = reportTimestamp.toISOString();
     if (format === 'pdf')
       primary = await this.generatePDFReport({
         investigationId,
@@ -288,23 +375,24 @@ class ReportService {
         metadata,
       });
     if (!zip) return primary;
+    const normalized = this.normalizeReportCollections(findings, evidence, [], metadata);
     const json = JSON.stringify(
       {
         investigationId,
         title,
-        findings,
-        evidence,
+        findings: normalized.findings,
+        evidence: normalized.evidence,
         metadata,
-        generatedAt: new Date().toISOString(),
+        generatedAt,
       },
       null,
       2,
     );
     const csvHeader = 'section,value\n';
-    const csvFindings = (findings || [])
+    const csvFindings = (normalized.findings || [])
       .map((f) => `finding,${JSON.stringify(String(f))}`)
       .join('\n');
-    const csvEvidence = (evidence || [])
+    const csvEvidence = (normalized.evidence || [])
       .map((e) => `evidence,${JSON.stringify(String(e))}`)
       .join('\n');
     const csv =
@@ -321,7 +409,7 @@ class ReportService {
     items.push({ name: 'report.csv', content: csv });
     const zipRes = await this.zipFiles(
       items,
-      (title || 'report') + '-' + Date.now(),
+      `${title || 'report'}-${this.formatTimestampForFilename(reportTimestamp)}`,
     );
     return { ...zipRes, items: [primary] };
   }
@@ -340,6 +428,7 @@ class ReportService {
         /[&<>]/g,
         (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c],
       );
+    const provenance = this.resolveProvenance(metadata);
 
     const metricRow = (label, value, unit = '') => `
       <div class="metric-row">
@@ -348,7 +437,7 @@ class ReportService {
       </div>`;
 
     const section = (name, data) => {
-      const metrics = Object.entries(data).map(([k, v]) => {
+      const metrics = Object.entries(data).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => {
         if (typeof v === 'object' && v !== null) {
           return metricRow(k, v.value, v.unit);
         }
@@ -379,6 +468,8 @@ class ReportService {
     .metric-value { font-family: monospace; font-weight: bold; }
     .unit { color: #95a5a6; font-size: 0.8em; font-weight: normal; }
     .footer { margin-top: 4rem; font-size: 0.8rem; text-align: center; color: #bdc3c7; }
+    .provenance { margin-top: 2rem; font-size: 0.85rem; color: #555; }
+    .provenance ul { padding-left: 1.2rem; }
   </style>
 </head>
 <body>
@@ -394,7 +485,19 @@ class ReportService {
 
   <div class="section">
     <h2>Metadata</h2>
-    <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px;">${esc(JSON.stringify(metadata || {}, null, 2))}</pre>
+    <pre style="background: #f8f9fa; padding: 10px; border-radius: 4px;">${esc(
+      this.stableStringify(metadata || {}),
+    )}</pre>
+  </div>
+
+  <div class="section provenance">
+    <h2>Provenance</h2>
+    <ul>
+      <li>Build: ${esc(provenance.buildVersion)}</li>
+      <li>Policy bundle hash: ${esc(provenance.policyBundleHash)}</li>
+      <li>Export hash: ${esc(provenance.exportHash)}</li>
+      <li>Time window: ${esc(provenance.timeWindow)}</li>
+    </ul>
   </div>
 
   <div class="footer">
@@ -430,6 +533,7 @@ class ReportService {
       return `<li>${esc(x)}</li>`;
     };
     const items = (arr) => arr.map(renderItem).join('\n');
+    const provenance = this.resolveProvenance(metadata);
 
     let gapsHtml = '';
     if (gaps && gaps.length > 0) {
@@ -457,6 +561,8 @@ class ReportService {
     .citations { font-size: 0.8em; color: #666; vertical-align: super; }
     .gaps { background-color: #fff8f8; padding: 1rem; border-left: 4px solid #ff4444; }
     code { background: #f6f8fa; padding: 2px 4px; border-radius: 4px; }
+    .provenance { margin-top: 2rem; font-size: 0.85rem; color: #555; }
+    .provenance ul { padding-left: 1.2rem; }
   </style>
   </head>
 <body>
@@ -485,7 +591,16 @@ class ReportService {
   ${gapsHtml}
   <div class="section">
     <h2>Metadata</h2>
-    <pre>${esc(JSON.stringify(metadata || {}, null, 2))}</pre>
+    <pre>${esc(this.stableStringify(metadata || {}))}</pre>
+  </div>
+  <div class="section provenance">
+    <h2>Provenance</h2>
+    <ul>
+      <li>Build: ${esc(provenance.buildVersion)}</li>
+      <li>Policy bundle hash: ${esc(provenance.policyBundleHash)}</li>
+      <li>Export hash: ${esc(provenance.exportHash)}</li>
+      <li>Time window: ${esc(provenance.timeWindow)}</li>
+    </ul>
   </div>
 </body>
 </html>`;
@@ -512,6 +627,7 @@ class ReportService {
       return `- ${esc(x)}`;
     };
     const items = (arr) => arr.map(renderItem).join('\n');
+    const provenance = this.resolveProvenance(metadata);
 
     let gapsMd = '';
     if (gaps && gaps.length > 0) {
@@ -521,8 +637,8 @@ class ReportService {
     return `# ${esc(title)}\n\nGenerated: ${esc(generatedAt)}$${
       investigationId ? `\nInvestigation: ${esc(investigationId)}` : ''
     }\n\n## Summary\n\n- Total Findings: ${findings.length}\n- Total Evidence: ${evidence.length}${gaps.length > 0 ? `\n- Uncited Statements: ${gaps.length}` : ''}\n\n## Findings\n${items(findings)}\n\n## Evidence\n${items(evidence)}\n${gapsMd}\n## Metadata\n\n\`\`\`json\n${esc(
-      JSON.stringify(metadata || {}, null, 2),
-    )}\n\`\`\`\n`;
+      this.stableStringify(metadata || {}),
+    )}\n\`\`\`\n\n## Provenance\n\n- Build: ${esc(provenance.buildVersion)}\n- Policy bundle hash: ${esc(provenance.policyBundleHash)}\n- Export hash: ${esc(provenance.exportHash)}\n- Time window: ${esc(provenance.timeWindow)}\n`;
   }
 }
 
