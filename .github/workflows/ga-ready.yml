@@ -10,6 +10,7 @@ jobs:
   ga-ready:
     name: GA Readiness Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     permissions:
       contents: read
       pull-requests: write
@@ -18,9 +19,11 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,6 +34,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare evidence directories
+        run: |
+          mkdir -p .evidence/ga
+          mkdir -p artifacts/ga/ga-ready
+
       - name: Boot Minimal Stack
         run: |
           docker compose -f docker-compose.yml -f docker-compose.minimal.yml up -d
@@ -39,40 +47,58 @@ jobs:
           sleep 30
           # We could use wait-for-it or healthcheck here
 
-      - name: Install Security Tools
-        run: |
-          # Install Gitleaks
-          wget https://github.com/gitleaks/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz
-          tar -xzf gitleaks_8.18.2_linux_x64.tar.gz
-          sudo mv gitleaks /usr/local/bin/
-
-          # Install Trivy
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.tar.gz
-          tar -xzf trivy_0.50.1_Linux-64bit.tar.gz
-          sudo mv trivy /usr/local/bin/
-
       - name: Run Gitleaks
-        run: |
-          gitleaks detect --source . --report-path gitleaks.json --no-git || true
-          # Note: We allow failure here so ga-check can report it,
-          # but usually we want to fail fast.
-          # bin/ga-check expects gitleaks.json to exist.
+        id: gitleaks
+        continue-on-error: true
+        uses: gitleaks/gitleaks-action@5ee6c46da3db5c6d5b7b8af4564c3ccaf16c5b88 # v2.3.2
+        with:
+          args: "detect --source . --report-format json --report-path gitleaks.json"
 
       - name: Run Trivy
-        run: |
-          trivy fs --format json --output trivy-results.json . || true
+        id: trivy
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'secret,vuln'
+          severity: 'CRITICAL,HIGH'
+          format: 'json'
+          output: 'trivy-results.json'
+          exit-code: '1'
 
       - name: Run GA Readiness Check
         id: ga_check
         run: |
           ./bin/ga-check.mjs
 
+      - name: Enforce scan status
+        if: always()
+        run: |
+          if [ "${{ steps.gitleaks.outcome }}" = "failure" ]; then
+            echo "Gitleaks reported failure"
+            exit 1
+          fi
+          if [ "${{ steps.trivy.outcome }}" = "failure" ]; then
+            echo "Trivy reported failure"
+            exit 1
+          fi
+
+      - name: Collect evidence bundle
+        if: always()
+        run: |
+          # Preserve raw security scan output for determinism
+          cp -f gitleaks.json .evidence/ga/gitleaks.json || true
+          cp -f trivy-results.json .evidence/ga/trivy-results.json || true
+          cp -rf .evidence/ga artifacts/ga/ga-ready/
+
       - name: Upload Evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ga-evidence
-          path: .evidence/ga/
+          path: artifacts/ga/ga-ready/
+          if-no-files-found: error
 
       - name: Comment on PR
         if: github.event_name == 'pull_request' && always()
