@@ -104,6 +104,7 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "coverage:gate": "node scripts/ci/coverage-gate.mjs",
     "prepare": "husky"
   },
   "keywords": [
