@@ -7,6 +7,7 @@ This document describes the format of the release artifacts bundle, designed for
 All key JSON artifacts in the release bundle include a top-level `schemaVersion` field. This version string (e.g., `"1.0.0"`) allows consumers to identify the format of the artifact and adapt to changes over time.
 
 Example (`release-manifest.json`):
+
 ```json
 {
   "schemaVersion": "1.0.0",
