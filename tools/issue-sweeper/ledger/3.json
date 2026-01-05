@@ -1,0 +1,221 @@
+{
+  "issue_number": 3,
+  "title": "Meta: Track IntelGraph bootstrap tasks",
+  "url": "https://github.com/BrianCLong/summit/issues/3",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9095051482,
+      "node_id": "LA_kwDOPaNncM8AAAACHht42g",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/type:chore",
+      "name": "type:chore",
+      "color": "bfdadc",
+      "default": false,
+      "description": "Maintenance"
+    },
+    {
+      "id": 9095051826,
+      "node_id": "LA_kwDOPaNncM8AAAACHht6Mg",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/priority:P1",
+      "name": "priority:P1",
+      "color": "e99695",
+      "default": false,
+      "description": "High priority"
+    }
+  ],
+  "updatedAt": "2025-08-12T00:03:13Z",
+  "createdAt": "2025-08-12T00:03:13Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15405,
+        "url": "https://github.com/BrianCLong/summit/pull/15405",
+        "mergedAt": null,
+        "title": "chore: pin pnpm runtime in CI and document project 19 queue"
+      },
+      {
+        "number": 15433,
+        "url": "https://github.com/BrianCLong/summit/pull/15433",
+        "mergedAt": null,
+        "title": "feat: add orchestration control plane slice"
+      },
+      {
+        "number": 15131,
+        "url": "https://github.com/BrianCLong/summit/pull/15131",
+        "mergedAt": "2025-12-30T21:30:53Z",
+        "title": "chore(deps): bump napi from 2.16.17 to 3.3.0"
+      },
+      {
+        "number": 15465,
+        "url": "https://github.com/BrianCLong/summit/pull/15465",
+        "mergedAt": null,
+        "title": "Add Topicality Stack Roadmap and Maturity Assessment"
+      },
+      {
+        "number": 14620,
+        "url": "https://github.com/BrianCLong/summit/pull/14620",
+        "mergedAt": "2025-12-27T06:04:45Z",
+        "title": "chore(deps-dev): Bump werkzeug from 3.1.3 to 3.1.4 in /modules/connector-sdk-s3csv"
+      },
+      {
+        "number": 15159,
+        "url": "https://github.com/BrianCLong/summit/pull/15159",
+        "mergedAt": "2025-12-30T21:37:15Z",
+        "title": "chore(deps): bump napi from 3.3.0 to 3.8.1 in the minor-and-patch group across 1 directory"
+      },
+      {
+        "number": 15381,
+        "url": "https://github.com/BrianCLong/summit/pull/15381",
+        "mergedAt": null,
+        "title": "Enhance Storage, Caching and DR Infrastructure"
+      },
+      {
+        "number": 15380,
+        "url": "https://github.com/BrianCLong/summit/pull/15380",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults"
+      },
+      {
+        "number": 14385,
+        "url": "https://github.com/BrianCLong/summit/pull/14385",
+        "mergedAt": null,
+        "title": "chore(deps): bump marshmallow from 3.26.1 to 3.26.2"
+      },
+      {
+        "number": 15394,
+        "url": "https://github.com/BrianCLong/summit/pull/15394",
+        "mergedAt": null,
+        "title": "Sprint 2026.02: Hard Gates and Safer Defaults (Decomposed)"
+      },
+      {
+        "number": 15388,
+        "url": "https://github.com/BrianCLong/summit/pull/15388",
+        "mergedAt": null,
+        "title": "fix(ci): pin supply-chain tools and apply security fix"
+      },
+      {
+        "number": 15373,
+        "url": "https://github.com/BrianCLong/summit/pull/15373",
+        "mergedAt": null,
+        "title": "🛡️ Sentinel: [CRITICAL] Fix Path Traversal in Recipe Execution"
+      },
+      {
+        "number": 14660,
+        "url": "https://github.com/BrianCLong/summit/pull/14660",
+        "mergedAt": "2025-12-27T15:20:47Z",
+        "title": "Initialize MVP-3 GA Governance Core"
+      },
+      {
+        "number": 14556,
+        "url": "https://github.com/BrianCLong/summit/pull/14556",
+        "mergedAt": "2025-12-27T04:15:39Z",
+        "title": "Sprint N+3: Observability & Drift Detection"
+      },
+      {
+        "number": 15387,
+        "url": "https://github.com/BrianCLong/summit/pull/15387",
+        "mergedAt": null,
+        "title": "feat: Backlog Orchestrator Init & Phase 1 Delivery"
+      },
+      {
+        "number": 15375,
+        "url": "https://github.com/BrianCLong/summit/pull/15375",
+        "mergedAt": null,
+        "title": "feat: Release Automation & Evidence Bundle"
+      },
+      {
+        "number": 15409,
+        "url": "https://github.com/BrianCLong/summit/pull/15409",
+        "mergedAt": null,
+        "title": "perf: add bounded k6 baseline and reporting workflow"
+      },
+      {
+        "number": 14551,
+        "url": "https://github.com/BrianCLong/summit/pull/14551",
+        "mergedAt": "2025-12-27T01:48:23Z",
+        "title": "Sprint N+3: Security Hardening & Abuse Resistance"
+      },
+      {
+        "number": 13602,
+        "url": "https://github.com/BrianCLong/summit/pull/13602",
+        "mergedAt": "2025-12-15T09:44:39Z",
+        "title": "deps(docker): bump python from 3.9-slim to 3.14-slim"
+      },
+      {
+        "number": 14263,
+        "url": "https://github.com/BrianCLong/summit/pull/14263",
+        "mergedAt": "2025-12-22T08:10:04Z",
+        "title": "Add productionization sprint N+3 plan"
+      },
+      {
+        "number": 15461,
+        "url": "https://github.com/BrianCLong/summit/pull/15461",
+        "mergedAt": null,
+        "title": "docs: establish PR stack plan and ownership boundaries"
+      },
+      {
+        "number": 13346,
+        "url": "https://github.com/BrianCLong/summit/pull/13346",
+        "mergedAt": "2025-12-05T17:34:11Z",
+        "title": "build(deps): bump jws from 3.2.2 to 3.2.3 in /deepagent-mvp"
+      },
+      {
+        "number": 13878,
+        "url": "https://github.com/BrianCLong/summit/pull/13878",
+        "mergedAt": "2025-12-20T11:25:27Z",
+        "title": "MVP-3 GA Release Orchestration Artifacts"
+      },
+      {
+        "number": 14509,
+        "url": "https://github.com/BrianCLong/summit/pull/14509",
+        "mergedAt": null,
+        "title": "Sprint N+3: Invariant Enforcement Layer & Provenance Guard"
+      },
+      {
+        "number": 15132,
+        "url": "https://github.com/BrianCLong/summit/pull/15132",
+        "mergedAt": "2025-12-30T21:20:21Z",
+        "title": "chore(deps): bump actions/checkout from 3 to 6"
+      },
+      {
+        "number": 14168,
+        "url": "https://github.com/BrianCLong/summit/pull/14168",
+        "mergedAt": "2025-12-22T08:29:43Z",
+        "title": "Add MVP-3 GA epics and tasks"
+      },
+      {
+        "number": 14461,
+        "url": "https://github.com/BrianCLong/summit/pull/14461",
+        "mergedAt": "2025-12-25T04:22:33Z",
+        "title": "Implement Top 3 Codex Prompts: Authz, Perf, Ingestion"
+      },
+      {
+        "number": 15401,
+        "url": "https://github.com/BrianCLong/summit/pull/15401",
+        "mergedAt": null,
+        "title": "Fix supply chain and security workflow gates"
+      },
+      {
+        "number": 15396,
+        "url": "https://github.com/BrianCLong/summit/pull/15396",
+        "mergedAt": null,
+        "title": "feat(ui): accessibility hardening and backlog hygiene"
+      },
+      {
+        "number": 14755,
+        "url": "https://github.com/BrianCLong/summit/pull/14755",
+        "mergedAt": null,
+        "title": "docs: add MVP-3-GA org design governance model"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

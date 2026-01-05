@@ -1,0 +1,131 @@
+{
+  "issue_number": 120,
+  "title": "chore(deps-dev): bump husky from 8.0.3 to 9.1.7",
+  "url": "https://github.com/BrianCLong/summit/pull/120",
+  "state": "closed",
+  "labels": [
+    {
+      "id": 9102204143,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic7w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/dependencies",
+      "name": "dependencies",
+      "color": "0366d6",
+      "default": false,
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "id": 9102204147,
+      "node_id": "LA_kwDOPaNncM8AAAACHoic8w",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/javascript",
+      "name": "javascript",
+      "color": "168700",
+      "default": false,
+      "description": "Pull requests that update javascript code"
+    }
+  ],
+  "updatedAt": "2025-08-14T20:19:50Z",
+  "createdAt": "2025-08-13T05:04:26Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 15398,
+        "url": "https://github.com/BrianCLong/summit/pull/15398",
+        "mergedAt": null,
+        "title": "chore: harden coverage and fuzz gates"
+      },
+      {
+        "number": 12722,
+        "url": "https://github.com/BrianCLong/summit/pull/12722",
+        "mergedAt": "2025-12-05T17:14:35Z",
+        "title": "Add issue specs for prompts 113-120"
+      },
+      {
+        "number": 14134,
+        "url": "https://github.com/BrianCLong/summit/pull/14134",
+        "mergedAt": "2025-12-20T11:01:22Z",
+        "title": "Optimize frontend performance (Code Splitting, PWA, Bundle Analysis) - v2"
+      },
+      {
+        "number": 12446,
+        "url": "https://github.com/BrianCLong/summit/pull/12446",
+        "mergedAt": "2025-12-04T17:46:00Z",
+        "title": "Add ultra-prime expansion for wave 15 missions"
+      },
+      {
+        "number": 12220,
+        "url": "https://github.com/BrianCLong/summit/pull/12220",
+        "mergedAt": "2025-11-21T16:49:56Z",
+        "title": "docs: add monorepo architecture refactoring plan with ADRs"
+      },
+      {
+        "number": 12195,
+        "url": "https://github.com/BrianCLong/summit/pull/12195",
+        "mergedAt": null,
+        "title": "Optimize frontend performance (Code Splitting, PWA, Bundle Analysis)"
+      },
+      {
+        "number": 11953,
+        "url": "https://github.com/BrianCLong/summit/pull/11953",
+        "mergedAt": "2025-11-20T10:20:52Z",
+        "title": "Review cloud cost optimization opportunities"
+      },
+      {
+        "number": 15323,
+        "url": "https://github.com/BrianCLong/summit/pull/15323",
+        "mergedAt": null,
+        "title": "feat: add red-team harness to sim-harness"
+      },
+      {
+        "number": 12096,
+        "url": "https://github.com/BrianCLong/summit/pull/12096",
+        "mergedAt": "2025-12-20T11:53:10Z",
+        "title": "Optimize Summit deployment and infrastructure"
+      },
+      {
+        "number": 13056,
+        "url": "https://github.com/BrianCLong/summit/pull/13056",
+        "mergedAt": "2025-12-17T21:19:15Z",
+        "title": "Add streamlined CI lanes and runbook"
+      },
+      {
+        "number": 11882,
+        "url": "https://github.com/BrianCLong/summit/pull/11882",
+        "mergedAt": null,
+        "title": "Add API documentation and validation layers"
+      },
+      {
+        "number": 15339,
+        "url": "https://github.com/BrianCLong/summit/pull/15339",
+        "mergedAt": "2026-01-01T11:37:58Z",
+        "title": "feat: leverage optimization and friction reduction"
+      },
+      {
+        "number": 1117,
+        "url": "https://github.com/BrianCLong/summit/pull/1117",
+        "mergedAt": "2025-09-03T01:09:14Z",
+        "title": "feat: implement maestro production readiness features and documentation"
+      },
+      {
+        "number": 11920,
+        "url": "https://github.com/BrianCLong/summit/pull/11920",
+        "mergedAt": "2025-11-20T10:05:36Z",
+        "title": "Build predictive analytics and forecasting platform"
+      },
+      {
+        "number": 1266,
+        "url": "https://github.com/BrianCLong/summit/pull/1266",
+        "mergedAt": "2025-09-16T22:05:41Z",
+        "title": "chore(ci): finalization kit + protections"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

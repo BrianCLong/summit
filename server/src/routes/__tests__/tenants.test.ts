@@ -1,14 +1,17 @@
 import request from 'supertest';
 import express from 'express';
+import * as database from '../../config/database.js';
+import { ProvenanceRepo } from '../../repos/ProvenanceRepo.js';
 
 const mockTenantService = {
   getTenantSettings: jest.fn(),
   updateSettings: jest.fn(),
   disableTenant: jest.fn(),
   createTenant: jest.fn(),
-  listTenants: jest.fn(),
-  getTenant: jest.fn(),
-  rollbackSettings: jest.fn(),
+};
+
+const mockTenantUsageService = {
+  getTenantUsage: jest.fn(),
 };
 
 let currentUser: any = {
@@ -17,11 +20,28 @@ let currentUser: any = {
   tenantId: 'tenant-1',
 };
 
-jest.mock('../tenants', () => jest.requireActual('../tenants'));
-
 jest.mock('../../services/TenantService.js', () => ({
   tenantService: mockTenantService,
-  createTenantSchema: { parse: (v: any) => v },
+  createTenantSchema: {
+    parse: (v: any) => v,
+    extend: () => ({
+      parse: (v: any) => v,
+    }),
+  },
+}));
+
+jest.mock('../../services/TenantUsageService.js', () => ({
+  tenantUsageService: mockTenantUsageService,
+}));
+
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: jest.fn(() => ({
+    connect: jest.fn().mockResolvedValue({
+      query: jest.fn().mockResolvedValue({ rows: [{ id: 'event-1' }] }),
+      release: jest.fn(),
+    }),
+  })),
+  getRedisClient: jest.fn(() => null),
 }));
 
 jest.mock('../../middleware/auth.js', () => ({
@@ -34,19 +54,9 @@ jest.mock('../../middleware/auth.js', () => ({
 const ensurePolicy = jest.fn((_action: string, _resource: string) => (_req: any, _res: any, next: any) => next());
 jest.mock('../../middleware/abac.js', () => ({ ensurePolicy }));
 
-const mockApplyProfile = jest.fn();
-jest.mock('../../services/PolicyProfileService.js', () => ({
-  policyProfileService: {
-    applyProfile: mockApplyProfile,
-  },
-}));
-
-const mockSetTenantPlan = jest.fn();
-const mockSetTenantOverride = jest.fn();
-jest.mock('../../lib/resources/QuotaConfig.js', () => ({
-  quotaConfigService: {
-    setTenantPlan: mockSetTenantPlan,
-    setTenantOverride: mockSetTenantOverride,
+jest.mock('../../provenance/ledger.js', () => ({
+  provenanceLedger: {
+    appendEntry: jest.fn(),
   },
 }));
 
@@ -66,6 +76,16 @@ describe('tenants routes', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (ProvenanceRepo as jest.Mock).mockImplementation(() => ({
+      by: mockRepoBy,
+    }));
+    (database.getPostgresPool as jest.Mock).mockReturnValue({
+      connect: jest.fn().mockResolvedValue({
+        query: jest.fn().mockResolvedValue({ rows: [{ id: 'event-1' }] }),
+        release: jest.fn(),
+      }),
+    });
+    (database.getRedisClient as jest.Mock).mockReturnValue(null);
     currentUser = { id: 'user-1', role: 'admin', tenantId: 'tenant-1' };
     mockTenantService.getTenantSettings.mockResolvedValue({
       id: 'tenant-1',
@@ -91,18 +111,21 @@ describe('tenants routes', () => {
       slug: 'acme',
       residency: 'US',
     });
-    mockTenantService.listTenants.mockResolvedValue([
-      { id: 'tenant-1', name: 'Acme', slug: 'acme' },
-    ]);
-    mockTenantService.getTenant.mockResolvedValue({
-      id: 'tenant-1',
-      name: 'Acme',
-      slug: 'acme',
-      settings: { policy_profile: 'baseline' },
-    });
-    mockTenantService.rollbackSettings.mockResolvedValue({
-      tenant: { id: 'tenant-1', settings: { theme: 'light' } },
-      rolledBackTo: { id: 'history-1' },
+    mockTenantUsageService.getTenantUsage.mockResolvedValue({
+      tenantId: 'tenant-1',
+      range: { key: '7d', start: '2024-01-01T00:00:00.000Z', end: '2024-01-08T00:00:00.000Z' },
+      totals: [{ kind: 'external_api.requests', unit: 'requests', total: 3 }],
+      breakdown: {
+        byWorkflow: [{ workflow: 'ingest', totals: [{ kind: 'external_api.requests', unit: 'requests', total: 3 }] }],
+        byEnvironment: [{ environment: 'prod', totals: [{ kind: 'external_api.requests', unit: 'requests', total: 3 }] }],
+        byWorkflowEnvironment: [
+          {
+            workflow: 'ingest',
+            environment: 'prod',
+            totals: [{ kind: 'external_api.requests', unit: 'requests', total: 3 }],
+          },
+        ],
+      },
     });
     mockRepoBy.mockResolvedValue([{ id: 'event-1' }]);
   });
@@ -122,12 +145,7 @@ describe('tenants routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.settings.theme).toBe('dark');
     expect(res.body.receipt.action).toBe('TENANT_SETTINGS_UPDATED');
-    expect(mockTenantService.updateSettings).toHaveBeenCalledWith(
-      'tenant-1',
-      { theme: 'dark' },
-      'user-1',
-      'settings_update',
-    );
+    expect(mockTenantService.updateSettings).toHaveBeenCalledWith('tenant-1', { theme: 'dark' }, 'user-1');
   });
 
   it('disables tenant with receipt', async () => {
@@ -146,44 +164,23 @@ describe('tenants routes', () => {
   });
 
   it('returns audit list with receipt', async () => {
-    const res = await request(app).get('/api/tenants/tenant-1/audit');
+    const res = await request(app).get('/api/tenants/tenant-1/audit?limit=1&offset=0');
+    expect(mockRepoBy).toHaveBeenCalled();
     expect(res.status).toBe(200);
     expect(res.body.data).toEqual([{ id: 'event-1' }]);
     expect(res.body.receipt.action).toBe('TENANT_AUDIT_VIEWED');
   });
 
-  it('lists tenants for super admin', async () => {
-    currentUser = { id: 'admin-1', role: 'SUPER_ADMIN', tenantId: 'tenant-1' };
-    const res = await request(app).get('/api/tenants');
+  it('returns usage summary with breakdowns', async () => {
+    const res = await request(app).get('/api/tenants/tenant-1/usage?range=7d');
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual([{ id: 'tenant-1', name: 'Acme', slug: 'acme' }]);
-  });
-
-  it('applies policy profile with receipt', async () => {
-    const res = await request(app)
-      .post('/api/tenants/tenant-1/policy-profile')
-      .send({ profileId: 'strict' });
-    expect(res.status).toBe(200);
-    expect(mockApplyProfile).toHaveBeenCalledWith('tenant-1', 'strict', 'user-1');
-    expect(res.body.receipt.action).toBe('TENANT_POLICY_PROFILE_APPLIED');
-  });
-
-  it('updates quotas with receipt', async () => {
-    const res = await request(app)
-      .post('/api/tenants/tenant-1/quotas')
-      .send({ plan: 'standard', overrides: { api_rpm: 9000 } });
-    expect(res.status).toBe(200);
-    expect(mockSetTenantPlan).toHaveBeenCalledWith('tenant-1', 'standard');
-    expect(mockSetTenantOverride).toHaveBeenCalledWith('tenant-1', { api_rpm: 9000 });
-    expect(res.body.receipt.action).toBe('TENANT_QUOTAS_UPDATED');
-  });
-
-  it('rolls back settings with receipt', async () => {
-    const res = await request(app)
-      .post('/api/tenants/tenant-1/settings/rollback')
-      .send({ reason: 'undo' });
-    expect(res.status).toBe(200);
-    expect(mockTenantService.rollbackSettings).toHaveBeenCalledWith('tenant-1', 'user-1', 'undo');
-    expect(res.body.receipt.action).toBe('TENANT_SETTINGS_ROLLBACK');
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toMatchObject({
+      tenantId: 'tenant-1',
+      totals: [{ kind: 'external_api.requests', unit: 'requests', total: 3 }],
+    });
+    expect(res.body.data.breakdown.byWorkflow[0]).toMatchObject({ workflow: 'ingest' });
+    expect(res.body.data.breakdown.byEnvironment[0]).toMatchObject({ environment: 'prod' });
+    expect(mockTenantUsageService.getTenantUsage).toHaveBeenCalledWith('tenant-1', '7d');
   });
 });

@@ -10,9 +10,7 @@ import { getPostgresPool } from '../config/database.js';
 import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 import provisionRouter from './tenants/provision.js';
-import { policyProfileService } from '../services/PolicyProfileService.js';
-import { quotaConfigService } from '../lib/resources/QuotaConfig.js';
-import type { PlanLimits, PlanTier } from '../lib/resources/types.js';
+import { tenantUsageService } from '../services/TenantUsageService.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -27,7 +25,6 @@ const router = Router();
 
 const settingsSchema = z.object({
   settings: z.record(z.any()),
-  reason: z.string().min(3).optional(),
 });
 
 const disableSchema = z.object({
@@ -39,30 +36,8 @@ const auditQuerySchema = z.object({
   offset: z.coerce.number().min(0).default(0),
 });
 
-const listQuerySchema = z.object({
-  limit: z.coerce.number().min(1).max(200).default(50),
-  offset: z.coerce.number().min(0).default(0),
-});
-
-const policyProfileSchema = z.object({
-  profileId: z.string().min(2),
-  reason: z.string().min(3).optional(),
-});
-
-const quotaSchema = z.object({
-  plan: z.enum(['starter', 'standard', 'premium', 'enterprise']),
-  overrides: z
-    .object({
-      api_rpm: z.number().int().min(1).optional(),
-      ingest_eps: z.number().int().min(1).optional(),
-      egress_gb_day: z.number().int().min(1).optional(),
-    })
-    .optional(),
-  reason: z.string().min(3).optional(),
-});
-
-const rollbackSchema = z.object({
-  reason: z.string().min(3).optional(),
+const usageQuerySchema = z.object({
+  range: z.string().optional(),
 });
 
 router.use('/provision', provisionRouter);
@@ -148,38 +123,6 @@ router.post('/', ensureAuthenticated, ensurePolicy('create', 'tenant'), async (r
   }
 });
 
-router.get(
-  '/',
-  ensureAuthenticated,
-  ensurePolicy('read', 'tenant'),
-  async (req: Request, res: Response) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const query = listQuerySchema.parse(req.query);
-      const userTenantId = authReq.user?.tenantId || authReq.user?.tenant_id;
-      const isSuperAdmin = authReq.user?.role === 'SUPER_ADMIN';
-      if (!isSuperAdmin && userTenantId) {
-        const tenant = await tenantService.getTenant(userTenantId);
-        return res.json({
-          success: true,
-          data: tenant ? [tenant] : [],
-          receipt: buildReceipt('TENANT_LIST_VIEWED', userTenantId, authReq.user?.id || 'unknown'),
-        });
-      }
-
-      const tenants = await tenantService.listTenants(query.limit, query.offset);
-      return res.json({
-        success: true,
-        data: tenants,
-        receipt: buildReceipt('TENANT_LIST_VIEWED', userTenantId || 'system', authReq.user?.id || 'unknown'),
-      });
-    } catch (error: any) {
-      logger.error('Error in GET /api/tenants:', error);
-      return res.status(500).json({ success: false, error: 'Internal Server Error' });
-    }
-  },
-);
-
 /**
  * @route GET /api/tenants/:id
  * @desc Get tenant details
@@ -256,12 +199,7 @@ router.put(
       const body = settingsSchema.parse(req.body);
       const tenantId = req.params.id;
       const actorId = authReq.user?.id || 'unknown';
-      const updated = await tenantService.updateSettings(
-        tenantId,
-        body.settings,
-        actorId,
-        body.reason || 'settings_update',
-      );
+      const updated = await tenantService.updateSettings(tenantId, body.settings, actorId);
       return res.json({
         success: true,
         data: updated,
@@ -275,118 +213,6 @@ router.put(
         return res.status(404).json({ success: false, error: error.message });
       }
       logger.error('Error in PUT /api/tenants/:id/settings:', error);
-      return res.status(500).json({ success: false, error: 'Internal Server Error' });
-    }
-  },
-);
-
-router.post(
-  '/:id/settings/rollback',
-  ensureAuthenticated,
-  ensureTenantScope,
-  policyGate(),
-  ensurePolicy('update', 'tenant'),
-  async (req: Request, res: Response) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const { reason } = rollbackSchema.parse(req.body);
-      const tenantId = req.params.id;
-      const actorId = authReq.user?.id || 'unknown';
-      const { tenant, rolledBackTo } = await tenantService.rollbackSettings(
-        tenantId,
-        actorId,
-        reason || 'settings_rollback',
-      );
-      return res.json({
-        success: true,
-        data: tenant,
-        rolledBackTo,
-        receipt: buildReceipt('TENANT_SETTINGS_ROLLBACK', tenantId, actorId),
-      });
-    } catch (error: any) {
-      if (error instanceof Error && error.message === 'Tenant not found') {
-        return res.status(404).json({ success: false, error: error.message });
-      }
-      if (error instanceof Error && error.message.includes('No rollback history')) {
-        return res.status(409).json({ success: false, error: error.message });
-      }
-      logger.error('Error in POST /api/tenants/:id/settings/rollback:', error);
-      return res.status(500).json({ success: false, error: 'Internal Server Error' });
-    }
-  },
-);
-
-router.post(
-  '/:id/policy-profile',
-  ensureAuthenticated,
-  ensureTenantScope,
-  policyGate(),
-  ensurePolicy('update', 'tenant'),
-  async (req: Request, res: Response) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const body = policyProfileSchema.parse(req.body);
-      const tenantId = req.params.id;
-      const actorId = authReq.user?.id || 'unknown';
-      await policyProfileService.applyProfile(tenantId, body.profileId, actorId);
-      const tenant = await tenantService.getTenant(tenantId);
-      return res.json({
-        success: true,
-        data: tenant,
-        receipt: buildReceipt('TENANT_POLICY_PROFILE_APPLIED', tenantId, actorId),
-      });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
-      }
-      if (error instanceof Error && error.message.includes('not found')) {
-        return res.status(404).json({ success: false, error: error.message });
-      }
-      logger.error('Error in POST /api/tenants/:id/policy-profile:', error);
-      return res.status(500).json({ success: false, error: 'Internal Server Error' });
-    }
-  },
-);
-
-router.post(
-  '/:id/quotas',
-  ensureAuthenticated,
-  ensureTenantScope,
-  policyGate(),
-  ensurePolicy('update', 'tenant'),
-  async (req: Request, res: Response) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      const body = quotaSchema.parse(req.body);
-      const tenantId = req.params.id;
-      const actorId = authReq.user?.id || 'unknown';
-      const plan = body.plan as PlanTier;
-      await quotaConfigService.setTenantPlan(tenantId, plan);
-      if (body.overrides) {
-        await quotaConfigService.setTenantOverride(
-          tenantId,
-          body.overrides as Partial<PlanLimits>,
-        );
-      }
-      const updated = await tenantService.updateSettings(
-        tenantId,
-        { quotas: { plan, overrides: body.overrides || {} } },
-        actorId,
-        body.reason || 'quota_update',
-      );
-      return res.json({
-        success: true,
-        data: updated,
-        receipt: buildReceipt('TENANT_QUOTAS_UPDATED', tenantId, actorId),
-      });
-    } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
-      }
-      if (error instanceof Error && error.message === 'Tenant not found') {
-        return res.status(404).json({ success: false, error: error.message });
-      }
-      logger.error('Error in POST /api/tenants/:id/quotas:', error);
       return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   },
@@ -418,6 +244,36 @@ router.post(
         return res.status(404).json({ success: false, error: error.message });
       }
       logger.error('Error in POST /api/tenants/:id/disable:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.get(
+  '/:id/usage',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('read', 'tenant'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const tenantId = req.params.id;
+      const { range } = usageQuerySchema.parse(req.query);
+      const usage = await tenantUsageService.getTenantUsage(tenantId, range);
+      return res.json({
+        success: true,
+        data: usage,
+        receipt: buildReceipt('TENANT_USAGE_VIEWED', tenantId, authReq.user?.id || 'unknown'),
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message.startsWith('Invalid range')) {
+        return res.status(400).json({ success: false, error: error.message });
+      }
+      logger.error('Error in GET /api/tenants/:id/usage:', error);
       return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   },

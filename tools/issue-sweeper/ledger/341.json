@@ -1,0 +1,68 @@
+{
+  "issue_number": 341,
+  "title": "Quantum Machine Learning Integration",
+  "url": "https://github.com/BrianCLong/summit/issues/341",
+  "state": "open",
+  "labels": [
+    {
+      "id": 9122126345,
+      "node_id": "LA_kwDOPaNncM8AAAACH7iaCQ",
+      "url": "https://api.github.com/repos/BrianCLong/summit/labels/epic-next-gen-ai",
+      "name": "epic-next-gen-ai",
+      "color": "FF6B6B",
+      "default": false,
+      "description": "Next-generation AI and quantum computing"
+    }
+  ],
+  "updatedAt": "2025-08-16T22:28:03Z",
+  "createdAt": "2025-08-16T22:28:03Z",
+  "classification": "unknown",
+  "solved_status": "already_solved",
+  "evidence": {
+    "prs": [
+      {
+        "number": 11852,
+        "url": "https://github.com/BrianCLong/summit/pull/11852",
+        "mergedAt": "2025-11-20T09:48:03Z",
+        "title": "Improve developer experience in summit monorepo"
+      },
+      {
+        "number": 13181,
+        "url": "https://github.com/BrianCLong/summit/pull/13181",
+        "mergedAt": "2025-12-04T15:39:09Z",
+        "title": "Add quantum-resistant crypto algorithms for Summit"
+      },
+      {
+        "number": 10120,
+        "url": "https://github.com/BrianCLong/summit/pull/10120",
+        "mergedAt": "2025-10-14T08:53:59Z",
+        "title": "feat: Build infrastructure monitoring platform"
+      },
+      {
+        "number": 11876,
+        "url": "https://github.com/BrianCLong/summit/pull/11876",
+        "mergedAt": "2025-11-20T14:33:36Z",
+        "title": "Wire end-to-end demo stories for two use cases"
+      },
+      {
+        "number": 11915,
+        "url": "https://github.com/BrianCLong/summit/pull/11915",
+        "mergedAt": null,
+        "title": "Implement SLO-driven alerting system for Summit"
+      },
+      {
+        "number": 11891,
+        "url": "https://github.com/BrianCLong/summit/pull/11891",
+        "mergedAt": null,
+        "title": "Build Geopolitical Risk Intelligence Platform"
+      }
+    ],
+    "commits": [],
+    "paths": [],
+    "tests": []
+  },
+  "actions_taken": [],
+  "verification": [],
+  "notes": "",
+  "run_id": "e3bea500-47da-4d74-a8d4-c5f5ce191303"
+}

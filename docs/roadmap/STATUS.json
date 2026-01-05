@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-14T22:05:00Z",
-  "revision_note": "Added Switchboard tenant admin UI with policy, quota, and rollback endpoints",
+  "last_updated": "2026-01-02T10:15:00Z",
+  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
   "initiatives": [
     {
       "id": "A",
