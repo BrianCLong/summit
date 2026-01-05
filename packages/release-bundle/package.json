@@ -1,0 +1,19 @@
+{
+  "name": "@intelgraph/release-bundle",
+  "version": "1.0.0",
+  "description": "Typed models, parsers, and loaders for release bundle artifacts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/__tests__/*.test.js"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.0.0"
+  }
+}
