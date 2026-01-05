@@ -1,0 +1,31 @@
+{
+  "name": "@summit/release-bundle",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "SDK for parsing and loading release bundles",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": "./dist/core.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "import": "./dist/node.js",
+      "default": "./dist/node.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test:bundle": "node scripts/validate-browser-build.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.0.0"
+  }
+}
