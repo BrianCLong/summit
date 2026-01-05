@@ -9,6 +9,7 @@ import { evidenceIntegrityService } from '../evidence/integrity-service.js';
 import { policyHotReloadService } from '../policy/hotReloadService.js';
 import { policyBundleStore } from '../policy/bundleStore.js';
 import { releaseReadinessService } from '../services/releaseReadinessService.js';
+import { systemHealthService } from '../services/SystemHealthService.js';
 
 const router = Router();
 const backupService = new BackupService();
@@ -221,6 +222,124 @@ router.get(
     } catch (error: any) {
       logger.error('Failed to get evidence index', error);
       res.status(500).json({ error: 'Failed to retrieve evidence index' });
+    }
+  },
+);
+
+/**
+ * @route GET /ops/system-health
+ * @description Get system health status including kill-switch, safe-mode, backpressure
+ */
+router.get('/system-health', async (req, res) => {
+  try {
+    const status = await systemHealthService.getStatus();
+    res.json(status);
+  } catch (error: any) {
+    logger.error('Failed to get system health status', error);
+    res.status(500).json({ error: 'Failed to retrieve system health status' });
+  }
+});
+
+/**
+ * @route POST /ops/system-health/kill-switch
+ * @description Enable or disable the kill-switch
+ */
+router.post(
+  '/system-health/kill-switch',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin']),
+  async (req, res) => {
+    const { enabled, reason } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: 'enabled (boolean) is required' });
+    }
+
+    if (enabled && !reason) {
+      return res.status(400).json({ error: 'reason is required when enabling kill-switch' });
+    }
+
+    try {
+      if (enabled) {
+        systemHealthService.enableKillSwitch(reason);
+      } else {
+        systemHealthService.disableKillSwitch();
+      }
+      res.json({ ok: true, killSwitchEnabled: systemHealthService.isKillSwitchEnabled() });
+    } catch (error: any) {
+      logger.error('Failed to toggle kill-switch', error);
+      res.status(500).json({ error: 'Failed to toggle kill-switch' });
+    }
+  },
+);
+
+/**
+ * @route POST /ops/system-health/safe-mode
+ * @description Enable or disable safe-mode
+ */
+router.post(
+  '/system-health/safe-mode',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin']),
+  async (req, res) => {
+    const { enabled, reason } = req.body;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: 'enabled (boolean) is required' });
+    }
+
+    if (enabled && !reason) {
+      return res.status(400).json({ error: 'reason is required when enabling safe-mode' });
+    }
+
+    try {
+      if (enabled) {
+        systemHealthService.enableSafeMode(reason);
+      } else {
+        systemHealthService.disableSafeMode();
+      }
+      res.json({ ok: true, safeModeEnabled: systemHealthService.isSafeModeEnabled() });
+    } catch (error: any) {
+      logger.error('Failed to toggle safe-mode', error);
+      res.status(500).json({ error: 'Failed to toggle safe-mode' });
+    }
+  },
+);
+
+/**
+ * @route POST /ops/policy-simulator
+ * @description Simulate a policy decision for testing/validation
+ */
+router.post(
+  '/policy-simulator',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'admin', 'OPERATOR']),
+  async (req, res) => {
+    const { action, resource, subject, context } = req.body;
+
+    if (!action || !resource || !subject) {
+      return res.status(400).json({
+        error: 'action, resource, and subject are required',
+      });
+    }
+
+    if (!subject.id || !Array.isArray(subject.roles)) {
+      return res.status(400).json({
+        error: 'subject must have id (string) and roles (array)',
+      });
+    }
+
+    try {
+      const result = await systemHealthService.simulatePolicy({
+        action,
+        resource,
+        subject,
+        context,
+      });
+      res.json(result);
+    } catch (error: any) {
+      logger.error('Policy simulation failed', error);
+      res.status(500).json({ error: 'Policy simulation failed' });
     }
   },
 );
