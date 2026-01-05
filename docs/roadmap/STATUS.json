@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-10T19:20:00Z",
+  "revision_note": "Aligned sprint N+7 ownership for ingestion mesh epics",
   "initiatives": [
     {
       "id": "A",
@@ -10,7 +10,7 @@
           "id": "A1",
           "name": "Local Vector Store",
           "status": "incomplete",
-          "owner": "Jules",
+          "owner": "Amp",
           "evidence": "No dedicated vector store service found in /server/src/services/",
           "blockers": ["Need to implement vector store service", "No storage backend configured"],
           "target_completion": "Sprint N+1"
@@ -19,7 +19,7 @@
           "id": "A2",
           "name": "RAG Ingestion Pipeline",
           "status": "partial",
-          "owner": "Jules",
+          "owner": "Amp",
           "evidence": "GraphRAGService.ts exists; ingestion incomplete",
           "blockers": ["Missing source connectors", "Incomplete processing pipeline"],
           "target_completion": "Sprint N+1"
@@ -28,7 +28,7 @@
           "id": "A3",
           "name": "Copilot Query Service",
           "status": "rc-ready",
-          "owner": "Jules",
+          "owner": "Amp",
           "evidence": "CopilotIntegrationService.ts and CopilotNLQueryService.ts exist and functional"
         }
       ]
