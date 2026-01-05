@@ -99,6 +99,15 @@ updates:
       minor-and-patch:
         update-types: ["minor", "patch"]
 
+  # Python (pip)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+
   # Cargo (Rust)
   - package-ecosystem: "cargo"
     directory: "/"
