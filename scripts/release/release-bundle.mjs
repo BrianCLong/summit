@@ -13,6 +13,7 @@ const options = {
   'override-reason': { type: 'string' },
   now: { type: 'string' }, // ISO string for deterministic timestamps
   'notes-max-commits': { type: 'string' }, // Passed to gen-release-notes if applicable
+  redaction: { type: 'string', default: 'none' },
 };
 
 const { values } = parseArgs({ options, strict: false });
@@ -228,6 +229,23 @@ async function main() {
      console.log('   Wrote checksums.txt');
   } catch (e) {
       console.warn('⚠️  Could not generate checksums (missing shasum/sha256sum?)');
+  }
+
+  // 6e. Redaction (Optional)
+  if (values.redaction !== 'none') {
+      console.log(`\n🔒 Redaction Mode: ${values.redaction}`);
+      const redactScript = resolveScript('redact-bundle.mjs');
+      if (redactScript) {
+          try {
+              run(`node ${redactScript} --mode ${values.redaction} --dir ${DIST_RELEASE}`);
+          } catch (e) {
+              console.error("❌ Redaction failed.");
+              process.exit(1);
+          }
+      } else {
+          console.error("❌ Redaction script not found.");
+          process.exit(1);
+      }
   }
 
   // 7. Verification

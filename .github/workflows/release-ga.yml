@@ -7,9 +7,19 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to release (if different from ref)'
+        description: "Tag to release (if different from ref)"
         required: false
         type: string
+      override_freeze:
+        description: "Override release freeze window?"
+        type: boolean
+        default: false
+        required: false
+      override_reason:
+        description: "Reason for override (min 20 chars)"
+        type: string
+        default: ""
+        required: false
 
 concurrency:
   group: release-${{ inputs.tag || github.ref_name }}
@@ -46,6 +56,18 @@ jobs:
 
       - name: Test Release Scripts
         run: pnpm -w test:release-scripts
+
+      - name: Check Release Freeze Window
+        env:
+          OVERRIDE: ${{ inputs.override_freeze || 'false' }}
+          OVERRIDE_REASON: ${{ inputs.override_reason || '' }}
+        run: node scripts/release/check-freeze.mjs
+
+      - name: Upload Freeze Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: freeze-evidence
+          path: dist/release/freeze.json
 
       - name: Run Server Tests
         run: |
@@ -149,6 +171,12 @@ jobs:
         with:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
+
+      - name: Download Freeze Evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: freeze-evidence
+          path: evidence/freeze
 
       - name: Download Release Status
         uses: actions/download-artifact@v4

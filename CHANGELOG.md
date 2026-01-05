@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- (New features will be documented here)
+- Added GA launch checklist, readiness report, and evidence index under `docs/release/` for operator execution.
 
 ### Changed
 - Documented Node.js 20.11.0 as the required runtime to match the repository toolchain.

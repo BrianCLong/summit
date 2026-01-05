@@ -4,6 +4,7 @@ This document defines the schema for the `release-status.json` artifact generate
 This file serves as a machine-readable contract for release readiness.
 
 ## File Location
+
 `dist/release/release-status.json`
 
 ## Schema
@@ -22,8 +23,8 @@ This file serves as a machine-readable contract for release readiness.
   ],
   "checks": {
     "preflight": { "ok": true, "path": "dist/release/preflight.json" },
-    "freeze":    { "ok": false, "path": "dist/release/freeze.json" },
-    "verify":    { "ok": true, "path": "dist/release/verify.json" }
+    "freeze": { "ok": false, "path": "dist/release/freeze.json" },
+    "verify": { "ok": true, "path": "dist/release/verify.json" }
   },
   "artifactsDir": "dist/release",
   "run": {
