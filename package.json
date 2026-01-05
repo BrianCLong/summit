@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
+    "verify": "tsx scripts/verify.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
@@ -87,6 +87,7 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ops:p0p1:autopilot": "npx tsx scripts/ops/p0p1-autopilot.ts --mode=live",
     "ops:p0p1:autopilot:offline": "npx tsx scripts/ops/p0p1-autopilot.ts --mode=offline --fixturesDir=scripts/ops/fixtures",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },
   "keywords": [

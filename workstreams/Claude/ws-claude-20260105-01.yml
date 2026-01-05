@@ -1,6 +1,6 @@
 agent: Claude
-workstream_id: ws-claude-20260103-01
-branch: autopilot/claude/ws-claude-20260103-01
+workstream_id: ws-claude-20260105-01
+branch: autopilot/claude/ws-claude-20260105-01
 boundaries:
   include_globs:
     - ".github/workflows/**"

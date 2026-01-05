@@ -1,6 +1,6 @@
 # P0/P1 Autopilot Report
 
-**Date:** 2026-01-03T08:47:39.409Z
+**Date:** 2026-01-05T15:50:51.952Z
 **Total Failures:** 30
 
 ## Operator Summary
@@ -11,27 +11,27 @@
 
 
 ### Claude
-- **ID:** ws-claude-20260103-01
+- **ID:** ws-claude-20260105-01
 - **Objectives:** Resolve GENERIC_FAILURE clusters, Diagnose systemic CI/test failures
-- [Manifest](workstreams/Claude/ws-claude-20260103-01.yml) | [Prompt](prompts/Claude/ws-claude-20260103-01.md)
+- [Manifest](workstreams/Claude/ws-claude-20260105-01.yml) | [Prompt](prompts/Claude/ws-claude-20260105-01.md)
 
 
 ### Codex
-- **ID:** ws-codex-20260103-01
+- **ID:** ws-codex-20260105-01
 - **Objectives:** Resolve LINT_CONFIGURATION clusters, Resolve PNPM_RECURSIVE_FAIL clusters, Fix lint configurations and TS errors across packages
-- [Manifest](workstreams/Codex/ws-codex-20260103-01.yml) | [Prompt](prompts/Codex/ws-codex-20260103-01.md)
+- [Manifest](workstreams/Codex/ws-codex-20260105-01.yml) | [Prompt](prompts/Codex/ws-codex-20260105-01.md)
 
 
 ### Qwen
-- **ID:** ws-qwen-20260103-01
+- **ID:** ws-qwen-20260105-01
 - **Objectives:** Resolve GENERIC_FAILURE clusters, Fix specific package runtime issues (metrics, network)
-- [Manifest](workstreams/Qwen/ws-qwen-20260103-01.yml) | [Prompt](prompts/Qwen/ws-qwen-20260103-01.md)
+- [Manifest](workstreams/Qwen/ws-qwen-20260105-01.yml) | [Prompt](prompts/Qwen/ws-qwen-20260105-01.md)
 
 
 ### Jules
-- **ID:** ws-jules-20260103-01
+- **ID:** ws-jules-20260105-01
 - **Objectives:** Maintain operational scripts and documentation
-- [Manifest](workstreams/Jules/ws-jules-20260103-01.yml) | [Prompt](prompts/Jules/ws-jules-20260103-01.md)
+- [Manifest](workstreams/Jules/ws-jules-20260105-01.yml) | [Prompt](prompts/Jules/ws-jules-20260105-01.md)
 
 
 ## Failure Clusters
@@ -52,9 +52,9 @@
 **Priority:** P1
 
 **Sample Signatures:**
-- `apps/analytics-engine lint: ESLint: 9.39.1` (apps/analytics-engine)
 - `apps/desktop-electron lint: ESLint: 9.39.2` (apps/desktop-electron)
 - `apps/command-console lint: ESLint: 9.39.1` (apps/command-console)
+- `apps/analytics-engine lint: ESLint: 9.39.1` (apps/analytics-engine)
 
 
 ### PNPM_RECURSIVE_FAIL (4)
@@ -62,7 +62,7 @@
 **Priority:** P1
 
 **Sample Signatures:**
-- `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/analytics-engine@2.0.0 lint: `eslint src`` (apps/analytics-engine)
+- `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/desktop@2.0.0 lint: `eslint src --ext .ts,.tsx`` (apps/desktop-electron)
 - `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/tenant-api@2.0.0 typecheck: `tsc --noEmit`` (companyos/services/tenant-api)
 - `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/mobile-interface@2.0.0 build: `next build`` (apps/mobile-interface)
 

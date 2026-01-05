@@ -1,6 +1,6 @@
 agent: Qwen
-workstream_id: ws-qwen-20260103-01
-branch: autopilot/qwen/ws-qwen-20260103-01
+workstream_id: ws-qwen-20260105-01
+branch: autopilot/qwen/ws-qwen-20260105-01
 boundaries:
   include_globs:
     - "companyos/services/tenant-api/**"

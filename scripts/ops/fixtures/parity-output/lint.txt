@@ -3,16 +3,6 @@ apps/analytics-engine lint$ eslint src
 apps/command-console lint$ eslint . --ext .ts,.tsx --report-unused-disable-directives
 apps/desktop-electron lint$ eslint src --ext .ts,.tsx
 apps/field-kit lint$ eslint .
-apps/analytics-engine lint: Oops! Something went wrong! :(
-apps/analytics-engine lint: ESLint: 9.39.1
-apps/analytics-engine lint: You are linting "src", but all of the files matching the glob pattern "src" are ignored.
-apps/analytics-engine lint: If you don't want to lint these files, remove the pattern "src" from the list of arguments passed to ESLint.
-apps/analytics-engine lint: If you do want to lint these files, explicitly list one or more of the files from this glob that you'd like to lint to see more details about why they are ignored.
-apps/analytics-engine lint:   * If the file is ignored because of a matching ignore pattern, check global ignores in your config file.
-apps/analytics-engine lint:     https://eslint.org/docs/latest/use/configure/ignore
-apps/analytics-engine lint:   * If the file is ignored because no matching configuration was supplied, check file patterns in your config file.
-apps/analytics-engine lint:     https://eslint.org/docs/latest/use/configure/configuration-files#specifying-files-with-arbitrary-extensions
-apps/analytics-engine lint:   * If the file is ignored because it is located outside of the base path, change the location of your config file to be in a parent directory.
 apps/desktop-electron lint: Oops! Something went wrong! :(
 apps/desktop-electron lint: ESLint: 9.39.2
 apps/desktop-electron lint: You are linting "src", but all of the files matching the glob pattern "src" are ignored.
@@ -33,12 +23,21 @@ apps/command-console lint:     https://eslint.org/docs/latest/use/configure/igno
 apps/command-console lint:   * If the file is ignored because no matching configuration was supplied, check file patterns in your config file.
 apps/command-console lint:     https://eslint.org/docs/latest/use/configure/configuration-files#specifying-files-with-arbitrary-extensions
 apps/command-console lint:   * If the file is ignored because it is located outside of the base path, change the location of your config file to be in a parent directory.
-apps/analytics-engine lint: Failed
-/app/apps/analytics-engine:
- ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/analytics-engine@2.0.0 lint: `eslint src`
-Exit status 2
-apps/graph-analytics lint$ eslint src
 apps/desktop-electron lint: Failed
-apps/intelgraph-api lint$ eslint . || true
+/app/apps/desktop-electron:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/desktop@2.0.0 lint: `eslint src --ext .ts,.tsx`
+Exit status 2
+apps/analytics-engine lint: Oops! Something went wrong! :(
+apps/analytics-engine lint: ESLint: 9.39.1
+apps/analytics-engine lint: You are linting "src", but all of the files matching the glob pattern "src" are ignored.
+apps/analytics-engine lint: If you don't want to lint these files, remove the pattern "src" from the list of arguments passed to ESLint.
+apps/analytics-engine lint: If you do want to lint these files, explicitly list one or more of the files from this glob that you'd like to lint to see more details about why they are ignored.
+apps/analytics-engine lint:   * If the file is ignored because of a matching ignore pattern, check global ignores in your config file.
+apps/analytics-engine lint:     https://eslint.org/docs/latest/use/configure/ignore
+apps/analytics-engine lint:   * If the file is ignored because no matching configuration was supplied, check file patterns in your config file.
+apps/analytics-engine lint:     https://eslint.org/docs/latest/use/configure/configuration-files#specifying-files-with-arbitrary-extensions
+apps/analytics-engine lint:   * If the file is ignored because it is located outside of the base path, change the location of your config file to be in a parent directory.
+apps/graph-analytics lint$ eslint src
 apps/command-console lint: Failed
-apps/labeling-ui lint$ eslint src --ext .ts,.tsx
+apps/intelgraph-api lint$ eslint . || true
+apps/analytics-engine lint: Failed

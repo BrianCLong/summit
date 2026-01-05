@@ -4,8 +4,8 @@ apps/analytics-engine test$ jest
 apps/command-console test$ vitest run
 apps/compliance-console test$ vitest run
 apps/command-console test: ▲ [WARNING] Duplicate key "verify" in object literal [duplicate-object-key]
-apps/command-console test:     ../../package.json:88:4:
-apps/command-console test:       88 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+apps/command-console test:     ../../package.json:90:4:
+apps/command-console test:       90 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
 apps/command-console test:          ╵     ~~~~~~~~
 apps/command-console test:   The original key "verify" is here:
 apps/command-console test:     ../../package.json:10:4:
@@ -13,38 +13,46 @@ apps/command-console test:       10 │     "verify": "tsx scripts/verify.ts",
 apps/command-console test:          ╵     ~~~~~~~~
 apps/command-console test:  RUN  v2.1.9 /app/apps/command-console
 apps/compliance-console test: ▲ [WARNING] Duplicate key "verify" in object literal [duplicate-object-key]
-apps/compliance-console test:     ../../package.json:88:4:
-apps/compliance-console test:       88 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+apps/compliance-console test:     ../../package.json:90:4:
+apps/compliance-console test:       90 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
 apps/compliance-console test:          ╵     ~~~~~~~~
 apps/compliance-console test:   The original key "verify" is here:
 apps/compliance-console test:     ../../package.json:10:4:
 apps/compliance-console test:       10 │     "verify": "tsx scripts/verify.ts",
 apps/compliance-console test:          ╵     ~~~~~~~~
 apps/compliance-console test:  RUN  v1.6.1 /app/apps/compliance-console
-apps/compliance-console test:  ✓ src/approvals/__tests__/abac.test.ts  (6 tests) 13ms
-apps/compliance-console test:  ✓ src/approvals/__tests__/auditTimeline.test.tsx  (1 test) 240ms
-apps/compliance-console test:  ✓ src/approvals/__tests__/approvalDetails.test.tsx  (2 tests) 206ms
+apps/compliance-console test:  ✓ src/approvals/__tests__/abac.test.ts  (6 tests) 8ms
+apps/compliance-console test:  ✓ src/approvals/__tests__/approvalDetails.test.tsx  (2 tests) 246ms
+apps/compliance-console test:  ✓ src/approvals/__tests__/auditTimeline.test.tsx  (1 test) 294ms
 apps/a11y-lab test: Running 4 tests using 2 workers
-apps/compliance-console test:  ✓ src/approvals/__tests__/approvalsPage.test.tsx  (1 test) 151ms
+apps/compliance-console test:  ✓ src/approvals/__tests__/approvalsPage.test.tsx  (1 test) 94ms
 apps/compliance-console test:  Test Files  4 passed (4)
 apps/compliance-console test:       Tests  10 passed (10)
-apps/compliance-console test:    Start at  08:35:22
-apps/compliance-console test:    Duration  6.17s (transform 480ms, setup 1.54s, collect 2.62s, tests 610ms, environment 4.37s, prepare 1.69s)
+apps/compliance-console test:    Start at  15:50:21
+apps/compliance-console test:    Duration  4.66s (transform 405ms, setup 1.07s, collect 2.02s, tests 642ms, environment 2.92s, prepare 1.58s)
 apps/compliance-console test: Done
 apps/field-kit test$ vitest
 apps/field-kit test: ▲ [WARNING] Duplicate key "verify" in object literal [duplicate-object-key]
-apps/field-kit test:     ../../package.json:88:4:
-apps/field-kit test:       88 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
+apps/field-kit test:     ../../package.json:90:4:
+apps/field-kit test:       90 │     "verify": "npx tsx server/scripts/verify-ga-security.ts",
 apps/field-kit test:          ╵     ~~~~~~~~
 apps/field-kit test:   The original key "verify" is here:
 apps/field-kit test:     ../../package.json:10:4:
 apps/field-kit test:       10 │     "verify": "tsx scripts/verify.ts",
 apps/field-kit test:          ╵     ~~~~~~~~
 apps/field-kit test: [1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/app/apps/field-kit[39m
-apps/a11y-lab test:   ✘  1 [chromium] › tests/a11y.spec.ts:22:3 › Accessibility gates › axe-core finds no critical violations and captures artifacts (7ms)
-apps/a11y-lab test:   ✘  2 [chromium] › tests/stress.spec.ts:12:3 › Stress a11y modes › handles text scaling (20ms)
-apps/a11y-lab test:   ✘  3 [chromium] › tests/stress.spec.ts:18:3 › Stress a11y modes › handles RTL toggles (6ms)
-apps/a11y-lab test:   ✘  4 [chromium] › tests/a11y.spec.ts:42:3 › Accessibility gates › focus order walk does not get trapped (6ms)
+apps/a11y-lab test:   ✘  1 [chromium] › tests/stress.spec.ts:12:3 › Stress a11y modes › handles text scaling (6ms)
+apps/a11y-lab test:   ✘  2 [chromium] › tests/a11y.spec.ts:22:3 › Accessibility gates › axe-core finds no critical violations and captures artifacts (22ms)
+apps/a11y-lab test:   ✘  3 [chromium] › tests/stress.spec.ts:18:3 › Stress a11y modes › handles RTL toggles (10ms)
+apps/field-kit test:  [32m✓[39m src/__tests__/sync.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 619[2mms[22m[39m
+apps/field-kit test:      [33m[2m✓[22m[39m processes queue when online [33m 606[2mms[22m[39m
+apps/field-kit test: [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+apps/field-kit test: [2m      Tests [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+apps/field-kit test: [2m   Start at [22m 15:50:27
+apps/field-kit test: [2m   Duration [22m 2.82s[2m (transform 160ms, setup 0ms, import 209ms, tests 619ms, environment 1.57s)[22m
+apps/field-kit test: Done
+apps/graph-analytics test$ jest
+apps/a11y-lab test:   ✘  4 [chromium] › tests/a11y.spec.ts:42:3 › Accessibility gates › focus order walk does not get trapped (7ms)
 apps/a11y-lab test:   1) [chromium] › tests/a11y.spec.ts:22:3 › Accessibility gates › axe-core finds no critical violations and captures artifacts
 apps/a11y-lab test:     Error: browserType.launch: Executable doesn't exist at /home/jules/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell
 apps/a11y-lab test:     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -94,4 +102,4 @@ apps/a11y-lab test: Failed
 /app/apps/a11y-lab:
  ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/a11y-lab@2.0.0 test: `pnpm exec playwright test`
 Exit status 1
-apps/graph-analytics test$ jest
+apps/labeling-ui test$ vitest

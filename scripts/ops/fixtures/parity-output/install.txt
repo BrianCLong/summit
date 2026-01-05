@@ -1,253 +1,118 @@
 Scope: all 649 workspace projects
-Progress: resolved 1, reused 0, downloaded 0, added 0
+Progress: resolved 0, reused 1, downloaded 0, added 0
 apps/analytics-engine                    |  WARN  deprecated @types/uuid@11.0.0
-Progress: resolved 27, reused 0, downloaded 19, added 0
-Progress: resolved 68, reused 7, downloaded 60, added 0
-Progress: resolved 89, reused 7, downloaded 81, added 0
+
+   ╭───────────────────────────────────────────────────────────────────╮
+   │                                                                   │
+   │                Update available! 10.0.0 → 10.27.0.                │
+   │   Changelog: https://github.com/pnpm/pnpm/releases/tag/v10.27.0   │
+   │                 Run "pnpm add -g pnpm" to update.                 │
+   │                                                                   │
+   ╰───────────────────────────────────────────────────────────────────╯
+
+Progress: resolved 67, reused 66, downloaded 0, added 0
 apps/gateway                             |  WARN  deprecated @apollo/server@4.12.2
-Progress: resolved 115, reused 7, downloaded 107, added 0
-apps/intelgraph-api                      |  WARN  deprecated apollo-server-express@3.13.0
+Progress: resolved 108, reused 107, downloaded 0, added 0
 apps/intelgraph-api                      |  WARN  deprecated @types/express-jwt@7.4.4
+apps/intelgraph-api                      |  WARN  deprecated apollo-server-express@3.13.0
 apps/labeling-ui                         |  WARN  deprecated eslint@8.57.1
-Progress: resolved 135, reused 7, downloaded 127, added 0
-apps/mobile-interface                    |  WARN  deprecated @types/cytoscape@3.31.0
-Progress: resolved 151, reused 7, downloaded 143, added 0
-apps/mobile-interface                    |  WARN  deprecated @storybook/testing-library@0.2.2
-Progress: resolved 162, reused 7, downloaded 154, added 0
-apps/mobile-interface                    |  WARN  deprecated react-use-gesture@9.1.3
-Progress: resolved 175, reused 7, downloaded 167, added 0
-Progress: resolved 177, reused 7, downloaded 169, added 0
-apps/mobile                              |  WARN  deprecated @testing-library/jest-native@5.4.3
+Progress: resolved 143, reused 142, downloaded 0, added 0
 apps/mobile                              |  WARN  deprecated @types/react-native@0.73.0
+apps/mobile                              |  WARN  deprecated @testing-library/jest-native@5.4.3
 apps/mobile                              |  WARN  deprecated metro-react-native-babel-preset@0.77.0
-Progress: resolved 197, reused 7, downloaded 189, added 0
-Progress: resolved 211, reused 7, downloaded 203, added 0
-Progress: resolved 219, reused 7, downloaded 211, added 0
-Progress: resolved 221, reused 7, downloaded 213, added 0
+Progress: resolved 198, reused 197, downloaded 0, added 0
 apps/mobile                              |  WARN  deprecated react-native-document-picker@9.3.1
-Progress: resolved 227, reused 7, downloaded 219, added 0
-Progress: resolved 237, reused 7, downloaded 229, added 0
-Progress: resolved 242, reused 7, downloaded 234, added 0
+Progress: resolved 216, reused 215, downloaded 0, added 0
 apps/mobile                              |  WARN  deprecated react-native-vector-icons@10.3.0
+apps/mobile-interface                    |  WARN  deprecated @types/cytoscape@3.31.0
+apps/mobile-interface                    |  WARN  deprecated @storybook/testing-library@0.2.2
+apps/mobile-interface                    |  WARN  deprecated react-use-gesture@9.1.3
+Progress: resolved 257, reused 256, downloaded 0, added 0
 apps/mobile-native                       |  WARN  deprecated react-native-audio-recorder-player@3.6.14
-apps/search-engine                       |  WARN  deprecated elasticsearch@16.7.3
 apps/search-engine                       |  WARN  deprecated @types/natural@6.0.1
-Progress: resolved 259, reused 7, downloaded 251, added 0
+apps/search-engine                       |  WARN  deprecated elasticsearch@16.7.3
+Progress: resolved 279, reused 278, downloaded 0, added 0
 apps/server                              |  WARN  deprecated @types/helmet@4.0.0
-Progress: resolved 304, reused 7, downloaded 296, added 0
-Progress: resolved 305, reused 7, downloaded 297, added 0
-Progress: resolved 305, reused 7, downloaded 298, added 0
-Progress: resolved 318, reused 7, downloaded 310, added 0
-Progress: resolved 318, reused 7, downloaded 311, added 0
-Progress: resolved 322, reused 7, downloaded 314, added 0
-Progress: resolved 330, reused 7, downloaded 322, added 0
-Progress: resolved 353, reused 7, downloaded 345, added 0
-Progress: resolved 382, reused 7, downloaded 374, added 0
-Progress: resolved 396, reused 7, downloaded 388, added 0
+Progress: resolved 359, reused 358, downloaded 0, added 0
+Progress: resolved 419, reused 418, downloaded 0, added 0
 packages/bitemporal                      |  WARN  deprecated crypto@1.0.1
-Progress: resolved 432, reused 7, downloaded 424, added 0
-Progress: resolved 448, reused 7, downloaded 440, added 0
+Progress: resolved 468, reused 467, downloaded 0, added 0
+Progress: resolved 482, reused 481, downloaded 0, added 0
 packages/deepfake-detection              |  WARN  deprecated fluent-ffmpeg@2.1.3
 packages/feature-flags                   |  WARN  deprecated @types/murmurhash@2.0.0
 packages/maestro-core                    |  WARN  deprecated @opentelemetry/api-metrics@0.33.0
-Progress: resolved 510, reused 7, downloaded 502, added 0
 packages/map-visualization               |  WARN  deprecated turf@3.0.14
-Progress: resolved 548, reused 7, downloaded 540, added 0
 packages/osint-collector                 |  WARN  deprecated puppeteer@23.11.1
-Progress: resolved 590, reused 7, downloaded 582, added 0
-Progress: resolved 604, reused 7, downloaded 596, added 0
+Progress: resolved 610, reused 609, downloaded 0, added 0
+Progress: resolved 638, reused 637, downloaded 0, added 0
 packages/web-scraper                     |  WARN  deprecated wappalyzer@6.10.66
 prov-ledger-service                      |  WARN  deprecated supertest@6.3.4
+Progress: resolved 679, reused 678, downloaded 0, added 0
 sdk/typescript                           |  WARN  deprecated dtslint@4.2.1
-Progress: resolved 641, reused 7, downloaded 633, added 0
 server                                   |  WARN  deprecated @types/express-mongo-sanitize@2.1.2
 server                                   |  WARN  deprecated csurf@1.11.0
-Progress: resolved 674, reused 7, downloaded 666, added 0
 server                                   |  WARN  deprecated @opentelemetry/exporter-jaeger@1.30.1
 server                                   |  WARN  deprecated @types/cron@2.4.3
 server                                   |  WARN  deprecated json2csv@5.0.7
 server                                   |  WARN  deprecated puppeteer@22.13.0
-Progress: resolved 719, reused 7, downloaded 711, added 0
 services/agent-runtime                   |  WARN  deprecated @types/bull@4.10.4
-Progress: resolved 752, reused 7, downloaded 744, added 0
+Progress: resolved 799, reused 798, downloaded 0, added 0
 services/data-pool                       |  WARN  deprecated ipfs-http-client@60.0.1
-Progress: resolved 777, reused 7, downloaded 769, added 0
 services/kb-service                      |  WARN  deprecated @types/dompurify@3.2.0
 services/prov-ledger                     |  WARN  deprecated apollo-server@3.13.0
-Progress: resolved 806, reused 7, downloaded 798, added 0
 services/reporting                       |  WARN  deprecated @types/handlebars@4.1.0
-Progress: resolved 829, reused 7, downloaded 821, added 0
 tools/summitctl                          |  WARN  deprecated @types/ora@3.2.0
+Progress: resolved 906, reused 905, downloaded 0, added 0
 services/authz-gateway                   |  WARN  deprecated @types/http-proxy-middleware@1.0.0
-Progress: resolved 872, reused 7, downloaded 864, added 0
-Progress: resolved 894, reused 7, downloaded 887, added 0
-Progress: resolved 905, reused 7, downloaded 898, added 0
-Progress: resolved 905, reused 7, downloaded 899, added 0
-Progress: resolved 925, reused 7, downloaded 918, added 0
-Progress: resolved 925, reused 7, downloaded 919, added 0
-Progress: resolved 927, reused 7, downloaded 920, added 0
-Progress: resolved 999, reused 7, downloaded 979, added 0
-Progress: resolved 1212, reused 7, downloaded 1192, added 0
-Progress: resolved 1475, reused 7, downloaded 1455, added 0
-Progress: resolved 1677, reused 7, downloaded 1657, added 0
-Progress: resolved 1867, reused 7, downloaded 1847, added 0
-Progress: resolved 1956, reused 7, downloaded 1936, added 0
-Progress: resolved 1983, reused 7, downloaded 1963, added 0
-Progress: resolved 2132, reused 7, downloaded 2112, added 0
-Progress: resolved 2221, reused 7, downloaded 2201, added 0
-Progress: resolved 2297, reused 7, downloaded 2277, added 0
-Progress: resolved 2408, reused 7, downloaded 2388, added 0
-Progress: resolved 2472, reused 7, downloaded 2452, added 0
-Progress: resolved 2529, reused 7, downloaded 2509, added 0
-Progress: resolved 2707, reused 7, downloaded 2687, added 0
-Progress: resolved 2846, reused 7, downloaded 2826, added 0
-Progress: resolved 2996, reused 7, downloaded 2976, added 0
+Progress: resolved 928, reused 928, downloaded 0, added 0
+Progress: resolved 1103, reused 1039, downloaded 0, added 0
+Progress: resolved 1286, reused 1211, downloaded 0, added 0
+Progress: resolved 1491, reused 1357, downloaded 0, added 0
+Progress: resolved 1849, reused 1697, downloaded 0, added 0
+Progress: resolved 2175, reused 2014, downloaded 0, added 0
+Progress: resolved 2385, reused 2212, downloaded 0, added 0
+Progress: resolved 2659, reused 2494, downloaded 0, added 0
+Progress: resolved 3019, reused 2852, downloaded 0, added 0
+Progress: resolved 3140, reused 2975, downloaded 0, added 0
+Progress: resolved 3282, reused 3115, downloaded 0, added 0
 readPackage: Overriding xlsx version in @nlpjs/xtables
-Progress: resolved 3141, reused 7, downloaded 3121, added 0
-Progress: resolved 3356, reused 7, downloaded 3337, added 0
-Progress: resolved 3439, reused 7, downloaded 3420, added 0
-Progress: resolved 3473, reused 7, downloaded 3454, added 0
-Progress: resolved 3498, reused 7, downloaded 3479, added 0
-Progress: resolved 3536, reused 7, downloaded 3517, added 0
-Progress: resolved 3573, reused 7, downloaded 3554, added 0
-Progress: resolved 3595, reused 7, downloaded 3576, added 0
-Progress: resolved 3694, reused 7, downloaded 3675, added 0
-Progress: resolved 3737, reused 7, downloaded 3718, added 0
-Progress: resolved 3786, reused 7, downloaded 3767, added 0
-Progress: resolved 3821, reused 7, downloaded 3804, added 0
-Progress: resolved 3969, reused 7, downloaded 3952, added 0
-Progress: resolved 4191, reused 7, downloaded 4174, added 0
-Progress: resolved 4305, reused 8, downloaded 4247, added 0
-Progress: resolved 4343, reused 8, downloaded 4262, added 0
-Progress: resolved 4411, reused 8, downloaded 4275, added 0
-Progress: resolved 4451, reused 9, downloaded 4293, added 0
-Progress: resolved 4544, reused 9, downloaded 4384, added 0
-Progress: resolved 4734, reused 9, downloaded 4575, added 0
-Progress: resolved 4786, reused 9, downloaded 4624, added 0
-Progress: resolved 4978, reused 9, downloaded 4798, added 0
-Progress: resolved 5081, reused 9, downloaded 4904, added 0
-Progress: resolved 5263, reused 9, downloaded 5089, added 0
-Progress: resolved 5370, reused 9, downloaded 5195, added 0
-Progress: resolved 5571, reused 9, downloaded 5396, added 0
-Progress: resolved 5622, reused 9, downloaded 5441, added 0
-Progress: resolved 5766, reused 9, downloaded 5589, added 0
-Progress: resolved 5880, reused 9, downloaded 5706, added 0
-Packages are hard linked from the content-addressable store to the virtual store.
-  Content-addressable store is at: /home/jules/.local/share/pnpm/store/v10
-  Virtual store is at:             node_modules/.pnpm
-Progress: resolved 6024, reused 9, downloaded 5851, added 0
-Progress: resolved 6131, reused 9, downloaded 5957, added 0
-Progress: resolved 6275, reused 9, downloaded 6108, added 0
-Progress: resolved 6351, reused 9, downloaded 6186, added 0
-Progress: resolved 6372, reused 9, downloaded 6205, added 0
-Progress: resolved 6377, reused 9, downloaded 6209, added 0
-Progress: resolved 6390, reused 9, downloaded 6218, added 0
-Progress: resolved 6401, reused 9, downloaded 6224, added 0
-Progress: resolved 6417, reused 9, downloaded 6232, added 0
-Progress: resolved 6450, reused 9, downloaded 6264, added 0
-Progress: resolved 6477, reused 9, downloaded 6303, added 0
+Progress: resolved 3431, reused 3256, downloaded 0, added 0
+Progress: resolved 3605, reused 3412, downloaded 0, added 0
+Progress: resolved 3775, reused 3563, downloaded 0, added 0
+Progress: resolved 3876, reused 3650, downloaded 0, added 0
+Progress: resolved 4025, reused 3789, downloaded 0, added 0
+Progress: resolved 4326, reused 4071, downloaded 0, added 0
+Progress: resolved 4471, reused 4226, downloaded 0, added 0
+Progress: resolved 4746, reused 4504, downloaded 0, added 0
+Progress: resolved 4947, reused 4707, downloaded 0, added 0
+Progress: resolved 5201, reused 4983, downloaded 0, added 0
+Progress: resolved 5380, reused 5207, downloaded 0, added 0
+Progress: resolved 5632, reused 5458, downloaded 0, added 0
+Progress: resolved 5847, reused 5674, downloaded 0, added 0
+Progress: resolved 6103, reused 5923, downloaded 0, added 0
+Progress: resolved 6364, reused 6208, downloaded 0, added 0
+Progress: resolved 6376, reused 6219, downloaded 0, added 0
+Progress: resolved 6382, reused 6226, downloaded 0, added 0
+Progress: resolved 6402, reused 6238, downloaded 0, added 0
+Progress: resolved 6416, reused 6252, downloaded 0, added 0
+Progress: resolved 6450, reused 6284, downloaded 0, added 0
+Progress: resolved 6477, reused 6313, downloaded 0, added 0
  WARN  131 deprecated subdependencies found: @apollo/server-gateway-interface@1.1.1, @babel/plugin-proposal-async-generator-functions@7.20.7, @babel/plugin-proposal-class-properties@7.18.6, @babel/plugin-proposal-nullish-coalescing-operator@7.18.6, @babel/plugin-proposal-numeric-separator@7.18.6, @babel/plugin-proposal-object-rest-spread@7.20.7, @babel/plugin-proposal-optional-catch-binding@7.18.6, @babel/plugin-proposal-optional-chaining@7.21.0, @graphql-tools/prisma-loader@8.0.17, @humanwhocodes/config-array@0.13.0, @humanwhocodes/object-schema@2.0.3, @mui/base@5.0.0-beta.42, @npmcli/move-file@2.0.1, @opentelemetry/exporter-jaeger@1.15.2, @opentelemetry/otlp-proto-exporter-base@0.41.2, @opentelemetry/otlp-proto-exporter-base@0.45.0, @opentelemetry/otlp-proto-exporter-base@0.46.0, @opentelemetry/otlp-proto-exporter-base@0.48.0, @react-native-community/async-storage@1.12.1, @types/hapi__catbox@12.1.0, @types/hapi__shot@6.0.0, @types/minimatch@6.0.0, @types/pino-pretty@5.0.0, @types/pino-std-serializers@4.0.0, abab@2.0.6, acorn-import-assertions@1.9.0, apollo-cache-control@0.15.0, apollo-datasource@0.10.0, apollo-datasource@3.3.2, apollo-reporting-protobuf@0.8.0, apollo-reporting-protobuf@3.4.0, apollo-server-caching@0.7.0, apollo-server-core@2.26.2, apollo-server-core@3.13.0, apollo-server-env@3.2.0, apollo-server-env@4.2.1, apollo-server-errors@2.5.0, apollo-server-errors@3.3.1, apollo-server-plugin-base@0.14.0, apollo-server-plugin-base@3.7.2, apollo-server-types@0.10.0, apollo-server-types@3.8.0, apollo-tracing@0.16.0, are-we-there-yet@1.1.7, are-we-there-yet@2.0.0, boolean@3.2.0, deep-assign@3.0.0, domexception@4.0.0, esri-loader@3.7.0, gauge@2.7.4, gauge@3.0.2, geojson-area@0.2.1, geojson-normalize@0.0.0, graphql-extensions@0.16.0, graphql-tools@4.0.8, har-validator@5.1.5, ipfs-core-types@0.14.1, ipfs-core-utils@0.18.1, lodash.get@4.4.2, lodash.isequal@4.5.0, multibase@4.0.6, node-domexception@1.0.0, npmlog@4.1.2, npmlog@5.0.1, puppeteer@19.7.5, q@1.5.1, querystring@0.2.0, request@2.88.2, rimraf@2.4.5, rimraf@2.6.3, rimraf@2.7.1, rimraf@3.0.2, rollup-plugin-terser@7.0.2, semver-diff@5.0.0, source-map@0.8.0-beta.0, sourcemap-codec@1.4.8, subscriptions-transport-ws@0.9.19, superagent@8.1.2, three-mesh-bvh@0.7.8, turf-along@3.0.12, turf-area@3.0.12, turf-bbox-polygon@3.0.12, turf-bbox@3.0.12, turf-bearing@3.0.12, turf-bezier@3.0.12, turf-buffer@3.0.12, turf-center@3.0.12, turf-centroid@3.0.12, turf-circle@3.0.12, turf-collect@3.0.12, turf-combine@3.0.12, turf-concave@3.0.12, turf-convex@3.0.12, turf-destination@3.0.12, turf-difference@3.0.12, turf-distance@3.0.12, turf-envelope@3.0.12, turf-explode@3.0.12, turf-flip@3.0.12, turf-helpers@3.0.12, turf-hex-grid@3.0.12, turf-inside@3.0.12, turf-intersect@3.0.12, turf-invariant@3.0.12, turf-isolines@3.0.12, turf-kinks@3.0.12, turf-line-distance@3.0.12, turf-line-slice@3.0.12, turf-meta@3.0.12, turf-midpoint@3.0.12, turf-nearest@3.0.12, turf-planepoint@3.0.12, turf-point-grid@3.0.12, turf-point-on-line@3.0.12, turf-point-on-surface@3.0.12, turf-random@3.0.12, turf-sample@3.0.12, turf-simplify@3.0.12, turf-square-grid@3.0.12, turf-square@3.0.12, turf-tag@3.0.12, turf-tesselate@3.0.12, turf-tin@3.0.12, turf-triangle-grid@3.0.12, turf-union@3.0.12, turf-within@3.0.12, uuid@3.4.0, whatwg-encoding@2.0.0, whatwg-encoding@3.1.1, workbox-cacheable-response@6.6.0, workbox-google-analytics@6.6.0
-Progress: resolved 6477, reused 9, downloaded 6304, added 0
-Packages: +6584
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Progress: resolved 6477, reused 9, downloaded 6304, added 1
-Progress: resolved 6477, reused 9, downloaded 6304, added 943
-Progress: resolved 6477, reused 9, downloaded 6304, added 1782
-Progress: resolved 6477, reused 9, downloaded 6304, added 2238
-Progress: resolved 6477, reused 9, downloaded 6304, added 2691
-Progress: resolved 6477, reused 9, downloaded 6304, added 3242
-Progress: resolved 6477, reused 9, downloaded 6304, added 3447
-Progress: resolved 6477, reused 9, downloaded 6304, added 3546
-Progress: resolved 6477, reused 9, downloaded 6304, added 3652
-Progress: resolved 6477, reused 9, downloaded 6304, added 4087
-Progress: resolved 6477, reused 9, downloaded 6304, added 4251
-Progress: resolved 6477, reused 9, downloaded 6304, added 4494
-Progress: resolved 6477, reused 9, downloaded 6304, added 4495
-Progress: resolved 6477, reused 9, downloaded 6304, added 5004
-Progress: resolved 6477, reused 9, downloaded 6304, added 5340
-Progress: resolved 6477, reused 9, downloaded 6304, added 5922
-Progress: resolved 6477, reused 9, downloaded 6304, added 6584, done
+Packages: +18 -2
+++++++++++++++++++--
+Progress: resolved 6477, reused 6313, downloaded 0, added 1
+Progress: resolved 6477, reused 6313, downloaded 0, added 7
+Progress: resolved 6477, reused 6313, downloaded 0, added 7, done
  WARN  Failed to create bin at /app/packages/deception-detector/node_modules/.bin/kpw-verify. ENOENT: no such file or directory, open '/app/packages/kpw-media/dist/cli.js'
  WARN  Failed to create bin at /app/services/federation-service/node_modules/.bin/ig-prov. ENOENT: no such file or directory, open '/app/packages/prov-ledger-client/dist/bin/ig-prov.js'
 packages/liquid-nano prepare$ pnpm run build
 packages/liquid-nano prepare: > @intelgraph/liquid-nano@2.0.0 build /app/packages/liquid-nano
 packages/liquid-nano prepare: > tsc -p tsconfig.build.json
+packages/liquid-nano prepare: Done
 . prepare$ husky
 . prepare: Done
-packages/liquid-nano prepare: Done
  WARN  Failed to create bin at /app/packages/deception-detector/node_modules/.bin/kpw-verify. ENOENT: no such file or directory, open '/app/packages/deception-detector/node_modules/@intelgraph/kpw-media/dist/cli.js'
  WARN  Failed to create bin at /app/services/federation-service/node_modules/.bin/ig-prov. ENOENT: no such file or directory, open '/app/services/federation-service/node_modules/@intelgraph/prov-ledger-client/dist/bin/ig-prov.js'
-
-dependencies:
-+ @jest/globals 30.2.0
-+ @mui/material 7.3.6
-+ @radix-ui/react-slider 1.3.6
-+ apollo-server-express 3.13.0
-+ axios 1.13.2
-+ cbor 9.0.2
-+ cross-env 10.1.0
-+ docx 9.5.1
-+ dotenv 17.2.3
-+ ioredis 5.8.2
-+ jest-extended 4.0.2
-+ neo4j-driver 5.28.2
-+ pg 8.16.3
-+ prom-client 15.1.3
-+ redis 5.10.0
-+ supertest 7.1.4
-+ ws 8.18.3
-+ xlsx 0.20.3
-
-devDependencies:
-+ @axe-core/playwright 4.11.0
-+ @commitlint/cli 19.8.1
-+ @commitlint/config-conventional 19.8.1
-+ @eslint/js 9.39.2
-+ @graphql-inspector/cli 6.0.5
-+ @playwright/test 1.57.0
-+ @semantic-release/changelog 6.0.3
-+ @semantic-release/git 10.0.1
-+ @semantic-release/github 11.0.6
-+ @semantic-release/npm 12.0.2
-+ @types/jest 29.5.14
-+ @types/js-yaml 4.0.9
-+ @types/uuid 11.0.0
-+ @typescript-eslint/eslint-plugin 8.50.1
-+ @typescript-eslint/parser 8.50.1
-+ ajv 8.17.1
-+ ajv-formats 3.0.1
-+ body-parser 2.2.1
-+ concurrently 9.2.1
-+ eslint 9.39.2
-+ eslint-config-prettier 10.1.8
-+ eslint-plugin-jest 29.11.0
-+ eslint-plugin-react 7.37.5
-+ eslint-plugin-react-hooks 7.0.1
-+ eslint-plugin-react-refresh 0.4.26
-+ eventemitter3 5.0.1
-+ express 5.2.1
-+ globals 15.15.0
-+ helmet 8.1.0
-+ husky 9.1.7
-+ jest 29.7.0
-+ jest-junit 16.0.0
-+ jest-watch-typeahead 2.2.2
-+ js-yaml 4.1.1
-+ lint-staged 16.2.7
-+ markdownlint-cli 0.45.0
-+ pg-mem 3.0.5
-+ prettier 3.7.4
-+ semantic-release 24.2.9
-+ ts-jest 29.4.6
-+ ts-node 10.9.2
-+ tsx 4.21.0
-+ typescript 5.9.3
-+ typescript-eslint 8.50.1
-+ uuid 13.0.0
-+ zod 4.2.1
-
-The following dependencies have build scripts that were ignored: @apollo/protobufjs, @firebase/util, @sentry/cli, @swc/core, @tensorflow/tfjs-node, @vaadin/vaadin-usage-statistics, argon2, aws-sdk, bcrypt, blake3, canvas, classic-level, core-js, core-js-pure, cpu-features, cypress, detox, dtrace-provider, electron, electron-winstaller, esbuild, ffmpeg-static, hyochan-welcome, isolated-vm, keccak, lzo, mongodb-memory-server, msgpackr-extract, msw, onnxruntime-node, protobufjs, puppeteer, sharp, snappy, spellchecker, ssh2, tesseract.js, unrs-resolver, xxhash
-To allow the execution of build scripts for these packages, add their names to "pnpm.onlyBuiltDependencies" in your "package.json", then run "pnpm rebuild"
 
  WARN  Issues with peer dependencies found
 apps/field-kit
@@ -260,8 +125,15 @@ apps/mobile
 │   └── ✕ unmet peer expect@"29.x.x || 28.x.x || ^27.2.5": found 30.2.0
 ├─┬ react-test-renderer 19.2.3
 │ └── ✕ unmet peer react@^19.2.3: found 19.2.1
+├─┬ react-native 0.76.9
+│ ├── ✕ unmet peer react@^18.2.0: found 19.2.1
+│ ├── ✕ unmet peer @types/react@^18.2.6: found 19.2.7
+│ └─┬ @react-native/virtualized-lists 0.76.9
+│   └── ✕ unmet peer @types/react@^18.2.6: found 19.2.7
 ├─┬ @shopify/react-native-skia 1.12.4
-│ └── ✕ unmet peer react@">=18.0 <19.0.0": found 19.2.1
+│ ├── ✕ unmet peer react@">=18.0 <19.0.0": found 19.2.1
+│ └─┬ react-reconciler 0.27.0
+│   └── ✕ unmet peer react@^18.0.0: found 19.2.1
 ├─┬ @sentry/react-native 5.36.0
 │ └─┬ @sentry/react 7.119.1
 │   └── ✕ unmet peer react@"15.x || 16.x || 17.x || 18.x": found 19.2.1
@@ -299,9 +171,7 @@ apps/mobile
 apps/mobile-interface
 ├─┬ @react-three/fiber 8.18.0
 │ ├── ✕ unmet peer react@">=18 <19": found 19.2.1
-│ ├── ✕ unmet peer react-dom@">=18 <19": found 19.2.1
-│ └─┬ react-reconciler 0.27.0
-│   └── ✕ unmet peer react@^18.0.0: found 19.2.1
+│ └── ✕ unmet peer react-dom@">=18 <19": found 19.2.1
 ├─┬ react-native 0.76.9
 │ ├── ✕ unmet peer react@^18.2.0: found 19.2.1
 │ ├── ✕ unmet peer @types/react@^18.2.6: found 19.2.7
@@ -322,30 +192,30 @@ apps/mobile-interface
 │   └── ✕ unmet peer react-native@>=0.78: found 0.76.9
 ├─┬ @storybook/addon-essentials 8.6.14
 │ ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-backgrounds 8.6.14
+│ ├─┬ @storybook/addon-controls 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 │ ├─┬ @storybook/addon-actions 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-controls 8.6.14
-│ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-measure 8.6.14
+│ ├─┬ @storybook/addon-backgrounds 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 │ ├─┬ @storybook/addon-highlight 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-outline 8.6.14
+│ ├─┬ @storybook/addon-measure 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-viewport 8.6.14
+│ ├─┬ @storybook/addon-docs 8.6.14
+│ │ ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ │ ├─┬ @storybook/blocks 8.6.14
+│ │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ │ ├─┬ @storybook/react-dom-shim 8.6.14
+│ │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ │ └─┬ @storybook/csf-plugin 8.6.14
+│ │   └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ ├─┬ @storybook/addon-outline 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 │ ├─┬ @storybook/addon-toolbars 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ └─┬ @storybook/addon-docs 8.6.14
-│   ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│   ├─┬ @storybook/blocks 8.6.14
-│   │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│   ├─┬ @storybook/react-dom-shim 8.6.14
-│   │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│   └─┬ @storybook/csf-plugin 8.6.14
-│     └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ └─┬ @storybook/addon-viewport 8.6.14
+│   └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 └─┬ @storybook/addon-interactions 8.6.14
   ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
   └─┬ @storybook/test 8.6.14
@@ -371,30 +241,30 @@ apps/mobile-native
 apps/web
 ├─┬ @storybook/addon-essentials 8.6.14
 │ ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-backgrounds 8.6.14
+│ ├─┬ @storybook/addon-controls 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 │ ├─┬ @storybook/addon-actions 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-controls 8.6.14
-│ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-measure 8.6.14
+│ ├─┬ @storybook/addon-backgrounds 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 │ ├─┬ @storybook/addon-highlight 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-outline 8.6.14
+│ ├─┬ @storybook/addon-measure 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ ├─┬ @storybook/addon-viewport 8.6.14
+│ ├─┬ @storybook/addon-docs 8.6.14
+│ │ ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ │ ├─┬ @storybook/blocks 8.6.14
+│ │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ │ ├─┬ @storybook/react-dom-shim 8.6.14
+│ │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ │ └─┬ @storybook/csf-plugin 8.6.14
+│ │   └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ ├─┬ @storybook/addon-outline 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 │ ├─┬ @storybook/addon-toolbars 8.6.14
 │ │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│ └─┬ @storybook/addon-docs 8.6.14
-│   ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│   ├─┬ @storybook/blocks 8.6.14
-│   │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│   ├─┬ @storybook/react-dom-shim 8.6.14
-│   │ └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
-│   └─┬ @storybook/csf-plugin 8.6.14
-│     └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
+│ └─┬ @storybook/addon-viewport 8.6.14
+│   └── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 ├─┬ @storybook/test 8.6.14
 │ ├── ✕ unmet peer storybook@^8.6.14: found 10.1.10
 │ └─┬ @storybook/instrumenter 8.6.14
@@ -414,65 +284,65 @@ apps/web
 │ └─┬ @storybook/components 7.5.3
 │   ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.1
 │   ├── ✕ unmet peer react-dom@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.1
-│   ├─┬ use-resize-observer 9.1.0
-│   │ ├── ✕ unmet peer react@"16.8.0 - 18": found 19.2.1
-│   │ └── ✕ unmet peer react-dom@"16.8.0 - 18": found 19.2.1
-│   └─┬ @radix-ui/react-select 1.2.2
-│     ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-compose-refs 1.0.1
-│     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-context 1.0.1
-│     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-id 1.0.1
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └─┬ @radix-ui/react-use-layout-effect 1.0.1
-│     │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-primitive 1.0.3
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └─┬ @radix-ui/react-slot 1.0.2
-│     │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-use-callback-ref 1.0.1
-│     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-use-controllable-state 1.0.1
-│     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-visually-hidden 1.0.3
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-collection 1.0.3
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-focus-scope 1.0.3
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-popper 1.1.2
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ ├─┬ @radix-ui/react-arrow 1.0.3
-│     │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ ├─┬ @radix-ui/react-use-rect 1.0.1
-│     │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └─┬ @radix-ui/react-use-size 1.0.1
-│     │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-dismissable-layer 1.0.4
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └─┬ @radix-ui/react-use-escape-keydown 1.0.3
-│     │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-focus-guards 1.0.1
-│     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-portal 1.0.3
-│     │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ @radix-ui/react-use-previous 1.0.1
-│     │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│     ├─┬ react-remove-scroll 2.5.5
-│     │ ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.1
-│     │ └── ✕ unmet peer @types/react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.7
-│     └─┬ @radix-ui/react-direction 1.0.1
-│       └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   ├─┬ @radix-ui/react-select 1.2.2
+│   │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-compose-refs 1.0.1
+│   │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-context 1.0.1
+│   │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-id 1.0.1
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └─┬ @radix-ui/react-use-layout-effect 1.0.1
+│   │ │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-primitive 1.0.3
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └─┬ @radix-ui/react-slot 1.0.2
+│   │ │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-use-controllable-state 1.0.1
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └─┬ @radix-ui/react-use-callback-ref 1.0.1
+│   │ │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-visually-hidden 1.0.3
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-collection 1.0.3
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-direction 1.0.1
+│   │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-focus-guards 1.0.1
+│   │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-dismissable-layer 1.0.4
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └─┬ @radix-ui/react-use-escape-keydown 1.0.3
+│   │ │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-focus-scope 1.0.3
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-popper 1.1.2
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ ├── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ ├─┬ @radix-ui/react-arrow 1.0.3
+│   │ │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ ├─┬ @radix-ui/react-use-rect 1.0.1
+│   │ │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └─┬ @radix-ui/react-use-size 1.0.1
+│   │ │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-portal 1.0.3
+│   │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-use-previous 1.0.1
+│   │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ └─┬ react-remove-scroll 2.5.5
+│   │   ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.1
+│   │   └── ✕ unmet peer @types/react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.7
+│   └─┬ use-resize-observer 9.1.0
+│     ├── ✕ unmet peer react@"16.8.0 - 18": found 19.2.1
+│     └── ✕ unmet peer react-dom@"16.8.0 - 18": found 19.2.1
 ├─┬ @storybook/blocks 7.5.3
 │ ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.1
 │ └── ✕ unmet peer react-dom@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.1
@@ -482,13 +352,13 @@ apps/web
 │ ├─┬ @radix-ui/react-dismissable-layer 1.0.5
 │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│ ├─┬ @radix-ui/react-presence 1.0.1
-│ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │ ├─┬ @radix-ui/react-popper 1.1.3
 │ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│ └─┬ @radix-ui/react-portal 1.0.4
+│ ├─┬ @radix-ui/react-portal 1.0.4
+│ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│ │ └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│ └─┬ @radix-ui/react-presence 1.0.1
 │   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │   └── ✕ unmet peer react-dom@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 └─┬ @tremor/react 3.18.7
@@ -531,24 +401,24 @@ packages/3d-visualization
 ├─┬ @react-three/postprocessing 2.19.1
 │ └── ✕ unmet peer react@^18.0: found 19.2.1
 ├─┬ leva 0.9.36
-│ ├─┬ @radix-ui/react-portal 1.0.2
-│ │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│ │ └─┬ @radix-ui/react-primitive 1.0.2
-│ │   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│ │   └─┬ @radix-ui/react-slot 1.0.1
-│ │     ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│ │     └─┬ @radix-ui/react-compose-refs 1.0.0
-│ │       └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │ └─┬ @radix-ui/react-tooltip 1.0.5
 │   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│   ├─┬ @radix-ui/react-context 1.0.0
-│   │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   ├─┬ @radix-ui/react-portal 1.0.2
+│   │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ └─┬ @radix-ui/react-primitive 1.0.2
+│   │   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │   └─┬ @radix-ui/react-slot 1.0.1
+│   │     ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │     └─┬ @radix-ui/react-compose-refs 1.0.0
+│   │       └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │   ├─┬ @radix-ui/react-dismissable-layer 1.0.3
 │   │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │ ├─┬ @radix-ui/react-use-callback-ref 1.0.0
+│   │ │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │   │ └─┬ @radix-ui/react-use-escape-keydown 1.0.2
-│   │   ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│   │   └─┬ @radix-ui/react-use-callback-ref 1.0.0
-│   │     └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
+│   ├─┬ @radix-ui/react-context 1.0.0
+│   │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │   ├─┬ @radix-ui/react-id 1.0.0
 │   │ ├── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │   │ └─┬ @radix-ui/react-use-layout-effect 1.0.0
@@ -563,9 +433,9 @@ packages/3d-visualization
 │   │   └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 │   ├─┬ @radix-ui/react-presence 1.0.0
 │   │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│   ├─┬ @radix-ui/react-visually-hidden 1.0.2
+│   ├─┬ @radix-ui/react-use-controllable-state 1.0.0
 │   │ └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
-│   └─┬ @radix-ui/react-use-controllable-state 1.0.0
+│   └─┬ @radix-ui/react-visually-hidden 1.0.2
 │     └── ✕ unmet peer react@"^16.8 || ^17.0 || ^18.0": found 19.2.1
 └─┬ react-globe.gl 2.37.0
   └─┬ globe.gl 2.45.0
@@ -575,6 +445,8 @@ packages/3d-visualization
 packages/charting
 └─┬ @visx/visx 3.12.0
   ├── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
+  ├─┬ @visx/bounds 3.12.0
+  │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/annotation 3.12.0
   │ ├── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   │ ├─┬ @visx/drag 3.12.0
@@ -583,16 +455,14 @@ packages/charting
   │ │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   │ └─┬ @visx/text 3.12.0
   │   └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
-  ├─┬ @visx/brush 3.12.0
-  │ ├── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
+  ├─┬ @visx/axis 3.12.0
+  │ ├── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   │ └─┬ @visx/shape 3.12.0
   │   └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
-  ├─┬ @visx/bounds 3.12.0
+  ├─┬ @visx/brush 3.12.0
   │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/clip-path 3.12.0
   │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
-  ├─┬ @visx/axis 3.12.0
-  │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/delaunay 3.12.0
   │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/geo 3.12.0
@@ -601,21 +471,23 @@ packages/charting
   │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/gradient 3.12.0
   │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
-  ├─┬ @visx/hierarchy 3.12.0
-  │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
-  ├─┬ @visx/legend 3.12.0
-  │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/grid 3.12.0
   │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/heatmap 3.12.0
   │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
+  ├─┬ @visx/hierarchy 3.12.0
+  │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/marker 3.12.0
   │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
+  ├─┬ @visx/legend 3.12.0
+  │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/network 3.12.0
   │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
+  ├─┬ @visx/pattern 3.12.0
+  │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/sankey 3.12.0
   │ └── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
-  ├─┬ @visx/pattern 3.12.0
+  ├─┬ @visx/responsive 3.12.0
   │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
   ├─┬ @visx/threshold 3.12.0
   │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
@@ -630,8 +502,6 @@ packages/charting
   └─┬ @visx/xychart 3.12.0
     ├── ✕ unmet peer react@"^16.8.0 || ^17.0.0 || ^18.0.0": found 19.2.1
     ├── ✕ unmet peer @react-spring/web@^9.4.5: found 10.0.3
-    ├─┬ @visx/responsive 3.12.0
-    │ └── ✕ unmet peer react@"^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0": found 19.2.1
     └─┬ @visx/react-spring 3.12.0
       ├── ✕ unmet peer react@"^16.3.0-0 || ^17.0.0 || ^18.0.0": found 19.2.1
       └── ✕ unmet peer @react-spring/web@^9.4.5: found 10.0.3
@@ -679,23 +549,23 @@ packages/telemetry-config
 │     ├── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
 │     ├─┬ @opentelemetry/context-async-hooks 1.19.0
 │     │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
-│     ├─┬ @opentelemetry/propagator-jaeger 1.19.0
+│     ├─┬ @opentelemetry/propagator-b3 1.19.0
 │     │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
-│     └─┬ @opentelemetry/propagator-b3 1.19.0
+│     └─┬ @opentelemetry/propagator-jaeger 1.19.0
 │       └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
 ├─┬ @opentelemetry/exporter-trace-otlp-grpc 0.48.0
 │ ├─┬ @opentelemetry/core 1.21.0
 │ │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
 │ └─┬ @opentelemetry/otlp-transformer 0.48.0
 │   ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.8.0": found 1.9.0
-│   ├─┬ @opentelemetry/resources 1.21.0
-│   │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
+│   ├─┬ @opentelemetry/sdk-trace-base 1.21.0
+│   │ ├── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
+│   │ └─┬ @opentelemetry/resources 1.21.0
+│   │   └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
 │   ├─┬ @opentelemetry/sdk-logs 0.48.0
 │   │ └── ✕ unmet peer @opentelemetry/api@">=1.4.0 <1.8.0": found 1.9.0
-│   ├─┬ @opentelemetry/sdk-metrics 1.21.0
-│   │ └── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.8.0": found 1.9.0
-│   └─┬ @opentelemetry/sdk-trace-base 1.21.0
-│     └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
+│   └─┬ @opentelemetry/sdk-metrics 1.21.0
+│     └── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.8.0": found 1.9.0
 └─┬ @opentelemetry/sdk-node 0.48.0
   ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.8.0": found 1.9.0
   └─┬ @opentelemetry/sdk-trace-node 1.21.0
@@ -712,28 +582,28 @@ server
 │ ├── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
 │ └─┬ apollo-server-core 2.26.2
 │   ├── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
+│   ├─┬ @apollographql/graphql-upload-8-fork 8.1.4
+│   │ └── ✕ unmet peer graphql@"0.13.1 - 15": found 16.12.0
 │   ├─┬ apollo-cache-control 0.15.0
 │   │ ├── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
 │   │ └─┬ apollo-server-plugin-base 0.14.0
 │   │   ├── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
 │   │   └─┬ apollo-server-types 0.10.0
 │   │     └── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
-│   ├─┬ apollo-graphql 0.9.7
-│   │ └── ✕ unmet peer graphql@"^14.2.1 || ^15.0.0": found 16.12.0
 │   ├─┬ apollo-server-errors 2.5.0
 │   │ └── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
+│   ├─┬ apollo-graphql 0.9.7
+│   │ └── ✕ unmet peer graphql@"^14.2.1 || ^15.0.0": found 16.12.0
 │   ├─┬ apollo-tracing 0.16.0
 │   │ └── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
 │   ├─┬ graphql-extensions 0.16.0
 │   │ └── ✕ unmet peer graphql@"^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
-│   ├─┬ graphql-tools 4.0.8
-│   │ ├── ✕ unmet peer graphql@"^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
-│   │ └─┬ apollo-link 1.2.14
-│   │   ├── ✕ unmet peer graphql@"^0.11.3 || ^0.12.3 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
-│   │   └─┬ apollo-utilities 1.3.4
-│   │     └── ✕ unmet peer graphql@"^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
-│   └─┬ @apollographql/graphql-upload-8-fork 8.1.4
-│     └── ✕ unmet peer graphql@"0.13.1 - 15": found 16.12.0
+│   └─┬ graphql-tools 4.0.8
+│     ├── ✕ unmet peer graphql@"^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
+│     └─┬ apollo-link 1.2.14
+│       ├── ✕ unmet peer graphql@"^0.11.3 || ^0.12.3 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
+│       └─┬ apollo-utilities 1.3.4
+│         └── ✕ unmet peer graphql@"^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0": found 16.12.0
 ├─┬ @bull-board/api 6.12.0
 │ └── ✕ unmet peer @bull-board/ui@6.12.0: found 5.23.0
 ├─┬ @opentelemetry/auto-instrumentations-node 0.39.0
@@ -742,38 +612,37 @@ server
 │ │   └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
 │ └─┬ @opentelemetry/sdk-node 0.41.2
 │   ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.5.0": found 1.9.0
-│   ├─┬ @opentelemetry/exporter-jaeger 1.15.2
-│   │ └─┬ @opentelemetry/sdk-trace-base 1.15.2
-│   │   ├── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
-│   │   └─┬ @opentelemetry/resources 1.15.2
-│   │     └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
-│   ├─┬ @opentelemetry/sdk-trace-node 1.15.2
-│   │ ├── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
-│   │ ├─┬ @opentelemetry/propagator-b3 1.15.2
-│   │ │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
-│   │ ├─┬ @opentelemetry/propagator-jaeger 1.15.2
-│   │ │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
-│   │ └─┬ @opentelemetry/context-async-hooks 1.15.2
-│   │   └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
-│   └─┬ @opentelemetry/exporter-trace-otlp-http 0.41.2
-│     └─┬ @opentelemetry/otlp-transformer 0.41.2
-│       ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.5.0": found 1.9.0
-│       ├─┬ @opentelemetry/sdk-logs 0.41.2
-│       │ └── ✕ unmet peer @opentelemetry/api@">=1.4.0 <1.5.0": found 1.9.0
-│       └─┬ @opentelemetry/sdk-metrics 1.15.2
-│         └── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.5.0": found 1.9.0
+│   ├─┬ @opentelemetry/exporter-trace-otlp-grpc 0.41.2
+│   │ ├─┬ @opentelemetry/sdk-trace-base 1.15.2
+│   │ │ ├── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
+│   │ │ └─┬ @opentelemetry/resources 1.15.2
+│   │ │   └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
+│   │ └─┬ @opentelemetry/otlp-transformer 0.41.2
+│   │   ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.5.0": found 1.9.0
+│   │   ├─┬ @opentelemetry/sdk-logs 0.41.2
+│   │   │ └── ✕ unmet peer @opentelemetry/api@">=1.4.0 <1.5.0": found 1.9.0
+│   │   └─┬ @opentelemetry/sdk-metrics 1.15.2
+│   │     └── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.5.0": found 1.9.0
+│   └─┬ @opentelemetry/sdk-trace-node 1.15.2
+│     ├── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
+│     ├─┬ @opentelemetry/context-async-hooks 1.15.2
+│     │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
+│     ├─┬ @opentelemetry/propagator-jaeger 1.15.2
+│     │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
+│     └─┬ @opentelemetry/propagator-b3 1.15.2
+│       └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.5.0": found 1.9.0
 ├─┬ @opentelemetry/exporter-prometheus 0.44.0
 │ ├─┬ @opentelemetry/core 1.17.1
 │ │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.7.0": found 1.9.0
-│ ├─┬ @opentelemetry/resources 1.17.1
-│ │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.7.0": found 1.9.0
 │ └─┬ @opentelemetry/sdk-metrics 1.17.1
-│   └── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.7.0": found 1.9.0
+│   ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.7.0": found 1.9.0
+│   └─┬ @opentelemetry/resources 1.17.1
+│     └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.7.0": found 1.9.0
 └─┬ @opentelemetry/sdk-node 0.45.0
   ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.8.0": found 1.9.0
   ├─┬ @opentelemetry/core 1.18.0
   │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
-  ├─┬ @opentelemetry/exporter-trace-otlp-http 0.45.0
+  ├─┬ @opentelemetry/exporter-trace-otlp-grpc 0.45.0
   │ ├─┬ @opentelemetry/sdk-trace-base 1.18.0
   │ │ ├── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
   │ │ └─┬ @opentelemetry/resources 1.18.0
@@ -805,9 +674,9 @@ services/timeseries-metrics
 └─┬ @opentelemetry/exporter-prometheus 0.45.1
   ├─┬ @opentelemetry/core 1.18.1
   │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
+  ├─┬ @opentelemetry/resources 1.18.1
+  │ └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
   └─┬ @opentelemetry/sdk-metrics 1.18.1
-    ├── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.8.0": found 1.9.0
-    └─┬ @opentelemetry/resources 1.18.1
-      └── ✕ unmet peer @opentelemetry/api@">=1.0.0 <1.8.0": found 1.9.0
+    └── ✕ unmet peer @opentelemetry/api@">=1.3.0 <1.8.0": found 1.9.0
 
-Done in 2m 44.3s
+Done in 1m 27.2s
