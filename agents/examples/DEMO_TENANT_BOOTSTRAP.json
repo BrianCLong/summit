@@ -1,0 +1,44 @@
+{
+  "task_id": "DEMO_TENANT_BOOTSTRAP",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "partner-demo-tenant-bootstrap",
+    "version": "v1",
+    "sha256": "bcd8043b9a5890175ceb45357d8a978548b7823f2124a51bedd8dbf687f84df7",
+    "path": "prompts/partner-demo-tenant-bootstrap.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/services/tenants/",
+      "server/src/routes/",
+      "server/src/repos/",
+      "apps/web/",
+      "docs/"
+    ],
+    "domains": ["tenancy", "evidence", "admin", "ui", "docs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "scripts/check-boundaries.cjs output",
+      "make smoke output",
+      "UI evidence export status screenshot"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Demo tenant bootstrap endpoint creates tenant and seeds workflows.",
+    "Evidence export status endpoint reports readiness for demo tenant.",
+    "Admin UI can trigger demo tenant bootstrap and display evidence export status.",
+    "Partner quick-start documentation updated with demo tenant steps."
+  ],
+  "stop_conditions": [
+    "CI failure in main.",
+    "Detection of PII in output.",
+    "Sandbox violation alert."
+  ]
+}

@@ -43,6 +43,7 @@ import narrativeSimulationRouter from './routes/narrative-sim.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
+import policyManagementRouter from './routes/policies/policy-management.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
@@ -101,6 +102,7 @@ import ontologyRouter from './routes/ontology.js';
 import searchIndexRouter from './routes/search-index.js'; // New search-index route
 import dataGovernanceRouter from './routes/data-governance-routes.js';
 import tenantBillingRouter from './routes/tenants/billing.js';
+import tenantUsageRouter from './routes/tenants/usage.js';
 import { gtmRouter } from './routes/gtm-messaging.js';
 import { airgapRouter } from './routes/airgap.js';
 import analyticsRouter from './routes/analytics.js';
@@ -123,12 +125,14 @@ import featureFlagsRouter from './routes/feature-flags.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
+import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
 import securityAdminRouter from './routes/security/security-admin.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
+import adminTenantsRouter from './routes/admin/tenants.js';
 import onboardingRouter from './routes/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
 import i18nRouter from './routes/i18n.js';
@@ -374,7 +378,10 @@ export const createApp = async () => {
 
   // Other routes
   // app.use('/api/policy', policyRouter);
+  app.use('/api/policies', policyManagementRouter);
+  app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
+  app.use('/api/brand-packs', brandPackRouter);
   app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
   app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
@@ -413,6 +420,7 @@ export const createApp = async () => {
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/costs', resourceCostsRouter);
   app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
+  app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
   app.use('/api/query-replay', queryReplayRouter);
   app.use('/api/correctness', correctnessProgramRouter);
@@ -445,6 +453,7 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
+  app.use('/api/admin', adminTenantsRouter);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
   app.use('/api/security', securityAdminRouter);

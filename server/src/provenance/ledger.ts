@@ -15,7 +15,14 @@ import {
   type SignatureBundle,
 } from '../security/crypto/index.js';
 import { MutationWitnessService, mutationWitness } from './witness.js';
-import { ProvenanceEntryV2, MutationPayload, MutationWitness, CrossServiceAttribution } from './types.js';
+import {
+  ProvenanceEntryV2,
+  MutationPayload,
+  MutationWitness,
+  CrossServiceAttribution,
+  ReceiptEvidence,
+  RecoveryEvidence,
+} from './types.js';
 import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
 import { putLocked } from '../audit/worm.js';
 import { CanonicalGraphService } from './CanonicalGraphService.js';
@@ -379,6 +386,46 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         }
       },
     );
+  }
+
+  async recordReceiptEvidence(receipt: ReceiptEvidence): Promise<ProvenanceEntry> {
+    return this.appendEntry({
+      tenantId: receipt.tenantId,
+      actionType: 'RECEIPT_ISSUED',
+      resourceType: 'receipt',
+      resourceId: receipt.receiptId,
+      actorId: receipt.actorId,
+      actorType: 'system',
+      payload: { receipt },
+      metadata: {
+        receipt,
+        entryId: receipt.entryId,
+        signerKeyId: receipt.signerKeyId,
+      },
+      timestamp: new Date(receipt.issuedAt),
+    });
+  }
+
+  async recordRecoveryEvidence(params: {
+    tenantId: string;
+    actorId: string;
+    actorType?: 'user' | 'system' | 'api' | 'job';
+    evidence: RecoveryEvidence;
+  }): Promise<ProvenanceEntry> {
+    const { tenantId, actorId, actorType, evidence } = params;
+    return this.appendEntry({
+      tenantId,
+      actionType: 'RECOVERY_EVIDENCE_CAPTURED',
+      resourceType: 'recovery',
+      resourceId: evidence.drillId,
+      actorId,
+      actorType: actorType || 'system',
+      payload: { recovery: evidence },
+      metadata: {
+        recovery: evidence,
+      },
+      timestamp: new Date(evidence.completedAt || evidence.startedAt),
+    });
   }
 
   private isMutationPayload(payload: any): payload is MutationPayload {

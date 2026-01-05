@@ -77,7 +77,16 @@ git tag v0.3.0 && git push origin v0.3.0
 - GitHub Release created as "Latest".
 - Artifacts attached to the release.
 
-## 6. Gates & What They Mean
+## 6. Reviewing and Approving Release Evidence
+
+After a release workflow completes, it may generate evidence files in the `/release-evidence/` directory. These files require a formal review and approval via a Pull Request before a release can be finalized.
+
+- **Pull Request Template:** When creating a PR for a new evidence file, you **must** use the `release-evidence` template. This can be selected by adding `?template=release-evidence.md` to the PR creation URL. The template includes a critical checklist for the reviewer.
+- **Approval:** Changes to release evidence are governed by `.github/CODEOWNERS`. An explicit approval from the designated owner (`@BrianCLong`) is required to merge.
+
+This governance gate ensures that every release is explicitly verified against key criteria (e.g., matching tag/SHA, non-expired) before it is published.
+
+## 7. Gates & What They Mean
 
 - **Preflight:** Checks branch ancestry and ensures `package.json` version matches the git tag.
 - **Freeze:** Checks if the current time falls within a "deployment freeze" window. Requires `override_freeze=true` to bypass.

@@ -53,6 +53,34 @@ export interface MutationWitness {
   };
 }
 
+export interface ReceiptEvidence {
+  receiptId: string;
+  entryId: string;
+  action: string;
+  actorId: string;
+  tenantId: string;
+  resourceId: string;
+  inputHash: string;
+  policyDecisionId?: string;
+  signature: string;
+  signerKeyId: string;
+  issuedAt: string;
+}
+
+export interface RecoveryEvidence {
+  drillId: string;
+  scenario: string;
+  status: 'pending' | 'successful' | 'failed';
+  startedAt: string;
+  completedAt?: string;
+  rtoTarget: string;
+  rpoTarget: string;
+  rtoActual?: string;
+  rpoActual?: string;
+  evidenceArtifacts: string[];
+  notes?: string;
+}
+
 export interface CrossServiceAttribution {
   originService: string;
   originRegion?: string;
@@ -83,11 +111,16 @@ export interface ProvenanceEntry {
     userAgent?: string;
     sessionId?: string;
     requestId?: string;
+    policyDecisionId?: string;
+    policyVersion?: string;
+    complianceMode?: boolean;
     purpose?: string;
     classification?: string[];
     // V2 Extensions stored in metadata for backward compatibility
     witness?: MutationWitness;
     attribution?: CrossServiceAttribution;
+    receipt?: ReceiptEvidence;
+    recovery?: RecoveryEvidence;
     // Additional properties from various usages
     correlationId?: string;
     connectorType?: string;
