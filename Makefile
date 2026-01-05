@@ -287,6 +287,9 @@ ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
 
+ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
+	./scripts/verification/verify_ops.sh
+
 # --- Demo Environment ---
 
 demo: ## Launch one-command demo environment
