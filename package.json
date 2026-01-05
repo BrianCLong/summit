@@ -75,6 +75,7 @@
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "release:backport-plan": "node scripts/release/build-backport-plan.mjs",
     "release:bundle": "node scripts/release/release-bundle.mjs",
     "release:verify": "node scripts/release/verify-release-bundle.mjs",
     "release:diff": "node scripts/release/diff-bundles.mjs",
