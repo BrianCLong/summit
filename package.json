@@ -40,6 +40,7 @@
     "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
     "lint": "eslint . && (ruff check . || true)",
+    "lint:release-policy": "node scripts/release/validate-release-policy.mjs",
     "lint:strict": "eslint . && (ruff check . || true)",
     "security:check": "node scripts/security-check.js",
     "lint:server": "cd server && npm run lint",
@@ -85,7 +86,6 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },
   "keywords": [
@@ -123,6 +123,7 @@
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "body-parser": "^2.2.1",
+    "commander": "^14.0.2",
     "concurrently": "^9.2.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",

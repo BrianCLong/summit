@@ -1,0 +1,36 @@
+# Release Policy: Defines the rules for creating new releases.
+# See docs/releases.md for more details.
+
+# The default branch for releases.
+default_branch: "main"
+
+# Release freeze configuration.
+freeze:
+  # When 'true', releases are blocked during the specified windows.
+  enabled: true
+  # The timezone for evaluating freeze windows (IANA format).
+  timezone: "America/New_York"
+  # A list of recurring or fixed-time freeze windows.
+  windows:
+    # A recurring weekly freeze every Friday.
+    - name: "Weekly production freeze"
+      # 'active' defaults to true if omitted.
+      active: true
+      # An RRULE string for recurring freezes.
+      # This example sets a freeze every Friday.
+      rrule: "FREQ=WEEKLY;BYDAY=FR"
+
+    # A fixed-time freeze for a specific event.
+    - name: "Q4 holiday freeze"
+      active: true
+      start: "2024-12-20T00:00:00Z"
+      end: "2025-01-03T23:59:59Z"
+
+# Override configuration for bypassing release freezes.
+override:
+  # When 'true', authorized users can bypass the freeze.
+  allowed: false
+  # When 'true', a reason must be provided for the override.
+  require_reason: true
+  # The minimum length of the override reason.
+  reason_min_len: 10
