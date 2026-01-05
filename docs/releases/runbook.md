@@ -45,26 +45,7 @@ To verify the release process without creating a permanent tag or publishing:
 5.  **Artifacts:**
     Check the workflow run summary for the "bundle artifact" or "release-bundle" to verify outputs.
 
-## 4. Generate Release Evidence PR
-
-After a successful dry-run, generate the release evidence PR:
-
-```bash
-maestro release evidence --tag v0.3.0
-```
-
-This command will:
-1.  Generate a `release-evidence/<tag>.json` file.
-2.  Create a branch named `chore/release-evidence-<tag>`.
-3.  Commit the evidence file.
-4.  Open a pull request for review.
-
-### Review Checklist:
-- **SHA matches intended commit:** Verify the `sha` in the JSON file matches the commit you intend to release.
-- **`expiresAt` is reasonable:** Ensure the expiration date is within the expected window (usually 24 hours).
-- **Run URL is correct:** Check that the `run.url` in the JSON links to the successful dry-run workflow.
-
-## 5. Cut an RC (Release Candidate)
+## 4. Cut an RC (Release Candidate)
 
 **Tag format:** `vX.Y.Z-rc.N` (e.g., `v0.3.0-rc.1`)
 
@@ -80,7 +61,7 @@ git tag v0.3.0-rc.1 && git push origin v0.3.0-rc.1
 - GitHub Release created with "Pre-release" checkbox checked.
 - Artifacts attached to the release.
 
-## 6. Cut a GA (General Availability)
+## 5. Cut a GA (General Availability)
 
 **Tag format:** `vX.Y.Z` (e.g., `v0.3.0`)
 
@@ -96,6 +77,15 @@ git tag v0.3.0 && git push origin v0.3.0
 - GitHub Release created as "Latest".
 - Artifacts attached to the release.
 
+## 6. Reviewing and Approving Release Evidence
+
+After a release workflow completes, it may generate evidence files in the `/release-evidence/` directory. These files require a formal review and approval via a Pull Request before a release can be finalized.
+
+- **Pull Request Template:** When creating a PR for a new evidence file, you **must** use the `release-evidence` template. This can be selected by adding `?template=release-evidence.md` to the PR creation URL. The template includes a critical checklist for the reviewer.
+- **Approval:** Changes to release evidence are governed by `.github/CODEOWNERS`. An explicit approval from the designated owner (`@BrianCLong`) is required to merge.
+
+This governance gate ensures that every release is explicitly verified against key criteria (e.g., matching tag/SHA, non-expired) before it is published.
+
 ## 7. Gates & What They Mean
 
 - **Preflight:** Checks branch ancestry and ensures `package.json` version matches the git tag.
@@ -106,7 +96,7 @@ git tag v0.3.0 && git push origin v0.3.0
   - **SHA Pinned Actions:** Verifies that GitHub Actions uses immutable SHAs.
 - **Idempotency:** Ensures the release process handles "create" (new release) vs "update" (existing release) correctly.
 
-## 8. Troubleshooting
+## 7. Troubleshooting
 
 | Error Message                            | Fix                                                                                                          |
 | :--------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
@@ -116,7 +106,7 @@ git tag v0.3.0 && git push origin v0.3.0
 | **"SHA256 mismatch"**                    | Regenerate artifacts locally to verify. Ensure no build processes are mutating files after generation.       |
 | **"Release already exists"**             | This is expected if re-running a job. The workflow updates the existing release.                             |
 
-## 9. FAQ
+## 8. FAQ
 
 - **Why RC doesn’t become latest?**
   - RCs are for testing. Only stable `vX.Y.Z` tags update the "latest" pointer in package managers and GitHub.
@@ -125,7 +115,7 @@ git tag v0.3.0 && git push origin v0.3.0
 - **How to download artifacts?**
   - Go to the **Releases** page in GitHub and expand the "Assets" section for the specific version.
 
-## 10. Machine-readable outputs
+## 9. Machine-readable outputs
 
 Maestro Conductor and other tools can parse these files from the release artifacts:
 
@@ -136,7 +126,7 @@ Maestro Conductor and other tools can parse these files from the release artifac
 
 Parse these JSON files for automated "go/no-go" decisions.
 
-## 11. Debugging Bundles
+## 10. Debugging Bundles
 
 To compare two release bundles (e.g., to investigate regressions or verify changes):
 
