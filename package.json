@@ -7,7 +7,7 @@
   "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
-    "verify": "tsx scripts/verify.ts",
+    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
@@ -87,7 +87,6 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
-    "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "prepare": "husky"
   },
   "keywords": [
@@ -152,6 +151,7 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.50.1",
     "uuid": "^13.0.0",
+    "vitest": "^4.0.16",
     "zod": "^4.2.1"
   },
   "lint-staged": {
