@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "name": "monthly-aggregate",
+      "usage": {
+        "computeMs": 3600000,
+        "storageBytesAverage": 5368709120,
+        "receiptSigningOps": 2500,
+        "periodDays": 30
+      },
+      "expected": {
+        "computeProxyCostUsd": 0.072,
+        "storageGbMonthCostUsd": 0.6,
+        "receiptSigningOpsCostUsd": 1,
+        "totalUsd": 1.672
+      }
+    },
+    {
+      "name": "weekly-aggregate",
+      "usage": {
+        "computeMs": 900000,
+        "storageBytesAverage": 2147483648,
+        "receiptSigningOps": 400,
+        "periodDays": 7
+      },
+      "expected": {
+        "computeProxyCostUsd": 0.018,
+        "storageGbMonthCostUsd": 0.056,
+        "receiptSigningOpsCostUsd": 0.16,
+        "totalUsd": 0.234
+      }
+    }
+  ]
+}

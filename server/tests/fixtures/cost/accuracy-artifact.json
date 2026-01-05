@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-01-05T00:00:00Z",
+  "toleranceUsd": 0.000001,
+  "bucketDefinitions": {
+    "computeProxy": {
+      "key": "computeProxy",
+      "description": "Compute proxy units derived from aggregate compute duration.",
+      "unit": "compute-second",
+      "rateUsd": 0.00002
+    },
+    "storageGbMonth": {
+      "key": "storageGbMonth",
+      "description": "Average storage footprint expressed in GB-months.",
+      "unit": "gb-month",
+      "rateUsd": 0.12
+    },
+    "receiptSigningOps": {
+      "key": "receiptSigningOps",
+      "description": "Receipt signing operations per billing period.",
+      "unit": "sign-op",
+      "rateUsd": 0.0004
+    }
+  },
+  "cases": [
+    {
+      "name": "monthly-aggregate",
+      "expectedTotalUsd": 1.672,
+      "actualTotalUsd": 1.672,
+      "deltaUsd": 0,
+      "withinTolerance": true
+    },
+    {
+      "name": "weekly-aggregate",
+      "expectedTotalUsd": 0.234,
+      "actualTotalUsd": 0.234,
+      "deltaUsd": 0,
+      "withinTolerance": true
+    }
+  ]
+}
