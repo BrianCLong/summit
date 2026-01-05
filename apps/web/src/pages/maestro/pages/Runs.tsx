@@ -1,7 +1,7 @@
 // =============================================
 // Maestro Runs Management - Live DAG Viewer
 // =============================================
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom'
 import {
   PlayIcon,
@@ -59,6 +59,23 @@ interface Run {
   cost: number
   steps: RunStep[]
   tags: string[]
+}
+
+interface RunEvent {
+  id: string
+  type:
+    | 'run-started'
+    | 'step-completed'
+    | 'policy-check'
+    | 'receipt-issued'
+    | 'run-completed'
+    | 'run-failed'
+    | 'run-cancelled'
+  title: string
+  detail: string
+  timestamp: string
+  actor?: string
+  receiptUrl?: string
 }
 
 // Mock runs data
@@ -489,7 +506,7 @@ function RunDetail() {
 
 function RunDetailView({ run }: { run: Run }) {
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'dag' | 'logs' | 'artifacts'
+    'overview' | 'dag' | 'logs' | 'artifacts' | 'timeline'
   >('overview')
 
   return (
@@ -585,6 +602,7 @@ function RunDetailView({ run }: { run: Run }) {
           <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
             {[
               { key: 'overview', label: 'Overview' },
+              { key: 'timeline', label: 'Timeline' },
               { key: 'dag', label: 'DAG' },
               { key: 'logs', label: 'Logs' },
               { key: 'artifacts', label: 'Artifacts' },
@@ -609,6 +627,7 @@ function RunDetailView({ run }: { run: Run }) {
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           {activeTab === 'overview' && <OverviewTab run={run} />}
+          {activeTab === 'timeline' && <TimelineTab run={run} />}
           {activeTab === 'dag' && <DAGTab run={run} />}
           {activeTab === 'logs' && <LogsTab run={run} />}
           {activeTab === 'artifacts' && <ArtifactsTab run={run} />}
@@ -848,6 +867,118 @@ function ArtifactsTab({ run }: { run: Run }) {
   )
 }
 
+function TimelineTab({ run }: { run: Run }) {
+  const isDemoMode = useDemoMode()
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [lastRefresh, setLastRefresh] = useState(new Date())
+  const [events, setEvents] = useState<RunEvent[]>(() =>
+    buildRunTimelineEvents(run)
+  )
+
+  useEffect(() => {
+    setEvents(buildRunTimelineEvents(run))
+    setLastRefresh(new Date())
+  }, [run.id])
+
+  useEffect(() => {
+    if (!autoRefresh || !isDemoMode) return
+    const interval = setInterval(() => {
+      setEvents(prev => appendSyntheticRunEvent(prev, run))
+      setLastRefresh(new Date())
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [autoRefresh, isDemoMode, run])
+
+  const orderedEvents = useMemo(
+    () =>
+      [...events].sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      ),
+    [events]
+  )
+
+  const refreshNow = () => {
+    setEvents(buildRunTimelineEvents(run))
+    setLastRefresh(new Date())
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            Run timeline & receipts
+          </h3>
+          <p className="text-sm text-gray-500">
+            Auto-refresh captures run events and attached receipts.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-gray-600">
+            <input
+              type="checkbox"
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              checked={autoRefresh}
+              onChange={event => setAutoRefresh(event.target.checked)}
+            />
+            Auto-refresh
+          </label>
+          <button
+            className="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            onClick={refreshNow}
+          >
+            Refresh now
+          </button>
+        </div>
+      </div>
+
+      <div className="text-xs text-gray-500">
+        Last updated {lastRefresh.toLocaleTimeString()}
+      </div>
+
+      <div className="space-y-3">
+        {orderedEvents.map(event => (
+          <div
+            key={event.id}
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold text-gray-900">
+                  {event.title}
+                </div>
+                <div className="mt-1 text-sm text-gray-600">{event.detail}</div>
+                <div className="mt-2 text-xs text-gray-500">
+                  {new Date(event.timestamp).toLocaleString()}
+                  {event.actor ? ` • ${event.actor}` : ''}
+                </div>
+              </div>
+              <span
+                className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${getEventBadgeClass(
+                  event.type
+                )}`}
+              >
+                {getEventLabel(event.type)}
+              </span>
+            </div>
+            {event.receiptUrl && (
+              <div className="mt-3">
+                <a
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                  href={event.receiptUrl}
+                >
+                  View receipt
+                </a>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function Runs() {
   return (
     <div className="p-6">
@@ -874,5 +1005,140 @@ function getStatusColor(status: Run['status']) {
       return 'text-yellow-700 bg-yellow-50 ring-yellow-600/20'
     default:
       return 'text-gray-700 bg-gray-50 ring-gray-600/20'
+  }
+}
+
+function buildRunTimelineEvents(run: Run): RunEvent[] {
+  const baseEvents: RunEvent[] = [
+    {
+      id: `${run.id}-start`,
+      type: 'run-started',
+      title: 'Run started',
+      detail: `Triggered by ${run.triggeredBy} via ${run.trigger}.`,
+      timestamp: run.startTime.toISOString(),
+      actor: run.triggeredBy,
+      receiptUrl: `/maestro/receipts/${run.id}/start`,
+    },
+  ]
+
+  const stepEvents = run.steps
+    .filter(step => step.endTime)
+    .map(step => {
+      const durationSeconds = step.duration ?? 0
+      const minutes = Math.floor(durationSeconds / 60)
+      const seconds = durationSeconds % 60
+      return {
+        id: `${run.id}-${step.id}-completed`,
+        type: 'step-completed' as const,
+        title: `${step.name} ${step.status}`,
+        detail: `${step.provider ?? 'Provider'} completed in ${minutes}m ${seconds}s.`,
+        timestamp: step.endTime?.toISOString() ?? run.startTime.toISOString(),
+        actor: step.provider,
+      }
+    })
+
+  const policyEvent: RunEvent = {
+    id: `${run.id}-policy-check`,
+    type: 'policy-check',
+    title: 'Policy check recorded',
+    detail: 'OPA simulation completed with audit receipt attached.',
+    timestamp: new Date(run.startTime.getTime() + 7 * 60 * 1000).toISOString(),
+    actor: 'policy-engine',
+    receiptUrl: `/maestro/receipts/${run.id}/policy`,
+  }
+
+  const terminalEvent: RunEvent | null =
+    run.status === 'completed'
+      ? {
+          id: `${run.id}-completed`,
+          type: 'run-completed',
+          title: 'Run completed',
+          detail: 'All steps finished with receipts archived.',
+          timestamp: run.endTime?.toISOString() ?? new Date().toISOString(),
+          actor: 'maestro',
+          receiptUrl: `/maestro/receipts/${run.id}/summary`,
+        }
+      : run.status === 'failed'
+        ? {
+            id: `${run.id}-failed`,
+            type: 'run-failed',
+            title: 'Run failed',
+            detail: 'Failure receipts captured for review.',
+            timestamp: run.endTime?.toISOString() ?? new Date().toISOString(),
+            actor: 'maestro',
+            receiptUrl: `/maestro/receipts/${run.id}/failure`,
+          }
+        : run.status === 'cancelled'
+          ? {
+              id: `${run.id}-cancelled`,
+              type: 'run-cancelled',
+              title: 'Run cancelled',
+              detail: 'Cancellation receipt captured for governance.',
+              timestamp: run.endTime?.toISOString() ?? new Date().toISOString(),
+              actor: 'maestro',
+              receiptUrl: `/maestro/receipts/${run.id}/cancelled`,
+            }
+          : null
+
+  return [
+    ...baseEvents,
+    ...stepEvents,
+    policyEvent,
+    ...(terminalEvent ? [terminalEvent] : []),
+  ]
+}
+
+function appendSyntheticRunEvent(events: RunEvent[], run: Run): RunEvent[] {
+  const synthetic: RunEvent = {
+    id: `${run.id}-receipt-${Date.now()}`,
+    type: 'receipt-issued',
+    title: 'Receipt captured',
+    detail: 'Auto-refresh recorded a governance checkpoint.',
+    timestamp: new Date().toISOString(),
+    actor: 'governance-ledger',
+    receiptUrl: `/maestro/receipts/${run.id}/checkpoint-${Date.now()}`,
+  }
+  return [synthetic, ...events].slice(0, 40)
+}
+
+function getEventLabel(type: RunEvent['type']) {
+  switch (type) {
+    case 'run-started':
+      return 'Run started'
+    case 'step-completed':
+      return 'Step update'
+    case 'policy-check':
+      return 'Policy check'
+    case 'receipt-issued':
+      return 'Receipt'
+    case 'run-completed':
+      return 'Completed'
+    case 'run-failed':
+      return 'Failed'
+    case 'run-cancelled':
+      return 'Cancelled'
+    default:
+      return 'Event'
+  }
+}
+
+function getEventBadgeClass(type: RunEvent['type']) {
+  switch (type) {
+    case 'run-started':
+      return 'text-blue-700 bg-blue-50 ring-blue-600/20'
+    case 'step-completed':
+      return 'text-emerald-700 bg-emerald-50 ring-emerald-600/20'
+    case 'policy-check':
+      return 'text-purple-700 bg-purple-50 ring-purple-600/20'
+    case 'receipt-issued':
+      return 'text-slate-700 bg-slate-50 ring-slate-500/30'
+    case 'run-completed':
+      return 'text-emerald-700 bg-emerald-50 ring-emerald-600/20'
+    case 'run-failed':
+      return 'text-red-700 bg-red-50 ring-red-600/20'
+    case 'run-cancelled':
+      return 'text-gray-700 bg-gray-50 ring-gray-500/30'
+    default:
+      return 'text-gray-700 bg-gray-50 ring-gray-500/30'
   }
 }

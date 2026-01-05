@@ -7,8 +7,20 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useMemo,
+  useCallback,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog'
+import { useNotification } from '@/contexts/NotificationContext'
+import { maestroApi, PolicyCheckResponse } from '@/lib/maestroApi'
 
 interface CommandPaletteAction {
   id: string
@@ -45,12 +57,218 @@ interface CommandPaletteProviderProps {
   children: ReactNode
 }
 
+interface PolicyActionField {
+  id: string
+  label: string
+  placeholder: string
+  required?: boolean
+  defaultValue?: string
+}
+
+interface PolicyActionConfig {
+  id: string
+  title: string
+  subtitle: string
+  policyAction: string
+  confirmLabel: string
+  fields: PolicyActionField[]
+  execute: (values: Record<string, string>) => Promise<void>
+}
+
 export function CommandPaletteProvider({
   children,
 }: CommandPaletteProviderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [actions, setActions] = useState<CommandPaletteAction[]>([])
   const navigate = useNavigate()
+  const { showNotification } = useNotification()
+  const [policyAction, setPolicyAction] = useState<PolicyActionConfig | null>(
+    null
+  )
+  const [policyResult, setPolicyResult] = useState<PolicyCheckResponse | null>(
+    null
+  )
+  const [formValues, setFormValues] = useState<Record<string, string>>({})
+  const [confirmText, setConfirmText] = useState('')
+  const [isCheckingPolicy, setIsCheckingPolicy] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const resetPolicyAction = useCallback(() => {
+    setPolicyAction(null)
+    setPolicyResult(null)
+    setFormValues({})
+    setConfirmText('')
+    setIsCheckingPolicy(false)
+    setIsSubmitting(false)
+  }, [])
+
+  const openPolicyAction = useCallback(
+    async (action: PolicyActionConfig) => {
+      const initialValues = initializeValues(action)
+      setPolicyAction(action)
+      setFormValues(initialValues)
+      setConfirmText('')
+      setPolicyResult(null)
+      setIsCheckingPolicy(true)
+      try {
+        const result = await simulatePolicy(action, initialValues)
+        setPolicyResult(result)
+      } catch (error) {
+        setPolicyResult({ allowed: false, reason: 'Policy simulation failed.' })
+      } finally {
+        setIsCheckingPolicy(false)
+      }
+    },
+    []
+  )
+
+  const updateFormValue = useCallback((field: string, value: string) => {
+    setFormValues(prev => ({ ...prev, [field]: value }))
+    setPolicyResult(null)
+  }, [])
+
+  const submitPolicyAction = useCallback(async () => {
+    if (!policyAction) return
+    setIsSubmitting(true)
+    try {
+      const result = await simulatePolicy(policyAction, formValues)
+      setPolicyResult(result)
+      if (result && !result.allowed) {
+        showNotification({
+          type: 'warning',
+          title: 'Policy denied',
+          message: result.reason || 'Policy denied the action.',
+        })
+        setIsSubmitting(false)
+        return
+      }
+      await policyAction.execute(formValues)
+      resetPolicyAction()
+    } catch (error) {
+      showNotification({
+        type: 'error',
+        title: 'Action failed',
+        message: 'Unable to complete the policy action.',
+      })
+      setIsSubmitting(false)
+    }
+  }, [formValues, policyAction, resetPolicyAction, showNotification])
+
+  const policyActions = useMemo<PolicyActionConfig[]>(
+    () => [
+      {
+        id: 'run-start',
+        title: 'Start run',
+        subtitle: 'Launch a new Maestro runbook execution',
+        policyAction: 'run/start',
+        confirmLabel: 'START',
+        fields: [
+          {
+            id: 'runbook',
+            label: 'Runbook',
+            placeholder: 'intelgraph-build-pipeline',
+            required: true,
+            defaultValue: 'intelgraph-build-pipeline',
+          },
+          {
+            id: 'environment',
+            label: 'Environment',
+            placeholder: 'production',
+            defaultValue: 'production',
+          },
+        ],
+        execute: async values => {
+          showNotification({
+            type: 'success',
+            title: 'Run started',
+            message: `Runbook ${values.runbook} launched for ${values.environment}.`,
+          })
+          navigate('/maestro/runs')
+        },
+      },
+      {
+        id: 'run-cancel',
+        title: 'Cancel run',
+        subtitle: 'Stop a live run and capture a receipt',
+        policyAction: 'run/cancel',
+        confirmLabel: 'CANCEL',
+        fields: [
+          {
+            id: 'runId',
+            label: 'Run ID',
+            placeholder: 'run_123',
+            required: true,
+          },
+        ],
+        execute: async values => {
+          showNotification({
+            type: 'success',
+            title: 'Run cancelled',
+            message: `Cancellation request submitted for ${values.runId}.`,
+          })
+          navigate(`/maestro/runs/${values.runId}`)
+        },
+      },
+      {
+        id: 'run-rerun-step',
+        title: 'Re-run step',
+        subtitle: 'Retry a specific run step',
+        policyAction: 'run/step/retry',
+        confirmLabel: 'RERUN',
+        fields: [
+          {
+            id: 'runId',
+            label: 'Run ID',
+            placeholder: 'run_123',
+            required: true,
+          },
+          {
+            id: 'stepId',
+            label: 'Step ID',
+            placeholder: 'step_4',
+            required: true,
+          },
+        ],
+        execute: async values => {
+          showNotification({
+            type: 'success',
+            title: 'Step retry queued',
+            message: `Retry requested for ${values.runId} • ${values.stepId}.`,
+          })
+          navigate(`/maestro/runs/${values.runId}`)
+        },
+      },
+      {
+        id: 'run-export-evidence',
+        title: 'Export evidence',
+        subtitle: 'Prepare an evidence bundle with policy guardrails',
+        policyAction: 'export/report',
+        confirmLabel: 'EXPORT',
+        fields: [
+          {
+            id: 'runId',
+            label: 'Run ID',
+            placeholder: 'run_123',
+            required: true,
+          },
+          {
+            id: 'destination',
+            label: 'Destination',
+            placeholder: 'secure-evidence-bucket',
+            required: true,
+          },
+        ],
+        execute: async values => {
+          showNotification({
+            type: 'success',
+            title: 'Evidence export queued',
+            message: `Export started for ${values.runId} to ${values.destination}.`,
+          })
+        },
+      },
+    ],
+    [navigate, showNotification]
+  )
 
   // Default navigation actions
   useEffect(() => {
@@ -92,14 +310,27 @@ export function CommandPaletteProvider({
       },
     ]
 
-    setActions(prev => [...prev, ...defaultActions])
+    const policyCommands: CommandPaletteAction[] = policyActions.map(action => ({
+      id: action.id,
+      title: action.title,
+      subtitle: action.subtitle,
+      section: 'Run Actions',
+      action: () => openPolicyAction(action),
+      keywords: [action.title.toLowerCase(), action.policyAction],
+    }))
+
+    setActions(prev => [...prev, ...defaultActions, ...policyCommands])
 
     return () => {
       setActions(prev =>
-        prev.filter(action => !defaultActions.find(def => def.id === action.id))
+        prev.filter(
+          action =>
+            !defaultActions.find(def => def.id === action.id) &&
+            !policyCommands.find(def => def.id === action.id)
+        )
       )
     }
-  }, [navigate])
+  }, [navigate, openPolicyAction, policyActions])
 
   // Keyboard shortcut handler
   useEffect(() => {
@@ -136,8 +367,139 @@ export function CommandPaletteProvider({
       }}
     >
       {children}
+      <PolicyActionDialog
+        action={policyAction}
+        policyResult={policyResult}
+        isCheckingPolicy={isCheckingPolicy}
+        isSubmitting={isSubmitting}
+        formValues={formValues}
+        confirmText={confirmText}
+        onClose={resetPolicyAction}
+        onConfirm={submitPolicyAction}
+        onFieldChange={updateFormValue}
+        onConfirmTextChange={setConfirmText}
+      />
       {isOpen && <CommandPalette />}
     </CommandPaletteContext.Provider>
+  )
+}
+
+function PolicyActionDialog({
+  action,
+  policyResult,
+  isCheckingPolicy,
+  isSubmitting,
+  formValues,
+  confirmText,
+  onClose,
+  onConfirm,
+  onFieldChange,
+  onConfirmTextChange,
+}: {
+  action: PolicyActionConfig | null
+  policyResult: PolicyCheckResponse | null
+  isCheckingPolicy: boolean
+  isSubmitting: boolean
+  formValues: Record<string, string>
+  confirmText: string
+  onClose: () => void
+  onConfirm: () => void
+  onFieldChange: (field: string, value: string) => void
+  onConfirmTextChange: (value: string) => void
+}) {
+  if (!action) return null
+
+  const requiredFieldsValid = action.fields.every(field =>
+    field.required ? Boolean(formValues[field.id]?.trim()) : true
+  )
+  const confirmValid =
+    confirmText.trim().toUpperCase() === action.confirmLabel.toUpperCase()
+
+  return (
+    <Dialog open={Boolean(action)} onOpenChange={open => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{action.title}</DialogTitle>
+          <DialogDescription>{action.subtitle}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+            <div className="font-medium text-gray-900">Policy simulation</div>
+            {isCheckingPolicy ? (
+              <div className="mt-1 text-gray-500">Simulating policy...</div>
+            ) : policyResult ? (
+              <div className="mt-1">
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
+                    policyResult.allowed
+                      ? 'text-emerald-700 bg-emerald-50 ring-emerald-600/20'
+                      : 'text-red-700 bg-red-50 ring-red-600/20'
+                  }`}
+                >
+                  {policyResult.allowed ? 'Allowed' : 'Denied'}
+                </span>
+                {policyResult.reason && (
+                  <p className="mt-2 text-xs text-gray-600">
+                    {policyResult.reason}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="mt-1 text-gray-500">
+                Policy simulation pending.
+              </div>
+            )}
+          </div>
+
+          {action.fields.map(field => (
+            <div key={field.id}>
+              <label className="text-sm font-medium text-gray-700">
+                {field.label}
+              </label>
+              <input
+                className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                value={formValues[field.id] ?? ''}
+                placeholder={field.placeholder}
+                onChange={event => onFieldChange(field.id, event.target.value)}
+              />
+            </div>
+          ))}
+
+          <div>
+            <label className="text-sm font-medium text-gray-700">
+              Type {action.confirmLabel} to confirm
+            </label>
+            <input
+              className="mt-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+              value={confirmText}
+              onChange={event => onConfirmTextChange(event.target.value)}
+              placeholder={action.confirmLabel}
+            />
+          </div>
+        </div>
+        <DialogFooter className="mt-6">
+          <button
+            className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            disabled={
+              isSubmitting ||
+              isCheckingPolicy ||
+              !requiredFieldsValid ||
+              !confirmValid ||
+              policyResult?.allowed === false
+            }
+            onClick={onConfirm}
+          >
+            {isSubmitting ? 'Submitting...' : 'Confirm action'}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -253,4 +615,20 @@ function CommandPalette() {
       </div>
     </div>
   )
+}
+
+async function simulatePolicy(
+  action: PolicyActionConfig,
+  values: Record<string, string>
+): Promise<PolicyCheckResponse> {
+  return maestroApi.policyCheck(action.policyAction, values)
+}
+
+function initializeValues(action: PolicyActionConfig) {
+  return action.fields.reduce<Record<string, string>>((acc, field) => {
+    if (field.defaultValue) {
+      acc[field.id] = field.defaultValue
+    }
+    return acc
+  }, {})
 }

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-02T09:00:00Z",
+  "revision_note": "Aligned Maestro UI governance surfaces (timeline, approvals, command palette) with policy checks and receipts",
   "initiatives": [
     {
       "id": "A",
