@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-01T12:30:00Z",
-  "revision_note": "Added CCR poisoning-detection epic and updated platform security scope",
+  "last_updated": "2026-01-05T02:16:44Z",
+  "revision_note": "Added restore drill evidence workflow and RTO/RPO validation",
   "initiatives": [
     {
       "id": "A",
