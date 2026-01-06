@@ -2,7 +2,7 @@ export type DemoWorkflowSeed = {
   templateId: string;
   name: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   tags: string[];
 };
 
@@ -12,7 +12,7 @@ export const demoWorkflowSeed: DemoWorkflowSeed[] = [
     name: 'Demo: Credential Stuffing Sweep',
     description:
       'Triage a suspected credential stuffing campaign targeting the partner portal.',
-    priority: 'high',
+    priority: 'HIGH',
     tags: ['demo', 'credential-stuffing', 'partner'],
   },
   {
@@ -20,7 +20,7 @@ export const demoWorkflowSeed: DemoWorkflowSeed[] = [
     name: 'Demo: Suspicious Payment Cluster',
     description:
       'Investigate anomalous payment relationships and document evidence artifacts.',
-    priority: 'medium',
+    priority: 'MEDIUM',
     tags: ['demo', 'fraud', 'evidence'],
   },
 ];
