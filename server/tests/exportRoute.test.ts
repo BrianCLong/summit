@@ -20,7 +20,7 @@ describe('GET /export/provenance', () => {
     ts: String(Date.now()),
     tenant: 'tenant-1',
     reasonCodeIn: '',
-  } as Record<string, string>;
+  };
 
   let app: any;
   beforeAll(async () => {

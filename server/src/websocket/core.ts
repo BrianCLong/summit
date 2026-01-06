@@ -52,6 +52,12 @@ export class WebSocketCore {
 
   constructor() {
     this.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
+    if (this.JWT_SECRET === 'dev-secret' && process.env.NODE_ENV === 'production') {
+      console.error('CRITICAL: JWT_SECRET using insecure default in production');
+      // In strict mode, we might want to throw, but for now log critical error
+      // throw new Error('JWT_SECRET must be set in production');
+    }
+
     this.redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
       port: parseInt(process.env.REDIS_PORT || '6379'),
