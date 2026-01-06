@@ -37,7 +37,7 @@ export interface ChatMessage {
 export class LLMService {
   private config: LLMConfig;
   private metrics: LLMMetrics;
-  private openai: OpenAI;
+  private _openai?: OpenAI;
 
   constructor(config: Partial<LLMConfig> = {}) {
     this.config = {
@@ -57,9 +57,17 @@ export class LLMService {
       averageLatency: 0,
     };
 
-    this.openai = new OpenAI({
-      apiKey: this.config.apiKey,
-    });
+    // OpenAI client is initialized lazily
+  }
+
+  private get openai(): OpenAI {
+    if (!this._openai) {
+      // Allow this to throw if API key is missing, but only when accessed
+      this._openai = new OpenAI({
+        apiKey: this.config.apiKey,
+      });
+    }
+    return this._openai;
   }
 
   /**
