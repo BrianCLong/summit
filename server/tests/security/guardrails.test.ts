@@ -8,10 +8,10 @@ describe('Production Guardrails', () => {
   beforeEach(() => {
     jest.resetModules();
     process.env = { ...originalEnv };
-    exitMock = jest.spyOn(process, 'exit').mockImplementation((code?: number | string): never => {
+    exitMock = jest.spyOn(process, 'exit').mockImplementation((code?: any): never => {
       throw new Error(`PROCESS_EXIT_${code}`);
     });
-    consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => { });
   });
 
   afterEach(() => {
@@ -23,7 +23,7 @@ describe('Production Guardrails', () => {
   const importConfig = async () => {
     // In ESM, simply re-importing might not re-execute if not using a query param to bust cache,
     // but jest.resetModules() handles this for us in a Jest environment.
-    return await import('../../src/config.ts');
+    return await import('../../src/config');
   };
 
   it('should fail booting in production with default secrets', async () => {

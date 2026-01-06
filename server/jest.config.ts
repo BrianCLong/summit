@@ -69,7 +69,7 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
   maxWorkers: process.env.CI ? 2 : '50%',
   // Open handle detection - helps identify hanging tests
   detectOpenHandles: process.env.JEST_DETECT_HANDLES === 'true',

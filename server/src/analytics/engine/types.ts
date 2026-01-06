@@ -7,7 +7,7 @@
  * @module analytics/engine/types
  */
 
-import { GovernanceVerdict } from '../../governance/types.js';
+import type { GovernanceVerdict } from '../../governance/types.js';
 
 // ============================================================================
 // Prediction Types (from Contract Section 1)

@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import yaml from 'js-yaml';
+import { getAuditSystem } from '../audit/index.js';
 import { AdvancedAuditSystem } from '../audit/advanced-audit-system.js';
 import { AppError } from '../lib/errors.js';
 import { fileURLToPath } from 'url';
@@ -48,7 +49,7 @@ export class PolicyEngine extends EventEmitter {
     // Use getInstance without params, assuming it's already initialized by the main app
     // or fallback to lazy initialization if possible
     try {
-      this.auditSystem = AdvancedAuditSystem.getInstance();
+      this.auditSystem = getAuditSystem();
     } catch (e: any) {
       // If not initialized, we can't really log audits effectively yet.
       // We'll let it fail or log to console.

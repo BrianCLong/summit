@@ -12,7 +12,14 @@
 // Compliance Frameworks
 // ============================================================================
 
-export type ComplianceFramework = 'SOC2' | 'ISO27001' | 'GDPR' | 'HIPAA' | 'PCI-DSS' | 'NIST';
+export enum ComplianceFramework {
+  SOC2 = 'SOC2',
+  ISO27001 = 'ISO27001',
+  GDPR = 'GDPR',
+  HIPAA = 'HIPAA',
+  PCIDSS = 'PCI-DSS',
+  NIST = 'NIST',
+}
 
 export type ControlStatus = 'compliant' | 'non_compliant' | 'partial' | 'not_applicable' | 'not_assessed';
 
@@ -40,17 +47,18 @@ export interface ControlMapping {
   controlId: string;
 }
 
-export type EvidenceType =
-  | 'system_config'
-  | 'access_log'
-  | 'audit_trail'
-  | 'policy_document'
-  | 'screenshot'
-  | 'test_result'
-  | 'attestation'
-  | 'scan_report'
-  | 'metric'
-  | 'custom';
+export enum EvidenceType {
+  SYSTEM_CONFIG = 'system_config',
+  ACCESS_LOG = 'access_log',
+  AUDIT_TRAIL = 'audit_trail',
+  POLICY_DOCUMENT = 'policy_document',
+  SCREENSHOT = 'screenshot',
+  TEST_RESULT = 'test_result',
+  ATTESTATION = 'attestation',
+  SCAN_REPORT = 'scan_report',
+  METRIC = 'metric',
+  CUSTOM = 'custom',
+}
 
 // ============================================================================
 // Control Assessment

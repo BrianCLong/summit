@@ -2,9 +2,9 @@ import request from 'supertest';
 import { createApp } from '../src/app';
 
 describe('Golden Path Guardrails - Negative Tests', () => {
-  let app;
-  let server;
-  let authToken;
+  let app: any;
+  let server: any;
+  let authToken: string;
 
   beforeAll(async () => {
     app = await createApp();
@@ -33,26 +33,26 @@ describe('Golden Path Guardrails - Negative Tests', () => {
 
     // If registration fails (e.g. user exists), try login
     if (registerRes.body.errors) {
-        const loginRes = await request(server)
+      const loginRes = await request(server)
         .post('/graphql')
         .send({
-            query: `
+          query: `
             mutation Login($input: LoginInput!) {
                 login(input: $input) {
                 token
                 }
             }
             `,
-            variables: {
+          variables: {
             input: {
-                email: 'guardrails-test@example.com',
-                password: 'password123',
+              email: 'guardrails-test@example.com',
+              password: 'password123',
             },
-            },
+          },
         });
-        authToken = loginRes.body.data.login.token;
+      authToken = loginRes.body.data.login.token;
     } else {
-        authToken = registerRes.body.data.register.token;
+      authToken = registerRes.body.data.register.token;
     }
   });
 
@@ -164,9 +164,9 @@ describe('Golden Path Guardrails - Negative Tests', () => {
         `
       });
 
-      // Should be treated as no token. If dev mode, it might work.
-      // If prod, it should fail.
-      // We'll rely on the "Invalid Token" test for session state inconsistency.
+    // Should be treated as no token. If dev mode, it might work.
+    // If prod, it should fail.
+    // We'll rely on the "Invalid Token" test for session state inconsistency.
   });
 
   // 4. Malformed AI Prompts
@@ -193,7 +193,7 @@ describe('Golden Path Guardrails - Negative Tests', () => {
     // It might return a validation error or handle it.
     // Ideally 400 or 200 with user-facing error.
     if (res.status === 500) {
-        fail('Server crashed with 500 on huge input');
+      fail('Server crashed with 500 on huge input');
     }
 
     // Checking for reasonable response time or error

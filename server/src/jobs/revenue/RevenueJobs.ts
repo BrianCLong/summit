@@ -1,4 +1,4 @@
-import PgBoss from 'pg-boss';
+import { type Job } from 'pg-boss';
 import RenewalService from '../../services/RenewalService.js';
 import PartnerPayoutService from '../../services/PartnerPayoutService.js';
 import logger from '../../utils/logger.js';

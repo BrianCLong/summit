@@ -5,6 +5,9 @@
  */
 import * as client from 'prom-client';
 
+// Clear the default registry to avoid duplicate metric errors
+client.register.clear();
+
 // Create a Registry which registers the metrics
 export const register = new client.Registry();
 

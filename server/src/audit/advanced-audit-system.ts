@@ -1271,4 +1271,4 @@ export class AdvancedAuditSystem extends EventEmitter {
 
 // Export singleton instance getter
 // This allows lazy initialization with correct dependencies
-export const advancedAuditSystem = AdvancedAuditSystem.getInstance();
+export const getAuditSystem = () => AdvancedAuditSystem.getInstance();

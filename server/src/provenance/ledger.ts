@@ -23,7 +23,7 @@ import {
   ReceiptEvidence,
   RecoveryEvidence,
 } from './types.js';
-import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { advancedAuditSystem } from '../audit/index.js';
 import { putLocked } from '../audit/worm.js';
 import { CanonicalGraphService } from './CanonicalGraphService.js';
 
