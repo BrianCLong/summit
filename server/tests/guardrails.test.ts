@@ -1,5 +1,36 @@
+import { jest } from '@jest/globals';
 import request from 'supertest';
-import { createApp } from '../src/app';
+
+// Use unstable_mockModule for ESM mocking support
+jest.unstable_mockModule('../src/workers/trustScoreWorker', () => ({
+  startTrustWorker: jest.fn(),
+}));
+jest.unstable_mockModule('../src/workers/retentionWorker', () => ({
+  startRetentionWorker: jest.fn(),
+}));
+jest.unstable_mockModule('../src/ingest/stream', () => ({
+  streamIngest: {
+    start: jest.fn().mockImplementation(async () => { }),
+    stop: jest.fn(),
+  },
+}));
+jest.unstable_mockModule('../src/webhooks/webhook.worker', () => ({
+  webhookWorker: {},
+}));
+jest.unstable_mockModule('../src/lib/telemetry/diagnostic-snapshotter', () => ({
+  snapshotter: {
+    trackRequest: jest.fn(),
+    untrackRequest: jest.fn(),
+    triggerSnapshot: jest.fn(),
+  },
+}));
+
+// Dynamic import for createApp after mocks are defined
+const { createApp } = await import('../src/app');
+
+// Import DB connections dynamically to close them
+const { pg } = await import('../src/db/pg');
+const { getNeo4jDriver } = await import('../src/db/neo4j');
 
 describe('Golden Path Guardrails - Negative Tests', () => {
   let app: any;
@@ -58,6 +89,8 @@ describe('Golden Path Guardrails - Negative Tests', () => {
 
   afterAll(async () => {
     await server.close();
+    await pg.close();
+    await getNeo4jDriver().close();
   });
 
   // 1. Invalid Entity Shapes
