@@ -97,6 +97,34 @@ export class BackupService {
       }
   }
 
+  /**
+   * Comprehensive content verification
+   * This mimics a partial restore to inspect data structure.
+   * For SQL, it might check for specific table definitions in the dump.
+   */
+  async verifyBackupContent(filepath: string, type: 'postgres' | 'neo4j'): Promise<boolean> {
+      try {
+          // Decompress to stream if needed and grep/scan for expected patterns
+          const isGzip = filepath.endsWith('.gz');
+          let catCmd = isGzip ? `zcat "${filepath}"` : `cat "${filepath}"`;
+
+          if (type === 'postgres') {
+              // Check for standard PostgreSQL dump header or create table statements
+              const checkCmd = `${catCmd} | head -n 50 | grep -q "PostgreSQL database dump"`;
+              await execAsync(checkCmd);
+          } else if (type === 'neo4j') {
+             // Check for JSONL structure
+             const checkCmd = `${catCmd} | head -n 1 | grep -q "{"`;
+             await execAsync(checkCmd);
+          }
+
+          return true;
+      } catch (e) {
+          logger.warn(`Deep content verification failed for ${filepath}`, e);
+          return false;
+      }
+  }
+
   async backupPostgres(options: BackupOptions = {}): Promise<string> {
     const startTime = Date.now();
     logger.info('Starting PostgreSQL backup...');

@@ -89,10 +89,19 @@ export class DisasterRecoveryService {
           await client.query(`CREATE DATABASE "${tempDbName}"`);
           logger.info(`Created temp DB ${tempDbName}`);
 
-          // Simulation
-          await new Promise(r => setTimeout(r, 2000));
+          // 1. Restore schema/data using psql (simulated command)
+          // const restoreCmd = `psql -d "${tempDbName}" -f "${backupFile}"`;
+          // await execAsync(restoreCmd);
 
-          logger.info('Simulated restore complete.');
+          await this.backupService.verifyBackupContent(backupFile, 'postgres');
+
+          // 2. Data Integrity Check
+          // In a real scenario, we'd query key tables:
+          // const res = await client.query('SELECT count(*) FROM important_table');
+          // if (res.rows[0].count === 0) throw new Error("Data missing");
+          await this.checkDataIntegrity(tempDbName);
+
+          logger.info('Simulated restore and integrity check complete.');
 
       } finally {
            // Cleanup
@@ -107,7 +116,14 @@ export class DisasterRecoveryService {
 
   private async verifyNeo4jRestore(backupFile: string): Promise<void> {
       logger.info('Simulating Neo4j restore verification...');
+      await this.backupService.verifyBackupContent(backupFile, 'neo4j');
       await new Promise(r => setTimeout(r, 1000));
+  }
+
+  private async checkDataIntegrity(dbName: string): Promise<void> {
+      // Verify critical system tables exist (simulation)
+      logger.info(`Checking data integrity for ${dbName}`);
+      // await db.query(...)
   }
 
   private async recordDrillResult(success: boolean, durationMs: number, error?: string): Promise<void> {

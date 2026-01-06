@@ -12,6 +12,9 @@ import { PrometheusMetrics } from '../utils/metrics.js';
 import logger from '../utils/logger.js';
 import { tracer } from '../utils/tracing.js';
 import { DatabaseService } from './DatabaseService.js';
+import { DistributedCacheService, getDistributedCache } from '../cache/DistributedCacheService.js';
+import { TenantAwareCache } from '../cache/TenantAwareCache.js';
+import { RedisService } from '../cache/redis.js';
 
 // Cost tracking configuration
 interface TenantCostConfig {
@@ -154,6 +157,7 @@ export class TenantCostService extends EventEmitter {
   private costCache: Map<string, TenantCostMetrics[]> = new Map();
   private budgets: Map<string, TenantBudget> = new Map();
   private forecasts: Map<string, CostForecast> = new Map();
+  private distributedCache: DistributedCacheService;
 
   constructor(config: Partial<TenantCostConfig> = {}, db: DatabaseService) {
     super();
@@ -176,6 +180,8 @@ export class TenantCostService extends EventEmitter {
 
     this.db = db;
     this.metrics = new PrometheusMetrics('tenant_cost_service');
+    // Initialize distributed cache with RedisService
+    this.distributedCache = getDistributedCache(RedisService.getInstance().getClient() as any);
 
     this.initializeMetrics();
     this.loadTenantBudgets();
@@ -405,84 +411,92 @@ export class TenantCostService extends EventEmitter {
     tenantId: string,
     period: 'hour' | 'day' | 'week' | 'month' = 'hour',
   ): Promise<TenantCostMetrics> {
-    return tracer.startActiveSpan(
-      'tenant_cost_service.calculate_costs',
-      async (span: Span) => {
-        const startTime = Date.now();
+    const tenantCache = new TenantAwareCache(this.distributedCache, tenantId);
 
-        try {
-          span.setAttributes({
-            'tenant_cost.tenant_id': tenantId,
-            'tenant_cost.period': period,
-          });
+    return tenantCache.getOrSet(
+      `costs:${period}`,
+      async () => {
+        return tracer.startActiveSpan(
+          'tenant_cost_service.calculate_costs',
+          async (span: Span) => {
+            const startTime = Date.now();
 
-          // Get usage data for the period
-          const usage = await this.getUsageForPeriod(tenantId, period);
+            try {
+              span.setAttributes({
+                'tenant_cost.tenant_id': tenantId,
+                'tenant_cost.period': period,
+              });
 
-          // Calculate costs by category
-          const costs = {
-            compute: usage.computeUnits * this.getCostRate('compute'),
-            storage: usage.storageGB * this.getCostRate('storage'),
-            network: usage.networkGB * this.getCostRate('network'),
-            apiCalls: usage.apiCalls * this.getCostRate('api_calls'),
-            total: 0,
-          };
+              // Get usage data for the period
+              const usage = await this.getUsageForPeriod(tenantId, period);
 
-          costs.total =
-            costs.compute + costs.storage + costs.network + costs.apiCalls;
+              // Calculate costs by category
+              const costs = {
+                compute: usage.computeUnits * this.getCostRate('compute'),
+                storage: usage.storageGB * this.getCostRate('storage'),
+                network: usage.networkGB * this.getCostRate('network'),
+                apiCalls: usage.apiCalls * this.getCostRate('api_calls'),
+                total: 0,
+              };
 
-          // Calculate efficiency metrics
-          const costPerUser =
-            usage.activeUsers > 0 ? costs.total / usage.activeUsers : 0;
-          const costPerQuery =
-            usage.queries > 0 ? costs.total / usage.queries : 0;
-          const costPerGB =
-            usage.dataIngested > 0 ? costs.total / usage.dataIngested : 0;
+              costs.total =
+                costs.compute + costs.storage + costs.network + costs.apiCalls;
 
-          const metrics: TenantCostMetrics = {
-            tenantId,
-            timestamp: new Date(),
-            period,
-            computeUnits: usage.computeUnits,
-            storageGB: usage.storageGB,
-            networkGB: usage.networkGB,
-            apiCalls: usage.apiCalls,
-            costs,
-            activeUsers: usage.activeUsers,
-            queries: usage.queries,
-            dataIngested: usage.dataIngested,
-            costPerUser,
-            costPerQuery,
-            costPerGB,
-          };
+              // Calculate efficiency metrics
+              const costPerUser =
+                usage.activeUsers > 0 ? costs.total / usage.activeUsers : 0;
+              const costPerQuery =
+                usage.queries > 0 ? costs.total / usage.queries : 0;
+              const costPerGB =
+                usage.dataIngested > 0 ? costs.total / usage.dataIngested : 0;
 
-          // Update Prometheus metrics
-          this.metrics.setGauge('tenant_cost_total', costs.total, {
-            tenant_id: tenantId,
-            period,
-          });
+              const metrics: TenantCostMetrics = {
+                tenantId,
+                timestamp: new Date(),
+                period,
+                computeUnits: usage.computeUnits,
+                storageGB: usage.storageGB,
+                networkGB: usage.networkGB,
+                apiCalls: usage.apiCalls,
+                costs,
+                activeUsers: usage.activeUsers,
+                queries: usage.queries,
+                dataIngested: usage.dataIngested,
+                costPerUser,
+                costPerQuery,
+                costPerGB,
+              };
 
-          // Check budget alerts
-          await this.checkBudgetAlerts(tenantId, metrics);
+              // Update Prometheus metrics
+              this.metrics.setGauge('tenant_cost_total', costs.total, {
+                tenant_id: tenantId,
+                period,
+              });
 
-          // Store metrics for caching
-          this.cacheCostMetrics(tenantId, metrics);
+              // Check budget alerts
+              await this.checkBudgetAlerts(tenantId, metrics);
 
-          const duration = (Date.now() - startTime) / 1000;
-          this.metrics.observeHistogram('cost_calculation_duration', duration);
+              // Store metrics for local memory caching (legacy)
+              this.cacheCostMetrics(tenantId, metrics);
 
-          return metrics;
-        } catch (error: any) {
-          logger.error('Failed to calculate tenant costs', {
-            tenantId,
-            period,
-            error: error instanceof Error ? error.message : String(error),
-          });
-          span.recordException(error as Error);
-          throw error;
-        }
+              const duration = (Date.now() - startTime) / 1000;
+              this.metrics.observeHistogram('cost_calculation_duration', duration);
+
+              return metrics;
+            } catch (error: any) {
+              logger.error('Failed to calculate tenant costs', {
+                tenantId,
+                period,
+                error: error instanceof Error ? error.message : String(error),
+              });
+              span.recordException(error as Error);
+              throw error;
+            }
+          },
+        );
       },
-    );
+      { ttlSeconds: 300 } // Cache for 5 minutes
+    ).then(envelope => envelope.data);
   }
 
   public async getServiceCostBreakdown(
