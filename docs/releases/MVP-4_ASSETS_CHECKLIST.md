@@ -12,6 +12,7 @@
 - GA evidence index: `docs/release/GA_EVIDENCE_INDEX.md`
 - GA checklist: `docs/release/GA_CHECKLIST.md`
 - Release runbook: `docs/releases/runbook.md`
+- MVP-4 rollback protocol: `docs/releases/v4.0.0/MVP4-GA-ROLLBACK.md`
 - Summit readiness assertion: `docs/SUMMIT_READINESS_ASSERTION.md`
 
 ## Artifact list

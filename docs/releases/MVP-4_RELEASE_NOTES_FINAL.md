@@ -7,7 +7,7 @@ Release codename: Ironclad Standard
 - GA gating and smoke verification are codified as first-class make targets for consistent release verification. (Evidence: `Makefile` targets `ga` and `smoke`, plus `docs/release/GA_CHECKLIST.md`.)
 - Release evidence is centralized with a dedicated evidence index and readiness report for verifiable sign-off. (Evidence: `docs/release/GA_EVIDENCE_INDEX.md`, `docs/release/GA_READINESS_REPORT.md`.)
 - Release bundle generation and verification scripts exist with automated tests for error handling. (Evidence: `scripts/release/release-bundle.mjs`, `scripts/release/verify-release-bundle.mjs`, `scripts/release/__tests__/error-handling.test.mjs`; command: `npm run test:release-scripts`.)
-- Operational rollback is defined and callable via a make target that wraps the rollback script. (Evidence: `Makefile` target `rollback`, `scripts/rollback.sh`.)
+- Operational rollback is defined, documented, and callable via a make target that wraps the rollback script. (Evidence: `docs/releases/v4.0.0/MVP4-GA-ROLLBACK.md`, `Makefile` target `rollback`, `scripts/rollback.sh`.)
 - SBOM and provenance generation are supported by dedicated compliance scripts. (Evidence: `package.json` scripts `generate:sbom`, `generate:provenance`; `docs/releases/runbook.md`.)
 
 ## What shipped
@@ -29,7 +29,7 @@ Release codename: Ironclad Standard
 ### Ops and DevEx
 
 - Release runbook and GA checklists formalize release operations and evidence capture. (Evidence: `docs/releases/runbook.md`, `docs/release/GA_CHECKLIST.md`, `docs/release/GA_EVIDENCE_INDEX.md`.)
-- Rollback drill automation is available via Makefile targets for operator practice. (Evidence: `Makefile` targets `rollback` and `rollback-drill`.)
+- Rollback protocol and drills are defined for operator practice. (Evidence: `docs/releases/v4.0.0/MVP4-GA-ROLLBACK.md`, `Makefile` targets `rollback` and `rollback-drill`.)
 
 ## Breaking changes
 
