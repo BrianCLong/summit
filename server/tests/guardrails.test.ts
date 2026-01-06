@@ -25,19 +25,24 @@ jest.unstable_mockModule('../src/lib/telemetry/diagnostic-snapshotter', () => ({
   },
 }));
 
-// Dynamic import for createApp after mocks are defined
-const { createApp } = await import('../src/app');
-
-// Import DB connections dynamically to close them
-const { pg } = await import('../src/db/pg');
-const { getNeo4jDriver } = await import('../src/db/neo4j');
-
 describe('Golden Path Guardrails - Negative Tests', () => {
   let app: any;
   let server: any;
   let authToken: string;
+  let pg: any;
+  let getNeo4jDriver: any;
 
   beforeAll(async () => {
+    // Dynamic import for createApp after mocks are defined
+    const appModule = await import('../src/app');
+    const createApp = appModule.createApp;
+
+    // Import DB connections dynamically to close them
+    const pgModule = await import('../src/db/pg');
+    pg = pgModule.pg;
+    const neo4jModule = await import('../src/db/neo4j');
+    getNeo4jDriver = neo4jModule.getNeo4jDriver;
+
     app = await createApp();
     server = app.listen(0);
 
