@@ -4,6 +4,8 @@ This is the canonical runbook for operators to perform releases.
 
 > **Quick Links:** See the [Release Bundle Artifacts Index](index.md) for a list of all scripts, workflows, and schemas.
 
+> **Evidence linting:** Pull requests that modify `release-evidence/*.json` run an automated lint to validate schema, tag/sha formats, go/no-go decision, and expiration windows. Fix lint failures before merging.
+
 ## 1. Overview
 
 - **Artifacts produced:**

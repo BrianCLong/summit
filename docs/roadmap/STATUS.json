@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-02T10:15:00Z",
-  "revision_note": "Added operational runbooks for rollback, quota, purge, restore drill, and billing discrepancy",
+  "last_updated": "2026-01-05T05:15:00Z",
+  "revision_note": "Added release evidence lint workflow and validator",
   "initiatives": [
     {
       "id": "A",

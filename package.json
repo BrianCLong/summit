@@ -44,6 +44,7 @@
     "lint": "eslint . && (ruff check . || true)",
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
     "lint:strict": "eslint . && (ruff check . || true)",
+    "lint:release-evidence": "node scripts/release/validate-evidence.mjs",
     "security:check": "node scripts/security-check.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",

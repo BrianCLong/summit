@@ -1,0 +1,25 @@
+name: Release Evidence Lint
+
+on:
+  pull_request:
+    paths:
+      - "release-evidence/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate release evidence files
+        run: npm run lint:release-evidence --if-present
