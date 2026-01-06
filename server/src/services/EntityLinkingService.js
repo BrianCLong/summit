@@ -1,5 +1,5 @@
 import { getNeo4jDriver } from '../config/database.js';
-const GNNService = require('./GNNService');
+import GNNService from './GNNService.js';
 import logger from '../utils/logger.js';
 
 /**
