@@ -102,8 +102,30 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
 
   const selectedRun: MaestroRunResponse | null = state.data;
 
+  // OPTIMIZATION: Create a map for O(1) task result lookup instead of O(N) find() in loop
+  const resultsMap = React.useMemo(() => {
+    const map = new Map<string, TaskResult>();
+    if (selectedRun?.results) {
+      selectedRun.results.forEach(r => map.set(r.task.id, r));
+    }
+    return map;
+  }, [selectedRun?.results]);
+
   const findResultForTask = (taskId: string): TaskResult | undefined =>
-    selectedRun?.results.find(r => r.task.id === taskId);
+    resultsMap.get(taskId);
+
+  // OPTIMIZATION: Pre-calculate formatted artifact strings to avoid expensive JSON.stringify in render loop
+  const formattedArtifacts = React.useMemo(() => {
+    const map = new Map<string, string>();
+    if (selectedRun?.results) {
+      selectedRun.results.forEach(r => {
+        if (r.artifact?.data) {
+          map.set(r.task.id, formatArtifactData(r.artifact.data));
+        }
+      });
+    }
+    return map;
+  }, [selectedRun?.results]);
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -386,10 +408,10 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                       {result.artifact ? (
                         <div className="relative group">
                           <pre className="mt-1 max-h-40 overflow-auto rounded-xl bg-slate-900/80 p-3 text-[11px] leading-relaxed text-slate-100 pr-10">
-                            {formatArtifactData(result.artifact.data)}
+                            {formattedArtifacts.get(result.task.id)}
                           </pre>
                           <CopyButton
-                            text={formatArtifactData(result.artifact.data)}
+                            text={formattedArtifacts.get(result.task.id) || ''}
                             className="absolute top-2 right-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
                           />
                         </div>
