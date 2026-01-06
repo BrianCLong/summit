@@ -12,6 +12,8 @@ import { registerExportCommands } from './commands/export.js';
 import { registerSyncCommands } from './commands/sync.js';
 import { registerConfigCommands } from './commands/config.js';
 import { registerAuditCommands } from './commands/audit.js';
+import { registerRunCommands } from './commands/run.js';
+import { registerDeterminismCommands } from './commands/determinism.js';
 import { VERSION } from './lib/constants.js';
 import { setupErrorHandling } from './utils/errors.js';
 
@@ -40,6 +42,8 @@ async function main(): Promise<void> {
   registerSyncCommands(program, config);
   registerConfigCommands(program, config);
   registerAuditCommands(program);
+  registerRunCommands(program);
+  registerDeterminismCommands(program);
 
   // Parse and execute
   await program.parseAsync(process.argv);
