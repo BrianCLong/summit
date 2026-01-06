@@ -816,6 +816,11 @@ type CrisisScenario {
   updatedAt: DateTime!
 }
 
+input CrisisScenarioInput {
+  crisisType: String!
+  simulationParameters: JSON!
+}
+
 type SocialMediaTelemetry {
   id: ID!
   scenarioId: ID!
@@ -2003,10 +2008,10 @@ input CampaignFilter {
     # Electronic Warfare Mutations
     ewRegisterAsset(input: JSON!): EWAsset!
     ewDeployJammer(input: JSON!): JammingMission!
-    ewStopJammer(missionId: ID!): JammingMission!
+    ewStopJammer(missionId: ID!): Boolean!
     ewSimulateSignalDetection(input: JSON!): SpectrumSignal!
     ewTriangulateSignal(signalId: ID!): DirectionFindingResult!
-    ewActivateProtection(assetId: ID!, protectionType: String!): EWAsset!
+    ewActivateProtection(assetId: ID!, protectionType: String!): Boolean!
 
     # Cognitive Security Mutations
     extractClaim(input: ClaimInput!): CogSecClaim!
@@ -2036,8 +2041,8 @@ input CampaignFilter {
     addProvenanceLink(credentialId: ID!, source: String!, platform: String): ProvenanceLink!
 
     # Wargaming Mutations
-    runWarGameSimulation(scenarioId: ID!): JSON!
-    updateCrisisScenario(id: ID!, input: JSON!): CrisisScenario!
+    runWarGameSimulation(input: CrisisScenarioInput!): CrisisScenario!
+    updateCrisisScenario(id: ID!, input: CrisisScenarioInput!): CrisisScenario!
     deleteCrisisScenario(id: ID!): Boolean!
 
     # Collaboration Mutations
