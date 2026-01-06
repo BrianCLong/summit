@@ -153,8 +153,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
   constructor() {
     super();
-    this.initializeTables();
-    this.initializeCryptoPipeline();
+    // Do not initialize tables in constructor to avoid side effects
+    // Tables should be initialized by migration or explicitly called start() method
     this.startRootSigning();
   }
 

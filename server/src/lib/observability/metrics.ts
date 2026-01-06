@@ -20,6 +20,7 @@ client.collectDefaultMetrics({
 
 // --- HTTP Metrics ---
 export const httpRequestDuration = new client.Histogram({
+  registers: [],
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
   labelNames: ['method', 'route', 'status_code'],
@@ -27,6 +28,7 @@ export const httpRequestDuration = new client.Histogram({
 });
 
 export const httpRequestsTotal = new client.Counter({
+  registers: [],
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
   labelNames: ['method', 'route', 'status_code'],
@@ -34,18 +36,21 @@ export const httpRequestsTotal = new client.Counter({
 
 // --- Business KPIs ---
 export const businessUserSignupsTotal = new client.Counter({
+  registers: [],
   name: 'business_user_signups_total',
   help: 'Total number of customer or workspace signups',
   labelNames: ['tenant', 'plan'],
 });
 
 export const businessApiCallsTotal = new client.Counter({
+  registers: [],
   name: 'business_api_calls_total',
   help: 'API calls attributed to customer activity and billing',
   labelNames: ['service', 'route', 'status_code', 'tenant'],
 });
 
 export const businessRevenueTotal = new client.Counter({
+  registers: [],
   name: 'business_revenue_total',
   help: "Recognized revenue amounts in the system's reporting currency",
   labelNames: ['tenant', 'currency'],
@@ -53,6 +58,7 @@ export const businessRevenueTotal = new client.Counter({
 
 // --- GraphQL Metrics ---
 export const graphqlRequestDuration = new client.Histogram({
+  registers: [],
   name: 'graphql_request_duration_seconds',
   help: 'Duration of GraphQL requests in seconds',
   labelNames: ['operation', 'operation_type'],
@@ -60,18 +66,21 @@ export const graphqlRequestDuration = new client.Histogram({
 });
 
 export const graphqlRequestsTotal = new client.Counter({
+  registers: [],
   name: 'graphql_requests_total',
   help: 'Total number of GraphQL requests',
   labelNames: ['operation', 'operation_type', 'status'],
 });
 
 export const graphqlErrors = new client.Counter({
+  registers: [],
   name: 'graphql_errors_total',
   help: 'Total number of GraphQL errors',
   labelNames: ['operation', 'error_type'],
 });
 
 export const graphqlResolverDurationSeconds = new client.Histogram({
+  registers: [],
   name: 'graphql_resolver_duration_seconds',
   help: 'Duration of GraphQL resolver execution in seconds',
   labelNames: ['resolver_name', 'field_name', 'type_name', 'status'],
@@ -79,12 +88,14 @@ export const graphqlResolverDurationSeconds = new client.Histogram({
 });
 
 export const graphqlResolverErrorsTotal = new client.Counter({
+  registers: [],
   name: 'graphql_resolver_errors_total',
   help: 'Total number of GraphQL resolver errors',
   labelNames: ['resolver_name', 'field_name', 'type_name', 'error_type'],
 });
 
 export const graphqlResolverCallsTotal = new client.Counter({
+  registers: [],
   name: 'graphql_resolver_calls_total',
   help: 'Total number of GraphQL resolver calls',
   labelNames: ['resolver_name', 'field_name', 'type_name'],
@@ -92,12 +103,14 @@ export const graphqlResolverCallsTotal = new client.Counter({
 
 // --- Database Metrics ---
 export const dbConnectionsActive = new client.Gauge({
+  registers: [],
   name: 'db_connections_active',
   help: 'Number of active database connections',
   labelNames: ['database'],
 });
 
 export const dbQueryDuration = new client.Histogram({
+  registers: [],
   name: 'db_query_duration_seconds',
   help: 'Duration of database queries in seconds',
   labelNames: ['database', 'operation'],
@@ -105,6 +118,7 @@ export const dbQueryDuration = new client.Histogram({
 });
 
 export const dbQueriesTotal = new client.Counter({
+  registers: [],
   name: 'db_queries_total',
   help: 'Total number of database queries',
   labelNames: ['database', 'operation', 'status'],
@@ -112,18 +126,21 @@ export const dbQueriesTotal = new client.Counter({
 
 // --- AI/ML Metrics ---
 export const aiJobsQueued = new client.Gauge({
+  registers: [],
   name: 'ai_jobs_queued',
   help: 'Number of AI/ML jobs in queue',
   labelNames: ['job_type'],
 });
 
 export const aiJobsProcessing = new client.Gauge({
+  registers: [],
   name: 'ai_jobs_processing',
   help: 'Number of AI/ML jobs currently processing',
   labelNames: ['job_type'],
 });
 
 export const aiJobDuration = new client.Histogram({
+  registers: [],
   name: 'ai_job_duration_seconds',
   help: 'Duration of AI/ML job processing in seconds',
   labelNames: ['job_type', 'status'],
@@ -131,24 +148,28 @@ export const aiJobDuration = new client.Histogram({
 });
 
 export const aiJobsTotal = new client.Counter({
+  registers: [],
   name: 'ai_jobs_total',
   help: 'Total number of AI/ML jobs processed',
   labelNames: ['job_type', 'status'],
 });
 
 export const aiRequestTotal = new client.Counter({
+  registers: [],
   name: 'ai_request_total',
   help: 'AI request events',
   labelNames: ['status'],
 });
 
 export const copilotApiRequestTotal = new client.Counter({
+  registers: [],
   name: 'copilot_api_request_total',
   help: 'Total number of AI Copilot API requests',
   labelNames: ['endpoint', 'mode', 'status'],
 });
 
 export const copilotApiRequestDurationMs = new client.Histogram({
+  registers: [],
   name: 'copilot_api_request_duration_ms',
   help: 'AI Copilot API request duration in milliseconds',
   labelNames: ['endpoint', 'mode'],
@@ -157,18 +178,21 @@ export const copilotApiRequestDurationMs = new client.Histogram({
 
 // --- Graph/Neo4j Metrics ---
 export const graphNodesTotal = new client.Gauge({
+  registers: [],
   name: 'graph_nodes_total',
   help: 'Total number of nodes in the graph',
   labelNames: ['investigation_id'],
 });
 
 export const graphEdgesTotal = new client.Gauge({
+  registers: [],
   name: 'graph_edges_total',
   help: 'Total number of edges in the graph',
   labelNames: ['investigation_id'],
 });
 
 export const graphOperationDuration = new client.Histogram({
+  registers: [],
   name: 'graph_operation_duration_seconds',
   help: 'Duration of graph operations in seconds',
   labelNames: ['operation', 'investigation_id'],
@@ -176,6 +200,7 @@ export const graphOperationDuration = new client.Histogram({
 });
 
 export const graphExpandRequestsTotal = new client.Counter({
+  registers: [],
   name: 'graph_expand_requests_total',
   help: 'Total expandNeighbors requests',
   labelNames: ['cached'],
@@ -183,12 +208,14 @@ export const graphExpandRequestsTotal = new client.Counter({
 
 // --- Pipeline/DORA Metrics ---
 export const pipelineUptimeRatio = new client.Gauge({
+  registers: [],
   name: 'pipeline_uptime_ratio',
   help: 'Pipeline availability ratio (0..1) over current window',
   labelNames: ['source', 'pipeline', 'env'],
 });
 
 export const pipelineLatencySeconds = new client.Histogram({
+  registers: [],
   name: 'pipeline_latency_seconds',
   help: 'End-to-end processing latency seconds',
   labelNames: ['source', 'pipeline', 'env'],
@@ -196,24 +223,28 @@ export const pipelineLatencySeconds = new client.Histogram({
 });
 
 export const maestroDeploymentsTotal = new client.Counter({
+  registers: [],
   name: 'maestro_deployments_total',
   help: 'Total number of deployments',
   labelNames: ['environment', 'status'],
 });
 
 export const maestroChangeFailureRate = new client.Gauge({
+  registers: [],
   name: 'maestro_change_failure_rate',
   help: 'Change failure rate percentage',
 });
 
 // --- Agent Metrics ---
 export const agentExecutionsTotal = new client.Counter({
+  registers: [],
   name: 'agent_executions_total',
   help: 'Total number of agent executions',
   labelNames: ['tenant', 'status'],
 });
 
 export const agentExecutionDuration = new client.Histogram({
+  registers: [],
   name: 'agent_execution_duration_seconds',
   help: 'Duration of agent execution in seconds',
   labelNames: ['tenant', 'status'],
@@ -221,6 +252,7 @@ export const agentExecutionDuration = new client.Histogram({
 });
 
 export const policyDecisionsTotal = new client.Counter({
+  registers: [],
   name: 'policy_decisions_total',
   help: 'Total number of policy decisions',
   labelNames: ['policy', 'decision', 'signal_type'],
@@ -228,18 +260,21 @@ export const policyDecisionsTotal = new client.Counter({
 
 // --- System/Error Metrics ---
 export const applicationErrors = new client.Counter({
+  registers: [],
   name: 'application_errors_total',
   help: 'Total number of application errors',
   labelNames: ['module', 'error_type', 'severity', 'signal_type'],
 });
 
 export const memoryUsage = new client.Gauge({
+  registers: [],
   name: 'application_memory_usage_bytes',
   help: 'Memory usage by application component',
   labelNames: ['component'],
 });
 
 export const tenantScopeViolationsTotal = new client.Counter({
+  registers: [],
   name: 'tenant_scope_violations_total',
   help: 'Total number of tenant scope violations',
 });

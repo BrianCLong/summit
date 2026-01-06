@@ -42,11 +42,19 @@ export const JOB_QUEUE_GENERATE_REPORT = 'generate-report';
  */
 class BatchJobService {
   private static instance: BatchJobService;
-  public boss: PgBoss;
+  private _boss?: PgBoss;
 
   private constructor() {
-    this.boss = new PgBoss(cfg.DATABASE_URL);
-    this.boss.on('error', error => console.error(`[PG-BOSS] Error: ${error.message}`));
+    // Lazy initialization
+  }
+
+  public get boss(): PgBoss {
+    if (!this._boss) {
+      // @ts-ignore
+      this._boss = new PgBoss(cfg.DATABASE_URL);
+      this._boss.on('error', error => console.error(`[PG-BOSS] Error: ${error.message}`));
+    }
+    return this._boss;
   }
 
   /**

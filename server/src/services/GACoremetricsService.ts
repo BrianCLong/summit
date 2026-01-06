@@ -110,9 +110,16 @@ export class GACoreMetricsService {
   // private erService = new HybridEntityResolutionService();
 
   constructor() {
-    // Start metrics collection
+    // Eager initialization removed
+  }
+
+  public start(): void {
+    if (this.isStarted) return;
+    this.isStarted = true;
     this.startMetricsCollection();
   }
+
+  private isStarted = false;
 
   private startMetricsCollection(): void {
     // Collect metrics every 30 seconds

@@ -164,6 +164,10 @@ const startServer = async () => {
     const policyWatcher = PolicyWatcher.getInstance();
     policyWatcher.start();
 
+    // Start GA Core Metrics Service
+    const { gaCoreMetrics } = await import('./services/GACoreMetricsService.js');
+    gaCoreMetrics.start();
+
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 

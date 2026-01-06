@@ -16,14 +16,25 @@ export interface Receipt {
 }
 
 export class ReceiptService {
-  private ledger: ProvenanceLedgerV2;
-  private signer: SigningService;
+  private _ledger?: ProvenanceLedgerV2;
+  private _signer?: SigningService;
   private static instance: ReceiptService;
 
   private constructor() {
-    this.ledger = ProvenanceLedgerV2.getInstance();
-    // Critical: Fail if signing service cannot be initialized (missing keys)
-    this.signer = new SigningService();
+  }
+
+  private get ledger(): ProvenanceLedgerV2 {
+    if (!this._ledger) {
+      this._ledger = ProvenanceLedgerV2.getInstance();
+    }
+    return this._ledger;
+  }
+
+  private get signer(): SigningService {
+    if (!this._signer) {
+      this._signer = new SigningService();
+    }
+    return this._signer;
   }
 
   public static getInstance(): ReceiptService {

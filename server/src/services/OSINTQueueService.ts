@@ -22,11 +22,11 @@ const connection = {
   db: config.redis?.db || 0,
 };
 
-export const osintQueue = new Queue('osint:ingest', { connection });
+export const osintQueue = new Queue('osint-ingest', { connection });
 
 export function startOSINTWorkers(): Worker {
   const worker = new Worker(
-    'osint:ingest',
+    'osint-ingest',
     async (job: Job<OSINTJobData>) => {
       const { type, targetId, tenantId, params } = job.data;
       logger.info(`Processing OSINT job ${job.id}: ${type} for ${targetId}`);

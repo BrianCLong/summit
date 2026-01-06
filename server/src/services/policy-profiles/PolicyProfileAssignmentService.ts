@@ -38,10 +38,17 @@ export interface ActivePolicyProfile {
 
 export class PolicyProfileAssignmentService {
   private static instance: PolicyProfileAssignmentService;
-  private receiptService: ReceiptService;
+  private _receiptService?: ReceiptService;
 
   private constructor() {
-    this.receiptService = ReceiptService.getInstance();
+    // Lazy
+  }
+
+  private get receiptService(): ReceiptService {
+    if (!this._receiptService) {
+      this._receiptService = ReceiptService.getInstance();
+    }
+    return this._receiptService;
   }
 
   public static getInstance(): PolicyProfileAssignmentService {
