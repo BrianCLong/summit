@@ -1,0 +1,90 @@
+name: Comprehensive Testing Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-server:
+    name: Server Tests (Unit & Integration)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run Server Unit Tests
+        run: |
+          cd server
+          pnpm test:unit --ci --runInBand --coverage
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+
+      - name: Upload Server Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: server-coverage
+          path: server/coverage/
+          retention-days: 7
+
+  test-web:
+    name: Web Tests (Unit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run Web Tests
+        run: |
+          cd apps/web
+          pnpm test:coverage
+
+      - name: Upload Web Coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: web-coverage
+          path: apps/web/coverage/
+          retention-days: 7
+
+  test-e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.50.1-jammy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright Tests
+        run: npx playwright test
+        env:
+          CI: true
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

@@ -1,7 +1,16 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-  preset: 'ts-jest/presets/default-esm',
+  // Replace preset with explicit transform to avoid resolution issues in monorepo
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: 'tsconfig.test.json', // Ensure we use the test tsconfig
+      },
+    ],
+  },
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [

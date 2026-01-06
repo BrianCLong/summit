@@ -12,9 +12,17 @@ export interface Quota {
     workloadLimits?: Partial<Record<WorkloadClass, ResourceLimit>>;
 }
 
+export interface HierarchicalQuota {
+    org: Record<string, any>;
+    team?: Record<string, any>;
+    user?: Record<string, any>;
+}
+
 export class QuotaManager {
     private static instance: QuotaManager;
     private tenantTiers: Map<string, 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE'> = new Map();
+    // In-memory store for hierarchical quotas for testing/prototype
+    private tenantQuotas: Map<string, HierarchicalQuota> = new Map();
 
     private constructor() {
         // Seed with some dummy data or defaults
@@ -120,6 +128,38 @@ export class QuotaManager {
 
     public setTenantTier(tenantId: string, tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE') {
         this.tenantTiers.set(tenantId, tier);
+    }
+
+    public updateTenantQuotas(tenantId: string, quotas: HierarchicalQuota) {
+        this.tenantQuotas.set(tenantId, quotas);
+    }
+
+    public checkQuota(tenantId: string, metric: string, amount: number, context?: { teamId?: string; userId?: string }): { allowed: boolean; reason?: string } {
+        const quotas = this.tenantQuotas.get(tenantId);
+        if (!quotas) return { allowed: true }; // No quotas defined, allow
+
+        // Check org level
+        if (quotas.org[metric]) {
+            const limit = quotas.org[metric].hardLimit;
+            const usage = quotas.org[metric].usage || 0;
+            if (usage + amount > limit) return { allowed: false, reason: 'Org quota exceeded' };
+        }
+
+        // Check team level
+        if (context?.teamId && quotas.team?.[context.teamId]?.[metric]) {
+             const limit = quotas.team[context.teamId][metric].hardLimit;
+             const usage = quotas.team[context.teamId][metric].usage || 0;
+             if (usage + amount > limit) return { allowed: false, reason: 'Team quota exceeded' };
+        }
+
+        // Check user level
+        if (context?.userId && quotas.user?.[context.userId]?.[metric]) {
+             const limit = quotas.user[context.userId][metric].hardLimit;
+             const usage = quotas.user[context.userId][metric].usage || 0;
+             if (usage + amount > limit) return { allowed: false, reason: 'User quota exceeded' };
+        }
+
+        return { allowed: true };
     }
 }
 
