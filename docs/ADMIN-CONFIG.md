@@ -9,7 +9,7 @@ This guide details critical configuration settings for production environments. 
 Controls the maximum number of concurrent connections to the primary PostgreSQL database.
 
 - **Environment Variable:** `PG_WRITE_POOL_SIZE`
-- **Default:** `24`
+- **Default:** `20`
 - **Recommended Production Value:** `40-80` (depending on CPU cores)
 - **Impact:**
   - **Too Low:** Requests queue up, leading to high latency or timeouts under load.
@@ -23,7 +23,7 @@ Update `.env` or your deployment manifest (Kubernetes/ECS):
 PG_WRITE_POOL_SIZE=60
 ```
 
-> **Note:** The read pool is configured separately via `PG_READ_POOL_SIZE` (default: `60`).
+> **Note:** The read pool is configured separately via `PG_READ_POOL_SIZE` (default: `5`).
 
 ### 2. Log Level (`LOG_LEVEL`)
 
