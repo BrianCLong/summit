@@ -5,14 +5,13 @@ import {
   recordRiskSignal,
 } from '../../observability/trust-risk-metrics.js';
 import {
-import {
-    getTrustScore,
-    upsertTrustScore,
-    insertRiskSignal,
-    listRecentSignals,
-    listRiskSignalsPaged,
-    listTrustScores,
-  } from '../../db/repositories/trustRiskRepo.js';
+  getTrustScore,
+  upsertTrustScore,
+  insertRiskSignal,
+  listRecentSignals,
+  listRiskSignalsPaged,
+  listTrustScores,
+} from '../../db/repositories/trustRiskRepo.js';
 
 function nowIso() {
   return new Date().toISOString();
