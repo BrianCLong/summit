@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [4.1.0] - MVP-4 GA Patch - 2026-01-06
+## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
 ### Fixed
 - **Server Build**: Fixed ~25 TypeScript errors preventing server compilation
