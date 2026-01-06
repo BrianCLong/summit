@@ -1,14 +1,14 @@
-import base64
-import json
 from dataclasses import dataclass
+import json
+import base64
+from typing import Dict, List, Tuple
 from datetime import datetime
 
 import numpy as np
-from sklearn.cluster import KMeans
 
-try:
+try:  # pragma: no cover - library might not be installed
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-except Exception:  # pragma: no cover - library might not be installed
+except ImportError:  # pragma: no cover - library might not be installed
     AESGCM = None
 
 try:  # XGBoost is optional for runtime environments
@@ -16,15 +16,17 @@ try:  # XGBoost is optional for runtime environments
 except Exception:  # pragma: no cover
     xgb = None
 
-from intelgraph_neo4j_client import Neo4jClient
+from sklearn.cluster import KMeans
+
 from intelgraph_postgres_client import PostgresClient
+from intelgraph_neo4j_client import Neo4jClient
 
 
 @dataclass
 class RoleVector:
     """Soft role representation."""
 
-    vector: dict[str, float]
+    vector: Dict[str, float]
 
     def encrypt(self, key: bytes) -> str:
         """Encrypt the role vector using AES-GCM."""
@@ -54,13 +56,13 @@ class RoleInferenceEngine:
         self.pg = pg_client
         self.neo = neo_client
         self.cluster_model: KMeans | None = None
-        self.std_dev: dict[int, float] = {}
-        self.role_map: dict[int, dict[str, float]] = {}
+        self.std_dev: Dict[int, float] = {}
+        self.role_map: Dict[int, Dict[str, float]] = {}
         self.xgb_model: xgb.Booster | None = None  # type: ignore[assignment]
 
     # ------------------------------------------------------------------
     # Data ingestion
-    def fetch_session_activity(self) -> list[dict]:
+    def fetch_session_activity(self) -> List[Dict]:
         """Fetch audit and session data from Postgres."""
         query = (
             "SELECT user_id, node_type, action, timestamp, tool "
@@ -74,9 +76,9 @@ class RoleInferenceEngine:
     def _time_bucket(ts: datetime) -> int:
         return ts.hour // 6  # four buckets across the day
 
-    def build_features(self, records: list[dict]) -> dict[str, np.ndarray]:
+    def build_features(self, records: List[Dict]) -> Dict[str, np.ndarray]:
         """Aggregate behaviour into feature vectors per user."""
-        features: dict[str, list[float]] = {}
+        features: Dict[str, List[float]] = {}
         for r in records:
             user = r["user_id"]
             feats = features.setdefault(user, [0] * 20)
@@ -92,7 +94,7 @@ class RoleInferenceEngine:
 
     # ------------------------------------------------------------------
     # Clustering and role assignment
-    def cluster_behaviours(self, user_features: dict[str, np.ndarray], n_clusters: int = 3) -> None:
+    def cluster_behaviours(self, user_features: Dict[str, np.ndarray], n_clusters: int = 3) -> None:
         matrix = np.vstack(list(user_features.values()))
         self.cluster_model = KMeans(n_clusters=n_clusters, random_state=42)
         labels = self.cluster_model.fit_predict(matrix)
@@ -102,12 +104,12 @@ class RoleInferenceEngine:
             self.std_dev[labels[idx]] = float(np.std(matrix[labels == labels[idx]], axis=0).mean())
             self.role_map[labels[idx]] = {f"Role{i}": float(c) for i, c in enumerate(center)}
 
-    def infer_roles(self, user_features: dict[str, np.ndarray]) -> dict[str, RoleVector]:
+    def infer_roles(self, user_features: Dict[str, np.ndarray]) -> Dict[str, RoleVector]:
         if self.cluster_model is None:
             raise RuntimeError("cluster_behaviours must be called first")
         matrix = np.vstack(list(user_features.values()))
         labels = self.cluster_model.predict(matrix)
-        roles: dict[str, RoleVector] = {}
+        roles: Dict[str, RoleVector] = {}
         for idx, user in enumerate(user_features.keys()):
             center = self.cluster_model.cluster_centers_[labels[idx]]
             vec = user_features[user]
@@ -131,7 +133,7 @@ class RoleInferenceEngine:
         pred = self.xgb_model.predict(dmat)
         return int(np.argmax(pred))
 
-    def deviation_from_centroid(self, user_vector: np.ndarray) -> tuple[float, bool]:
+    def deviation_from_centroid(self, user_vector: np.ndarray) -> Tuple[float, bool]:
         if self.cluster_model is None:
             raise RuntimeError("cluster_behaviours must be called first")
         label = int(self.cluster_model.predict([user_vector])[0])
@@ -169,8 +171,7 @@ class RoleInferenceEngine:
 # ----------------------------------------------------------------------
 # Access simulation helper
 
-
-def simulate_access(role_vector: dict[str, float], action: str) -> dict[str, object]:
+def simulate_access(role_vector: Dict[str, float], action: str) -> Dict[str, object]:
     """Simple rule-based access simulation for API."""
     required_role = {
         "delete-user": "Admin",

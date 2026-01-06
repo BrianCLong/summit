@@ -46,7 +46,6 @@ import { policyRouter } from './routes/policy.js';
 import policyManagementRouter from './routes/policies/policy-management.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
-const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 // import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
@@ -142,6 +141,8 @@ import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
+
+import rbacRouter from './routes/rbacRoutes.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing

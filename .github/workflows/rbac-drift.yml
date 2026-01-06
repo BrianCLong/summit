@@ -1,0 +1,22 @@
+name: RBAC Drift Monitor
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM nightly
+
+jobs:
+  rbac-drift:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install numpy scikit-learn cryptography xgboost
+      - name: Run drift monitor
+        run: |
+          python rbac/rbac_drift_monitor.py

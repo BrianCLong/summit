@@ -42,6 +42,15 @@ import {
   Settings,
   RocketLaunch,
   PendingActions,
+  MilitaryTech,
+  Notifications,
+  Extension,
+  Cable,
+  Key,
+  VerifiedUser,
+  Science,
+  Security,
+  Assignment as AssignmentIcon,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -115,10 +124,6 @@ const SandboxDashboard = React.lazy(() =>
 const ReleaseReadinessRoute = React.lazy(() =>
   import('./routes/ReleaseReadinessRoute')
 );
-
-import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import { Security } from '@mui/icons-material';
-import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
 // Demo mode components
 import DemoIndicator from './components/common/DemoIndicator';

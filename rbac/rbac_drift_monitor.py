@@ -3,6 +3,7 @@
 import csv
 from datetime import datetime
 from pathlib import Path
+from typing import Dict
 
 from intelgraph_neo4j_client import Neo4jClient
 from intelgraph_postgres_client import PostgresClient
@@ -23,7 +24,7 @@ def run_monitor():  # pragma: no cover - CLI utility
     engine.cluster_behaviours(feats)
     roles = engine.infer_roles(feats)
 
-    flagged_users: dict[str, float] = {}
+    flagged_users: Dict[str, float] = {}
     for user, vec in feats.items():
         _, flagged = engine.deviation_from_centroid(vec)
         if flagged:
