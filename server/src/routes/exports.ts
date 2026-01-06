@@ -16,10 +16,15 @@ router.post('/sign-manifest', async (req, res) => {
     const manifestString = JSON.stringify({ tenant, filters, timestamp });
 
     // In a real system, we'd use a private key from KMS/Secrets
-    const secret = process.env.EXPORT_SIGNING_SECRET || 'dev-secret';
+    const secret = process.env.EXPORT_SIGNING_SECRET;
+    if (!secret && process.env.NODE_ENV === 'production') {
+      console.error('CRITICAL: EXPORT_SIGNING_SECRET not set in production');
+      return res.status(500).json({ error: 'server_configuration_error' });
+    }
+    const signingSecret = secret || 'dev-secret';
 
     const signature = crypto
-      .createHmac('sha256', secret)
+      .createHmac('sha256', signingSecret)
       .update(manifestString)
       .digest('hex');
 

@@ -102,7 +102,13 @@ exportRouter.get('/provenance', async (req, res) => {
       } catch {}
     }
 
-    const secret = process.env.EXPORT_SIGNING_SECRET || 'dev-secret';
+    const secret = process.env.EXPORT_SIGNING_SECRET;
+    if (!secret && process.env.NODE_ENV === 'production') {
+      console.error('CRITICAL: EXPORT_SIGNING_SECRET not set in production');
+      return res.status(500).json({ error: 'server_configuration_error' });
+    }
+    const signingSecret = secret || 'dev-secret';
+
     const params: Record<string, string> = {
       scope,
       id,
@@ -116,7 +122,7 @@ exportRouter.get('/provenance', async (req, res) => {
       ...(to ? { to } : {}),
       ...(contains ? { contains } : {}),
     };
-    if (!sig || !verify(params, sig, secret))
+    if (!sig || !verify(params, sig, signingSecret))
       return res.status(403).json({ error: 'invalid_signature' });
     if (Math.abs(Date.now() - ts) > 15 * 60 * 1000)
       return res.status(403).json({ error: 'expired' });
