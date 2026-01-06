@@ -17,7 +17,7 @@ client.collectDefaultMetrics({
 // HTTP Request metrics
 console.log('Initializing httpRequestDuration...');
 try {
-  console.log('Current metrics in global registry:', client.register.getMetricsAsJSON().map(m => m.name));
+
 } catch (e) { }
 
 export const httpRequestDuration = new client.Histogram({
