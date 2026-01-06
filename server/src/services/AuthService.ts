@@ -265,7 +265,10 @@ const ROLE_SCOPES: Record<string, string[]> = {
  */
 export class AuthService {
   /** PostgreSQL connection pool for database operations */
-  private pool: Pool;
+  /** PostgreSQL connection pool for database operations */
+  private get pool(): Pool {
+    return getPostgresPool() as unknown as Pool;
+  }
   private metrics: PrometheusMetrics;
 
   /**
@@ -274,12 +277,13 @@ export class AuthService {
    * Initializes the PostgreSQL connection pool and sets up Prometheus metrics for authentication events.
    */
   constructor() {
-    this.pool = getPostgresPool() as unknown as Pool;
+
+    // Lazy initialized via getter
     this.metrics = new PrometheusMetrics('summit_auth');
     this.metrics.createHistogram(
-        'user_registration_duration_seconds',
-        'Time taken to register a user',
-        ['status']
+      'user_registration_duration_seconds',
+      'Time taken to register a user',
+      ['status']
     );
   }
 

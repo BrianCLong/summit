@@ -32,10 +32,18 @@ const logger = (pino as any)();
 const router = express.Router();
 
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
-const connection = getRedisClient(); // Use existing Redis client for BullMQ
-if (!connection) {
+// WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
+const redisClient = getRedisClient(); // Use existing Redis client for BullMQ
+if (!redisClient) {
   throw new Error('Redis connection is required for AI queue rate limiting');
 }
+
+// Create a new connection with maxRetriesPerRequest: null as required by BullMQ
+// If it's a mock client (no duplicate method), we fallback to the client itself and hope for the best (or it will fail later)
+const connection = (redisClient as any).duplicate
+  ? (redisClient as any).duplicate({ maxRetriesPerRequest: null })
+  : redisClient;
+
 const videoAnalysisQueue = new Queue('videoAnalysisQueue', {
   connection,
   limiter: {

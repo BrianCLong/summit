@@ -84,7 +84,7 @@ import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
 import palettesRouter from './routes/palettes.js';
-import edgeOpsRouter from './routes/edge-ops.js';
+
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 import metaOrchestratorRouter from './routes/meta-orchestrator.js';
@@ -92,7 +92,7 @@ import adminSmokeRouter from './routes/admin-smoke.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import resourceCostsRouter from './routes/resource-costs.js';
-import queryReplayRouter from './routes/query-replay.js';
+
 import streamRouter from './routes/stream.js'; // Added import
 import queryPreviewStreamRouter from './routes/query-preview-stream.js';
 import correctnessProgramRouter from './routes/correctness-program.js';
@@ -415,7 +415,7 @@ export const createApp = async () => {
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
-  app.use('/api/edge', edgeOpsRouter);
+
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
   app.use('/api', adminSmokeRouter);
   app.use('/api/scenarios', scenarioRouter);
@@ -423,7 +423,7 @@ export const createApp = async () => {
   app.use('/api/tenants/:tenantId/billing', tenantBillingRouter);
   app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
-  app.use('/api/query-replay', queryReplayRouter);
+
   app.use('/api/correctness', correctnessProgramRouter);
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
