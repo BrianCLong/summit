@@ -43,7 +43,7 @@ const config: Config = {
       statements: 85,
     },
   },
-  coverageReporters: ['text', 'lcov', 'cobertura'],
+  coverageReporters: ['text', 'lcov', 'cobertura', 'json-summary'],
   coverageDirectory: '<rootDir>/coverage',
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
