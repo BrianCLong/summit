@@ -1,0 +1,40 @@
+{
+  "task_id": "AGENTIC_MLOPS_CONTROL_PLANE_V1",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "agentic-mlops-control-plane",
+    "version": "v1",
+    "sha256": "fe5f30ab4b1feb5841f0a88bc72d93e3a74db03ac7e80eb3806e46653e356b04",
+    "path": "prompts/tasks/agentic-mlops-control-plane.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/architecture/",
+      "docs/roadmap/STATUS.json",
+      "server/src/routes/",
+      "server/src/services/mlops-control-plane/",
+      "server/src/monitoring/metrics.ts",
+      "prompts/tasks/agentic-mlops-control-plane.md"
+    ],
+    "domains": ["mlops", "agents", "observability", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["pnpm --filter intelgraph-server test -- mlops-control-plane"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Agentic MLOps control plane endpoints respond with validated schemas.",
+    "Cache-first inference flow persists entity-keyed reports.",
+    "Prometheus metrics and drift hooks are emitted."
+  ],
+  "stop_conditions": [
+    "OPA policy denial for admin flush endpoint.",
+    "Cache or report persistence failures.",
+    "Tests failing for mlops-control-plane scope."
+  ]
+}

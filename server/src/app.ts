@@ -42,6 +42,7 @@ import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
+import mlopsControlPlaneRouter from './routes/mlops-control-plane.js';
 import { policyRouter } from './routes/policy.js';
 import policyManagementRouter from './routes/policies/policy-management.js';
 import { metricsRoute } from './http/metricsRoute.js';
@@ -390,6 +391,8 @@ export const createApp = async () => {
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/api/predictive', predictiveRouter);
+  app.use('/api/mlops', mlopsControlPlaneRouter);
+  app.use('/mlops', mlopsControlPlaneRouter);
   app.use('/api/export', disclosuresRouter); // Mount export under /api/export as per spec
   app.use('/disclosures', disclosuresRouter); // Keep old mount for compat
   app.use('/rbac', rbacRouter);

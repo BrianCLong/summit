@@ -152,6 +152,43 @@ export const llmRequestsTotal = new client.Counter({
   labelNames: ['provider', 'model', 'status'],
 });
 
+// Agentic MLOps Control Plane metrics
+export const mlopsCacheHitsTotal = new client.Counter({
+  name: 'mlops_cache_hits_total',
+  help: 'Total number of MLOps cache hits',
+});
+
+export const mlopsCacheMissesTotal = new client.Counter({
+  name: 'mlops_cache_misses_total',
+  help: 'Total number of MLOps cache misses',
+});
+
+export const mlopsTrainBaseRequestsTotal = new client.Counter({
+  name: 'mlops_train_base_requests_total',
+  help: 'Total number of base training requests',
+});
+
+export const mlopsTrainDerivedRequestsTotal = new client.Counter({
+  name: 'mlops_train_derived_requests_total',
+  help: 'Total number of derived training requests',
+});
+
+export const mlopsInferRequestsTotal = new client.Counter({
+  name: 'mlops_infer_requests_total',
+  help: 'Total number of inference requests',
+});
+
+export const mlopsAgentReportGenerationTotal = new client.Counter({
+  name: 'mlops_agent_report_generation_total',
+  help: 'Agent report generation outcomes',
+  labelNames: ['status'],
+});
+
+export const mlopsDriftDetectedTotal = new client.Counter({
+  name: 'mlops_drift_detected_total',
+  help: 'Total number of drift detections',
+});
+
 // Graph operations metrics
 export const graphNodesTotal = new client.Gauge({
   name: 'graph_nodes_total',

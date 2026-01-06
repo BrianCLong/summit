@@ -79,3 +79,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agentic-mlops-control-plane
+    version: v1
+    path: prompts/tasks/agentic-mlops-control-plane.md
+    sha256: fe5f30ab4b1feb5841f0a88bc72d93e3a74db03ac7e80eb3806e46653e356b04
+    description: Implement the Agentic MLOps Control Plane slice with caching, rate limits, metrics, and critique gates.
+    scope:
+      paths:
+        - docs/architecture/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - server/src/routes/
+        - server/src/services/mlops-control-plane/
+        - server/src/monitoring/metrics.ts
+        - prompts/tasks/agentic-mlops-control-plane.md
+      domains:
+        - mlops
+        - agents
+        - observability
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
