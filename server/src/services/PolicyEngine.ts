@@ -40,7 +40,7 @@ export interface PolicyDecision {
 export class PolicyEngine extends EventEmitter {
   private static instance: PolicyEngine;
   private config: any;
-  private auditSystem!: AdvancedAuditSystem;
+  private auditSystem: AdvancedAuditSystem | null = null;
   private initialized: boolean = false;
   private opaUrl: string = 'http://localhost:8181/v1/data/governance/allow';
 
