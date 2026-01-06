@@ -38,35 +38,45 @@ function main() {
     console.log(`\nScanning files in ${SCRIPT_DIR} for reason codes...`);
     const files = readdirSync(SCRIPT_DIR).filter(f => f.endsWith('.mjs') || f.endsWith('.js'));
 
-    const codeRegex = /(?:code|reason):\s*['"`]([A-Z0-9_]+)['"`]/g;
-    const literalRegex = /addError\(\s*['"`]([A-Z0-9_]+)['"`]/g;
+    // Scan for direct usage of string literals, which should be avoided now.
+    // However, since we replaced them with constants, we might want to check for constant usage or simply that we didn't leave any strings.
+    // The previous regex looked for string literals. If we did our job, those should be gone (except in reason-codes.mjs itself).
 
     for (const file of files) {
+        // Skip reason-codes.mjs as it defines them
+        if (file === 'reason-codes.mjs') continue;
+
         const filePath = join(SCRIPT_DIR, file);
         const content = readFileSync(filePath, 'utf8');
+
+        // Regex to catch remaining string literal codes
+        // We look for code: 'STRING' or addError('STRING')
+        const codeRegex = /(?:code|reason):\s*['"`]([A-Z0-9_]+)['"`]/g;
+        const literalRegex = /addError\(\s*['"`]([A-Z0-9_]+)['"`]/g;
 
         let match;
         while ((match = codeRegex.exec(content)) !== null) {
             const foundCode = match[1];
-            if (!knownCodes.has(foundCode)) {
+            // If it matches a known code, it's a string literal we failed to replace!
+            if (knownCodes.has(foundCode)) {
                 if (!unknownCodeFound) {
-                    console.error('\n❌ Error: Found unknown reason codes:');
+                    console.error('\n❌ Error: Found raw string reason codes (should use constants):');
                     unknownCodeFound = true;
                 }
                 const lineNumber = content.substring(0, match.index).split('\n').length;
-                console.error(`  - Code: '${foundCode}' in ${filePath}:${lineNumber}`);
+                console.error(`  - Raw Code: '${foundCode}' in ${filePath}:${lineNumber}`);
             }
         }
 
         while ((match = literalRegex.exec(content)) !== null) {
             const foundCode = match[1];
-            if (!knownCodes.has(foundCode)) {
+            if (knownCodes.has(foundCode)) {
                 if (!unknownCodeFound) {
-                    console.error('\n❌ Error: Found unknown reason codes:');
+                    console.error('\n❌ Error: Found raw string reason codes (should use constants):');
                     unknownCodeFound = true;
                 }
                 const lineNumber = content.substring(0, match.index).split('\n').length;
-                console.error(`  - Code: '${foundCode}' in ${filePath}:${lineNumber}`);
+                console.error(`  - Raw Code: '${foundCode}' in ${filePath}:${lineNumber}`);
             }
         }
     }

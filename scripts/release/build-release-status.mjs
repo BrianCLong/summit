@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { RELEASE_STATUS_BLOCKED, blockedReason } from './reason-codes.mjs';
 
 const DIST_DIR = process.env.DIST_DIR || 'dist/release';
 const OUT_FILE = join(DIST_DIR, 'release-status.json');
@@ -61,11 +62,11 @@ function main() {
 
     if (!data) {
       allOk = false;
-      statusObj.blockedReasons.push({
-        code: 'MISSING_ARTIFACTS',
-        message: `Required check output missing: ${filename}`,
-        details: { file: filename }
-      });
+      statusObj.blockedReasons.push(blockedReason(
+        RELEASE_STATUS_BLOCKED.MISSING_ARTIFACTS,
+        `Required check output missing: ${filename}`,
+        { file: filename }
+      ));
     } else {
       statusObj.checks[checkName].ok = !!data.ok;
 
@@ -75,18 +76,18 @@ function main() {
         let code = data.code;
         if (!code) {
           switch(checkName) {
-            case 'freeze': code = 'FREEZE_WINDOW'; break;
-            case 'verify': code = 'VERIFY_FAILED'; break;
-            case 'preflight': code = 'PREFLIGHT_ANCESTRY'; break;
-            default: code = 'UNKNOWN';
+            case 'freeze': code = RELEASE_STATUS_BLOCKED.FREEZE_WINDOW; break;
+            case 'verify': code = RELEASE_STATUS_BLOCKED.VERIFY_FAILED; break;
+            case 'preflight': code = RELEASE_STATUS_BLOCKED.PREFLIGHT_ANCESTRY; break;
+            default: code = RELEASE_STATUS_BLOCKED.UNKNOWN;
           }
         }
 
-        statusObj.blockedReasons.push({
-          code: code,
-          message: data.message || data.error || `${checkName} check failed`,
-          details: data
-        });
+        statusObj.blockedReasons.push(blockedReason(
+          code,
+          data.message || data.error || `${checkName} check failed`,
+          data
+        ));
       }
     }
   }

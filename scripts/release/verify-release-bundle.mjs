@@ -5,6 +5,7 @@ import { resolve, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { createHash } from 'node:crypto';
 import { ReleaseBundleError } from './lib/errors.mjs';
+import { EVIDENCE_CHECK, MAESTRO_NOGO } from './reason-codes.mjs';
 
 const options = {
   path: { type: 'string', default: 'dist/release' },
@@ -56,7 +57,7 @@ function checkCompatibility(bundleIndex) {
     return {
       compatible: false,
       message: 'schemaVersion field is missing or not a string in bundle-index.json',
-      code: 'MISSING_FIELD',
+      code: MAESTRO_NOGO.MISSING_FIELD,
       details: { field: 'schemaVersion' }
     };
   }
@@ -66,7 +67,7 @@ function checkCompatibility(bundleIndex) {
     return {
       compatible: false,
       message: `Could not parse major version from schemaVersion: "${bundleIndex.schemaVersion}"`,
-      code: 'INVALID_ENUM'
+      code: MAESTRO_NOGO.INVALID_ENUM
     };
   }
 
@@ -74,7 +75,7 @@ function checkCompatibility(bundleIndex) {
     return {
       compatible: false,
       message: `Unsupported schema major version. Bundle has ${bundleMajor}, script supports ${SUPPORTED_MAJOR_VERSION}.`,
-      code: 'SCHEMA_MAJOR_UNSUPPORTED',
+      code: MAESTRO_NOGO.SCHEMA_MAJOR_UNSUPPORTED,
       details: { bundleVersion: bundleIndex.schemaVersion, supportedVersion: `${SUPPORTED_MAJOR_VERSION}.x.x` }
     };
   }
@@ -115,7 +116,7 @@ try {
             execSync(`node "${compatScript}" --dir "${BUNDLE_DIR}" --strict`, { stdio: 'inherit' });
             addCheck('Compatibility check passed');
         } catch (e) {
-             addError('COMPATIBILITY_CHECK_FAILED', 'Compatibility check failed');
+             addError(EVIDENCE_CHECK.COMPATIBILITY_CHECK_FAILED, 'Compatibility check failed');
         }
     } else {
         console.warn('⚠️ Compatibility script not found, skipping check.');
@@ -161,7 +162,7 @@ try {
 
         // A) Ensure file is in SHA256SUMS
         if (!canonicalHashes.has(relPath)) {
-            addError('DIR_EXTRA_FILE', `File found on disk but missing from SHA256SUMS: ${relPath}`);
+            addError(EVIDENCE_CHECK.DIR_EXTRA_FILE, `File found on disk but missing from SHA256SUMS: ${relPath}`);
             continue;
         }
 
@@ -169,7 +170,7 @@ try {
         const computedHash = getSha256(fullPath);
         const expectedHash = canonicalHashes.get(relPath);
         if (computedHash !== expectedHash) {
-            addError('HASH_MISMATCH', `Hash mismatch for ${relPath}. Expected ${expectedHash}, got ${computedHash}`);
+            addError(EVIDENCE_CHECK.HASH_MISMATCH, `Hash mismatch for ${relPath}. Expected ${expectedHash}, got ${computedHash}`);
         }
     }
 
@@ -178,7 +179,7 @@ try {
     // C) Ensure every file in SHA256SUMS exists on disk
     for (const [filename, hash] of canonicalHashes) {
         if (!filesOnDisk.has(filename)) {
-            addError('DIR_MISSING_FILE', `File listed in SHA256SUMS but missing from disk: ${filename}`);
+            addError(EVIDENCE_CHECK.DIR_MISSING_FILE, `File listed in SHA256SUMS but missing from disk: ${filename}`);
         }
     }
 
@@ -195,7 +196,7 @@ try {
             try {
                 indexJson = JSON.parse(readFileSync(indexPath, 'utf-8'));
             } catch (e) {
-                throw new ReleaseBundleError('INVALID_JSON', `Failed to parse bundle-index.json: ${e.message}`, { originalError: e.message });
+                throw new ReleaseBundleError(MAESTRO_NOGO.INVALID_JSON, `Failed to parse bundle-index.json: ${e.message}`, { originalError: e.message });
             }
 
             assertCompatible(indexJson); // This will throw on major version mismatch
@@ -205,10 +206,10 @@ try {
                 indexJson.files.forEach(f => {
                      // f.path, f.sha256
                      if (!canonicalHashes.has(f.path)) {
-                         addError('INDEX_EXTRA_FILE', `bundle-index.json lists file not in SHA256SUMS: ${f.path}`);
+                         addError(EVIDENCE_CHECK.INDEX_EXTRA_FILE, `bundle-index.json lists file not in SHA256SUMS: ${f.path}`);
                      } else if (f.path !== 'bundle-index.json' && canonicalHashes.get(f.path) !== f.sha256) {
                          // Skip hash check for self to avoid circular dependency
-                         addError('INDEX_HASH_MISMATCH', `bundle-index.json hash mismatch for ${f.path}`);
+                         addError(EVIDENCE_CHECK.INDEX_HASH_MISMATCH, `bundle-index.json hash mismatch for ${f.path}`);
                      }
                 });
 
@@ -224,7 +225,7 @@ try {
 
                 if (missingInIndex.length > 0) {
                       missingInIndex.forEach(f => {
-                          addError('INDEX_MISSING_FILE', `SHA256SUMS lists file not in bundle-index.json: ${f}`);
+                          addError(EVIDENCE_CHECK.INDEX_MISSING_FILE, `SHA256SUMS lists file not in bundle-index.json: ${f}`);
                       });
                 } else {
                      addCheck('bundle-index.json validated against SHA256SUMS');
@@ -235,7 +236,7 @@ try {
                  // Check pointers
                  for(const [ptrName, ptrTarget] of Object.entries(indexJson.pointers)) {
                      if (!canonicalHashes.has(ptrTarget)) {
-                         addError('POINTER_INVALID', `Pointer ${ptrName} -> ${ptrTarget} targets file not in SHA256SUMS`);
+                         addError(EVIDENCE_CHECK.POINTER_INVALID, `Pointer ${ptrName} -> ${ptrTarget} targets file not in SHA256SUMS`);
                      }
                  }
                  addCheck('bundle-index.json pointers validated');
@@ -246,7 +247,7 @@ try {
             if (e instanceof ReleaseBundleError) {
                 throw e;
             }
-            addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);
+            addError(EVIDENCE_CHECK.INTERNAL_ERROR, `Error processing bundle-index.json: ${e.message}`);
         }
     }
 
@@ -261,14 +262,14 @@ try {
                  provJson.subject.forEach(sub => {
                      subjectPaths.add(sub.name);
                      if (!canonicalHashes.has(sub.name)) {
-                         addError('PROV_EXTRA_SUBJECT', `Provenance subject not in SHA256SUMS: ${sub.name}`);
+                         addError(EVIDENCE_CHECK.PROV_EXTRA_SUBJECT, `Provenance subject not in SHA256SUMS: ${sub.name}`);
                      } else {
                          // Check digests
                          // Provenance usually has "digest": { "sha256": "..." }
                          if (sub.digest && sub.digest.sha256) {
                              if (sub.name !== 'provenance.json' && sub.digest.sha256 !== canonicalHashes.get(sub.name)) {
                                  // Skip hash check for self
-                                 addError('PROV_HASH_MISMATCH', `Provenance hash mismatch for ${sub.name}`);
+                                 addError(EVIDENCE_CHECK.PROV_HASH_MISMATCH, `Provenance hash mismatch for ${sub.name}`);
                              }
                          }
                      }
@@ -284,14 +285,14 @@ try {
 
                  if (missingSubjects.length > 0) {
                      missingSubjects.forEach(f => {
-                         addError('PROV_MISSING_SUBJECT', `SHA256SUMS file missing from Provenance subjects: ${f}`);
+                         addError(EVIDENCE_CHECK.PROV_MISSING_SUBJECT, `SHA256SUMS file missing from Provenance subjects: ${f}`);
                      });
                  } else {
                      addCheck('provenance.json subjects match SHA256SUMS');
                  }
              }
         } catch (e) {
-             throw new ReleaseBundleError('INVALID_JSON', `Failed to parse provenance.json: ${e.message}`);
+             throw new ReleaseBundleError(MAESTRO_NOGO.INVALID_JSON, `Failed to parse provenance.json: ${e.message}`);
         }
     }
 
@@ -299,7 +300,7 @@ try {
     const notesSourcePath = join(BUNDLE_DIR, 'notes-source.json');
     if (existsSync(notesSourcePath)) {
         if (!existsSync(join(BUNDLE_DIR, 'release-notes.md'))) {
-            addError('NOTES_MISSING', 'notes-source.json exists but release-notes.md is missing');
+            addError(EVIDENCE_CHECK.NOTES_MISSING, 'notes-source.json exists but release-notes.md is missing');
         } else {
             addCheck('notes-source.json consistency verified');
         }
@@ -309,7 +310,7 @@ try {
     if (e instanceof ReleaseBundleError) {
         addError(e.code, e.message);
     } else {
-        addError('INTERNAL_ERROR', e.message);
+        addError(EVIDENCE_CHECK.INTERNAL_ERROR, e.message);
     }
 }
 

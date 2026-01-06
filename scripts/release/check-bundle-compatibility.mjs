@@ -3,6 +3,7 @@
 import { existsSync, readFileSync, writeFileSync, appendFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { parseArgs } from 'node:util';
+import { MAESTRO_NOGO } from './reason-codes.mjs';
 
 const options = {
   dir: { type: 'string', default: 'dist/release' },
@@ -63,7 +64,7 @@ if (!existsSync(BUNDLE_DIR)) {
               if (major !== SUPPORTED_MAJOR) {
                 compatibility.ok = false;
                 const error = {
-                  code: 'SCHEMA_MAJOR_UNSUPPORTED',
+                  code: MAESTRO_NOGO.SCHEMA_MAJOR_UNSUPPORTED,
                   file: relPath,
                   found: json.schemaVersion,
                   supportedMajor: SUPPORTED_MAJOR,
@@ -79,7 +80,7 @@ if (!existsSync(BUNDLE_DIR)) {
                  console.error(`❌ ${file}: Could not parse major version from "${json.schemaVersion}"`);
                  compatibility.ok = false;
                  compatibility.errors.push({
-                    code: 'SCHEMA_VERSION_INVALID',
+                    code: MAESTRO_NOGO.SCHEMA_VERSION_INVALID,
                     file: relPath,
                     found: json.schemaVersion,
                     supportedMajor: SUPPORTED_MAJOR
@@ -93,7 +94,7 @@ if (!existsSync(BUNDLE_DIR)) {
           console.error(`❌ ${file}: JSON parse error: ${e.message}`);
           compatibility.ok = false;
           compatibility.errors.push({
-              code: 'JSON_PARSE_ERROR',
+              code: MAESTRO_NOGO.JSON_PARSE_ERROR,
               file: relPath,
               message: e.message
           });
