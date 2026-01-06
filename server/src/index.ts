@@ -165,7 +165,7 @@ const startServer = async () => {
     policyWatcher.start();
 
     // Start GA Core Metrics Service
-    const { gaCoreMetrics } = await import('./services/GACoreMetricsService.js');
+    const { gaCoreMetrics } = await import('./services/GACoremetricsService.js');
     gaCoreMetrics.start();
 
     // Check Neo4j Indexes
