@@ -16,6 +16,25 @@ This runs:
 2. **Lint** (`pnpm lint`) - Code quality and style checks
 3. **Build** (`pnpm build`) - Compiles all packages
 4. **Unit tests** (`pnpm --filter server test:unit`) - Runs server unit tests
+5. **Smoke tests** (`pnpm ga:smoke`) - Integration smoke hook
+
+## Scoped Verification
+
+For faster feedback during development:
+
+```bash
+# Server-only gate (fastest)
+pnpm ga:verify:server
+
+# Just smoke tests
+pnpm ga:smoke
+```
+
+| Script             | Scope         | Use Case               |
+| ------------------ | ------------- | ---------------------- |
+| `ga:verify`        | Full platform | CI gates, pre-release  |
+| `ga:verify:server` | Server only   | Backend development    |
+| `ga:smoke`         | Integration   | Smoke/integration hook |
 
 ## Full GA Gate (requires Docker)
 
