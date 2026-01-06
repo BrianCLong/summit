@@ -288,11 +288,11 @@ router.post(
       res.json({
         success: true,
         entityId,
-        jobId: result.jobId,
-        taskId: result.taskId,
-        candidates: result.candidates,
+        jobId: (result as any).jobId,
+        taskId: (result as any).taskId,
+        candidates: (result as any).candidates,
         metadata: {
-          model: result.modelName || 'default_link_predictor',
+          model: (result as any).modelName || 'default_link_predictor',
           topK,
           executionTime: responseTime,
         },

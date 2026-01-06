@@ -84,7 +84,9 @@ const rangeOrder: UsageRangeKey[] = [
 ];
 
 export class TenantUsageService {
-  private pool = getPostgresPool();
+  private get pool() {
+    return getPostgresPool();
+  }
 
   getUsageRange(range?: string): UsageRange {
     const key = (range || '30d') as UsageRangeKey;
