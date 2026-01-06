@@ -104,6 +104,7 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "ga:verify": "pnpm typecheck && pnpm lint && pnpm build && pnpm --filter server test:unit",
     "prepare": "husky"
   },
   "keywords": [

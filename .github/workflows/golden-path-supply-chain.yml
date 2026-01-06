@@ -31,15 +31,17 @@ jobs:
     steps:
       - run: echo "Workflow disabled - placeholder job for CI status"
 
+  # NOTE: This job is disabled pending infrastructure setup
+  # The reusable workflow requires container registry and SLSA infrastructure
   build-reference:
-    if: false # Temporarily disabled
+    if: ${{ false }}
     name: Build + sign + attest reference artifact
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
       image_name: ${{ github.repository_owner }}/summit-authz-gateway
       context: services/authz-gateway
       dockerfile: services/authz-gateway/Dockerfile
-      push: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+      push: true
       sign: true
       sbom: true
       slsa_provenance: true
@@ -59,7 +61,7 @@ jobs:
   #   #   severity_threshold: HIGH
 
   publish-evidence:
-    if: false # Temporarily disabled
+    if: ${{ false }}
     name: Publish bundle
     runs-on: ubuntu-latest
     needs: [build-reference]

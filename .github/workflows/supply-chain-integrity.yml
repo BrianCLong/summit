@@ -102,7 +102,7 @@ jobs:
 
       # Build and push container image if Dockerfile exists
       - name: Build and Push Docker Image
-        if: hash docker 2>/dev/null && [ -f "Dockerfile" ]
+        if: ${{ hashFiles('Dockerfile') != '' }}
         run: |
           DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/summit-platform
           DOCKER_TAG=${{ env.VERSION }}
