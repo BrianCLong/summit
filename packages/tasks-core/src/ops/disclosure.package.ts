@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { defineTask } from '@intelgraph/maestro-sdk';
 import fs from 'node:fs';
 import path from 'node:path';

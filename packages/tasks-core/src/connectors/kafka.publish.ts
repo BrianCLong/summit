@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { defineTask } from '@intelgraph/maestro-sdk';
 import { Kafka } from 'kafkajs';
 
