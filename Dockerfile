@@ -21,12 +21,19 @@ RUN pnpm run build
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
+# Copy production node_modules
 COPY --from=base /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
+# Copy built server
+COPY --from=build /app/server/dist ./server/dist
+COPY --from=build /app/server/package.json ./server/
+# Copy built packages (workspace dependencies)
+COPY --from=build /app/packages ./packages
+# Copy root config files
 COPY --from=build /app/package.json ./
 COPY --from=build /app/turbo.json ./
+COPY --from=build /app/pnpm-workspace.yaml ./
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/healthz || exit 1
 USER 1000
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "server/dist/src/index.js"]
