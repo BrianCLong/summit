@@ -23,7 +23,8 @@ if ! command -v grype &> /dev/null; then
     exit 1
 fi
 
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+# Use timestamp format without colons (GitHub artifacts don't allow : in filenames)
+TIMESTAMP=$(date -u +"%Y%m%dT%H%M%SZ")
 REPORT_FILE="$OUTPUT_DIR/vulnerability-report-${TIMESTAMP}.${REPORT_FORMAT}"
 MATCHES_FILE="$OUTPUT_DIR/vulnerability-matches-${TIMESTAMP}.json"
 
