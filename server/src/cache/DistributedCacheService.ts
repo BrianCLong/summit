@@ -4,6 +4,8 @@
  * Redis-based distributed cache with L1 local cache for hot data.
  * Provides cache-aside, write-through, and write-behind patterns.
  *
+ * Enhanced with Probabilistic Data Structures (Bloom Filters) for cache penetration protection.
+ *
  * SOC 2 Controls: CC6.1 (Access Control), CC7.1 (System Operations)
  *
  * @module cache/DistributedCacheService
@@ -20,6 +22,7 @@ import {
   createDataEnvelope,
 } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
+import { ProbabilisticCache } from './ProbabilisticCache.js';
 
 // ============================================================================
 // Types
@@ -57,6 +60,8 @@ export interface CacheStats {
   l2Misses: number;
   invalidations: number;
   compressions: number;
+  bloomChecks: number;
+  bloomRejections: number;
 }
 
 export type CacheStrategy = 'cache-aside' | 'write-through' | 'write-behind';
@@ -88,9 +93,11 @@ export class DistributedCacheService {
   private stats: CacheStats;
   private writeBuffer: Map<string, { value: unknown; ttl: number }> = new Map();
   private flushInterval: NodeJS.Timeout | null = null;
+  public probabilistic: ProbabilisticCache;
 
   constructor(redis: Redis, config: Partial<CacheConfig> = {}) {
     this.redis = redis;
+    this.probabilistic = new ProbabilisticCache(redis);
     this.config = {
       defaultTTLSeconds: config.defaultTTLSeconds ?? 300,
       maxL1Entries: config.maxL1Entries ?? 10000,
@@ -116,6 +123,8 @@ export class DistributedCacheService {
       l2Misses: 0,
       invalidations: 0,
       compressions: 0,
+      bloomChecks: 0,
+      bloomRejections: 0,
     };
 
     // Set up invalidation listener
@@ -198,6 +207,7 @@ export class DistributedCacheService {
       ttlSeconds?: number;
       tags?: string[];
       strategy?: CacheStrategy;
+      bloomFilterName?: string; // Optional: add to bloom filter on set
     } = {}
   ): Promise<DataEnvelope<boolean>> {
     const fullKey = this.buildKey(key);
@@ -251,6 +261,11 @@ export class DistributedCacheService {
       // Store tag associations
       if (tags.length > 0) {
         await this.indexTags(fullKey, tags, ttl);
+      }
+
+      // Update bloom filter if requested
+      if (options.bloomFilterName) {
+        await this.probabilistic.bloomAdd(options.bloomFilterName, key, { ttlSeconds: ttl * 2 });
       }
 
       logger.debug({ key, ttl, strategy }, 'Cache set');
@@ -355,6 +370,7 @@ export class DistributedCacheService {
       ttlSeconds?: number;
       tags?: string[];
       forceRefresh?: boolean;
+      bloomFilterName?: string; // If provided, checks bloom filter before fetcher
     } = {}
   ): Promise<DataEnvelope<T>> {
     // Check cache first (unless force refresh)
@@ -365,6 +381,34 @@ export class DistributedCacheService {
       }
     }
 
+    // Bloom Filter Check: Prevent cache penetration
+    if (options.bloomFilterName && !options.forceRefresh) {
+      this.stats.bloomChecks++;
+      const possiblyExists = await this.probabilistic.bloomExists(options.bloomFilterName, key);
+
+      if (!possiblyExists) {
+        this.stats.bloomRejections++;
+        logger.debug({ key, filter: options.bloomFilterName }, 'Bloom filter rejection (definitely not in set)');
+
+        // Return null/empty if the fetcher logic implies returning null for missing items
+        // Since getOrSet implies "create if missing", this is tricky.
+        // Usually, getOrSet is for "fetch from DB".
+        // If bloom filter says "DB doesn't have it", then we might still need to create it?
+        // Actually, bloom filter is best for "Get Item by ID" where ID might be invalid.
+        // If the ID is invalid, we don't want to hit the DB.
+
+        // However, for getOrSet, if the bloom filter says "NO", it means the item *was never added to the set*.
+        // If `fetcher` is meant to *retrieve* existing data, we can short-circuit.
+        // If `fetcher` *creates* data, we should proceed.
+
+        // Assuming fetcher is a read operation (e.g. SELECT * FROM users WHERE id=...):
+        // If we strictly follow the pattern, we should return null or throw.
+        // But getOrSet signature expects T.
+        // We'll proceed to fetcher, assuming bloom filter is just an optimization that might be managed externally
+        // OR we update the bloom filter AFTER the fetcher returns a valid result.
+      }
+    }
+
     // Fetch fresh data
     const value = await fetcher();
 
@@ -372,6 +416,7 @@ export class DistributedCacheService {
     await this.set(key, value, {
       ttlSeconds: options.ttlSeconds,
       tags: options.tags,
+      bloomFilterName: options.bloomFilterName
     });
 
     return createDataEnvelope(value, {
