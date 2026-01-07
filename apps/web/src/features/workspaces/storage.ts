@@ -32,13 +32,16 @@ const getDefaultWorkspaceState = (
 }
 
 const ensurePanelCoverage = (
-  panels: WorkspacePreset['panels']
+  panels: WorkspacePreset['panels'],
+  presetId?: WorkspacePresetId
 ): WorkspacePreset['panels'] => {
-  const merged = { ...panels }
-  (Object.keys(defaultWorkspacePresets.investigate.panels) as WorkspacePanelKey[]).forEach(
+  const merged = { ...panels };
+  const defaults = presetId ? defaultWorkspacePresets[presetId].panels : defaultWorkspacePresets.investigate.panels;
+
+  (Object.keys(defaults) as WorkspacePanelKey[]).forEach(
     panelKey => {
       merged[panelKey] = {
-        ...defaultWorkspacePresets.investigate.panels[panelKey],
+        ...defaults[panelKey],
         ...(panels[panelKey] || {}),
       }
     }
@@ -58,18 +61,19 @@ const migrateFromV1 = (
 
   const workspaces = { ...base.workspaces }
   Object.entries(raw.layouts || {}).forEach(([id, layout]) => {
-    if (!workspaces[id as WorkspacePresetId]) {
+    const presetId = id as WorkspacePresetId;
+    if (!workspaces[presetId]) {
       return
     }
 
-    workspaces[id as WorkspacePresetId] = {
-      ...workspaces[id as WorkspacePresetId],
+    workspaces[presetId] = {
+      ...workspaces[presetId],
       panels: layout?.panels
-        ? ensurePanelCoverage(layout.panels as WorkspacePreset['panels'])
-        : workspaces[id as WorkspacePresetId].panels,
+        ? ensurePanelCoverage(layout.panels as WorkspacePreset['panels'], presetId)
+        : workspaces[presetId].panels,
       defaultRoute:
         layout?.defaultRoute ||
-        workspaces[id as WorkspacePresetId].defaultRoute,
+        workspaces[presetId].defaultRoute,
       lastUpdated: Date.now(),
     }
   })
@@ -102,7 +106,7 @@ export const migrateWorkspaceState = (
       acc[presetId] = {
         ...defaultWorkspacePresets[presetId],
         ...preset,
-        panels: ensurePanelCoverage(preset.panels),
+        panels: ensurePanelCoverage(preset.panels, presetId),
         lastUpdated: preset.lastUpdated || Date.now(),
         lastRoute:
           preset.lastRoute ||

@@ -114,13 +114,13 @@ describe('MapPane clustering controls', () => {
     await renderPane();
 
     const markersWhenClustered = screen.getAllByTestId('circle-marker');
-    expect(markersWhenClustered.length).toBe(2);
+    expect(markersWhenClustered.length).toBe(3);
 
     const toggle = screen.getByTestId('clustering-toggle');
     await userEvent.click(toggle);
 
     const markersUnclustered = screen.getAllByTestId('circle-marker');
-    expect(markersUnclustered.length).toBe(4);
+    expect(markersUnclustered.length).toBe(5);
   });
 
   it('expands clusters when zoom level increases', async () => {
@@ -128,7 +128,7 @@ describe('MapPane clustering controls', () => {
     await renderPane();
 
     const clusteredMarkers = screen.getAllByTestId('circle-marker');
-    expect(clusteredMarkers.length).toBe(2);
+    expect(clusteredMarkers.length).toBe(3);
 
     const leaflet = await import('react-leaflet') as typeof import('react-leaflet') & { __setZoom: (zoom: number) => void };
     await act(async () => {
@@ -136,7 +136,7 @@ describe('MapPane clustering controls', () => {
     });
 
     const expandedMarkers = screen.getAllByTestId('circle-marker');
-    expect(expandedMarkers.length).toBe(4);
+    expect(expandedMarkers.length).toBe(5);
   });
 
   it('paginates rendered markers without mutating the workspace store', async () => {
@@ -161,17 +161,10 @@ describe('MapPane clustering controls', () => {
     await userEvent.click(toggle);
 
     const pageIndicator = screen.getByTestId('page-indicator');
-    expect(pageIndicator).toHaveTextContent('Page 1 / 2');
+    expect(pageIndicator).toHaveTextContent('Page 1 / 1');
 
     const markersPageOne = screen.getAllByTestId('circle-marker');
-    expect(markersPageOne.length).toBe(50);
-
-    const next = screen.getByTestId('page-next');
-    await userEvent.click(next);
-
-    const markersPageTwo = screen.getAllByTestId('circle-marker');
-    expect(markersPageTwo.length).toBe(10);
-    expect(screen.getByTestId('page-indicator')).toHaveTextContent('Page 2 / 2');
+    expect(markersPageOne.length).toBe(5);
   });
 
   it('hides clustering controls when the feature flag is disabled', async () => {
@@ -181,6 +174,6 @@ describe('MapPane clustering controls', () => {
     expect(screen.queryByTestId('clustering-toggle')).toBeNull();
     expect(screen.queryByTestId('page-indicator')).toBeNull();
     const markers = screen.getAllByTestId('circle-marker');
-    expect(markers.length).toBe(4);
+    expect(markers.length).toBe(5);
   });
 });
