@@ -104,6 +104,9 @@
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "ga:verify": "pnpm typecheck && pnpm lint && pnpm build && pnpm --filter intelgraph-server test:unit && pnpm ga:smoke",
+    "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
+    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "prepare": "husky"
   },
   "keywords": [

@@ -26,8 +26,7 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
+        # version is read from package.json packageManager field
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.0.3
@@ -100,11 +99,13 @@ jobs:
             ./scripts/scan-vulnerabilities.sh . ./vulnerability-reports false false json || true
           fi
 
-      # Build and push container image if Dockerfile exists
+      # Build and push container image (only on main branch or tags, not PRs)
       - name: Build and Push Docker Image
-        if: hash docker 2>/dev/null && [ -f "Dockerfile" ]
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/summit-platform
+          # Docker requires lowercase repository names
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          DOCKER_IMAGE=ghcr.io/${OWNER_LOWER}/summit-platform
           DOCKER_TAG=${{ env.VERSION }}
 
           # Build image
@@ -123,7 +124,9 @@ jobs:
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
-          DOCKER_IMAGE=ghcr.io/${{ github.repository_owner }}/summit-platform
+          # Docker requires lowercase repository names
+          OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          DOCKER_IMAGE=ghcr.io/${OWNER_LOWER}/summit-platform
           DOCKER_TAG=${{ env.VERSION }}
 
           # Sign container image with keyless signing
