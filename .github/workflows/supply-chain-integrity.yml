@@ -99,9 +99,9 @@ jobs:
             ./scripts/scan-vulnerabilities.sh . ./vulnerability-reports false false json || true
           fi
 
-      # Build and push container image if Dockerfile exists
+      # Build and push container image (only on main branch or tags, not PRs)
       - name: Build and Push Docker Image
-        if: ${{ hashFiles('Dockerfile') != '' }}
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         run: |
           # Docker requires lowercase repository names
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
