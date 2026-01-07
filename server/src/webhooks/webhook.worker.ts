@@ -5,6 +5,7 @@ import axios from 'axios';
 import { pg } from '../db/pg.js';
 import { webhookService } from './webhook.service.js';
 import { logger } from '../utils/logger.js';
+import { validateUrl } from '../utils/ssrf.js';
 
 const connection = new (IORedis as any)(process.env.REDIS_URL || 'redis://localhost:6379', {
   maxRetriesPerRequest: null,
@@ -45,6 +46,9 @@ export const webhookWorker = new Worker<WebhookJobData>(
     };
 
     try {
+      // Validate URL to prevent SSRF
+      await validateUrl(url);
+
       const response = await axios.post(url, payload, {
         headers: {
           'Content-Type': 'application/json',
@@ -55,6 +59,7 @@ export const webhookWorker = new Worker<WebhookJobData>(
           'User-Agent': 'Summit-Webhook-Service/1.0',
         },
         timeout: 10000, // 10s timeout
+        maxRedirects: 0, // Disable redirects to prevent bypass
         validateStatus: () => true, // Capture all status codes
       });
 

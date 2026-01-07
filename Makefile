@@ -127,7 +127,9 @@ rollback-drill: ## Run simulated rollback drill
 sbom:   ## Generate CycloneDX SBOM
 	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
-smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
+smoke: bootstrap ## Fresh clone smoke test: bootstrap -> up -> health check
+	@echo "Bringing up services with retry..."
+	@./scripts/ops/docker_compose_retry.sh -f $(COMPOSE_DEV_FILE) up --build -d
 	@echo "Waiting for services to start..."
 	@sleep 45
 	@echo "Checking UI health..."

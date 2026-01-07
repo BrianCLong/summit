@@ -44,6 +44,11 @@ jobs:
         with:
           go-version: "1.21"
 
+      - name: Verify Artifact Path Lengths
+        run: |
+          chmod +x scripts/ci/check_max_path.sh
+          ./scripts/ci/check_max_path.sh 200 .
+
       # Install supply chain tools with strict pinning
       - name: Install syft
         run: |
@@ -154,11 +159,16 @@ jobs:
           ./scripts/bundle-release-evidence.sh ${{ env.VERSION }} summit-platform $GITHUB_SHA ./release-evidence
 
       # Upload SBOMs as artifacts
+      # Zipping to prevent max path length issues during upload/download
+      - name: Zip SBOMs
+        run: |
+          tar -czf sboms-${{ env.VERSION }}.tar.gz ./sboms/
+
       - name: Upload SBOMs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.3.3
         with:
           name: sboms-${{ env.VERSION }}
-          path: ./sboms/
+          path: sboms-${{ env.VERSION }}.tar.gz
           retention-days: 90
 
       # Upload vulnerability reports
@@ -192,7 +202,12 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.1.7
         with:
           name: sboms-${{ needs.supply-chain-integrity.outputs.release-version }}
-          path: ./sboms
+          path: .
+
+      - name: Extract SBOMs
+        run: |
+          mkdir -p ./sboms
+          tar -xzf sboms-${{ needs.supply-chain-integrity.outputs.release-version }}.tar.gz -C .
 
       - name: Download Vulnerability Reports
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.1.7
