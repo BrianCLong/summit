@@ -1,12 +1,12 @@
 # Multi-stage build for IntelGraph
-FROM node:20.18.3-alpine AS base
+FROM node:22-alpine AS base
 WORKDIR /app
 # Use pnpm for package management (version must match package.json packageManager field)
 RUN npm install -g pnpm@10.0.0
 COPY package.json pnpm-lock.yaml turbo.json .pnpmfile.cjs ./
 RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
-FROM node:20.18.3-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 RUN npm install -g pnpm@10.0.0
 # Copy all source files first, then install dependencies
@@ -19,7 +19,7 @@ ARG GRAPHQL_SCHEMA_URL
 ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
 RUN pnpm run build
 
-FROM node:20.18.3-alpine AS runtime
+FROM node:22-alpine AS runtime
 WORKDIR /app
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
