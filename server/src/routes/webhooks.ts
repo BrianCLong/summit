@@ -106,9 +106,9 @@ const verifyLifecycleSecret = (req: any, res: any, next: any) => {
 };
 
 // Helper for validation (for new routes)
-const validate = (schema: any) => (req: any, res: any, next: any) => {
+const validate = (schema: any) => async (req: any, res: any, next: any) => {
   try {
-    req.body = schema.parse(req.body);
+    req.body = await schema.parseAsync(req.body);
     next();
   } catch (error: any) {
     res.status(400).json({ error: 'Invalid input', details: error });

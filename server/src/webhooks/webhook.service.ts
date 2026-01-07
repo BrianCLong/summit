@@ -3,6 +3,7 @@ import { pg } from '../db/pg.js';
 import crypto from 'crypto';
 import { webhookQueue } from './webhook.queue.js';
 import { z } from 'zod/v4';
+import { validateWebhookUrl } from '../utils/url-validator.js';
 
 export interface WebhookConfig {
   id: string;
@@ -45,7 +46,13 @@ export interface WebhookDeliveryAttempt {
 }
 
 export const CreateWebhookSchema = z.object({
-  url: z.string().url(),
+  url: z.string().url().refine(async (url) => {
+    try {
+      return await validateWebhookUrl(url);
+    } catch (e: any) {
+      return false;
+    }
+  }, { message: 'Invalid URL: Internal addresses are not allowed' }),
   event_types: z.array(z.string()).min(1),
   secret: z.string().optional(), // If not provided, one will be generated
 });
@@ -53,7 +60,14 @@ export const CreateWebhookSchema = z.object({
 export type CreateWebhookInput = z.infer<typeof CreateWebhookSchema>;
 
 export const UpdateWebhookSchema = z.object({
-  url: z.string().url().optional(),
+  url: z.string().url().optional().refine(async (url) => {
+    if (!url) return true;
+    try {
+      return await validateWebhookUrl(url);
+    } catch (e: any) {
+      return false;
+    }
+  }, { message: 'Invalid URL: Internal addresses are not allowed' }),
   event_types: z.array(z.string()).min(1).optional(),
   is_active: z.boolean().optional(),
   secret: z.string().optional(),
