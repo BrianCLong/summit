@@ -1,0 +1,78 @@
+groups:
+  - name: SummitSystemHealth
+    rules:
+      # Availability & Errors
+      - alert: HighErrorRate
+        expr: rate(intelgraph_http_request_duration_seconds_count{status=~"5.."}[5m]) / rate(intelgraph_http_request_duration_seconds_count[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP Error Rate detected"
+          description: "HTTP 5xx error rate is above 1% for the last 5 minutes."
+
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(intelgraph_http_request_duration_seconds_bucket[5m])) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API Latency Degradation"
+          description: "95th percentile API latency is above 1.5s for the last 5 minutes."
+
+      # Resource Usage
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Memory Usage"
+          description: "Service memory usage exceeds 1GB."
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU Usage"
+          description: "CPU usage is above 80% for the last 5 minutes."
+
+      # Database Health
+      - alert: SlowQueriesDetected
+        expr: increase(intelgraph_slow_queries_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow Queries Detected"
+          description: "More than 10 slow queries detected in the last 5 minutes."
+
+      - alert: ConnectionPoolSaturation
+        expr: intelgraph_db_connection_pool_usage / intelgraph_db_connection_pool_size > 0.8
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "DB Connection Pool Saturation"
+          description: "Database connection pool usage is above 80%."
+
+      # Business Logic / Jobs
+      - alert: JobFailureSpike
+        expr: rate(intelgraph_jobs_processed_total{status="failed"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Background Job Failures"
+          description: "Background job failure rate is elevated."
+
+      - alert: CostBudgetExceeded
+        expr: intelgraph_cost_budget_utilization_ratio > 0.9
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Cost Budget Critical"
+          description: "Tenant cost budget utilization exceeds 90%."

@@ -1,0 +1,72 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Jobs Processed",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(increase(intelgraph_jobs_processed_total[1h]))",
+          "legendFormat": "Last Hour"
+        }
+      ]
+    },
+    {
+      "title": "Job Failures",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(increase(intelgraph_jobs_processed_total{status=\"failed\"}[1h]))",
+          "legendFormat": "Last Hour"
+        }
+      ]
+    },
+    {
+      "title": "Cost Accrued (USD)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum(intelgraph_cost_accrued_usd_total) by (tenant_id)",
+          "legendFormat": "{{tenant_id}}"
+        }
+      ]
+    },
+    {
+      "title": "Budget Utilization",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        {
+          "expr": "intelgraph_cost_budget_utilization_ratio",
+          "legendFormat": "{{tenant_id}}"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["business", "cost"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Summit Business Metrics",
+  "uid": "summit-business-metrics",
+  "version": 1,
+  "weekStart": ""
+}

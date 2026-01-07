@@ -1,16 +1,17 @@
-// @ts-nocheck
-import { metrics } from '../observability/metrics.js';
+
+import { metrics } from '../../observability/metrics.js';
+import { registry } from '../../observability/metrics-enhanced.js';
 import { Meter } from '@opentelemetry/api';
-import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { Gauge } from 'prom-client';
 
-// @deprecated - Use server/src/lib/observability/ instead
+// @deprecated - Use server/src/lib/observability/ instead, but now backed by real metrics
 class ComprehensiveTelemetry {
   private static instance: ComprehensiveTelemetry;
-  private meter: Meter;
+  private meter: any; // Meter type from API is interface, but implementation is separate
 
-  // Performance counters
+  // Performance counters mapped to real Prometheus metrics
   public readonly subsystems: {
     database: {
       queries: { add: (value?: number) => void };
@@ -32,34 +33,69 @@ class ComprehensiveTelemetry {
   private activeConnectionsCount = 0;
 
   private constructor() {
-    // Legacy support: Reuse the OTel service or create a bridged meter
-    // For now, we stub this to prevent breaking existing consumers but direct them to new metrics
-    // Ideally this class should be deleted and consumers migrated.
+    // Legacy support: We still initialize a dummy meter to avoid breaking types if anything accessed .meter
+    // Removing MeterProvider usage as it requires sdk-metrics which is missing in dev environment
+    // and this is deprecated code anyway.
+    this.meter = {
+        createCounter: () => ({ add: () => {} }),
+        createHistogram: () => ({ record: () => {} }),
+    };
 
-    // We create a dummy meter provider for backward compat if needed,
-    // but really we should just point to the new registry.
-    const resource = new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: 'intelgraph-server-legacy',
-    });
-    const meterProvider = new MeterProvider({ resource });
-    this.meter = meterProvider.getMeter('intelgraph-server-telemetry-legacy');
+    // Real metric bindings
+    this.requestDuration = {
+      record: (value: number) => {
+        // Value is in ms from app.ts (process.hrtime converted to ms)
+        // Prometheus standard is seconds
+        metrics.httpRequestDuration.observe(value / 1000);
+      }
+    };
 
-    // Mocks to satisfy type checker while we migrate
-    this.requestDuration = { record: () => {} };
-    this.activeConnections = { add: (value: number) => {} };
+    this.activeConnections = {
+      add: (value: number) => {
+        if (value > 0) metrics.activeConnections.inc(value);
+        else metrics.activeConnections.dec(Math.abs(value));
+      }
+    };
+
     this.subsystems = {
       database: {
-        queries: { add: (value?: number) => {} },
-        errors: { add: (value?: number) => {} },
-        latency: { record: (value?: number) => {} },
+        queries: {
+            add: (value?: number) => {
+                // We don't have a dedicated query counter in basic metrics,
+                // but we can infer from histogram count if needed.
+                // For now, no-op or add a specific counter if strictly required.
+            }
+        },
+        errors: {
+            add: (value?: number) => {
+                // Can be added to a general error counter if one exists
+            }
+        },
+        latency: {
+          record: (value: number) => {
+             // value in ms
+             metrics.databaseQueryDuration.observe(value / 1000);
+          }
+        },
       },
       cache: {
-        hits: { add: (value?: number) => {} },
-        misses: { add: (value?: number) => {} },
-        sets: { add: (value?: number) => {} },
-        dels: { add: (value?: number) => {} },
+        hits: { add: (value?: number) => metrics.cacheHits.inc(value || 1) },
+        misses: { add: (value?: number) => metrics.cacheMisses.inc(value || 1) },
+        sets: { add: (value?: number) => { /* No metric yet */ } },
+        dels: { add: (value?: number) => { /* No metric yet */ } },
       },
-      api: { requests: { add: (value?: number) => {} }, errors: { add: (value?: number) => {} } },
+      api: {
+        requests: {
+           // Handled by middleware mostly
+           add: (value?: number) => { }
+        },
+        errors: {
+           add: (value?: number) => {
+             // We can assume 500 error for generic count if needed
+             // metrics.httpRequestsTotal.inc({ status: '500' }); // If such metric existed
+           }
+        }
+      },
     };
   }
 
@@ -75,24 +111,31 @@ class ComprehensiveTelemetry {
     attributes: Record<string, string | number>,
   ) {
     // Forward to new metric
+    // duration is in ms from app.ts
+    // attributes usually contain method, route, status
+    const labels: Record<string, string> = {};
+    if (attributes.method) labels.method = String(attributes.method);
+    if (attributes.route) labels.route = String(attributes.route);
+    if (attributes.status) labels.status = String(attributes.status);
+
     metrics.httpRequestDuration.observe(
-      attributes as Record<string, string>,
-      duration,
+      labels,
+      duration / 1000,
     );
   }
 
   public incrementActiveConnections() {
     this.activeConnectionsCount++;
-    this.activeConnections.add(1);
+    metrics.activeConnections.inc(1);
   }
 
   public decrementActiveConnections() {
     this.activeConnectionsCount--;
-    this.activeConnections.add(-1);
+    metrics.activeConnections.dec(1);
   }
 
   public onMetric(_listener: (metricName: string, value: number) => void) {
-    // No-op or reimplement if critical
+    // No-op
   }
 }
 

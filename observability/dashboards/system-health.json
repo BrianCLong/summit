@@ -1,73 +1,80 @@
 {
-  "dashboard": {
-    "title": "IntelGraph - System Health",
-    "tags": ["intelgraph", "system", "health"],
-    "timezone": "browser",
-    "panels": [
-      {
-        "id": 1,
-        "title": "Active WebSocket Connections",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "intelgraph_active_connections",
-            "legendFormat": "{{tenant}}",
-            "refId": "A"
-          }
-        ],
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
-      },
-      {
-        "id": 2,
-        "title": "Node.js Memory Usage",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "nodejs_heap_size_total_bytes",
-            "legendFormat": "Heap Total",
-            "refId": "A"
-          },
-          {
-            "expr": "nodejs_heap_size_used_bytes",
-            "legendFormat": "Heap Used",
-            "refId": "B"
-          }
-        ],
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
-      },
-      {
-        "id": 3,
-        "title": "CPU Usage",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "rate(process_cpu_user_seconds_total[5m])",
-            "legendFormat": "User CPU",
-            "refId": "A"
-          },
-          {
-            "expr": "rate(process_cpu_system_seconds_total[5m])",
-            "legendFormat": "System CPU",
-            "refId": "B"
-          }
-        ],
-        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
-      },
-      {
-        "id": 4,
-        "title": "Event Loop Lag",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "nodejs_eventloop_lag_seconds",
-            "legendFormat": "Event Loop Lag",
-            "refId": "A"
-          }
-        ],
-        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
-      }
-    ],
-    "refresh": "10s",
-    "time": { "from": "now-1h", "to": "now" }
-  }
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(process_cpu_seconds_total[1m]) * 100",
+          "legendFormat": "CPU Usage %"
+        }
+      ]
+    },
+    {
+      "title": "Memory Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "process_resident_memory_bytes",
+          "legendFormat": "RSS"
+        },
+        {
+          "expr": "nodejs_heap_size_used_bytes",
+          "legendFormat": "Heap Used"
+        }
+      ]
+    },
+    {
+      "title": "Event Loop Lag",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "nodejs_eventloop_lag_seconds",
+          "legendFormat": "Lag"
+        }
+      ]
+    },
+    {
+      "title": "Active Handles",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "nodejs_active_handles",
+          "legendFormat": "Handles"
+        },
+        {
+          "expr": "nodejs_active_requests",
+          "legendFormat": "Requests"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["system", "nodejs"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Summit System Health",
+  "uid": "summit-system-health",
+  "version": 1,
+  "weekStart": ""
 }
