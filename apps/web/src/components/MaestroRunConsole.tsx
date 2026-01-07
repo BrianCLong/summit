@@ -16,6 +16,8 @@ import {
   XCircle,
   CheckCircle2,
   Clock,
+  Sparkles,
+  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -40,6 +42,15 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
     'Summarize recent deployment failures',
     'Draft a release note for the latest commit',
   ];
+
+  const handleQuickPrompt = (prompt: string) => {
+    if (!input.trim()) {
+      setInput(prompt);
+      return;
+    }
+    // Append with a newline if there's already text
+    setInput(prev => `${prev}\n\n${prompt}`);
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
@@ -129,24 +140,22 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                   className="min-h-[120px] resize-none text-sm"
                 />
 
-                {!input && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="text-[10px] font-medium text-slate-500">
-                      Try:
-                    </span>
-                    {QUICK_PROMPTS.map(prompt => (
-                      <button
-                        key={prompt}
-                        type="button"
-                        onClick={() => setInput(prompt)}
-                        aria-label={`Use prompt: ${prompt}`}
-                        className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-                      >
-                        {prompt}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <span className="text-[10px] font-medium text-slate-500">
+                    Try:
+                  </span>
+                  {QUICK_PROMPTS.map(prompt => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => handleQuickPrompt(prompt)}
+                      aria-label={`Use prompt: ${prompt}`}
+                      className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -175,6 +184,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                     type="submit"
                     disabled={state.isRunning || !input.trim()}
                     className="gap-2"
+                    title={!input.trim() ? 'Enter a prompt to run' : 'Execute prompt'}
                   >
                     {state.isRunning ? (
                       <>
@@ -314,9 +324,11 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
             <ScrollArea className="h-[280px]">
               <div className="divide-y divide-slate-800/70">
                 {!selectedRun && (
-                  <div className="p-4 text-xs text-slate-400">
-                    No tasks yet. Submit a request to see Maestro’s plan and
-                    execution.
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <ClipboardList className="mb-2 h-8 w-8 text-slate-700" />
+                    <p className="text-xs text-slate-400">
+                      No tasks yet. Submit a request to see Maestro’s plan and execution.
+                    </p>
                   </div>
                 )}
 
@@ -362,9 +374,11 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
             <ScrollArea className="h-[280px]">
               <div className="divide-y divide-slate-800/70">
                 {!selectedRun && (
-                  <div className="p-4 text-xs text-slate-400">
-                    Task outputs from Maestro will appear here once a run has
-                    completed.
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <Sparkles className="mb-2 h-8 w-8 text-slate-700" />
+                    <p className="text-xs text-slate-400">
+                      Task outputs from Maestro will appear here once a run has completed.
+                    </p>
                   </div>
                 )}
 
@@ -442,15 +456,22 @@ function CopyButton({
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className={className}
-      onClick={handleCopy}
-      aria-label={copied ? 'Copied' : 'Copy to clipboard'}
-      title={copied ? 'Copied!' : 'Copy to clipboard'}
-    >
-      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-    </Button>
+    <div className="relative inline-flex items-center">
+      {copied && (
+        <span className="absolute right-full mr-2 text-[10px] text-emerald-400 animate-in fade-in slide-in-from-right-1">
+          Copied!
+        </span>
+      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        className={className}
+        onClick={handleCopy}
+        aria-label={copied ? 'Copied' : 'Copy to clipboard'}
+        title={copied ? 'Copied!' : 'Copy to clipboard'}
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+      </Button>
+    </div>
   );
 }
