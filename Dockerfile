@@ -9,9 +9,10 @@ RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 FROM node:20.18.3-alpine AS build
 WORKDIR /app
 RUN npm install -g pnpm@10.0.0
-COPY package.json pnpm-lock.yaml turbo.json .pnpmfile.cjs ./
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# Copy all source files first, then install dependencies
+# This ensures all workspace package.json files are present for proper dependency resolution
 COPY . .
+RUN pnpm install --frozen-lockfile --ignore-scripts
 ARG API_BASE_URL
 ENV API_BASE_URL=$API_BASE_URL
 ARG GRAPHQL_SCHEMA_URL
