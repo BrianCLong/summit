@@ -11,10 +11,10 @@ on:
         required: false
         type: string
       dry_run:
-        description: "Validate release process without publishing"
+        description: "Dry Run? (Skip release creation, show summary only)"
+        required: true
+        default: true
         type: boolean
-        default: false
-        required: false
       override_freeze:
         description: "Override release freeze window?"
         type: boolean
@@ -32,6 +32,7 @@ concurrency:
 
 permissions:
   contents: write
+  pull-requests: write
   packages: write
   id-token: write # For OIDC/Cosign if needed
 
@@ -159,8 +160,11 @@ jobs:
     permissions:
       contents: write
       packages: write
+      pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -243,11 +247,34 @@ jobs:
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          NOTES="GA Release ${RELEASE_TAG} (SLSA L3 Compliant)"
+          echo "notes=$NOTES" >> $GITHUB_OUTPUT
+          echo "$NOTES" > release-notes.md
+
+      - name: Generate Release Summary
+        run: node scripts/release/create-release-artifacts.mjs
+
+      - name: Publish Job Summary
+        run: cat dist/release/release-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR (Dry Run)
+        if: env.DRY_RUN == 'true' && github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Try to find PR number associated with this branch
+          PR_NUM=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number' || echo "")
+
+          if [ -n "$PR_NUM" ]; then
+            echo "Commenting on PR #$PR_NUM"
+            gh pr comment "$PR_NUM" -F dist/release/release-report.md || echo "Failed to comment on PR"
+          else
+            echo "No PR found for branch ${{ github.ref_name }}"
+          fi
 
       - name: Idempotent Release
+        if: env.DRY_RUN == 'false'
         id: publish
-        if: ${{ inputs.dry_run != true }}
         run: |
           TAG="${{ inputs.tag || github.ref_name }}"
           echo "Processing release for tag: $TAG"
@@ -285,32 +312,6 @@ jobs:
 
           echo "existed=$EXISTED" >> "$GITHUB_OUTPUT"
           echo "action=$ACTION" >> "$GITHUB_OUTPUT"
-
-      - name: Dry Run Summary
-        if: ${{ inputs.dry_run == true }}
-        run: |
-          TAG="${{ inputs.tag || github.ref_name }}"
-          echo "dry_run=true" >> "$GITHUB_OUTPUT"
-          echo "### 🧪 Dry Run Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** \`$TAG\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### ✅ Validation Passed" >> $GITHUB_STEP_SUMMARY
-          echo "- Build: Server and Client images built successfully" >> $GITHUB_STEP_SUMMARY
-          echo "- Tests: All verification gates passed" >> $GITHUB_STEP_SUMMARY
-          echo "- Evidence: Bundle created and checksums verified" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### 📦 Artifacts (not published)" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          ls -la release-assets/ >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### 🔐 Evidence Checksums" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          cat evidence/SHA256SUMS | head -20 >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> **Note:** This was a dry run. No release was published." >> $GITHUB_STEP_SUMMARY
 
       - name: Release Summary
         if: ${{ always() && inputs.dry_run != true }}

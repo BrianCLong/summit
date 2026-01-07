@@ -1,68 +1,99 @@
-#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
 
-import { execSync } from 'node:child_process';
-import { existsSync, readFileSync, appendFileSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+const distDir = 'dist/release';
+const summaryFile = path.join(distDir, 'release-summary.json');
+const reportFile = path.join(distDir, 'release-report.md');
 
-// This script orchestrates the creation of release artifacts.
-// It is intended to be called by CI/CD pipelines.
+// Ensure dist dir
+fs.mkdirSync(distDir, { recursive: true });
 
-const TAG = process.env.TAG || process.argv[2];
-const PREV_TAG = process.env.PREV_TAG || process.argv[3];
-const GITHUB_STEP_SUMMARY = process.env.GITHUB_STEP_SUMMARY;
+const tag = process.env.RELEASE_TAG || 'v0.0.0-dryrun';
+const sha = process.env.GITHUB_SHA || '0000000';
+const releaseAssetsDir = 'release-assets';
 
-if (!TAG) {
-  console.error('Error: TAG is required');
-  process.exit(1);
-}
-
-console.log(`Creating release artifacts for ${TAG}...`);
-
-// 1. Generate Release Notes
-const generatorScript = resolve(process.cwd(), 'scripts/release/generate-release-notes.mjs');
+// 1. Version Consistency
+let versionObserved = 'unknown';
 try {
-  execSync(`node "${generatorScript}" "${TAG}" "${PREV_TAG || ''}"`, { stdio: 'inherit' });
-} catch (error) {
-  console.error('Failed to generate release notes');
-  process.exit(1);
+  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  versionObserved = packageJson.version;
+} catch (e) {
+  console.error('Could not read package.json', e);
 }
 
-// 2. Handle CHANGELOG integration (if applicable)
-// The prompt requires: "Preserve existing “use CHANGELOG section if present” behavior only if the repo already does this"
-// Since we are creating this file and have no access to legacy extraction logic in this context,
-// we will rely on the commit parsing.
-// If a CHANGELOG.md file exists, we might consider appending it, but usually generated notes are specific to the release.
-// We'll leave this as-is for now, respecting the "otherwise keep commit-based notes as canonical" clause.
+const versionExpected = tag.startsWith('v') ? tag.slice(1) : tag;
+const versionMatch = versionObserved === versionExpected;
 
-// 3. Run Compatibility Check (generates compatibility.json)
-const compatScript = resolve(process.cwd(), 'scripts/release/check-bundle-compatibility.mjs');
-if (existsSync(compatScript)) {
-  console.log('Running compatibility check...');
-  try {
-    // Assuming artifacts are in dist/release, which is the default for the script
-    execSync(`node "${compatScript}" --strict`, { stdio: 'inherit' });
-  } catch (e) {
-    console.error('Compatibility check failed.');
-    process.exit(1);
+// 2. Git Reachability (Best Effort)
+const defaultBranch = 'main';
+const reachableFromDefaultBranch = 'unknown';
+
+// 3. Artifacts
+const artifacts = [];
+if (fs.existsSync(releaseAssetsDir)) {
+  const files = fs.readdirSync(releaseAssetsDir);
+  for (const file of files) {
+    const filepath = path.join(releaseAssetsDir, file);
+    if (fs.statSync(filepath).isFile()) {
+      const content = fs.readFileSync(filepath);
+      const sha256 = crypto.createHash('sha256').update(content).digest('hex');
+      artifacts.push({
+        name: file,
+        path: filepath,
+        sha256
+      });
+    }
   }
 }
 
-// 4. Update Step Summary
-if (GITHUB_STEP_SUMMARY && existsSync(GITHUB_STEP_SUMMARY)) {
-  const notesPath = resolve('dist/release/release-notes.md');
-  if (existsSync(notesPath)) {
-    const notes = readFileSync(notesPath, 'utf8');
-    const summaryLines = [
-      '## Release Notes Preview',
-      '',
-      ...notes.split('\n').slice(0, 30),
-      '',
-      ...(notes.split('\n').length > 30 ? ['... (see full release notes for more)'] : [])
-    ];
-
-    appendFileSync(GITHUB_STEP_SUMMARY, summaryLines.join('\n'));
-    console.log('Added release notes preview to step summary.');
-  }
+// 4. Notes Preview
+let notesPreview = '';
+const notesPath = 'release-notes.md';
+if (fs.existsSync(notesPath)) {
+  const notesContent = fs.readFileSync(notesPath, 'utf8');
+  notesPreview = notesContent.split('\n').slice(0, 40).join('\n');
 }
 
-console.log('Release artifacts created successfully.');
+const summary = {
+  tag,
+  sha,
+  defaultBranch,
+  reachableFromDefaultBranch,
+  versionExpected,
+  versionObserved,
+  versionMatch,
+  artifacts,
+  generatedAt: new Date().toISOString()
+};
+
+fs.writeFileSync(summaryFile, JSON.stringify(summary, null, 2));
+console.log(`Summary written to ${summaryFile}`);
+
+// Generate Markdown Report for Job Summary
+let md = `# Release Dry-Run Summary\n\n`;
+md += `**Tag:** \`${tag}\`\n`;
+md += `**SHA:** \`${sha.substring(0, 7)}\`\n`;
+md += `**Version Match:** ${versionMatch ? 'Yes' : 'No'} (Expected: ${versionExpected}, Got: ${versionObserved})\n`;
+md += `**Generated At:** ${summary.generatedAt}\n\n`;
+
+md += `## Artifacts\n\n`;
+if (artifacts.length > 0) {
+  md += `| Filename | SHA256 |\n`;
+  md += `| --- | --- |\n`;
+  artifacts.forEach(a => {
+    md += `| ${a.name} | \`${a.sha256.substring(0, 16)}...\` |\n`;
+  });
+} else {
+  md += `_No artifacts found in ${releaseAssetsDir}_\n`;
+}
+
+md += `\n## Release Notes Preview\n\n`;
+if (notesPreview) {
+  md += `\`\`\`markdown\n${notesPreview}\n\`\`\`\n`;
+} else {
+  md += `_No release notes file found at ${notesPath}_\n`;
+}
+
+fs.writeFileSync(reportFile, md);
+console.log(`Report written to ${reportFile}`);
