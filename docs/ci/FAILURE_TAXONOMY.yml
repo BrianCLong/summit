@@ -1,0 +1,37 @@
+# Failure Taxonomy Catalog
+# Defines categories, severity, and remediation hints for CI failures
+
+failures:
+  - code: CI-TIMEOUT-001
+    pattern: "ETIMEDOUT"
+    category: "Infrastructure"
+    severity: "P1"
+    next_steps:
+      - "Check database connection pool settings"
+      - "Verify network latency between runner and DB"
+      - "Review recent changes to timeout configurations"
+
+  - code: CI-OOM-002
+    pattern: "JavaScript heap out of memory"
+    category: "Resource"
+    severity: "P0"
+    next_steps:
+      - "Increase NODE_OPTIONS --max-old-space-size"
+      - "Check for memory leaks in recent PRs"
+      - "Analyze heap snapshot if available"
+
+  - code: CI-FLAKE-003
+    pattern: "Test failed, but passed on retry"
+    category: "Flakiness"
+    severity: "P2"
+    next_steps:
+      - "Mark test as skipped if persistently flaky"
+      - "Investigate race conditions in test setup"
+
+  - code: CI-DEP-004
+    pattern: "Module not found"
+    category: "Dependency"
+    severity: "P0"
+    next_steps:
+      - "Run pnpm install locally to verify"
+      - "Check package.json and lockfile consistency"

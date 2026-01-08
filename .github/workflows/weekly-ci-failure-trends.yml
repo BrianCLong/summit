@@ -1,0 +1,71 @@
+name: Weekly CI Failure Trends
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 9am
+  workflow_dispatch:
+
+jobs:
+  analyze-and-draft:
+    name: Analyze Trends & Draft Issues
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - run: corepack enable && corepack prepare pnpm@9.0.5 --activate
+      - run: pnpm install --frozen-lockfile
+
+      # Simulating the trend report generation since the original source was missing or archived
+      # In a real scenario, this would be `scripts/ci/generate_failure_report.ts` or similar.
+      - name: Generate Trend Report (Simulation)
+        run: |
+          mkdir -p artifacts/ci-trends
+          echo '{
+            "meta": { "generated_at": "'$(date -u -Iseconds)'", "window_days": 7 },
+            "action_queue": [
+              { "failure_code": "CI-TIMEOUT-001", "count": 15, "delta": 5, "priority": "P1", "top_workflows": ["ci.yml"], "example_runs": ["https://github.com/org/repo/actions/runs/123"] },
+              { "failure_code": "CI-OOM-002", "count": 25, "delta": 10, "priority": "P0", "top_workflows": ["ci-heavy.yml"], "example_runs": ["https://github.com/org/repo/actions/runs/201"] }
+            ]
+          }' > artifacts/ci-trends/report.json
+
+      - name: Load Policy
+        id: policy
+        run: |
+          # Default to draft mode if policy file is missing
+          MODE="draft"
+          if [ -f policy/ci-issue-automation.yml ]; then
+             MODE=$(grep "^mode:" policy/ci-issue-automation.yml | awk '{print $2}')
+          fi
+          echo "MODE=${MODE:-draft}" >> $GITHUB_ENV
+
+      - name: Draft/Apply Issues
+        run: |
+          pnpm tsx scripts/ci/draft_ci_failure_issues.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT_PATH: artifacts/ci-trends/report.json
+          TAXONOMY_PATH: docs/ci/FAILURE_TAXONOMY.yml
+          MODE: ${{ env.MODE }}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-issue-drafts
+          path: artifacts/ci-issues/
+
+      - name: Job Summary
+        if: always()
+        run: |
+          if [ -f artifacts/ci-issues/digest.md ]; then
+            cat artifacts/ci-issues/digest.md >> $GITHUB_STEP_SUMMARY
+          fi
