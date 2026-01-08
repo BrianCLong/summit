@@ -33,3 +33,19 @@ channels:
     allowed_from:
       - series-branch
     require_evidence: false
+
+dependency_change_gate:
+  enabled: true
+  scope: release-intent
+  thresholds:
+    major_bumps: 1        # if >= this, approval required
+    added_deps: 3         # if >= this, approval required
+    removed_deps: 3       # if >= this, approval required
+    total_events: 5       # optional aggregate trigger
+  approval_signal:
+    label: deps-approved  # exact string
+  allowlist:
+    - "@types/*"
+    - "eslint*"
+    - "prettier*"
+  notes: "Gate is visibility-only; approval required only on release-intent PRs."

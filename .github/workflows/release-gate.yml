@@ -29,6 +29,31 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Analyze Dependency Changes
+        id: deps-analyze
+        if: github.event_name == 'pull_request'
+        run: |
+          # Fetch base branch to ensure we can compare
+          git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
+          node scripts/ci/analyze_dependency_changes.mjs origin/${{ github.base_ref }} HEAD
+
+      - name: Upload Dependency Report
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deps-change-report
+          path: artifacts/deps-change/
+
+      - name: Enforce Dependency Approval
+        if: github.event_name == 'pull_request'
+        env:
+          # Check if PR has 'release-intent' label
+          RELEASE_INTENT: ${{ contains(github.event.pull_request.labels.*.name, 'release-intent') }}
+          # Check if PR has 'deps-approved' label
+          HAS_APPROVAL: ${{ contains(github.event.pull_request.labels.*.name, 'deps-approved') }}
+        run: |
+          node scripts/ci/enforce_dependency_approval.mjs
+
       - name: Run Targeted Tests
         run: |
           echo "Running release script tests..."
