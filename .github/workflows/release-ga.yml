@@ -41,14 +41,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: "pnpm"
@@ -69,7 +69,7 @@ jobs:
         run: node scripts/release/check-freeze.mjs
 
       - name: Upload Freeze Evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: freeze-evidence
           path: dist/release/freeze.json
@@ -119,7 +119,7 @@ jobs:
 
       - name: Upload Release Status
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-status
           path: dist/release/release-status.json
@@ -161,7 +161,7 @@ jobs:
       bundle_path: ${{ steps.collect.outputs.bundle_path }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -216,7 +216,7 @@ jobs:
             --workflow-run "${{ github.run_id }}"
 
       - name: Upload SBOM Bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sbom-bundle-${{ steps.version.outputs.tag }}
           path: artifacts/release/${{ steps.version.outputs.tag }}/
@@ -249,7 +249,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Extract Tag
         id: version
@@ -259,31 +259,31 @@ jobs:
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
       - name: Download Server Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: build-artifacts-server-${{ github.run_id }}
           path: evidence/server
 
       - name: Download Client Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
 
       - name: Download SBOM Bundle
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: sbom-bundle-${{ steps.version.outputs.tag }}
           path: evidence/sbom-bundle
 
       - name: Download Freeze Evidence
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: freeze-evidence
           path: evidence/freeze
 
       - name: Download Release Status
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-status
           path: evidence/release
@@ -372,7 +372,7 @@ jobs:
           EOF
 
       - name: Upload Release Bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: release-bundle-${{ steps.version.outputs.tag }}
           path: release-assets/
@@ -410,10 +410,10 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download Release Bundle
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: release-bundle-${{ needs.prepare-release.outputs.tag }}
           path: release-assets
@@ -477,7 +477,7 @@ jobs:
           cat release-assets/approval_record.json
 
       - name: Upload Approval Record
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: approval-record-${{ needs.prepare-release.outputs.tag }}
           path: release-assets/approval_record.json

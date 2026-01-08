@@ -7,12 +7,12 @@ jobs:
   sbom:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: anchore/sbom-action@v0
         with:
           format: cyclonedx-json
           output-file: sbom.json
-      - uses: anchore/scan-action@v3
+      - uses: anchore/scan-action@v7
         with:
           sbom: sbom.json
           fail-build: true
