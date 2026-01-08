@@ -165,6 +165,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Download Server Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -189,45 +200,44 @@ jobs:
           name: release-status
           path: evidence/release
 
-      - name: Create Evidence Bundle
+      - name: Create Evidence Bundle and Snapshot
         run: |
           mkdir -p release-assets
 
-          # Generate Checksums for all evidence (This creates evidence/SHA256SUMS)
-          # Use deterministic sorting to ensure stable hash
-          cd evidence
-          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
-          cd ..
+          # Generate the compliance snapshot and its bundle index first, so they are included in the checksums
+          echo "Generating bundle index..."
+          node scripts/release/build-bundle-index.mjs --dir evidence/ --output evidence/bundle-index.json
 
-          # Verify Evidence Linkage
-          # We compare the digest of the generated artifacts (SHA256SUMS) against the
-          # committed evidence file in release-evidence/<TAG>.json
-
+          echo "Generating compliance snapshot..."
           TAG="${{ inputs.tag || github.ref_name }}"
           # Strip refs/tags/ prefix if present
           TAG="${TAG#refs/tags/}"
+          SNAPSHOT_NAME="COMPLIANCE_SNAPSHOT_${TAG}.md"
+          node scripts/releases/generate_compliance_snapshot.mjs \
+            --target "$TAG" \
+            --bundle-index "evidence/bundle-index.json" \
+            --output "evidence/$SNAPSHOT_NAME"
+          echo "✅ Snapshot added to evidence directory: evidence/$SNAPSHOT_NAME"
 
+          # Generate Checksums for all evidence, including the newly generated files
+          echo "Generating checksums for all evidence..."
+          cd evidence
+          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          cd ..
+          echo "✅ SHA256SUMS generated."
+
+          # Verify Evidence Linkage
           REPO_EVIDENCE="release-evidence/${TAG}.json"
-
           if [ -f "$REPO_EVIDENCE" ]; then
             echo "Verifying linkage against committed evidence: $REPO_EVIDENCE"
-
-            # Compute digest of the FRESH SHA256SUMS (generated in previous step)
-            # Note: SHA256SUMS is in the 'evidence/' directory
             ACTUAL_DIGEST=$(sha256sum evidence/SHA256SUMS | awk '{print $1}')
-
-            # Validate the committed evidence file structure
             node scripts/release/validate-evidence.mjs --evidence "$REPO_EVIDENCE"
-
-            # Check for mismatch
             EXPECTED_DIGEST=$(jq -r .bundle.digest "$REPO_EVIDENCE")
 
             if [ "$ACTUAL_DIGEST" != "$EXPECTED_DIGEST" ]; then
               echo "❌ EVIDENCE_BUNDLE_DIGEST_MISMATCH"
               echo "Expected: $EXPECTED_DIGEST"
               echo "Actual:   $ACTUAL_DIGEST"
-
-              # Emit failure report
               echo '{"ok": false, "digestMatched": false, "expectedDigest": "'"$EXPECTED_DIGEST"'", "actualDigest": "'"$ACTUAL_DIGEST"'"}' > evidence/evidence-check.json
               exit 1
             else
@@ -238,7 +248,10 @@ jobs:
             echo "⚠️ No committed evidence found at $REPO_EVIDENCE, skipping linkage check."
           fi
 
+          # Finally, package all evidence artifacts into the release bundle
+          echo "Creating evidence bundle archive..."
           tar -czf release-assets/evidence.tar.gz evidence/
+          echo "✅ Evidence bundle created at release-assets/evidence.tar.gz"
 
       - name: Generate Release Notes
         id: notes

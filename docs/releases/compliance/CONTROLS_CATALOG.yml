@@ -1,0 +1,121 @@
+controls:
+  # Supply Chain Integrity
+  - id: CTRL-SC-001
+    area: "Supply Chain Integrity"
+    statement: "The origin and contents of all third-party dependencies are documented."
+    evidence:
+      - name: "Software Bill of Materials (SBOM)"
+        source: "bundle:sbom"
+        notes: "Provides a machine-readable inventory of all software components and their dependencies."
+  - id: CTRL-SC-002
+    area: "Supply Chain Integrity"
+    statement: "The build process is documented and verifiable."
+    evidence:
+      - name: "Build Provenance"
+        source: "bundle:provenance"
+        notes: "Records how the build was produced, including the builder, source commit, and inputs."
+
+  # CI/CD Integrity and Reproducibility
+  - id: CTRL-CICD-001
+    area: "CI/CD Integrity and Reproducibility"
+    statement: "All release artifacts are verifiably intact and unmodified."
+    evidence:
+      - name: "Artifact Checksums"
+        source: "bundle:checksums"
+        notes: "SHA256 checksums for all files in the release bundle allow for integrity verification."
+  - id: CTRL-CICD-002
+    area: "CI/CD Integrity and Reproducibility"
+    statement: "The release build process is designed to be deterministic and reproducible."
+    evidence:
+      - name: "Reproducibility Verification"
+        source: "ci:verify-reproducible-job"
+        notes: "The CI pipeline includes a job to verify that the release build is byte-for-byte reproducible."
+
+  # Approval and Release Authorization
+  - id: CTRL-AUTH-001
+    area: "Approval and Release Authorization"
+    statement: "A formal, auditable approval process is required to authorize a release to production."
+    evidence:
+      - name: "Release Status & Sign-off"
+        source: "bundle:status"
+        notes: "Contains the final release decision, approvers, and criteria status."
+  - id: CTRL-AUTH-002
+    area: "Approval and Release Authorization"
+    statement: "Release promotion is governed by a machine-readable policy defining gates and required approvals."
+    evidence:
+      - name: "Release Policy"
+        source: "repo:release-policy.yml"
+        notes: "The canonical policy file that governs release channels, freezes, and approval requirements."
+
+  # Change Tracking
+  - id: CTRL-CHG-001
+    area: "Change Tracking"
+    statement: "All code changes included in a release are documented and traceable to a version."
+    evidence:
+      - name: "Release Notes"
+        source: "bundle:notes"
+        notes: "Summarizes the changes, contributors, and scope of the release."
+  - id: CTRL-CHG-002
+    area: "Change Tracking"
+    statement: "All release artifacts are traceable to a specific source code commit."
+    evidence:
+      - name: "Release Manifest"
+        source: "bundle:manifest"
+        notes: "Links the release artifacts to the exact Git commit SHA they were built from."
+
+  # Incident/Rollback Preparedness
+  - id: CTRL-IR-001
+    area: "Incident/Rollback Preparedness"
+    statement: "The system is capable of rolling back to a previous version in case of failure."
+    evidence:
+      - name: "Rollback Plan"
+        source: "docs:ga/ROLLBACK.md"
+        notes: "Documents the strategy and procedures for performing a release rollback."
+  - id: CTRL-IR-002
+    area: "Incident/Rollback Preparedness"
+    statement: "Post-deployment health is monitored to detect incidents."
+    evidence:
+      - name: "Canary Deployment Report"
+        source: "bundle:canary-report"
+        notes: "Provides results from the post-release canary deployment, verifying system health. (Note: May not be present in all bundles)"
+
+  # Monitoring/Alerting Readiness
+  - id: CTRL-MON-001
+    area: "Monitoring/Alerting Readiness"
+    statement: "Core system health metrics are defined and monitored via dashboards."
+    evidence:
+      - name: "Observability Dashboards"
+        source: "repo:observability/dashboards/"
+        notes: "Configuration-as-code for key Grafana dashboards."
+  - id: CTRL-MON-002
+    area: "Monitoring/Alerting Readiness"
+    statement: "Alerting rules are defined as code to notify operators of critical issues."
+    evidence:
+      - name: "Alerting Rules"
+        source: "repo:observability/alert-rules-intelgraph.yml"
+        notes: "Configuration-as-code for key Prometheus alerting rules."
+
+  # Exception Governance
+  - id: CTRL-EX-001
+    area: "Exception Governance"
+    statement: "A formal process exists for documenting and approving exceptions to policy (waivers)."
+    evidence:
+      - name: "Waiver Report"
+        source: "bundle:waivers"
+        notes: "A report of all active waivers, their justification, and expiry. (Note: May not be present in all bundles)"
+  - id: CTRL-EX-002
+    area: "Exception Governance"
+    statement: "A formal process exists for tracking and accepting security risks."
+    evidence:
+      - name: "Security Exceptions Report"
+        source: "bundle:security-exceptions"
+        notes: "A report of all accepted security risks. (Note: May not be present in all bundles)"
+
+  # Data Migration Safety
+  - id: CTRL-DATA-001
+    area: "Data Migration Safety"
+    statement: "Database migrations are tracked in a registry and are designed to be safe."
+    evidence:
+      - name: "Migration Registry Report"
+        source: "bundle:migration-registry"
+        notes: "Provides a log of all applied database migrations. (Note: May not be present in all bundles)"

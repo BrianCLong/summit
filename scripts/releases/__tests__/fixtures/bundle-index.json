@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0.0",
+  "tag": "v0.1.0-test.1",
+  "channel": "test",
+  "generatedAt": "2024-01-01T12:00:00.000Z",
+  "pointers": {
+    "status": "dist/release/release-status.json",
+    "manifest": "dist/release/release-manifest.json",
+    "notes": "dist/release/release-notes.md",
+    "sbom": "dist/release/sbom.cdx.json",
+    "provenance": "dist/release/provenance.json",
+    "checksums": "dist/release/SHA256SUMS"
+  },
+  "files": [
+    {
+      "path": "dist/release/bundle-index.json",
+      "bytes": 1234,
+      "sha256": "abcdef123456"
+    },
+    {
+      "path": "dist/release/release-manifest.json",
+      "bytes": 5678,
+      "sha256": "fedcba654321"
+    }
+  ]
+}
