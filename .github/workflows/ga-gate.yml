@@ -3,20 +3,25 @@ name: GA Gate
 on:
   pull_request:
     branches: [main]
+    # SAFETY: Conservative paths-ignore to prevent skipping required checks
+    # This workflow MUST run on any code/config/dependency changes
+    # Only skip for pure documentation changes
     paths-ignore:
       - "**.md"
       - "docs/**"
-      - ".github/workflows/*.md"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
       - "LICENSE"
       - ".gitignore"
+      # NOTE: We do NOT ignore:
+      # - .github/workflows/** (workflow changes must trigger this)
+      # - package.json, pnpm-lock.yaml, .pnpmfile.cjs (dependency changes must trigger this)
+      # - scripts/**, tools/** (build/test script changes must trigger this)
   push:
     branches: [main]
     paths-ignore:
       - "**.md"
       - "docs/**"
-      - ".github/workflows/*.md"
   workflow_dispatch:
 
 concurrency:
@@ -52,6 +57,8 @@ jobs:
           make bootstrap
 
       - name: Run GA Gate
+        # CANONICAL ENTRYPOINT: Uses make ga -> scripts/ga-gate.sh
+        # This is the official GA verification entrypoint (equivalent to pnpm ga:verify)
         run: |
           make ga
 

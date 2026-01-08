@@ -3,9 +3,15 @@ name: Compliance
 on:
   push:
     branches: [main]
+    # SAFETY: Conservative paths-ignore to prevent skipping compliance checks
+    # This workflow MUST run on any code/config/policy changes
     paths-ignore:
       - "**.md"
       - "docs/**"
+      # NOTE: We do NOT ignore:
+      # - .github/workflows/** (workflow changes must trigger this)
+      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
+      # - policy/**, scripts/compliance/** (policy/compliance changes must trigger this)
   pull_request:
     branches: [main]
     paths-ignore:
@@ -13,6 +19,10 @@ on:
       - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
+      # NOTE: We do NOT ignore:
+      # - .github/workflows/** (workflow changes must trigger this)
+      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
+      # - policy/**, scripts/compliance/** (policy/compliance changes must trigger this)
   schedule:
     - cron: "0 0 * * 1" # Weekly on Mondays
 

@@ -3,19 +3,27 @@ name: Unit Tests & Coverage
 on:
   push:
     branches: [main, develop]
+    # SAFETY: Conservative paths-ignore to prevent skipping required checks
+    # This workflow MUST run on any code/config/dependency changes
     paths-ignore:
       - "**.md"
       - "docs/**"
-      - ".github/workflows/*.md"
+      # NOTE: We do NOT ignore:
+      # - .github/workflows/** (workflow changes must trigger this)
+      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
+      # - server/**, client/** (code changes must trigger this)
   pull_request:
     branches: [main, develop]
     paths-ignore:
       - "**.md"
       - "docs/**"
-      - ".github/workflows/*.md"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
       - "LICENSE"
+      # NOTE: We do NOT ignore:
+      # - .github/workflows/** (workflow changes must trigger this)
+      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
+      # - server/**, client/** (code changes must trigger this)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -46,10 +54,12 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Run Server Unit Tests with Coverage (Security Focus)
+      - name: Run Server Unit Tests with Coverage
         working-directory: ./server
+        # CANONICAL ENTRYPOINT: Use test:ci script for deterministic CI execution
+        # Defined in server/package.json with hardened settings from commit 8434f7ae3b0
         run: |
-          pnpm exec jest --config jest.config.ts --passWithNoTests --coverage --collectCoverageFrom="src/security/**/*.ts" --testMatch="**/security/__tests__/**/*.test.ts" --reporters=default --reporters=jest-junit
+          pnpm test:ci
         env:
           CI: true
           NODE_ENV: test
