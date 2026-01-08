@@ -1,0 +1,69 @@
+name: Stabilization Retrospective
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 1 * *' # Run at 8:00 AM UTC on the first day of every month
+
+jobs:
+  generate-retrospective:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/workflows/reusable/toolchain-setup
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Retrospective Report
+        id: generate
+        continue-on-error: true
+        run: |
+          node scripts/releases/generate_stabilization_retrospective.mjs --token \${{ secrets.GITHUB_TOKEN }}
+
+          # Find the generated JSON file to use in the summary
+          JSON_FILE=$(find artifacts/stabilization/retrospective -name 'retro_*.json' -print -quit)
+          if [[ -f "$JSON_FILE" ]]; then
+            echo "json_path=$JSON_FILE" >> $GITHUB_OUTPUT
+            echo "report_generated=true" >> $GITHUB_OUTPUT
+          else
+            echo "report_generated=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Retrospective Artifacts
+        if: steps.generate.outputs.report_generated == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-retrospective
+          path: artifacts/stabilization/retrospective/
+
+      - name: Write Job Summary
+        if: steps.generate.outputs.report_generated == 'true'
+        run: |
+          JSON_PATH=\${{ steps.generate.outputs.json_path }}
+
+          echo "## Stabilization Retrospective Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          RISK_TREND=$(jq -r '.aggregatedData.trends.risk_index | "Risk Index Trend: \(.[0]) → \(.[-1])"' $JSON_PATH)
+          echo "* **$RISK_TREND**" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Top Recommendations" >> $GITHUB_STEP_SUMMARY
+
+          jq -r '.recommendations | .[] | "* **\(.focus):** \(.rationale)"' $JSON_PATH >> $GITHUB_STEP_SUMMARY
+
+      - name: Handle No Data Case
+        if: steps.generate.outcome == 'failure' && steps.generate.outputs.report_generated != 'true'
+        run: |
+          echo "## Stabilization Retrospective Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Could not generate a report because no weekly scorecard artifacts were found in the selected window." >> $GITHUB_STEP_SUMMARY
+          echo "This is expected if it's the first run of the month and no weekly closeouts have occurred yet." >> $GITHUB_STEP_SUMMARY
