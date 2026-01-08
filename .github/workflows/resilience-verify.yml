@@ -1,0 +1,39 @@
+
+name: Resilience Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  verify-resilience:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Resilience Verification
+        run: npx tsx scripts/resilience-verify.ts
+        env:
+           # Using mock secrets for CI
+           JWT_SECRET: "ci-secret-must-be-very-long-to-satisfy-the-check-at-least-32-chars"
+           JWT_REFRESH_SECRET: "ci-refresh-secret-must-be-very-long-to-satisfy-the-check-at-least-32-chars"
+           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+           NEO4J_URI: "bolt://localhost:7687"
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resilience-reports
+          path: dist/resilience/

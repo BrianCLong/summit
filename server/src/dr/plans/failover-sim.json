@@ -1,0 +1,32 @@
+
+{
+  "id": "failover-simulation",
+  "name": "Failover Simulation",
+  "description": "Simulates a primary region failure and secondary promotion.",
+  "steps": [
+    {
+      "name": "Simulate Primary Failure",
+      "type": "exec",
+      "command": "simulate-failure --region=us-east-1"
+    },
+    {
+      "name": "Verify Traffic Drain",
+      "type": "verify",
+      "timeoutMs": 5000
+    },
+    {
+      "name": "Promote Secondary",
+      "type": "exec",
+      "command": "promote --region=us-west-1"
+    },
+    {
+      "name": "Verify Read/Write on Secondary",
+      "type": "verify"
+    },
+    {
+      "name": "Revert to Primary",
+      "type": "exec",
+      "command": "revert-failover"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+
+{
+  "id": "backup-restore-rehearsal",
+  "name": "Backup Restore Rehearsal",
+  "description": "Simulates a restore of the primary database from the latest backup.",
+  "steps": [
+    {
+      "name": "Verify Backup Integrity",
+      "type": "verify",
+      "description": "Check checksums of latest backup",
+      "command": "verify-backup"
+    },
+    {
+      "name": "Provision Temp Database",
+      "type": "exec",
+      "command": "createdb dr_drill_temp"
+    },
+    {
+      "name": "Restore Schema",
+      "type": "exec",
+      "command": "psql -d dr_drill_temp -f backups/latest/schema.sql"
+    },
+    {
+      "name": "Verify Data Counts",
+      "type": "verify",
+      "description": "Ensure row counts match manifest"
+    },
+    {
+      "name": "Cleanup",
+      "type": "exec",
+      "command": "dropdb dr_drill_temp"
+    }
+  ],
+  "rollback": [
+    {
+      "name": "Force Cleanup",
+      "type": "exec",
+      "command": "dropdb --if-exists dr_drill_temp"
+    }
+  ]
+}
