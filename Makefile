@@ -83,7 +83,7 @@ dev:
 	pnpm run dev
 
 test:   ## Run unit tests (node+python)
-	pnpm -w run test:unit || true && $(VENV_BIN)/pytest || true
+	pnpm -w run test:unit && $(VENV_BIN)/pytest
 
 lint:   ## Lint js/ts + python
 	pnpm -w exec eslint . || true

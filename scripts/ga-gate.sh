@@ -134,15 +134,24 @@ record_check "Services Up" "make up" || { generate_report; exit 1; }
 # 4. Readiness Wait
 wait_for_ready() {
     echo "Waiting for readiness probe (localhost:8080/health/ready)..."
-    local retries=30
+    local retries=60
     local wait=2
-    for ((i=0; i<retries; i++)); do
-        if curl -s -f http://localhost:8080/health/ready > /dev/null; then
+    for ((i=1; i<=retries; i++)); do
+        echo "Attempt $i/$retries: Checking readiness..."
+        if curl -s -f http://localhost:8080/health/ready > /dev/null 2>&1; then
+            echo "  ✅ Service is ready."
             return 0
+        else
+            echo "  - Service not ready yet."
         fi
-        sleep $wait
-        echo -n "."
+
+        if [ $i -lt $retries ]; then
+            sleep $wait
+        fi
     done
+    echo "❌ Service failed to become ready after $retries attempts."
+    echo "Final attempt details:"
+    curl -v http://localhost:8080/health/ready
     return 1
 }
 record_check "Readiness Check" "wait_for_ready" || { generate_report; exit 1; }
