@@ -1,0 +1,49 @@
+name: Stabilization Retrospective
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Runs on the first day of every month
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  generate-roadmap-handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Derive Stabilization Roadmap Candidates
+        id: derive
+        run: npx tsx scripts/releases/derive_stabilization_roadmap_candidates.mjs
+
+      - name: Sync Stabilization Roadmap Handoff
+        id: sync
+        run: npx tsx scripts/releases/sync_stabilization_roadmap_handoff.mjs
+
+      - name: Upload Roadmap Handoff Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: roadmap-handoff
+          path: artifacts/stabilization/roadmap-handoff/
+
+      - name: Create Job Summary
+        run: |
+          echo "### Stabilization Roadmap Handoff Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Generated on: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following roadmap candidates were derived:" >> $GITHUB_STEP_SUMMARY
+          CANDIDATES=$(jq -r 'keys[]' artifacts/stabilization/derived-candidates.json)
+          for CANDIDATE in $CANDIDATES; do
+            echo "- **$CANDIDATE**" >> $GITHUB_STEP_SUMMARY
+          done
