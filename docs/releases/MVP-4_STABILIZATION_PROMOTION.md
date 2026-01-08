@@ -1,467 +1,561 @@
-# MVP-4 Stabilization RC to GA Promotion Plan
+# MVP-4 Stabilization RC → GA Promotion Guide
 
-**Authority:** `docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md`
-**Scope:** Promotion of stabilization RC to General Availability (GA)
-**Version:** 1.0.0
+**Authority**: This document defines the canonical procedure for promoting MVP-4 stabilization release candidates to general availability.
 
-## Purpose
+**Version**: 1.0.0
+**Last Updated**: 2026-01-07
+**Owner**: Platform Engineering
 
-This document defines the process, preconditions, and commands for promoting a stabilization Release Candidate (RC) to General Availability (GA).
+---
 
-## Preconditions for Promotion
+## Table of Contents
 
-Before promoting an RC to GA, ALL of the following conditions must be met:
+1. [Overview](#overview)
+2. [Prerequisites](#prerequisites)
+3. [Promotion Workflow](#promotion-workflow)
+4. [Local Verification](#local-verification)
+5. [Automated Promotion Guard](#automated-promotion-guard)
+6. [Manual Promotion Steps](#manual-promotion-steps)
+7. [Post-Promotion](#post-promotion)
+8. [Rollback Procedure](#rollback-procedure)
+9. [Emergency Procedures](#emergency-procedures)
 
-### 1. Time-Based Stability Window
+---
 
-- **Minimum RC age:** 24 hours (48 hours recommended)
-- **Reasoning:** Allows time for CI to run across multiple environments and for issues to surface
-- **Verification:** Check tag creation date
-  ```bash
-  git show v4.1.2-rc.N --format="%ci" --no-patch
-  ```
+## Overview
 
-### 2. CI Green Across All Critical Workflows
+### Purpose
 
-All critical workflows must show `success` status:
+This guide ensures safe, deterministic, and auditable promotion of stabilization release candidates to production-ready GA releases.
 
-```bash
-# Check workflow status for the RC commit
-gh run list --commit $(git rev-parse v4.1.2-rc.N) --limit 20
+### Release Nomenclature
 
-# Must be GREEN:
-# - ci-core.yml
-# - unit-test-coverage.yml
-# - workflow-lint.yml
-# - supply-chain-integrity.yml
-# - ga-gate.yml
-```
+- **RC (Release Candidate)**: `v4.1.2-rc.1`, `v4.1.2-rc.2`, etc.
+  - Built from `main` branch
+  - Deployed to staging/preview environments
+  - Stabilization period: 24-48 hours minimum
 
-**Rejection criteria:**
+- **GA (General Availability)**: `v4.1.2`
+  - Promoted from validated RC
+  - Deployed to production
+  - Fully supported and documented
 
-- Any critical workflow shows `failure`
-- Any required workflow shows `cancelled` or `skipped` (unless explicitly waived)
+### Promotion Contract
 
-### 3. No P0 or P1 Issues Discovered
+**A release candidate can be promoted to GA if and only if:**
 
-Review issue tracker and monitoring systems:
+1. All Required CI Checks are GREEN (see `docs/ci/REQUIRED_CHECKS.md`)
+2. RC has been stable in staging for minimum 24 hours
+3. No critical bugs reported during stabilization period
+4. Promotion evidence bundle is generated and archived
 
-```bash
-# Check GitHub issues created/updated since RC tag
-gh issue list --label "P0,P1" --state open --json number,title,createdAt
+---
 
-# Check monitoring dashboards for anomalies
-# - Error rates
-# - Latency p95/p99
-# - Resource utilization
-```
+## Prerequisites
 
-**Rejection criteria:**
+### Required Tools
 
-- Any open P0 issue
-- More than 2 open P1 issues without mitigation plan
-
-### 4. Security Scan Clean
-
-Security scans must show no new critical or high vulnerabilities:
+Install the following tools before proceeding:
 
 ```bash
-# Run security check
-pnpm run security:check
+# GitHub CLI (required for workflow verification)
+brew install gh
 
-# Generate SBOM and compare to baseline
-pnpm run generate:sbom
-# Review: artifacts/sbom.json
+# Verify installation
+gh --version
+gh auth status
 
-# Check for new CVEs
-pnpm audit --audit-level=high
+# jq (required for JSON parsing in verification scripts)
+brew install jq
+
+# actionlint (required for workflow validation)
+brew install actionlint
 ```
 
-**Rejection criteria:**
+### Required Access
 
-- New critical vulnerabilities (CVSS >= 9.0)
-- New high vulnerabilities (CVSS >= 7.0) without documented exception
+- **GitHub**: Write access to repository (for tagging)
+- **CI**: Ability to view workflow runs
+- **Deployment**: Access to production deployment pipelines (if applicable)
 
-### 5. Local Verification Passes
-
-All verification commands must pass:
-
-```bash
-# Run full GA verification suite
-pnpm ga:verify
-# Must exit with code 0
-
-# Run server CI tests
-pnpm --filter intelgraph-server test:ci
-# Must show 100% pass rate (excluding quarantined tests)
-
-# Build Docker image
-docker build -t intelgraph:4.1.2 .
-# Must complete without errors
-```
-
-**Rejection criteria:**
-
-- Any verification command exits with non-zero code
-- Test failures (excluding documented quarantine)
-- Build errors
-
-### 6. Evidence Pack Complete
-
-Verify that the evidence pack is fully populated:
-
-```bash
-# Check evidence pack
-cat artifacts/release/v4.1.2-rc.N/evidence_pack.md
-
-# Verify all placeholders are filled:
-# - CI workflow status (not "PENDING_CI_RUN")
-# - Local verification results (not "TO_BE_FILLED")
-# - Security scan results (not "TO_BE_FILLED")
-# - Performance benchmarks (not "TO_BE_FILLED")
-```
-
-**Rejection criteria:**
-
-- Evidence pack has unfilled placeholders
-- CI proof section is empty
-- Verification results are missing
-
-### 7. Stakeholder Approval
-
-Required approvals:
-
-- [ ] Engineering lead sign-off
-- [ ] Security team review (if security changes)
-- [ ] Product owner acknowledgment (if user-facing changes)
-
-### 8. Rollback Plan Tested
-
-Ensure rollback procedures are documented and tested:
-
-- Previous stable version identified (v4.1.1)
-- Rollback commands verified
-- Data migration rollback tested (if applicable)
-
-## Promotion Process
-
-### Step 1: Final Pre-Flight Checks
+### Environment Setup
 
 ```bash
 # Navigate to repository root
-cd /Users/brianlong/Developer/summit
+cd /path/to/summit
+
+# Ensure you're on main branch
+git checkout main
+git pull origin main
 
 # Ensure working tree is clean
 git status
-# Must show: "nothing to commit, working tree clean"
-
-# Fetch latest tags
-git fetch --tags
-
-# Identify the RC to promote
-RC_TAG="v4.1.2-rc.3"  # Replace with actual RC number
-echo "Promoting: ${RC_TAG}"
-
-# Verify RC tag exists
-git tag -l "${RC_TAG}"
-
-# Get RC commit SHA
-RC_COMMIT=$(git rev-parse "${RC_TAG}")
-echo "RC Commit: ${RC_COMMIT}"
-
-# Checkout RC commit
-git checkout "${RC_TAG}"
 ```
 
-### Step 2: Run Final Verification
+---
 
-```bash
-# Run full verification suite
-pnpm ga:verify
+## Promotion Workflow
 
-# Expected output:
-# ✓ typecheck passed
-# ✓ lint passed
-# ✓ build passed
-# ✓ server unit tests passed
-# ✓ smoke tests passed
+### High-Level Flow
 
-# Capture exit code
-if [ $? -ne 0 ]; then
-    echo "ERROR: Verification failed. Do not promote."
-    exit 1
-fi
+```
+[RC Created] → [CI Runs] → [24-48h Stabilization] → [Green Verification] → [Promotion] → [GA Released]
+     ↓              ↓              ↓                      ↓                    ↓             ↓
+  v4.1.2-rc.1   All checks   Monitor staging      Run promotion guard    Create GA tag   v4.1.2
+                  run        No critical bugs     Verify all green       Push to remote  Deploy
 ```
 
-### Step 3: Create GA Tag
+### Decision Tree
+
+```
+Can I promote this RC?
+├─ Are all required checks GREEN? ──────────────┐
+│  ├─ Yes ─────────────────────────────────────┤
+│  └─ No → BLOCKED (fix failures, re-tag RC)   │
+│                                               │
+├─ Has RC been stable for 24-48 hours? ────────┤
+│  ├─ Yes ─────────────────────────────────────┤
+│  └─ No → Wait or document exception          │
+│                                               │
+├─ Any critical bugs in staging? ──────────────┤
+│  ├─ No ──────────────────────────────────────┤
+│  └─ Yes → BLOCKED (fix bugs, create new RC)  │
+│                                               │
+└─ Promotion evidence bundle generated? ───────┤
+   ├─ Yes ───────────────────────────────────► PROMOTE ✅
+   └─ No → Run promotion guard workflow
+```
+
+---
+
+## Local Verification
+
+### Step 1: Verify RC is Green
+
+Use the verification script to check if your RC commit has passed all required checks:
 
 ```bash
-# Define GA version (remove -rc.N suffix)
+# Basic verification
+./scripts/release/verify-green-for-tag.sh --tag v4.1.2-rc.1
+
+# Verify specific commit (if RC tag not yet created)
+./scripts/release/verify-green-for-tag.sh \
+  --tag v4.1.2-rc.1 \
+  --commit a8b19638b58
+
+# Verbose output (shows full workflow data)
+./scripts/release/verify-green-for-tag.sh \
+  --tag v4.1.2-rc.1 \
+  --verbose
+```
+
+### Expected Output: GREEN
+
+```
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                          PROMOTION GATE TRUTH TABLE                            ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║ Tag:    v4.1.2-rc.1
+║ Commit: a8b1963 (a8b19638b58452371e7749f714e2b9bea9f482ad)
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+WORKFLOW                            | CONCLUSION   | STATUS     | RUN URL
+────────────────────────────────────────────────────────────────────────────────────
+Release Readiness Gate              | ✅ SUCCESS   | completed  | https://...
+Workflow Lint                       | ✅ SUCCESS   | completed  | https://...
+GA Gate                             | ✅ SUCCESS   | completed  | https://...
+Unit Tests & Coverage               | ✅ SUCCESS   | completed  | https://...
+CI Core (Primary Gate)              | ✅ SUCCESS   | completed  | https://...
+
+════════════════════════════════════════════════════════════════════════════════════
+
+[SUCCESS] PROMOTION ALLOWED: All required checks passed ✅
+
+  ✅ GREEN FOR PROMOTION
+```
+
+### What if NOT GREEN?
+
+```
+WORKFLOW                            | CONCLUSION   | STATUS     | RUN URL
+────────────────────────────────────────────────────────────────────────────────────
+Release Readiness Gate              | ✅ SUCCESS   | completed  | https://...
+Workflow Lint                       | ✅ SUCCESS   | completed  | https://...
+GA Gate                             | ❌ FAILURE   | completed  | https://...  ← FAILED
+Unit Tests & Coverage               | ⏳ IN_PROGRESS | in_progress | https://... ← NOT DONE
+CI Core (Primary Gate)              | ✅ SUCCESS   | completed  | https://...
+
+[ERROR] PROMOTION BLOCKED: One or more required checks failed ❌
+
+Blocking failures:
+  • GA Gate: FAILURE
+  • Unit Tests & Coverage: IN_PROGRESS (not completed)
+
+Actions required:
+  1. Review failed workflow runs above
+  2. Fix any test/build/lint failures
+  3. Ensure all workflows complete successfully
+  4. Re-run this verification script
+
+  ❌ BLOCKED - NOT SAFE FOR PROMOTION
+```
+
+**Resolution**:
+
+1. Click the failed workflow URL
+2. Review logs and fix the issue
+3. Push fix to main (triggers new CI runs)
+4. Create new RC: `v4.1.2-rc.2`
+5. Re-verify the new RC
+
+---
+
+## Automated Promotion Guard
+
+### Step 2: Run Promotion Guard Workflow
+
+The Promotion Guard workflow automates verification and generates the promotion evidence bundle.
+
+#### Via GitHub UI
+
+1. Navigate to: **Actions** → **Release Promotion Guard**
+2. Click **Run workflow**
+3. Fill in inputs:
+   - **version**: `4.1.2` (target GA version)
+   - **rc_tag**: `v4.1.2-rc.1` (RC to promote)
+   - **commit_sha**: (optional, auto-detected from tag)
+   - **skip_verification**: `false` (DO NOT skip unless emergency)
+4. Click **Run workflow**
+
+#### Via GitHub CLI
+
+```bash
+# Standard promotion (recommended)
+gh workflow run release-promote-guard.yml \
+  -f version=4.1.2 \
+  -f rc_tag=v4.1.2-rc.1
+
+# With explicit commit SHA
+gh workflow run release-promote-guard.yml \
+  -f version=4.1.2 \
+  -f rc_tag=v4.1.2-rc.1 \
+  -f commit_sha=a8b19638b58452371e7749f714e2b9bea9f482ad
+
+# Emergency bypass (DANGEROUS - requires incident documentation)
+gh workflow run release-promote-guard.yml \
+  -f version=4.1.2 \
+  -f rc_tag=v4.1.2-rc.1 \
+  -f skip_verification=true
+```
+
+### Step 3: Download Promotion Bundle
+
+Once the workflow completes successfully:
+
+1. Go to workflow run page
+2. Scroll to **Artifacts** section
+3. Download `promotion-bundle-4.1.2.zip`
+4. Extract and review:
+
+```bash
+unzip promotion-bundle-4.1.2.zip -d promotion-bundle/
+cd promotion-bundle/
+
+# Review promotion evidence
+cat promotion_evidence.json
+
+# Review promotion checklist
+cat PROMOTION_CHECKLIST.md
+
+# Review summary
+cat summary.md
+```
+
+---
+
+## Manual Promotion Steps
+
+### Step 4: Create GA Tag
+
+After verifying green and downloading the promotion bundle:
+
+```bash
+# Set variables
+RC_TAG="v4.1.2-rc.1"
 GA_TAG="v4.1.2"
-echo "Creating GA tag: ${GA_TAG}"
+COMMIT_SHA=$(git rev-parse ${RC_TAG}^{commit})
 
 # Create annotated GA tag
-git tag -a "${GA_TAG}" "${RC_TAG}" -m "MVP-4 Stabilization Release ${GA_TAG}
-
-This release includes critical stability improvements and CI hardening
-work completed during the post-GA stabilization window.
+git tag -a "${GA_TAG}" "${COMMIT_SHA}" -m "MVP-4 Stabilization Release ${GA_TAG}
 
 Promoted from: ${RC_TAG}
-Commit: ${RC_COMMIT}
-Date: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+Commit: ${COMMIT_SHA}
+Verified at: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-Verification:
-- All CI workflows: GREEN
-- Security scans: CLEAN
-- Local verification: PASS
-- RC stability period: 48 hours
+This release has passed all required gates:
+- Release Readiness Gate
+- Workflow Lint
+- GA Gate
+- Unit Tests & Coverage
+- CI Core (Primary Gate)
 
-See: docs/releases/MVP-4_STABILIZATION_RELEASE_NOTES.md
+Evidence: https://github.com/your-org/summit/actions/runs/XXXXXX
+
+Release Notes: docs/releases/MVP-4_STABILIZATION_RELEASE_NOTES.md
 "
 
-# Verify tag was created
-git tag -l "${GA_TAG}"
-git show "${GA_TAG}" --no-patch
+# Verify tag created
+git tag -v "${GA_TAG}" 2>/dev/null || git show "${GA_TAG}"
 ```
-
-### Step 4: Update package.json (Optional)
-
-If semantic-release is not handling version bumps:
-
-```bash
-# Update version in package.json
-npm version "${GA_TAG#v}" --no-git-tag-version
-
-# Commit version bump
-git add package.json
-git commit -m "chore(release): bump version to ${GA_TAG#v}"
-```
-
-**Note:** Skip this step if using semantic-release or if package.json updates are handled separately.
 
 ### Step 5: Push GA Tag
 
 ```bash
-# Push GA tag to origin
+# Push GA tag to remote
 git push origin "${GA_TAG}"
 
-# Verify tag was pushed
+# Verify tag is visible remotely
 gh release list | grep "${GA_TAG}"
 ```
 
-### Step 6: Create GitHub Release
+### Step 6: Monitor Release Workflows
 
 ```bash
-# Create GitHub release using prepared release notes
-gh release create "${GA_TAG}" \
-  --title "MVP-4 Stabilization Release ${GA_TAG}" \
-  --notes-file "artifacts/release/${RC_TAG}/github_release.md" \
-  --verify-tag
+# Watch workflows triggered by the GA tag
+gh run watch
 
-# Or manually create release in GitHub UI:
-# https://github.com/YOUR_ORG/YOUR_REPO/releases/new
-# - Select tag: v4.1.2
-# - Title: MVP-4 Stabilization Release v4.1.2
-# - Description: Copy from artifacts/release/v4.1.2-rc.N/github_release.md
+# Or list recent runs
+gh run list --limit 10
+
+# View specific workflow
+gh run view <run-id>
 ```
-
-### Step 7: Update Release Documentation
-
-```bash
-# Create GA-specific release notes
-cp "docs/releases/MVP-4_STABILIZATION_RELEASE_NOTES.md" \
-   "docs/releases/MVP-4_STABILIZATION_RELEASE_NOTES_${GA_TAG}.md"
-
-# Update with GA-specific information
-# - Replace all RC references with GA tag
-# - Add actual promotion date
-# - Add final CI status links
-# - Add final metrics/benchmarks
-
-# Commit documentation updates
-git add docs/releases/
-git commit -m "docs(release): finalize ${GA_TAG} release notes"
-git push origin main
-```
-
-### Step 8: Post-Promotion Verification
-
-```bash
-# Wait for GitHub release to process
-sleep 30
-
-# Verify GitHub release exists
-gh release view "${GA_TAG}"
-
-# Test installation from release
-# (Optional - depends on distribution method)
-# npm install your-package@4.1.2
-# docker pull your-registry/intelgraph:4.1.2
-```
-
-### Step 9: Announce Release
-
-Communication channels:
-
-- [ ] Internal Slack/Teams notification
-- [ ] Update release status page
-- [ ] Email to stakeholders (if critical)
-- [ ] Update CHANGELOG.md (if not automated)
-
-Template:
-
-```
-🎉 MVP-4 Stabilization Release v4.1.2 is now GA!
-
-This release includes critical CI hardening and stability improvements.
-
-📋 Release Notes: https://github.com/YOUR_ORG/YOUR_REPO/releases/tag/v4.1.2
-🔍 Evidence Pack: artifacts/release/v4.1.2-rc.N/evidence_pack.md
-📊 Metrics: [Link to monitoring dashboard]
-
-Promoted from RC after 48 hours of stability testing.
-All verification gates passed. No breaking changes.
-```
-
-### Step 10: Post-Promotion Monitoring
-
-Monitor for the first 24-48 hours after GA:
-
-```bash
-# Monitor error rates
-# (Use your monitoring tool - Grafana, Datadog, etc.)
-
-# Check for new issues
-gh issue list --label "bug" --state open --json number,title,createdAt
-
-# Monitor CI on main branch
-gh run list --branch main --limit 10
-```
-
-## Rollback Procedure
-
-If critical issues are discovered post-promotion:
-
-### Emergency Rollback (Within 24 Hours)
-
-```bash
-# Option 1: Revert to previous stable version
-PREVIOUS_TAG="v4.1.1"
-
-# Create hotfix branch
-git checkout -b hotfix/rollback-${GA_TAG}
-
-# Revert problematic changes
-git revert ${RC_COMMIT}
-
-# Tag hotfix
-git tag -a v4.1.3 -m "Hotfix: Rollback ${GA_TAG} due to [ISSUE]"
-git push origin v4.1.3
-```
-
-### Long-term Rollback (After 24 Hours)
-
-If GA has been deployed to production:
-
-```bash
-# DO NOT delete GA tag once released
-# Instead, create a new patch release
-
-# Identify problematic commits
-git log v4.1.1..v4.1.2 --oneline
-
-# Create fix branch
-git checkout -b fix/issue-description v4.1.1
-
-# Cherry-pick safe commits or write new fix
-git cherry-pick [SAFE_COMMITS]
-
-# Create new RC
-./scripts/release/prepare-stabilization-rc.sh --live --version 4.1.3-rc.1
-```
-
-**IMPORTANT:** Never delete or force-push over a GA tag that has been publicly released.
-
-## Governance and Compliance
-
-### Evidence Archive
-
-After promotion, archive all evidence:
-
-```bash
-# Create evidence archive
-tar -czf "artifacts/release/v4.1.2-ga-evidence.tar.gz" \
-  "artifacts/release/v4.1.2-rc."*
-
-# Store in long-term storage (e.g., S3, artifact repository)
-# Retention: Minimum 1 year for compliance
-```
-
-### Audit Trail
-
-Maintain audit trail in `docs/releases/RELEASE_HISTORY.md`:
-
-```markdown
-## v4.1.2 - 2026-01-09
-
-- **Type:** Stabilization Release
-- **Promoted from:** v4.1.2-rc.3
-- **RC Created:** 2026-01-07
-- **GA Promoted:** 2026-01-09
-- **Approvers:** [Name], [Name]
-- **CI Status:** All green
-- **Issues:** 0 P0, 0 P1
-- **Evidence:** artifacts/release/v4.1.2-ga-evidence.tar.gz
-```
-
-## Decision Log
-
-Document promotion decision:
-
-```markdown
-## Promotion Decision: v4.1.2-rc.3 → v4.1.2 GA
-
-**Date:** 2026-01-09
-**Decision:** PROMOTE
-**Rationale:**
-
-- All CI workflows green for 48 hours
-- Zero P0/P1 issues discovered during RC period
-- Security scans clean (no new critical/high CVEs)
-- All verification gates passed
-- Performance metrics within acceptable ranges
-
-**Risks Accepted:**
-
-- [None / List any known issues with mitigation]
-
-**Approvers:**
-
-- Engineering Lead: [Name]
-- Security Team: [Name]
-- Product Owner: [Name]
-
-**Next Steps:**
-
-- Monitor for 48 hours post-GA
-- Continue Week 2 stabilization work per plan
-```
-
-## References
-
-- **Tagging Guide:** `docs/releases/MVP-4_STABILIZATION_TAGGING.md`
-- **Release Notes:** `docs/releases/MVP-4_STABILIZATION_RELEASE_NOTES.md`
-- **Evidence Pack:** `docs/releases/MVP-4_STABILIZATION_EVIDENCE_PACK.md`
-- **Stabilization Plan:** `docs/releases/MVP-4_POST_GA_STABILIZATION_PLAN.md`
-- **SemVer Spec:** https://semver.org/
-
-## Change Log
-
-| Version | Date       | Changes                        |
-| ------- | ---------- | ------------------------------ |
-| 1.0.0   | 2026-01-07 | Initial promotion plan created |
 
 ---
 
-**Template Version:** 1.0.0
-**Last Updated:** 2026-01-07
+## Post-Promotion
+
+### Verify Release Artifacts
+
+1. **GitHub Release Page**
+
+   ```bash
+   gh release view "${GA_TAG}"
+   ```
+
+2. **Docker Images** (if applicable)
+
+   ```bash
+   docker pull ghcr.io/your-org/summit:4.1.2
+   docker pull ghcr.io/your-org/summit:latest
+   ```
+
+3. **Documentation**
+   - Verify CHANGELOG.md updated
+   - Verify release notes published
+   - Verify API documentation updated
+
+### Archive Promotion Evidence
+
+```bash
+# Create release artifacts directory
+mkdir -p artifacts/release/${GA_TAG}
+
+# Copy promotion evidence
+cp promotion-bundle/promotion_evidence.json artifacts/release/${GA_TAG}/
+cp promotion-bundle/PROMOTION_CHECKLIST.md artifacts/release/${GA_TAG}/
+cp promotion-bundle/summary.md artifacts/release/${GA_TAG}/
+
+# Commit to repository
+git add artifacts/release/${GA_TAG}/
+git commit -m "docs(release): archive promotion evidence for ${GA_TAG}"
+git push origin main
+```
+
+### Announce Release
+
+1. **Team Channels**
+   - Post in `#releases` Slack channel
+   - Include release notes link
+   - Mention any breaking changes or migration steps
+
+2. **Update CHANGELOG.md**
+
+   ```bash
+   # Add GA release entry
+   vim CHANGELOG.md
+
+   # Commit
+   git add CHANGELOG.md
+   git commit -m "docs(changelog): add ${GA_TAG} release notes"
+   git push origin main
+   ```
+
+### Monitor Production
+
+- Monitor error rates for 24-48 hours
+- Check application metrics/dashboards
+- Review user-reported issues
+- Be prepared to rollback if critical issues detected
+
+---
+
+## Rollback Procedure
+
+If critical issues are discovered after GA promotion:
+
+### Immediate Mitigation
+
+```bash
+# Option 1: Delete GA tag (if not yet deployed to production)
+git tag -d "${GA_TAG}"
+git push origin :refs/tags/${GA_TAG}
+
+# Option 2: Create hotfix tag pointing to previous stable release
+PREVIOUS_TAG="v4.1.1"
+git tag -a "v4.1.2-hotfix.1" "${PREVIOUS_TAG}" -m "Emergency rollback to ${PREVIOUS_TAG}"
+git push origin "v4.1.2-hotfix.1"
+```
+
+### Full Rollback Steps
+
+1. **Identify previous stable version**
+
+   ```bash
+   git tag --list 'v4.1.*' --sort=-v:refname
+   ```
+
+2. **Deploy previous version to production**
+
+   ```bash
+   # Follow deployment procedure for previous tag
+   # E.g., v4.1.1
+   ```
+
+3. **Document incident**
+   - Create post-mortem
+   - Update release notes with rollback notice
+   - Identify root cause
+
+4. **Plan fix**
+   - Create new RC with fix
+   - Restart stabilization period
+   - Re-verify and promote when ready
+
+---
+
+## Emergency Procedures
+
+### Emergency Hotfix Promotion
+
+**ONLY use in critical security incidents or production-down scenarios.**
+
+1. **Document the incident**
+   - Create incident ticket
+   - Document why normal process is bypassed
+   - Get approval from Platform Engineering lead
+
+2. **Run Promotion Guard with bypass**
+
+   ```bash
+   gh workflow run release-promote-guard.yml \
+     -f version=4.1.2 \
+     -f rc_tag=v4.1.2-rc.1 \
+     -f skip_verification=true
+   ```
+
+3. **Manual verification**
+   - Run local smoke tests
+   - Review critical functionality
+   - Document manual verification steps
+
+4. **Proceed with promotion**
+   - Follow manual promotion steps
+   - Deploy immediately
+   - Monitor closely
+
+5. **Post-incident**
+   - Retroactively verify bypassed checks within 48 hours
+   - Update incident post-mortem
+   - Add to release notes as emergency hotfix
+
+### Incident Communication
+
+Template for emergency promotion announcement:
+
+```
+🚨 EMERGENCY RELEASE: v4.1.2
+
+Reason: [Critical security patch / Production outage fix]
+Impact: [Affected systems/users]
+Verification: [Manual verification performed / Bypassed checks documented]
+Incident: [Link to incident ticket]
+
+Standard promotion verification was bypassed due to emergency conditions.
+Post-incident verification in progress.
+
+Deployed by: @username
+Approved by: @platform-lead
+Timestamp: 2026-01-07T20:00:00Z
+```
+
+---
+
+## References
+
+- **Required Checks**: `docs/ci/REQUIRED_CHECKS.md`
+- **Tagging Guide**: `docs/releases/MVP-4_STABILIZATION_TAGGING.md`
+- **Release Notes Template**: `docs/releases/MVP-4_STABILIZATION_RELEASE_NOTES.md`
+- **Evidence Pack Template**: `docs/releases/MVP-4_STABILIZATION_EVIDENCE_PACK.md`
+- **GA Definition**: `docs/GA_DEFINITION.md`
+
+---
+
+## Appendix: Promotion Commands Cheatsheet
+
+### Quick Commands Reference
+
+```bash
+# 1. Verify RC is green
+./scripts/release/verify-green-for-tag.sh --tag v4.1.2-rc.1
+
+# 2. Run Promotion Guard
+gh workflow run release-promote-guard.yml \
+  -f version=4.1.2 \
+  -f rc_tag=v4.1.2-rc.1
+
+# 3. Download and review bundle
+# (via GitHub UI: Actions → Workflow Run → Artifacts)
+
+# 4. Create GA tag
+git tag -a v4.1.2 $(git rev-parse v4.1.2-rc.1^{commit}) -m "..."
+
+# 5. Push GA tag
+git push origin v4.1.2
+
+# 6. Monitor workflows
+gh run watch
+
+# 7. Verify release
+gh release view v4.1.2
+
+# 8. Archive evidence
+cp promotion-bundle/* artifacts/release/v4.1.2/
+git add artifacts/release/v4.1.2/
+git commit -m "docs(release): archive promotion evidence for v4.1.2"
+git push origin main
+```
+
+---
+
+## Change History
+
+| Version | Date       | Changes                           |
+| ------- | ---------- | --------------------------------- |
+| 1.0.0   | 2026-01-07 | Initial promotion guide for MVP-4 |
+
+---
+
+**Document Authority**: Platform Engineering
+**Next Review**: 2026-02-07 (or before MVP-5 kickoff)
+**Emergency Contact**: @platform-engineering-oncall
