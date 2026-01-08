@@ -146,7 +146,7 @@
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "body-parser": "^2.2.1",
-    "commander": "^12.1.0",
+    "commander": "^14.0.2",
     "concurrently": "^9.2.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -176,6 +176,7 @@
     "typescript-eslint": "^8.50.1",
     "uuid": "^13.0.0",
     "vitest": "^4.0.16",
+    "yaml": "^2.8.2",
     "zod": "^4.2.1"
   },
   "lint-staged": {
@@ -226,7 +227,6 @@
     "apollo-server-express": "^3.13.0",
     "axios": "^1.13.2",
     "cbor": "^9.0.2",
-    "commander": "^14.0.2",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
     "dotenv": "^17.2.1",

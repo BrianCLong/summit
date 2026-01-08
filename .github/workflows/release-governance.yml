@@ -1,0 +1,116 @@
+name: Release Governance Spine
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release Channel (canary, stable)'
+        required: true
+        default: 'canary'
+      target:
+        description: 'Target Environment'
+        required: true
+        default: 'production'
+      check_type:
+        description: 'Verification Mode (static, runtime, all)'
+        required: true
+        default: 'all'
+  pull_request:
+    types: [opened, synchronize, labeled]
+
+jobs:
+  verify:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'release-intent')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      statuses: write
+    outputs:
+      result: ${{ steps.gate.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: npm install -g pnpm@10.0.0 && pnpm install
+
+      - name: Release Gate Verification
+        id: gate
+        run: |
+          mkdir -p .out/artifacts
+          npx tsx scripts/governance/verify.ts --out-dir .out/artifacts --check-type ${{ inputs.check_type || 'static' }}
+        continue-on-error: false
+
+      - name: Upload Gate Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-results
+          path: .out/artifacts/gate/
+
+  evidence:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: npm install -g pnpm@10.0.0 && pnpm install
+
+      - name: Generate Evidence Bundle
+        run: |
+          npx tsx scripts/governance/generate-evidence.ts \
+            --out-dir .out/artifacts \
+            --channel ${{ inputs.channel || 'pr-check' }} \
+            --target ${{ inputs.target || 'staging' }}
+
+      - name: Upload Evidence Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-bundle
+          path: .out/artifacts/bundle/
+
+      - name: Upload Governance Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-reports
+          path: .out/artifacts/governance/
+
+  summary:
+    needs: [verify, evidence]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate Summary
+        run: |
+          echo "## Release Governance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f artifacts/governance-reports/release-summary.json ]; then
+            cat artifacts/governance-reports/release-summary.json | jq -r '.executive_summary.status' | awk '{print "**Status:** "$0}' >> $GITHUB_STEP_SUMMARY
+          else
+             echo "**Status:** ⚠️ Incomplete Run" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- [Gate Report](gate-results)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Evidence Bundle](release-evidence-bundle)" >> $GITHUB_STEP_SUMMARY
