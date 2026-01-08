@@ -38,6 +38,11 @@ jobs:
             echo "Skipping tests: scripts/verify-evidence-bundle.test.ts not found"
           fi
 
+      - name: Run Preflight Checks
+        env:
+          TAG: v0.0.0-pr.${{ github.event.pull_request.number || github.run_id }}
+        run: node scripts/release/preflight-release.mjs
+
       - name: Run Release Gate
         run: |
           pnpm release:bundle -- \

@@ -148,7 +148,16 @@ if (mismatches.length > 0) {
 }
 console.log(`✅ All package versions match ${versionExpected}`);
 
-// 6. Write Output
+// 6. Run Rollback Readiness Validation
+console.log('🔍 Running Rollback Readiness Validation...');
+try {
+  execSync(`node ${join(process.cwd(), 'scripts/release/validate_rollback_readiness.mjs')}`, { stdio: 'inherit' });
+} catch (e) {
+  fail('Rollback readiness validation failed.');
+}
+console.log('✅ Rollback readiness validation passed.');
+
+// 7. Write Output
 const outputDir = 'dist/release';
 if (!existsSync(outputDir)) {
   mkdirSync(outputDir, { recursive: true });

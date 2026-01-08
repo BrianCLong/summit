@@ -48,6 +48,11 @@ cd "$ROOT_DIR"
 ./scripts/validate-build-hardening.sh > /dev/null 2>&1
 cp "$ROOT_DIR/build-hardening-validation-report.md" "$EVIDENCE_DIR/reports/"
 
+# Add rollback readiness report
+if [ -f "$ROOT_DIR/artifacts/rollback/readiness.md" ]; then
+  cp "$ROOT_DIR/artifacts/rollback/readiness.md" "$EVIDENCE_DIR/reports/rollback-readiness.md"
+fi
+
 # Generate security assessment
 cat > "$EVIDENCE_DIR/reports/security-assessment.md" << 'EOF'
 # Build Platform Security Assessment
