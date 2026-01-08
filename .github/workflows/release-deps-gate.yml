@@ -1,0 +1,72 @@
+name: Release Dependency Gate
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  dependency-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Convert pnpm-lock.yaml to json for parsing (since we can't depend on pnpm/node_modules in sandbox/ci sometimes)
+      - name: Prepare Lockfile
+        run: npx js-yaml pnpm-lock.yaml > temp-lock.json
+
+      - name: Generate SBOM
+        run: npx tsx scripts/release/generate_sbom.ts temp-lock.json
+
+      - name: Generate License Inventory
+        run: npx tsx scripts/release/generate_license_inventory.ts
+
+      - name: Diff against Baseline
+        run: npx tsx scripts/verification/diff_dependency_baseline.ts
+
+      - name: Evaluate Policy
+        run: npx tsx scripts/release/check_policy.ts
+
+      - name: Check Approval Status
+        id: check
+        run: |
+          POLICY_STATUS=$(jq -r .status dist/evidence/deps/policy-check.json)
+          echo "Policy Status: $POLICY_STATUS"
+
+          if [ "$POLICY_STATUS" == "NEEDS_APPROVAL" ]; then
+            echo "::warning::Dependency changes require approval!"
+            cat dist/evidence/deps/deps-diff.md >> $GITHUB_STEP_SUMMARY
+
+            if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+              echo "::error::Release build requires explicit approval record."
+
+              if [ -f "dist/evidence/approvals/deps-approval.json" ]; then
+                 echo "Approval record found. Verifying..."
+                 npx tsx scripts/verification/verify_approval.ts
+              else
+                 echo "No approval record found. Please run local approval script and commit the artifact."
+                 exit 1
+              fi
+            fi
+          else
+            echo "Policy Check Passed."
+          fi
+
+      - name: Upload Evidence Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-deps
+          path: dist/evidence/

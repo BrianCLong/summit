@@ -1,0 +1,84 @@
+{
+  "version": "1.0",
+  "risk_tiers": {
+    "LOW": {
+      "description": "Minor updates, safe licenses, allowed registries",
+      "requires_approval": false
+    },
+    "MEDIUM": {
+      "description": "Major updates, unknown licenses",
+      "requires_approval": true,
+      "min_approvers": 1
+    },
+    "HIGH": {
+      "description": "New dependencies, restricted licenses, security flags",
+      "requires_approval": true,
+      "min_approvers": 2
+    }
+  },
+  "license_policy": {
+    "allow": [
+      "MIT",
+      "Apache-2.0",
+      "ISC",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "0BSD",
+      "Unlicense"
+    ],
+    "deny": [
+      "GPL-2.0",
+      "GPL-3.0",
+      "AGPL-3.0",
+      "LGPL-3.0"
+    ],
+    "review_required": [
+      "MPL-2.0",
+      "EPL-1.0",
+      "EPL-2.0"
+    ]
+  },
+  "package_policy": {
+    "allowed_scopes": [
+      "@intelgraph/*",
+      "@radix-ui/*",
+      "@types/*",
+      "@actions/*",
+      "@opentelemetry/*",
+      "@semantic-release/*",
+      "@apollo/*"
+    ],
+    "flagged_packages": [
+      "crypto",
+      "axios",
+      "express",
+      "jsonwebtoken"
+    ]
+  },
+  "approval_rules": [
+    {
+      "id": "new_dependency",
+      "description": "Any new dependency added to runtime",
+      "risk": "MEDIUM"
+    },
+    {
+      "id": "new_high_risk_license",
+      "description": "New dependency with denied or review-required license",
+      "risk": "HIGH"
+    },
+    {
+      "id": "major_version_bump",
+      "description": "Major version upgrade of existing dependency",
+      "risk": "MEDIUM"
+    },
+    {
+      "id": "flagged_package_change",
+      "description": "Change in flagged sensitive packages",
+      "risk": "HIGH"
+    }
+  ],
+  "approvers": [
+    "jules",
+    "security-team"
+  ]
+}

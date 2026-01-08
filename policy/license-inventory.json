@@ -1,0 +1,22 @@
+[
+  { "package": "react", "license": "MIT" },
+  { "package": "react-dom", "license": "MIT" },
+  { "package": "express", "license": "MIT" },
+  { "package": "pg", "license": "MIT" },
+  { "package": "neo4j-driver", "license": "Apache-2.0" },
+  { "package": "typescript", "license": "Apache-2.0" },
+  { "package": "jest", "license": "MIT" },
+  { "package": "zod", "license": "MIT" },
+  { "package": "axios", "license": "MIT" },
+  { "package": "winston", "license": "MIT" },
+  { "package": "lodash", "license": "MIT" },
+  { "package": "commander", "license": "MIT" },
+  { "package": "uuid", "license": "MIT" },
+  { "package": "jsonwebtoken", "license": "MIT" },
+  { "package": "moment", "license": "MIT" },
+  { "package": "inquirer", "license": "ISC" },
+  { "package": "chalk", "license": "MIT" },
+  { "package": "rxjs", "license": "Apache-2.0" },
+  { "package": "@angular/core", "license": "MIT" },
+  { "package": "vue", "license": "MIT" }
+]

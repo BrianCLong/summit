@@ -352,3 +352,8 @@ eval-artifacts/
 artifacts/agent-lab
 bin/
 .evidence/
+
+# Allow Dependency Approval Evidence
+!dist/evidence/approvals/
+!dist/evidence/deps/baseline.json
+!policy/license-inventory.json
