@@ -156,3 +156,57 @@ jobs:
           name: evidence-index-entry
           path: ${{ steps.emit.outputs.snippet_path }}
           if-no-files-found: error
+
+  build-stabilization-pack:
+    name: Build Stabilization Review Pack
+    runs-on: ubuntu-latest
+    needs: build-weekly-evidence
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Node.js and pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Compute identifiers
+        id: meta
+        run: |
+          set -euo pipefail
+          DATE=$(date -u +"%Y-%m-%d")
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          ZIP_NAME="STABILIZATION_REVIEW_PACK_${DATE}_${SHORT_SHA}.zip"
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate stabilization review pack
+        run: |
+          node scripts/release/build_stabilization_review_pack.mjs \
+            --date=${{ steps.meta.outputs.date }} \
+            --sha=${{ steps.meta.outputs.sha }} \
+            --out=artifacts/stabilization/review-pack/${{ steps.meta.outputs.zip_name }}
+
+      - name: Upload stabilization review pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: stabilization-review-pack
+          path: artifacts/stabilization/review-pack/${{ steps.meta.outputs.zip_name }}
+          if-no-files-found: error
+
+      - name: Write Job Summary
+        run: |
+          echo "### Stabilization Review Pack" >> $GITHUB_STEP_SUMMARY
+          echo "A stabilization review pack has been generated." >> $GITHUB_STEP_SUMMARY
+          echo "- **Artifact Name:** ${{ steps.meta.outputs.zip_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "You can download it from the artifacts section of this workflow run." >> $GITHUB_STEP_SUMMARY
