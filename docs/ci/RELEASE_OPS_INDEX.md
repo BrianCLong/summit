@@ -23,6 +23,7 @@ This document serves as the central index for all Release Operations tooling and
 | [On-Call Handoff](ONCALL_HANDOFF.md)                  | 3x/day     | Shift change  | Shift transition notes      |
 | [Auto-Triage](AUTO_TRIAGE_ROUTING.md)                 | Event      | Issue labeled | Route blockers to teams     |
 | [Auto-Remediation](AUTO_REMEDIATION.md)               | Event + 4h | Issue labeled | Automated fixes             |
+| [Release Train Dashboard](RELEASE_TRAIN_DASHBOARD.md) | 2-hourly   | Events        | Visual pipeline status      |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
 
 ---
@@ -40,11 +41,12 @@ This document serves as the central index for all Release Operations tooling and
 
 ### Monitoring Features
 
-| Feature            | Status    | Documentation                                  |
-| ------------------ | --------- | ---------------------------------------------- |
-| Blocker Escalation | ✅ Active | [BLOCKER_ESCALATION.md](BLOCKER_ESCALATION.md) |
-| Daily Digest       | ✅ Active | [RELEASE_OPS_DIGEST.md](RELEASE_OPS_DIGEST.md) |
-| On-Call Handoff    | ✅ Active | [ONCALL_HANDOFF.md](ONCALL_HANDOFF.md)         |
+| Feature            | Status    | Documentation                                            |
+| ------------------ | --------- | -------------------------------------------------------- |
+| Blocker Escalation | ✅ Active | [BLOCKER_ESCALATION.md](BLOCKER_ESCALATION.md)           |
+| Daily Digest       | ✅ Active | [RELEASE_OPS_DIGEST.md](RELEASE_OPS_DIGEST.md)           |
+| On-Call Handoff    | ✅ Active | [ONCALL_HANDOFF.md](ONCALL_HANDOFF.md)                   |
+| Release Dashboard  | ✅ Active | [RELEASE_TRAIN_DASHBOARD.md](RELEASE_TRAIN_DASHBOARD.md) |
 
 ### Automation Features
 

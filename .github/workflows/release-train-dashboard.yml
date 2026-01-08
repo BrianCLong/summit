@@ -1,0 +1,169 @@
+name: Release Train Dashboard
+
+# RELEASE TRAIN DASHBOARD GENERATOR
+# Generates a visual dashboard showing release pipeline status,
+# health metrics, blockers, and promotion readiness.
+#
+# See docs/ci/RELEASE_TRAIN_DASHBOARD.md for full documentation.
+
+on:
+  schedule:
+    # Update every 2 hours during business hours
+    - cron: "0 */2 * * *"
+
+  # Update on release events
+  release:
+    types: [published, created]
+
+  # Update on blocker changes
+  issues:
+    types: [opened, closed, labeled, unlabeled]
+
+  workflow_dispatch:
+    inputs:
+      publish_pages:
+        description: "Publish to GitHub Pages"
+        type: boolean
+        default: false
+
+# Prevent concurrent runs
+concurrency:
+  group: release-train-dashboard
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  issues: read
+  actions: read
+  pages: write
+  id-token: write
+
+jobs:
+  check-trigger:
+    name: Check Trigger
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check trigger conditions
+        id: check
+        run: |
+          # Always run for schedule and workflow_dispatch
+          if [[ "${{ github.event_name }}" == "schedule" ]] || \
+             [[ "${{ github.event_name }}" == "workflow_dispatch" ]] || \
+             [[ "${{ github.event_name }}" == "release" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # For issue events, only run if release-blocker label involved
+          LABELS='${{ toJson(github.event.issue.labels.*.name) }}'
+          if echo "$LABELS" | grep -q '"release-blocker"'; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+  generate-dashboard:
+    name: Generate Dashboard
+    needs: check-trigger
+    if: needs.check-trigger.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for tags
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Dashboard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/generate_release_dashboard.sh
+
+          ./scripts/release/generate_release_dashboard.sh \
+            --out artifacts/release-train/dashboard.md \
+            --json artifacts/release-train/dashboard.json \
+            --state docs/releases/_state/dashboard_state.json
+
+      - name: Check for State Changes
+        id: check_changes
+        run: |
+          if git diff --quiet docs/releases/_state/dashboard_state.json 2>/dev/null; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit State Changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/releases/_state/dashboard_state.json
+
+          git commit -m "chore(release-ops): update dashboard state
+
+          Automated update from Release Train Dashboard workflow.
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          [skip ci]"
+
+          git push
+
+      - name: Upload Dashboard Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-train-dashboard-${{ github.run_id }}
+          path: |
+            artifacts/release-train/dashboard.md
+            artifacts/release-train/dashboard.json
+          retention-days: 30
+
+      - name: Job Summary
+        run: |
+          if [[ -f artifacts/release-train/dashboard.md ]]; then
+            cat artifacts/release-train/dashboard.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Extract Health Score
+        id: health
+        run: |
+          if [[ -f artifacts/release-train/dashboard.json ]]; then
+            SCORE=$(jq -r '.health.score' artifacts/release-train/dashboard.json)
+            BLOCKERS=$(jq -r '.health.blocker_count' artifacts/release-train/dashboard.json)
+            READY=$(jq -r '.promotion.ready' artifacts/release-train/dashboard.json)
+            echo "score=$SCORE" >> $GITHUB_OUTPUT
+            echo "blockers=$BLOCKERS" >> $GITHUB_OUTPUT
+            echo "ready=$READY" >> $GITHUB_OUTPUT
+          fi
+
+  # Optional: Publish to GitHub Pages
+  publish-pages:
+    name: Publish to Pages
+    needs: generate-dashboard
+    if: inputs.publish_pages == true
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Dashboard
+        uses: actions/download-artifact@v4
+        with:
+          name: release-train-dashboard-${{ github.run_id }}
+          path: ./pages
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./pages
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
