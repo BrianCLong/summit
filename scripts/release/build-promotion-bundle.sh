@@ -42,6 +42,8 @@ OUTPUT:
     - promote_to_ga.sh       Operator commands to promote RC to GA
     - REQUIRED_CHECKS.txt    Truth table snapshot from verify-green-for-tag
     - PROMOTION_CHECKLIST.md Step-by-step promotion guide
+    - governance/            Governance lockfile snapshot
+    - SHA256SUMS             Checksums for all bundle files
 
 EXAMPLES:
     $0 --tag v4.1.2-rc.1 --commit a8b1963
@@ -467,6 +469,118 @@ main() {
 
     log_info "Capturing REQUIRED_CHECKS.txt..."
     capture_truth_table "${tag}" "${commit_sha}" "${output_dir}/REQUIRED_CHECKS.txt"
+
+    # Generate governance lockfile
+    log_info "Generating governance lockfile..."
+    local governance_hash=""
+    if [[ -f "${SCRIPT_DIR}/generate_governance_lockfile.sh" ]]; then
+        "${SCRIPT_DIR}/generate_governance_lockfile.sh" \
+            --sha "${commit_sha}" \
+            --tag "${tag}" \
+            --out-dir "${output_dir}/governance" 2>&1 || {
+            log_warn "Governance lockfile generation failed, continuing..."
+        }
+
+        # Compute governance hash for stamping
+        if [[ -f "${output_dir}/governance/governance_lockfile.json" ]]; then
+            governance_hash=$(sha256sum "${output_dir}/governance/governance_lockfile.json" | cut -d' ' -f1)
+            log_info "Governance hash: ${governance_hash}"
+        fi
+    else
+        log_warn "Governance lockfile generator not found"
+    fi
+
+    # Sign governance lockfile (if signing script exists and governance_SHA256SUMS exists)
+    local signature_method="unsigned"
+    local signature_reason="not_attempted"
+    if [[ -f "${SCRIPT_DIR}/sign_governance_lockfile.sh" && -f "${output_dir}/governance/governance_SHA256SUMS" ]]; then
+        log_info "Signing governance lockfile..."
+        if "${SCRIPT_DIR}/sign_governance_lockfile.sh" \
+            --mode sign \
+            --subject "${output_dir}/governance/governance_SHA256SUMS" \
+            --out-dir "${output_dir}/governance/signatures" \
+            --tag "${tag}" \
+            --sha "${commit_sha}" 2>&1; then
+
+            # Check if signature was created or marked unsigned
+            if [[ -f "${output_dir}/governance/signatures/metadata.json" ]]; then
+                signature_method=$(jq -r '.method // "unknown"' "${output_dir}/governance/signatures/metadata.json" 2>/dev/null || echo "unknown")
+                if [[ "$signature_method" == "sigstore-cosign-oidc" ]]; then
+                    log_success "Governance lockfile signed with Sigstore OIDC"
+                    signature_reason="ok"
+                else
+                    signature_reason=$(jq -r '.reason // "unknown"' "${output_dir}/governance/signatures/metadata.json" 2>/dev/null || echo "unknown")
+                    log_warn "Governance lockfile unsigned: ${signature_reason}"
+                fi
+            fi
+        else
+            log_warn "Governance signing failed, continuing with unsigned bundle"
+            signature_reason="signing_failed"
+        fi
+    else
+        if [[ ! -f "${SCRIPT_DIR}/sign_governance_lockfile.sh" ]]; then
+            log_info "Signing script not found, skipping"
+            signature_reason="script_not_found"
+        elif [[ ! -f "${output_dir}/governance/governance_SHA256SUMS" ]]; then
+            log_info "No governance_SHA256SUMS to sign"
+            signature_reason="no_subject"
+        fi
+    fi
+
+    # Generate pipeline_metadata.json with governance hash and signature
+    log_info "Generating pipeline_metadata.json..."
+    cat > "${output_dir}/pipeline_metadata.json" << METADATA_EOF
+{
+  "version": "1.1.0",
+  "type": "rc-promotion-bundle",
+  "generated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "release": {
+    "tag": "${tag}",
+    "sha": "${commit_sha}",
+    "type": "rc"
+  },
+  "governance": {
+    "governance_hash": "${governance_hash:-null}",
+    "lockfile_path": "governance/governance_lockfile.json",
+    "sums_path": "governance/governance_SHA256SUMS"
+  },
+  "governance_signature": {
+    "method": "${signature_method}",
+    "status": "${signature_reason}",
+    "subject": "governance/governance_SHA256SUMS",
+    "sig_path": "governance/signatures/governance_SHA256SUMS.sig",
+    "cert_path": "governance/signatures/governance_SHA256SUMS.cert",
+    "metadata_path": "governance/signatures/metadata.json",
+    "identity_policy": "security/sigstore-identity-policy.yml"
+  },
+  "verification": {
+    "offline_verification": "sha256sum -c SHA256SUMS",
+    "governance_verification": "sha256sum governance/governance_lockfile.json",
+    "signature_verification": "cosign verify-blob --signature governance/signatures/governance_SHA256SUMS.sig --certificate governance/signatures/governance_SHA256SUMS.cert --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp 'https://github.com/.*/summit/.github/workflows/.*' governance/governance_SHA256SUMS"
+  }
+}
+METADATA_EOF
+
+    # Append governance identity block to release notes
+    if [[ -f "${SCRIPT_DIR}/emit_governance_identity_block.sh" ]]; then
+        log_info "Appending governance identity to release notes..."
+        local identity_block
+        identity_block=$("${SCRIPT_DIR}/emit_governance_identity_block.sh" \
+            --bundle-dir "${output_dir}" \
+            --mode rc 2>/dev/null) || identity_block=""
+
+        if [[ -n "$identity_block" && -f "${output_dir}/github_release.md" ]]; then
+            echo "" >> "${output_dir}/github_release.md"
+            echo "$identity_block" >> "${output_dir}/github_release.md"
+            log_info "Governance identity block appended"
+        fi
+    fi
+
+    # Generate SHA256SUMS for the entire bundle
+    log_info "Generating SHA256SUMS..."
+    cd "${output_dir}"
+    find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+    cd - > /dev/null
 
     # List bundle contents
     echo ""

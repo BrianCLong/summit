@@ -3,85 +3,136 @@
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
 **Last Updated:** 2026-01-08
+**Version:** 2.0.0 (Policy-Driven)
 
 ## Overview
 
-The Release Train Dashboard provides a visual overview of the release pipeline status, including health metrics, active blockers, CI status, and promotion readiness. It serves as a single pane of glass for release operations.
+The Release Train Dashboard provides real-time visibility into the promotability status of all release candidates using the **same policy engine** that governs RC and GA pipelines. This ensures that what you see in the dashboard is exactly what the promotion gates will enforce.
+
+### Key Principle: Policy-Driven
+
+The dashboard is not an independent system. It computes promotability by:
+
+1. Loading the same `REQUIRED_CHECKS_POLICY.yml` used by pipelines
+2. Using the same base-selection algorithm (`compute_base_for_commit.sh`)
+3. Running `verify-green-for-tag.sh` in report-only mode
+
+This guarantees **zero drift** between dashboard status and actual pipeline decisions.
 
 ### Key Properties
 
-- **Real-time health score**: 0-100 score based on blockers and CI status
-- **Promotion readiness**: Clear yes/no indicator with blocking reasons
-- **Multi-format output**: Markdown dashboard + JSON data
-- **Historical tracking**: Health score history for trend analysis
+- **Policy-aligned**: Uses same policy engine as RC/GA pipelines
+- **Promotion readiness**: Clear promotable/blocked/pending status
+- **Multi-format output**: Markdown dashboard + JSON data for automation
+- **Machine-consumable**: JSON contract for downstream automation
+
+---
+
+## JSON Contract
+
+The dashboard generates `artifacts/release-train/dashboard.json` with the following schema:
+
+```json
+{
+  "repository": "owner/repo",
+  "generated_at": "2026-01-08T12:00:00Z",
+  "generator_version": "1.0.0",
+  "candidates": [
+    {
+      "candidate_type": "main|rc",
+      "tag": "v4.1.2-rc.3",
+      "commit_sha": "a8b1963...",
+      "base_sha": "79a2dee...",
+      "changed_files_count": 15,
+      "promotable_state": "success|blocked|pending",
+      "top_blocker": "CI Core" | null,
+      "checks": [
+        {
+          "name": "CI Core",
+          "required": "always|conditional|conditional_skipped",
+          "status": "success|failure|pending|skipped",
+          "conclusion": "SUCCESS|FAILURE|MISSING|...",
+          "url": "https://..."
+        }
+      ],
+      "generated_at": "2026-01-08T12:00:00Z",
+      "generator_version": "3.2.0"
+    }
+  ],
+  "summary": {
+    "total_candidates": 3,
+    "promotable": 1,
+    "blocked": 1,
+    "pending": 1
+  }
+}
+```
+
+### Field Definitions
+
+| Field                 | Type        | Description                                       |
+| --------------------- | ----------- | ------------------------------------------------- |
+| `candidate_type`      | string      | `main` for HEAD of main, `rc` for RC tags         |
+| `tag`                 | string      | Tag name or `main`                                |
+| `commit_sha`          | string      | Full commit SHA                                   |
+| `base_sha`            | string      | Base reference used for changed file detection    |
+| `changed_files_count` | number      | Number of files changed from base                 |
+| `promotable_state`    | enum        | `success`, `blocked`, or `pending`                |
+| `top_blocker`         | string/null | Name of first blocking check (if blocked/pending) |
+| `checks`              | array       | Detailed check status list                        |
+
+### Promotable State Definitions
+
+| State     | Meaning                             | Action                        |
+| --------- | ----------------------------------- | ----------------------------- |
+| `success` | All required checks passed          | Safe to promote               |
+| `blocked` | One or more required checks failed  | Fix failures before promoting |
+| `pending` | Checks still running or not started | Wait for completion           |
+
+### Check Required Types
+
+| Type                  | Meaning                                              |
+| --------------------- | ---------------------------------------------------- |
+| `always`              | Always required for every commit                     |
+| `conditional`         | Required because changed files matched path patterns |
+| `conditional_skipped` | Not required (no matching path changes)              |
 
 ---
 
 ## Dashboard Sections
 
-### Health Score
+### Summary Table
 
-A 0-100 score calculated from:
+| Metric           | Description                                   |
+| ---------------- | --------------------------------------------- |
+| Total Candidates | Number of evaluated release candidates        |
+| Promotable       | Candidates safe to promote (all checks green) |
+| Blocked          | Candidates with failed checks                 |
+| Pending          | Candidates waiting for checks to complete     |
 
-| Factor             | Impact     |
-| ------------------ | ---------- |
-| Each open blocker  | -5 points  |
-| Each P0 blocker    | -20 points |
-| Each failed CI run | -3 points  |
+### Candidate Status
 
-| Score Range | Status    | Emoji |
-| ----------- | --------- | ----- |
-| 90-100      | Excellent | 🟢    |
-| 70-89       | Good      | 🟡    |
-| 50-69       | Warning   | 🟠    |
-| 0-49        | Critical  | 🔴    |
+Each candidate shows:
 
-### Quick Stats
+| Status     | Indicator | Meaning                    |
+| ---------- | --------- | -------------------------- |
+| Promotable | ✅        | All required checks passed |
+| Blocked    | ❌        | One or more checks failed  |
+| Pending    | ⏳        | Checks still running       |
 
-| Metric          | Description                          |
-| --------------- | ------------------------------------ |
-| Latest Stable   | Most recent GA release tag           |
-| Latest RC       | Most recent release candidate        |
-| Open Blockers   | Count of `release-blocker` issues    |
-| P0 Critical     | Count of P0/escalated blockers       |
-| CI Success Rate | Percentage of successful recent runs |
-| Promotion Ready | Yes/No with blocking reasons         |
+### Detailed Check Status
 
-### Promotion Status
+For each candidate, the truth table shows:
 
-Shows whether the current RC can be promoted to GA:
+| Column   | Description                                       |
+| -------- | ------------------------------------------------- |
+| Check    | Workflow name                                     |
+| Required | `always`, `conditional`, or `conditional_skipped` |
+| Status   | `success`, `failure`, `pending`, or `skipped`     |
 
-- ✅ **Ready** - No blockers, CI passing
-- ❌ **Blocked** - Lists blocking issues
+### Action Queue
 
-### Release Lines
-
-| Line   | Description                        |
-| ------ | ---------------------------------- |
-| Stable | Current production release         |
-| RC     | Release candidate under validation |
-| Main   | Active development branch          |
-
-### CI Status
-
-Recent workflow runs with status indicators:
-
-| Status      | Indicator |
-| ----------- | --------- |
-| Success     | ✅        |
-| Failure     | ❌        |
-| In Progress | 🔄        |
-| Queued      | ⏳        |
-| Cancelled   | ⚫        |
-
-### Active Blockers
-
-Table of open release blockers with:
-
-- Issue number (linked)
-- Priority label
-- Age
-- Title (truncated)
+Lists blocked candidates with their top blockers for quick triage
 
 ---
 
@@ -176,29 +227,42 @@ The dashboard also generates a JSON file for programmatic access:
 
 ---
 
-## Manual Invocation
+## Running Locally
+
+### Generate Dashboard
+
+```bash
+# Full generation with live GitHub API calls
+./scripts/release/generate_release_train_dashboard.sh
+
+# Dry run (show what would be generated)
+./scripts/release/generate_release_train_dashboard.sh --dry-run
+
+# Skip API calls (use empty status maps)
+./scripts/release/generate_release_train_dashboard.sh --skip-api
+
+# Verbose output
+./scripts/release/generate_release_train_dashboard.sh --verbose
+
+# Custom output directory
+./scripts/release/generate_release_train_dashboard.sh \
+  --output-dir /tmp/my-dashboard
+```
+
+### Output Files
+
+| File                                       | Description             |
+| ------------------------------------------ | ----------------------- |
+| `artifacts/release-train/dashboard.json`   | Machine-readable JSON   |
+| `docs/releases/RELEASE_TRAIN_DASHBOARD.md` | Human-readable markdown |
 
 ### Via GitHub Actions UI
 
 1. Navigate to Actions → Release Train Dashboard
 2. Click "Run workflow"
-3. Optionally enable "Publish to GitHub Pages"
+3. Optionally configure skip_api or verbose
 4. Click "Run workflow"
-
-### Via CLI
-
-```bash
-# Generate dashboard
-./scripts/release/generate_release_dashboard.sh
-
-# Custom output paths
-./scripts/release/generate_release_dashboard.sh \
-  --out /tmp/dashboard.md \
-  --json /tmp/dashboard.json
-
-# Dry run (no state update)
-./scripts/release/generate_release_dashboard.sh --dry-run
-```
+5. Download artifacts when complete
 
 ---
 
@@ -327,8 +391,60 @@ echo "Your custom content here"
 
 ---
 
+## Consuming the Dashboard
+
+### From Other Workflows
+
+Download and use the dashboard JSON:
+
+```yaml
+- name: Download Dashboard
+  uses: actions/download-artifact@v4
+  with:
+    name: release-train-dashboard
+
+- name: Check Promotability
+  run: |
+    BLOCKED=$(jq -r '.summary.blocked' artifacts/release-train/dashboard.json)
+    if [[ "${BLOCKED}" -gt 0 ]]; then
+      echo "::warning::${BLOCKED} blocked candidates"
+    fi
+```
+
+### From Scripts
+
+```bash
+# Check if any candidates are blocked
+if jq -e '.summary.blocked > 0' dashboard.json; then
+  echo "Blocked candidates detected"
+fi
+
+# Get list of blocked candidates
+jq -r '.candidates[] | select(.promotable_state == "blocked") | .tag' dashboard.json
+
+# Get top blocker for each blocked candidate
+jq -r '.candidates[] | select(.promotable_state == "blocked") | "\(.tag): \(.top_blocker)"' dashboard.json
+```
+
+### Automation Integration
+
+The dashboard JSON is designed to be consumed by:
+
+1. **Issue Automation**: Create/update blocked release issues
+2. **Escalation**: Trigger alerts when candidates remain blocked
+3. **Handoff Notes**: Include promotability status in shift handoffs
+4. **Digest**: Summarize dashboard state in daily reports
+
+---
+
 ## References
 
+- **Generator Script**: `scripts/release/generate_release_train_dashboard.sh`
+- **Verification Script**: `scripts/release/verify-green-for-tag.sh`
+- **Base Computation**: `scripts/release/compute_base_for_commit.sh`
+- **Policy File**: `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+- **Required Checks Docs**: `docs/ci/REQUIRED_CHECKS.md`
+- **Workflow**: `.github/workflows/release-train-dashboard.yml`
 - [Release Ops Index](RELEASE_OPS_INDEX.md)
 - [Release Ops Digest](RELEASE_OPS_DIGEST.md)
 - [Blocker Escalation](BLOCKER_ESCALATION.md)
@@ -340,6 +456,7 @@ echo "Your custom content here"
 | Date       | Change                          | Author               |
 | ---------- | ------------------------------- | -------------------- |
 | 2026-01-08 | Initial Release Train Dashboard | Platform Engineering |
+| 2026-01-08 | v2.0.0: Policy-driven dashboard | Platform Engineering |
 
 ---
 

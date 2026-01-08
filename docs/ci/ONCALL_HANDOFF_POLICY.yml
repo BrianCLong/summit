@@ -2,11 +2,24 @@
 # Configures the handoff note generator for shift transitions
 #
 # This policy file is read by scripts/release/generate_oncall_handoff.sh
+# Cadence gating by scripts/release/should_run_task.sh
 # See docs/ci/ONCALL_HANDOFF.md for full documentation.
 
-version: "1.0.0"
+version: "1.1.0"
 
-# Handoff timing
+# Run windows (UTC) - handoff only runs within these shift-change windows
+# The orchestrator runs hourly; this gates when handoff actually executes
+run_windows_utc:
+  - start: "09:00"   # Morning handoff window (EMEA -> Americas)
+    end: "09:30"
+  - start: "17:00"   # Evening handoff window (Americas -> APAC)
+    end: "17:30"
+
+# Cadence hours - minimum time between handoff executions
+# Combined with run_windows_utc ensures twice-per-day execution at shift changes
+cadence_hours: 8
+
+# Handoff timing (legacy format, preserved for compatibility)
 schedule:
   # Shift change times (UTC)
   shift_changes:
