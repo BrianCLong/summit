@@ -34,6 +34,7 @@ This document serves as the central index for all Release Operations tooling and
 | [Stabilization Report](STABILIZATION_REPORT.md)       | Daily      | `09:00 UTC`   | Progress tracking report     |
 | [Dependency Freeze](DEPENDENCY_FREEZE.md)             | Event      | PR lockfile   | Prevent RC dep changes       |
 | [Schema Compatibility](SCHEMA_COMPATIBILITY.md)       | Event      | PR schema     | Prevent breaking API changes |
+| [Release Rollback](ROLLBACK_AUTOMATION.md)            | Manual     | Dispatch      | Safe GA rollback automation  |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems    |
 
 ---
@@ -50,6 +51,7 @@ This document serves as the central index for all Release Operations tooling and
 | Postmortem Enforcement | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md#postmortem-requirements) |
 | Dependency Freeze      | ✅ Active | [DEPENDENCY_FREEZE.md](DEPENDENCY_FREEZE.md)                                 |
 | Schema Compatibility   | ✅ Active | [SCHEMA_COMPATIBILITY.md](SCHEMA_COMPATIBILITY.md)                           |
+| Rollback Automation    | ✅ Active | [ROLLBACK_AUTOMATION.md](ROLLBACK_AUTOMATION.md)                             |
 
 ### Monitoring Features
 
@@ -231,6 +233,7 @@ This document serves as the central index for all Release Operations tooling and
 | `evidence_state.json`             | Evidence collection  | `docs/releases/_state/` |
 | `dependency_freeze_state.json`    | Dependency freeze    | `docs/releases/_state/` |
 | `schema_compatibility_state.json` | Schema compat        | `docs/releases/_state/` |
+| `rollback_state.json`             | Rollback history     | `docs/releases/_state/` |
 
 ---
 
@@ -254,6 +257,7 @@ This document serves as the central index for all Release Operations tooling and
 | `generate_stabilization_report.sh` | Progress report         | `./scripts/release/generate_stabilization_report.sh` |
 | `verify_dependency_freeze.sh`      | Verify dep freeze       | `./scripts/release/verify_dependency_freeze.sh`      |
 | `check_schema_compatibility.sh`    | Check schema compat     | `./scripts/release/check_schema_compatibility.sh`    |
+| `rollback_release.sh`              | Rollback failed release | `./scripts/release/rollback_release.sh`              |
 
 ### Common Flags
 
@@ -408,6 +412,7 @@ All scripts support these common flags:
 | 2026-01-08 | Added Stabilization Report           | Platform Engineering |
 | 2026-01-08 | Added Dependency Freeze              | Platform Engineering |
 | 2026-01-08 | Added Schema Compatibility           | Platform Engineering |
+| 2026-01-08 | Added Rollback Automation            | Platform Engineering |
 
 ---
 
