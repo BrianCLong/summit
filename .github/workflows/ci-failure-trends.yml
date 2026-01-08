@@ -1,0 +1,49 @@
+name: CI Failure Trend Report
+
+on:
+  schedule:
+    # Mondays at 09:00 UTC (approx 2am/3am Denver depending on DST, or 9am UTC)
+    # The prompt asked for "Mondays 09:00 America/Denver equivalent UTC".
+    # Denver is UTC-7 (MST) or UTC-6 (MDT).
+    # 09:00 Denver is 16:00 UTC (standard) or 15:00 UTC (daylight).
+    # I'll stick to 16:00 UTC for consistency.
+    - cron: '0 16 * * 1'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days to analyze'
+        required: false
+        default: '7'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile # Ensure commander and axios are available in root
+
+      - name: Generate Report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DAYS="${{ inputs.days || 7 }}"
+          node scripts/ci/generate_ci_failure_trends.mjs --days $DAYS --out artifacts/ci-trends/report.md
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-failure-trend-report
+          path: artifacts/ci-trends/
