@@ -320,3 +320,54 @@ jobs:
           echo "- **Concurrency Group:** release-${{ inputs.tag || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Existed:** ${{ steps.publish.outputs.existed }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Action Taken:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+
+  generate-war-room-checklist:
+    name: Generate War Room Checklist
+    needs: [test-and-verify]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download Prerequisite Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          pattern: |
+            signoff-decision
+            release-readiness-onepager
+            release-cut-plan
+          merge-multiple: true
+
+      - name: Generate Checklist
+        run: |
+          # The download action places files in subdirectories named after the artifact.
+          # Move them to the expected locations for the script.
+          mkdir -p artifacts/signoff artifacts/release-readiness artifacts/release-cut
+          mv artifacts/signoff-decision/decision.json artifacts/signoff/
+          mv artifacts/release-readiness-onepager/onepager.md artifacts/release-readiness/
+          mv artifacts/release-cut-plan/plan.md artifacts/release-cut/
+
+          ./scripts/release/generate_war_room_checklist.mjs \
+            --channel=ga \
+            --target=${{ inputs.tag || github.ref_name }} \
+            --out=artifacts/release-war-room/WAR_ROOM_ga_${{ inputs.tag || github.ref_name }}.md
+
+      - name: Upload Checklist
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-war-room-checklist
+          path: artifacts/release-war-room/
