@@ -1,7 +1,7 @@
 // src/components/MaestroRunConsole.tsx
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useMaestroRun } from '@/hooks/useMaestroRun';
 import type { MaestroRunResponse, TaskResult } from '@/types/maestro';
 
@@ -102,8 +102,15 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
 
   const selectedRun: MaestroRunResponse | null = state.data;
 
+  // Optimize: Create a map for O(1) task result lookups instead of O(N) find() in the render loop.
+  // This reduces complexity from O(N^2) to O(N) where N is the number of tasks.
+  const resultsMap = useMemo(() => {
+    if (!selectedRun?.results) return new Map<string, TaskResult>();
+    return new Map(selectedRun.results.map(r => [r.task.id, r]));
+  }, [selectedRun?.results]);
+
   const findResultForTask = (taskId: string): TaskResult | undefined =>
-    selectedRun?.results.find(r => r.task.id === taskId);
+    resultsMap.get(taskId);
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -369,37 +376,42 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                 )}
 
                 {selectedRun &&
-                  selectedRun.results.map(result => (
-                    <div key={result.task.id} className="p-4 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-semibold text-slate-100">
-                            {result.task.description}
-                          </span>
-                          <span className="font-mono text-[11px] text-slate-500">
-                            Task {result.task.id}
-                          </span>
+                  selectedRun.results.map(result => {
+                    const formattedData = result.artifact
+                      ? formatArtifactData(result.artifact.data)
+                      : '';
+                    return (
+                      <div key={result.task.id} className="p-4 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-slate-100">
+                              {result.task.description}
+                            </span>
+                            <span className="font-mono text-[11px] text-slate-500">
+                              Task {result.task.id}
+                            </span>
+                          </div>
+                          {renderTaskStatus(result.task.status)}
                         </div>
-                        {renderTaskStatus(result.task.status)}
-                      </div>
 
-                      {result.artifact ? (
-                        <div className="relative group">
-                          <pre className="mt-1 max-h-40 overflow-auto rounded-xl bg-slate-900/80 p-3 text-[11px] leading-relaxed text-slate-100 pr-10">
-                            {formatArtifactData(result.artifact.data)}
-                          </pre>
-                          <CopyButton
-                            text={formatArtifactData(result.artifact.data)}
-                            className="absolute top-2 right-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
-                          />
-                        </div>
-                      ) : (
-                        <p className="mt-1 text-[11px] text-slate-500">
-                          No artifact produced for this task.
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                        {result.artifact ? (
+                          <div className="relative group">
+                            <pre className="mt-1 max-h-40 overflow-auto rounded-xl bg-slate-900/80 p-3 text-[11px] leading-relaxed text-slate-100 pr-10">
+                              {formattedData}
+                            </pre>
+                            <CopyButton
+                              text={formattedData}
+                              className="absolute top-2 right-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 h-7 w-7"
+                            />
+                          </div>
+                        ) : (
+                          <p className="mt-1 text-[11px] text-slate-500">
+                            No artifact produced for this task.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
             </ScrollArea>
           </CardContent>
