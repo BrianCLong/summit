@@ -1,0 +1,65 @@
+name: Pilot Reporting
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Weekly on Monday
+  workflow_dispatch:
+    inputs:
+      sector:
+        description: 'Sector Code (e.g. defense)'
+        required: true
+        default: 'defense'
+      period:
+        description: 'Reporting Period (e.g. 2025-W40)'
+        required: true
+        default: 'current'
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
+
+      - name: Set Period
+        id: period
+        run: |
+          if [ "${{ github.event.inputs.period }}" == "current" ] || [ -z "${{ github.event.inputs.period }}" ]; then
+            echo "PERIOD=$(date +%Y-W%V)" >> $GITHUB_ENV
+          else
+            echo "PERIOD=${{ github.event.inputs.period }}" >> $GITHUB_ENV
+          fi
+
+      - name: Create Mock Inputs (Demo)
+        run: |
+          mkdir -p inputs
+          echo '{"runs": [{"id": "run-1", "status": "READY", "verified": true}, {"id": "run-2", "status": "NOT READY", "reason_codes": ["GATE_FAIL"], "verified": true}], "sync_stats": {"total_sessions": 10, "sessions_within_budget": 9}}' > inputs/readiness.json
+          echo '{"sync_stats": {"total_sessions": 10, "sessions_within_budget": 9}}' > inputs/budget.json
+
+      - name: Validate KPIs
+        run: npx tsx scripts/reporting/validate_kpis.ts docs/pilots/${{ github.event.inputs.sector || 'defense' }}/kpis.yml
+
+      - name: Collect Signals
+        run: npx tsx scripts/reporting/collect_pilot_signals.ts ${{ github.event.inputs.sector || 'defense' }} ${{ env.PERIOD }} inputs
+
+      - name: Build Report
+        run: npx tsx scripts/reporting/build_weekly_sponsor_report.ts ${{ github.event.inputs.sector || 'defense' }} ${{ env.PERIOD }}
+
+      - name: Build Dashboard
+        run: npx tsx scripts/reporting/build_sector_outcomes_dashboard.ts ${{ github.event.inputs.sector || 'defense' }} ${{ env.PERIOD }}
+
+      - name: Verify No Leaks
+        run: npx tsx scripts/verification/verify_pilot_report_no_leak.ts dist/pilot-reporting/${{ github.event.inputs.sector || 'defense' }}/${{ env.PERIOD }} ci/pilot-report-redaction-policy.yml
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pilot-report-${{ github.event.inputs.sector || 'defense' }}-${{ env.PERIOD }}
+          path: dist/pilot-reporting/${{ github.event.inputs.sector || 'defense' }}/${{ env.PERIOD }}/

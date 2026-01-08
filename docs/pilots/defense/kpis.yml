@@ -1,0 +1,54 @@
+# KPI Definitions for Information Warfare Defense Pilot
+# Enforces strict metrics for pilot success/failure tracking.
+
+kpis:
+  - id: readiness_rate
+    name: "Readiness Rate"
+    description: "Percentage of pilot runs marked as READY vs NOT READY."
+    formula: "count(status == 'READY') / count(total_runs) * 100"
+    unit: "percent"
+    threshold:
+      warn: 90
+      fail: 80
+    allowed_sources:
+      - "readiness_json"
+
+  - id: evidence_integrity
+    name: "Evidence Integrity Score"
+    description: "Percentage of runs where all trust pack verifiers passed."
+    formula: "count(trust_pack_verified == true) / count(total_runs) * 100"
+    unit: "percent"
+    threshold:
+      warn: 95
+      fail: 90
+    allowed_sources:
+      - "trust_pack_verify"
+
+  - id: sync_budget_compliance
+    name: "Sync Budget Compliance"
+    description: "Percentage of sync sessions that completed within cost budget."
+    formula: "count(cost <= budget) / count(total_sessions) * 100"
+    unit: "percent"
+    threshold:
+      warn: 98
+      fail: 95
+    allowed_sources:
+      - "usage_logs"
+      - "budget_tracker"
+
+  - id: flake_rate
+    name: "Flake Rate"
+    description: "Percentage of quarantined tests or gates per run."
+    formula: "count(quarantined_gates) / count(total_gates) * 100"
+    unit: "percent"
+    threshold:
+      warn: 5
+      fail: 10
+    allowed_sources:
+      - "gate_summaries"
+
+display_rules:
+  rounding: 2
+  pass_color: "green"
+  warn_color: "yellow"
+  fail_color: "red"

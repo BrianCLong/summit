@@ -1,0 +1,31 @@
+# Redaction Policy for Pilot Reporting
+# Enforces strict no-leak rules for external artifacts.
+
+denylist:
+  patterns:
+    - "internal\\.corp"
+    - "api_key"
+    - "secret"
+    - "password"
+    - "Authorization: Bearer"
+    - "[0-9a-f]{32,}"  # Long hashes (heuristically) unless allowed
+
+  files:
+    - ".env"
+    - "secrets.yaml"
+
+allowlist:
+  fields:
+    - "pilot_id"
+    - "sector"
+    - "period"
+    - "status"
+    - "value"
+    - "name"
+    - "description"
+    - "runs"
+    - "sync_stats"
+    - "reason_codes"
+
+  exceptions:
+    - "pilot-defense-.*" # Pilot IDs allowed
