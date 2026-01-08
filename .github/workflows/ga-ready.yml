@@ -7,10 +7,31 @@ on:
     branches: [ main ]
 
 jobs:
+  check-intent:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.intent.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check Intent
+        id: intent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RESULT=$(node scripts/ci/is_release_intent.mjs)
+          echo "Detected intent: $RESULT"
+          IS_INTENT=$(echo "$RESULT" | jq -r .result)
+          echo "result=$IS_INTENT" >> $GITHUB_OUTPUT
+
   ga-ready:
     name: GA Readiness Gate
     runs-on: ubuntu-latest
+    needs: check-intent
     timeout-minutes: 25
+    if: needs.check-intent.outputs.result == 'true'
     permissions:
       contents: read
       pull-requests: write

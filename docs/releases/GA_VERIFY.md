@@ -75,6 +75,14 @@ The GA verification is integrated into CI workflows:
 - `supply-chain-integrity.yml` - SBOM and vulnerability scanning
 - `ga-readiness.yml` - Full GA gate checks
 
+## Release Intent
+
+To run strict GA gates on a Pull Request (which are otherwise skipped to save time), apply the label:
+
+`release-intent`
+
+This signals that the PR is intended for release and requires full verification.
+
 ## Evidence Collection
 
 To collect GA evidence for release:

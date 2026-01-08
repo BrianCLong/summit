@@ -60,3 +60,19 @@ git revert HEAD
 ```
 
 Use `git revert` to keep history intact while undoing the release commit.
+
+## Release Intent Signal
+
+To standardizing release gates across workflows, we use a canonical signal to determine "Release Intent".
+
+**Signal:** GitHub Label `release-intent`
+
+| Context | Condition for Release Intent |
+| :--- | :--- |
+| **Pull Request** | Label `release-intent` is present |
+| **Release Branch** | Branch name starts with `release/` (e.g. `release/v1.2`) |
+| **Main Branch** | Branch name is `main` (implies potential release) |
+| **Tag** | Any tag starting with `v` |
+| **Manual** | Workflow input `strict_mode: true` |
+
+When Release Intent is detected, CI runs strict gates (e.g. `ga-gate`, `release-gate`) which might otherwise be skipped or run in a lighter mode.
