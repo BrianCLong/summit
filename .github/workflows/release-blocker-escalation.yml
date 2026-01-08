@@ -2,14 +2,20 @@ name: Release Blocker Escalation
 
 # SLO-STYLE ESCALATION WORKFLOW
 # Automatically escalates persistent release blockers with labels and status updates.
-# Runs hourly to detect blockers that exceed SLO thresholds.
+#
+# DEPRECATION NOTICE:
+# This workflow is now a step in the Release Ops Orchestrator.
+# Primary schedule: release-ops-orchestrator.yml (hourly)
+# This workflow retains workflow_dispatch for manual runs and debugging.
 #
 # See docs/ci/BLOCKER_ESCALATION.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
 
 on:
-  schedule:
-    # Run every 60 minutes
-    - cron: "15 * * * *"
+  # Schedule removed - now handled by release-ops-orchestrator.yml
+  # schedule:
+  #   - cron: "15 * * * *"
+
   workflow_dispatch:
     inputs:
       dry_run:

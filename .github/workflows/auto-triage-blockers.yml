@@ -4,7 +4,12 @@ name: Auto-Triage Release Blockers
 # Routes release blocker issues to appropriate teams based on
 # labels, file paths, and keywords.
 #
+# NOTE: This workflow is event-driven (triggered on issue changes).
+# The Release Ops Orchestrator also calls the routing script hourly
+# for batch processing. This workflow handles real-time routing.
+#
 # See docs/ci/AUTO_TRIAGE_ROUTING.md for full documentation.
+# See docs/ci/RELEASE_OPS_ORCHESTRATOR.md for orchestrator details.
 
 on:
   issues:

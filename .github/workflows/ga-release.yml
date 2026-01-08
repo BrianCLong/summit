@@ -1,22 +1,28 @@
-name: GA Release
+name: GA Release (ga/v* Legacy)
+# DEPRECATED: This workflow is superseded by release-ga-pipeline.yml
+# The canonical GA pipeline owns all v*.*.* tag events.
+# The ga/v* tag pattern is deprecated; use v*.*.* tags instead.
+# This workflow is retained for manual-only dispatch compatibility.
+# See: docs/ci/RELEASE_GA_PIPELINE.md
 
 on:
-  push:
-    tags:
-      - 'ga/v*'
+  # Tag triggers removed - now handled by release-ga-pipeline.yml
+  # push:
+  #   tags:
+  #     - 'ga/v*'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 2.0.0 or v2.0.0)'
+        description: "Version to release (e.g., 2.0.0 or v2.0.0)"
         required: true
         type: string
       dry_run:
-        description: 'Dry run (create artifacts but not release)'
+        description: "Dry run (create artifacts but not release)"
         required: false
         type: boolean
         default: false
       prerelease:
-        description: 'Mark as pre-release'
+        description: "Mark as pre-release"
         required: false
         type: boolean
         default: false
@@ -47,8 +53,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -100,8 +106,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
+          node-version: "20.x"
+          cache: "pnpm"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -284,7 +290,7 @@ jobs:
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
     with:
       base64-subjects: "${{ needs.build.outputs.hashes }}"
-      upload-assets: false  # We'll upload manually in release job
+      upload-assets: false # We'll upload manually in release job
 
   # Release - Create GitHub Release
   release:
