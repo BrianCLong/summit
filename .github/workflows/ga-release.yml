@@ -50,19 +50,43 @@ jobs:
           node-version: '20.x'
           cache: 'pnpm'
 
+      # Initialize Perf Budget (for the whole job/workflow if possible, but step level here)
+      - name: Initialize Perf Budget
+        run: node scripts/ci/capture_step_timings.mjs --record-start
+
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: node scripts/ci/capture_step_timings.mjs pnpm install --frozen-lockfile
+        env:
+          STEP_NAME: install
 
       - name: Run Tests
         run: |
           echo "Running GA gate tests..."
-          pnpm run test:quick || echo "Quick tests completed"
+          node scripts/ci/capture_step_timings.mjs pnpm run test:quick || echo "Quick tests completed"
+        env:
+          STEP_NAME: test
 
       - name: Type Check
         run: |
           echo "Running type checks..."
           # Run type check if available
-          pnpm run typecheck || echo "No typecheck script, skipping"
+          node scripts/ci/capture_step_timings.mjs pnpm run typecheck || echo "No typecheck script, skipping"
+        env:
+          STEP_NAME: typecheck
+
+      - name: Generate Perf Report (GA Gate)
+        if: always()
+        run: node scripts/ci/generate_perf_budget_report.mjs
+        env:
+          IS_RELEASE_INTENT: true
+          JOB_NAME: ga_verify
+
+      - name: Upload Perf Budget Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-budget-report-ga-gate
+          path: artifacts/perf-budget/
 
   # Build - Create release artifacts
   build:
@@ -103,13 +127,20 @@ jobs:
           node-version: '20.x'
           cache: 'pnpm'
 
+      - name: Initialize Perf Budget
+        run: node scripts/ci/capture_step_timings.mjs --record-start
+
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: node scripts/ci/capture_step_timings.mjs pnpm install --frozen-lockfile
+        env:
+          STEP_NAME: install
 
       - name: Build Artifacts
         run: |
           echo "Building release artifacts..."
-          pnpm run build
+          node scripts/ci/capture_step_timings.mjs pnpm run build
+        env:
+          STEP_NAME: build
 
       - name: Verify Build Artifacts
         run: |
@@ -165,6 +196,20 @@ jobs:
 
           # Export hashes for SLSA provenance (base64 encoded)
           echo "hashes=$(cat SHA256SUMS | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Perf Report (Build)
+        if: always()
+        run: node scripts/ci/generate_perf_budget_report.mjs
+        env:
+          IS_RELEASE_INTENT: true
+          JOB_NAME: build
+
+      - name: Upload Perf Budget Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-budget-report-build
+          path: artifacts/perf-budget/
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0

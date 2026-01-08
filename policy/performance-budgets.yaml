@@ -1,0 +1,18 @@
+performance_budgets:
+  calibration:
+    mode: warn        # warn until baseline established
+    baseline_runs: 5  # number of consecutive runs to learn baseline
+  budgets:
+    ga_verify:
+      max_minutes: 30
+      step_budgets:
+        install: 8
+        build: 10
+        test: 12
+    comprehensive_test:
+      max_minutes: 45
+  regression:
+    allowed_percent_over_baseline: 20
+  scope:
+    normal: warn
+    release_intent: enforce_after_calibration
