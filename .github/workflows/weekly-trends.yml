@@ -1,0 +1,46 @@
+name: Weekly Trends
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Run every Monday at 9am UTC
+  workflow_dispatch:
+
+jobs:
+  owner-routing-check:
+    name: Owner Routing & CI Failure Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Failure Owners
+        run: node scripts/ci/validate_failure_owners.mjs
+
+      - name: Generate Dummy Failures (for demonstration)
+        run: |
+          mkdir -p artifacts/ci-issues
+          if [ ! -f artifacts/ci-issues/failures.json ]; then
+            echo '[{"code": "CI-EX-001", "category": "example", "workflow": "example-workflow", "paths": ["server/example/foo.ts"]}]' > artifacts/ci-issues/failures.json
+          fi
+
+      - name: Draft CI Failure Issues
+        run: node scripts/ci/draft_ci_failure_issues.mjs
+        env:
+          CI_FAILURES_PATH: artifacts/ci-issues/failures.json
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-owners-routing
+          path: |
+            artifacts/ci-owners/
+            artifacts/ci-issues/

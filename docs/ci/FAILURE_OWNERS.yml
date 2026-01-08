@@ -1,0 +1,19 @@
+defaults:
+  triage_label: needs-triage
+  owner_label_prefix: owner/
+
+owners: []
+  # Template owner entry - do not uncomment until confirmed
+  # - id: OWN-001
+  #   name: "Example Team"
+  #   github: ["@example-user"]
+  #   labels: ["owner/example"]
+  #   areas: ["server"]
+  #   matches:
+  #     failure_codes: ["CI-EX-001"]
+  #     categories: ["example"]
+  #     paths: ["server/example/**"]
+  #     workflows: ["example-workflow"]
+  #   escalation:
+  #     slack_or_email: ""
+  #     on_p0: true
