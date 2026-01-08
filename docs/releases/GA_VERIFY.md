@@ -1,102 +1,63 @@
-# GA Verification Guide
+# GA Verification Gate Contract
 
-This document describes how to verify GA readiness for the Summit Platform.
+## Overview
 
-## Quick Verification (CI-friendly)
+The `pnpm ga:verify` command is the **single source of truth** for General Availability (GA) readiness. It serves as the acceptance gate for all release candidates and acts as an informational check for standard development workflows.
 
-Run the single deterministic verification command:
+## The Contract
+
+1.  **Single Entry Point**: All verification is invoked via `pnpm ga:verify`.
+2.  **Determinism**: Rerunning the gate on the same commit must produce identical results and evidence structure (excluding timestamps).
+3.  **Acceptance Gating**:
+    *   **Blocking**: For PRs with the `release-intent` label or targeting `release/*` branches.
+    *   **Informational**: For standard feature/fix PRs (failures do not block merge unless enforced by repository policy).
+4.  **Evidence**: A successful run **must** produce a cryptographic evidence pack in `docs/releases/evidence/<sha>/`.
+
+## Verification Scope
+
+The `ga:verify` command orchestrates the following strict checks:
+
+1.  **Type Safety**: `pnpm typecheck` (Full project TypeScript compilation)
+2.  **Code Quality**: `pnpm lint` (ESLint, Prettier, etc.)
+3.  **Build Integrity**: `pnpm build` (Production build verification)
+4.  **Unit Logic**: `pnpm --filter intelgraph-server test:unit` (Server-side unit tests)
+5.  **Integration Smoke**: `pnpm ga:smoke` (Critical path verification)
+
+## Pass/Fail Criteria
+
+*   **PASS**: All steps complete with exit code `0`. An evidence pack is generated and stored.
+*   **FAIL**: Any step returns non-zero. No evidence pack is generated (or marked incomplete).
+
+## Environment Assumptions
+
+*   **Runtime**: Node.js >= 18.18 (as defined in `.node-version` / `package.json`)
+*   **Package Manager**: `pnpm` (version managed via `corepack` or `package.json`)
+*   **OS**: Linux (CI/Production reference), macOS/Windows (Local Dev supported)
+
+## Evidence Pack Structure
+
+On success, artifacts are stored at `docs/releases/evidence/<COMMIT_SHA>/`:
+
+```text
+docs/releases/evidence/<COMMIT_SHA>/
+├── index.md            # Summary of the run
+├── manifest.json       # Machine-readable metadata (versions, SHA, OS)
+├── output.log          # Combined output of the verification run
+└── artifacts/          # (Optional) Additional build artifacts
+```
+
+## Usage
+
+### Local Development
 
 ```bash
+# Standard run (informational mode default)
 pnpm ga:verify
+
+# Force strict blocking mode (simulating release gate)
+GA_VERIFY_STRICT=true pnpm ga:verify
 ```
 
-This runs:
+### CI Implementation
 
-1. **TypeScript check** (`pnpm typecheck`) - Ensures type safety
-2. **Lint** (`pnpm lint`) - Code quality and style checks
-3. **Build** (`pnpm build`) - Compiles all packages
-4. **Unit tests** (`pnpm --filter server test:unit`) - Runs server unit tests
-5. **Smoke tests** (`pnpm ga:smoke`) - Integration smoke hook
-
-## Scoped Verification
-
-For faster feedback during development:
-
-```bash
-# Server-only gate (fastest)
-pnpm ga:verify:server
-
-# Just smoke tests
-pnpm ga:smoke
-```
-
-| Script             | Scope         | Use Case               |
-| ------------------ | ------------- | ---------------------- |
-| `ga:verify`        | Full platform | CI gates, pre-release  |
-| `ga:verify:server` | Server only   | Backend development    |
-| `ga:smoke`         | Integration   | Smoke/integration hook |
-
-## Full GA Gate (requires Docker)
-
-For comprehensive verification including integration tests and service health:
-
-```bash
-make ga
-```
-
-This runs:
-
-1. Lint and Unit Tests
-2. Clean Environment (docker down)
-3. Services Up (docker up)
-4. Readiness Check (health probes)
-5. Deep Health Check
-6. Smoke Tests
-7. Security Checks (SBOM, secrets scan)
-
-Reports are generated in `artifacts/ga/`.
-
-## Governance and Compliance
-
-Additional verification for GA compliance:
-
-```bash
-pnpm verify:governance
-pnpm verify:living-documents
-pnpm generate:sbom
-pnpm generate:provenance
-```
-
-## CI Integration
-
-The GA verification is integrated into CI workflows:
-
-- `CI.yml` - Primary gate using `pnpm ga:verify`
-- `supply-chain-integrity.yml` - SBOM and vulnerability scanning
-- `ga-readiness.yml` - Full GA gate checks
-
-## Evidence Collection
-
-To collect GA evidence for release:
-
-```bash
-make ga                          # Run full gate
-cat artifacts/ga/ga_report.json  # View results
-cat artifacts/ga/ga_report.md    # Human-readable report
-```
-
-## Troubleshooting
-
-If verification fails:
-
-1. **TypeScript errors**: Run `pnpm typecheck` directly to see full error output
-2. **Lint failures**: Run `pnpm lint` to see specific violations
-3. **Build failures**: Check `pnpm build` output for compilation errors
-4. **Test failures**: Run `pnpm --filter server test` for detailed test output
-
-For service health issues, check:
-
-```bash
-make logs      # View docker logs
-make health    # Run health checks
-```
+The CI workflow `.github/workflows/ga-verify.yml` automatically enforces this contract. It detects release intent based on PR labels and branch targets to toggle strict mode.

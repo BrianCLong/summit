@@ -1,0 +1,67 @@
+name: GA Verify
+
+on:
+  pull_request:
+    branches: [main, release/*]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main, release/*]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  ga-verify:
+    name: GA Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        # version is read from package.json packageManager field
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Determine Strict Mode
+        id: strict-mode
+        run: |
+          IS_RELEASE_INTENT=false
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'release-intent') }}" == "true" ]]; then
+            IS_RELEASE_INTENT=true
+          fi
+
+          IS_RELEASE_BRANCH=false
+          if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            IS_RELEASE_BRANCH=true
+          fi
+
+          if [[ "$IS_RELEASE_INTENT" == "true" || "$IS_RELEASE_BRANCH" == "true" ]]; then
+            echo "GA_VERIFY_STRICT=true" >> $GITHUB_ENV
+            echo "Strict mode enabled (Blocking)"
+          else
+            echo "GA_VERIFY_STRICT=false" >> $GITHUB_ENV
+            echo "Strict mode disabled (Informational)"
+          fi
+
+      - name: Run GA Verification
+        run: pnpm ga:verify
+
+      - name: Upload Evidence Pack
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-evidence-${{ github.sha }}
+          path: docs/releases/evidence/
+          retention-days: 90
