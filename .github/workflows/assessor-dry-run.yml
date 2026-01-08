@@ -1,0 +1,42 @@
+# .github/workflows/assessor-dry-run.yml
+name: Assessor Dry-Run
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.18'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Generate Review Pack
+        id: generate-pack
+        run: |
+          node scripts/review-pack/generate_review_pack.mjs | tee /tmp/generate_pack_output.log
+          echo "artifact-path=$(grep 'Review pack available at:' /tmp/generate_pack_output.log | awk '{print $NF}')" >> $GITHUB_OUTPUT
+          echo "log-path=/tmp/assessor-dryrun.log" >> $GITHUB_OUTPUT
+
+      - name: Upload Dry-Run Log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: assessor-dryrun-log
+          path: ${{ steps.generate-pack.outputs.log-path }}
+
+      - name: Upload Review Pack Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: review-pack
+          path: ${{ steps.generate-pack.outputs.artifact-path }}
