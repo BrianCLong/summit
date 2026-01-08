@@ -1,0 +1,48 @@
+name: Post-Release Verification Sweep
+
+on:
+  push:
+    tags:
+      - 'rc-*'
+      - 'ga-*'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and pnpm
+        uses: ./.github/workflows/reusable/toolchain-setup
+        with:
+          node-version: '18.18'
+          pnpm-version: '9.4.0'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run smoke tests
+        id: smoke_tests
+        run: |
+          pnpm typecheck
+          pnpm build
+          pnpm --filter intelgraph-server test:unit
+          pnpm --filter intelgraph-client test
+        continue-on-error: true
+
+      - name: Generate evidence
+        id: evidence
+        run: |
+          node scripts/releases/post_release_evidence.mjs \
+            --ref=${{ github.ref }} \
+            --sha=${{ github.sha }} \
+            --status=${{ steps.smoke_tests.outcome }}
+
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-release-verify-${{ github.ref_name }}
+          path: |
+            artifacts/post-release/${{ github.ref_name }}/summary.md
+            artifacts/post-release/${{ github.ref_name }}/summary.json
