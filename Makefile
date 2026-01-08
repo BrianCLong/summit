@@ -278,7 +278,7 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 
 # --- GA Hardening ---
 
-.PHONY: ga ga-verify
+.PHONY: ga ga-verify ga-validate ga-evidence
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
 	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
@@ -286,6 +286,11 @@ ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Secu
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
+
+ga-validate: ## Run release hardening validator (deterministic evidence bundle)
+	@npx tsx scripts/releases/ga_validate.ts
+
+ga-evidence: ga-validate ## Alias for ga-validate
 
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh

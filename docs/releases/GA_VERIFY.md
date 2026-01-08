@@ -85,6 +85,16 @@ cat artifacts/ga/ga_report.json  # View results
 cat artifacts/ga/ga_report.md    # Human-readable report
 ```
 
+### Release Hardening (Evidence Pack)
+
+For a deterministic, auditable evidence bundle (as required by Release Hardening protocols), run:
+
+```bash
+make ga-validate
+```
+
+This creates a comprehensive bundle in `artifacts/ga-evidence/<DATE>/<SHA>/`. See [GA_EVIDENCE.md](GA_EVIDENCE.md) for details.
+
 ## Troubleshooting
 
 If verification fails:

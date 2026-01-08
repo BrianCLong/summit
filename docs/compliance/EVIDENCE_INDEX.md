@@ -20,4 +20,6 @@ This document provides audit-ready links to evidence for each control. Use the "
 | **OPS-03** | Change Management | CI Workflow | `.github/workflows/deploy-multi-region.yml` | `cat .github/workflows/deploy-multi-region.yml` |
 | **OPS-04** | Disaster Recovery | Runbook | `docs/runbooks/dr/` | `ls -l docs/runbooks/dr/` |
 | **OPS-05** | Supply Chain Security | CI Workflow | `.github/workflows/reusable-golden-path.yml` | `grep "cosign sign" .github/workflows/reusable-golden-path.yml` |
+| **REL-01** | Release Validator | Script | `scripts/releases/ga_validate.ts` | `ls -l scripts/releases/ga_validate.ts` |
+| **REL-02** | GA Evidence Bundle | Artifact Directory | `artifacts/ga-evidence/` | `ls -R artifacts/ga-evidence/` |
 | **AI-01** | Model Governance | Document | `docs/governance/MODEL_GOVERNANCE.md` | `ls -l docs/governance/MODEL_GOVERNANCE.md` |
