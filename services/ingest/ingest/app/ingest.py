@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import time
 from collections import defaultdict
 from collections.abc import Iterator
 from typing import Any, cast
