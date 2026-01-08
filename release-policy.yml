@@ -20,16 +20,34 @@ override:
 
 channels:
   rc:
-    allowed_from:
-      - default-branch
-    require_evidence: false
+    allowed_branches:
+      - main
+      - release/v*
+    requirements:
+      evidence:
+        - manifest
+        - checksums
+      shards:
+        - build
+        - test
+      resilience:
+        dr_drill: optional
+        backup_integrity: optional
+
   ga:
-    allowed_from:
-      - default-branch
-      - series-branch
-    require_evidence: false
-  patch:
-    # patch is really ga on series branch; included for clarity
-    allowed_from:
-      - series-branch
-    require_evidence: false
+    allowed_branches:
+      - release/v*
+    requirements:
+      evidence:
+        - manifest
+        - checksums
+        - attestations
+        - resilience-report
+      shards:
+        - build
+        - test
+        - security-scan
+        - e2e
+      resilience:
+        dr_drill: required
+        backup_integrity: required

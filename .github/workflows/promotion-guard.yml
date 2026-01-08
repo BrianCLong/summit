@@ -1,0 +1,84 @@
+name: Promotion Guard
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to verify'
+        required: true
+      channel:
+        description: 'Target channel (rc|ga)'
+        required: true
+        default: 'rc'
+      evidence_artifact:
+        description: 'Name of the evidence artifact to download (optional, for cross-workflow)'
+        required: false
+
+jobs:
+  promotion-guard:
+    name: Promotion Guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # In a real flow, we would download the evidence artifact from a previous build job
+      # or from a release. For now, we assume the evidence is generated or passed.
+      # If triggered via tag, maybe we fetch the release assets?
+      # For the scope of this task, we assume we have access to artifacts or generate them.
+
+      # For demonstration, we'll try to download an artifact if provided, otherwise fail or mock.
+      - name: Download Evidence Artifact
+        if: ${{ inputs.evidence_artifact }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.evidence_artifact }}
+          path: dist/evidence
+
+      # Run Promotion Guard
+      - name: Run Promotion Guard
+        id: guard
+        continue-on-error: true # Report-only mode initially
+        run: |
+           TAG=${{ inputs.tag || github.ref_name }}
+           CHANNEL=${{ inputs.channel || 'rc' }}
+
+           # If running on a tag push, determine channel from tag?
+           if [[ "$TAG" == *"rc"* ]]; then
+             CHANNEL="rc"
+           fi
+
+           echo "Verifying promotion for tag $TAG to channel $CHANNEL"
+
+           npx tsx scripts/verification/promotion_guard.ts \
+             --tag "$TAG" \
+             --channel "$CHANNEL" \
+             --evidence-dir dist/evidence \
+             --offline > decision.json
+
+           cat decision.json
+
+           # Check decision
+           DECISION=$(jq -r .decision decision.json)
+           if [[ "$DECISION" != "ALLOW" ]]; then
+             echo "::error::Promotion Guard DENIED promotion"
+             jq .reasons decision.json
+             exit 1
+           fi
+
+      - name: Upload Decision Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: promotion-decision
+          path: decision.json
