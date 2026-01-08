@@ -31,7 +31,7 @@ NC='\033[0m' # No Color
 
 # --- Logging functions ---
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $*"
+    echo -e "${BLUE}[INFO]${NC} $*" >&2
 }
 
 log_success() {
@@ -39,7 +39,7 @@ log_success() {
 }
 
 log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $*"
+    echo -e "${YELLOW}[WARN]${NC} $*" >&2
 }
 
 log_error() {
@@ -150,7 +150,7 @@ check_workflow_status() {
     ')
 
     if [[ "${workflow_data}" == "{}" ]]; then
-        echo "MISSING||N/A||N/A"
+        printf "MISSING\tN/A\tN/A"
         return
     fi
 
@@ -164,12 +164,12 @@ check_workflow_status() {
 
     # If status is not completed, check current status
     if [[ "${status}" != "completed" ]]; then
-        echo "${status^^}||${status}||${url}"
+        printf "%s\t%s\t%s" "${status^^}" "${status}" "${url}"
         return
     fi
 
     # Return conclusion for completed runs
-    echo "${conclusion^^}||${status}||${url}"
+    printf "%s\t%s\t%s" "${conclusion^^}" "${status}" "${url}"
 }
 
 print_truth_table() {
@@ -196,7 +196,7 @@ print_truth_table() {
         local result
         result=$(check_workflow_status "${workflow}" "${runs_json}")
 
-        IFS='||' read -r conclusion status url <<< "${result}"
+        IFS=$'\t' read -r conclusion status url <<< "${result}"
 
         # Determine status symbol
         local symbol
@@ -210,7 +210,7 @@ print_truth_table() {
             color="${RED}"
             all_green=false
             blocking_failures+=("${workflow}: MISSING (workflow did not run)")
-        elif [[ "${conclusion}" == "IN_PROGRESS" ]] || [[ "${conclusion}" == "QUEUED" ]] || [[ "${conclusion}" == "WAITING" ]]; then
+        elif [[ "${conclusion}" == "IN_PROGRESS" ]] || [[ "${conclusion}" == "QUEUED" ]] || [[ "${conclusion}" == "WAITING" ]] || [[ "${conclusion}" == "PENDING" ]]; then
             symbol="⏳"
             color="${YELLOW}"
             all_green=false
