@@ -1,0 +1,48 @@
+gates:
+  - id: unit-tests
+    name: "Unit Tests"
+    status: required
+    description: "Core unit tests for server and shared packages"
+    owner: "@intelgraph/core-platform"
+    workflow_job: "ci-core.yml/test:unit"
+    promotion_criteria:
+      min_consecutive_green: 10
+      min_pass_rate_percent: 98
+      max_flake_retry_percent: 2
+      max_duration_seconds_p95: 300
+
+  - id: e2e-tests
+    name: "E2E Tests"
+    status: report_only
+    description: "End-to-end playwright tests"
+    owner: "@intelgraph/qa"
+    workflow_job: "e2e.yml/test"
+    promotion_criteria:
+      min_consecutive_green: 5
+      min_pass_rate_percent: 90
+      max_flake_retry_percent: 5
+      max_duration_seconds_p95: 1200
+
+  - id: security-scan
+    name: "Security Scan"
+    status: required
+    description: "Static analysis and vulnerability scanning"
+    owner: "@intelgraph/security"
+    workflow_job: "ci-security.yml/scan"
+    promotion_criteria:
+      min_consecutive_green: 20
+      min_pass_rate_percent: 99
+      max_flake_retry_percent: 0
+      max_duration_seconds_p95: 600
+
+  - id: lint
+    name: "Linting"
+    status: required
+    description: "Code style and linting checks"
+    owner: "@intelgraph/dev-ex"
+    workflow_job: "ci-core.yml/lint"
+    promotion_criteria:
+      min_consecutive_green: 10
+      min_pass_rate_percent: 99
+      max_flake_retry_percent: 1
+      max_duration_seconds_p95: 120

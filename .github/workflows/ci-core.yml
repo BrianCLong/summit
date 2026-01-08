@@ -45,7 +45,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint (strict)
-        run: pnpm lint --max-warnings 0
+        run: ./scripts/ci/check_gate.ts --gate-id lint --command "pnpm lint --max-warnings 0"
+
+      - name: Upload Gate Summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-summary-lint
+          path: dist/ci/gates/lint.*.summary.json
 
       - name: Typecheck
         run: pnpm typecheck
@@ -68,7 +75,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
-        run: pnpm test:unit
+        run: ./scripts/ci/check_gate.ts --gate-id unit-tests --command "pnpm test:unit"
+
+      - name: Upload Gate Summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-summary-unit-tests
+          path: dist/ci/gates/unit-tests.*.summary.json
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
