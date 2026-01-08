@@ -152,9 +152,82 @@ jobs:
       slsa_provenance: true
     secrets: inherit
 
+  # Job: Collect and unify SBOM artifacts
+  collect-sboms:
+    name: Collect SBOMs & Generate Provenance
+    needs: [build-server, build-client]
+    runs-on: ubuntu-latest
+    outputs:
+      bundle_path: ${{ steps.collect.outputs.bundle_path }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract Tag and Version
+        id: version
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          TAG="${TAG#refs/tags/}"
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Tag: ${TAG}, Version: ${VERSION}"
+
+      - name: Create Bundle Directory
+        run: |
+          mkdir -p artifacts/release/${{ steps.version.outputs.tag }}
+
+      - name: Collect SBOM Artifacts
+        id: collect
+        run: |
+          chmod +x scripts/release/collect_sbom_artifacts.sh
+
+          # Run SBOM collection
+          # Allow missing container SBOM initially - it may not exist yet
+          ./scripts/release/collect_sbom_artifacts.sh \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --sha "${{ github.sha }}" \
+            --out "artifacts/release/${{ steps.version.outputs.tag }}" \
+            --allow-missing-container || true
+
+          echo "bundle_path=artifacts/release/${{ steps.version.outputs.tag }}" >> $GITHUB_OUTPUT
+
+      - name: Generate Provenance Manifest
+        run: |
+          chmod +x scripts/release/generate_provenance_manifest.sh
+
+          ./scripts/release/generate_provenance_manifest.sh \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --sha "${{ github.sha }}" \
+            --bundle-dir "artifacts/release/${{ steps.version.outputs.tag }}" \
+            --workflow-run "${{ github.run_id }}"
+
+      - name: Upload SBOM Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-bundle-${{ steps.version.outputs.tag }}
+          path: artifacts/release/${{ steps.version.outputs.tag }}/
+          retention-days: 90
+
+      - name: SBOM Collection Summary
+        run: |
+          echo "## SBOM Collection Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${{ steps.version.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Collected Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          find artifacts/release/${{ steps.version.outputs.tag }} -type f -name "*.json" | while read f; do
+            echo "$(basename $f): $(wc -c < $f | tr -d ' ') bytes"
+          done >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
   release:
     name: Create Release
-    needs: [build-server, build-client]
+    needs: [build-server, build-client, collect-sboms]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -164,6 +237,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Extract Tag
+        id: version
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          TAG="${TAG#refs/tags/}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
       - name: Download Server Artifacts
         uses: actions/download-artifact@v4
@@ -176,6 +256,12 @@ jobs:
         with:
           name: build-artifacts-client-${{ github.run_id }}
           path: evidence/client
+
+      - name: Download SBOM Bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom-bundle-${{ steps.version.outputs.tag }}
+          path: evidence/sbom-bundle
 
       - name: Download Freeze Evidence
         uses: actions/download-artifact@v4
