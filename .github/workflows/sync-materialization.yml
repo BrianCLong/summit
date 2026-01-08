@@ -1,0 +1,22 @@
+
+name: Sync Materialization Verify
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Unit Tests
+        run: npx tsx server/tests/sync/VectorClock.test.ts && npx tsx server/tests/sync/MergeEngine.test.ts && npx tsx server/tests/sync/SyncRepository.test.ts
+      - name: Run Integration Tests
+        run: npx tsx server/tests/sync/Integration.test.ts
