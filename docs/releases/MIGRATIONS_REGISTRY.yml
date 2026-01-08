@@ -1,0 +1,15 @@
+migrations: []
+# - id: MIG-001
+#   migration_ref: "20231026100000_create_users_table.sql"
+#   area: "db"
+#   type: "reversible"
+#   description: "Initial creation of the users table."
+#   owner: "@username"
+#   ticket: "https://github.com/BrianCLong/summit/issues/1"
+#   introduced_on: "2023-10-26"
+#   risk_level: "low"
+#   rollback_plan: "Run '20231026100000_drop_users_table.sql' to remove the table."
+#   forward_fix_plan: "N/A for reversible migration."
+#   data_loss_risk: "none"
+#   verification: "psql -c 'SELECT 1 FROM users LIMIT 1;'"
+#   expires_on: "YYYY-MM-DD"
