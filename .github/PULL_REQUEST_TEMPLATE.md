@@ -53,3 +53,7 @@
 - [ ] Tests executed and linked in evidence
 - [ ] Documentation updated (if applicable)
 - [ ] Debt plan honored (budget respected or retired)
+
+## Compliance Artifacts
+- [ ] Remediation plan verified (if applicable)
+- [ ] Evidence attached for governance gates

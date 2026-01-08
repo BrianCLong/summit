@@ -1,0 +1,77 @@
+- code: POLICY_DRIFT
+  severity: high
+  owner: governance
+  runbook_links:
+    - docs/runbooks/HAZARD_DRIFT.md#policy-drift
+  suggested_actions:
+    - "Run scripts/compliance/check_drift.ts to identify drift"
+    - "Review policy changes in policy/ directory"
+    - "Revert unauthorized changes or update policy signatures"
+  verification_steps: "pnpm compliance:check"
+  rollback_notes: "Revert changes to policy definitions"
+
+- code: EVIDENCE_TAMPER
+  severity: critical
+  owner: security
+  runbook_links:
+    - docs/runbooks/SOC2_EVIDENCE_GENERATION.md#evidence-integrity
+  suggested_actions:
+    - "Verify evidence signatures using scripts/compliance/verify_evidence_signatures.sh"
+    - "Check provenance ledger for unauthorized writes"
+  verification_steps: "scripts/compliance/verify_evidence_signatures.sh"
+  rollback_notes: "Invalidate compromised evidence and regenerate"
+
+- code: PROMOTION_DENY
+  severity: medium
+  owner: release-engineering
+  runbook_links:
+    - docs/runbooks/DEPLOYMENT_RUNBOOK.md#promotion-failure
+  suggested_actions:
+    - "Check release gates in policy/release-gates"
+    - "Verify all required checks passed in CI"
+  verification_steps: "scripts/release/verify-release.sh"
+  rollback_notes: "Cancel promotion and investigate gate failure"
+
+- code: DEPS_APPROVAL_MISSING
+  severity: high
+  owner: security
+  runbook_links:
+    - docs/runbooks/PROVENANCE_SBOM.md#dependency-approval
+  suggested_actions:
+    - "Run scripts/compliance/generate_sbom.ts"
+    - "Check against allowed licenses and packages"
+  verification_steps: "pnpm generate:sbom && pnpm security:check"
+  rollback_notes: "Remove unapproved dependency"
+
+- code: GA_VERIFY_TIMEOUT
+  severity: medium
+  owner: qa
+  runbook_links:
+    - docs/runbooks/GA_RUNBOOK.md#verification-timeout
+  suggested_actions:
+    - "Check system resources and load"
+    - "Retry verification with increased timeout if justifiable"
+  verification_steps: "pnpm ga:verify"
+  rollback_notes: "None, retry verification"
+
+- code: DRILL_FAIL
+  severity: high
+  owner: ops
+  runbook_links:
+    - docs/runbooks/DR_RUNBOOK.md#drill-failure
+  suggested_actions:
+    - "Analyze drill logs in dist/dr/logs"
+    - "Identify failing component (database, recovery, etc.)"
+  verification_steps: "scripts/dr/dr-verify.sh"
+  rollback_notes: "Restore to pre-drill state"
+
+- code: UNKNOWN_ERROR
+  severity: low
+  owner: triage
+  runbook_links:
+    - docs/runbooks/INCIDENT_RESPONSE.md#triage
+  suggested_actions:
+    - "Check CI logs for errors"
+    - "Escalate to on-call if persistent"
+  verification_steps: "Rerun CI job"
+  rollback_notes: "None"
