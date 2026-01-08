@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-16T00:00:00Z",
-  "revision_note": "Added CompanyOS Sprint 04 plan for residency seams, canary releases, and tenant onboarding",
+  "last_updated": "2026-01-08T14:58:40Z",
+  "revision_note": "Added scaffolded INSLAW/PROMIS affidavit demo artifacts for provenance-first ingestion",
   "initiatives": [
     {
       "id": "A",
