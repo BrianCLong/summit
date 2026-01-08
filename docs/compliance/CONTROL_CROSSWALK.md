@@ -18,3 +18,7 @@ This document maps the repository's internal Reference Controls (Ref-ID) to exte
 | **OPS-04** | Disaster Recovery | CC9.1, CC9.2 | A.17.1.1 - A.17.1.3 | CP-1 - CP-10 | - |
 | **OPS-05** | Supply Chain Security | CC9.2 | A.15.1.1 | SR-3 | EU AI Act (Value Chain) |
 | **AI-01** | Model Governance | - | - | - | ISO 42001, NIST AI RMF |
+| **REL-01** | GA Gate Verification | CC8.1 | A.14.2.2 | CM-3, CA-7 | - |
+| **REL-02** | Reproducible Build | CC8.1, CC9.2 | A.12.5.1 | SA-12, CM-5 | - |
+| **REL-03** | Evidence Bundle | CC2.2, CC7.2 | A.12.4.3 | AU-2, AU-7 | - |
+| **RLB-01** | Reliability Gates | CC7.1 | A.12.1.2 | SI-2, SA-8 | - |

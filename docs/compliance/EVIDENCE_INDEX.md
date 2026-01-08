@@ -21,3 +21,7 @@ This document provides audit-ready links to evidence for each control. Use the "
 | **OPS-04** | Disaster Recovery | Runbook | `docs/runbooks/dr/` | `ls -l docs/runbooks/dr/` |
 | **OPS-05** | Supply Chain Security | CI Workflow | `.github/workflows/reusable-golden-path.yml` | `grep "cosign sign" .github/workflows/reusable-golden-path.yml` |
 | **AI-01** | Model Governance | Document | `docs/governance/MODEL_GOVERNANCE.md` | `ls -l docs/governance/MODEL_GOVERNANCE.md` |
+| **REL-01** | GA Gate Verification | CI Workflow / Report | `artifacts/ga/ga_report.md` | `make ga` |
+| **REL-02** | Reproducible Build | CI Workflow | `.github/workflows/ga-release.yml` | `pnpm verify:reproducible` |
+| **REL-03** | Evidence Bundle | CI Workflow / Artifact | `dist/release/evidence-bundle.tar.gz` | `pnpm build:release` |
+| **RLB-01** | Reliability Gates | CI Workflow / Script | `scripts/ci/reliability-lints.cjs` | `node scripts/ci/reliability-lints.cjs` |
