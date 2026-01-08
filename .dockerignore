@@ -37,11 +37,14 @@ infra/
 .parcel-cache/
 build/
 out/
+**/.out/
+**/artifacts/
 
 # Testing
 coverage/
 .nyc_output/
 test-results/
+**/test-results/
 **/__tests__/
 **/__mocks__/
 *.test.js
@@ -52,6 +55,7 @@ tests/
 e2e/
 cypress/
 playwright-report/
+**/playwright-report/
 
 # Environment and secrets (CRITICAL)
 .env
@@ -84,6 +88,7 @@ AUTHORS
 # Logs and temporary files
 logs/
 *.log
+**/*.log
 tmp/
 temp/
 *.tmp

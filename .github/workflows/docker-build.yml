@@ -58,10 +58,21 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix={{branch}}-
 
+      - name: Stage Docker Context
+        run: node scripts/ci/stage_docker_context.mjs
+
+      - name: Upload Context Manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-context-manifest
+          path: .out/docker-context/MANIFEST.json
+          retention-days: 5
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: .out/docker-context
+          file: .out/docker-context/Dockerfile
           platforms: ${{ matrix.platform }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
