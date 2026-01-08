@@ -31,6 +31,8 @@ jobs:
       - run: pnpm lint
       - name: Check CJS files use CommonJS syntax
         run: pnpm lint:cjs
+      - name: Reliability Lint (Drift Prevention)
+        run: npx tsx scripts/ci/reliability-lints.ts origin/main
       - run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
   verify:

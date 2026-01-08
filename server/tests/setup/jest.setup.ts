@@ -4,6 +4,7 @@
  */
 
 import 'jest-extended';
+import './reliability'; // Import reliability helpers (auto-registers afterAll cleanup)
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
 jest.mock('ioredis', () => {
