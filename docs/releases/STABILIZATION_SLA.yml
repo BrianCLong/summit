@@ -1,0 +1,11 @@
+sla:
+  P0: { days: 7 }
+  P1: { days: 14 }
+  P2: { days: 30 }
+escalation_tiers:
+  T0: "On track"
+  T1: "Due soon (<=2 days)"
+  T2: "Overdue (1–7 days)"
+  T3: "Overdue (>7 days)"
+rules:
+  blocked_unissued_is_escalated: true
