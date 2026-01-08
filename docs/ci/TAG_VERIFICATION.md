@@ -26,6 +26,8 @@ Use tag verification:
 3. **CI gates**: Automated verification in promotion workflows
 4. **Manual checks**: Debug failing promotions
 
+> **Note**: For RC tags, verification is automatically handled by the [Release RC Pipeline](RELEASE_RC_PIPELINE.md). Use this workflow for manual verification or non-RC tags.
+
 ---
 
 ## Verification Process
@@ -236,9 +238,10 @@ cat docs/ci/REQUIRED_CHECKS_POLICY.json | jq '.conditional_required'
 ## References
 
 - [Release Ops Index](RELEASE_OPS_INDEX.md)
+- [Release RC Pipeline](RELEASE_RC_PIPELINE.md) - Canonical RC tag workflow
 - [Promotion Bundle](PROMOTION_BUNDLE.md)
 - [Required Checks Policy](REQUIRED_CHECKS_POLICY.json)
-- [RC Preparation](../releases/MVP-4_STABILIZATION_TAGGING.md)
+- [RC Preparation](RC_PREPARATION.md)
 
 ---
 

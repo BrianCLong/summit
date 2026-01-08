@@ -17,10 +17,8 @@ on:
         required: false
         type: string
 
-  # Auto-generate bundle on RC tag push
-  push:
-    tags:
-      - "v*.*.*-rc.*"
+  # NOTE: RC tag push trigger removed - now handled by release-rc.yml
+  # Use workflow_dispatch for manual bundle generation only
 
 permissions:
   contents: read
