@@ -26,6 +26,9 @@ This document serves as the central index for all Release Operations tooling and
 | [Release Train Dashboard](RELEASE_TRAIN_DASHBOARD.md) | 2-hourly   | Events        | Visual pipeline status      |
 | [Test Quarantine](TEST_QUARANTINE.md)                 | Event      | Test failure  | Quarantine flaky tests      |
 | [Changelog Generator](CHANGELOG_GENERATOR.md)         | Event      | Tag/release   | Generate release notes      |
+| [Dependency Audit](DEPENDENCY_AUDIT.md)               | Daily      | `06:00 UTC`   | Security vulnerability scan |
+| [Type Safety Audit](TYPE_SAFETY_AUDIT.md)             | Daily      | `07:00 UTC`   | TypeScript any detection    |
+| [API Determinism](API_DETERMINISM.md)                 | Daily      | `08:00 UTC`   | Response consistency check  |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
 
 ---
@@ -58,6 +61,14 @@ This document serves as the central index for all Release Operations tooling and
 | Auto-Remediation    | ✅ Active | [AUTO_REMEDIATION.md](AUTO_REMEDIATION.md)       |
 | Test Quarantine     | ✅ Active | [TEST_QUARANTINE.md](TEST_QUARANTINE.md)         |
 | Changelog Generator | ✅ Active | [CHANGELOG_GENERATOR.md](CHANGELOG_GENERATOR.md) |
+
+### Audit Features
+
+| Feature           | Status    | Documentation                                |
+| ----------------- | --------- | -------------------------------------------- |
+| Dependency Audit  | ✅ Active | [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)   |
+| Type Safety Audit | ✅ Active | [TYPE_SAFETY_AUDIT.md](TYPE_SAFETY_AUDIT.md) |
+| API Determinism   | ✅ Active | [API_DETERMINISM.md](API_DETERMINISM.md)     |
 
 ---
 
@@ -187,6 +198,9 @@ This document serves as the central index for all Release Operations tooling and
 | `REMEDIATION_PLAYBOOKS.yml`     | Playbook definitions  | `docs/ci/` |
 | `TEST_QUARANTINE_POLICY.yml`    | Quarantine rules      | `docs/ci/` |
 | `CHANGELOG_POLICY.yml`          | Changelog categories  | `docs/ci/` |
+| `DEPENDENCY_AUDIT_POLICY.yml`   | Audit thresholds      | `docs/ci/` |
+| `TYPE_SAFETY_POLICY.yml`        | Any type limits       | `docs/ci/` |
+| `API_DETERMINISM_POLICY.yml`    | Endpoint checks       | `docs/ci/` |
 
 ### State Files
 
@@ -200,6 +214,9 @@ This document serves as the central index for all Release Operations tooling and
 | `quarantine_state.json`  | Quarantine history   | `docs/releases/_state/` |
 | `changelog_state.json`   | Generation history   | `docs/releases/_state/` |
 | `dashboard_state.json`   | Dashboard snapshots  | `docs/releases/_state/` |
+| `audit_state.json`       | Dependency audit     | `docs/releases/_state/` |
+| `type_safety_state.json` | Type safety audit    | `docs/releases/_state/` |
+| `determinism_state.json` | API determinism      | `docs/releases/_state/` |
 
 ---
 
@@ -215,6 +232,9 @@ This document serves as the central index for all Release Operations tooling and
 | `generate_release_dashboard.sh`  | Generate dashboard      | `./scripts/release/generate_release_dashboard.sh`  |
 | `manage_test_quarantine.sh`      | Manage test quarantine  | `./scripts/release/manage_test_quarantine.sh`      |
 | `generate_changelog.sh`          | Generate changelog      | `./scripts/release/generate_changelog.sh`          |
+| `dependency_audit.sh`            | Dependency security     | `./scripts/release/dependency_audit.sh`            |
+| `type_safety_audit.sh`           | Type safety check       | `./scripts/release/type_safety_audit.sh`           |
+| `api_determinism_check.sh`       | API consistency         | `./scripts/release/api_determinism_check.sh`       |
 
 ### Common Flags
 
@@ -364,6 +384,7 @@ All scripts support these common flags:
 | 2026-01-08 | Initial Release Ops Index            | Platform Engineering |
 | 2026-01-08 | Added all MVP-4 features             | Platform Engineering |
 | 2026-01-08 | Added Test Quarantine, Changelog Gen | Platform Engineering |
+| 2026-01-08 | Added Stabilization Audit features   | Platform Engineering |
 
 ---
 
