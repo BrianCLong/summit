@@ -58,6 +58,19 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=sha,prefix={{branch}}-
 
+      - name: Path Budget Scan & Enforce
+        run: |
+          npm install --no-save js-yaml minimatch
+          node scripts/ci/scan_path_budgets.mjs
+          node scripts/ci/enforce_path_budgets.mjs
+
+      - name: Upload Path Budget Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: path-budget-report-docker
+          path: artifacts/path-budget/
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:

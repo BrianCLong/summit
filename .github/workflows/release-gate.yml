@@ -45,6 +45,18 @@ jobs:
             --override-freeze \
             --override-reason "PR gate run"
 
+      - name: Path Budget Scan & Enforce
+        run: |
+          node scripts/ci/scan_path_budgets.mjs
+          node scripts/ci/enforce_path_budgets.mjs --release-intent
+
+      - name: Upload Path Budget Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: path-budget-report
+          path: artifacts/path-budget/
+
       - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4

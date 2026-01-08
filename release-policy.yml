@@ -33,3 +33,24 @@ channels:
     allowed_from:
       - series-branch
     require_evidence: false
+
+path_budgets:
+  normal:
+    max_path_chars: 220
+    max_depth: 18
+    fail: false
+  release_intent:
+    max_path_chars: 200
+    max_depth: 16
+    fail: true
+  scopes:
+    - "."                 # repo workspace
+    - "artifacts"         # generated outputs
+    - "server/dist"
+    - "web/dist"
+  excludes:
+    - "**/node_modules/**"
+    - "**/.pnpm-store/**"
+    - "**/.turbo/**"
+    - "**/.git/**"
+    - "**/playwright/.cache/**"
