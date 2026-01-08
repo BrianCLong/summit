@@ -1,68 +1,97 @@
-# Deployment & Release Runbook
+# Deployment Runbook
 
-## 1. Release Strategy (Envelope)
-We utilize a progressive delivery strategy ("Canary Release") for all Tier-0 services to minimize blast radius.
+## Overview
 
-### Stages
-1.  **Stage 0: Internal/Seed (Smoke Test)**
-    -   Target: Internal 'seed' tenant (e.g., `summit-internal`).
-    -   Traffic: 0% real user traffic.
-    -   Gate: Automated Smoke Tests (`make smoke`), DB Migration Check.
+This runbook describes the deployment and release process for the platform. It covers the creation of release artifacts, validation gates, and the promotion lifecycle from Release Candidate (RC) to General Availability (GA).
 
-2.  **Stage 1: Canary (1-5%)**
-    -   Target: Randomly sampled sessions (sticky by user ID).
-    -   Traffic: 1% -> 5%.
-    -   Gate: 15 minutes bake time. Error rate < 1%, Latency p95 < 1500ms.
+## Release Channels
 
-3.  **Stage 2: Ramp (25% -> 50%)**
-    -   Target: Broader user base.
-    -   Traffic: 25% -> 50%.
-    -   Gate: 30 minutes bake time.
+The platform release process is governed by the `release-policy.yml` file, which defines the following channels:
 
-4.  **Stage 3: Full Rollout (100%)**
-    -   Target: All users.
-    -   Action: Promote canary to stable. Delete old pods.
+*   **RC (Release Candidate):**
+    *   **Tag:** `vX.Y.Z-rc.N`
+    *   **Allowed From:** `default-branch` (main)
+    *   **Purpose:** Stabilization and verification before GA.
+    *   **Evidence:** Optional.
 
-## 2. Rollback Procedure
-**Trigger**: Sev-1 Alert (Error Rate > 5% or Latency > 2s) during rollout.
+*   **GA (General Availability):**
+    *   **Tag:** `vX.Y.Z`
+    *   **Allowed From:** `default-branch` (main) OR `series-branch` (release/X.Y).
+    *   **Purpose:** Production-ready release.
+    *   **Evidence:** Not strictly required by policy for creation, but release workflow generates and verifies it.
 
-1.  **Stop the Line**: Pause rollout immediately.
-2.  **Revert Traffic**: Switch 100% traffic back to `stable` version.
-    ```bash
-    kubectl rollout undo deployment/api-server
-    ```
-3.  **Verify Stability**: Check dashboards for error rate recovery.
-4.  **Post-Mortem**: Create incident ticket. Do not re-deploy until root cause is fixed.
+*   **Patch:**
+    *   **Tag:** `vX.Y.Z` (on series branch)
+    *   **Allowed From:** `series-branch`.
+    *   **Purpose:** Hotfixes for existing series.
 
-## 2.5. Release Channel Policy
-Release channels (`rc`, `ga`) and their allowed source branches are configured in `release-policy.yml`.
+## Workflow
 
-Example configuration:
-```yaml
-channels:
-  rc:
-    allowed_from:
-      - default-branch
-    require_evidence: false
-  ga:
-    allowed_from:
-      - default-branch
-      - series-branch # e.g. release/v1.2
-    require_evidence: false
-```
+### 1. Triggering a Release
 
-- **rc**: Typically allowed only from `default-branch` (main).
-- **ga**: Can be allowed from `series-branch` for LTS/Patch releases.
-- **require_evidence**: If true, specific evidence artifacts must be present in the bundle.
+Releases are triggered by pushing a tag.
 
-## 3. Deployment Verification Tests (DVT)
-Automated checks run after every traffic shift.
+**Dry Run:**
+The `GA Release` workflow defaults to `dry_run: true`. This means pushing a tag will:
+1.  Run all validation gates.
+2.  Build artifacts.
+3.  Generate evidence.
+4.  **SKIP** the final publish step to GitHub Releases.
 
--   **Endpoint**: `/health` (Deep Check)
--   **Endpoint**: `/api/v1/user/me` (Auth Check)
--   **Synthetic**: Execute 1 "Golden Path" run (Ingest -> Search).
+To perform a **real** release, you must manually trigger the `GA Release` workflow via `workflow_dispatch` and set `dry_run: false`, OR rely on automation that sets this input (if configured).
 
-## 4. Feature Flags
-Use `LaunchDarkly` (or internal equiv) for feature-level rollouts independent of code deploys.
--   Naming: `feat-<ticket-id>-<name>`
--   Default: `False` (Off)
+### 2. Validation Gates
+
+The release workflow enforces several checks:
+*   **Policy Validation:** Ensures `release-policy.yml` is valid.
+*   **Preflight Check:**
+    *   Verifies the tag format matches the policy.
+    *   Verifies the commit is reachable from the allowed branch (`main` or `release/*`) for the target channel.
+    *   Verifies `package.json` versions match the tag.
+*   **Freeze Window:** Checks if a deployment freeze is active (unless overridden).
+*   **Tests & Security:** Runs unit tests, integration tests, and security scans.
+
+### 3. Artifacts
+
+The release process generates the following artifacts (stored in GitHub Actions and/or published to the Release):
+
+*   `dist/release/release-report.md`: High-level summary of the release.
+*   `dist/release/release-notes.md`: Generated changelog.
+*   `dist/release/preflight.json`: Results of the preflight check.
+*   `release-assets/evidence.tar.gz`: Contains SLSA provenance, SBOMs, and checksums.
+
+## Runbook: Creating a Release
+
+1.  **Prepare the Code:**
+    *   Ensure `package.json` version is updated.
+    *   Commit changes.
+
+2.  **Push Tag (Dry Run):**
+    *   `git tag v1.2.3`
+    *   `git push origin v1.2.3`
+    *   *Action:* Watch the "GA Release" workflow. It should pass and mark "Dry Run Summary".
+
+3.  **Review Dry Run:**
+    *   Check the "Dry Run Summary" in the Actions UI.
+    *   Download `release-report.md` artifact if needed.
+
+4.  **Publish (Real Release):**
+    *   Go to Actions -> GA Release.
+    *   Run workflow -> Select branch (tag) -> Set `dry_run: false`.
+    *   *Action:* The workflow will publish the release to GitHub.
+
+## Troubleshooting
+
+### Ancestry Check Failed
+*   **Error:** "Tag vX.Y.Z is not reachable from default branch..."
+*   **Cause:** The tag was created on a commit that is not merged into `main` (for GA/RC) or the appropriate `release/X.Y` branch.
+*   **Fix:** Merge the PR first, then tag the merge commit (or a commit reachable from it).
+
+### Docker Rate Limiting
+*   **Error:** "toomanyrequests: You have reached your pull rate limit."
+*   **Cause:** Docker Hub limits unauthenticated pulls.
+*   **Mitigation:** The workflow includes retry logic. If it persists, ensure the runner is using an authenticated context or a mirror.
+
+### Freeze Window
+*   **Error:** "Freeze window is active"
+*   **Fix:** Wait for the window to close, or use `override_freeze: true` with a valid `override_reason`.

@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
+import yaml from 'js-yaml';
 
 // Utils
 function run(cmd) {
@@ -23,8 +24,6 @@ function fail(msg, details = []) {
 // 1. Determine TAG
 const TAG = process.env.TAG || process.env.GITHUB_REF_NAME;
 if (!TAG) {
-  // If run without tag, maybe we can assume checking HEAD if it matches a tag?
-  // But requirement is strict.
   fail('No TAG provided via TAG or GITHUB_REF_NAME env vars.');
 }
 
@@ -46,47 +45,73 @@ if (!sha) {
 }
 console.log(`✅ Tag resolved to SHA: ${sha}`);
 
-// 4. Check Ancestry
-const defaultBranch = process.env.DEFAULT_BRANCH || 'main';
+// 4. Load Release Policy
+const policyPath = join(process.cwd(), 'release-policy.yml');
+let policy;
+try {
+  policy = yaml.load(readFileSync(policyPath, 'utf8'));
+} catch (e) {
+  fail(`Failed to load release-policy.yml: ${e.message}`);
+}
+
+// 5. Determine Channel
+let channel = 'ga'; // Default to GA
+if (TAG.includes('-rc.')) {
+  channel = 'rc';
+}
+
+console.log(`ℹ️  Detected channel: ${channel}`);
+
+const channelPolicy = policy.channels[channel];
+if (!channelPolicy) {
+  fail(`No policy defined for channel '${channel}'`);
+}
+
+// 6. Check Ancestry based on Policy
+const defaultBranch = policy.default_branch || 'main';
 let ancestryAcceptedVia = 'none';
 let series = null;
 let seriesBranch = null;
 
-// Check if origin/<defaultBranch> exists, if not try to fetch
-let originRef = `origin/${defaultBranch}`;
-if (!run(`git rev-parse --verify ${originRef}`)) {
-    console.log(`ℹ️ ${originRef} not found, attempting fetch...`);
-    try {
-        execSync(`git fetch origin ${defaultBranch} --depth=1`, { stdio: 'inherit' });
-    } catch (e) {
-        console.warn(`⚠️ Failed to fetch origin/${defaultBranch}. Ancestry check might fail if ref is missing.`);
-    }
+const allowedFrom = channelPolicy.allowed_from || [];
+console.log(`ℹ️  Channel '${channel}' allows release from: ${allowedFrom.join(', ')}`);
+
+// Check 'default-branch' if allowed
+if (allowedFrom.includes('default-branch')) {
+  let originRef = `origin/${defaultBranch}`;
+  if (!run(`git rev-parse --verify ${originRef}`)) {
+      console.log(`ℹ️ ${originRef} not found, attempting fetch...`);
+      try {
+          execSync(`git fetch origin ${defaultBranch} --depth=1`, { stdio: 'inherit' });
+      } catch (e) {
+          console.warn(`⚠️ Failed to fetch origin/${defaultBranch}. Ancestry check might fail.`);
+      }
+  }
+
+  let reachable = false;
+  try {
+    execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: 'ignore' });
+    reachable = true;
+  } catch (e) {
+    reachable = false;
+  }
+
+  if (reachable) {
+    ancestryAcceptedVia = 'default';
+    console.log(`✅ Tag is reachable from ${originRef}`);
+  }
 }
 
-let reachableFromDefault = false;
-try {
-  execSync(`git merge-base --is-ancestor ${sha} ${originRef}`, { stdio: 'ignore' });
-  reachableFromDefault = true;
-} catch (e) {
-  reachableFromDefault = false;
-}
-
-if (reachableFromDefault) {
-  ancestryAcceptedVia = 'default';
-  console.log(`✅ Tag is reachable from ${originRef}`);
-} else {
-  console.log(`ℹ️ Tag not reachable from ${originRef}, checking for series branch match...`);
-  // Check if it is a series branch case
-  // versionExpected is X.Y.Z
+// Check 'series-branch' if allowed AND not yet accepted
+if (ancestryAcceptedVia === 'none' && allowedFrom.includes('series-branch')) {
+  // Derive series branch
   const seriesMatch = versionExpected.match(/^(\d+\.\d+)\.\d+$/);
   if (seriesMatch) {
     series = seriesMatch[1];
     seriesBranch = `release/${series}`;
     const seriesRef = `origin/${seriesBranch}`;
 
-    // Check if series branch exists
     if (run(`git rev-parse --verify ${seriesRef}`)) {
-       // Check reachability
        try {
           execSync(`git merge-base --is-ancestor ${sha} ${seriesRef}`, { stdio: 'ignore' });
           ancestryAcceptedVia = 'series';
@@ -101,10 +126,10 @@ if (reachableFromDefault) {
 }
 
 if (ancestryAcceptedVia === 'none') {
-  fail(`Tag ${TAG} is not reachable from default branch '${originRef}' or valid series branch.`);
+  fail(`Tag ${TAG} (channel: ${channel}) is not reachable from allowed branches: ${allowedFrom.join(', ')}`);
 }
 
-// 5. Version Check
+// 7. Version Check
 const mismatches = [];
 
 function checkPackage(path, name) {
@@ -122,12 +147,9 @@ function checkPackage(path, name) {
 // Root
 checkPackage('package.json', 'ROOT');
 
-// Workspaces - "best effort" scanning based on repo structure knowledge
-// "packages/*", "client", "server"
-
+// Workspaces
 const candidates = ['client', 'server'];
 
-// Scan packages/*
 if (existsSync('packages')) {
   const pkgs = readdirSync('packages', { withFileTypes: true });
   for (const dirent of pkgs) {
@@ -137,7 +159,6 @@ if (existsSync('packages')) {
   }
 }
 
-// Check found workspaces
 candidates.forEach(dir => {
   const pkgPath = join(dir, 'package.json');
   checkPackage(pkgPath, dir);
@@ -148,7 +169,7 @@ if (mismatches.length > 0) {
 }
 console.log(`✅ All package versions match ${versionExpected}`);
 
-// 6. Write Output
+// 8. Write Output
 const outputDir = 'dist/release';
 if (!existsSync(outputDir)) {
   mkdirSync(outputDir, { recursive: true });
@@ -157,8 +178,9 @@ if (!existsSync(outputDir)) {
 const result = {
   tag: TAG,
   sha,
+  channel,
   defaultBranch,
-  reachableFromDefaultBranch: ancestryAcceptedVia === 'default', // Keep for backward compat
+  reachableFromDefaultBranch: ancestryAcceptedVia === 'default',
   ancestryAcceptedVia,
   series,
   seriesBranch,

@@ -47,6 +47,11 @@ on:
         required: false
         type: boolean
         default: true
+      prefetch_images:
+        description: "Space-separated list of base images to pre-pull with retry"
+        required: false
+        type: string
+        default: ""
     outputs:
       image_digest:
         description: "Image digest"
@@ -116,6 +121,25 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=sha,prefix=sha-
+
+      - name: Prefetch Base Images
+        if: inputs.prefetch_images != ''
+        shell: bash
+        run: |
+          for image in ${{ inputs.prefetch_images }}; do
+            echo "Prefetching $image..."
+            n=0
+            until [ "$n" -ge 5 ]; do
+              docker pull "$image" && break
+              n=$((n+1))
+              echo "Pull failed, retrying in 10s... ($n/5)"
+              sleep 10
+            done
+            if [ "$n" -ge 5 ]; then
+              echo "::error::Failed to pull $image after 5 attempts."
+              exit 1
+            fi
+          done
 
       - name: Set reproducible build environment
         if: inputs.reproducible
