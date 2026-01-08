@@ -1,0 +1,27 @@
+enforcement_scopes:
+  ga_tags:
+    enforce: true
+  rc_tags:
+    enforce: false
+  scheduled_compliance:
+    enforce: true
+
+baseline_strategy:
+  mode: "lockfile"
+  lockfile_path: "ci/governance-score-baseline.lock"
+
+tolerance_rules:
+  allowed_drop_points: 0
+  allowed_drop_components: []
+
+mandatory_conditions:
+  hard_fail_reason_codes:
+    - "POLICY_DRIFT"
+    - "EVIDENCE_VERIFY_FAIL"
+    - "PROMOTION_DENY"
+
+override_requirements:
+  decision_log_type: "POLICY_EXCEPTION"
+  max_ttl_hours: 168 # 1 week
+  allowed_override_reason_codes:
+    - "SCORE_RATCHET_DROP"
