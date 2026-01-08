@@ -1,0 +1,28 @@
+item_identity:
+  format: "{ownerBucket}:{reasonCode}:{gateId}:{artifactKey}"
+  optional_fields: ["artifactKey"]
+
+evidence_rules:
+  GATE_FIXED:
+    evidence_type: "gate_summary"
+    condition: "current.status == 'PASS' && baseline.status != 'PASS'"
+  EXCEPTION_CLOSED:
+    evidence_type: "exceptions_list"
+    condition: "item.id not in current.active_exceptions"
+  DRIFT_RESOLVED:
+    evidence_type: "drift_status"
+    condition: "current.drift_status == 'PASS'"
+  INCIDENT_DRILL_FIXED:
+    evidence_type: "drill_scenario"
+    condition: "current.status == 'PASS'"
+  PERFORMANCE_IMPROVED:
+    evidence_type: "performance_metric"
+    condition: "current.p95 < baseline.p95"
+
+score_lift:
+  metric: "governance_score_total"
+  calculation: "current.total - baseline.total"
+
+baseline_rules:
+  default: "previous_week"
+  fallback: "missing_baseline"

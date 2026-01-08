@@ -1,0 +1,55 @@
+name: Plan Execution Evidence
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Weekly on Monday at 9 AM
+  workflow_dispatch:
+
+jobs:
+  plan-execution-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install -g tsx
+
+      - name: Generate Plan Artifact (Simulation)
+        # In production, this would download the previous week's artifact.
+        # Here we generate it fresh for the simulation/verification.
+        run: python3 scripts/orchestrate_sprint.py
+
+      - name: Calculate Period ID
+        id: period
+        run: |
+          # Extract plan_id from the generated plans.json
+          # Assuming standard path dist/sprint-plans/<period>/plans.json
+          PLAN_ID=$(ls dist/sprint-plans | head -n 1)
+          echo "period_id=$PLAN_ID" >> $GITHUB_OUTPUT
+
+      - name: Collect Signals
+        run: |
+          npx tsx scripts/reporting/collect_plan_execution_signals.ts ${{ steps.period.outputs.period_id }}
+
+      - name: Build Plan vs Actual Report
+        run: |
+          npx tsx scripts/reporting/build_plan_vs_actual_report.ts ${{ steps.period.outputs.period_id }}
+
+      - name: Verify No-Leak
+        run: |
+          if grep -q "FAIL" dist/plan-execution/${{ steps.period.outputs.period_id }}/proofs/no-leak-report.json; then
+            echo "No-Leak check failed!"
+            exit 1
+          fi
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-execution-evidence-${{ steps.period.outputs.period_id }}
+          path: dist/plan-execution/${{ steps.period.outputs.period_id }}/

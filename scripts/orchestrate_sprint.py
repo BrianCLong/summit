@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import json
+import os
+import hashlib
 from datetime import datetime
 
 # Prompt definitions
@@ -106,10 +109,49 @@ PROMPTS = [
     },
 ]
 
+def generate_plan_id():
+    # Generate a period ID based on the current ISO calendar week
+    now = datetime.now()
+    year, week, _ = now.isocalendar()
+    return f"{year}-W{week:02d}"
+
+def calculate_hash(data):
+    return hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
 
 def main():
     print("--- Multi-Agent Sprint Orchestrator ---")
-    print(f"Timestamp: {datetime.now().isoformat()}\n")
+    timestamp = datetime.now().isoformat()
+    print(f"Timestamp: {timestamp}\n")
+
+    plan_id = generate_plan_id()
+
+    # Calculate hashes (mocked for source files as they are hardcoded here)
+    prompts_hash = calculate_hash(PROMPTS)
+
+    # Construct the plan object
+    plan_artifact = {
+        "plan_id": plan_id,
+        "timestamp": timestamp,
+        "policy_hashes": {
+            "scoring_policy": "mock-scoring-hash",
+            "planning_policy": "mock-planning-hash"
+        },
+        "source_artifact_hashes": {
+            "governance_score": "mock-score-hash",
+            "triage": "mock-triage-hash",
+            "exceptions": "mock-exceptions-hash",
+            "prompts_hash": prompts_hash
+        },
+        "items": PROMPTS
+    }
+
+    # Ensure output directory exists
+    output_dir = f"dist/sprint-plans/{plan_id}"
+    os.makedirs(output_dir, exist_ok=True)
+
+    output_file = os.path.join(output_dir, "plans.json")
+    with open(output_file, "w") as f:
+        json.dump(plan_artifact, f, indent=2)
 
     for prompt in PROMPTS:
         print(
@@ -121,6 +163,7 @@ def main():
         print("    Status: PENDING_EXECUTION")
         print("-" * 40)
 
+    print(f"\nPlan artifact generated at: {output_file}")
     print("\nOrchestration complete. Agents notified.")
 
     # In a real system, this would trigger webhooks or queue jobs.
