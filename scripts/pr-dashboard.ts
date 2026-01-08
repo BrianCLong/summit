@@ -241,6 +241,30 @@ function renderDashboard(data: DashboardData): void {
 
   console.log('='.repeat(80));
   console.log();
+
+  // Integrated Governance Score Section
+  const governancePath = path.join(process.cwd(), 'dist/compliance/governance-score.json');
+  if (fs.existsSync(governancePath)) {
+      try {
+          const governanceScore = JSON.parse(fs.readFileSync(governancePath, 'utf8'));
+          console.log('\n' + '='.repeat(80));
+          console.log('  GOVERNANCE COMPLETENESS SCORE');
+          console.log('='.repeat(80));
+          console.log();
+          console.log(`  Overall Score: ${governanceScore.score_total}/100`);
+          console.log(`  Grade:         ${governanceScore.grade}`);
+
+          if (governanceScore.reasons && governanceScore.reasons.length > 0) {
+              console.log('\n  Top Detractors:');
+              governanceScore.reasons.slice(0, 5).forEach((r: any) => {
+                  console.log(`   - [${r.severity.toUpperCase()}] ${r.message}`);
+              });
+          }
+          console.log();
+      } catch (e) {
+          console.log('  Failed to load Governance Score.');
+      }
+  }
 }
 
 /**
