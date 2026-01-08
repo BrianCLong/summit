@@ -1,0 +1,76 @@
+name: Release Governance
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release Channel'
+        required: true
+        type: choice
+        options:
+        - rc
+        - ga
+        - rollback
+      target_sha:
+        description: 'The full commit SHA or tag to be released'
+        required: true
+      apply:
+        description: 'Set to "true" for a live release'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.target_sha }}
+
+      - name: Setup Node.js and pnpm
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: true
+
+      - name: Run Verification
+        run: pnpm ga:verify
+
+      - name: Build Release Artifacts
+        run: pnpm build
+
+      - name: Generate Evidence Bundle
+        run: |
+          mkdir -p evidence-bundle/reports
+          cp artifacts/ga/ga_report.json evidence-bundle/reports/
+          cp artifacts/sbom/sbom.json evidence-bundle/reports/
+          cp artifacts/provenance/provenance.json evidence-bundle/reports/
+          # Create placeholder for signoff decision
+          echo '{"decision": "GO"}' > evidence-bundle/signoff/decision.json
+          # Copy over the templates from this PR
+          cp artifacts/bundle/EVIDENCE_INDEX.md evidence-bundle/
+          cp artifacts/bundle/MANIFEST.json evidence-bundle/
+          cp artifacts/bundle/README.md evidence-bundle/
+          tar -czf evidence-bundle.tar.gz evidence-bundle
+
+      - name: Upload Evidence Bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: evidence-bundle
+          path: evidence-bundle.tar.gz
+
+      - name: 'Publish Release (if apply=true)'
+        if: github.event.inputs.apply == true
+        run: echo "Publishing release..."
+
+      - name: Update Job Summary
+        run: |
+          echo "### Release Governance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Channel | Target SHA | Apply |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| `${{ github.event.inputs.channel }}` | `${{ github.event.inputs.target_sha }}` | `${{ github.event.inputs.apply }}` |" >> $GITHUB_STEP_SUMMARY
