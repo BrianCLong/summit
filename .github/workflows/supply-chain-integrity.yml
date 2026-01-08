@@ -218,18 +218,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+        with:
+          path: s # Checkout to short path to prevent max-path limits
+
+      - name: Check path length (Guardrail)
+        run: |
+          cd s
+          node scripts/ci/check_path_length.cjs
 
       - name: Download Source SBOMs
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.1.7
         with:
           name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
-          path: ./sboms
+          path: ./artifacts/sboms
 
       - name: Download Source Vulnerability Reports
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.1.7
         with:
           name: vulnerability-reports-source-${{ needs.supply-chain-integrity.outputs.release-version }}
-          path: ./vulnerability-reports
+          path: ./artifacts/vulnerability-reports
 
       - name: Install tools
         run: |
@@ -237,6 +244,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v0.104.3
 
       - name: Run CI Supply Chain Gate
+        working-directory: s
         env:
           RELEASE_VERSION: ${{ needs.supply-chain-integrity.outputs.release-version }}
         run: |
