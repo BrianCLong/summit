@@ -123,6 +123,23 @@ jobs:
             ls -lh client/dist/ | head -20
           fi
 
+      - name: Enforce Artifact Budgets (Release Intent)
+        run: |
+          mkdir -p artifacts
+          # Copy distribution folders to artifacts for inventory (glob doesn't follow symlinks by default)
+          cp -r server/dist artifacts/server-dist || true
+          cp -r client/dist artifacts/client-dist || true
+
+          node scripts/ci/inventory_artifacts.mjs --root artifacts --policy release-policy.yml
+          node scripts/ci/enforce_artifact_budgets.mjs --profile release_intent
+
+      - name: Upload Artifact Budget Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-budget-report-release
+          path: artifacts/artifact-budget/
+
       - name: Prepare Distribution
         run: |
           mkdir -p dist/release

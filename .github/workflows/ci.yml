@@ -56,6 +56,24 @@ jobs:
             server/scripts/verify-*.log
           retention-days: 7
 
+      - name: Inventory Artifacts
+        if: always()
+        run: |
+           # Create artifacts dir if it doesn't exist to prevent script failure
+           mkdir -p artifacts
+           # Copy verification logs to artifacts for inventory
+           cp server/scripts/verify-*.log artifacts/ || true
+
+           node scripts/ci/inventory_artifacts.mjs --root artifacts --policy release-policy.yml
+           node scripts/ci/enforce_artifact_budgets.mjs --profile normal
+
+      - name: Upload Artifact Budget Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-budget-report
+          path: artifacts/artifact-budget/
+
   test:
     name: Test (${{ matrix.test-suite }})
     needs: [lint, verify]

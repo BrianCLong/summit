@@ -33,3 +33,29 @@ channels:
     allowed_from:
       - series-branch
     require_evidence: false
+
+artifact_budgets:
+  normal:
+    max_total_mb: 200
+    max_files: 5000
+    per_section_mb:
+      evidence: 50
+      test_reports: 50
+      coverage: 50
+      e2e_media: 50
+  release_intent:
+    max_total_mb: 150
+    max_files: 3000
+    per_section_mb:
+      evidence: 60
+      test_reports: 40
+      coverage: 30
+      e2e_media: 20
+      server-dist: 100
+      client-dist: 100
+  exclusions:
+    - "**/node_modules/**"
+    - "**/.pnpm-store/**"
+    - "**/.turbo/**"
+    - "**/.cache/**"
+    - "**/playwright-report/**/trace.zip"

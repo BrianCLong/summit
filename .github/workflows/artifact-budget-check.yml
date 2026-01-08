@@ -1,0 +1,54 @@
+name: Artifact Budget Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/ci/inventory_artifacts.mjs'
+      - 'scripts/ci/enforce_artifact_budgets.mjs'
+      - 'release-policy.yml'
+
+jobs:
+  check-budgets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install --filter scripts/ci...
+
+      # Create some dummy artifacts for testing
+      - name: Generate Dummy Artifacts
+        run: |
+          mkdir -p artifacts/evidence
+          mkdir -p artifacts/coverage
+
+          # Create a 10MB file
+          dd if=/dev/zero of=artifacts/evidence/large_file.bin bs=1M count=10
+
+          # Create many small files
+          for i in {1..100}; do echo "test" > artifacts/coverage/file_$i.txt; done
+
+      - name: Inventory Artifacts
+        run: |
+          node scripts/ci/inventory_artifacts.mjs --root artifacts --policy release-policy.yml
+
+      - name: Enforce Budgets (Normal)
+        run: |
+          node scripts/ci/enforce_artifact_budgets.mjs --profile normal
+
+      - name: Enforce Budgets (Release Intent)
+        run: |
+          node scripts/ci/enforce_artifact_budgets.mjs --profile release_intent
+
+      - name: Upload Budget Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: artifact-budget-report
+          path: artifacts/artifact-budget/
