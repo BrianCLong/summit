@@ -1,55 +1,84 @@
-# GitHub Actions Workflows
+# CI/CD Workflows
 
-This document provides a catalog of the rationalized GitHub Actions workflows for the Summit repository. The original 250+ workflows have been consolidated to a streamlined, reusable, and maintainable structure to improve CI/CD velocity and reduce operational overhead.
+This directory contains the GitHub Actions workflows for the Summit/IntelGraph repository.
 
-## Guiding Principles
+## Release Process
 
-- **Consolidation over Proliferation**: Workflows are consolidated into logical groups. New CI logic should be added to existing workflows where possible.
-- **Reusability**: Common tasks like environment setup and testing are encapsulated in reusable workflows (`./reusable/`).
-- **Clarity and Convention**: Workflows are named clearly to indicate their purpose.
-- **Golden Path Integrity**: Core workflows that protect the main branch are preserved and explicitly defined.
+The GA (General Availability) release process is a multi-phase, policy-driven operation designed for safety, auditability, and manual approval. It is orchestrated by three core workflows:
 
----
+1.  `release-governance.yml`
+2.  `release-cut.yml`
+3.  `post-release-verify.yml`
 
-## 1. Core CI/CD Pipeline
+### How to Execute a GA Release
 
-These are the primary workflows that run on every pull request and push to `main`.
+**Phase 1: Pre-cut Validation (Eligibility Check)**
 
-### `ci.yml`
+1.  Navigate to **Actions -> Release Governance**.
+2.  Click **Run workflow**.
+3.  Enter the full **commit SHA** you want to release in the `target` field.
+4.  Leave `apply` as `false`.
+5.  Run the workflow and wait for it to complete.
+6.  Verify that the run produced an artifact named `evidence-bundle-<sha>`.
+7.  Inside the bundle, confirm that `decision.json` shows `"decision": "ELIGIBLE"`.
+8.  **Record the workflow run ID**. You will need it for the next step.
 
-This is the main, consolidated Continuous Integration (CI) workflow. It orchestrates the entire validation pipeline for the application.
+**Phase 2: War Room & Approval**
 
-**Key Stages:**
-1.  **Setup**: Initializes the environment, installs dependencies, and restores caches using the `_reusable-setup.yml` workflow.
-2.  **Lint**: Runs static code analysis to enforce code style and catch common errors.
-3.  **Typecheck**: Performs TypeScript type checking to ensure type safety across the codebase.
-4.  **Test Matrix**: Runs a parallel matrix of test suites using the `_reusable-test.yml` workflow:
-    - `unit`: Fast-running unit tests.
-    - `integration`: Tests requiring database and other service connections.
-    - `e2e`: End-to-end tests using Playwright.
+1.  Generate the War Room checklist by running the `generate-war-room-checklist.mjs` script.
+2.  Convene the release team and complete the checklist.
+3.  If all preconditions are met, proceed to the approval gate.
 
----
+**Phase 3: The Cut (Applying the GA Tag)**
 
-## 2. Required Branch Protection Workflows
+1.  Navigate to **Actions -> Release Cut**.
+2.  Click **Run workflow**.
+3.  Enter the same **commit SHA** in the `sha` field.
+4.  Enter the **workflow run ID** from the `release-governance` run in the `governance_run_id` field. This links the cut to its eligibility evidence.
+5.  Set `apply` to `true`.
+6.  Run the workflow. It will pause and wait for approval.
+7.  An authorized reviewer must approve the run from the "Environments" tab or the workflow run UI.
 
-These workflows are configured as **required status checks** in the branch protection rules for `main`. They must pass before any pull request can be merged. **Do not modify these files without careful consideration and approval.**
+**Phase 4 & 5: Automated Verification**
 
-- **`ci-lint-and-unit.yml`**: Provides a fast feedback loop by running linting and unit tests.
-- **`ci-golden-path.yml`**: Ensures the application's "golden path" is always functional. It runs `make bootstrap`, `make up`, and `make smoke`.
-- **`security.yml`**: Performs critical security scans, including dependency scanning with Trivy, secret scanning with Gitleaks, and static application security testing (SAST).
+*   Once approved, the `release-cut` workflow creates and pushes the `ga-<date>-<shortsha>` tag.
+*   The push of this tag automatically triggers the `post-release-verify.yml` workflow.
+*   Monitor this workflow to ensure the smoke tests pass.
+*   If it fails, an incident report is generated, and the rollback plan should be activated.
 
----
+**Phase 6: Completion**
 
-## 3. Reusable Workflows
+*   If the post-release verification passes, run the `generate-release-summary.mjs` script to create the final `RELEASE_COMPLETE` artifact.
+*   The release is now complete.
 
-The `reusable/` directory contains modular, parameterized workflows that are called by other workflows. This avoids code duplication and centralizes common logic.
+### Workflow Details
 
-- **`_reusable-setup.yml`**: Handles checkout, Node.js/pnpm setup, dependency installation, and caching.
-- **`_reusable-test.yml`**: A comprehensive test runner that can execute different types of tests (unit, integration, e2e) and manage services like PostgreSQL, Redis, and Neo4j.
-- **Other `_reusable-*.yml` files**: Provide building blocks for CI, security, performance, and release tasks.
+#### `release-governance.yml`
 
----
+*   **Trigger**: `workflow_dispatch`
+*   **Purpose**: Performs security, policy, and readiness checks on a given commit SHA.
+*   **WARNING**: As of the initial implementation, the underlying script (`scripts/release/check-eligibility.mjs`) is a **placeholder**. It does **not** perform real checks and will always return an `ELIGIBLE` decision. This framework must be integrated with actual security and policy scanners before being used in production.
+*   **Inputs**:
+    *   `channel`: The release channel (e.g., `ga`).
+    *   `target`: The commit SHA to evaluate.
+    *   `apply`: Should always be `false`.
+*   **Outputs**: An evidence bundle artifact containing `decision.json`.
 
-## 4. Archived Workflows
+#### `release-cut.yml`
 
-The `.archive/` directory contains over 200 legacy workflows that have been decommissioned during the rationalization sprint. These are kept for historical reference and can be used as a source for logic if needed in the future. They are not active and will not be triggered.
+*   **Trigger**: `workflow_dispatch`
+*   **Purpose**: Creates and pushes the official GA tag after receiving manual approval.
+*   **Inputs**:
+    *   `channel`: Must be `ga`.
+    *   `sha`: The commit SHA to tag.
+    *   `governance_run_id`: The run ID of the `release-governance` workflow that deemed the SHA eligible.
+    *   `apply`: Must be `true` to execute the cut.
+*   **Protection**: Uses the `release-approval` environment, requiring a manual sign-off.
+
+#### `post-release-verify.yml`
+
+*   **Trigger**: `push` of a tag matching `ga-*`
+*   **Purpose**: Runs the "golden path" smoke tests (`make smoke`) to validate the release.
+*   **Outputs**:
+    *   On success: A `post-release-evidence.json` artifact.
+    *   On failure: An `incident-report.md` artifact.

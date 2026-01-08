@@ -1,0 +1,72 @@
+name: Post-Release Verification
+
+on:
+  push:
+    tags:
+      - 'ga-*'
+
+jobs:
+  verify-release:
+    name: Verify GA Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Smoke Test Suite
+        id: smoke-test
+        continue-on-error: true
+        run: |
+          # The 'make smoke' command is the designated "golden path" test.
+          # We assume it exits with a non-zero status code on failure.
+          if make smoke; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Incident Report on Failure
+        if: steps.smoke-test.outputs.status == 'failure'
+        run: |
+          mkdir -p ./.artifacts
+          cat << EOF > ./.artifacts/incident-report.md
+          # 🚨 Post-Release Verification Failed
+          - **Tag**: \`${{ github.ref_name }}\`
+          - **Timestamp**: $(date -u --iso-8601=seconds)
+          - **Failure**: The 'make smoke' command failed after the release tag was pushed.
+          ## Next Steps
+          1. **Do not promote this release.**
+          2. Review the logs of this workflow run for detailed error messages.
+          3. Initiate the rollback process as defined in \`ROLLBACK.md\`.
+          EOF
+          # In a real scenario, this would also trigger PagerDuty, Slack alerts, etc.
+          echo "::error::Post-release verification failed. Incident report generated."
+
+      - name: Generate Evidence on Success
+        if: steps.smoke-test.outputs.status == 'success'
+        run: |
+          mkdir -p ./.artifacts
+          echo '{"verification": "PASS", "tag": "${{ github.ref_name }}", "verifiedAt": "'$(date -u --iso-8601=seconds)'"}' > ./.artifacts/post-release-evidence.json
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-release-verify-result-${{ github.ref_name }}
+          path: ./.artifacts/

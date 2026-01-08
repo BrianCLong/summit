@@ -1,0 +1,67 @@
+name: Release Governance
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel (e.g., ga, rc)'
+        required: true
+        type: string
+        default: 'ga'
+      target:
+        description: 'The full commit SHA to evaluate for release readiness'
+        required: true
+        type: string
+      apply:
+        description: 'Dry-run if false, execute if true (for this workflow, it should always be false)'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  check-eligibility:
+    name: Check Release Eligibility
+    runs-on: ubuntu-latest
+    outputs:
+      decision: ${{ steps.check.outputs.decision }}
+      sha: ${{ steps.check.outputs.sha }}
+
+    steps:
+      - name: Checkout code at target SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.target }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Eligibility Check
+        id: check
+        run: |
+          mkdir -p ./.evidence/release-governance
+          node scripts/release/check-eligibility.mjs --sha ${{ github.event.inputs.target }} --channel ${{ github.event.inputs.channel }}
+          DECISION=$(jq -r .decision ./.evidence/release-governance/decision.json)
+          echo "decision=$DECISION" >> $GITHUB_OUTPUT
+          echo "sha=${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
+
+      - name: Create Evidence Bundle
+        if: always()
+        run: |
+          tar -czf release-governance-evidence.tar.gz ./.evidence/release-governance/
+
+      - name: Upload Evidence Bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-${{ github.event.inputs.target }}
+          path: release-governance-evidence.tar.gz

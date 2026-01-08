@@ -1,0 +1,144 @@
+name: Release Cut
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Release channel (must be "ga")'
+        required: true
+        type: string
+        default: 'ga'
+      sha:
+        description: 'The full commit SHA to apply the GA tag to'
+        required: true
+        type: string
+      governance_run_id:
+        description: 'The ID of the release-governance workflow run that approved this SHA'
+        required: true
+        type: string
+      apply:
+        description: 'Set to true to create and push the GA refs'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  prepare-cut:
+    name: Prepare and Verify
+    runs-on: ubuntu-latest
+    outputs:
+      eligible: ${{ steps.verify_eligibility.outputs.eligible }}
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.sha }}
+
+      - name: Download Eligibility Decision
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: release-governance.yml
+          run_id: ${{ github.event.inputs.governance_run_id }}
+          name: evidence-bundle-${{ github.event.inputs.sha }}
+          path: ./.evidence-download
+
+      - name: Verify Eligibility
+        id: verify_eligibility
+        run: |
+          tar -xzf ./.evidence-download/release-governance-evidence.tar.gz
+          DECISION=$(jq -r .decision ./.evidence/release-governance/decision.json)
+          if [ "$DECISION" == "ELIGIBLE" ]; then
+            echo "eligible=true" >> $GITHUB_OUTPUT
+            echo "✅ SHA is eligible for release based on run ${{ github.event.inputs.governance_run_id }}."
+          else
+            echo "eligible=false" >> $GITHUB_OUTPUT
+            echo "❌ SHA is NOT eligible for release based on run ${{ github.event.inputs.governance_run_id }}."
+            exit 1
+          fi
+
+      - name: Generate Version String
+        id: get_version
+        run: |
+          VERSION_DATE=$(date -u +'%Y.%m.%d')
+          SHORT_SHA=$(echo "${{ github.event.inputs.sha }}" | cut -c1-7)
+          VERSION="ga-${VERSION_DATE}-${SHORT_SHA}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Generated version: $VERSION"
+
+  execute-cut:
+    name: Execute Release Cut
+    needs: prepare-cut
+    if: needs.prepare-cut.outputs.eligible == 'true' && github.event.inputs.apply == true
+    runs-on: ubuntu-latest
+    environment: release-approval
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.sha }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure Git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Create and Push GA Refs
+        id: apply_refs
+        run: |
+          node scripts/release/apply-refs.mjs --sha ${{ github.event.inputs.sha }} --version ${{ needs.prepare-cut.outputs.version }} > apply-refs-output.json
+          cat apply-refs-output.json
+          TAG_CREATED=$(jq -r .tagCreated apply-refs-output.json)
+          BRANCH_CREATED=$(jq -r .branchCreated apply-refs-output.json)
+          echo "tag_created=$TAG_CREATED" >> $GITHUB_OUTPUT
+          echo "branch_created=$BRANCH_CREATED" >> $GITHUB_OUTPUT
+
+      - name: Generate Result Artifact
+        if: always()
+        run: |
+          mkdir -p ./.artifacts
+          cat << EOF > ./.artifacts/result.md
+          # Release Cut Complete
+          - **Actor**: ${{ github.actor }}
+          - **Timestamp**: $(date -u --iso-8601=seconds)
+          - **SHA**: \`${{ github.event.inputs.sha }}\`
+          - **Channel**: `${{ github.event.inputs.channel }}`
+          ## Refs Created
+          - **Tag**: \`${{ steps.apply_refs.outputs.tag_created }}\`
+          - **Branch**: \`${{ steps.apply_refs.outputs.branch_created || 'N/A' }}\`
+          EOF
+
+      - name: Upload Result Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-cut-result-${{ github.event.inputs.sha }}
+          path: ./.artifacts/result.md
+
+  dry-run-summary:
+    name: Dry Run Summary
+    if: github.event.inputs.apply == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report Dry Run
+        run: |
+          echo "## 🧪 Dry Run: Release Cut" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow was run with \`apply=false\`. No release refs were created." >> $GITHUB_STEP_SUMMARY
+          echo "- **Target SHA**: \`${{ github.event.inputs.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Approval Gate**: Skipped" >> $GITHUB_STEP_SUMMARY
