@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Tuple
 
 import numpy as np
 import pandas as pd
@@ -16,9 +15,9 @@ from sklearn.model_selection import train_test_split
 class FidelityReport:
     """Describes how closely synthetic data matches the source distribution."""
 
-    class_balance: Dict[str, float]
-    numeric_drift: Dict[str, float]
-    categorical_overlap: Dict[str, float]
+    class_balance: dict[str, float]
+    numeric_drift: dict[str, float]
+    categorical_overlap: dict[str, float]
 
 
 @dataclass(frozen=True)
@@ -31,27 +30,29 @@ class UtilityReport:
     meets_precision_target: bool
 
 
-def build_fidelity_report(original: pd.DataFrame, synthetic: pd.DataFrame, target: str) -> FidelityReport:
+def build_fidelity_report(
+    original: pd.DataFrame, synthetic: pd.DataFrame, target: str
+) -> FidelityReport:
     """Compute summary statistics describing fidelity."""
 
     class_balance = (
-        pd.concat([original[target], synthetic[target]])
-        .value_counts(normalize=True)
-        .to_dict()
+        pd.concat([original[target], synthetic[target]]).value_counts(normalize=True).to_dict()
     )
 
     numeric_columns = original.select_dtypes(include=["number"]).columns
-    numeric_drift: Dict[str, float] = {}
+    numeric_drift: dict[str, float] = {}
     for column in numeric_columns:
         orig = original[column]
         synth = synthetic[column]
         if orig.std(ddof=0) == 0:
             numeric_drift[column] = float(abs(orig.mean() - synth.mean()))
         else:
-            numeric_drift[column] = float(abs(orig.mean() - synth.mean()) / (orig.std(ddof=0) + 1e-9))
+            numeric_drift[column] = float(
+                abs(orig.mean() - synth.mean()) / (orig.std(ddof=0) + 1e-9)
+            )
 
     categorical_columns = [c for c in original.columns if c not in numeric_columns and c != target]
-    categorical_overlap: Dict[str, float] = {}
+    categorical_overlap: dict[str, float] = {}
     for column in categorical_columns:
         orig_counts = original[column].value_counts(normalize=True)
         synth_counts = synthetic[column].value_counts(normalize=True)
@@ -101,7 +102,7 @@ def _prepare_features(df: pd.DataFrame) -> np.ndarray:
     return encoded.to_numpy(dtype=float)
 
 
-def _train_and_score(X: np.ndarray, y: np.ndarray, seed: int) -> Tuple[float, float]:
+def _train_and_score(X: np.ndarray, y: np.ndarray, seed: int) -> tuple[float, float]:
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, stratify=y, random_state=seed
     )

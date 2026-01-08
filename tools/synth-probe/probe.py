@@ -3,7 +3,7 @@ import json
 import os
 import sys
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 import yaml
@@ -35,8 +35,8 @@ GP_RATIO = Histogram(
 )
 
 
-def load_catalog(path: str) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as handle:
+def load_catalog(path: str) -> dict[str, Any]:
+    with open(path, encoding="utf-8") as handle:
         data = yaml.safe_load(handle)
     journeys = {j["id"]: j for j in data.get("journeys", [])}
     return {"journeys": journeys}
@@ -62,17 +62,19 @@ def init_tracer() -> None:
 
 
 class JourneyRunner:
-    def __init__(self, catalog: Dict[str, Any], base_url: str, headers: Dict[str, str], timeout: int):
+    def __init__(
+        self, catalog: dict[str, Any], base_url: str, headers: dict[str, str], timeout: int
+    ):
         self.catalog = catalog
         self.base_url = base_url.rstrip("/")
         self.headers = headers
         self.timeout = timeout
         self.tracer = trace.get_tracer(__name__)
 
-    def list_journeys(self) -> List[Dict[str, Any]]:
+    def list_journeys(self) -> list[dict[str, Any]]:
         return list(self.catalog["journeys"].values())
 
-    def run_journey(self, journey_id: str, samples: int = 1) -> Dict[str, Any]:
+    def run_journey(self, journey_id: str, samples: int = 1) -> dict[str, Any]:
         journey = self.catalog["journeys"].get(journey_id)
         if not journey:
             raise ValueError(f"Unknown journey {journey_id}")
@@ -91,7 +93,7 @@ class JourneyRunner:
         GP_RATIO.labels(journey=journey_id).observe(success_ratio)
         return {"journey": journey_id, "success_ratio": success_ratio, "steps": results}
 
-    def _run_step(self, journey_id: str, step: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_step(self, journey_id: str, step: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.base_url}{step['target']}"
         method = step.get("method", "GET").upper()
         expected_status = step.get("expected_status", 200)
@@ -109,11 +111,11 @@ class JourneyRunner:
             span.set_attribute("release.sha", os.environ.get("GIT_SHA", ""))
 
             request_headers = dict(self.headers)
-            carrier: Dict[str, str] = {}
+            carrier: dict[str, str] = {}
             propagate.inject(carrier)
             request_headers.update(carrier)
             response = None
-            error_reason: Optional[str] = None
+            error_reason: str | None = None
             try:
                 response = requests.request(
                     method,
@@ -159,7 +161,7 @@ class JourneyRunner:
         }
 
 
-def parse_args(argv: List[str]) -> argparse.Namespace:
+def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Golden path synthetic probe")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -180,8 +182,8 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-def header_dict(header_list: List[str], tenant: str, token: Optional[str]) -> Dict[str, str]:
-    headers: Dict[str, str] = {"X-Tenant": tenant, "Accept": "application/json"}
+def header_dict(header_list: list[str], tenant: str, token: str | None) -> dict[str, str]:
+    headers: dict[str, str] = {"X-Tenant": tenant, "Accept": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
     for item in header_list:
@@ -191,14 +193,22 @@ def header_dict(header_list: List[str], tenant: str, token: Optional[str]) -> Di
     return headers
 
 
-def main(argv: List[str]) -> int:
+def main(argv: list[str]) -> int:
     args = parse_args(argv)
     init_tracer()
     catalog = load_catalog(args.catalog)
 
     if args.command == "list":
         journeys = catalog["journeys"].values()
-        print(json.dumps([{"id": j["id"], "name": j.get("name"), "steps": len(j.get("steps", []))} for j in journeys], indent=2))
+        print(
+            json.dumps(
+                [
+                    {"id": j["id"], "name": j.get("name"), "steps": len(j.get("steps", []))}
+                    for j in journeys
+                ],
+                indent=2,
+            )
+        )
         return 0
 
     if args.command == "run":

@@ -16,6 +16,8 @@ import AuthService from '../../src/services/AuthService';
 import { ensureAuthenticated, requirePermission } from '../../src/middleware/auth';
 import { securityTestVectors, createMockRequest, createMockResponse } from '../utils/auth-test-helpers';
 import type { Pool } from 'pg';
+import GAEnrollmentService from '../../src/services/GAEnrollmentService.js';
+import { secretsService } from '../../src/services/SecretsService.js';
 
 jest.mock('../../src/config/database', () => ({
     getPostgresPool: jest.fn(() => ({
@@ -49,13 +51,13 @@ jest.mock('../../src/config/index.js', () => ({
 describe('Authentication Security Tests', () => {
   let authService: AuthService;
   let mockPool: jest.Mocked<Pool>;
-  let mockClient: jest.Mocked<PoolClient>;
+  let mockClient: jest.Mocked<{ query: jest.Mock; release: jest.Mock }>;
 
   beforeEach(() => {
     mockClient = {
       query: jest.fn(),
       release: jest.fn(),
-    } as unknown as jest.Mocked<PoolClient>;
+    } as unknown as jest.Mocked<{ query: jest.Mock; release: jest.Mock }>;
 
     mockPool = {
       connect: jest.fn().mockResolvedValue(mockClient),
@@ -67,6 +69,19 @@ describe('Authentication Security Tests', () => {
 
     authService = new AuthService();
     jest.clearAllMocks();
+    const config = require('../../src/config/index.js').default;
+    config.jwt = {
+      secret: 'test-secret',
+      expiresIn: '24h',
+      refreshSecret: 'test-refresh',
+    };
+    jest
+      .spyOn(authService, 'generateTokens')
+      .mockResolvedValue({ token: 'token', refreshToken: 'refresh-token' });
+    jest
+      .spyOn(GAEnrollmentService, 'checkUserEnrollmentEligibility')
+      .mockResolvedValue({ eligible: true });
+    jest.spyOn(secretsService, 'getSecret').mockResolvedValue('test-secret');
   });
 
   describe('OWASP A01:2021 - Broken Access Control', () => {
@@ -124,7 +139,14 @@ describe('Authentication Security Tests', () => {
       ];
 
       roles.forEach(({ role, permission, shouldAllow }) => {
-        const user = { id: 'test', role, email: 'test@test.com', isActive: true, createdAt: new Date() };
+        const user = {
+          id: 'test',
+          role,
+          email: 'test@test.com',
+          isActive: true,
+          createdAt: new Date(),
+          scopes: [],
+        };
         const result = authService.hasPermission(user, permission);
         expect(result).toBe(shouldAllow);
       });
@@ -142,8 +164,17 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({}) // BEGIN
         .mockResolvedValueOnce({ rows: [] }) // No existing user
         .mockResolvedValueOnce({
-          rows: [{ id: 'user-123', email: userData.email }],
+          rows: [
+            {
+              id: 'user-123',
+              email: userData.email,
+              role: 'ANALYST',
+              is_active: true,
+              created_at: new Date(),
+            },
+          ],
         })
+        .mockResolvedValueOnce({}) // user_tenants
         .mockResolvedValueOnce({}) // Session
         .mockResolvedValueOnce({}); // COMMIT
 
@@ -162,7 +193,9 @@ describe('Authentication Security Tests', () => {
       const insertCall = mockClient.query.mock.calls.find((call: any) =>
         call[0].includes('INSERT INTO users'),
       );
-      expect(insertCall).toBeDefined();
+      if (!insertCall) {
+        throw new Error('Expected INSERT INTO users to be called');
+      }
       expect(insertCall[1]).not.toContain(userData.password);
     });
 
@@ -226,10 +259,19 @@ describe('Authentication Security Tests', () => {
           .mockResolvedValueOnce({}) // BEGIN
           .mockResolvedValueOnce({ rows: [] }) // Check existing
           .mockResolvedValueOnce({
-            rows: [{ id: 'user-123', email: 'test@example.com' }],
+            rows: [
+              {
+                id: 'user-123',
+                email: 'test@example.com',
+                role: 'ANALYST',
+                is_active: true,
+                created_at: new Date(),
+              },
+            ],
           })
-          .mockResolvedValueOnce({})
-          .mockResolvedValueOnce({});
+          .mockResolvedValueOnce({}) // user_tenants
+          .mockResolvedValueOnce({}) // Session
+          .mockResolvedValueOnce({}); // COMMIT
 
         const argon2 = require('argon2');
         argon2.hash = jest.fn().mockResolvedValue('hash');
@@ -281,10 +323,19 @@ describe('Authentication Security Tests', () => {
             .mockResolvedValueOnce({})
             .mockResolvedValueOnce({ rows: [] })
             .mockResolvedValueOnce({
-              rows: [{ id: 'user-123', first_name: payload }],
+              rows: [
+                {
+                  id: 'user-123',
+                  first_name: payload,
+                  role: 'ANALYST',
+                  is_active: true,
+                  created_at: new Date(),
+                },
+              ],
             })
-            .mockResolvedValueOnce({})
-            .mockResolvedValueOnce({});
+            .mockResolvedValueOnce({}) // user_tenants
+            .mockResolvedValueOnce({}) // Session
+            .mockResolvedValueOnce({}); // COMMIT
 
           const argon2 = require('argon2');
           argon2.hash = jest.fn().mockResolvedValue('hash');
@@ -456,7 +507,7 @@ describe('Authentication Security Tests', () => {
     it('should invalidate sessions on logout', async () => {
       mockClient.query
         .mockResolvedValueOnce({}) // BEGIN
-        .mockResolvedValueOnce({}) // Revoke all sessions
+        .mockResolvedValueOnce({ rows: [{ tenant_id: 'tenant-1', last_login: new Date() }] }) // Revoke all sessions
         .mockResolvedValueOnce({}); // COMMIT
 
       mockPool.query.mockResolvedValueOnce({});
@@ -564,8 +615,22 @@ describe('Authentication Security Tests', () => {
       const longPassword = 'b'.repeat(10000);
 
       mockClient.query
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({ rows: [] });
+        .mockResolvedValueOnce({}) // BEGIN
+        .mockResolvedValueOnce({ rows: [] }) // No existing user
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'user-123',
+              email: longEmail,
+              role: 'ANALYST',
+              is_active: true,
+              created_at: new Date(),
+            },
+          ],
+        })
+        .mockResolvedValueOnce({}) // user_tenants
+        .mockResolvedValueOnce({}) // Session
+        .mockResolvedValueOnce({}); // COMMIT
 
       // Should not crash, should handle gracefully
       await expect(
@@ -583,10 +648,19 @@ describe('Authentication Security Tests', () => {
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({
-          rows: [{ id: 'user-123', email: 'test@example.com' }],
+          rows: [
+            {
+              id: 'user-123',
+              email: 'test@example.com',
+              role: 'ANALYST',
+              is_active: true,
+              created_at: new Date(),
+            },
+          ],
         })
-        .mockResolvedValueOnce({})
-        .mockResolvedValueOnce({});
+        .mockResolvedValueOnce({}) // user_tenants
+        .mockResolvedValueOnce({}) // Session
+        .mockResolvedValueOnce({}); // COMMIT
 
       const argon2 = require('argon2');
       argon2.hash = jest.fn().mockResolvedValue('hash');

@@ -39,7 +39,7 @@ class DetectorConfig(BaseModel):
 
     @field_validator("adaptive_sensitivity")
     @classmethod
-    def _positive_sensitivity(cls, value: float) -> float:  # noqa: D401
+    def _positive_sensitivity(cls, value: float) -> float:
         """Ensure sensitivity is positive."""
 
         if value <= 0:

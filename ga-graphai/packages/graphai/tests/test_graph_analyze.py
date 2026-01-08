@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from main import app  # type: ignore
 
-
 client = TestClient(app)
 
 
@@ -22,7 +21,11 @@ def test_graph_analysis_pipeline():
             {"source": "e", "target": "f", "timestamp": "2024-01-05T00:00:00Z", "label": "ef"},
         ],
         "custom_algorithms": [
-            {"name": "a_to_f_path", "algorithm": "shortest_path", "parameters": {"source": "a", "target": "f"}},
+            {
+                "name": "a_to_f_path",
+                "algorithm": "shortest_path",
+                "parameters": {"source": "a", "target": "f"},
+            },
             {"name": "primary_pagerank", "algorithm": "pagerank", "parameters": {"alpha": 0.9}},
         ],
     }

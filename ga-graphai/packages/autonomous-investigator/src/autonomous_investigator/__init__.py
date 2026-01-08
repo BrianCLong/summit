@@ -12,12 +12,12 @@ from .fusion_pipeline import (
 )
 
 __all__ = [
-    "app",
     "CorrelationResult",
     "FusionEntity",
     "FusionOutcome",
     "FusionPattern",
     "IntelligenceFusionPipeline",
+    "app",
 ]
 
 

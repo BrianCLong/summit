@@ -220,8 +220,9 @@ class DistributedTrainingManager:
             scheduler = None
 
         if not self.config.use_deepspeed:
-            optimizer, scheduler = self.accelerator.prepare_optimizer(optimizer), (
-                self.accelerator.prepare_scheduler(scheduler) if scheduler else None
+            optimizer, scheduler = (
+                self.accelerator.prepare_optimizer(optimizer),
+                (self.accelerator.prepare_scheduler(scheduler) if scheduler else None),
             )
 
         self.optimizer = optimizer

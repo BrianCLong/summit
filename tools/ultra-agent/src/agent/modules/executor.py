@@ -1,9 +1,10 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from ..llm import LLM
-from .. import tools
+
 import json
-import pathlib
+from dataclasses import dataclass
+
+from .. import tools
+from ..llm import LLM
 
 
 @dataclass
@@ -50,18 +51,18 @@ FORMAT (JSON):
         response = await self.llm.call(prompt)
 
         try:
-            start = response.find('{')
-            end = response.rfind('}') + 1
+            start = response.find("{")
+            end = response.rfind("}") + 1
             if start != -1 and end != -1:
                 json_str = response[start:end]
                 files = json.loads(json_str)
             else:
-                 raise ValueError("No JSON found")
-        except Exception as e:
+                raise ValueError("No JSON found")
+        except Exception:
             # Fallback for demo/testing without LLM
             files = {
                 "output/README.md": f"# Generated Project\n\nSummary: {interpreted.summary}",
-                "output/src/main.py": "print('Hello World')"
+                "output/src/main.py": "print('Hello World')",
             }
             # In production, we would raise or retry
             # raise RuntimeError(f"LLM response was not valid JSON file map: {e}")
@@ -78,7 +79,5 @@ FORMAT (JSON):
             written_files.append(full_path)
 
         return ExecutionResult(
-            success=True,
-            files=written_files,
-            notes=["Generated project skeleton from LLM."]
+            success=True, files=written_files, notes=["Generated project skeleton from LLM."]
         )

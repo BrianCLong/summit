@@ -1,8 +1,8 @@
 """Utility datasets for the Counterfactual Evaluation Harness."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -20,11 +20,11 @@ class CEHDataset:
     name: str
     data: pd.DataFrame
     target: pd.Series
-    confounders: List[str] = field(default_factory=list)
-    treatment: Optional[str] = None
-    environments: Optional[pd.Series] = None
+    confounders: list[str] = field(default_factory=list)
+    treatment: str | None = None
+    environments: pd.Series | None = None
     description: str = ""
-    metadata: Dict[str, object] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not isinstance(self.data, pd.DataFrame):  # pragma: no cover - defensive
@@ -140,6 +140,6 @@ def load_breast_cancer_demo(seed: int = 11) -> CEHDataset:
 
 __all__ = [
     "CEHDataset",
-    "load_synthetic_demo",
     "load_breast_cancer_demo",
+    "load_synthetic_demo",
 ]

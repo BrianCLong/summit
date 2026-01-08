@@ -1,20 +1,28 @@
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 from pydantic import BaseModel
-import random
+
 from .schemas import Candidate
+
 
 class OversightDecision(BaseModel):
     action: str  # "APPROVE", "REJECT", "ESCALATE"
     score: float
     reason: str
-    tags: List[str]
+    tags: list[str]
+
 
 class Policy:
-    def evaluate(self, prompt: str, candidate: Candidate, telemetry: Dict[str, Any]) -> OversightDecision:
+    def evaluate(
+        self, prompt: str, candidate: Candidate, telemetry: dict[str, Any]
+    ) -> OversightDecision:
         raise NotImplementedError
 
+
 class AutoJudge(Policy):
-    def evaluate(self, prompt: str, candidate: Candidate, telemetry: Dict[str, Any]) -> OversightDecision:
+    def evaluate(
+        self, prompt: str, candidate: Candidate, telemetry: dict[str, Any]
+    ) -> OversightDecision:
         # Heuristic checks
         text = candidate.text.lower()
         if "danger" in text or "kill" in text:
@@ -22,7 +30,7 @@ class AutoJudge(Policy):
                 action="REJECT",
                 score=0.1,
                 reason="Detected unsafe keywords",
-                tags=["safety_violation"]
+                tags=["safety_violation"],
             )
 
         # Tool usage check (mock)
@@ -33,30 +41,30 @@ class AutoJudge(Policy):
                         action="REJECT",
                         score=0.4,
                         reason="Tool execution failure",
-                        tags=["tool_failure"]
+                        tags=["tool_failure"],
                     )
 
         # Telemetry aware check
         if telemetry.get("high_risk_flag"):
-             return OversightDecision(
+            return OversightDecision(
                 action="ESCALATE",
                 score=0.5,
                 reason="High risk telemetry flag active",
-                tags=["telemetry_escalation"]
+                tags=["telemetry_escalation"],
             )
 
         return OversightDecision(
-            action="APPROVE",
-            score=0.9,
-            reason="Passed heuristic checks",
-            tags=["safe"]
+            action="APPROVE", score=0.9, reason="Passed heuristic checks", tags=["safe"]
         )
 
+
 class OversightOrchestrator:
-    def __init__(self, policies: List[Policy] = None):
+    def __init__(self, policies: list[Policy] = None):
         self.policies = policies or [AutoJudge()]
 
-    def decide(self, prompt: str, candidate: Candidate, telemetry: Optional[Dict[str, Any]] = None) -> OversightDecision:
+    def decide(
+        self, prompt: str, candidate: Candidate, telemetry: dict[str, Any] | None = None
+    ) -> OversightDecision:
         telemetry = telemetry or {}
 
         final_decision = OversightDecision(action="APPROVE", score=1.0, reason="Default", tags=[])

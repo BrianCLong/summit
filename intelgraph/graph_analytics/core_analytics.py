@@ -208,11 +208,11 @@ def detect_roles_and_brokers(graph: Graph) -> dict[str, Any]:
 
 __all__ = [
     "Graph",
-    "find_shortest_path",
-    "find_k_shortest_paths",
-    "detect_communities_louvain",
-    "detect_communities_leiden",
     "calculate_betweenness_centrality",
     "calculate_eigenvector_centrality",
+    "detect_communities_leiden",
+    "detect_communities_louvain",
     "detect_roles_and_brokers",
+    "find_k_shortest_paths",
+    "find_shortest_path",
 ]

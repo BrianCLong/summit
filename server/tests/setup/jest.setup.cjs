@@ -84,6 +84,7 @@ jest.mock('ioredis', () => {
     async get() { return null; }
     async set() { return 'OK'; }
     async del() { return 1; }
+    async info() { return 'redis_version:7.0.0'; }
     async publish(channel, message) {
       if (subscribers.has(channel)) {
         subscribers.get(channel).forEach(client => {

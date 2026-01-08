@@ -15,12 +15,12 @@ import EntityCorrelationEngine from '../EntityCorrelationEngine.js';
  */
 export class AdvancedCorrelationEngine {
   private embeddingService: EmbeddingService;
-  private baseCorrelationEngine: EntityCorrelationEngine;
+  private baseCorrelationEngine: any;
   private logger = logger.child({ service: 'AdvancedCorrelationEngine' });
 
   constructor(
     embeddingService?: EmbeddingService,
-    baseCorrelationEngine?: EntityCorrelationEngine
+    baseCorrelationEngine?: any
   ) {
     this.embeddingService = embeddingService || new EmbeddingService();
     this.baseCorrelationEngine = baseCorrelationEngine || new EntityCorrelationEngine();

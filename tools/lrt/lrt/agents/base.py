@@ -1,9 +1,10 @@
 """Base classes for red-team agents."""
+
 from __future__ import annotations
 
 import abc
 import random
-from typing import Iterable
+from collections.abc import Iterable
 
 from ..api import AttackSession, ProtectedAPI
 

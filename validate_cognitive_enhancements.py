@@ -64,9 +64,9 @@ def validate_cognitive_enhancements():
             assert hasattr(agent, "energy_level"), "Agent missing energy_level"
             assert hasattr(agent, "motivation_level"), "Agent missing motivation_level"
             assert hasattr(agent, "cognitive_biases"), "Agent missing cognitive_biases"
-            assert hasattr(
-                agent, "relationship_preferences"
-            ), "Agent missing relationship_preferences"
+            assert hasattr(agent, "relationship_preferences"), (
+                "Agent missing relationship_preferences"
+            )
 
             print("✅ All enhanced agent properties present")
 
@@ -79,9 +79,9 @@ def validate_cognitive_enhancements():
             # Test collective state method
             collective_state = cognitive_os.get_collective_psychological_state()
             assert "system_mood" in collective_state, "Missing system mood in collective state"
-            assert (
-                "aggregate_cognitive_metrics" in collective_state
-            ), "Missing aggregate cognitive metrics"
+            assert "aggregate_cognitive_metrics" in collective_state, (
+                "Missing aggregate cognitive metrics"
+            )
             print("✅ Collective psychological state working correctly")
 
     except Exception as e:

@@ -10,6 +10,7 @@ from intelgraph_py.storage.neo4j_store import Neo4jStore
 
 load_dotenv()
 
+
 class OSINTDataFetcher:
     """Collects OSINT information from various external services."""
 

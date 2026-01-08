@@ -18,6 +18,7 @@ from typing import Any
 @dataclass
 class MappingDecision:
     """A single field mapping decision."""
+
     source_field: str
     canonical_entity: str
     canonical_property: str
@@ -30,6 +31,7 @@ class MappingDecision:
 @dataclass
 class PIIHandling:
     """PII handling decision for a field."""
+
     field_name: str
     pii_category: str
     redaction_strategy: str
@@ -40,6 +42,7 @@ class PIIHandling:
 @dataclass
 class LicenseDecision:
     """License compliance decision."""
+
     source_name: str
     license_id: str | None
     compliance_status: str  # allow, warn, block
@@ -51,6 +54,7 @@ class LicenseDecision:
 @dataclass
 class IngestConfiguration:
     """Complete ingest configuration with lineage."""
+
     config_id: str
     tenant_id: str
     source_name: str
@@ -274,13 +278,9 @@ class LineageRecorder:
         if not tenant_dir.exists():
             return []
 
-        return [
-            file.stem for file in tenant_dir.glob("*.json")
-        ]
+        return [file.stem for file in tenant_dir.glob("*.json")]
 
-    def query_by_source(
-        self, tenant_id: str, source_name: str
-    ) -> list[IngestConfiguration]:
+    def query_by_source(self, tenant_id: str, source_name: str) -> list[IngestConfiguration]:
         """Query configurations by source name.
 
         Args:
@@ -317,17 +317,12 @@ class LineageRecorder:
 
         # Extract field names and sample types
         first_row = sample_data[0]
-        schema = {
-            field: type(value).__name__
-            for field, value in first_row.items()
-        }
+        schema = {field: type(value).__name__ for field, value in first_row.items()}
 
         canonical_json = json.dumps(schema, sort_keys=True)
         return hashlib.sha256(canonical_json.encode()).hexdigest()
 
-    def generate_provenance_report(
-        self, config: IngestConfiguration
-    ) -> dict[str, Any]:
+    def generate_provenance_report(self, config: IngestConfiguration) -> dict[str, Any]:
         """Generate human-readable provenance report.
 
         Args:
@@ -349,24 +344,18 @@ class LineageRecorder:
             },
             "mappings": {
                 "count": len(config.field_mappings),
-                "entities": list(
-                    set(m.canonical_entity for m in config.field_mappings)
-                ),
+                "entities": list(set(m.canonical_entity for m in config.field_mappings)),
             },
             "pii": {
                 "count": len(config.pii_handling),
-                "categories": list(
-                    set(p.pii_category for p in config.pii_handling)
-                ),
+                "categories": list(set(p.pii_category for p in config.pii_handling)),
                 "requires_dpia": len(config.pii_handling) >= 3,
             },
             "license": {
                 "status": config.license_decision.compliance_status
                 if config.license_decision
                 else "unknown",
-                "reason": config.license_decision.reason
-                if config.license_decision
-                else None,
+                "reason": config.license_decision.reason if config.license_decision else None,
             },
             "provenance_chain": config.provenance_chain,
         }

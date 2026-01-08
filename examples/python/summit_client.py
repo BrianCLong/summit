@@ -8,32 +8,28 @@ Requirements:
 """
 
 import requests
-import json
-from typing import Dict, List, Optional
 
 
 class SummitClient:
     """Python client for Summit Platform API"""
-    
-    def __init__(self, base_url: str = "http://localhost:4000", token: Optional[str] = None):
+
+    def __init__(self, base_url: str = "http://localhost:4000", token: str | None = None):
         self.base_url = base_url
         self.graphql_url = f"{base_url}/graphql"
         self.token = token
         self.session = requests.Session()
-        
+
         if token:
-            self.session.headers.update({
-                "Authorization": f"Bearer {token}"
-            })
-    
-    def login(self, email: str, password: str) -> Dict:
+            self.session.headers.update({"Authorization": f"Bearer {token}"})
+
+    def login(self, email: str, password: str) -> dict:
         """
         Authenticate and get JWT token
-        
+
         Args:
             email: User email
             password: User password
-            
+
         Returns:
             Dict with token, refreshToken, and user info
         """
@@ -51,26 +47,24 @@ class SummitClient:
             }
         }
         """
-        
+
         variables = {"email": email, "password": password}
         response = self._execute_query(query, variables, auth_required=False)
-        
+
         if response and "login" in response:
             self.token = response["login"]["token"]
-            self.session.headers.update({
-                "Authorization": f"Bearer {self.token}"
-            })
-        
+            self.session.headers.update({"Authorization": f"Bearer {self.token}"})
+
         return response
-    
-    def list_entities(self, entity_type: Optional[str] = None, limit: int = 25) -> List[Dict]:
+
+    def list_entities(self, entity_type: str | None = None, limit: int = 25) -> list[dict]:
         """
         List entities
-        
+
         Args:
             entity_type: Filter by entity type (e.g., "Person", "Organization")
             limit: Maximum number of results
-            
+
         Returns:
             List of entities
         """
@@ -85,18 +79,18 @@ class SummitClient:
             }
         }
         """
-        
+
         variables = {"type": entity_type, "limit": limit}
         response = self._execute_query(query, variables)
         return response.get("entities", [])
-    
-    def get_entity(self, entity_id: str) -> Optional[Dict]:
+
+    def get_entity(self, entity_id: str) -> dict | None:
         """
         Get entity by ID
-        
+
         Args:
             entity_id: Entity ID
-            
+
         Returns:
             Entity data or None if not found
         """
@@ -118,19 +112,19 @@ class SummitClient:
             }
         }
         """
-        
+
         variables = {"id": entity_id}
         response = self._execute_query(query, variables)
         return response.get("entity")
-    
-    def create_entity(self, entity_type: str, props: Dict) -> Dict:
+
+    def create_entity(self, entity_type: str, props: dict) -> dict:
         """
         Create new entity
-        
+
         Args:
             entity_type: Type of entity (e.g., "Person", "Organization")
             props: Entity properties
-            
+
         Returns:
             Created entity
         """
@@ -144,25 +138,20 @@ class SummitClient:
             }
         }
         """
-        
-        variables = {
-            "input": {
-                "type": entity_type,
-                "props": props
-            }
-        }
-        
+
+        variables = {"input": {"type": entity_type, "props": props}}
+
         response = self._execute_query(query, variables)
         return response.get("createEntity", {})
-    
-    def update_entity(self, entity_id: str, props: Dict) -> Dict:
+
+    def update_entity(self, entity_id: str, props: dict) -> dict:
         """
         Update entity properties
-        
+
         Args:
             entity_id: Entity ID
             props: Properties to update
-            
+
         Returns:
             Updated entity
         """
@@ -176,18 +165,18 @@ class SummitClient:
             }
         }
         """
-        
+
         variables = {"id": entity_id, "props": props}
         response = self._execute_query(query, variables)
         return response.get("updateEntity", {})
-    
+
     def delete_entity(self, entity_id: str) -> bool:
         """
         Delete entity
-        
+
         Args:
             entity_id: Entity ID
-            
+
         Returns:
             True if deleted successfully
         """
@@ -196,19 +185,19 @@ class SummitClient:
             deleteEntity(id: $id)
         }
         """
-        
+
         variables = {"id": entity_id}
         response = self._execute_query(query, variables)
         return response.get("deleteEntity", False)
-    
-    def create_investigation(self, name: str, description: str = "") -> Dict:
+
+    def create_investigation(self, name: str, description: str = "") -> dict:
         """
         Create new investigation
-        
+
         Args:
             name: Investigation name
             description: Investigation description
-            
+
         Returns:
             Created investigation
         """
@@ -223,21 +212,16 @@ class SummitClient:
             }
         }
         """
-        
-        variables = {
-            "input": {
-                "name": name,
-                "description": description
-            }
-        }
-        
+
+        variables = {"input": {"name": name, "description": description}}
+
         response = self._execute_query(query, variables)
         return response.get("createInvestigation", {})
-    
-    def list_investigations(self) -> List[Dict]:
+
+    def list_investigations(self) -> list[dict]:
         """
         List all investigations
-        
+
         Returns:
             List of investigations
         """
@@ -257,46 +241,43 @@ class SummitClient:
             }
         }
         """
-        
+
         response = self._execute_query(query)
         return response.get("investigations", [])
-    
-    def _execute_query(self, query: str, variables: Optional[Dict] = None, 
-                      auth_required: bool = True) -> Dict:
+
+    def _execute_query(
+        self, query: str, variables: dict | None = None, auth_required: bool = True
+    ) -> dict:
         """
         Execute GraphQL query
-        
+
         Args:
             query: GraphQL query string
             variables: Query variables
             auth_required: Whether authentication is required
-            
+
         Returns:
             Query result data
-            
+
         Raises:
             Exception: If query fails
         """
         payload = {"query": query}
         if variables:
             payload["variables"] = variables
-        
+
         headers = {"Content-Type": "application/json"}
         if auth_required and self.token:
             headers["Authorization"] = f"Bearer {self.token}"
-        
-        response = requests.post(
-            self.graphql_url,
-            json=payload,
-            headers=headers
-        )
-        
+
+        response = requests.post(self.graphql_url, json=payload, headers=headers)
+
         response.raise_for_status()
         result = response.json()
-        
+
         if "errors" in result:
             raise Exception(f"GraphQL Error: {result['errors']}")
-        
+
         return result.get("data", {})
 
 
@@ -304,40 +285,31 @@ class SummitClient:
 if __name__ == "__main__":
     # Initialize client
     client = SummitClient(base_url="http://localhost:4000")
-    
+
     # Login
     print("Logging in...")
-    auth_result = client.login(
-        email="user@example.com",
-        password="password123"
-    )
+    auth_result = client.login(email="user@example.com", password="password123")
     print(f"Logged in as: {auth_result['login']['user']['name']}")
-    
+
     # Create entity
     print("\nCreating entity...")
     entity = client.create_entity(
-        entity_type="Person",
-        props={
-            "name": "John Doe",
-            "email": "john@example.com",
-            "age": 30
-        }
+        entity_type="Person", props={"name": "John Doe", "email": "john@example.com", "age": 30}
     )
     print(f"Created entity: {entity['id']}")
-    
+
     # List entities
     print("\nListing entities...")
     entities = client.list_entities(entity_type="Person", limit=10)
     print(f"Found {len(entities)} entities")
-    
+
     # Create investigation
     print("\nCreating investigation...")
     investigation = client.create_investigation(
-        name="Test Investigation",
-        description="Example investigation"
+        name="Test Investigation", description="Example investigation"
     )
     print(f"Created investigation: {investigation['id']}")
-    
+
     # List investigations
     print("\nListing investigations...")
     investigations = client.list_investigations()

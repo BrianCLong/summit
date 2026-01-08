@@ -30,7 +30,7 @@ class FileSource(BaseSource):
     def _infer_schema(self, path: Path) -> dict[str, str]:
         with path.open("r", newline="") as f:
             reader = csv.DictReader(f)
-            return {name: "string" for name in reader.fieldnames or []}
+            return dict.fromkeys(reader.fieldnames or [], "string")
 
     def read_full(self, stream: dict[str, str]) -> Iterator[dict[str, str]]:
         path = Path(stream["path"])

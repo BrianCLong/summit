@@ -20,7 +20,18 @@ const config: Config = {
     '/coverage/',
     '/playwright-tests/',
   ],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
   moduleNameMapper: {
+    '^jsdom$': '<rootDir>/tests/mocks/jsdom.ts',
+    '.*diagnostic-snapshotter(\\.js)?$': '<rootDir>/tests/mocks/diagnostic-snapshotter.ts',
+    '.*DeterministicExportService(\\.js)?$': '<rootDir>/tests/mocks/deterministic-export-service.ts',
+    '.*PolicyEngine(\\.js)?$': '<rootDir>/tests/mocks/policy-engine.ts',
+    '.*prompts/registry(\\.js)?$': '<rootDir>/tests/mocks/prompts-registry.ts',
+    '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
+    '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
+    '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
+
+    '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^(\\.{1,2}/.*)\\.js$': '$1',
@@ -69,7 +80,13 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { useESM: true }],
+    '^.+\\.js$': ['ts-jest', { useESM: true }],
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss)/)',
+  ],
   maxWorkers: process.env.CI ? 2 : '50%',
   // Open handle detection - helps identify hanging tests
   detectOpenHandles: process.env.JEST_DETECT_HANDLES === 'true',

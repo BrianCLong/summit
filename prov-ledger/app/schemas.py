@@ -39,6 +39,7 @@ class EvidenceRequest(BaseModel):
     license_terms: str | None = None
     license_owner: str | None = None
 
+
 class AttachEvidenceRequest(BaseModel):
     claim_id: str
     evidence_id: str

@@ -58,6 +58,23 @@ module.exports = async () => {
       await new Promise((r) => setTimeout(r, 500));
     }
 
+    try {
+      await new Promise((resolve) => {
+        const server = require('http').createServer();
+        server.once('error', (err) => {
+          if (err && err.code === 'EPERM') {
+            process.env.NO_NETWORK_LISTEN = 'true';
+          }
+          resolve();
+        });
+        server.listen(0, '127.0.0.1', () => {
+          server.close(() => resolve());
+        });
+      });
+    } catch (err) {
+      process.env.NO_NETWORK_LISTEN = 'true';
+    }
+
     console.log('✅ Jest Global Setup completed successfully');
   } catch (error) {
     console.error('❌ Jest Global Setup failed:', error);

@@ -13,7 +13,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -21,22 +21,20 @@ import yaml
 CONNECTORS_DIR = Path(__file__).parent.parent / "connectors"
 sys.path.insert(0, str(CONNECTORS_DIR))
 
-from sdk.base import BaseConnector
-from sdk.pii import PIIDetector, PIIField, PIISeverity, RedactionPolicy
-from sdk.license import LicenseEnforcer, LicenseConfig
 from sdk.validator import validate_manifest
 
 
 class Colors:
     """Terminal colors for better UX."""
-    HEADER = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    END = '\033[0m'
-    BOLD = '\033[1m'
+
+    HEADER = "\033[95m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    END = "\033[0m"
+    BOLD = "\033[1m"
 
 
 class IngestWizard:
@@ -52,9 +50,9 @@ class IngestWizard:
 
     def print_header(self, text: str):
         """Print a formatted header."""
-        print(f"\n{Colors.HEADER}{Colors.BOLD}{'='*70}")
+        print(f"\n{Colors.HEADER}{Colors.BOLD}{'=' * 70}")
         print(f"  {text}")
-        print(f"{'='*70}{Colors.END}\n")
+        print(f"{'=' * 70}{Colors.END}\n")
 
     def print_info(self, text: str):
         """Print info message."""
@@ -87,7 +85,7 @@ class IngestWizard:
 
         if not response:
             return default
-        return response in ['y', 'yes']
+        return response in ["y", "yes"]
 
     def select_connector(self):
         """List available connectors and let user select one."""
@@ -141,19 +139,19 @@ class IngestWizard:
         manifest_path = self.connector_path / "manifest.yaml"
         report = validate_manifest(str(manifest_path))
 
-        if report['valid']:
+        if report["valid"]:
             self.print_success("Connector manifest is valid!")
         else:
             self.print_error("Connector manifest has errors:")
-            for error in report['errors']:
+            for error in report["errors"]:
                 print(f"  - {error}")
 
-        if report['warnings']:
+        if report["warnings"]:
             self.print_warning("Warnings:")
-            for warning in report['warnings']:
+            for warning in report["warnings"]:
                 print(f"  - {warning}")
 
-        if not report['valid']:
+        if not report["valid"]:
             if not self.confirm("Continue anyway?", default=False):
                 sys.exit(1)
 
@@ -162,7 +160,7 @@ class IngestWizard:
         self.print_header("Field Mapping Proposal")
 
         # Load sample data to analyze fields
-        sample_file = self.connector_path / self.manifest.get('sample_data_file', 'sample.csv')
+        sample_file = self.connector_path / self.manifest.get("sample_data_file", "sample.csv")
 
         if not sample_file.exists():
             self.print_warning(f"Sample file not found: {sample_file}")
@@ -170,13 +168,14 @@ class IngestWizard:
 
         # Detect fields based on file type
         fields = []
-        if sample_file.suffix == '.csv':
+        if sample_file.suffix == ".csv":
             import csv
+
             with open(sample_file) as f:
                 reader = csv.DictReader(f)
                 fields = reader.fieldnames or []
 
-        elif sample_file.suffix == '.json':
+        elif sample_file.suffix == ".json":
             with open(sample_file) as f:
                 data = json.load(f)
                 if isinstance(data, dict):
@@ -216,21 +215,21 @@ class IngestWizard:
         field_lower = field_name.lower()
 
         # Common patterns
-        if any(x in field_lower for x in ['person', 'name', 'user', 'author', 'actor']):
+        if any(x in field_lower for x in ["person", "name", "user", "author", "actor"]):
             return "Person"
-        elif any(x in field_lower for x in ['org', 'company', 'organization']):
+        elif any(x in field_lower for x in ["org", "company", "organization"]):
             return "Organization"
-        elif any(x in field_lower for x in ['ip', 'address', 'host']):
+        elif any(x in field_lower for x in ["ip", "address", "host"]):
             return "IPAddress"
-        elif any(x in field_lower for x in ['domain', 'url', 'website']):
+        elif any(x in field_lower for x in ["domain", "url", "website"]):
             return "Domain"
-        elif any(x in field_lower for x in ['email', 'mail']):
+        elif any(x in field_lower for x in ["email", "mail"]):
             return "Email"
-        elif any(x in field_lower for x in ['phone', 'mobile', 'tel']):
+        elif any(x in field_lower for x in ["phone", "mobile", "tel"]):
             return "PhoneNumber"
-        elif any(x in field_lower for x in ['location', 'place', 'city', 'country']):
+        elif any(x in field_lower for x in ["location", "place", "city", "country"]):
             return "Location"
-        elif any(x in field_lower for x in ['project', 'campaign']):
+        elif any(x in field_lower for x in ["project", "campaign"]):
             return "Project"
         else:
             return "Entity"
@@ -240,17 +239,17 @@ class IngestWizard:
         field_lower = field_name.lower()
 
         # High risk PII
-        high_risk = ['ssn', 'social_security', 'credit_card', 'password', 'secret']
+        high_risk = ["ssn", "social_security", "credit_card", "password", "secret"]
         if any(x in field_lower for x in high_risk):
             return "high"
 
         # Medium risk PII
-        medium_risk = ['name', 'email', 'phone', 'address', 'dob', 'birth']
+        medium_risk = ["name", "email", "phone", "address", "dob", "birth"]
         if any(x in field_lower for x in medium_risk):
             return "medium"
 
         # Low risk
-        low_risk = ['user', 'author', 'account']
+        low_risk = ["user", "author", "account"]
         if any(x in field_lower for x in low_risk):
             return "low"
 
@@ -260,7 +259,7 @@ class IngestWizard:
         """Review PII flags from manifest and get user decisions."""
         self.print_header("PII Review")
 
-        pii_flags = self.manifest.get('pii_flags', [])
+        pii_flags = self.manifest.get("pii_flags", [])
 
         if not pii_flags:
             self.print_info("No PII flags defined in manifest")
@@ -268,13 +267,13 @@ class IngestWizard:
 
         for pii_config in pii_flags:
             if isinstance(pii_config, dict):
-                field_name = pii_config.get('field_name', 'unknown')
-                description = pii_config.get('description', '')
-                severity = pii_config.get('severity', 'medium')
-                policy = pii_config.get('redaction_policy', 'allow')
+                field_name = pii_config.get("field_name", "unknown")
+                description = pii_config.get("description", "")
+                severity = pii_config.get("severity", "medium")
+                policy = pii_config.get("redaction_policy", "allow")
 
                 # Color based on severity
-                color = Colors.RED if severity in ['high', 'critical'] else Colors.YELLOW
+                color = Colors.RED if severity in ["high", "critical"] else Colors.YELLOW
 
                 print(f"{color}Field: {Colors.BOLD}{field_name}{Colors.END}{color}")
                 print(f"  {description}")
@@ -282,10 +281,9 @@ class IngestWizard:
                 print(f"  Policy: {policy}{Colors.END}\n")
 
                 # If policy is 'prompt', ask user
-                if policy == 'prompt':
+                if policy == "prompt":
                     decision = self.prompt(
-                        f"  How to handle '{field_name}'? (allow/redact/block)",
-                        default="redact"
+                        f"  How to handle '{field_name}'? (allow/redact/block)", default="redact"
                     )
                     self.pii_decisions[field_name] = decision
                     self.print_success(f"  Will {decision} field '{field_name}'")
@@ -295,7 +293,7 @@ class IngestWizard:
         """Review and display license restrictions."""
         self.print_header("License & Compliance")
 
-        license_config = self.manifest.get('license', {})
+        license_config = self.manifest.get("license", {})
 
         if isinstance(license_config, str):
             self.print_info(f"License: {license_config}")
@@ -303,35 +301,37 @@ class IngestWizard:
 
         # Display license info
         print(f"{Colors.BOLD}License Type:{Colors.END} {license_config.get('type', 'unknown')}")
-        print(f"{Colors.BOLD}Classification:{Colors.END} {license_config.get('classification', 'unknown')}")
+        print(
+            f"{Colors.BOLD}Classification:{Colors.END} {license_config.get('classification', 'unknown')}"
+        )
 
-        if license_config.get('attribution_required'):
+        if license_config.get("attribution_required"):
             self.print_warning("Attribution required for this data source")
 
         # Show allowed use cases
-        allowed = license_config.get('allowed_use_cases', [])
+        allowed = license_config.get("allowed_use_cases", [])
         if allowed:
             print(f"\n{Colors.GREEN}Allowed use cases:{Colors.END}")
             for use_case in allowed:
                 print(f"  ✓ {use_case}")
 
         # Show blocked use cases
-        blocked = license_config.get('blocked_use_cases', [])
+        blocked = license_config.get("blocked_use_cases", [])
         if blocked:
             print(f"\n{Colors.RED}Prohibited use cases:{Colors.END}")
             for use_case in blocked:
                 print(f"  ✗ {use_case}")
 
         # Show blocked fields
-        blocked_fields = license_config.get('blocked_fields', [])
+        blocked_fields = license_config.get("blocked_fields", [])
         if blocked_fields:
             print(f"\n{Colors.RED}Blocked fields:{Colors.END}")
             for bf in blocked_fields:
-                field_name = bf.get('field_name', 'unknown')
-                reason = bf.get('reason', 'No reason provided')
+                field_name = bf.get("field_name", "unknown")
+                reason = bf.get("reason", "No reason provided")
                 print(f"  {Colors.BOLD}{field_name}{Colors.END}: {reason}")
 
-                alternative = bf.get('alternative')
+                alternative = bf.get("alternative")
                 if alternative:
                     print(f"    {Colors.CYAN}Alternative: {alternative}{Colors.END}")
 
@@ -347,7 +347,7 @@ class IngestWizard:
         start_time = time.time()
 
         # For demo, we'll use the CSV connector as an example
-        if self.manifest['name'] == 'csv-connector':
+        if self.manifest["name"] == "csv-connector":
             from csv_connector.connector import CSVConnector
 
             manifest_path = self.connector_path / "manifest.yaml"
@@ -368,15 +368,15 @@ class IngestWizard:
             print(f"  Records failed: {results['stats']['records_failed']}")
 
             # PII report
-            pii_report = results.get('pii_report', {})
-            if pii_report.get('total_actions', 0) > 0:
+            pii_report = results.get("pii_report", {})
+            if pii_report.get("total_actions", 0) > 0:
                 print(f"\n{Colors.YELLOW}PII Detections:{Colors.END}")
                 print(f"  Total actions: {pii_report['total_actions']}")
                 print(f"  Fields with PII: {', '.join(pii_report.get('fields_with_pii', []))}")
 
             # License report
-            license_report = results.get('license_report', {})
-            if license_report.get('total_violations', 0) > 0:
+            license_report = results.get("license_report", {})
+            if license_report.get("total_violations", 0) > 0:
                 print(f"\n{Colors.RED}License Violations:{Colors.END}")
                 print(f"  Total violations: {license_report['total_violations']}")
 
@@ -387,7 +387,7 @@ class IngestWizard:
             self.print_warning(f"Ingestion not yet implemented for {self.manifest['name']}")
             self.print_info("Use the connector's native implementation or implement connector.py")
 
-    def _write_lineage(self, results: Dict[str, Any]):
+    def _write_lineage(self, results: dict[str, Any]):
         """Write lineage records to provenance system."""
         self.print_info("Recording lineage...")
 
@@ -395,18 +395,18 @@ class IngestWizard:
         sys.path.insert(0, str(Path(__file__).parent.parent / "python"))
 
         try:
-            from intelgraph_py.provenance.fabric_client import submit_receipt, generate_hash
+            from intelgraph_py.provenance.fabric_client import generate_hash, submit_receipt
 
-            for result in results.get('results', []):
-                lineage = result.get('lineage', {})
+            for result in results.get("results", []):
+                lineage = result.get("lineage", {})
 
                 # Create lineage record
                 lineage_data = {
-                    "connector": self.manifest['name'],
+                    "connector": self.manifest["name"],
                     "timestamp": time.time(),
-                    "source": lineage.get('source_system', 'unknown'),
-                    "classification": lineage.get('data_classification', 'internal'),
-                    "entities_count": len(result.get('entities', [])),
+                    "source": lineage.get("source_system", "unknown"),
+                    "classification": lineage.get("data_classification", "internal"),
+                    "entities_count": len(result.get("entities", [])),
                 }
 
                 # Generate hash and submit receipt
@@ -414,11 +414,13 @@ class IngestWizard:
                 data_hash = generate_hash(data_bytes)
                 receipt = submit_receipt(data_hash, lineage_data)
 
-                self.lineage_records.append({
-                    "tx_id": receipt.tx_id,
-                    "hash": data_hash,
-                    "lineage": lineage_data,
-                })
+                self.lineage_records.append(
+                    {
+                        "tx_id": receipt.tx_id,
+                        "hash": data_hash,
+                        "lineage": lineage_data,
+                    }
+                )
 
             self.print_success(f"Recorded {len(self.lineage_records)} lineage records")
 
@@ -434,7 +436,9 @@ class IngestWizard:
         print(f"{Colors.BOLD}Type:{Colors.END} {self.manifest.get('ingestion_type', 'unknown')}")
 
         if self.field_mappings:
-            print(f"\n{Colors.BOLD}Field Mappings:{Colors.END} {len(self.field_mappings)} fields mapped")
+            print(
+                f"\n{Colors.BOLD}Field Mappings:{Colors.END} {len(self.field_mappings)} fields mapped"
+            )
 
         if self.pii_decisions:
             print(f"\n{Colors.BOLD}PII Decisions:{Colors.END}")
@@ -473,6 +477,7 @@ def main():
     except Exception as e:
         print(f"\n\n{Colors.RED}Error: {e}{Colors.END}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

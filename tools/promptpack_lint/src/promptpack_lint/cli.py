@@ -1,10 +1,13 @@
-import click
 import os
 import sys
+
+import click
+
 from .linter import Linter
 
+
 @click.command()
-@click.option('--repo', default='.', help='Path to repository root')
+@click.option("--repo", default=".", help="Path to repository root")
 def main(repo):
     """Lint all prompt packs in prompts/packs/."""
     try:
@@ -39,5 +42,6 @@ def main(repo):
     else:
         sys.exit(0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

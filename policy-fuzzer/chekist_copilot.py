@@ -1,14 +1,17 @@
 """
 ChekistCopilot: Aggressive policy fuzzing agent.
 """
+
 from policy_generator import generate_policy
 from query_generator import generate_query
+
 
 class ChekistCopilot:
     """
     A specialized agent that generates aggressive policy/query pairs
     designed to bypass standard governance checks.
     """
+
     def __init__(self):
         pass
 

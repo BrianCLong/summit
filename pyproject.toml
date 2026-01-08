@@ -21,15 +21,17 @@ include = ["maestro*", "api*"]
 
 [tool.ruff]
 line-length = 100
-select = ["E","F","I","UP","B","C90"]
-ignore = ["E501"]
-fix = true
 exclude = [
   ".venv",
   "venv",
   "node_modules",
   "v4/archive",
 ]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C90"]
+ignore = ["E501"]
+fixable = ["ALL"]
 
 [tool.mypy]
 python_version = "3.11"

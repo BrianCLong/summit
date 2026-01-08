@@ -2,6 +2,7 @@ import logging
 
 log = logging.getLogger("summit-fara")
 
+
 class PythonSandbox:
     def __init__(self):
         log.info("Python Sandbox initialized (Stub)")

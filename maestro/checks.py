@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from .models import Artifact, Run
+from .models import Artifact
 from .storage import MaestroStore
 
 
@@ -30,11 +30,7 @@ class ReleaseGateResult:
 def check_artifact_compliance(artifact: Artifact) -> bool:
     """Check if an artifact meets compliance requirements."""
     meta = artifact.metadata_json
-    return (
-        meta.sbom_present
-        and meta.slsa_provenance_present
-        and meta.risk_assessment_present
-    )
+    return meta.sbom_present and meta.slsa_provenance_present and meta.risk_assessment_present
 
 
 def check_release_gate(store: MaestroStore, run_id: str) -> ReleaseGateResult:
@@ -150,8 +146,6 @@ def generate_compliance_report(store: MaestroStore, run_id: str) -> dict[str, An
         "artifacts": artifact_compliance,
         "summary": {
             "total_artifacts": len(artifacts),
-            "compliant_artifacts": sum(
-                1 for a in artifact_compliance if a["compliant"]
-            ),
+            "compliant_artifacts": sum(1 for a in artifact_compliance if a["compliant"]),
         },
     }

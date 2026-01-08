@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from statistics import mean
 from time import perf_counter
-from typing import Dict, Iterable
 
 import dask.dataframe as dd
 import numpy as np
@@ -28,13 +28,14 @@ def _synthetic_loader(rows: int, npartitions: int) -> dd.DataFrame:
     return dd.from_pandas(pdf, npartitions=npartitions)
 
 
-def run_benchmark(rows: int = 50_000, repeats: int = 3) -> Dict[str, float | Dict[str, float]]:
-    timings: list[Dict[str, float]] = []
+def run_benchmark(rows: int = 50_000, repeats: int = 3) -> dict[str, float | dict[str, float]]:
+    timings: list[dict[str, float]] = []
     anomaly_rates: list[float] = []
 
     for _ in range(repeats):
         pipeline = PostgresPreprocessingPipeline(
-            connection_uri="postgresql://benchmark", data_loader=lambda: _synthetic_loader(rows, npartitions=8)
+            connection_uri="postgresql://benchmark",
+            data_loader=lambda: _synthetic_loader(rows, npartitions=8),
         )
         start = perf_counter()
         result = pipeline.run()
@@ -46,7 +47,7 @@ def run_benchmark(rows: int = 50_000, repeats: int = 3) -> Dict[str, float | Dic
         timings.append(stage_timings)
         anomaly_rates.append(result.quality_insights["anomalySummary"]["anomalyRate"])
 
-    aggregated: Dict[str, float] = {}
+    aggregated: dict[str, float] = {}
     keys: Iterable[str] = {key for timing in timings for key in timing}
     for key in keys:
         aggregated[key] = mean(timing.get(key, 0.0) for timing in timings)

@@ -551,8 +551,7 @@ class QuantumCommunication:
 
         if channel_key not in self.quantum_channels:
             logger.warning(
-                f"No quantum channel between {message.source.value} and "
-                f"{message.destination.value}"
+                f"No quantum channel between {message.source.value} and {message.destination.value}"
             )
             return False
 

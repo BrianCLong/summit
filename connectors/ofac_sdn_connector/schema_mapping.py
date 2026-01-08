@@ -366,12 +366,12 @@ if __name__ == "__main__":
 
         # Print sample entities
         for i, entity in enumerate(entities[:3]):
-            print(f"\nSample Entity {i+1}:")
+            print(f"\nSample Entity {i + 1}:")
             print(json.dumps(entity, indent=2, default=str))
 
         # Print sample relationships
         for i, rel in enumerate(relationships[:3]):
-            print(f"\nSample Relationship {i+1}:")
+            print(f"\nSample Relationship {i + 1}:")
             print(json.dumps(rel, indent=2, default=str))
 
     except Exception as e:

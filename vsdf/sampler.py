@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -26,8 +25,8 @@ class ConstraintDrivenSampler:
         self,
         schema: TabularSchema,
         constraints: ConstraintSet,
-        config: Optional[SamplerConfig] = None,
-        random_state: Optional[int] = None,
+        config: SamplerConfig | None = None,
+        random_state: int | None = None,
     ) -> None:
         self.schema = schema
         self.constraints = constraints
@@ -67,7 +66,7 @@ class ConstraintDrivenSampler:
     def _generate_base_batch(self, num_rows: int) -> pd.DataFrame:
         numeric = self._sample_numeric(num_rows)
         categorical = self._sample_categorical(num_rows)
-        columns: Dict[str, pd.Series] = {}
+        columns: dict[str, pd.Series] = {}
 
         if numeric is not None:
             for column, series in numeric.items():
@@ -81,14 +80,14 @@ class ConstraintDrivenSampler:
         ordered_columns = [col for col in self.schema.columns.keys() if col in frame.columns]
         return frame[ordered_columns]
 
-    def _sample_numeric(self, num_rows: int) -> Optional[pd.DataFrame]:
+    def _sample_numeric(self, num_rows: int) -> pd.DataFrame | None:
         numeric_columns = self.schema.numeric_columns
         if not numeric_columns:
             return None
 
         stats = self.constraints.numeric_stats
-        means: List[float] = []
-        stds: List[float] = []
+        means: list[float] = []
+        stds: list[float] = []
         for column in numeric_columns:
             column_stats = stats.get(column, {"mean": 0.0, "std": 1.0})
             mean = float(column_stats.get("mean", 0.0))
@@ -124,12 +123,12 @@ class ConstraintDrivenSampler:
 
         return numeric_frame
 
-    def _sample_categorical(self, num_rows: int) -> Optional[pd.DataFrame]:
+    def _sample_categorical(self, num_rows: int) -> pd.DataFrame | None:
         categorical_columns = self.schema.categorical_columns
         if not categorical_columns:
             return None
 
-        series_dict: Dict[str, pd.Series] = {}
+        series_dict: dict[str, pd.Series] = {}
         for column in categorical_columns:
             constraint = self.constraints.marginals.get(column)
             if constraint is None:
@@ -142,7 +141,9 @@ class ConstraintDrivenSampler:
 
         return pd.DataFrame(series_dict)
 
-    def _sample_categorical_column(self, constraint: MarginalConstraint, num_rows: int) -> pd.Series:
+    def _sample_categorical_column(
+        self, constraint: MarginalConstraint, num_rows: int
+    ) -> pd.Series:
         distribution = constraint.distribution.astype(float)
         distribution = distribution / distribution.sum()
         counts = distribution * num_rows
@@ -165,12 +166,12 @@ class ConstraintDrivenSampler:
         sampled = self.rng.choice(categories, size=num_rows, p=probabilities)
         return pd.Series(sampled, dtype="object")
 
-    def _filter_denials(self, frame: pd.DataFrame) -> tuple[pd.DataFrame, Dict[str, float]]:
+    def _filter_denials(self, frame: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, float]]:
         if not self.constraints.denial_constraints:
             return frame, {}
 
         filtered = frame.copy()
-        violation_rates: Dict[str, float] = {}
+        violation_rates: dict[str, float] = {}
         for constraint in self.constraints.denial_constraints:
             try:
                 mask = filtered.eval(constraint.predicate)

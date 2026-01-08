@@ -1,9 +1,9 @@
 """Tests for license enforcement and compliance checking."""
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
-from src.license_client import LicenseClient, LicenseCheckResult
+import pytest
+from src.license_client import LicenseCheckResult, LicenseClient
 
 
 @pytest.fixture
@@ -266,9 +266,7 @@ def test_license_enforcement_human_readable():
             )
 
         # Check appeal path is provided
-        assert result.appeal_path is not None, (
-            f"No appeal path for {scenario['name']}"
-        )
+        assert result.appeal_path is not None, f"No appeal path for {scenario['name']}"
 
         print(f"✓ {scenario['name']}: {result.reason}")
 

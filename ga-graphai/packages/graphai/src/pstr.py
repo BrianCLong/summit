@@ -4,9 +4,10 @@ import hashlib
 import heapq
 import random
 from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -130,11 +131,15 @@ class PolicyEngine:
         return hasher.hexdigest()
 
     @staticmethod
-    def check_sensitivity(labels: Iterable[str], user_ctx: UserContext, purpose: str) -> PolicyDecisionRecord:
+    def check_sensitivity(
+        labels: Iterable[str], user_ctx: UserContext, purpose: str
+    ) -> PolicyDecisionRecord:
         sensitivity = set(labels)
         clearances = set(user_ctx.clearances)
         if "forbidden" in sensitivity:
-            return PolicyDecisionRecord(decision=PolicyDecision.DENY, reason="Contains forbidden label", mask_spec=None)
+            return PolicyDecisionRecord(
+                decision=PolicyDecision.DENY, reason="Contains forbidden label", mask_spec=None
+            )
         if sensitivity and not sensitivity.issubset(clearances):
             missing = sorted(list(sensitivity - clearances))
             return PolicyDecisionRecord(
@@ -142,7 +147,9 @@ class PolicyEngine:
                 reason=f"Redacted for sensitivity: {', '.join(missing)}",
                 mask_spec={"mask": "***", "labels": missing},
             )
-        return PolicyDecisionRecord(decision=PolicyDecision.ALLOW, reason="Clearance satisfied", mask_spec=None)
+        return PolicyDecisionRecord(
+            decision=PolicyDecision.ALLOW, reason="Clearance satisfied", mask_spec=None
+        )
 
 
 def _semantic_similarity(query: str, text: str | None) -> float:
@@ -172,7 +179,9 @@ def _score_path(candidate: PathCandidate) -> float:
     return (alpha * candidate.rel + beta * candidate.trust) - gamma * candidate.cost
 
 
-def _path_signature(candidate: PathCandidate, policy_scope: str, index_version: str | None) -> tuple[Any, ...]:
+def _path_signature(
+    candidate: PathCandidate, policy_scope: str, index_version: str | None
+) -> tuple[Any, ...]:
     rel_types = tuple(sorted(candidate.edges))
     nodes_hash = hashlib.md5("|".join(sorted(candidate.nodes)).encode()).hexdigest()
     return (
@@ -197,7 +206,9 @@ def _extend_path(
 ) -> PathCandidate:
     next_nodes = base.nodes + [dest_node.id]
     next_edges = base.edges + [edge.rel_type or "edge"]
-    next_rel = (base.rel * base.hops + _semantic_similarity(query, dest_node.text or dest_node.label)) / (base.hops + 1)
+    next_rel = (
+        base.rel * base.hops + _semantic_similarity(query, dest_node.text or dest_node.label)
+    ) / (base.hops + 1)
     edge_trust = _trust_score(edge.provenance)
     node_trust = _trust_score(dest_node.provenance)
     next_trust = 0.5 * base.trust + 0.25 * edge_trust + 0.25 * node_trust
@@ -234,7 +245,9 @@ def _compile_evidence(candidate: PathCandidate, determinism: DeterminismConfig) 
         determinism={
             "seed": determinism.seed,
             "index_version": determinism.index_version,
-            "time_window": determinism.time_window.model_dump() if determinism.time_window else None,
+            "time_window": determinism.time_window.model_dump()
+            if determinism.time_window
+            else None,
         },
     )
 
@@ -248,7 +261,8 @@ def pstr_search(request: PstrRequest) -> PstrResponse:
 
     seeds = sorted(
         request.nodes,
-        key=lambda node: _semantic_similarity(request.query, node.text or node.label) + _trust_score(node.provenance),
+        key=lambda node: _semantic_similarity(request.query, node.text or node.label)
+        + _trust_score(node.provenance),
         reverse=True,
     )[: request.budgets.seed_k]
 
@@ -259,7 +273,9 @@ def pstr_search(request: PstrRequest) -> PstrResponse:
     expansions = 0
 
     for seed in seeds:
-        policy_decision = PolicyEngine.check_sensitivity(seed.sensitivity_labels, request.user_ctx, request.purpose)
+        policy_decision = PolicyEngine.check_sensitivity(
+            seed.sensitivity_labels, request.user_ctx, request.purpose
+        )
         if policy_decision.decision == PolicyDecision.DENY:
             continue
         base = PathCandidate(
@@ -273,8 +289,13 @@ def pstr_search(request: PstrRequest) -> PstrResponse:
             policy_decisions=[policy_decision],
             redactions=[],
         )
-        if policy_decision.decision == PolicyDecision.ALLOW_WITH_REDACTION and policy_decision.mask_spec:
-            base.redactions.append(Redaction(target_id=seed.id, mask_spec=policy_decision.mask_spec))
+        if (
+            policy_decision.decision == PolicyDecision.ALLOW_WITH_REDACTION
+            and policy_decision.mask_spec
+        ):
+            base.redactions.append(
+                Redaction(target_id=seed.id, mask_spec=policy_decision.mask_spec)
+            )
         signature = _path_signature(base, policy_scope, request.determinism.index_version)
         cache[signature] = base
         heapq.heappush(queue, (-_score_path(base), base))
@@ -292,23 +313,40 @@ def pstr_search(request: PstrRequest) -> PstrResponse:
         for edge in adjacency.get(candidate.nodes[-1], []):
             if request.budgets.rel_whitelist and edge.rel_type not in request.budgets.rel_whitelist:
                 continue
-            edge_policy = PolicyEngine.check_sensitivity(edge.sensitivity_labels, request.user_ctx, request.purpose)
+            edge_policy = PolicyEngine.check_sensitivity(
+                edge.sensitivity_labels, request.user_ctx, request.purpose
+            )
             if edge_policy.decision == PolicyDecision.DENY:
                 continue
             destination = next((node for node in request.nodes if node.id == edge.target), None)
             if destination is None:
                 continue
-            node_policy = PolicyEngine.check_sensitivity(destination.sensitivity_labels, request.user_ctx, request.purpose)
+            node_policy = PolicyEngine.check_sensitivity(
+                destination.sensitivity_labels, request.user_ctx, request.purpose
+            )
             if node_policy.decision == PolicyDecision.DENY:
                 continue
 
             extended = _extend_path(candidate, edge, destination, request.query)
             extended.policy_decisions.append(edge_policy)
             extended.policy_decisions.append(node_policy)
-            if edge_policy.decision == PolicyDecision.ALLOW_WITH_REDACTION and edge_policy.mask_spec:
-                extended.redactions.append(Redaction(target_id=f"edge:{edge.source}->{edge.target}", mask_spec=edge_policy.mask_spec))
-            if node_policy.decision == PolicyDecision.ALLOW_WITH_REDACTION and node_policy.mask_spec:
-                extended.redactions.append(Redaction(target_id=destination.id, mask_spec=node_policy.mask_spec))
+            if (
+                edge_policy.decision == PolicyDecision.ALLOW_WITH_REDACTION
+                and edge_policy.mask_spec
+            ):
+                extended.redactions.append(
+                    Redaction(
+                        target_id=f"edge:{edge.source}->{edge.target}",
+                        mask_spec=edge_policy.mask_spec,
+                    )
+                )
+            if (
+                node_policy.decision == PolicyDecision.ALLOW_WITH_REDACTION
+                and node_policy.mask_spec
+            ):
+                extended.redactions.append(
+                    Redaction(target_id=destination.id, mask_spec=node_policy.mask_spec)
+                )
 
             signature = _path_signature(extended, policy_scope, request.determinism.index_version)
             existing = cache.get(signature)
@@ -323,5 +361,7 @@ def pstr_search(request: PstrRequest) -> PstrResponse:
         "cache_hits": cache_hits,
         "policy_scope": policy_scope,
     }
-    ranked = sorted(results, key=lambda ep: ep.evidence_paths[0].score, reverse=True)[: request.top_k]
+    ranked = sorted(results, key=lambda ep: ep.evidence_paths[0].score, reverse=True)[
+        : request.top_k
+    ]
     return PstrResponse(evidence_programs=ranked, telemetry=telemetry)

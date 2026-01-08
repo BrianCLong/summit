@@ -1,8 +1,9 @@
 """SDK-compliant Parquet connector implementation."""
 
 import sys
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Dict, Iterator, List
+from typing import Any
 
 # Add SDK to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -25,9 +26,8 @@ class ParquetConnector(BaseConnector):
 
     def __init__(self, manifest_path: str, parquet_file_path: str = None):
         super().__init__(manifest_path)
-        self.parquet_file_path = (
-            parquet_file_path
-            or self.connector_dir / self.manifest.get("sample_data_file", "sample.parquet")
+        self.parquet_file_path = parquet_file_path or self.connector_dir / self.manifest.get(
+            "sample_data_file", "sample.parquet"
         )
 
         # Get Parquet config from manifest
@@ -36,7 +36,7 @@ class ParquetConnector(BaseConnector):
         self.columns = self.config.get("columns")  # Specific columns to read
         self.filters = self.config.get("filters")  # Row filters
 
-    def fetch_raw_data(self) -> Iterator[Dict[str, Any]]:
+    def fetch_raw_data(self) -> Iterator[dict[str, Any]]:
         """
         Fetch rows from Parquet file.
 
@@ -63,11 +63,13 @@ class ParquetConnector(BaseConnector):
                 row_dict = row.to_dict()
 
                 # Replace NaN with None
-                row_dict = {k: (None if isinstance(v, float) and v != v else v) for k, v in row_dict.items()}
+                row_dict = {
+                    k: (None if isinstance(v, float) and v != v else v) for k, v in row_dict.items()
+                }
 
                 yield row_dict
 
-    def map_to_entities(self, raw_data: Dict[str, Any]) -> tuple[List[Dict], List[Dict]]:
+    def map_to_entities(self, raw_data: dict[str, Any]) -> tuple[list[dict], list[dict]]:
         """
         Map Parquet row to IntelGraph entities.
 
@@ -141,7 +143,7 @@ def main():
     # Print first few results
     print("\n=== Sample Results ===")
     for i, result in enumerate(results["results"][:3]):
-        print(f"\nResult {i+1}:")
+        print(f"\nResult {i + 1}:")
         print(json.dumps(result, indent=2))
 
 

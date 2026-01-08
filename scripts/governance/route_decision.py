@@ -10,9 +10,10 @@ Types:
   partner    : Partner Certification
   feature    : Standard Feature
 """
+
 import argparse
-import sys
 import json
+import sys
 
 OWNERSHIP_MAP = {
     "capabilities": "@intelgraph/platform-core",
@@ -23,41 +24,42 @@ OWNERSHIP_MAP = {
     "data": "@intelgraph/data-team",
     "observability": "@intelgraph/ops-team",
     "frontend": "@intelgraph/frontend-team",
-    "provenance": "@intelgraph/provenance-team"
+    "provenance": "@intelgraph/provenance-team",
 }
 
 DECISION_RULES = {
     "safety": {
         "approvers": ["@intelgraph/security-team", "Security Lead"],
         "sla": "4 hours",
-        "escalation": "CISO"
+        "escalation": "CISO",
     },
     "entitlement": {
         "approvers": ["@intelgraph/policy-team", "Product Lead"],
         "sla": "24 hours",
-        "escalation": "VP Product"
+        "escalation": "VP Product",
     },
     "cost": {
         "approvers": ["@intelgraph/finops-team"],
         "sla": "24 hours",
-        "escalation": "VP Engineering"
+        "escalation": "VP Engineering",
     },
     "partner": {
         "approvers": ["@intelgraph/integrations-team", "Security Lead"],
         "sla": "48 hours",
-        "escalation": "VP Business Dev"
+        "escalation": "VP Business Dev",
     },
-    "feature": {
-        "approvers": ["{DRI}"],
-        "sla": "24 hours",
-        "escalation": "Engineering Manager"
-    }
+    "feature": {"approvers": ["{DRI}"], "sla": "24 hours", "escalation": "Engineering Manager"},
 }
+
 
 def main():
     parser = argparse.ArgumentParser(description="Route decisions to the correct approvers.")
-    parser.add_argument("--type", required=True, choices=DECISION_RULES.keys(), help="Type of decision")
-    parser.add_argument("--domain", help="Domain key (for feature decisions)", choices=OWNERSHIP_MAP.keys())
+    parser.add_argument(
+        "--type", required=True, choices=DECISION_RULES.keys(), help="Type of decision"
+    )
+    parser.add_argument(
+        "--domain", help="Domain key (for feature decisions)", choices=OWNERSHIP_MAP.keys()
+    )
 
     args = parser.parse_args()
 
@@ -75,10 +77,11 @@ def main():
         "decision_type": args.type,
         "approvers": approvers,
         "sla": rule["sla"],
-        "escalation": rule["escalation"]
+        "escalation": rule["escalation"],
     }
 
     print(json.dumps(result, indent=2))
+
 
 if __name__ == "__main__":
     main()

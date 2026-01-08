@@ -1,13 +1,13 @@
 import AuthService from '../services/AuthService.js';
 import { PubSub } from 'graphql-subscriptions';
-const copilotResolvers = require('./resolvers.copilot.js');
-const graphResolvers = require('./resolvers.graphops.js');
-const aiResolvers = require('./resolvers.ai.js');
-const annotationsResolvers = require('./resolvers.annotations.js');
+import { copilotResolvers as copilotResolversRaw } from './resolvers.copilot.js';
+import { graphResolvers as graphResolversRaw } from './resolvers.graphops.js';
+import { aiResolvers as aiResolversRaw } from './resolvers.ai.js';
+import { annotationsResolvers as annotationsResolversRaw } from './resolvers.annotations.js';
 import { v040Resolvers } from './resolvers/v040/index';
 import { activityResolvers } from './resolvers/activity.js';
 import { geoIntResolvers } from './resolvers/geoint.js';
-import { documentResolvers } from './resolvers.document.js';
+import { documentResolvers as documentResolversRaw } from './resolvers.document.js';
 import { ingestionResolvers } from './resolvers/ingestionResolvers.js';
 import { randomUUID } from 'node:crypto';
 import { erResolvers } from './resolvers.er.js';
@@ -50,6 +50,11 @@ interface CopilotGoalsArgs {
 
 const pubsub = new PubSub();
 const authService = new AuthService();
+const copilotResolvers: any = copilotResolversRaw;
+const graphResolvers: any = graphResolversRaw;
+const aiResolvers: any = aiResolversRaw;
+const annotationsResolvers: any = annotationsResolversRaw;
+const documentResolvers: any = documentResolversRaw;
 
 const goals: Array<{
   id: string;

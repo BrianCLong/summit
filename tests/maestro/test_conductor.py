@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 
 from api.conductor import AGENTS, REVIEWS, WORK_ITEMS
 from maestro.app import create_maestro_app
-from maestro.models import AgentType, WorkItemStatus
 
 
 @pytest.fixture(autouse=True)
@@ -186,10 +185,19 @@ def test_get_reviews_for_work_item():
 def setup_routing_environment():
     """Helper function to create agents for routing tests."""
     agents = {
-        "jules-bug-fixer": client.post("/conductor/agents", json={"name": "jules-bug-fixer", "type": "code_generation"}).json(),
-        "codex-feature-dev": client.post("/conductor/agents", json={"name": "codex-feature-dev", "type": "code_generation"}).json(),
-        "atlas-security-scanner": client.post("/conductor/agents", json={"name": "atlas-security-scanner", "type": "security_analysis"}).json(),
-        "jules-generalist": client.post("/conductor/agents", json={"name": "jules-generalist", "type": "other"}).json(),
+        "jules-bug-fixer": client.post(
+            "/conductor/agents", json={"name": "jules-bug-fixer", "type": "code_generation"}
+        ).json(),
+        "codex-feature-dev": client.post(
+            "/conductor/agents", json={"name": "codex-feature-dev", "type": "code_generation"}
+        ).json(),
+        "atlas-security-scanner": client.post(
+            "/conductor/agents",
+            json={"name": "atlas-security-scanner", "type": "security_analysis"},
+        ).json(),
+        "jules-generalist": client.post(
+            "/conductor/agents", json={"name": "jules-generalist", "type": "other"}
+        ).json(),
     }
     return agents
 
@@ -236,7 +244,10 @@ def test_handoff_work_item():
     item_id = item["id"]
 
     # Assign to first agent
-    client.patch(f"/conductor/work-items/{item_id}", json={"assigned_to_agent_id": agents["jules-generalist"]["id"]})
+    client.patch(
+        f"/conductor/work-items/{item_id}",
+        json={"assigned_to_agent_id": agents["jules-generalist"]["id"]},
+    )
 
     # Handoff to another agent
     handoff_agent_id = agents["jules-bug-fixer"]["id"]

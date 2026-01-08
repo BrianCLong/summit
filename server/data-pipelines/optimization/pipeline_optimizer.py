@@ -110,7 +110,7 @@ class PipelineOptimizer:
         self._lock = threading.Lock()
 
     def analyze(self) -> PipelineAnalysis:
-        in_degree: dict[str, int] = {name: 0 for name in self._tasks}
+        in_degree: dict[str, int] = dict.fromkeys(self._tasks, 0)
         adjacency: dict[str, list[str]] = defaultdict(list)
         for task in self._tasks.values():
             for dep in task.dependencies:

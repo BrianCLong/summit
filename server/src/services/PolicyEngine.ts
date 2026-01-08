@@ -73,7 +73,7 @@ export class PolicyEngine extends EventEmitter {
 
       try {
         const fileContents = await readFile(configPath, 'utf8');
-        this.config = yaml.load(fileContents);
+        this.config = yaml.load(fileContents as unknown as string);
         console.log('PolicyEngine loaded configuration from', configPath);
       } catch (e: any) {
         console.warn('PolicyEngine could not load config file from', configPath, e);

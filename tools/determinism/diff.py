@@ -10,7 +10,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -252,11 +252,9 @@ class DeterminismChecker:
     def _format_timestamp(self, file_path: Path) -> str:
         """Return an ISO8601 timestamp string for the file mtime."""
         mtime = file_path.stat().st_mtime
-        return datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(timespec="microseconds")
+        return datetime.fromtimestamp(mtime, tz=UTC).isoformat(timespec="microseconds")
 
-    def _detect_nondeterminism(
-        self, art1: BuildArtifact, art2: BuildArtifact
-    ) -> list[str]:
+    def _detect_nondeterminism(self, art1: BuildArtifact, art2: BuildArtifact) -> list[str]:
         """Inspect mismatching artifacts for common nondeterministic patterns."""
 
         if not art1.absolute_path or not art2.absolute_path:
@@ -277,7 +275,9 @@ class DeterminismChecker:
 
         if content1 and content2 and content1 != content2:
             if sorted(content1.splitlines()) == sorted(content2.splitlines()):
-                suspicions.append("Same lines but different ordering; sort outputs for determinism.")
+                suspicions.append(
+                    "Same lines but different ordering; sort outputs for determinism."
+                )
 
         signature_patterns: dict[str, str] = {
             "timestamp": r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?",
@@ -369,7 +369,7 @@ def main():
     # Generate report
     report = {
         "determinism_check": {
-            "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "timestamp": datetime.now(UTC).isoformat(timespec="seconds"),
             "build1_path": str(build1_path),
             "build2_path": str(build2_path),
             "artifact_comparison": comparison,

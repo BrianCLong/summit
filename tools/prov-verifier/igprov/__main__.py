@@ -8,6 +8,7 @@ Verifies a disclosure/export bundle by:
 3) Optionally verifying a Merkle root if present (sorted by path).
 Exit code 0 on success; non-zero on any mismatch.
 """
+
 import argparse
 import hashlib
 import json

@@ -1,8 +1,9 @@
-import subprocess
 import logging
 import shlex
+import subprocess
 
 log = logging.getLogger("summit-fara")
+
 
 class GitHubCLI:
     def __init__(self):

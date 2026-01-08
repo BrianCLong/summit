@@ -5,8 +5,9 @@ from typing import Protocol
 class LLMClient(Protocol):
     """Lightweight protocol used by the pipeline to talk to LLMs."""
 
-    def complete(self, prompt: str, *, system_prompt: str | None = None, temperature: float = 0.2) -> str:
-        ...
+    def complete(
+        self, prompt: str, *, system_prompt: str | None = None, temperature: float = 0.2
+    ) -> str: ...
 
 
 @dataclass
@@ -20,7 +21,9 @@ class OpenAILLMClient:
 
     model: str = "gpt-4o-mini"
 
-    def complete(self, prompt: str, *, system_prompt: str | None = None, temperature: float = 0.2) -> str:
+    def complete(
+        self, prompt: str, *, system_prompt: str | None = None, temperature: float = 0.2
+    ) -> str:
         from openai import OpenAI
 
         client = OpenAI()

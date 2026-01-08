@@ -329,7 +329,16 @@
       "Bash(while read id)",
       "Bash(do gh run cancel $id)",
       "Bash(od:*)",
-      "Bash(xargs -I {} sh -c 'echo \"\"Cancelling {}\"\"; gh run cancel {} 2>&1 || true')"
+      "Bash(xargs -I {} sh -c 'echo \"\"Cancelling {}\"\"; gh run cancel {} 2>&1 || true')",
+      "Bash(gh pr create --title \"test: enforce coverage gate and add API fuzzing contracts (recreated)\" --body \"$(cat <<''EOF''\n## Summary\n\n- Add coverage enforcement step to CI that fails if thresholds not met\n- Add status.contract.test.ts for API contract validation  \n- Add scope-guard.fuzz.test.ts for property-based scope testing\n- Add json-summary to coverage reporters for CI parsing\n- Add fast-check dependency for property-based testing\n\nSupersedes #15365 due to repo history restructure.\n\n## Test plan\n\n- [ ] `./scripts/ga/ga-verify --full` \n- [ ] Unit tests pass with coverage enforcement\n- [ ] Property-based tests execute correctly\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nEOF\n)\")",
+      "Bash(openssl dgst:*)",
+      "Bash(for id in 20793827944 20790657844 20788990287 20788501974 20788422113 20786257649)",
+      "Bash(for id in 20792103229 20792103062 20795979631 20795979649 20795979583)",
+      "Bash(ruff check:*)",
+      "Bash(pip3 install:*)",
+      "Bash(pipx install:*)",
+      "Bash(uvx ruff:*)",
+      "Bash(ruff format:*)"
     ],
     "deny": [],
     "ask": []

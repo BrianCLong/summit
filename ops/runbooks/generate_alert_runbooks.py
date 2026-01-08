@@ -10,7 +10,6 @@ from typing import Any
 
 import yaml
 
-
 ALERT_SOURCES = [
     Path("ops/alerts/slo-burn-rules.yml"),
     Path("ops/slos-and-alerts.yaml"),
@@ -86,15 +85,11 @@ def build_markdown(alerts: list[dict[str, Any]]) -> str:
             lines.append("")
 
         lines.append("### One-click remediation")
-        lines.append(
-            f"```sh\n./ops/runbooks/one_click_remediation.sh \"{alert_name}\"\n```"
-        )
+        lines.append(f'```sh\n./ops/runbooks/one_click_remediation.sh "{alert_name}"\n```')
         lines.append("")
 
         lines.append("### Verification hooks")
-        lines.append(
-            f"```sh\n./ops/runbooks/verify_remediation.sh \"{alert_name}\"\n```"
-        )
+        lines.append(f'```sh\n./ops/runbooks/verify_remediation.sh "{alert_name}"\n```')
         lines.append("")
 
         lines.append("### Signals to validate")
@@ -181,13 +176,17 @@ def check(alerts: list[dict[str, Any]]) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate alert runbooks with remediation hooks")
-    parser.add_argument("--check", action="store_true", help="Validate generated files are up-to-date")
+    parser.add_argument(
+        "--check", action="store_true", help="Validate generated files are up-to-date"
+    )
     args = parser.parse_args()
 
     alerts = parse_alert_sources()
     if args.check:
         if not check(alerts):
-            raise SystemExit("Generated alert runbooks are out of date. Run without --check to refresh.")
+            raise SystemExit(
+                "Generated alert runbooks are out of date. Run without --check to refresh."
+            )
         return
 
     generate(alerts)

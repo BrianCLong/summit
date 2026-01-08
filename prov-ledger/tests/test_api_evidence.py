@@ -9,6 +9,7 @@ def test_register_evidence(client):
     assert data["hash"]
     assert data["id"]
 
+
 def test_register_evidence_v1(client):
     resp = client.post(
         "/v1/evidence",
@@ -16,7 +17,7 @@ def test_register_evidence_v1(client):
             "hash": "sha256:1234567890abcdef",
             "type": "document",
             "url": "http://example.com/doc.pdf",
-            "metadata": {"title": "Test Doc"}
+            "metadata": {"title": "Test Doc"},
         },
         headers={"X-API-Key": "testkey"},
     )

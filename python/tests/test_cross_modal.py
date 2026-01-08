@@ -1,12 +1,13 @@
-import sys
 import os
+import sys
+
 import numpy as np
-import pytest
 
 # Add the python directory to the python path so we can import the module
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from enrichment_service.cross_modal_resolution import resolve_entity
+
 
 def test_resolve_entity_text_only():
     text_vec = np.array([0.1, 0.2, 0.3])
@@ -16,6 +17,7 @@ def test_resolve_entity_text_only():
     assert key.startswith("tx:")
     # Expected default confidence for text only
     assert conf == 0.62
+
 
 def test_resolve_entity_multimodal():
     text_vec = np.array([0.1, 0.2, 0.3])

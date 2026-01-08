@@ -1,10 +1,12 @@
 """Pure Python fallback implementation of the GW-DE dual-entropy watermark."""
+
 from __future__ import annotations
 
 import math
 import random
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Sequence, Tuple, Union
+from typing import Union
 
 import numpy as np
 
@@ -88,7 +90,7 @@ def _unpack_metadata(raw_bits: Sequence[int]) -> Metadata | None:
 
 
 def _encode_zero_width_bits(bits: Iterable[int], include_sentinels: bool = False) -> str:
-    pieces: List[str] = []
+    pieces: list[str] = []
     if include_sentinels:
         pieces.append(ZERO_WIDTH_META_START)
     for bit in bits:
@@ -98,8 +100,10 @@ def _encode_zero_width_bits(bits: Iterable[int], include_sentinels: bool = False
     return "".join(pieces)
 
 
-def _decode_zero_width_bits(text: str, offset: int, with_sentinels: bool = False) -> Tuple[List[int], int]:
-    bits: List[int] = []
+def _decode_zero_width_bits(
+    text: str, offset: int, with_sentinels: bool = False
+) -> tuple[list[int], int]:
+    bits: list[int] = []
     i = offset
     if with_sentinels:
         if i >= len(text) or text[i] != ZERO_WIDTH_META_START:
@@ -128,14 +132,13 @@ def _strip_zero_width(text: str) -> str:
     return "".join(
         c
         for c in text
-        if c
-        not in (ZERO_WIDTH_ZERO, ZERO_WIDTH_ONE, ZERO_WIDTH_META_START, ZERO_WIDTH_META_END)
+        if c not in (ZERO_WIDTH_ZERO, ZERO_WIDTH_ONE, ZERO_WIDTH_META_START, ZERO_WIDTH_META_END)
     )
 
 
-def _tokenize(text: str) -> List[str]:
-    tokens: List[str] = []
-    current: List[str] = []
+def _tokenize(text: str) -> list[str]:
+    tokens: list[str] = []
+    current: list[str] = []
     for char in text:
         if char.isspace():
             if current:
@@ -148,9 +151,9 @@ def _tokenize(text: str) -> List[str]:
     return tokens
 
 
-def _combined_bits(tokens: Sequence[str], state_seed: int, key_hash: int) -> List[int]:
+def _combined_bits(tokens: Sequence[str], state_seed: int, key_hash: int) -> list[int]:
     rng = random.Random((state_seed ^ key_hash) & 0xFFFFFFFFFFFFFFFF)
-    bits: List[int] = []
+    bits: list[int] = []
     for idx, token in enumerate(tokens):
         content = _stable_hash(f"{token}:{idx}")
         content_bit = content & 1
@@ -159,12 +162,14 @@ def _combined_bits(tokens: Sequence[str], state_seed: int, key_hash: int) -> Lis
     return bits
 
 
-def _image_combined_bits(payload: np.ndarray, skip_bits: int, state_seed: int, key_hash: int) -> List[int]:
+def _image_combined_bits(
+    payload: np.ndarray, skip_bits: int, state_seed: int, key_hash: int
+) -> list[int]:
     flat = payload.reshape(-1)
     if flat.size <= skip_bits:
         return []
     rng = random.Random((state_seed ^ key_hash) & 0xFFFFFFFFFFFFFFFF)
-    bits: List[int] = []
+    bits: list[int] = []
     for idx in range(skip_bits, flat.size):
         mix = ((int(flat[idx]) & 0xFF) << 32) ^ idx
         content_bit = _stable_hash64(mix) & 1
@@ -175,14 +180,14 @@ def _image_combined_bits(payload: np.ndarray, skip_bits: int, state_seed: int, k
 
 def _encode_metadata(meta: Metadata) -> str:
     raw = _pack_metadata(meta)
-    bits: List[int] = []
+    bits: list[int] = []
     for byte in raw:
         for shift in range(7, -1, -1):
             bits.append((byte >> shift) & 1)
     return _encode_zero_width_bits(bits, include_sentinels=True)
 
 
-def _decode_metadata(text: str) -> Tuple[Metadata | None, int]:
+def _decode_metadata(text: str) -> tuple[Metadata | None, int]:
     bits, end_offset = _decode_zero_width_bits(text, 0, with_sentinels=True)
     if len(bits) != _METADATA_BITS:
         return None, 0
@@ -204,7 +209,7 @@ def _false_positive_rate(matches: int, total: int) -> float:
     return 0.5 * _erfc(z / math.sqrt(2.0))
 
 
-def embed(payload: Payload, key: str, state_seed: int) -> Dict[str, object]:
+def embed(payload: Payload, key: str, state_seed: int) -> dict[str, object]:
     if isinstance(payload, str):
         cleaned = _strip_zero_width(payload)
         tokens = _tokenize(cleaned)
@@ -215,9 +220,9 @@ def embed(payload: Payload, key: str, state_seed: int) -> Dict[str, object]:
             fingerprint_length=len(tokens),
         )
         bits = _combined_bits(tokens, meta.state_seed, meta.key_hash)
-        builder: List[str] = [_encode_metadata(meta)]
+        builder: list[str] = [_encode_metadata(meta)]
         token_index = 0
-        current: List[str] = []
+        current: list[str] = []
         for char in cleaned:
             if char.isspace():
                 if current:
@@ -262,7 +267,7 @@ def embed(payload: Payload, key: str, state_seed: int) -> Dict[str, object]:
         bits = _image_combined_bits(payload, _METADATA_SLOTS, meta.state_seed, meta.key_hash)
         watermarked = payload.copy().reshape(-1)
         raw_meta = _pack_metadata(meta)
-        meta_bits: List[int] = []
+        meta_bits: list[int] = []
         for byte in raw_meta:
             for shift in range(7, -1, -1):
                 meta_bits.append((byte >> shift) & 1)
@@ -301,7 +306,7 @@ def detect(payload: Payload) -> Detection:
         stripped = _strip_zero_width(payload[offset:])
         tokens = _tokenize(stripped)
         expected = _combined_bits(tokens, meta.state_seed, meta.key_hash)
-        extracted: List[int] = []
+        extracted: list[int] = []
         token_index = 0
         for char in payload[offset:]:
             if char in (ZERO_WIDTH_ZERO, ZERO_WIDTH_ONE):
@@ -323,17 +328,20 @@ def detect(payload: Payload) -> Detection:
         if flat.size <= _METADATA_SLOTS:
             return Detection(0.0, 1.0, 0, 0, False)
         meta_samples = [int(flat[i] & 1) for i in range(_METADATA_SLOTS)]
-        majority_bits: List[int] = []
+        majority_bits: list[int] = []
         for bit_index in range(_METADATA_BITS):
             start = bit_index * _METADATA_REPEAT
-            window = meta_samples[start:start + _METADATA_REPEAT]
+            window = meta_samples[start : start + _METADATA_REPEAT]
             ones = sum(window)
             majority_bits.append(1 if ones > (_METADATA_REPEAT // 2) else 0)
         meta = _unpack_metadata(majority_bits)
         if not meta or meta.version != 1:
             return Detection(0.0, 1.0, 0, 0, False)
         expected = _image_combined_bits(payload, _METADATA_SLOTS, meta.state_seed, meta.key_hash)
-        extracted = [int(flat[i] & 1) for i in range(_METADATA_SLOTS, _METADATA_SLOTS + meta.fingerprint_length)]
+        extracted = [
+            int(flat[i] & 1)
+            for i in range(_METADATA_SLOTS, _METADATA_SLOTS + meta.fingerprint_length)
+        ]
         total = min(len(expected), len(extracted))
         matches = sum(1 for idx in range(total) if expected[idx] == extracted[idx])
         score = (matches / total) if total else 0.0
@@ -343,5 +351,4 @@ def detect(payload: Payload) -> Detection:
     raise TypeError("Unsupported payload type")
 
 
-__all__ = ["embed", "detect", "Detection", "Metadata"]
-
+__all__ = ["Detection", "Metadata", "detect", "embed"]

@@ -35,7 +35,7 @@ class OCREngine:
                 return {"error": f"Unsupported OCR engine: {self.engine}"}
 
         except Exception as e:
-            return {"error": f"OCR extraction failed: {str(e)}"}
+            return {"error": f"OCR extraction failed: {e!s}"}
 
     def _tesseract_ocr(
         self, image_path: str, languages: str, confidence_threshold: float, word_level: bool
@@ -100,7 +100,7 @@ class OCREngine:
             }
 
         except Exception as e:
-            return {"error": f"Tesseract OCR failed: {str(e)}"}
+            return {"error": f"Tesseract OCR failed: {e!s}"}
 
     def _extract_words(self, text: str, confidence: float) -> list[dict]:
         """Extract word-level information"""

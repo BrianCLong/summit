@@ -24,4 +24,3 @@ ALERT_PAGE_SEVERITIES = {"page", "p1", "p0"}
 
 class PolicyViolation(Exception):
     """Raised when an operation violates a governance policy."""
-

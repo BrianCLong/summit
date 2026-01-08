@@ -55,6 +55,11 @@ input RegisterInput {
   lastName: String!
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
 """
 Authentication response with user and tokens
 """
@@ -122,6 +127,19 @@ type Investigation {
   description: String
   createdAt: DateTime!
   updatedAt: DateTime
+  entities: [Entity!]
+  relationships: [Relationship!]
+  status: InvestigationStatus
+  priority: Int
+}
+
+type InvestigationSnapshot {
+  id: ID!
+  investigationId: ID!
+  data: JSON!
+  snapshotLabel: String
+  createdAt: DateTime!
+  createdBy: String!
 }
 
 input InvestigationInput {
@@ -129,19 +147,26 @@ input InvestigationInput {
   description: String
 }
 
+enum InvestigationStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  ON_HOLD
+}
+
 type AuditLog {
   id: ID!
-  userId: ID!
+  userId: String!
   action: String!
   resourceType: String!
   resourceId: String
   details: JSON
-  investigationId: ID
+  investigationId: String
   createdAt: DateTime!
 }
 
-input AuditLogFilter {
-  userId: ID
+input AuditFilter {
+  userId: String
   entityType: String
   from: DateTime
   to: DateTime
@@ -668,6 +693,18 @@ type SLOSnapshot {
   p99Ms: Int
   errorRate: Float!
   window: String!
+}
+
+type CostSnapshot {
+  graphqlPerMillionUsd: Float
+  ingestPerThousandUsd: Float
+}
+
+type EvidenceOk {
+  ok: Boolean!
+  reasons: [String!]!
+  snapshot: SLOSnapshot
+  cost: CostSnapshot
 }
 
 type ArtifactRef {
@@ -1753,6 +1790,8 @@ input CampaignFilter {
 
 
   type Query {
+    healthScore: Int!
+    evidenceOk(service: String, releaseId: String): EvidenceOk!
     # Authentication Queries
     """Get the currently authenticated user"""
     me: AuthUser
@@ -1772,6 +1811,8 @@ input CampaignFilter {
     users(limit: Int = 25, offset: Int = 0): [User!]!
     investigation(id: ID!): Investigation
     investigations(limit: Int = 25, offset: Int = 0): [Investigation!]!
+    investigationSnapshots(investigationId: ID!): [InvestigationSnapshot!]!
+    investigationSnapshot(id: ID!): InvestigationSnapshot
     semanticSearch(query: String!, filters: SemanticSearchFilter, limit: Int = 10, offset: Int = 0): [Entity!]! # Enhanced query
     
     # AI Analysis Queries
@@ -1841,7 +1882,7 @@ input CampaignFilter {
     ): [SimilarEntity!]!
     auditTrace(
       investigationId: ID!
-      filter: AuditLogFilter
+      filter: AuditFilter
     ): [AuditLog!]!
 
     # Support Ticket Queries
@@ -1930,7 +1971,7 @@ input CampaignFilter {
     register(input: RegisterInput!): AuthResponse!
 
     """Authenticate user and return JWT tokens"""
-    login(email: String!, password: String!): AuthResponse!
+    login(input: LoginInput!): AuthResponse!
 
     """Refresh access token using refresh token"""
     refreshToken(refreshToken: String!): RefreshTokenResponse!
@@ -1964,6 +2005,7 @@ input CampaignFilter {
     createInvestigation(input: InvestigationInput!): Investigation! @scope(requires: "write:case")
     updateInvestigation(id: ID!, input: InvestigationInput!): Investigation! @scope(requires: "write:case")
     deleteInvestigation(id: ID!): Boolean! @scope(requires: "write:case")
+    createInvestigationSnapshot(investigationId: ID!, label: String): InvestigationSnapshot! @scope(requires: "write:case")
     linkEntities(text: String!): [LinkedEntity!]!
     extractRelationships(text: String!, entities: [LinkedEntityInput!]!): [ExtractedRelationship!]!
     generateEntitiesFromText(investigationId: ID!, text: String!): GeneratedEntitiesResult!
@@ -2047,8 +2089,8 @@ input CampaignFilter {
 
     # Collaboration Mutations
     createWarRoom(name: String!): WarRoom!
-    addParticipant(roomId: ID!, userId: ID!, role: String!): WarRoomParticipant!
-    removeParticipant(roomId: ID!, userId: ID!): Boolean!
+    addParticipant(warRoomId: ID!, userId: ID!, role: String!): WarRoomParticipant!
+    removeParticipant(warRoomId: ID!, userId: ID!): Boolean!
 
     # Sprint 28 Mutations
     submitNps(score: Int!, comment: String): Boolean!
@@ -2085,8 +2127,16 @@ input CampaignFilter {
     # Ingestion Subscriptions
     evidenceIngested(tenantId: String!): IngestionResult
 
+    # Collaboration Subscriptions
+    participantAdded: WarRoomSubscriptionPayload!
+    participantRemoved: WarRoomSubscriptionPayload!
+
     # Copilot Subscriptions
     copilotEvents(runId: ID!): CopilotEvent!
+  }
+
+  type WarRoomSubscriptionPayload {
+    warRoom: WarRoom!
   }
 
 

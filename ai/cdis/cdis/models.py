@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Sequence, Tuple
 
 import networkx as nx
 
@@ -17,8 +17,8 @@ class Edge:
 
 @dataclass
 class GraphEstimate:
-    nodes: List[str]
-    edges: List[Edge]
+    nodes: list[str]
+    edges: list[Edge]
 
     def to_networkx(self) -> nx.DiGraph:
         g = nx.DiGraph()
@@ -28,8 +28,8 @@ class GraphEstimate:
             g.add_edge(edge.source, edge.target, weight=edge.weight, confidence=edge.confidence)
         return g
 
-    def adjacency(self) -> Dict[str, Dict[str, float]]:
-        table: Dict[str, Dict[str, float]] = {node: {} for node in self.nodes}
+    def adjacency(self) -> dict[str, dict[str, float]]:
+        table: dict[str, dict[str, float]] = {node: {} for node in self.nodes}
         for edge in self.edges:
             table[edge.source][edge.target] = edge.weight
         return table
@@ -39,25 +39,25 @@ class GraphEstimate:
 class Simulation:
     sim_id: str
     graph: GraphEstimate
-    baseline: Dict[str, float]
+    baseline: dict[str, float]
     confidence: float
-    history: List[Dict[str, float]] = field(default_factory=list)
+    history: list[dict[str, float]] = field(default_factory=list)
 
 
 @dataclass
 class PathContribution:
-    path: List[str]
+    path: list[str]
     contribution: float
 
 
 @dataclass
 class InterventionResult:
     sim_id: str
-    interventions: Dict[str, float]
-    target: Optional[str]
-    delta: Dict[str, float]
-    projected: Dict[str, float]
-    paths: List[PathContribution]
+    interventions: dict[str, float]
+    target: str | None
+    delta: dict[str, float]
+    projected: dict[str, float]
+    paths: list[PathContribution]
     confidence: float
 
 
@@ -65,16 +65,16 @@ def new_simulation_id() -> str:
     return uuid.uuid4().hex
 
 
-def topological_sort(graph: GraphEstimate) -> List[str]:
+def topological_sort(graph: GraphEstimate) -> list[str]:
     g = graph.to_networkx()
     return list(nx.topological_sort(g)) if nx.is_directed_acyclic_graph(g) else graph.nodes
 
 
 def enumerate_paths(
     graph: GraphEstimate, sources: Sequence[str], target: str, limit: int = 5
-) -> List[PathContribution]:
+) -> list[PathContribution]:
     g = graph.to_networkx()
-    contributions: List[PathContribution] = []
+    contributions: list[PathContribution] = []
     for src in sources:
         if src not in g.nodes or target not in g.nodes:
             continue
@@ -88,9 +88,9 @@ def enumerate_paths(
 
 
 def merge_effects(
-    paths: List[PathContribution],
-) -> Dict[Tuple[str, str], float]:
-    aggregated: Dict[Tuple[str, str], float] = {}
+    paths: list[PathContribution],
+) -> dict[tuple[str, str], float]:
+    aggregated: dict[tuple[str, str], float] = {}
     for p in paths:
         if len(p.path) < 2:
             continue

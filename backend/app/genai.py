@@ -1,11 +1,11 @@
+import faiss
 from ctransformers import AutoModelForCausalLM
 from sentence_transformers import SentenceTransformer
-import faiss
-import numpy as np
 
 # --- 1. Load the Local LLM ---
 # This will be loaded on application startup.
 llm = None
+
 
 def load_llm():
     """Loads the local LLM."""
@@ -18,9 +18,10 @@ def load_llm():
             max_new_tokens=1024,
         )
 
+
 # --- 2. Set up the Vector Store (RAG) ---
 # For the MVP, we'll use a simple in-memory FAISS index.
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 # A real implementation would have a more sophisticated document store.
 documents = [
     "Malware IOCs are indicators of compromise related to malicious software.",
@@ -32,6 +33,7 @@ documents = [
 document_embeddings = embedding_model.encode(documents)
 index = faiss.IndexFlatL2(document_embeddings.shape[1])
 index.add(document_embeddings)
+
 
 # --- 3. Prediction Generation ---
 def generate_prediction(ioc_name):
@@ -71,6 +73,7 @@ def generate_prediction(ioc_name):
     # A real implementation would have more robust parsing and error handling.
     try:
         import json
+
         return json.loads(response.strip())
     except Exception:
         return {

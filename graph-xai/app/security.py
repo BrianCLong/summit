@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Set
+from collections.abc import Callable
 
 from fastapi import Depends, Header, HTTPException
 from jose import jwt
@@ -13,7 +13,7 @@ def check_api_key(x_api_key: str = Header(default="")) -> None:
     settings = get_settings()
     if settings.auth_mode != "apikey":
         return
-    keys: Set[str] = {k.strip() for k in (settings.api_keys or "").split(",") if k.strip()}
+    keys: set[str] = {k.strip() for k in (settings.api_keys or "").split(",") if k.strip()}
     if x_api_key not in keys:
         raise HTTPException(status_code=401, detail="invalid_api_key")
 

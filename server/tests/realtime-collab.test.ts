@@ -14,7 +14,7 @@ describe('realtime collaboration basics', () => {
     await new Promise<void>((resolve) => {
       server.listen(() => {
         const address = server.address() as any;
-        url = `http://localhost:${address.port}/ws`;
+        url = `http://localhost:${address.port}`;
         resolve();
       });
     });
@@ -25,36 +25,70 @@ describe('realtime collaboration basics', () => {
     server.close(done);
   });
 
-  it('shares presence and cursor updates', (done) => {
+  it('shares presence and cursor updates', async () => {
     const c1 = ioClient(url, {
       auth: { tenantId: 't1', userId: 'u1' },
+      path: '/ws',
       transports: ['websocket'],
     });
     const c2 = ioClient(url, {
       auth: { tenantId: 't1', userId: 'u2' },
+      path: '/ws',
       transports: ['websocket'],
     });
 
-    c1.on('presence:join', (payload) => {
-      if (payload.userId === 'u2') {
-        c2.emit('cursor:move', { investigationId: 'i1', x: 5, y: 6 });
-      }
-    });
-
-    c1.on('cursor:move', (payload) => {
-      try {
-        expect(payload.userId).toBe('u2');
-        expect(payload.x).toBe(5);
-        expect(payload.y).toBe(6);
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
         c1.close();
         c2.close();
-        done();
-      } catch (err) {
-        done(err);
+        reject(new Error('cursor:move timeout'));
+      }, 5000);
+
+      const onError = (err: unknown) => {
+        clearTimeout(timer);
+        c1.close();
+        c2.close();
+        reject(err instanceof Error ? err : new Error(String(err)));
+      };
+
+      let joined = false;
+
+      c1.on('presence:join', (payload) => {
+        if (payload.userId === 'u2') {
+          c2.emit('cursor:move', { investigationId: 'i1', x: 5, y: 6 });
+        }
+      });
+
+      c1.on('cursor:move', (payload) => {
+        try {
+          expect(payload.userId).toBe('u2');
+          expect(payload.x).toBe(5);
+          expect(payload.y).toBe(6);
+          clearTimeout(timer);
+          c1.close();
+          c2.close();
+          resolve();
+        } catch (err) {
+          onError(err);
+        }
+      });
+
+      c1.on('connect_error', onError);
+      c2.on('connect_error', onError);
+
+      const maybeJoin = () => {
+        if (joined) return;
+        joined = true;
+        c1.emit('join', { investigationId: 'i1' });
+        c2.emit('join', { investigationId: 'i1' });
+      };
+
+      if (c1.connected && c2.connected) {
+        maybeJoin();
+      } else {
+        c1.on('connect', maybeJoin);
+        c2.on('connect', maybeJoin);
       }
     });
-
-    c1.emit('join', { investigationId: 'i1' });
-    c2.emit('join', { investigationId: 'i1' });
-  });
+  }, 10000);
 });

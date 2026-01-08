@@ -1,11 +1,11 @@
 import { gql } from 'apollo-server-express';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-const { copilotTypeDefs } = require('./schema.copilot.js');
-const { graphTypeDefs } = require('./schema.graphops.js');
-const { aiTypeDefs } = require('./schema.ai.js');
-const graphragTypes = require('./types/graphragTypes.js');
-const coreTypeDefs = require('./schema/core.js');
+import { copilotTypeDefs } from './schema.copilot.js';
+import { graphTypeDefs } from './schema.graphops.js';
+import { aiTypeDefs } from './schema.ai.js';
+import { graphragTypes } from './types/graphragTypes.js';
+import { coreTypeDefs } from './schema.core.js';
 import { activityTypeDefs } from './schema/activity.js';
 import { documentTypeDefs } from './schema.document.js';
 import { threatActorTypeDefs } from './schema.threat-actor';

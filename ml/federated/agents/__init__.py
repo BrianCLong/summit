@@ -5,26 +5,26 @@ Implements autonomous agents for federated OSINT model training
 with support for air-gapped operation.
 """
 
-from .osint_trainer_agent import (
-    OSINTTrainerAgent,
-    AgentConfig,
-    TrainingTask,
-)
-from .coordinator_agent import (
-    FederatedCoordinatorAgent,
-    CoordinatorConfig,
-)
 from .airgap_sync_agent import (
     AirgapSyncAgent,
     SyncConfig,
 )
+from .coordinator_agent import (
+    CoordinatorConfig,
+    FederatedCoordinatorAgent,
+)
+from .osint_trainer_agent import (
+    AgentConfig,
+    OSINTTrainerAgent,
+    TrainingTask,
+)
 
 __all__ = [
-    "OSINTTrainerAgent",
     "AgentConfig",
-    "TrainingTask",
-    "FederatedCoordinatorAgent",
-    "CoordinatorConfig",
     "AirgapSyncAgent",
+    "CoordinatorConfig",
+    "FederatedCoordinatorAgent",
+    "OSINTTrainerAgent",
     "SyncConfig",
+    "TrainingTask",
 ]

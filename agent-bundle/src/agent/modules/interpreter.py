@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 
 
@@ -17,6 +18,6 @@ class Interpreter:
             "Identify architecture needs",
             "Identify tests/docs/infra requirements",
             "Consider performance, security, scalability",
-            "Consider PR-ready packaging"
+            "Consider PR-ready packaging",
         ]
         return InterpretedRequest(raw=request, summary=summary, implications=implications)

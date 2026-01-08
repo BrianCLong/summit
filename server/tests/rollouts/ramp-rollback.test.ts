@@ -3,10 +3,10 @@ import { evaluateCanary } from '../../src/conductor/rollback.js';
 
 describe('Ramp rollback SLO breach triggers', () => {
   it('triggers rollback when error rate exceeds threshold', async () => {
-    const rollback = jest.fn().mockResolvedValue(undefined);
-    const fetchMetrics = jest
-      .fn()
-      .mockResolvedValue({ errorRate: 0.12, p95: 120 });
+    const rollback = jest.fn(() => Promise.resolve(undefined));
+    const fetchMetrics = jest.fn(() =>
+      Promise.resolve({ errorRate: 0.12, p95: 120 }),
+    );
 
     const result = await evaluateCanary(
       'run-1',
@@ -20,10 +20,10 @@ describe('Ramp rollback SLO breach triggers', () => {
   });
 
   it('triggers rollback when p95 latency exceeds threshold', async () => {
-    const rollback = jest.fn().mockResolvedValue(undefined);
-    const fetchMetrics = jest
-      .fn()
-      .mockResolvedValue({ errorRate: 0.01, p95: 750 });
+    const rollback = jest.fn(() => Promise.resolve(undefined));
+    const fetchMetrics = jest.fn(() =>
+      Promise.resolve({ errorRate: 0.01, p95: 750 }),
+    );
 
     const result = await evaluateCanary(
       'run-2',
@@ -37,10 +37,10 @@ describe('Ramp rollback SLO breach triggers', () => {
   });
 
   it('does not trigger rollback when SLOs are healthy', async () => {
-    const rollback = jest.fn().mockResolvedValue(undefined);
-    const fetchMetrics = jest
-      .fn()
-      .mockResolvedValue({ errorRate: 0.01, p95: 120 });
+    const rollback = jest.fn(() => Promise.resolve(undefined));
+    const fetchMetrics = jest.fn(() =>
+      Promise.resolve({ errorRate: 0.01, p95: 120 }),
+    );
 
     const result = await evaluateCanary(
       'run-3',
