@@ -1,0 +1,50 @@
+quarter_id: "2026Q1"
+objectives:
+  - id: "gov_posture"
+    title: "Governance Posture"
+    description: "Maintain strict governance and compliance standards across the platform."
+    key_results:
+      - metric_id: "governance_score"
+        target: 95
+        direction: ">="
+        measurement_window: "last_run"
+        data_source: "governance-score.json:score"
+        weighting: 1.0
+      - metric_id: "policy_drift"
+        target: 0
+        direction: "=="
+        measurement_window: "last_7_days"
+        data_source: "compliance.json:drift_days"
+        hard_fail: true
+
+  - id: "operational_excellence"
+    title: "Operational Excellence"
+    description: "Ensure high availability and rapid incident response."
+    key_results:
+      - metric_id: "ga_verify_p95"
+        target: 15
+        direction: "<="
+        measurement_window: "last_30_runs"
+        data_source: "ga-verify-summary.json:p95_minutes"
+      - metric_id: "incident_drill_pass_rate"
+        target: 0.95
+        direction: ">="
+        measurement_window: "last_5_drills"
+        data_source: "incident-drills.json:pass_rate"
+
+sla_commitments:
+  ga_verify_p95_minutes: 15
+  incident_drill_pass_rate_lastN: 0.95
+  policy_drift_days_per_month: 0
+  overdue_exceptions: 0
+  evidence_offline_verify_pass_rate_lastN: 1.0
+
+tolerances:
+  missing_data_penalty: "AT_RISK"
+  unknown_handling: "AT_RISK"
+
+ownership:
+  governance_score: "Security/Gov"
+  policy_drift: "Security/Gov"
+  ga_verify_p95: "Platform/CI"
+  incident_drill_pass_rate: "Field Mode"
