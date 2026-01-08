@@ -31,19 +31,43 @@ This is the canonical runbook for operators to perform releases.
 3.  **Ensure versions match:**
     Check `package.json` in root, server, and client directories to ensure they match the intended tag.
 
-## 3. Dry-run (Recommended)
+## 3. How to do a GA cut dry-run
 
-To verify the release process without creating a permanent tag or publishing:
+The `GA Release Dry-Run` workflow is a dedicated rehearsal mechanism. It exercises the entire release governance spine—generating the full evidence bundle, sign-off decision, and executive one-pagers—without cutting any real tags or branches.
 
-1.  Go to **Actions** tab in GitHub.
-2.  Select the **Release Train** (or `Release`) workflow.
-3.  Click **Run workflow**.
-4.  **Inputs:**
-    - `tag`: Enter the intended tag (e.g., `v0.3.0`).
-    - `dry_run`: Set to `true`.
-    - `override_freeze`: Set to `true` (and provide reason if prompted) if releasing during a freeze window.
-5.  **Artifacts:**
-    Check the workflow run summary for the "bundle artifact" or "release-bundle" to verify outputs.
+**Use this process to build confidence and verify the release machinery before a real release.**
+
+1.  **Navigate to the Workflow:**
+    - Go to the **Actions** tab in the GitHub repository.
+    - In the left sidebar, find and select the **"GA Release Dry-Run"** workflow.
+
+2.  **Run the Workflow:**
+    - Click the **"Run workflow"** button.
+    - You will be presented with the following inputs:
+
+| Input | Description | Default |
+| :--- | :--- | :--- |
+| `target` | The branch, tag, or SHA to run against. | `main` |
+| `version` | A *mock* version for the rehearsal. | `1.2.3-dryrun` |
+| `apply` | **MUST BE `false`**. Setting to `true` will cause the workflow to fail. | `false` |
+
+3.  **Monitor and Review:**
+    - The workflow will first trigger the canonical `ga-release.yml` workflow and wait for it to complete. This may take some time.
+    - Once the underlying release workflow is finished, the dry-run workflow will download all the produced artifacts.
+    - Finally, it will run a script to generate a summary report.
+
+4.  **Check the Artifacts:**
+    - When the workflow is complete, go to the run's **"Summary"** page.
+    - Under the **"Artifacts"** section, you will find a single zip file named **`dry-run-summary`**.
+    - Download and unzip this artifact. It will contain the `DRY_RUN_SUMMARY.md` file.
+
+5.  **Interpret the Results:**
+    - Open `DRY_RUN_SUMMARY.md`. This file is the single source of truth for the dry-run.
+    - It contains:
+        - The exact SHA the dry-run was performed against.
+        - The outcome of the sign-off decision (e.g., `ELIGIBLE` or `NOT ELIGIBLE`).
+        - A list of all generated evidence bundle reports.
+        - Pointers to any missing inputs and instructions on how to fix the underlying process.
 
 ## 4. Cut an RC (Release Candidate)
 

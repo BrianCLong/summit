@@ -1,0 +1,90 @@
+
+name: GA Release Dry-Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'The branch, tag, or SHA to run the dry-run against'
+        required: true
+        default: 'main'
+      version:
+        description: 'A mock version for the dry-run (e.g., 1.2.3-dryrun)'
+        required: true
+        default: '1.2.3-dryrun'
+      apply:
+        description: 'This must be false for a dry-run. If true, this workflow will fail.'
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  validate-inputs:
+    name: Validate Dry-Run Inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Assert apply is false'
+        if: ${{ github.event.inputs.apply == true }}
+        run: |
+          echo "::error::'apply' cannot be true for a dry-run workflow."
+          echo "This workflow is for rehearsal purposes only and must not create a release."
+          exit 1
+      - name: 'Inputs are valid'
+        run: echo "Inputs are valid for a dry-run."
+
+  trigger-ga-release:
+    name: Trigger GA Release Workflow
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    outputs:
+      run_id: ${{ steps.trigger.outputs.run_id }}
+    steps:
+      - name: 'Trigger GA Release Workflow'
+        id: trigger
+        uses: a-b-r-o-w-n/trigger-workflow-and-wait@v1.5.0
+        with:
+          workflow_file_name: 'ga-release.yml'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.inputs.target }}
+          wait_for_completion: true
+          inputs: '{ "dry_run": true, "version": "${{ github.event.inputs.version }}" }'
+          propagate_failure: true
+          trigger_workflow: true
+
+  generate-summary:
+    name: Generate Dry-Run Summary
+    needs: trigger-ga-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts from triggered workflow
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ga-release.yml
+          run_id: ${{ needs.trigger-ga-release.outputs.run_id }}
+          path: ./artifacts/
+
+      - name: 'Debug: List downloaded artifacts'
+        run: ls -R ./artifacts
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Summary Generator
+        run: node scripts/releases/generate_dry_run_summary.mjs
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+
+      - name: Upload Dry-Run Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: dry-run-summary
+          path: artifacts/dry-run/DRY_RUN_SUMMARY.md
+          retention-days: 90
