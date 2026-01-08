@@ -1,0 +1,25 @@
+taxonomies:
+  - code: "CI-INFRA-001"
+    category: "Infrastructure"
+    severity: "P0"
+    description: "Critical infrastructure timeout or unavailability"
+    next_steps:
+      - "Check cloud provider status page"
+      - "Review recent infrastructure changes in terraform"
+      - "Verify runner connectivity"
+  - code: "CI-TEST-001"
+    category: "Test Reliability"
+    severity: "P1"
+    description: "High frequency test flake or regression"
+    next_steps:
+      - "Run verification suite locally with --repeat"
+      - "Check test isolation and database cleanup"
+      - "Review recent changes to the test suite"
+  - code: "CI-BUILD-001"
+    category: "Build Failure"
+    severity: "P0"
+    description: "Deterministic build failure"
+    next_steps:
+      - "Check dependency resolution"
+      - "Verify build environment consistency"
+      - "Check for conflicting changes in main"

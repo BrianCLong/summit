@@ -1,0 +1,9 @@
+{
+  "ci_issue_automation": {
+    "enabled": true,
+    "mode": "draft",
+    "min_count": 10,
+    "min_regression_delta": 5,
+    "max_issues_per_week": 5
+  }
+}

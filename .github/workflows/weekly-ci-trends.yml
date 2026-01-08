@@ -1,0 +1,90 @@
+name: Weekly CI Failure Trends
+
+on:
+  schedule:
+    - cron: "0 1 * * 0" # 1 AM Sunday
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Execution mode"
+        required: false
+        default: "draft"
+        type: choice
+        options:
+          - draft
+          - apply
+
+jobs:
+  analyze-trends:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # This step simulates the Trend Report generation.
+      # In a real scenario, this would likely run a more complex analysis script.
+      - name: Generate Trend Report (Simulation)
+        run: |
+          mkdir -p artifacts/ci-trends
+          cat > artifacts/ci-trends/report.json <<EOF
+          {
+            "action_queue": [
+              {
+                "failure_code": "CI-INFRA-001",
+                "count": 15,
+                "delta": 5,
+                "workflows": ["ci-core", "nightly"],
+                "examples": [
+                  "https://github.com/${{ github.repository }}/actions/runs/1001"
+                ]
+              },
+              {
+                "failure_code": "CI-TEST-001",
+                "count": 12,
+                "delta": 6,
+                "workflows": ["ci-verify"],
+                "examples": [
+                  "https://github.com/${{ github.repository }}/actions/runs/2001"
+                ]
+              }
+            ]
+          }
+          EOF
+
+      - name: Run Issue Drafter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          POLICY_PATH: scripts/ci/ci_issue_policy.json
+          REPORT_PATH: artifacts/ci-trends/report.json
+        run: |
+          # Override mode if provided via input
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+             # Create temp policy with overridden mode
+             jq '.ci_issue_automation.mode = "${{ inputs.mode }}"' scripts/ci/ci_issue_policy.json > policy_override.json
+             export POLICY_PATH=policy_override.json
+          fi
+
+          node scripts/ci/draft_ci_failure_issues.mjs
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-issues-drafts
+          path: artifacts/ci-issues/
+
+      - name: Summary
+        if: always()
+        run: |
+          if [[ -f artifacts/ci-issues/digest.md ]]; then
+            cat artifacts/ci-issues/digest.md >> $GITHUB_STEP_SUMMARY
+          fi
