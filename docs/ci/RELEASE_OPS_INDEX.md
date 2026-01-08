@@ -24,6 +24,8 @@ This document serves as the central index for all Release Operations tooling and
 | [Auto-Triage](AUTO_TRIAGE_ROUTING.md)                 | Event      | Issue labeled | Route blockers to teams     |
 | [Auto-Remediation](AUTO_REMEDIATION.md)               | Event + 4h | Issue labeled | Automated fixes             |
 | [Release Train Dashboard](RELEASE_TRAIN_DASHBOARD.md) | 2-hourly   | Events        | Visual pipeline status      |
+| [Test Quarantine](TEST_QUARANTINE.md)                 | Event      | Test failure  | Quarantine flaky tests      |
+| [Changelog Generator](CHANGELOG_GENERATOR.md)         | Event      | Tag/release   | Generate release notes      |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
 
 ---
@@ -54,6 +56,8 @@ This document serves as the central index for all Release Operations tooling and
 | ------------------- | --------- | ------------------------------------------------ |
 | Auto-Triage Routing | ✅ Active | [AUTO_TRIAGE_ROUTING.md](AUTO_TRIAGE_ROUTING.md) |
 | Auto-Remediation    | ✅ Active | [AUTO_REMEDIATION.md](AUTO_REMEDIATION.md)       |
+| Test Quarantine     | ✅ Active | [TEST_QUARANTINE.md](TEST_QUARANTINE.md)         |
+| Changelog Generator | ✅ Active | [CHANGELOG_GENERATOR.md](CHANGELOG_GENERATOR.md) |
 
 ---
 
@@ -78,7 +82,8 @@ This document serves as the central index for all Release Operations tooling and
 │  │                      STATE MANAGEMENT                            │   │
 │  ├─────────────────────────────────────────────────────────────────┤   │
 │  │  blockers_state.json  │  digest_state.json  │  triage_state.json │   │
-│  │  handoff_state.json   │  remediation_state.json                  │   │
+│  │  handoff_state.json   │  remediation_state.json │ dashboard_state │   │
+│  │  quarantine_state.json │  changelog_state.json                   │   │
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
@@ -86,7 +91,8 @@ This document serves as the central index for all Release Operations tooling and
 │  ├─────────────────────────────────────────────────────────────────┤   │
 │  │  BLOCKER_ESCALATION_POLICY.yml  │  RELEASE_OPS_DIGEST_POLICY.yml │   │
 │  │  ONCALL_HANDOFF_POLICY.yml      │  TRIAGE_ROUTING_POLICY.yml     │   │
-│  │  REMEDIATION_PLAYBOOKS.yml                                       │   │
+│  │  REMEDIATION_PLAYBOOKS.yml      │  TEST_QUARANTINE_POLICY.yml    │   │
+│  │  CHANGELOG_POLICY.yml                                            │   │
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -179,6 +185,8 @@ This document serves as the central index for all Release Operations tooling and
 | `ONCALL_HANDOFF_POLICY.yml`     | Shift schedules       | `docs/ci/` |
 | `TRIAGE_ROUTING_POLICY.yml`     | Team routing rules    | `docs/ci/` |
 | `REMEDIATION_PLAYBOOKS.yml`     | Playbook definitions  | `docs/ci/` |
+| `TEST_QUARANTINE_POLICY.yml`    | Quarantine rules      | `docs/ci/` |
+| `CHANGELOG_POLICY.yml`          | Changelog categories  | `docs/ci/` |
 
 ### State Files
 
@@ -189,6 +197,9 @@ This document serves as the central index for all Release Operations tooling and
 | `handoff_state.json`     | Handoff context      | `docs/releases/_state/` |
 | `triage_state.json`      | Triage cooldowns     | `docs/releases/_state/` |
 | `remediation_state.json` | Remediation attempts | `docs/releases/_state/` |
+| `quarantine_state.json`  | Quarantine history   | `docs/releases/_state/` |
+| `changelog_state.json`   | Generation history   | `docs/releases/_state/` |
+| `dashboard_state.json`   | Dashboard snapshots  | `docs/releases/_state/` |
 
 ---
 
@@ -201,6 +212,9 @@ This document serves as the central index for all Release Operations tooling and
 | `generate_oncall_handoff.sh`     | Generate handoff note   | `./scripts/release/generate_oncall_handoff.sh`     |
 | `auto_triage_blockers.sh`        | Route blockers to teams | `./scripts/release/auto_triage_blockers.sh`        |
 | `run_remediation.sh`             | Execute playbooks       | `./scripts/release/run_remediation.sh`             |
+| `generate_release_dashboard.sh`  | Generate dashboard      | `./scripts/release/generate_release_dashboard.sh`  |
+| `manage_test_quarantine.sh`      | Manage test quarantine  | `./scripts/release/manage_test_quarantine.sh`      |
+| `generate_changelog.sh`          | Generate changelog      | `./scripts/release/generate_changelog.sh`          |
 
 ### Common Flags
 
@@ -345,10 +359,11 @@ All scripts support these common flags:
 
 ## Change Log
 
-| Date       | Change                    | Author               |
-| ---------- | ------------------------- | -------------------- |
-| 2026-01-08 | Initial Release Ops Index | Platform Engineering |
-| 2026-01-08 | Added all MVP-4 features  | Platform Engineering |
+| Date       | Change                               | Author               |
+| ---------- | ------------------------------------ | -------------------- |
+| 2026-01-08 | Initial Release Ops Index            | Platform Engineering |
+| 2026-01-08 | Added all MVP-4 features             | Platform Engineering |
+| 2026-01-08 | Added Test Quarantine, Changelog Gen | Platform Engineering |
 
 ---
 
