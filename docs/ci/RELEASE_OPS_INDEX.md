@@ -35,6 +35,8 @@ This document serves as the central index for all Release Operations tooling and
 | [Dependency Freeze](DEPENDENCY_FREEZE.md)             | Event      | PR lockfile   | Prevent RC dep changes       |
 | [Schema Compatibility](SCHEMA_COMPATIBILITY.md)       | Event      | PR schema     | Prevent breaking API changes |
 | [Release Rollback](ROLLBACK_AUTOMATION.md)            | Manual     | Dispatch      | Safe GA rollback automation  |
+| [Tag Verification](TAG_VERIFICATION.md)               | Event      | RC tag push   | Verify green for promotion   |
+| [Promotion Bundle](PROMOTION_BUNDLE.md)               | Event      | RC tag push   | Generate promotion artifacts |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems    |
 
 ---
@@ -52,6 +54,8 @@ This document serves as the central index for all Release Operations tooling and
 | Dependency Freeze      | ✅ Active | [DEPENDENCY_FREEZE.md](DEPENDENCY_FREEZE.md)                                 |
 | Schema Compatibility   | ✅ Active | [SCHEMA_COMPATIBILITY.md](SCHEMA_COMPATIBILITY.md)                           |
 | Rollback Automation    | ✅ Active | [ROLLBACK_AUTOMATION.md](ROLLBACK_AUTOMATION.md)                             |
+| Tag Verification       | ✅ Active | [TAG_VERIFICATION.md](TAG_VERIFICATION.md)                                   |
+| Promotion Bundle       | ✅ Active | [PROMOTION_BUNDLE.md](PROMOTION_BUNDLE.md)                                   |
 
 ### Monitoring Features
 
@@ -258,6 +262,9 @@ This document serves as the central index for all Release Operations tooling and
 | `verify_dependency_freeze.sh`      | Verify dep freeze       | `./scripts/release/verify_dependency_freeze.sh`      |
 | `check_schema_compatibility.sh`    | Check schema compat     | `./scripts/release/check_schema_compatibility.sh`    |
 | `rollback_release.sh`              | Rollback failed release | `./scripts/release/rollback_release.sh`              |
+| `verify-green-for-tag.sh`          | Verify green for tag    | `./scripts/release/verify-green-for-tag.sh`          |
+| `build-promotion-bundle.sh`        | Build promotion bundle  | `./scripts/release/build-promotion-bundle.sh`        |
+| `prepare-stabilization-rc.sh`      | Prepare RC tag          | `./scripts/release/prepare-stabilization-rc.sh`      |
 
 ### Common Flags
 
@@ -413,6 +420,8 @@ All scripts support these common flags:
 | 2026-01-08 | Added Dependency Freeze              | Platform Engineering |
 | 2026-01-08 | Added Schema Compatibility           | Platform Engineering |
 | 2026-01-08 | Added Rollback Automation            | Platform Engineering |
+| 2026-01-08 | Added Tag Verification               | Platform Engineering |
+| 2026-01-08 | Added Promotion Bundle               | Platform Engineering |
 
 ---
 

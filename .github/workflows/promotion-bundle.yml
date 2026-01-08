@@ -1,0 +1,147 @@
+name: Promotion Bundle
+
+# Generates promotion bundles for RC → GA promotion
+# Automatically triggered on RC tag push or manual dispatch
+#
+# See docs/ci/PROMOTION_BUNDLE.md for full documentation.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "RC tag to build bundle for (e.g., v4.1.2-rc.1)"
+        required: true
+        type: string
+      commit:
+        description: "Commit SHA (default: tag points to)"
+        required: false
+        type: string
+
+  # Auto-generate bundle on RC tag push
+  push:
+    tags:
+      - "v*.*.*-rc.*"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build-bundle:
+    name: Build Promotion Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Parameters
+        id: params
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG="${{ github.ref_name }}"
+            COMMIT="${{ github.sha }}"
+          else
+            TAG="${{ inputs.tag }}"
+            COMMIT="${{ inputs.commit }}"
+            if [[ -z "${COMMIT}" ]]; then
+              # Resolve tag to commit
+              COMMIT=$(git rev-parse "${TAG}" 2>/dev/null || echo "${{ github.sha }}")
+            fi
+          fi
+
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
+
+          # Extract version for artifact naming
+          VERSION=$(echo "${TAG}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-rc\.[0-9]+$/\1/')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+          echo "Tag: ${TAG}"
+          echo "Commit: ${COMMIT}"
+          echo "Version: ${VERSION}"
+
+      - name: Validate RC Tag Format
+        run: |
+          TAG="${{ steps.params.outputs.tag }}"
+          if ! [[ "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+            echo "::error::Invalid RC tag format: ${TAG}. Expected vX.Y.Z-rc.N"
+            exit 1
+          fi
+
+      - name: Install Dependencies
+        run: |
+          which jq || sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Build Promotion Bundle
+        id: bundle
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/build-promotion-bundle.sh
+          chmod +x scripts/release/verify-green-for-tag.sh
+
+          TAG="${{ steps.params.outputs.tag }}"
+          COMMIT="${{ steps.params.outputs.commit }}"
+          OUTPUT_DIR="artifacts/promotion-bundles/${TAG}"
+
+          ./scripts/release/build-promotion-bundle.sh \
+            --tag "${TAG}" \
+            --commit "${COMMIT}" \
+            --output "${OUTPUT_DIR}"
+
+          echo "bundle_path=${OUTPUT_DIR}" >> $GITHUB_OUTPUT
+
+      - name: Upload Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: promotion-bundle-${{ steps.params.outputs.tag }}
+          path: ${{ steps.bundle.outputs.bundle_path }}
+          retention-days: 90
+
+      - name: Job Summary
+        run: |
+          TAG="${{ steps.params.outputs.tag }}"
+          COMMIT="${{ steps.params.outputs.commit }}"
+          VERSION="${{ steps.params.outputs.version }}"
+          GA_TAG="v${VERSION}"
+
+          echo "### Promotion Bundle: ${TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| RC Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| GA Tag | \`${GA_TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${COMMIT:0:7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${VERSION} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Bundle Contents" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Purpose |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| \`github_release.md\` | Release notes |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`promote_to_ga.sh\` | Promotion script |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`REQUIRED_CHECKS.txt\` | Verification snapshot |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`PROMOTION_CHECKLIST.md\` | Step-by-step guide |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### How to Promote" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download the \`promotion-bundle-${TAG}\` artifact" >> $GITHUB_STEP_SUMMARY
+          echo "2. Extract and navigate to the bundle directory" >> $GITHUB_STEP_SUMMARY
+          echo "3. Review the checklist: \`cat PROMOTION_CHECKLIST.md\`" >> $GITHUB_STEP_SUMMARY
+          echo "4. Dry-run promotion: \`./promote_to_ga.sh --dry-run\`" >> $GITHUB_STEP_SUMMARY
+          echo "5. Execute promotion: \`./promote_to_ga.sh\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Quick Promotion Commands" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Download and extract artifact, then:" >> $GITHUB_STEP_SUMMARY
+          echo "cd promotion-bundle-${TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "./promote_to_ga.sh --dry-run  # Preview" >> $GITHUB_STEP_SUMMARY
+          echo "./promote_to_ga.sh            # Execute" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

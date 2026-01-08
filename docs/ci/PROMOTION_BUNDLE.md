@@ -1,0 +1,292 @@
+# Promotion Bundle
+
+**Status:** Active (MVP-4)
+**Owner:** Platform Engineering
+**Last Updated:** 2026-01-08
+
+## Overview
+
+The Promotion Bundle system generates self-contained packages for RC to GA promotion. Each bundle contains all necessary artifacts, scripts, and documentation to safely promote a release candidate to general availability.
+
+### Key Properties
+
+- **Self-contained**: Everything needed for promotion in one package
+- **Operator-friendly**: Generated scripts for easy execution
+- **Auditable**: Captures verification state at bundle time
+- **Reproducible**: Same inputs produce identical bundles
+
+---
+
+## Bundle Contents
+
+Each promotion bundle includes:
+
+| File                     | Purpose                                |
+| ------------------------ | -------------------------------------- |
+| `github_release.md`      | Release notes for GitHub Release       |
+| `promote_to_ga.sh`       | Executable script to promote RC to GA  |
+| `REQUIRED_CHECKS.txt`    | Truth table snapshot from verification |
+| `PROMOTION_CHECKLIST.md` | Step-by-step promotion guide           |
+
+---
+
+## Usage
+
+### Generate Bundle
+
+```bash
+# Generate promotion bundle for an RC
+./scripts/release/build-promotion-bundle.sh \
+  --tag v4.1.2-rc.1 \
+  --commit a8b1963
+
+# Specify custom output directory
+./scripts/release/build-promotion-bundle.sh \
+  --tag v4.1.2-rc.1 \
+  --commit a8b1963 \
+  --output ./my-bundle
+```
+
+### Execute Promotion
+
+```bash
+# Navigate to bundle directory
+cd artifacts/promotion-bundles/v4.1.2-rc.1
+
+# Preview promotion (dry run)
+./promote_to_ga.sh --dry-run
+
+# Execute promotion
+./promote_to_ga.sh
+```
+
+### Via GitHub Actions
+
+Promotion bundles are automatically generated when RC tags are created:
+
+1. Push RC tag: `git push origin v4.1.2-rc.1`
+2. Workflow generates bundle
+3. Download from workflow artifacts
+4. Execute locally
+
+---
+
+## Configuration Options
+
+| Option     | Description                     | Default                             |
+| ---------- | ------------------------------- | ----------------------------------- |
+| `--tag`    | RC tag name (e.g., v4.1.2-rc.1) | Required                            |
+| `--commit` | Commit SHA the tag points to    | Required                            |
+| `--output` | Output directory                | `artifacts/promotion-bundles/<tag>` |
+| `--help`   | Show help message               | -                                   |
+
+---
+
+## Promotion Workflow
+
+### 1. Generate Bundle
+
+```bash
+./scripts/release/build-promotion-bundle.sh --tag v4.1.2-rc.1 --commit a8b1963
+```
+
+Output:
+
+```
+═══════════════════════════════════════════════════════════════
+  Building Promotion Bundle
+═══════════════════════════════════════════════════════════════
+[INFO] Script version: 1.0.0
+[INFO] RC Tag: v4.1.2-rc.1
+[INFO] Commit: a8b1963
+[INFO] Output: artifacts/promotion-bundles/v4.1.2-rc.1
+
+[INFO] Generating github_release.md...
+[INFO] Generating promote_to_ga.sh...
+[INFO] Generating PROMOTION_CHECKLIST.md...
+[INFO] Capturing REQUIRED_CHECKS.txt...
+
+═══════════════════════════════════════════════════════════════
+  Promotion Bundle Created
+═══════════════════════════════════════════════════════════════
+```
+
+### 2. Review Bundle
+
+```bash
+cd artifacts/promotion-bundles/v4.1.2-rc.1
+
+# Review promotion checklist
+cat PROMOTION_CHECKLIST.md
+
+# Check verification status
+cat REQUIRED_CHECKS.txt
+```
+
+### 3. Execute Promotion
+
+```bash
+# Always dry-run first
+./promote_to_ga.sh --dry-run
+
+# Execute if everything looks correct
+./promote_to_ga.sh
+```
+
+The promotion script:
+
+1. Re-verifies the RC commit is green
+2. Creates the GA tag
+3. Pushes the GA tag
+4. Outputs the GitHub Release command
+
+### 4. Create GitHub Release
+
+After the script completes:
+
+```bash
+gh release create v4.1.2 \
+  --title "v4.1.2 - MVP-4 Stabilization" \
+  --notes-file docs/releases/MVP-4_STABILIZATION_RELEASE_NOTES.md
+```
+
+---
+
+## Generated Files
+
+### github_release.md
+
+```markdown
+# v4.1.2-rc.1 - MVP-4 Stabilization Release Candidate
+
+**Release Type**: Stabilization RC
+**Version**: 4.1.2
+**RC Tag**: `v4.1.2-rc.1`
+**Commit**: `a8b1963`
+
+## What's in this RC
+
+This release candidate contains fixes and improvements...
+
+## Verification Status
+
+- ✅ Release Readiness Gate
+- ✅ GA Gate
+- ✅ Unit Tests & Coverage
+- ✅ CI Core (Primary Gate)
+```
+
+### promote_to_ga.sh
+
+Executable script that:
+
+- Re-runs verification
+- Creates annotated GA tag
+- Pushes to origin
+- Prints GitHub Release command
+
+### REQUIRED_CHECKS.txt
+
+Snapshot of verification truth table at bundle generation time.
+
+### PROMOTION_CHECKLIST.md
+
+Step-by-step guide covering:
+
+- Pre-promotion verification
+- Promotion steps (script and manual)
+- Post-promotion tasks
+- Rollback procedures
+
+---
+
+## Integration
+
+### With Tag Verification
+
+The bundle includes REQUIRED_CHECKS.txt captured by running:
+
+```bash
+./scripts/release/verify-green-for-tag.sh --tag <tag> --commit <sha>
+```
+
+### With Rollback
+
+If issues are discovered after promotion:
+
+```bash
+# From the checklist
+git tag -d v4.1.2
+git push origin :refs/tags/v4.1.2
+gh release delete v4.1.2 --yes
+```
+
+Or use the rollback automation:
+
+```bash
+./scripts/release/rollback_release.sh --tag v4.1.2 --reason "Critical bug discovered"
+```
+
+---
+
+## Best Practices
+
+1. **Always dry-run first**: Preview before executing
+2. **Review checklist**: Follow PROMOTION_CHECKLIST.md
+3. **Archive bundles**: Keep bundles for audit trail
+4. **Verify again**: The script re-verifies before promoting
+5. **Monitor post-promotion**: Watch for issues 24-48h after GA
+
+---
+
+## Troubleshooting
+
+### Bundle Generation Fails
+
+```bash
+# Check if tag format is correct
+echo "v4.1.2-rc.1" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$'
+
+# Verify commit exists
+git rev-parse a8b1963
+```
+
+### Promotion Script Fails
+
+```bash
+# Check verification status
+./scripts/release/verify-green-for-tag.sh --tag v4.1.2-rc.1 --verbose
+
+# List workflow runs
+gh run list --commit a8b1963
+```
+
+### Missing Workflows in REQUIRED_CHECKS.txt
+
+If verification shows MISSING:
+
+1. Workflows may still be running - wait for completion
+2. Commit may not be pushed - verify remote status
+3. Workflow may not have triggered - check path filters
+
+---
+
+## References
+
+- [Release Ops Index](RELEASE_OPS_INDEX.md)
+- [Tag Verification](TAG_VERIFICATION.md)
+- [Rollback Automation](ROLLBACK_AUTOMATION.md)
+- [RC Preparation](../releases/MVP-4_STABILIZATION_TAGGING.md)
+
+---
+
+## Change Log
+
+| Date       | Change                                 | Author               |
+| ---------- | -------------------------------------- | -------------------- |
+| 2026-01-08 | Initial Promotion Bundle documentation | Platform Engineering |
+
+---
+
+**Document Authority**: Platform Engineering
+**Next Review**: 2026-02-08 (or before MVP-5 kickoff)
