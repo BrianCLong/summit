@@ -1,0 +1,2 @@
+{"id": "BG-2023-001", "type": "BREAK_GLASS", "owner": "alice", "created_at": "2023-10-01T00:00:00Z", "scope": "deploy-prod", "rationale": "Urgent fix", "evidence_hash": "sha256:123"}
+{"id": "BG-2023-002", "type": "BREAK_GLASS", "owner": "bob", "created_at": "2023-12-01T00:00:00Z", "scope": "access-db", "rationale": "Debug prod issue", "evidence_hash": "sha256:456"}

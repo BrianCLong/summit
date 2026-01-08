@@ -1,0 +1,24 @@
+policy_version: "1.0"
+enforcement_mode: report_only
+
+exception_types:
+  BREAK_GLASS:
+    max_ttl_days: 7
+    required_fields: [owner, rationale]
+    grace_period_days: 1
+
+  POLICY_EXCEPTION:
+    max_ttl_days: 30
+    required_fields: [owner, rationale, scope]
+    grace_period_days: 3
+
+  GATE_DEMOTION:
+    max_ttl_days: 90
+    required_fields: [owner, rationale, scope]
+    grace_period_days: 7
+
+allowlist:
+  - id: "BG-PERM-001"
+    owner: "admin"
+    expires_at: "2025-01-01T00:00:00Z"
+    rationale: "Long term override"

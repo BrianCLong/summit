@@ -1,0 +1,62 @@
+name: Exception Lifecycle Management
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Weekly on Monday
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor-exceptions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        # Assuming devDependencies are enough or just specific packages needed for scripts
+        run: npm install -D tsx zod js-yaml @types/node
+
+      - name: Validate Policy
+        run: npx tsx scripts/ci/validate_exception_lifecycle_policy.ts
+
+      - name: Collect Exceptions
+        run: npx tsx scripts/reporting/collect_exceptions.ts
+
+      - name: Build Sunset Report
+        run: npx tsx scripts/reporting/build_exception_sunset_report.ts
+
+      - name: Verify No Leaks
+        run: npx tsx scripts/verification/verify_exception_reports_no_leak.ts
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: exception-reports
+          path: dist/exceptions/
+
+      - name: Check Enforcement
+        run: |
+          # Check policy mode
+          MODE=$(grep "enforcement_mode:" ci/exception-lifecycle-policy.yml | awk '{print $2}')
+
+          # Check for violations in report
+          VIOLATIONS=$(grep -o '"violation": [0-9]*' dist/exceptions/sunset-report.json | awk '{print $2}')
+
+          echo "Enforcement Mode: $MODE"
+          echo "Violations Found: $VIOLATIONS"
+
+          if [[ "$MODE" == "fail_on_violation" && "$VIOLATIONS" -gt 0 ]]; then
+            echo "::error::Blocking violations found and enforcement is enabled."
+            exit 1
+          fi
+
+          if [[ "$VIOLATIONS" -gt 0 ]]; then
+            echo "::warning::Violations found but enforcement is report_only."
+          fi

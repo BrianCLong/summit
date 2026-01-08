@@ -1,0 +1,2 @@
+{"decision_id": "DEC-2023-001", "decision_type": "POLICY_EXCEPTION", "owner": "charlie", "timestamp": "2023-11-15T00:00:00Z", "expires_at": "2023-12-15T00:00:00Z", "scope": "security-scan-skip", "rationale": "False positive", "context": {"policy": "no-criticals"}}
+{"decision_id": "DEC-2023-002", "decision_type": "GATE_DEMOTION", "owner": "dave", "timestamp": "2023-10-20T00:00:00Z", "expires_at": "2024-01-20T00:00:00Z", "scope": "perf-gate", "rationale": "Temporary regression", "context": {"gate": "p95-latency"}}
