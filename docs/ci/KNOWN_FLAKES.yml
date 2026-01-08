@@ -1,0 +1,25 @@
+# Known Flakes Registry
+#
+# This file tracks known flaky tests to provide better actionable feedback in CI.
+#
+# REGISTRY SPEC:
+# - id: FLAKE-### (Unique identifier)
+# - area: server|web|e2e|infra|other
+# - test_selector: string (path, test name regex, or runner selector)
+# - symptom: short description of the failure
+# - owner: github handle or human name
+# - ticket: URL (GitHub issue preferred)
+# - introduced_on: YYYY-MM-DD
+# - expires_on: YYYY-MM-DD (hard limit, no permanent flakes)
+# - repro: copy/paste command(s) to reproduce
+# - mitigation_notes: optional (what’s suspected; not a workaround)
+
+- id: FLAKE-000
+  area: other
+  test_selector: "example/test/path"
+  symptom: "Example symptom description"
+  owner: "@example-user"
+  ticket: "https://github.com/BrianCLong/summit/issues/0"
+  introduced_on: "2024-10-27"
+  expires_on: "2030-11-27"
+  repro: "npm test example/test/path"

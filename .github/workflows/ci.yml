@@ -32,6 +32,8 @@ jobs:
       - name: Check CJS files use CommonJS syntax
         run: pnpm lint:cjs
       - run: cd server && npx tsx scripts/check-error-codes-doc.ts
+      - name: Validate Known Flakes Registry
+        run: node scripts/ci/validate_known_flakes.mjs
 
   verify:
     name: Verification Suite
@@ -82,6 +84,17 @@ jobs:
       - name: Run API authz e2e tests
         if: matrix.test-suite == 'integration'
         run: pnpm --filter @intelgraph/api test
+
+      - name: Check Known Flakes (on failure)
+        if: failure()
+        run: |
+          # If a failure list exists (e.g. from a reporter), check against registry
+          if [ -f test-results/failed_tests.txt ]; then
+            node scripts/ci/capture_failures.mjs test-results/failed_tests.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No test-results/failed_tests.txt found. Skipping flake matching."
+            echo "::notice::Known Flakes check skipped: test-results/failed_tests.txt not found (requires reporter configuration)"
+          fi
 
   golden-path:
     name: Golden Path
