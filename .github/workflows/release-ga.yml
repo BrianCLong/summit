@@ -59,6 +59,16 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate Security Exceptions
+        run: ./scripts/security/validate_security_exceptions.mjs --strict --release-channel ga
+
+      - name: Upload Security Exceptions Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-exceptions-report
+          path: artifacts/security-exceptions/
+
       - name: Test Release Scripts
         run: pnpm -w test:release-scripts
 
@@ -164,6 +174,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Download Server Artifacts
         uses: actions/download-artifact@v4
@@ -188,6 +211,12 @@ jobs:
         with:
           name: release-status
           path: evidence/release
+
+      - name: Download Security Exceptions Report
+        uses: actions/download-artifact@v4
+        with:
+          name: security-exceptions-report
+          path: evidence/security-exceptions
 
       - name: Create Evidence Bundle
         run: |
@@ -243,7 +272,19 @@ jobs:
       - name: Generate Release Notes
         id: notes
         run: |
-          echo "notes=GA Release ${{ inputs.tag || github.ref_name }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
+          TAG_VAR="${{ inputs.tag || github.ref_name }}"
+          # Strip refs/tags/ prefix
+          TAG_VAR="${TAG_VAR#refs/tags/}"
+
+          # Use --output-file to avoid conflicts with other steps
+          node scripts/release/generate-release-notes.mjs --tag "$TAG_VAR" --output-file TEMP_RELEASE_NOTES.md
+
+          NOTES=$(cat TEMP_RELEASE_NOTES.md)
+
+          # Correctly format for multiline output in GitHub Actions
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Idempotent Release
         id: publish

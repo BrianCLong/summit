@@ -47,5 +47,10 @@ This checklist is the operator-ready runbook for declaring GA. Execute steps in 
 
 ## Sign-off
 
+## Security Exceptions
+- [ ] Review the `security-exceptions-report.md` artifact from the CI build.
+- [ ] Verify that there are no invalid, expired, or unapproved critical exceptions for this release.
+- [ ] Acknowledge any active exceptions in the release notes.
+
 - Product, Security, and SRE leads sign GA in `GA_READINESS_REPORT.md`.
 - Update `docs/roadmap/STATUS.json` with completion evidence and mark epics ready.

@@ -3,14 +3,9 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const TAG = process.env.TAG || process.argv[2];
-const OUTPUT_FILE = process.env.OUTPUT_FILE || 'RELEASE_NOTES.md';
-const DIST_DIR = process.env.DIST_DIR || 'dist/release';
 
 /**
  * Groups commits by their conventional commit type.
@@ -41,12 +36,58 @@ export function groupCommits(commits) {
   return groups;
 }
 
-// Ensure dist dir exists
-if (TAG) {
-  fs.mkdirSync(DIST_DIR, { recursive: true });
-}
+const argv = yargs(hideBin(process.argv))
+  .option('tag', {
+    type: 'string',
+    description: 'The git tag to generate notes for.',
+  })
+  .option('output-file', {
+    type: 'string',
+    description: 'The file to write the release notes to.',
+    default: 'RELEASE_NOTES.md',
+  }).argv;
 
-const extractScript = path.join(__dirname, 'extract-changelog-notes.mjs');
+const TAG = argv.tag || process.env.TAG;
+const OUTPUT_FILE = argv.outputFile;
+const DIST_DIR = process.env.DIST_DIR || 'dist/release';
+const EVIDENCE_DIR = 'evidence'; // In the release job, artifacts are here.
+
+/**
+ * Appends the security exceptions section to the release notes file.
+ * @param {string} outputFile - The path to the release notes file.
+ */
+function appendSecurityExceptions(outputFile) {
+  const summaryPath = path.join(process.cwd(), EVIDENCE_DIR, 'security-exceptions', 'summary.json');
+
+  if (!fs.existsSync(summaryPath)) {
+    console.log('No security exception summary found. Skipping.');
+    return;
+  }
+
+  try {
+    const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+    const activeExceptions = summary.valid || [];
+
+    if (activeExceptions.length === 0) {
+      console.log('No active security exceptions to add to release notes.');
+      return;
+    }
+
+    let notesSection = '\n\n## ⚠️ Security Exceptions\n\n';
+    notesSection += 'This release includes the following active security exceptions:\n\n';
+
+    activeExceptions.forEach(ex => {
+      notesSection += `- **${ex.id} (${ex.risk_rating})**: ${ex.description}\n`;
+      notesSection += `  - **Owner:** ${ex.owner}\n`;
+      notesSection += `  - **Expires:** ${ex.expires_on}\n`;
+    });
+
+    fs.appendFileSync(outputFile, notesSection);
+    console.log(`Appended ${activeExceptions.length} active security exceptions to ${outputFile}.`);
+  } catch (e) {
+    console.error('Failed to process and append security exceptions:', e);
+  }
+}
 
 function getLastTag(tag) {
   try {
@@ -62,123 +103,43 @@ function getGitRange(tag) {
 }
 
 function generateGitNotes(tag) {
-  try {
+    const range = getGitRange(tag);
+    const cmd = `git log --pretty=format:"- %s (%h) - %an" --no-merges "${range}"`;
     try {
-      execSync('command -v gh 2>/dev/null');
-    } catch(e) {
-      throw new Error('gh not found');
-    }
-
-    const remoteUrl = execSync('git config --get remote.origin.url').toString().trim();
-    let repoInfo = '';
-    if (remoteUrl.includes('github.com')) {
-      const match = remoteUrl.match(/[:/]([^/]+)\/([^/.]+)(?:\.git)?$/);
-      if (match) {
-        repoInfo = `${match[1]}/${match[2]}`;
-      }
-    }
-
-    if (repoInfo) {
-      const cmd = `gh api -X POST "repos/${repoInfo}/releases/generate-notes" -f tag_name="${tag}" --jq .body`;
-      const notes = execSync(cmd).toString();
-      return { notes, source: 'git-gh-api', range: getGitRange(tag) };
-    }
-  } catch (e) {
-    // gh failed or not available
-  }
-
-  const range = getGitRange(tag);
-  const cmd = `git log --pretty=format:"- %s (%h) - %an" --no-merges "${range}"`;
-  try {
-    const notes = execSync(cmd).toString();
-    const body = `## Changes\n\n${notes}`;
-    return { notes: body, source: 'git-log', range };
-  } catch (e) {
-    console.error("Failed to generate git log notes");
-    return { notes: "No release notes available.", source: 'git-failed', range: '' };
-  }
-}
-
-function addToStepSummary(message) {
-  if (process.env.GITHUB_STEP_SUMMARY) {
-    try {
-      fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, message + '\n');
+        const notes = execSync(cmd).toString();
+        const body = `## Changes\n\n${notes}`;
+        return { notes: body, source: 'git-log', range };
     } catch (e) {
-      console.error('Failed to write to GITHUB_STEP_SUMMARY', e);
+        console.error("Failed to generate git log notes");
+        return { notes: "No release notes available.", source: 'git-failed', range: '' };
     }
-  }
 }
 
 function main() {
   if (!TAG) {
-    console.error('Error: TAG argument or environment variable is required.');
+    console.error('Error: --tag argument or TAG environment variable is required.');
     process.exit(1);
   }
 
   console.log(`Generating release notes for ${TAG}...`);
 
-  try {
-    const extracted = execSync(`node ${extractScript} ${TAG}`, {
-      stdio: ['ignore', 'pipe', 'ignore']
-    }).toString();
+  const date = new Date().toISOString().split('T')[0];
+  let fullNotes = `# ${TAG} (${date})\n\n`;
 
-    const date = new Date().toISOString().split('T')[0];
-    const header = `# ${TAG} (${date})\n\n`;
-    const fullNotes = header + extracted;
+  const { notes: gitNotes } = generateGitNotes(TAG);
+  fullNotes += gitNotes;
 
-    fs.writeFileSync(OUTPUT_FILE, fullNotes);
+  fs.writeFileSync(OUTPUT_FILE, fullNotes);
 
-    let usedPath = 'CHANGELOG.md';
-    if (!fs.existsSync('CHANGELOG.md') && fs.existsSync('docs/CHANGELOG.md')) {
-      usedPath = 'docs/CHANGELOG.md';
-    }
+  console.log(`Base release notes written to ${OUTPUT_FILE}`);
 
-    const metadata = {
-      schemaVersion: "1.0.0",
-      tag: TAG,
-      source: "changelog",
-      path: usedPath
-    };
-
-    fs.writeFileSync(path.join(DIST_DIR, 'notes-source.json'), JSON.stringify(metadata, null, 2));
-    const msg = "Release notes source: changelog (" + usedPath + ")";
-    console.log(msg);
-    addToStepSummary(msg);
-
-  } catch (e) {
-    if (e.status === 3) {
-      console.log("Changelog section not found. Falling back to git generation.");
-
-      const { notes, source, range } = generateGitNotes(TAG);
-
-      fs.writeFileSync(OUTPUT_FILE, notes);
-
-      const metadata = {
-        schemaVersion: "1.0.0",
-        tag: TAG,
-        source: "git",
-        range: range
-      };
-      fs.writeFileSync(path.join(DIST_DIR, 'notes-source.json'), JSON.stringify(metadata, null, 2));
-      const msg = `Release notes source: git (${range})`;
-      console.log(msg);
-      addToStepSummary(msg);
-
-    } else {
-      console.error("Unexpected error during changelog extraction:", e);
-      process.exit(1);
-    }
-  }
-
-  try {
-    const shasum = execSync(`sha256sum ${path.join(DIST_DIR, 'notes-source.json')}`).toString().trim();
-    fs.appendFileSync(path.join(DIST_DIR, 'SHA256SUMS'), shasum + '\n');
-  } catch (e) {
-    // Ignore
-  }
+  appendSecurityExceptions(OUTPUT_FILE);
 }
 
 // Only run main when executed directly
-if (TAG && import.meta.url === `file://${process.argv[1]}`) {
-  main();
+if (import.meta.url.startsWith('file:')) {
+  const modulePath = fileURLToPath(import.meta.url);
+  if (process.argv[1] === modulePath) {
+    main();
+  }
 }

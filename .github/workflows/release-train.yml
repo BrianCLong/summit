@@ -35,6 +35,16 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate Security Exceptions
+        run: ./scripts/security/validate_security_exceptions.mjs --strict --release-channel rc
+
+      - name: Upload Security Exceptions Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-exceptions-report
+          path: artifacts/security-exceptions/
+
       - name: Build Packages
         id: build
         run: npm run build

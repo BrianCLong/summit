@@ -1,0 +1,24 @@
+# This is the canonical registry for all security exceptions.
+# For details on the process, see ./SECURITY_EXCEPTIONS.md
+
+exceptions: []
+
+# - id: SECEX-001
+#   control: "SAST"
+#   scope:
+#     channel: "rc"
+#     target: "sha:1234567890abcdef"
+#     surface: "ci"
+#   description: "Temporary waiver for a known false positive in the SAST scanner."
+#   owner: "@some-user"
+#   ticket: "https://github.com/BrianCLong/summit/issues/123"
+#   rationale: "The scanner is incorrectly flagging a benign use of eval(). A fix is in progress."
+#   compensating_controls:
+#     - "Manual code review by two senior engineers."
+#     - "Additional logging and monitoring around the affected component."
+#   risk_rating: "medium"
+#   created_on: "2024-01-15"
+#   expires_on: "2024-02-15"
+#   review_required_by: "2024-02-01"
+#   approvals:
+#     - "@seceng-lead"
