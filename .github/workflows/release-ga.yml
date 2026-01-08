@@ -194,10 +194,21 @@ jobs:
 
           echo "bundle_path=artifacts/release/${{ steps.version.outputs.tag }}" >> $GITHUB_OUTPUT
 
+      - name: Generate Bundle SBOM
+        run: |
+          chmod +x scripts/release/generate_bundle_sbom.sh
+
+          # Generate CycloneDX SBOM describing the bundle contents
+          ./scripts/release/generate_bundle_sbom.sh \
+            --bundle "artifacts/release/${{ steps.version.outputs.tag }}" \
+            --tag "${{ steps.version.outputs.tag }}" \
+            --sha "${{ github.sha }}"
+
       - name: Generate Provenance Manifest
         run: |
           chmod +x scripts/release/generate_provenance_manifest.sh
 
+          # Generate provenance manifest (after bundle SBOM so it can reference it)
           ./scripts/release/generate_provenance_manifest.sh \
             --tag "${{ steps.version.outputs.tag }}" \
             --sha "${{ github.sha }}" \

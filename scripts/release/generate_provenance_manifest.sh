@@ -103,11 +103,13 @@ generate_provenance() {
     # Determine what exists
     local source_sbom_exists="false"
     local container_sbom_exists="false"
+    local bundle_sbom_exists="false"
     local source_vuln_exists="false"
     local container_vuln_exists="false"
 
     [[ -f "${source_sbom_path}" ]] && source_sbom_exists="true"
     [[ -f "${container_sbom_path}" ]] && container_sbom_exists="true"
+    [[ -f "${bundle_dir}/sbom/bundle.cdx.json" ]] && bundle_sbom_exists="true"
     [[ -f "${source_vuln_path}" ]] && source_vuln_exists="true"
     [[ -f "${container_vuln_path}" ]] && container_vuln_exists="true"
 
@@ -116,10 +118,18 @@ generate_provenance() {
     source_sbom_size=$(size_of_file "${source_sbom_path}")
     local container_sbom_size
     container_sbom_size=$(size_of_file "${container_sbom_path}")
+    local bundle_sbom_size
+    bundle_sbom_size=$(size_of_file "${bundle_dir}/sbom/bundle.cdx.json")
     local source_vuln_size
     source_vuln_size=$(size_of_file "${source_vuln_path}")
     local container_vuln_size
     container_vuln_size=$(size_of_file "${container_vuln_path}")
+
+    # Calculate bundle SBOM hash
+    local bundle_sbom_sha256=""
+    if [[ -f "${bundle_dir}/sbom/bundle.cdx.json" ]]; then
+        bundle_sbom_sha256=$(sha256sum "${bundle_dir}/sbom/bundle.cdx.json" | cut -d' ' -f1)
+    fi
 
     # Get version without 'v' prefix
     local version="${tag#v}"
@@ -155,6 +165,14 @@ generate_provenance() {
       "sha256": "${container_sbom_sha256}",
       "size_bytes": ${container_sbom_size},
       "image_digest": "${image_digest:-not_available}"
+    },
+    "bundle": {
+      "path": "sbom/bundle.cdx.json",
+      "format": "CycloneDX 1.5",
+      "exists": ${bundle_sbom_exists},
+      "sha256": "${bundle_sbom_sha256}",
+      "size_bytes": ${bundle_sbom_size},
+      "description": "Bundle contents inventory SBOM"
     }
   },
   "vulnerability_summaries": {
