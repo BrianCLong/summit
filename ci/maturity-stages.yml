@@ -1,0 +1,35 @@
+stages:
+  PILOT:
+    description: "Experimental/Pilot stage. Reporting only."
+    gates:
+      promotion_guard: report_only
+      deps_approval: report_only
+      policy_drift: report_only
+      field_budgets: report_only
+      observability_verify: report_only
+  PRE_GA:
+    description: "Release Candidate stage. Promotion guard required."
+    gates:
+      promotion_guard: required
+      deps_approval: report_only
+      policy_drift: report_only
+      field_budgets: report_only
+      observability_verify: required
+  GA:
+    description: "General Availability. All gates required."
+    gates:
+      promotion_guard: required
+      deps_approval: required
+      policy_drift: required
+      field_budgets: required
+      observability_verify: required
+
+mappings:
+  - pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+    stage: GA
+  - pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+-rc\\.[0-9]+$"
+    stage: PRE_GA
+  - pattern: "^main$"
+    stage: PILOT
+  - pattern: ".*"
+    stage: PILOT
