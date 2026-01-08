@@ -24,6 +24,7 @@ import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
 import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
+import { systemBundleStore } from './policy/bundleStore.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
@@ -170,6 +171,14 @@ const startServer = async () => {
 
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+
+    // Load System Policy Bundle
+    // We attempt to load from the standard distribution path.
+    // In production, this might be a different path mounted via volume.
+    const policyBundlePath = process.env.POLICY_BUNDLE_PATH || path.resolve(__dirname, '../../dist/policy-bundle');
+    systemBundleStore.load(policyBundlePath).catch(err => {
+        logger.warn(`Failed to load system policy bundle from ${policyBundlePath}. Some policy features may be unavailable. Error: ${err.message}`);
+    });
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
