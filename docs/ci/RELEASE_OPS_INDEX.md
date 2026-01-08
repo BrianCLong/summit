@@ -31,6 +31,7 @@ This document serves as the central index for all Release Operations tooling and
 | [API Determinism](API_DETERMINISM.md)                 | Daily      | `08:00 UTC`   | Response consistency check  |
 | [Pre-Release Health](PRE_RELEASE_HEALTH.md)           | On tag     | `05:00 UTC`   | Unified release gate        |
 | [Evidence Collection](EVIDENCE_COLLECTION.md)         | Daily      | `04:00 UTC`   | Capture compliance evidence |
+| [Stabilization Report](STABILIZATION_REPORT.md)       | Daily      | `09:00 UTC`   | Progress tracking report    |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
 
 ---
@@ -66,13 +67,14 @@ This document serves as the central index for all Release Operations tooling and
 
 ### Audit Features
 
-| Feature             | Status    | Documentation                                    |
-| ------------------- | --------- | ------------------------------------------------ |
-| Dependency Audit    | ✅ Active | [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)       |
-| Type Safety Audit   | ✅ Active | [TYPE_SAFETY_AUDIT.md](TYPE_SAFETY_AUDIT.md)     |
-| API Determinism     | ✅ Active | [API_DETERMINISM.md](API_DETERMINISM.md)         |
-| Pre-Release Health  | ✅ Active | [PRE_RELEASE_HEALTH.md](PRE_RELEASE_HEALTH.md)   |
-| Evidence Collection | ✅ Active | [EVIDENCE_COLLECTION.md](EVIDENCE_COLLECTION.md) |
+| Feature              | Status    | Documentation                                      |
+| -------------------- | --------- | -------------------------------------------------- |
+| Dependency Audit     | ✅ Active | [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)         |
+| Type Safety Audit    | ✅ Active | [TYPE_SAFETY_AUDIT.md](TYPE_SAFETY_AUDIT.md)       |
+| API Determinism      | ✅ Active | [API_DETERMINISM.md](API_DETERMINISM.md)           |
+| Pre-Release Health   | ✅ Active | [PRE_RELEASE_HEALTH.md](PRE_RELEASE_HEALTH.md)     |
+| Evidence Collection  | ✅ Active | [EVIDENCE_COLLECTION.md](EVIDENCE_COLLECTION.md)   |
+| Stabilization Report | ✅ Active | [STABILIZATION_REPORT.md](STABILIZATION_REPORT.md) |
 
 ---
 
@@ -228,21 +230,22 @@ This document serves as the central index for all Release Operations tooling and
 
 ## Scripts
 
-| Script                           | Purpose                 | Usage                                              |
-| -------------------------------- | ----------------------- | -------------------------------------------------- |
-| `escalate_release_blockers.sh`   | Apply escalation labels | `./scripts/release/escalate_release_blockers.sh`   |
-| `generate_release_ops_digest.sh` | Generate daily digest   | `./scripts/release/generate_release_ops_digest.sh` |
-| `generate_oncall_handoff.sh`     | Generate handoff note   | `./scripts/release/generate_oncall_handoff.sh`     |
-| `auto_triage_blockers.sh`        | Route blockers to teams | `./scripts/release/auto_triage_blockers.sh`        |
-| `run_remediation.sh`             | Execute playbooks       | `./scripts/release/run_remediation.sh`             |
-| `generate_release_dashboard.sh`  | Generate dashboard      | `./scripts/release/generate_release_dashboard.sh`  |
-| `manage_test_quarantine.sh`      | Manage test quarantine  | `./scripts/release/manage_test_quarantine.sh`      |
-| `generate_changelog.sh`          | Generate changelog      | `./scripts/release/generate_changelog.sh`          |
-| `dependency_audit.sh`            | Dependency security     | `./scripts/release/dependency_audit.sh`            |
-| `type_safety_audit.sh`           | Type safety check       | `./scripts/release/type_safety_audit.sh`           |
-| `api_determinism_check.sh`       | API consistency         | `./scripts/release/api_determinism_check.sh`       |
-| `pre_release_health_check.sh`    | Unified health check    | `./scripts/release/pre_release_health_check.sh`    |
-| `collect_evidence.sh`            | Collect GA evidence     | `./scripts/release/collect_evidence.sh`            |
+| Script                             | Purpose                 | Usage                                                |
+| ---------------------------------- | ----------------------- | ---------------------------------------------------- |
+| `escalate_release_blockers.sh`     | Apply escalation labels | `./scripts/release/escalate_release_blockers.sh`     |
+| `generate_release_ops_digest.sh`   | Generate daily digest   | `./scripts/release/generate_release_ops_digest.sh`   |
+| `generate_oncall_handoff.sh`       | Generate handoff note   | `./scripts/release/generate_oncall_handoff.sh`       |
+| `auto_triage_blockers.sh`          | Route blockers to teams | `./scripts/release/auto_triage_blockers.sh`          |
+| `run_remediation.sh`               | Execute playbooks       | `./scripts/release/run_remediation.sh`               |
+| `generate_release_dashboard.sh`    | Generate dashboard      | `./scripts/release/generate_release_dashboard.sh`    |
+| `manage_test_quarantine.sh`        | Manage test quarantine  | `./scripts/release/manage_test_quarantine.sh`        |
+| `generate_changelog.sh`            | Generate changelog      | `./scripts/release/generate_changelog.sh`            |
+| `dependency_audit.sh`              | Dependency security     | `./scripts/release/dependency_audit.sh`              |
+| `type_safety_audit.sh`             | Type safety check       | `./scripts/release/type_safety_audit.sh`             |
+| `api_determinism_check.sh`         | API consistency         | `./scripts/release/api_determinism_check.sh`         |
+| `pre_release_health_check.sh`      | Unified health check    | `./scripts/release/pre_release_health_check.sh`      |
+| `collect_evidence.sh`              | Collect GA evidence     | `./scripts/release/collect_evidence.sh`              |
+| `generate_stabilization_report.sh` | Progress report         | `./scripts/release/generate_stabilization_report.sh` |
 
 ### Common Flags
 
@@ -394,6 +397,7 @@ All scripts support these common flags:
 | 2026-01-08 | Added Test Quarantine, Changelog Gen | Platform Engineering |
 | 2026-01-08 | Added Stabilization Audit features   | Platform Engineering |
 | 2026-01-08 | Added Evidence Collection            | Platform Engineering |
+| 2026-01-08 | Added Stabilization Report           | Platform Engineering |
 
 ---
 
