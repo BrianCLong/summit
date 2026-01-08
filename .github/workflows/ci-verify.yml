@@ -116,8 +116,30 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check governance compliance
-        run: npm run check:governance || echo "Governance check skipped (script may not exist)"
+        id: governance
+        run: |
+          npm run check:governance 2>&1 | tee governance.log
+          exit_code=${PIPESTATUS[0]}
+          if [ $exit_code -ne 0 ]; then
+            echo "Governance check failed"
+            exit $exit_code
+          fi
         continue-on-error: true # Non-blocking until governance engine is stable
+
+      - name: Capture Failure Triage Pack (Governance)
+        if: failure() || steps.governance.outcome == 'failure'
+        run: |
+          node scripts/ci/capture_failures.mjs \
+            --cmd "npm run check:governance" \
+            --log-file governance.log \
+            --output-dir artifacts/triage-governance
+
+      - name: Upload Triage Artifacts (Governance)
+        if: failure() || steps.governance.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-governance
+          path: artifacts/triage-governance/
 
       - name: Validate agent contracts
         run: |
