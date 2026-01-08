@@ -1,0 +1,16 @@
+# This file tracks known flaky tests in the CI/CD pipeline.
+# Each entry helps provide context to failures, but does NOT prevent the test from running or failing the build.
+
+- id: FLAKE-001
+  test_pattern: "specific_test_name_or_path"
+  owner: "@team-devops"
+  ticket: "PROJ-1234"
+  description: "This test intermittently fails due to a race condition in the test environment."
+  expires_on: "2024-12-31"
+
+- id: FLAKE-002
+  test_pattern: "another/flaky/test.spec.ts"
+  owner: "@team-frontend"
+  ticket: "PROJ-5678"
+  description: "This test relies on a third-party service that is sometimes unavailable."
+  expires_on: "2025-01-15"

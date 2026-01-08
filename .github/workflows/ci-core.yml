@@ -54,7 +54,17 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
-        run: pnpm test:unit
+        id: unit-tests
+        run: |
+          mkdir -p artifacts/triage
+          pnpm test:unit --reporters=default --reporters=jest-junit --testLocationInResults --outputFile=artifacts/triage/junit.xml
+
+      - name: Parse Test Results
+        if: always()
+        run: |
+          node scripts/ci/parse-junit.mjs \
+            --inputFile=artifacts/triage/junit.xml \
+            --outputFile=artifacts/triage/failing_tests.log
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -63,6 +73,29 @@ jobs:
         with:
           files: ./coverage/coverage-final.json
           flags: unit
+
+      - name: Capture Failure and Generate Rerun Hints
+        if: failure()
+        run: |
+          FAILING_TESTS=$(paste -sd "," artifacts/triage/failing_tests.log)
+          node scripts/ci/generate-rerun-hints.mjs \
+            --phase="Unit Tests" \
+            --command="pnpm test:unit" \
+            --failing-tests="$FAILING_TESTS"
+
+      - name: Upload Triage Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rerun-hints-unit-tests
+          path: artifacts/triage/rerun_hints.md
+          retention-days: 7
+
+      - name: Add Rerun Hints to Job Summary
+        if: failure()
+        run: |
+          echo "###  triage (Top 20 lines)" >> $GITHUB_STEP_SUMMARY
+          head -n 20 artifacts/triage/rerun_hints.md >> $GITHUB_STEP_SUMMARY
 
   integration-tests:
     name: Integration Tests
@@ -106,10 +139,43 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
       - name: Run integration tests
-        run: pnpm test:integration
+        id: integration-tests
+        run: |
+          mkdir -p artifacts/triage
+          pnpm test:integration --reporters=default --reporters=jest-junit --testLocationInResults --outputFile=artifacts/triage/junit_integration.xml
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
           REDIS_URL: redis://localhost:6379
+
+      - name: Parse Integration Test Results
+        if: always()
+        run: |
+          node scripts/ci/parse-junit.mjs \
+            --inputFile=artifacts/triage/junit_integration.xml \
+            --outputFile=artifacts/triage/failing_integration_tests.log
+
+      - name: Capture Failure and Generate Rerun Hints
+        if: failure()
+        run: |
+          FAILING_TESTS=$(paste -sd "," artifacts/triage/failing_integration_tests.log)
+          node scripts/ci/generate-rerun-hints.mjs \
+            --phase="Integration Tests" \
+            --command="pnpm test:integration" \
+            --failing-tests="$FAILING_TESTS"
+
+      - name: Upload Triage Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rerun-hints-integration-tests
+          path: artifacts/triage/rerun_hints.md
+          retention-days: 7
+
+      - name: Add Rerun Hints to Job Summary
+        if: failure()
+        run: |
+          echo "###  triage (Top 20 lines)" >> $GITHUB_STEP_SUMMARY
+          head -n 20 artifacts/triage/rerun_hints.md >> $GITHUB_STEP_SUMMARY
 
       - name: Verify ecosystem exports
         run: npm test -- test/verification/integrations.node.test.ts --bail
