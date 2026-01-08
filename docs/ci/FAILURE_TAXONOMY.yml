@@ -1,0 +1,25 @@
+categories:
+  INFRA_ERROR:
+    description: "Failures caused by underlying infrastructure instability (network, disk, K8s)."
+    severity: warn
+    remediation_owner: "platform-ops"
+  TEST_TIMEOUT:
+    description: "Tests that exceeded the configured timeout duration."
+    severity: warn
+    remediation_owner: "dev-productivity"
+  FLAKY_TEST:
+    description: "Tests that fail non-deterministically without code changes."
+    severity: fail
+    remediation_owner: "qa-lead"
+  REGRESSION:
+    description: "Tests that were passing in previous stable build but fail now."
+    severity: fail
+    remediation_owner: "feature-team"
+  BUILD_FAILURE:
+    description: "Compilation or build process errors."
+    severity: fail
+    remediation_owner: "build-cop"
+  LINT_ERROR:
+    description: "Static analysis or formatting violations."
+    severity: info
+    remediation_owner: "dev-productivity"

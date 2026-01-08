@@ -1,0 +1,15 @@
+ci_roadmap_sync:
+  enabled: true
+  mode: draft
+  max_items_per_week: 5
+  selection:
+    include_p0_only: false
+    min_failure_count: 10
+    min_regression_delta: 5
+    include_failed_okrs: true
+  project:
+    enabled: false
+    project_url: ""
+  labels:
+    base: ["ci-reliability"]
+    triage: ["needs-triage"]
