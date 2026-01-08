@@ -1,0 +1,100 @@
+name: Compliance Dashboard
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Weekly on Monday at 8am
+  workflow_dispatch:
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install -g tsx
+
+      # Step A: Download Artifacts
+      # We need to find the latest successful run on 'main' that produced the relevant artifacts.
+      # The main CI workflow seems to be 'ci.yml' or 'ci-verify.yml'. Let's assume 'ci.yml' is the primary one.
+      # However, specific artifacts like 'incident-drills' might come from other workflows.
+      # We will use a strategy to look for specific workflow runs.
+
+      - name: Create Dist Dirs
+        run: mkdir -p dist/maturity dist/readiness dist/policy-evidence dist/deps dist/promotion dist/drills dist/field
+
+      - name: Download Artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Helper function to download artifact from latest successful run of a workflow
+          download_latest() {
+            WORKFLOW=$1
+            ARTIFACT_NAME=$2
+            DEST_DIR=$3
+
+            echo "Looking for artifact '$ARTIFACT_NAME' in workflow '$WORKFLOW'..."
+            RUN_ID=$(gh run list --workflow "$WORKFLOW" --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+
+            if [ -z "$RUN_ID" ]; then
+              echo "No successful run found for workflow $WORKFLOW on main."
+              return
+            fi
+
+            echo "Found Run ID: $RUN_ID"
+            gh run download "$RUN_ID" -n "$ARTIFACT_NAME" -D "$DEST_DIR" || echo "Artifact $ARTIFACT_NAME not found in run $RUN_ID"
+          }
+
+          # Maturity, Readiness, Policy, Deps often come from the main CI
+          download_latest "ci.yml" "maturity-eval" "dist/maturity"
+          download_latest "ci.yml" "readiness-report" "dist/readiness"
+          download_latest "ci.yml" "policy-evidence" "dist/policy-evidence"
+          download_latest "ci.yml" "deps-report" "dist/deps"
+
+          # Promotion Guard might come from a release workflow
+          download_latest "release-promote-guard.yml" "promotion-guard" "dist/promotion"
+
+          # Incident Drills likely from a specific drill workflow or nightly
+          download_latest "incident-playbook.sh" "incident-drills" "dist/drills" || download_latest "ci.yml" "incident-drills" "dist/drills"
+
+          # Field Readiness
+          download_latest "ci.yml" "field-readiness" "dist/field"
+
+      # Step B: Collect Signals
+      - name: Collect Signals
+        run: npx tsx scripts/reporting/collect_compliance_signals.ts
+        env:
+          ARTIFACTS_DIR: dist
+          OUTPUT_DIR: dist/compliance
+
+      # Step C: Build Dashboard
+      - name: Build Dashboard
+        run: npx tsx scripts/reporting/build_compliance_dashboard.ts
+        env:
+          INPUT_FILE: dist/compliance/signals.json
+          OUTPUT_DIR: dist/compliance
+
+      # Step D: No-Leak Verify
+      - name: Verify No Leak
+        run: npx tsx scripts/verification/verify_compliance_dashboard_no_leak.ts
+        env:
+          DASHBOARD_DIR: dist/compliance
+
+      # Step E: Upload Artifacts
+      - name: Upload Dashboard
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-dashboard
+          path: |
+            dist/compliance/compliance.json
+            dist/compliance/compliance.md
+            dist/compliance/compliance.html
+            dist/compliance/signals.json
+            dist/compliance/verifier_report.json
+          retention-days: 14
