@@ -38,7 +38,7 @@ const LoadTestsSchema = z.object({
   script: z.string(),
   duration: z.string().optional(),
   virtual_users: z.number().optional(),
-  thresholds: z.record(z.any()).optional(),
+  thresholds: z.record(z.string(), z.any()).optional(),
 });
 
 const ChaosScenarioSchema = z.object({
@@ -73,9 +73,14 @@ export type ValidationReport = {
 function verifySchema(data: any): ValidationReport {
   const result = EvidenceBundleManifestSchema.safeParse(data);
   if (!result.success) {
+    const errorList = result.error.errors || (result.error as any).issues || [];
+    const messages = errorList.length > 0
+      ? errorList.map((e: any) => `Schema Error: ${e.path.join('.')} - ${e.message}`)
+      : [`Schema Error: ${result.error.message || 'Unknown validation error'}`];
+
     return {
       success: false,
-      messages: result.error.errors.map(e => `Schema Error: ${e.path.join('.')} - ${e.message}`),
+      messages: messages,
     };
   }
   return { success: true, messages: ['Schema validation passed.'] };
