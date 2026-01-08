@@ -22,13 +22,13 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Checkout Code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
 
       - name: Setup Tools (OPA, Cosign, Syft, Grype)
-        uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         with:
           go-version: '1.21'
 
@@ -57,7 +57,7 @@ jobs:
 
       # 2. Secrets Scanning (Trivy)
       - name: Run Trivy vulnerability scanner (Secrets)
-        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
         id: trivy
         continue-on-error: true
         with:
@@ -71,7 +71,7 @@ jobs:
 
       # 3. Dependency Review
       - name: Dependency Review
-        uses: actions/dependency-review-action@5a2ce3f5b92ee19cbb1541a4984c76d921601d7c # v4.3.4
+        uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
         with:
           fail-on-severity: high
           deny-licenses: AGPL-3.0, GPL-3.0, LGPL-3.0
@@ -89,7 +89,7 @@ jobs:
 
       - name: Persist artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ga-risk-artifacts
           path: |

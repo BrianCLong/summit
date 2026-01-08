@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # ============================================================================
       # MONOREPO SETUP: This monorepo uses pnpm workspaces with client/, server/,
@@ -58,7 +58,7 @@ jobs:
 
       - name: Setup Node.js
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: "pnpm"
@@ -75,7 +75,7 @@ jobs:
       # JavaScript/TypeScript to ensure proper module resolution and analysis.
       # ============================================================================
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           # For JavaScript/TypeScript, ensure we capture all workspace packages
@@ -101,10 +101,10 @@ jobs:
 
       - name: Autobuild (Python/Go)
         if: matrix.language != 'javascript-typescript'
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{matrix.language}}"
           # Upload results even if there are compilation errors
