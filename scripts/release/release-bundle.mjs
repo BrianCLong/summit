@@ -212,7 +212,18 @@ async function main() {
   writeFileSync(join(DIST_RELEASE, 'release-manifest.json'), JSON.stringify(manifest, null, 2));
   console.log('   Wrote release-manifest.json');
 
-  // 6d. Checksums
+  // 6d. Release Report
+  const reportScript = resolveScript('build-release-report.mjs');
+  if (reportScript) {
+      console.log('\n📊 Generating Release Report...');
+      try {
+          run(`node ${reportScript}`);
+      } catch (e) {
+          console.warn('⚠️  Failed to generate release report.');
+      }
+  }
+
+  // 6e. Checksums
   console.log('\n🔏 Generating Checksums...');
   try {
      const files = runSilent(`find ${DIST_RELEASE} -type f -not -name "checksums.txt"`).split('\n').filter(Boolean);
@@ -250,6 +261,7 @@ async function main() {
   console.log('\n---------------------------------------------------');
   console.log('🎉 RELEASE BUNDLE READY');
   console.log(`📂 Location: ${DIST_RELEASE}`);
+  console.log(`📄 Release report: dist/release/release-report.md`);
   console.log('---------------------------------------------------');
 }
 
