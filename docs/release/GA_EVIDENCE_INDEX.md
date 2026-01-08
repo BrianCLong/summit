@@ -48,3 +48,9 @@ Centralized index of commands, outputs, and artifact locations for GA verificati
 - **SBOM**: `sbom.json` in repo root.
 - **Provenance**: `artifacts/provenance/` (if generated).
 - **Screenshots/Reports**: Store under `artifacts/evidence/` with date-stamped subfolders.
+
+## Issuance Evidence
+
+- **Date issued**: 2026-01-06 (Simulated)
+- **Number of issues created**: 13
+- **Link list**: [Stabilization Tickets](../releases/STABILIZATION_TICKETS.md)

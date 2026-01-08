@@ -4,6 +4,21 @@
 **Scope:** Stabilization-only; no feature releases permitted during this window. (Policy: `docs/release/PATCH_PROCESS.md`)
 **Source of Commitments:** `docs/ga/GA_DEFINITION.md` (Part 12), `docs/release/GA_READINESS_REPORT.md`, `docs/releases/v4.0.0/MVP4-GA-READINESS.md`
 
+## Tracker Summary
+
+- **Total Items:** 13
+- **P0 Items:** 5
+- **P1 Items:** 6
+- **P2 Items:** 2
+- **Unassigned:** 13
+
+**Next P0 Execution Targets:**
+1. [STAB-01] CI Parity & Smoke Verification
+2. [STAB-02] Security Baselines & SBOM
+3. [STAB-03] Enable pnpm audit in CI
+4. [STAB-04] Mitigate Policy Bypass Risk
+5. [STAB-05] Secrets Hygiene Verification
+
 ## 1) Operating Constraints (Non-Negotiable)
 
 - **Change class**: Critical Hotfix or Standard Patch only; Feature Releases are **not permitted**. (Policy: `docs/release/PATCH_PROCESS.md`)
@@ -17,27 +32,23 @@
 - **Full CI and security baselines captured** in evidence index. (Source: `docs/release/GA_READINESS_REPORT.md`)
 - **Hypercare monitoring enforced for first 72 hours.** (Source: `docs/releases/v4.0.0/MVP4-GA-READINESS.md`)
 
-## 3) Timeline and Work Plan
+## 3) Work Plan (Execution Tracker)
 
-### Day 0–3 (Hypercare)
-
-- **Monitoring cadence**: hourly SLO checks, reduced alert thresholds. (Source: `docs/releases/v4.0.0/MVP4-GA-READINESS.md`)
-- **CI parity verification**: run and capture logs for `make ci` and `make smoke`. (Source: `docs/release/GA_READINESS_REPORT.md`)
-- **Security baselines**: run `npm run security:check`, `npm run generate:sbom`, `npm run generate:provenance`, and attach outputs. (Source: `docs/release/GA_CHECKLIST.md`)
-- **Governance verification**: run `npm run verify:governance` and `npm run verify:living-documents`. (Source: `docs/release/GA_CHECKLIST.md`)
-
-### Day 4–7 (Week 1 Commitments)
-
-- **Enable `pnpm audit` in CI** at critical level and capture evidence. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
-- **Implement error budgets in Prometheus** and document the config location. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
-- **Create ADR-009** for MVP-4 GA decisions. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
-- **Zero P0 incidents**: record incident log (or “none observed”) in evidence index. (Commitment: `docs/ga/GA_DEFINITION.md` 12.1)
-
-### Day 8–14 (Week 2 Stabilization)
-
-- **Test reliability**: eradicate quarantined tests and produce 100% pass rate evidence. (Commitment: `docs/ga/GA_DEFINITION.md` 12.2)
-- **API determinism audit**: capture findings and required fixes. (Commitment: `docs/ga/GA_DEFINITION.md` 12.2)
-- **Type safety audit**: identify and remove `any` in core paths; log findings as Governed Exceptions if deferrals remain. (Commitment: `docs/ga/GA_DEFINITION.md` 12.2)
+| ID | Item | Priority | Owner | Target | Status | Ticket |
+| -- | ---- | -------- | ----- | ------ | ------ | ------ |
+| STAB-01 | CI Parity & Smoke Verification | P0 | UNASSIGNED | Week 1 | Backlog | [STAB-01](STABILIZATION_TICKETS.md#stabilizationp0-ci-parity--smoke-verification) |
+| STAB-02 | Security Baselines & SBOM | P0 | UNASSIGNED | Week 1 | Backlog | [STAB-02](STABILIZATION_TICKETS.md#stabilizationp0-security-baselines--sbom) |
+| STAB-03 | Enable pnpm audit in CI | P0 | UNASSIGNED | Week 1 | Backlog | [STAB-03](STABILIZATION_TICKETS.md#stabilizationp0-enable-pnpm-audit-in-ci) |
+| STAB-04 | Mitigate Policy Bypass Risk | P0 | UNASSIGNED | Week 1 | Backlog | [STAB-04](STABILIZATION_TICKETS.md#stabilizationp0-mitigate-policy-bypass-risk-r-02) |
+| STAB-05 | Secrets Hygiene Verification | P0 | UNASSIGNED | Week 1 | Backlog | [STAB-05](STABILIZATION_TICKETS.md#stabilizationp0-secrets-hygiene-verification-r-04) |
+| STAB-06 | Operational Monitoring & Error Budgets | P1 | UNASSIGNED | Week 1 | Backlog | [STAB-06](STABILIZATION_TICKETS.md#stabilizationp1-operational-monitoring--error-budgets) |
+| STAB-07 | Governance Verification & Signed Approvals | P1 | UNASSIGNED | Week 1 | Backlog | [STAB-07](STABILIZATION_TICKETS.md#stabilizationp1-governance-verification--signed-approvals) |
+| STAB-08 | Test Reliability & Quarantined Tests | P1 | UNASSIGNED | Week 2 | Backlog | [STAB-08](STABILIZATION_TICKETS.md#stabilizationp1-test-reliability--quarantined-tests) |
+| STAB-09 | API Determinism Audit | P1 | UNASSIGNED | Week 2 | Backlog | [STAB-09](STABILIZATION_TICKETS.md#stabilizationp1-api-determinism-audit) |
+| STAB-10 | Load Testing Evidence | P1 | UNASSIGNED | Week 2 | Backlog | [STAB-10](STABILIZATION_TICKETS.md#stabilizationp1-load-testing-evidence) |
+| STAB-11 | Integration Tests | P1 | UNASSIGNED | Week 2 | Backlog | [STAB-11](STABILIZATION_TICKETS.md#stabilizationp1-integration-tests) |
+| STAB-12 | Type Safety Audit & Strict Linting | P2 | UNASSIGNED | Week 2 | Backlog | [STAB-12](STABILIZATION_TICKETS.md#stabilizationp2-type-safety-audit--strict-linting) |
+| STAB-13 | Create ADR-009 | P2 | UNASSIGNED | Week 1 | Backlog | [STAB-13](STABILIZATION_TICKETS.md#stabilizationp2-create-adr-009) |
 
 ## 4) Verification Gates (Each Patch)
 
@@ -61,9 +72,7 @@
 
 ## 6) Risk Ledger (Stabilization Window)
 
-- **API determinism failures**: enforce typed errors and remove unhandled 500s. (Source: `docs/releases/v4.0.0/MVP4-GA-Readiness-Package.md` risk R-01)
-- **Policy bypass risk**: ensure authz coverage per mutation and evidence via governance checks. (Source: `docs/releases/v4.0.0/MVP4-GA-Readiness-Package.md` risk R-02)
-- **Secrets hygiene gaps**: confirm scans and rotation readiness. (Source: `docs/releases/v4.0.0/MVP4-GA-Readiness-Package.md` risk R-04)
+Merged into Execution Tracker (Items STAB-04, STAB-05, STAB-09).
 
 ## 7) Governed Exceptions (If Needed)
 
@@ -76,4 +85,4 @@
 - **Week 2 audits complete** with remediation or Governed Exceptions documented.
 - **CI green with deterministic smoke evidence** captured for the stabilization release.
 
-**Status:** Intentionally constrained to stabilization scope only. Finalized.
+**Status:** Active Execution (See Tracker)

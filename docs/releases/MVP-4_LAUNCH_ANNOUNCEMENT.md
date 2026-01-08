@@ -22,9 +22,9 @@ What shipped in this GA package:
 
 Forward-looking (clearly labeled):
 
-- Deferred pending completion: full CI parity run (`make ci`) with published evidence.
-- Deferred pending completion: load-testing evidence with `k6` in a provisioned environment.
-- Deferred pending completion: signed GA approvals in `docs/release/GA_READINESS_REPORT.md`.
+- Deferred pending completion: [STAB-01] full CI parity run (`make ci`) with published evidence.
+- Deferred pending completion: [STAB-10] load-testing evidence with `k6` in a provisioned environment.
+- Deferred pending completion: [STAB-07] signed GA approvals in `docs/release/GA_READINESS_REPORT.md`.
 
 ## Internal (team update)
 
@@ -48,6 +48,6 @@ What shipped in this GA package:
 
 Forward-looking (clearly labeled):
 
-- Deferred pending completion: run `make ci` and attach logs to `docs/release/GA_EVIDENCE_INDEX.md`.
-- Deferred pending completion: generate SBOM/provenance evidence and attach to the index.
-- Deferred pending completion: load-testing baseline once `k6` is available.
+- Deferred pending completion: [STAB-01] run `make ci` and attach logs to `docs/release/GA_EVIDENCE_INDEX.md`.
+- Deferred pending completion: [STAB-02] generate SBOM/provenance evidence and attach to the index.
+- Deferred pending completion: [STAB-10] load-testing baseline once `k6` is available.
