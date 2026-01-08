@@ -43,7 +43,27 @@ Examples:
 
 ## Usage
 
-### Dry Run (Default - Safe)
+### Via GitHub Actions (Recommended)
+
+The **single-button deterministic** approach:
+
+1. Navigate to **Actions → RC Preparation**
+2. Click **"Run workflow"**
+3. Fill in optional fields:
+   - `base_version`: Base version (e.g., `4.1.2`)
+   - `commit_sha`: Target commit (default: main HEAD)
+4. Click **"Run workflow"**
+5. Download the `rc-prep-bundle-{tag}` artifact
+6. Run `commands.sh` from the bundle to create the RC
+
+```bash
+# After downloading and extracting the artifact:
+cd rc-prep-bundle-v4.1.2-rc.1
+chmod +x commands.sh
+./commands.sh
+```
+
+### Via CLI (Dry Run - Default)
 
 ```bash
 # Preview what would happen without creating tags
@@ -53,41 +73,55 @@ Examples:
 ./scripts/release/prepare-stabilization-rc.sh
 ```
 
-### Live Mode (Creates Tags)
+### Via CLI (Live Mode - Creates Tags)
 
 ```bash
 # Create actual RC tag
 ./scripts/release/prepare-stabilization-rc.sh --live
 
-# With explicit version
-./scripts/release/prepare-stabilization-rc.sh --live --version v4.1.2-rc.1
+# With explicit version and commit
+./scripts/release/prepare-stabilization-rc.sh --live --version v4.1.2-rc.1 --commit a8b1963
 ```
 
-### Verbose Output
+### Via CLI (CI Mode - JSON Output)
 
 ```bash
-# Show detailed progress
-./scripts/release/prepare-stabilization-rc.sh --verbose
+# For CI integration with JSON output
+./scripts/release/prepare-stabilization-rc.sh --dry-run --json --commit $(git rev-parse HEAD)
 ```
 
 ---
 
 ## Configuration Options
 
+### CLI Options
+
 | Option      | Description                          | Default       |
 | ----------- | ------------------------------------ | ------------- |
 | `--dry-run` | Preview without tagging              | true          |
 | `--live`    | Execute actual git operations        | false         |
 | `--verbose` | Enable verbose logging               | false         |
+| `--json`    | Output JSON for CI integration       | false         |
 | `--version` | Override version (e.g., v4.1.2-rc.1) | Auto-detected |
+| `--commit`  | Target commit SHA                    | HEAD          |
 | `--help`    | Show help message                    | -             |
+
+### Workflow Inputs
+
+| Input               | Description                  | Default     |
+| ------------------- | ---------------------------- | ----------- |
+| `base_version`      | Base version (e.g., 4.1.2)   | Auto-detect |
+| `commit_sha`        | Target commit SHA            | main HEAD   |
+| `dry_run`           | Dry run mode                 | true        |
+| `skip_verification` | Skip release readiness check | false       |
 
 ### Environment Variables
 
-| Variable  | Description                      | Default |
-| --------- | -------------------------------- | ------- |
-| `DRY_RUN` | Set to 'false' for live mode     | true    |
-| `VERBOSE` | Set to 'true' for verbose output | false   |
+| Variable      | Description                      | Default |
+| ------------- | -------------------------------- | ------- |
+| `DRY_RUN`     | Set to 'false' for live mode     | true    |
+| `VERBOSE`     | Set to 'true' for verbose output | false   |
+| `JSON_OUTPUT` | Set to 'true' for JSON output    | false   |
 
 ---
 
@@ -107,13 +141,31 @@ The script automatically detects the next version:
 
 Artifacts are stored in `artifacts/release/{tag}/`:
 
-| File                | Description                        |
-| ------------------- | ---------------------------------- |
-| `commits.txt`       | List of commits since last tag     |
-| `evidence.json`     | Verification commands and metadata |
-| `release_notes.md`  | Copy of release notes template     |
-| `evidence_pack.md`  | Copy of evidence pack template     |
-| `github_release.md` | GitHub Release description         |
+| File                | Description                                 |
+| ------------------- | ------------------------------------------- |
+| `commands.sh`       | Executable script to create and push RC tag |
+| `summary.json`      | Machine-readable bundle metadata            |
+| `github_release.md` | GitHub Release description                  |
+| `commits.txt`       | List of commits since last tag              |
+| `evidence.json`     | Verification commands and metadata          |
+| `release_notes.md`  | Copy of release notes template              |
+| `evidence_pack.md`  | Copy of evidence pack template              |
+
+### Example commands.sh
+
+The generated script handles all tagging steps:
+
+```bash
+#!/usr/bin/env bash
+# Step 1: Create the annotated tag
+git tag -a "v4.1.2-rc.1" a8b1963 -m "MVP-4 Stabilization RC..."
+
+# Step 2: Push the tag
+git push origin "v4.1.2-rc.1"
+
+# Step 3: Create GitHub Release
+gh release create "v4.1.2-rc.1" --prerelease --title "..."
+```
 
 ### Example evidence.json
 
@@ -339,6 +391,7 @@ git tag -l v4.1.2-rc.1
 | Date       | Change                               | Author               |
 | ---------- | ------------------------------------ | -------------------- |
 | 2026-01-08 | Initial RC Preparation documentation | Platform Engineering |
+| 2026-01-08 | Added workflow and commands.sh       | Platform Engineering |
 
 ---
 

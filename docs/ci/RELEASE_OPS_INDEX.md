@@ -37,7 +37,7 @@ This document serves as the central index for all Release Operations tooling and
 | [Release Rollback](ROLLBACK_AUTOMATION.md)            | Manual     | Dispatch      | Safe GA rollback automation  |
 | [Tag Verification](TAG_VERIFICATION.md)               | Event      | RC tag push   | Verify green for promotion   |
 | [Promotion Bundle](PROMOTION_BUNDLE.md)               | Event      | RC tag push   | Generate promotion artifacts |
-| [RC Preparation](RC_PREPARATION.md)                   | Manual     | CLI           | Create stabilization RC tags |
+| [RC Preparation](RC_PREPARATION.md)                   | Manual     | Dispatch/CLI  | Create stabilization RC tags |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems    |
 
 ---
@@ -425,6 +425,7 @@ All scripts support these common flags:
 | 2026-01-08 | Added Tag Verification               | Platform Engineering |
 | 2026-01-08 | Added Promotion Bundle               | Platform Engineering |
 | 2026-01-08 | Added RC Preparation                 | Platform Engineering |
+| 2026-01-08 | Added RC Preparation workflow        | Platform Engineering |
 
 ---
 
