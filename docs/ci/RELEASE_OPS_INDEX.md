@@ -30,6 +30,7 @@ This document serves as the central index for all Release Operations tooling and
 | [Type Safety Audit](TYPE_SAFETY_AUDIT.md)             | Daily      | `07:00 UTC`   | TypeScript any detection    |
 | [API Determinism](API_DETERMINISM.md)                 | Daily      | `08:00 UTC`   | Response consistency check  |
 | [Pre-Release Health](PRE_RELEASE_HEALTH.md)           | On tag     | `05:00 UTC`   | Unified release gate        |
+| [Evidence Collection](EVIDENCE_COLLECTION.md)         | Daily      | `04:00 UTC`   | Capture compliance evidence |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
 
 ---
@@ -65,12 +66,13 @@ This document serves as the central index for all Release Operations tooling and
 
 ### Audit Features
 
-| Feature            | Status    | Documentation                                  |
-| ------------------ | --------- | ---------------------------------------------- |
-| Dependency Audit   | ✅ Active | [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)     |
-| Type Safety Audit  | ✅ Active | [TYPE_SAFETY_AUDIT.md](TYPE_SAFETY_AUDIT.md)   |
-| API Determinism    | ✅ Active | [API_DETERMINISM.md](API_DETERMINISM.md)       |
-| Pre-Release Health | ✅ Active | [PRE_RELEASE_HEALTH.md](PRE_RELEASE_HEALTH.md) |
+| Feature             | Status    | Documentation                                    |
+| ------------------- | --------- | ------------------------------------------------ |
+| Dependency Audit    | ✅ Active | [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)       |
+| Type Safety Audit   | ✅ Active | [TYPE_SAFETY_AUDIT.md](TYPE_SAFETY_AUDIT.md)     |
+| API Determinism     | ✅ Active | [API_DETERMINISM.md](API_DETERMINISM.md)         |
+| Pre-Release Health  | ✅ Active | [PRE_RELEASE_HEALTH.md](PRE_RELEASE_HEALTH.md)   |
+| Evidence Collection | ✅ Active | [EVIDENCE_COLLECTION.md](EVIDENCE_COLLECTION.md) |
 
 ---
 
@@ -220,6 +222,7 @@ This document serves as the central index for all Release Operations tooling and
 | `type_safety_state.json`  | Type safety audit    | `docs/releases/_state/` |
 | `determinism_state.json`  | API determinism      | `docs/releases/_state/` |
 | `health_check_state.json` | Pre-release health   | `docs/releases/_state/` |
+| `evidence_state.json`     | Evidence collection  | `docs/releases/_state/` |
 
 ---
 
@@ -239,6 +242,7 @@ This document serves as the central index for all Release Operations tooling and
 | `type_safety_audit.sh`           | Type safety check       | `./scripts/release/type_safety_audit.sh`           |
 | `api_determinism_check.sh`       | API consistency         | `./scripts/release/api_determinism_check.sh`       |
 | `pre_release_health_check.sh`    | Unified health check    | `./scripts/release/pre_release_health_check.sh`    |
+| `collect_evidence.sh`            | Collect GA evidence     | `./scripts/release/collect_evidence.sh`            |
 
 ### Common Flags
 
@@ -389,6 +393,7 @@ All scripts support these common flags:
 | 2026-01-08 | Added all MVP-4 features             | Platform Engineering |
 | 2026-01-08 | Added Test Quarantine, Changelog Gen | Platform Engineering |
 | 2026-01-08 | Added Stabilization Audit features   | Platform Engineering |
+| 2026-01-08 | Added Evidence Collection            | Platform Engineering |
 
 ---
 
