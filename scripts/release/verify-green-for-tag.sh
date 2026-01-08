@@ -1,25 +1,23 @@
 #!/usr/bin/env bash
-# verify-green-for-tag.sh v1.0.0
+# verify-green-for-tag.sh v2.0.0
 # Verifies that a commit has passed all required CI workflows before tag/promotion
 #
 # Authority: docs/ci/REQUIRED_CHECKS.md
+# Policy: docs/ci/REQUIRED_CHECKS_POLICY.json
 # Purpose: Prevent RC→GA promotion unless commit is proven green
-# Contract: Exit 0 = safe to promote, Exit 1 = blocked
+# Contract: Exit 0 = safe to promote, Exit 1 = blocked, Exit 2 = invalid args
 
 set -euo pipefail
 
 # --- Configuration ---
-SCRIPT_VERSION="1.0.0"
+SCRIPT_VERSION="2.0.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+POLICY_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_POLICY.json"
 
-# Required workflows that MUST be green for promotion
-REQUIRED_WORKFLOWS=(
-    "Release Readiness Gate"
-    "Workflow Lint"
-    "GA Gate"
-    "Unit Tests & Coverage"
-    "CI Core (Primary Gate)"
-)
+# Global state (populated by compute_required_workflows)
+declare -a ALWAYS_REQUIRED_WORKFLOWS=()
+declare -A CONDITIONAL_WORKFLOW_STATUS=()
 
 # --- Color output ---
 RED='\033[0;31m'
@@ -51,44 +49,48 @@ print_usage() {
     cat <<EOF
 Usage: $0 [OPTIONS]
 
-Verifies that a commit has passed all required CI workflows.
+Verifies that a commit has passed all required CI workflows based on
+the conditional checks policy.
 
 OPTIONS:
     --tag TAG          Tag to verify (e.g., v4.1.2-rc.1)
     --commit SHA       Commit SHA to verify (default: HEAD)
+    --base REF         Base reference for diff (default: auto-detect parent)
     --branch BRANCH    Branch context (default: main)
     --verbose          Enable verbose logging
     --help             Show this help message
 
 EXAMPLES:
-    # Verify current HEAD for RC tag
+    # Verify current HEAD for RC tag (auto-detect base)
     $0 --tag v4.1.2-rc.1
 
-    # Verify specific commit
-    $0 --tag v4.1.2-rc.1 --commit a8b1963
+    # Verify specific commit with explicit base
+    $0 --tag v4.1.2-rc.1 --commit a8b1963 --base origin/main~5
 
     # Verify with verbose output
     $0 --tag v4.1.2-rc.1 --verbose
 
-REQUIRED WORKFLOWS:
-    - Release Readiness Gate
-    - Workflow Lint
-    - GA Gate
-    - Unit Tests & Coverage
-    - CI Core (Primary Gate)
+POLICY:
+    The script loads check requirements from:
+    ${POLICY_FILE}
+
+    - always_required: Must pass for every commit
+    - conditional_required: Must pass if specific paths changed
+    - informational: Not blocking for promotion
 
 EXIT CODES:
     0  All required checks passed (green for promotion)
-    1  One or more checks failed/missing (blocked)
+    1  One or more required checks failed/missing (blocked)
     2  Invalid arguments or environment
 
 REFERENCES:
     Required Checks:  docs/ci/REQUIRED_CHECKS.md
+    Policy File:      docs/ci/REQUIRED_CHECKS_POLICY.json
     Promotion Guide:  docs/releases/MVP-4_STABILIZATION_PROMOTION.md
 EOF
 }
 
-check_gh_cli() {
+check_dependencies() {
     if ! command -v gh &> /dev/null; then
         log_error "GitHub CLI (gh) is not installed"
         log_info "Install with: brew install gh  (macOS)"
@@ -96,39 +98,107 @@ check_gh_cli() {
         exit 2
     fi
 
-    # Verify authentication
     if ! gh auth status &> /dev/null; then
         log_error "GitHub CLI is not authenticated"
         log_info "Run: gh auth login"
         exit 2
     fi
+
+    if ! command -v jq &> /dev/null; then
+        log_error "jq is not installed"
+        log_info "Install with: brew install jq  (macOS)"
+        exit 2
+    fi
+
+    if [[ ! -f "${POLICY_FILE}" ]]; then
+        log_error "Policy file not found: ${POLICY_FILE}"
+        exit 2
+    fi
 }
 
 get_repo_info() {
-    local owner
-    local repo
-
-    # Get repo from git remote
     local remote_url
     remote_url=$(git remote get-url origin)
 
     if [[ "${remote_url}" =~ github\.com[:/]([^/]+)/([^/\.]+) ]]; then
-        owner="${BASH_REMATCH[1]}"
-        repo="${BASH_REMATCH[2]}"
-        echo "${owner}/${repo}"
+        echo "${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
     else
         log_error "Could not parse GitHub repo from remote URL: ${remote_url}"
         exit 2
     fi
 }
 
+# --- Changed Files Detection ---
+get_changed_files() {
+    local base_ref="$1"
+    local commit_sha="$2"
+
+    git diff --name-only "${base_ref}..${commit_sha}" 2>/dev/null || {
+        # Fallback: if base doesn't exist, get files from commit
+        git diff-tree --no-commit-id --name-only -r "${commit_sha}" 2>/dev/null || echo ""
+    }
+}
+
+# --- Conditional Check Evaluation ---
+check_path_matches() {
+    local changed_files="$1"
+    local patterns_json="$2"
+
+    # Extract patterns from JSON array
+    local patterns
+    patterns=$(echo "${patterns_json}" | jq -r '.[]')
+
+    while IFS= read -r pattern; do
+        [[ -z "${pattern}" ]] && continue
+        # Check if any changed file matches this regex pattern
+        while IFS= read -r file; do
+            [[ -z "${file}" ]] && continue
+            if echo "${file}" | grep -qE "${pattern}"; then
+                return 0  # Match found
+            fi
+        done <<< "${changed_files}"
+    done <<< "${patterns}"
+
+    return 1  # No match
+}
+
+compute_required_workflows() {
+    local changed_files="$1"
+
+    # Clear global arrays
+    ALWAYS_REQUIRED_WORKFLOWS=()
+    CONDITIONAL_WORKFLOW_STATUS=()
+
+    # Load always_required workflows
+    while IFS= read -r wf_name; do
+        [[ -n "${wf_name}" ]] && ALWAYS_REQUIRED_WORKFLOWS+=("${wf_name}")
+    done < <(jq -r '.always_required[].name' "${POLICY_FILE}")
+
+    # Check conditional_required workflows
+    while IFS= read -r conditional; do
+        [[ -z "${conditional}" ]] && continue
+
+        local wf_name
+        local patterns
+        wf_name=$(echo "${conditional}" | jq -r '.name')
+        patterns=$(echo "${conditional}" | jq -c '.required_when_paths_match')
+
+        # Check if any changed file matches the patterns
+        if check_path_matches "${changed_files}" "${patterns}"; then
+            CONDITIONAL_WORKFLOW_STATUS["${wf_name}"]="REQUIRED"
+        else
+            CONDITIONAL_WORKFLOW_STATUS["${wf_name}"]="SKIPPED"
+        fi
+    done < <(jq -c '.conditional_required[]' "${POLICY_FILE}")
+}
+
+# --- Workflow Status Checking ---
 fetch_workflow_runs() {
     local commit_sha="$1"
     local repo="$2"
 
     log_info "Fetching workflow runs for commit ${commit_sha:0:7}..."
 
-    # Fetch all workflow runs for this commit
     gh run list \
         --repo "${repo}" \
         --commit "${commit_sha}" \
@@ -162,7 +232,7 @@ check_workflow_status() {
     status=$(echo "${workflow_data}" | jq -r '.status // "N/A"')
     url=$(echo "${workflow_data}" | jq -r '.url // "N/A"')
 
-    # If status is not completed, check current status
+    # If status is not completed, use status as conclusion
     if [[ "${status}" != "completed" ]]; then
         printf "%s\t%s\t%s" "${status^^}" "${status}" "${url}"
         return
@@ -172,78 +242,129 @@ check_workflow_status() {
     printf "%s\t%s\t%s" "${conclusion^^}" "${status}" "${url}"
 }
 
+# --- Truth Table Rendering ---
 print_truth_table() {
     local runs_json="$1"
     local commit_sha="$2"
     local tag="$3"
+    local base_ref="$4"
+    local changed_count="$5"
 
     echo ""
     echo "╔════════════════════════════════════════════════════════════════════════════════╗"
     echo "║                          PROMOTION GATE TRUTH TABLE                            ║"
     echo "╠════════════════════════════════════════════════════════════════════════════════╣"
-    echo "║ Tag:    ${tag}"
-    echo "║ Commit: ${commit_sha:0:7} (${commit_sha})"
+    echo "║ Tag:     ${tag}"
+    echo "║ Commit:  ${commit_sha:0:7} (${commit_sha})"
+    echo "║ Base:    ${base_ref}"
+    echo "║ Changed: ${changed_count} files"
     echo "╚════════════════════════════════════════════════════════════════════════════════╝"
     echo ""
 
-    printf "%-35s | %-12s | %-10s | %s\n" "WORKFLOW" "CONCLUSION" "STATUS" "RUN URL"
-    printf "%s\n" "────────────────────────────────────────────────────────────────────────────────────────────────"
+    printf "%-35s | %-11s | %-12s | %s\n" "WORKFLOW" "REQUIRED" "STATUS" "RESULT"
+    printf "%s\n" "────────────────────────────────────────────────────────────────────────────────────────────────────"
 
-    local all_green=true
+    local all_required_pass=true
     local blocking_failures=()
 
-    for workflow in "${REQUIRED_WORKFLOWS[@]}"; do
+    # Process always_required workflows
+    for wf_name in "${ALWAYS_REQUIRED_WORKFLOWS[@]}"; do
         local result
-        result=$(check_workflow_status "${workflow}" "${runs_json}")
+        result=$(check_workflow_status "${wf_name}" "${runs_json}")
 
+        local conclusion status url
         IFS=$'\t' read -r conclusion status url <<< "${result}"
 
-        # Determine status symbol
-        local symbol
-        local color="${NC}"
-
+        local symbol result_text color
         if [[ "${conclusion}" == "SUCCESS" ]]; then
             symbol="✅"
+            result_text="PASS"
             color="${GREEN}"
-        elif [[ "${conclusion}" == "MISSING" ]]; then
-            symbol="❌"
-            color="${RED}"
-            all_green=false
-            blocking_failures+=("${workflow}: MISSING (workflow did not run)")
-        elif [[ "${conclusion}" == "IN_PROGRESS" ]] || [[ "${conclusion}" == "QUEUED" ]] || [[ "${conclusion}" == "WAITING" ]] || [[ "${conclusion}" == "PENDING" ]]; then
+        elif [[ "${conclusion}" == "MISSING" ]] || [[ "${conclusion}" == "QUEUED" ]] || \
+             [[ "${conclusion}" == "IN_PROGRESS" ]] || [[ "${conclusion}" == "PENDING" ]] || \
+             [[ "${conclusion}" == "WAITING" ]]; then
             symbol="⏳"
+            result_text="WAITING"
             color="${YELLOW}"
-            all_green=false
-            blocking_failures+=("${workflow}: ${conclusion} (not completed)")
-        elif [[ "${conclusion}" == "FAILURE" ]] || [[ "${conclusion}" == "TIMED_OUT" ]] || [[ "${conclusion}" == "CANCELLED" ]]; then
-            symbol="❌"
-            color="${RED}"
-            all_green=false
-            blocking_failures+=("${workflow}: ${conclusion}")
+            all_required_pass=false
+            blocking_failures+=("${wf_name}: ${conclusion} (not completed)")
         else
-            symbol="⚠️"
-            color="${YELLOW}"
-            all_green=false
-            blocking_failures+=("${workflow}: ${conclusion} (unexpected state)")
+            symbol="❌"
+            result_text="FAIL"
+            color="${RED}"
+            all_required_pass=false
+            blocking_failures+=("${wf_name}: ${conclusion}")
         fi
 
-        printf "${color}%-35s${NC} | ${color}%-12s${NC} | %-10s | %s\n" \
-            "${workflow:0:35}" \
+        printf "${color}%-35s${NC} | %-11s | ${color}%-12s${NC} | ${color}%s${NC}\n" \
+            "${wf_name:0:35}" \
+            "ALWAYS" \
             "${symbol} ${conclusion}" \
-            "${status}" \
-            "${url}"
+            "${result_text}"
+    done
+
+    # Process conditional_required workflows
+    for wf_name in "${!CONDITIONAL_WORKFLOW_STATUS[@]}"; do
+        local is_required="${CONDITIONAL_WORKFLOW_STATUS[${wf_name}]}"
+
+        local result
+        result=$(check_workflow_status "${wf_name}" "${runs_json}")
+
+        local conclusion status url
+        IFS=$'\t' read -r conclusion status url <<< "${result}"
+
+        local symbol result_text color required_label
+
+        if [[ "${is_required}" == "SKIPPED" ]]; then
+            # Not required for this commit
+            symbol="⏭️"
+            result_text="N/A"
+            color="${CYAN}"
+            required_label="SKIP"
+        elif [[ "${conclusion}" == "SUCCESS" ]]; then
+            symbol="✅"
+            result_text="PASS"
+            color="${GREEN}"
+            required_label="COND"
+        elif [[ "${conclusion}" == "MISSING" ]] || [[ "${conclusion}" == "QUEUED" ]] || \
+             [[ "${conclusion}" == "IN_PROGRESS" ]] || [[ "${conclusion}" == "PENDING" ]] || \
+             [[ "${conclusion}" == "WAITING" ]]; then
+            symbol="⏳"
+            result_text="WAITING"
+            color="${YELLOW}"
+            all_required_pass=false
+            blocking_failures+=("${wf_name}: ${conclusion} (required but not completed)")
+            required_label="COND"
+        else
+            symbol="❌"
+            result_text="FAIL"
+            color="${RED}"
+            all_required_pass=false
+            blocking_failures+=("${wf_name}: ${conclusion}")
+            required_label="COND"
+        fi
+
+        printf "${color}%-35s${NC} | %-11s | ${color}%-12s${NC} | ${color}%s${NC}\n" \
+            "${wf_name:0:35}" \
+            "${required_label}" \
+            "${symbol} ${conclusion}" \
+            "${result_text}"
     done
 
     echo ""
-    echo "════════════════════════════════════════════════════════════════════════════════════════════════"
+    echo "════════════════════════════════════════════════════════════════════════════════════════════════════"
     echo ""
 
-    if [[ "${all_green}" == "true" ]]; then
+    # Legend
+    echo "Legend: ALWAYS=always required | COND=conditionally required | SKIP=not required for this commit"
+    echo ""
+
+    if [[ "${all_required_pass}" == "true" ]]; then
         log_success "PROMOTION ALLOWED: All required checks passed ✅"
         echo ""
         log_info "This commit is safe to promote:"
-        log_info "  • All required workflows completed successfully"
-        log_info "  • No blocking failures detected"
+        log_info "  • All always-required workflows completed successfully"
+        log_info "  • All conditionally-required workflows (for changed paths) passed"
         log_info "  • Tag ${tag} can be created/promoted"
         return 0
     else
@@ -255,9 +376,9 @@ print_truth_table() {
         done
         echo ""
         log_warn "Actions required:"
-        log_warn "  1. Review failed workflow runs above"
-        log_warn "  2. Fix any test/build/lint failures"
-        log_warn "  3. Ensure all workflows complete successfully"
+        log_warn "  1. Review failed/pending workflow runs above"
+        log_warn "  2. Wait for in-progress workflows to complete"
+        log_warn "  3. Fix any test/build/lint failures"
         log_warn "  4. Re-run this verification script"
         return 1
     fi
@@ -267,6 +388,7 @@ print_truth_table() {
 main() {
     local tag=""
     local commit_sha=""
+    local base_ref=""
     local branch="main"
     local verbose=false
 
@@ -279,6 +401,10 @@ main() {
                 ;;
             --commit)
                 commit_sha="$2"
+                shift 2
+                ;;
+            --base)
+                base_ref="$2"
                 shift 2
                 ;;
             --branch)
@@ -308,6 +434,9 @@ main() {
         exit 2
     fi
 
+    # Pre-flight checks
+    check_dependencies
+
     # Default commit to HEAD if not specified
     if [[ -z "${commit_sha}" ]]; then
         commit_sha=$(git rev-parse HEAD)
@@ -317,21 +446,59 @@ main() {
         commit_sha=$(git rev-parse "${commit_sha}")
     fi
 
+    # Default base to parent commit if not specified
+    if [[ -z "${base_ref}" ]]; then
+        base_ref="${commit_sha}^"
+        log_info "Using parent commit as base: ${base_ref}"
+    fi
+
     log_info "=== Promotion Gate Verification ==="
     log_info "Script version: ${SCRIPT_VERSION}"
+    log_info "Policy file: ${POLICY_FILE}"
     log_info "Tag: ${tag}"
     log_info "Commit: ${commit_sha:0:7} (${commit_sha})"
+    log_info "Base: ${base_ref}"
     log_info "Branch: ${branch}"
     echo ""
-
-    # Pre-flight checks
-    check_gh_cli
 
     # Get repo info
     local repo
     repo=$(get_repo_info)
     log_info "Repository: ${repo}"
     echo ""
+
+    # Get changed files
+    log_info "Computing changed files..."
+    local changed_files
+    changed_files=$(get_changed_files "${base_ref}" "${commit_sha}")
+    local changed_count
+    changed_count=$(echo "${changed_files}" | grep -c . || echo "0")
+    log_info "Found ${changed_count} changed files"
+
+    if [[ "${verbose}" == "true" ]] && [[ -n "${changed_files}" ]]; then
+        log_info "Changed files:"
+        echo "${changed_files}" | while IFS= read -r file; do
+            echo "  - ${file}"
+        done
+        echo ""
+    fi
+
+    # Compute required workflows based on changed files
+    log_info "Computing required workflows based on policy..."
+    compute_required_workflows "${changed_files}"
+
+    if [[ "${verbose}" == "true" ]]; then
+        log_info "Always-required workflows: ${#ALWAYS_REQUIRED_WORKFLOWS[@]}"
+        for wf in "${ALWAYS_REQUIRED_WORKFLOWS[@]}"; do
+            echo "  - ${wf}"
+        done
+        echo ""
+        log_info "Conditional workflow status:"
+        for wf in "${!CONDITIONAL_WORKFLOW_STATUS[@]}"; do
+            echo "  - ${wf}: ${CONDITIONAL_WORKFLOW_STATUS[${wf}]}"
+        done
+        echo ""
+    fi
 
     # Fetch workflow runs
     local runs_json
@@ -344,7 +511,7 @@ main() {
     fi
 
     # Print truth table and check status
-    if print_truth_table "${runs_json}" "${commit_sha}" "${tag}"; then
+    if print_truth_table "${runs_json}" "${commit_sha}" "${tag}" "${base_ref}" "${changed_count}"; then
         echo ""
         log_success "════════════════════════════════════════════════════════════════"
         log_success "  ✅ GREEN FOR PROMOTION"

@@ -2,8 +2,8 @@
 
 **Authority**: This document defines the canonical set of CI workflows that MUST pass before any release tag can be promoted from RC to GA.
 
-**Version**: 1.0.0
-**Last Updated**: 2026-01-07
+**Version**: 2.0.0
+**Last Updated**: 2026-01-08
 **Owner**: Platform Engineering
 
 ---
@@ -11,10 +11,13 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Required Checks](#required-checks)
-3. [Informational Checks](#informational-checks)
-4. [Check Verification](#check-verification)
-5. [Troubleshooting](#troubleshooting)
+2. [Policy Source of Truth](#policy-source-of-truth)
+3. [Always-Required Checks](#always-required-checks)
+4. [Conditionally-Required Checks](#conditionally-required-checks)
+5. [Informational Checks](#informational-checks)
+6. [Evaluation Examples](#evaluation-examples)
+7. [Check Verification](#check-verification)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -26,31 +29,53 @@ This document establishes the **immutable contract** for release promotion safet
 
 > **A commit is safe for GA promotion if and only if all Required Checks are GREEN (success status).**
 
+### Key Principle: Deterministic Evaluation
+
+The set of required checks for any commit is **deterministically computed** based on:
+
+1. The commit SHA being evaluated
+2. The set of files changed between the commit and its base
+
+This eliminates ambiguity: given the same inputs, the Promotion Guard always produces the same required check set.
+
 ### Scope
 
 - **Applies to**: MVP-4 Post-GA Stabilization releases (v4.1.x)
 - **Enforced by**: `scripts/release/verify-green-for-tag.sh`
+- **Policy defined in**: `docs/ci/REQUIRED_CHECKS_POLICY.json`
 - **Automated via**: `.github/workflows/release-promote-guard.yml`
-
-### Principles
-
-1. **No Ambiguity**: Green means releasable. Red means blocked.
-2. **No Bypass**: Required checks cannot be skipped (except documented emergency procedures)
-3. **Deterministic**: Same commit + same checks = same promotion decision
-4. **Auditable**: All promotion decisions generate evidence artifacts
 
 ---
 
-## Required Checks
+## Policy Source of Truth
 
-These workflows **MUST** complete with `conclusion: success` for any commit to be promoted to GA.
+The canonical policy is defined in machine-readable format:
+
+```
+docs/ci/REQUIRED_CHECKS_POLICY.json
+```
+
+This file contains:
+
+- **always_required**: Checks that must pass for every commit
+- **conditional_required**: Checks required only when specific paths change
+- **informational**: Checks that provide signals but don't block promotion
+
+The Promotion Guard script reads this policy file to compute the required set.
+
+---
+
+## Always-Required Checks
+
+These workflows **MUST** complete with `conclusion: success` for **every** commit promoted to GA.
 
 ### 1. Release Readiness Gate
 
-**Workflow**: `.github/workflows/release-readiness.yml`
-**Name**: `Release Readiness Gate`
-
-**Purpose**: Comprehensive release readiness verification
+| Field    | Value                                     |
+| -------- | ----------------------------------------- |
+| Workflow | `.github/workflows/release-readiness.yml` |
+| Name     | `Release Readiness Gate`                  |
+| Triggers | Every PR/push to main (NO path filters)   |
 
 **Guarantees**:
 
@@ -62,44 +87,13 @@ These workflows **MUST** complete with `conclusion: success` for any commit to b
 - All workflow files are valid (actionlint)
 - Required workflows trigger on critical changes
 
-**Triggers**:
+### 2. GA Gate
 
-- Every PR to main (no path filters)
-- Every push to main (no path filters)
-- Manual trigger (workflow_dispatch)
-
-**Critical**: This workflow has **NO paths-ignore rules** to ensure it runs on every change.
-
----
-
-### 2. Workflow Lint
-
-**Workflow**: `.github/workflows/workflow-lint.yml`
-**Name**: `Workflow Lint`
-
-**Purpose**: Prevent CI breakage from malformed workflow files
-
-**Guarantees**:
-
-- All GitHub Actions workflow files are syntactically valid
-- All shell scripts in workflows pass ShellCheck
-- No dangerous patterns (e.g., bypassing required checks)
-
-**Triggers**:
-
-- PRs that modify `.github/workflows/**`
-- Pushes to main that modify `.github/workflows/**`
-
-**Why Required**: Ensures CI infrastructure remains functional and cannot be accidentally broken.
-
----
-
-### 3. GA Gate
-
-**Workflow**: `.github/workflows/ga-gate.yml`
-**Name**: `GA Gate`
-
-**Purpose**: Official GA verification entrypoint
+| Field    | Value                                   |
+| -------- | --------------------------------------- |
+| Workflow | `.github/workflows/ga-gate.yml`         |
+| Name     | `GA Gate`                               |
+| Triggers | PRs/pushes to main (docs-only excluded) |
 
 **Guarantees**:
 
@@ -107,47 +101,27 @@ These workflows **MUST** complete with `conclusion: success` for any commit to b
 - Generates GA snapshot with CI/release metadata
 - Verifies all GA-readiness criteria
 
-**Triggers**:
+### 3. Unit Tests & Coverage
 
-- PRs to main (ignores docs-only changes)
-- Pushes to main (ignores docs-only changes)
-- Manual trigger (workflow_dispatch)
-
-**Critical**: Uses conservative paths-ignore to prevent skipping on code/config/dependency changes.
-
----
-
-### 4. Unit Tests & Coverage
-
-**Workflow**: `.github/workflows/unit-test-coverage.yml`
-**Name**: `Unit Tests & Coverage`
-
-**Purpose**: Ensure test suite passes with adequate coverage
+| Field    | Value                                           |
+| -------- | ----------------------------------------------- |
+| Workflow | `.github/workflows/unit-test-coverage.yml`      |
+| Name     | `Unit Tests & Coverage`                         |
+| Triggers | PRs/pushes to main/develop (docs-only excluded) |
 
 **Guarantees**:
 
 - All server unit tests pass via `pnpm test:ci`
 - Coverage meets minimum thresholds
-- Test results are deterministic (hardened settings from commit 8434f7ae3b0)
+- Test results are deterministic
 
-**Triggers**:
+### 4. CI Core (Primary Gate)
 
-- PRs to main/develop (ignores docs-only changes)
-- Pushes to main/develop (ignores docs-only changes)
-
-**Coverage Gates**:
-
-- PR mode: Changed files only (--scope=changed)
-- Push mode: All files (--scope=all)
-
----
-
-### 5. CI Core (Primary Gate)
-
-**Workflow**: `.github/workflows/ci-core.yml`
-**Name**: `CI Core (Primary Gate)`
-
-**Purpose**: Primary blocking gate for all PRs
+| Field    | Value                           |
+| -------- | ------------------------------- |
+| Workflow | `.github/workflows/ci-core.yml` |
+| Name     | `CI Core (Primary Gate)`        |
+| Triggers | PRs/pushes to main, merge queue |
 
 **Guarantees**:
 
@@ -158,13 +132,89 @@ These workflows **MUST** complete with `conclusion: success` for any commit to b
 - Build is deterministic (bit-for-bit reproducible)
 - Golden path smoke test succeeds
 
-**Triggers**:
+---
 
-- PRs to main (ignores docs-only changes)
-- Pushes to main (ignores docs-only changes)
-- Merge queue events
+## Conditionally-Required Checks
 
-**Critical**: All jobs are **BLOCKING** - PRs cannot merge if any job fails. No `continue-on-error` allowed.
+These workflows are required **only when specific file paths are changed**.
+
+### 1. Workflow Lint
+
+| Field         | Value                                                  |
+| ------------- | ------------------------------------------------------ |
+| Workflow      | `.github/workflows/workflow-lint.yml`                  |
+| Name          | `Workflow Lint`                                        |
+| Required when | `.github/workflows/**` or `.github/actions/**` changes |
+
+**Path patterns**:
+
+```regex
+^\.github/workflows/.*
+^\.github/actions/.*
+```
+
+**Guarantees**:
+
+- All GitHub Actions workflow files are syntactically valid
+- All shell scripts in workflows pass ShellCheck
+- No dangerous patterns (e.g., bypassing required checks)
+
+### 2. CodeQL
+
+| Field         | Value                                     |
+| ------------- | ----------------------------------------- |
+| Workflow      | `.github/workflows/codeql.yml`            |
+| Name          | `CodeQL`                                  |
+| Required when | `server/`, `packages/`, or `cli/` changes |
+
+**Path patterns**:
+
+```regex
+^server/
+^packages/
+^cli/
+```
+
+**Guarantees**:
+
+- Security analysis for TypeScript/JavaScript code
+- No high-severity vulnerabilities introduced
+
+### 3. SBOM & Vulnerability Scanning
+
+| Field         | Value                                            |
+| ------------- | ------------------------------------------------ |
+| Workflow      | `.github/workflows/sbom-vuln-scan.yml`           |
+| Name          | `SBOM & Vulnerability Scanning`                  |
+| Required when | Docker, dependencies, or security scripts change |
+
+**Path patterns**:
+
+```regex
+^Dockerfile
+^docker-compose
+^package\.json$
+^pnpm-lock\.yaml$
+^server/package\.json$
+^\.github/workflows/supply-chain
+^scripts/security/
+```
+
+### 4. Docker Build & Security Scan
+
+| Field         | Value                                     |
+| ------------- | ----------------------------------------- |
+| Workflow      | `.github/workflows/docker-build-scan.yml` |
+| Name          | `Docker Build & Security Scan`            |
+| Required when | Docker configuration changes              |
+
+**Path patterns**:
+
+```regex
+^Dockerfile
+^docker-compose
+^\.dockerignore$
+```
 
 ---
 
@@ -172,29 +222,96 @@ These workflows **MUST** complete with `conclusion: success` for any commit to b
 
 These workflows provide valuable signals but are **NOT** blocking for promotion:
 
-### Release Train
+| Workflow                  | Purpose                         |
+| ------------------------- | ------------------------------- |
+| Release Train             | Automated release orchestration |
+| Post-Release Canary       | Post-deployment smoke tests     |
+| PR Quality Gate           | Additional PR quality metrics   |
+| Release Reliability       | Release success metrics         |
+| AI Copilot Canary         | AI feature monitoring           |
+| Performance Baseline (k6) | Performance benchmarks          |
+| CI Legacy (Non-Blocking)  | Legacy compatibility checks     |
 
-**Workflow**: `.github/workflows/release-train.yml`
-**Purpose**: Automated release orchestration
-**Status**: Informational (tracks release cadence)
+---
 
-### Post-Release Canary
+## Evaluation Examples
 
-**Workflow**: `.github/workflows/post-release-canary.yml`
-**Purpose**: Post-deployment smoke tests
-**Status**: Informational (monitors production health after release)
+### Example 1: Documentation-Only Change
 
-### PR Quality Gate
+**Changed files**:
 
-**Workflow**: `.github/workflows/pr-quality-gate.yml`
-**Purpose**: Additional PR quality metrics
-**Status**: Informational (provides guidance, not blocking)
+```
+docs/README.md
+docs/api/endpoints.md
+```
 
-### Release Reliability
+**Required checks**:
 
-**Workflow**: `.github/workflows/release-reliability.yml`
-**Purpose**: Tracks release success metrics
-**Status**: Informational (observability)
+- ✅ Release Readiness Gate (always required)
+- ✅ GA Gate (always required)
+- ✅ Unit Tests & Coverage (always required)
+- ✅ CI Core (Primary Gate) (always required)
+- ⏭️ Workflow Lint (SKIPPED - no workflow changes)
+- ⏭️ CodeQL (SKIPPED - no code changes)
+- ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
+
+### Example 2: Workflow Change
+
+**Changed files**:
+
+```
+.github/workflows/ci-core.yml
+docs/ci/workflow-guide.md
+```
+
+**Required checks**:
+
+- ✅ Release Readiness Gate (always required)
+- ✅ GA Gate (always required)
+- ✅ Unit Tests & Coverage (always required)
+- ✅ CI Core (Primary Gate) (always required)
+- ✅ Workflow Lint (**REQUIRED** - `.github/workflows/` changed)
+- ⏭️ CodeQL (SKIPPED - no code changes)
+- ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
+
+### Example 3: Server Code Change
+
+**Changed files**:
+
+```
+server/src/routes/health.ts
+server/tests/health.test.ts
+```
+
+**Required checks**:
+
+- ✅ Release Readiness Gate (always required)
+- ✅ GA Gate (always required)
+- ✅ Unit Tests & Coverage (always required)
+- ✅ CI Core (Primary Gate) (always required)
+- ⏭️ Workflow Lint (SKIPPED - no workflow changes)
+- ✅ CodeQL (**REQUIRED** - `server/` changed)
+- ⏭️ SBOM & Vulnerability Scanning (SKIPPED - no dependency changes)
+
+### Example 4: Dependency Update
+
+**Changed files**:
+
+```
+package.json
+pnpm-lock.yaml
+server/package.json
+```
+
+**Required checks**:
+
+- ✅ Release Readiness Gate (always required)
+- ✅ GA Gate (always required)
+- ✅ Unit Tests & Coverage (always required)
+- ✅ CI Core (Primary Gate) (always required)
+- ⏭️ Workflow Lint (SKIPPED - no workflow changes)
+- ⏭️ CodeQL (SKIPPED - no code changes)
+- ✅ SBOM & Vulnerability Scanning (**REQUIRED** - dependency files changed)
 
 ---
 
@@ -205,31 +322,24 @@ These workflows provide valuable signals but are **NOT** blocking for promotion:
 Use the `verify-green-for-tag.sh` script to check if a commit is safe for promotion:
 
 ```bash
-# Verify current HEAD for a specific tag
+# Verify with automatic base detection
 ./scripts/release/verify-green-for-tag.sh --tag v4.1.2-rc.1
 
-# Verify specific commit
-./scripts/release/verify-green-for-tag.sh --tag v4.1.2-rc.1 --commit a8b1963
+# Verify specific commit with explicit base
+./scripts/release/verify-green-for-tag.sh \
+  --tag v4.1.2-rc.1 \
+  --commit a8b1963 \
+  --base origin/main~5
 
 # Verbose output with full workflow data
-./scripts/release/verify-green-for-tag.sh --tag v4.1.2-rc.1 --verbose
-```
-
-### Automated Verification
-
-Use the Release Promotion Guard workflow:
-
-```bash
-# Trigger via GitHub UI: Actions → Release Promotion Guard → Run workflow
-# Or via GitHub CLI:
-gh workflow run release-promote-guard.yml \
-  -f version=4.1.2 \
-  -f rc_tag=v4.1.2-rc.1
+./scripts/release/verify-green-for-tag.sh \
+  --tag v4.1.2-rc.1 \
+  --verbose
 ```
 
 ### Truth Table Output
 
-The verification script produces a **Gate Truth Table** showing the status of each required check:
+The verification script produces a **Gate Truth Table** showing the status of each check:
 
 ```
 ╔════════════════════════════════════════════════════════════════════════════════╗
@@ -237,15 +347,19 @@ The verification script produces a **Gate Truth Table** showing the status of ea
 ╠════════════════════════════════════════════════════════════════════════════════╣
 ║ Tag:    v4.1.2-rc.1
 ║ Commit: a8b1963 (a8b19638b58452371e7749f714e2b9bea9f482ad)
+║ Base:   79a2dee (origin/main~1)
+║ Changed: 3 files
 ╚════════════════════════════════════════════════════════════════════════════════╝
 
-WORKFLOW                            | CONCLUSION   | STATUS     | RUN URL
+WORKFLOW                            | REQUIRED   | STATUS      | RESULT
 ────────────────────────────────────────────────────────────────────────────────────
-Release Readiness Gate              | ✅ SUCCESS   | completed  | https://github.com/...
-Workflow Lint                       | ✅ SUCCESS   | completed  | https://github.com/...
-GA Gate                             | ✅ SUCCESS   | completed  | https://github.com/...
-Unit Tests & Coverage               | ✅ SUCCESS   | completed  | https://github.com/...
-CI Core (Primary Gate)              | ✅ SUCCESS   | completed  | https://github.com/...
+Release Readiness Gate              | ALWAYS     | ✅ SUCCESS  | PASS
+GA Gate                             | ALWAYS     | ✅ SUCCESS  | PASS
+Unit Tests & Coverage               | ALWAYS     | ✅ SUCCESS  | PASS
+CI Core (Primary Gate)              | ALWAYS     | ✅ SUCCESS  | PASS
+Workflow Lint                       | CONDITIONAL| ⏭️ SKIPPED  | N/A (not required)
+CodeQL                              | CONDITIONAL| ✅ SUCCESS  | PASS
+SBOM & Vulnerability Scanning       | CONDITIONAL| ⏭️ SKIPPED  | N/A (not required)
 
 ════════════════════════════════════════════════════════════════════════════════════
 
@@ -264,49 +378,47 @@ The verification script uses standard exit codes:
 
 ## Troubleshooting
 
-### Workflow Not Running
+### Workflow Not Running (But Required)
 
 **Symptom**: Required workflow missing from commit status
 
-**Possible Causes**:
+**Diagnosis**:
 
-1. Workflow has `paths-ignore` rules that excluded this commit
-2. Workflow is disabled in repository settings
-3. Workflow file has syntax errors (check Workflow Lint)
+```bash
+# Check what files changed
+git diff --name-only origin/main~1..HEAD
 
-**Resolution**:
-
-1. Check workflow triggers in `.github/workflows/<workflow>.yml`
-2. Verify workflow is enabled: Settings → Actions → Workflows
-3. Run `actionlint .github/workflows/` to check syntax
-
-### Workflow Failed
-
-**Symptom**: Required workflow shows `conclusion: failure`
+# Check if workflow is required for those changes
+./scripts/release/verify-green-for-tag.sh --tag vX.Y.Z --verbose
+```
 
 **Resolution**:
 
-1. Click the workflow run URL in the truth table
-2. Review failed job logs
-3. Fix the underlying issue (test failure, build error, etc.)
-4. Push fix to trigger re-run
-5. Re-verify with `verify-green-for-tag.sh`
+1. If workflow should have triggered, check workflow's path filters
+2. If workflow is disabled, enable in repository settings
+3. Push a no-op change to trigger missing workflow
 
-### Workflow In Progress
+### Workflow Marked SKIPPED But Should Be Required
 
-**Symptom**: Required workflow shows `status: in_progress`
+**Symptom**: Conditional workflow shows SKIPPED but you expected it to run
+
+**Diagnosis**:
+
+1. Check the changed files: `git diff --name-only <base>..<commit>`
+2. Check the path patterns in `REQUIRED_CHECKS_POLICY.json`
+3. Verify the regex patterns match your changed files
 
 **Resolution**:
 
-- Wait for workflow to complete
-- Monitor with: `gh run watch`
-- Re-run verification script once completed
+1. Update path patterns in policy if incorrect
+2. Use `--base` flag to specify correct base reference
+3. Verify you're checking the correct commit SHA
 
 ### Emergency Bypass
 
 **DANGER**: Only for critical hotfixes under incident response
 
-If a promotion must proceed without green checks (e.g., emergency security patch):
+If a promotion must proceed without green checks:
 
 1. Document the incident in your incident tracker
 2. Get approval from Platform Engineering lead
@@ -320,28 +432,26 @@ gh workflow run release-promote-guard.yml \
 ```
 
 4. Create post-incident review ticket to address bypassed checks
-5. Document the bypass in release notes
-
-**Warning**: Bypassed promotions must be audited and retroactively verified within 48 hours.
 
 ---
 
 ## References
 
+- **Policy File**: `docs/ci/REQUIRED_CHECKS_POLICY.json`
 - **Promotion Guide**: `docs/releases/MVP-4_STABILIZATION_PROMOTION.md`
 - **Tagging Guide**: `docs/releases/MVP-4_STABILIZATION_TAGGING.md`
 - **GA Definition**: `docs/GA_DEFINITION.md`
-- **CI Architecture**: `docs/ci/ARCHITECTURE.md`
 
 ---
 
 ## Change History
 
-| Version | Date       | Changes                                   |
-| ------- | ---------- | ----------------------------------------- |
-| 1.0.0   | 2026-01-07 | Initial version with 5 required workflows |
+| Version | Date       | Changes                                         |
+| ------- | ---------- | ----------------------------------------------- |
+| 1.0.0   | 2026-01-07 | Initial version with 5 required workflows       |
+| 2.0.0   | 2026-01-08 | Add conditional required checks with path rules |
 
 ---
 
 **Document Authority**: Platform Engineering
-**Next Review**: 2026-02-07 (or before MVP-5 kickoff)
+**Next Review**: 2026-02-08 (or before MVP-5 kickoff)
