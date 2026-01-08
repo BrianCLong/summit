@@ -2,9 +2,23 @@ name: GA Readiness Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
   push:
-    branches: [ main ]
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/*.md"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ga-ready:
@@ -28,8 +42,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -59,13 +73,13 @@ jobs:
         continue-on-error: true
         uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          scanners: 'secret,vuln'
-          severity: 'CRITICAL,HIGH'
-          format: 'json'
-          output: 'trivy-results.json'
-          exit-code: '1'
+          scan-type: "fs"
+          scan-ref: "."
+          scanners: "secret,vuln"
+          severity: "CRITICAL,HIGH"
+          format: "json"
+          output: "trivy-results.json"
+          exit-code: "1"
 
       - name: Run GA Readiness Check
         id: ga_check

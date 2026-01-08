@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, reopened, synchronize, edited, labeled]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   pull-requests: write
   contents: read
@@ -75,7 +79,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Check PR Metadata
         run: node scripts/ga/check-pr-metadata.mjs

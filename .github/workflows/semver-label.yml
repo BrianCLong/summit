@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, labeled, unlabeled]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   check-semver-label:
     name: Check SemVer Label
@@ -15,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install dependencies (scripts)
         run: |

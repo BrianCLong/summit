@@ -3,11 +3,28 @@ name: Docker Build & Security Scan
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/workflows/*.md"
   pull_request:
     branches: [main]
+    paths:
+      - "Dockerfile"
+      - "docker-compose*.yml"
+      - ".dockerignore"
+      - "server/**"
+      - "client/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/docker-build.yml"
   schedule:
     - cron: "0 0 * * 0" # Weekly security scan
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   REGISTRY: ghcr.io
