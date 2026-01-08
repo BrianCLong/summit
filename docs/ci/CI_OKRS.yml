@@ -1,0 +1,32 @@
+window_days: 7
+okrs:
+  - id: OKR-CI-001
+    name: "Reduce weekly CI failures"
+    metric: failures_total
+    target: { type: "max", value: 50 }
+    source: ci_failure_trends
+    severity_weighting: true
+
+  - id: OKR-CI-002
+    name: "Reduce P0 failure codes"
+    metric: p0_failures_total
+    target: { type: "max", value: 5 }
+    source: ci_failure_trends
+
+  - id: OKR-CI-003
+    name: "Burn down top regressing failure code"
+    metric: top_regression_delta
+    target: { type: "max", value: 0 }
+    source: ci_failure_trends
+
+  - id: OKR-CI-004
+    name: "Keep release gate duration within budget"
+    metric: ga_verify_minutes_p95
+    target: { type: "max", value: 30 }
+    source: perf_budget
+
+  - id: OKR-CI-005
+    name: "Maintain triage coverage"
+    metric: triage_artifact_coverage_percent
+    target: { type: "min", value: 95 }
+    source: ci_failure_trends
