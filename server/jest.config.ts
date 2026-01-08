@@ -27,6 +27,7 @@ const config: Config = {
     '.*DeterministicExportService(\\.js)?$': '<rootDir>/tests/mocks/deterministic-export-service.ts',
     '.*PolicyEngine(\\.js)?$': '<rootDir>/tests/mocks/policy-engine.ts',
     '.*prompts/registry(\\.js)?$': '<rootDir>/tests/mocks/prompts-registry.ts',
+    '.*health/aggregator(\\.js)?$': '<rootDir>/tests/mocks/health-aggregator.ts',
     '^ioredis$': '<rootDir>/tests/mocks/ioredis.ts',
     '^pg-boss$': '<rootDir>/tests/mocks/pg-boss.ts',
     '.*scripts/maintenance(\\.js)?$': '<rootDir>/tests/mocks/maintenance.ts',
@@ -45,7 +46,11 @@ const config: Config = {
     '!src/**/index.ts',
     '!src/config/**',
     '!src/database/**',
+    '!src/generated/**',
+    '!src/**/__mocks__/**',
+    '!src/**/*.d.ts',
   ],
+  coverageProvider: 'v8',
   coverageThreshold: {
     global: {
       branches: 85,
@@ -88,6 +93,8 @@ const config: Config = {
     'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss)/)',
   ],
   maxWorkers: process.env.CI ? 2 : '50%',
+  // Limit worker memory to prevent OOM in CI
+  workerIdleMemoryLimit: process.env.CI ? '512MB' : undefined,
   // Open handle detection - helps identify hanging tests
   detectOpenHandles: process.env.JEST_DETECT_HANDLES === 'true',
   // Force exit after tests complete (CI safety net for orphan handles)

@@ -13,6 +13,7 @@
     "test": "jest --config jest.config.ts",
     "test:watch": "jest --config jest.config.ts --watch",
     "test:coverage": "jest --config jest.config.ts --coverage",
+    "test:ci": "jest --config jest.config.ts --passWithNoTests --coverage --reporters=default --reporters=jest-junit",
     "test:quarantine": "jest --config jest.quarantine.config.cjs --passWithNoTests",
     "test:integration": "jest --config jest.config.ts --testPathPattern=integration --passWithNoTests",
     "test:unit": "jest --config jest.config.ts --testPathIgnorePatterns=integration --passWithNoTests",

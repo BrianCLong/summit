@@ -40,6 +40,7 @@ module.exports = async () => {
     process.env.JWT_REFRESH_SECRET =
       process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret-for-testing-only';
     process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
+    process.env.DISABLE_SWAGGER = process.env.DISABLE_SWAGGER || 'true';
 
     const testDirs = [
       path.join(__dirname, '../../tmp'),
@@ -67,7 +68,7 @@ module.exports = async () => {
           }
           resolve();
         });
-        server.listen(0, '127.0.0.1', () => {
+        server.listen(0, '0.0.0.0', () => {
           server.close(() => resolve());
         });
       });

@@ -257,6 +257,203 @@ jest.mock('../../src/observability/tracing', () => ({
   })),
 }));
 
+// Mock BullMQ to prevent Queue/Worker initialization at module load
+jest.mock('bullmq', () => {
+  class MockQueue {
+    constructor(name, opts) {
+      this.name = name;
+      this.opts = opts;
+    }
+    async add() { return { id: 'mock-job-id' }; }
+    async getJobCounts() { return { waiting: 0, active: 0, completed: 0, failed: 0 }; }
+    async close() { return Promise.resolve(); }
+    async obliterate() { return Promise.resolve(); }
+    on() { return this; }
+    off() { return this; }
+  }
+
+  class MockWorker {
+    constructor(name, processor, opts) {
+      this.name = name;
+      this.processor = processor;
+      this.opts = opts;
+    }
+    async close() { return Promise.resolve(); }
+    on() { return this; }
+    off() { return this; }
+  }
+
+  class MockJob {
+    constructor(data) {
+      this.id = 'mock-job-id';
+      this.data = data;
+    }
+    async updateProgress() { return Promise.resolve(); }
+  }
+
+  return {
+    __esModule: true,
+    Queue: MockQueue,
+    Worker: MockWorker,
+    Job: MockJob,
+    QueueEvents: jest.fn().mockImplementation(() => ({
+      on: jest.fn(),
+      close: jest.fn(),
+    })),
+  };
+});
+
+// Mock node-cron to prevent cron jobs from starting
+jest.mock('node-cron', () => ({
+  __esModule: true,
+  default: {
+    schedule: jest.fn(() => ({
+      start: jest.fn(),
+      stop: jest.fn(),
+      destroy: jest.fn(),
+    })),
+    validate: jest.fn(() => true),
+  },
+  schedule: jest.fn(() => ({
+    start: jest.fn(),
+    stop: jest.fn(),
+    destroy: jest.fn(),
+  })),
+  validate: jest.fn(() => true),
+}));
+
+// Mock socket.io to prevent WebSocket server initialization
+jest.mock('socket.io', () => {
+  const EventEmitter = require('events');
+
+  class MockServer extends EventEmitter {
+    constructor() {
+      super();
+      this.sockets = new MockNamespace();
+    }
+    use() { return this; }
+    on() { return this; }
+    emit() { return this; }
+    to() { return this; }
+    in() { return this; }
+    close(callback) {
+      if (callback) callback();
+      return this;
+    }
+    listen() { return this; }
+  }
+
+  class MockNamespace extends EventEmitter {
+    constructor() {
+      super();
+      this.adapter = { rooms: new Map() };
+    }
+    emit() { return this; }
+    to() { return this; }
+    in() { return this; }
+  }
+
+  class MockSocket extends EventEmitter {
+    constructor() {
+      super();
+      this.id = 'mock-socket-id';
+      this.rooms = new Set();
+    }
+    join() { return this; }
+    leave() { return this; }
+    emit() { return this; }
+    disconnect() { return this; }
+  }
+
+  return {
+    __esModule: true,
+    Server: MockServer,
+    Socket: MockSocket,
+  };
+});
+
+// Mock kafkajs to prevent Kafka client initialization
+jest.mock('kafkajs', () => {
+  class MockProducer {
+    async connect() { return Promise.resolve(); }
+    async disconnect() { return Promise.resolve(); }
+    async send() { return Promise.resolve(); }
+    on() { return this; }
+  }
+
+  class MockConsumer {
+    async connect() { return Promise.resolve(); }
+    async disconnect() { return Promise.resolve(); }
+    async subscribe() { return Promise.resolve(); }
+    async run() { return Promise.resolve(); }
+    on() { return this; }
+  }
+
+  class MockAdmin {
+    async connect() { return Promise.resolve(); }
+    async disconnect() { return Promise.resolve(); }
+    async createTopics() { return Promise.resolve(); }
+    async deleteTopics() { return Promise.resolve(); }
+  }
+
+  class MockKafka {
+    producer() { return new MockProducer(); }
+    consumer() { return new MockConsumer(); }
+    admin() { return new MockAdmin(); }
+  }
+
+  return {
+    __esModule: true,
+    Kafka: MockKafka,
+    Producer: MockProducer,
+    Consumer: MockConsumer,
+    Admin: MockAdmin,
+  };
+});
+
+// Mock ws (WebSocket) to prevent WebSocket server initialization
+jest.mock('ws', () => {
+  const EventEmitter = require('events');
+
+  class MockWebSocket extends EventEmitter {
+    constructor(url, opts) {
+      super();
+      this.url = url;
+      this.readyState = 1; // OPEN
+      setTimeout(() => this.emit('open'), 0);
+    }
+    send(data, callback) {
+      if (callback) callback();
+    }
+    close() {
+      this.emit('close');
+    }
+    terminate() {}
+  }
+
+  class MockWebSocketServer extends EventEmitter {
+    constructor(opts) {
+      super();
+      this.clients = new Set();
+    }
+    close(callback) {
+      if (callback) callback();
+    }
+    handleUpgrade() {}
+  }
+
+  MockWebSocket.Server = MockWebSocketServer;
+  MockWebSocketServer.prototype.WebSocket = MockWebSocket;
+
+  return {
+    __esModule: true,
+    default: MockWebSocket,
+    WebSocket: MockWebSocket,
+    WebSocketServer: MockWebSocketServer,
+    Server: MockWebSocketServer,
+  };
+});
+
 // Mock prom-client to prevent metric registration conflicts
 jest.mock('prom-client', () => {
   const mockMetric = {

@@ -6,11 +6,25 @@ import * as client from 'prom-client';
 // Create a Registry which registers the metrics
 export const register = new client.Registry();
 
+// Store the default metrics collection handle for cleanup
+let defaultMetricsInterval: ReturnType<typeof client.collectDefaultMetrics> | undefined;
+
 // Add default metrics (CPU, memory, event loop lag, etc.)
-client.collectDefaultMetrics({
-  register,
-  gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5], // Garbage collection buckets
-});
+// Only collect in production/non-test environments to avoid open handles in tests
+if (process.env.NODE_ENV !== 'test' && process.env.ZERO_FOOTPRINT !== 'true') {
+  defaultMetricsInterval = client.collectDefaultMetrics({
+    register,
+    gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5], // Garbage collection buckets
+  });
+}
+
+// Cleanup function to stop metrics collection
+export function stopMetricsCollection() {
+  if (defaultMetricsInterval && typeof defaultMetricsInterval === 'object' && 'clear' in defaultMetricsInterval) {
+    (defaultMetricsInterval as any).clear();
+  }
+  register.clear();
+}
 
 // Custom Application Metrics
 
@@ -671,14 +685,18 @@ export const metrics = {
   idempotentHitsTotal,
 };
 
-// Update memory usage periodically
-setInterval(() => {
-  const usage = process.memoryUsage();
-  memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
-  memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
-  memoryUsage.set({ component: 'external' }, usage.external);
-  memoryUsage.set({ component: 'rss' }, usage.rss);
-}, 30000); // Every 30 seconds
+// Update memory usage periodically (skip in test to avoid open handles)
+const shouldCollectMemory =
+  process.env.NODE_ENV !== 'test' && !process.env.JEST_WORKER_ID;
+if (shouldCollectMemory) {
+  setInterval(() => {
+    const usage = process.memoryUsage();
+    memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
+    memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
+    memoryUsage.set({ component: 'external' }, usage.external);
+    memoryUsage.set({ component: 'rss' }, usage.rss);
+  }, 30000);
+}
 
 // Legacy IntelGraph metrics (merged from observability/metrics.ts)
 export const intelgraphJobsProcessed = new client.Counter({
