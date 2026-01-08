@@ -29,6 +29,7 @@ This document serves as the central index for all Release Operations tooling and
 | [Dependency Audit](DEPENDENCY_AUDIT.md)               | Daily      | `06:00 UTC`   | Security vulnerability scan |
 | [Type Safety Audit](TYPE_SAFETY_AUDIT.md)             | Daily      | `07:00 UTC`   | TypeScript any detection    |
 | [API Determinism](API_DETERMINISM.md)                 | Daily      | `08:00 UTC`   | Response consistency check  |
+| [Pre-Release Health](PRE_RELEASE_HEALTH.md)           | On tag     | `05:00 UTC`   | Unified release gate        |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
 
 ---
@@ -64,11 +65,12 @@ This document serves as the central index for all Release Operations tooling and
 
 ### Audit Features
 
-| Feature           | Status    | Documentation                                |
-| ----------------- | --------- | -------------------------------------------- |
-| Dependency Audit  | ✅ Active | [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)   |
-| Type Safety Audit | ✅ Active | [TYPE_SAFETY_AUDIT.md](TYPE_SAFETY_AUDIT.md) |
-| API Determinism   | ✅ Active | [API_DETERMINISM.md](API_DETERMINISM.md)     |
+| Feature            | Status    | Documentation                                  |
+| ------------------ | --------- | ---------------------------------------------- |
+| Dependency Audit   | ✅ Active | [DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md)     |
+| Type Safety Audit  | ✅ Active | [TYPE_SAFETY_AUDIT.md](TYPE_SAFETY_AUDIT.md)   |
+| API Determinism    | ✅ Active | [API_DETERMINISM.md](API_DETERMINISM.md)       |
+| Pre-Release Health | ✅ Active | [PRE_RELEASE_HEALTH.md](PRE_RELEASE_HEALTH.md) |
 
 ---
 
@@ -204,19 +206,20 @@ This document serves as the central index for all Release Operations tooling and
 
 ### State Files
 
-| File                     | Purpose              | Location                |
-| ------------------------ | -------------------- | ----------------------- |
-| `blockers_state.json`    | Escalation state     | `docs/releases/_state/` |
-| `digest_state.json`      | Digest deduplication | `docs/releases/_state/` |
-| `handoff_state.json`     | Handoff context      | `docs/releases/_state/` |
-| `triage_state.json`      | Triage cooldowns     | `docs/releases/_state/` |
-| `remediation_state.json` | Remediation attempts | `docs/releases/_state/` |
-| `quarantine_state.json`  | Quarantine history   | `docs/releases/_state/` |
-| `changelog_state.json`   | Generation history   | `docs/releases/_state/` |
-| `dashboard_state.json`   | Dashboard snapshots  | `docs/releases/_state/` |
-| `audit_state.json`       | Dependency audit     | `docs/releases/_state/` |
-| `type_safety_state.json` | Type safety audit    | `docs/releases/_state/` |
-| `determinism_state.json` | API determinism      | `docs/releases/_state/` |
+| File                      | Purpose              | Location                |
+| ------------------------- | -------------------- | ----------------------- |
+| `blockers_state.json`     | Escalation state     | `docs/releases/_state/` |
+| `digest_state.json`       | Digest deduplication | `docs/releases/_state/` |
+| `handoff_state.json`      | Handoff context      | `docs/releases/_state/` |
+| `triage_state.json`       | Triage cooldowns     | `docs/releases/_state/` |
+| `remediation_state.json`  | Remediation attempts | `docs/releases/_state/` |
+| `quarantine_state.json`   | Quarantine history   | `docs/releases/_state/` |
+| `changelog_state.json`    | Generation history   | `docs/releases/_state/` |
+| `dashboard_state.json`    | Dashboard snapshots  | `docs/releases/_state/` |
+| `audit_state.json`        | Dependency audit     | `docs/releases/_state/` |
+| `type_safety_state.json`  | Type safety audit    | `docs/releases/_state/` |
+| `determinism_state.json`  | API determinism      | `docs/releases/_state/` |
+| `health_check_state.json` | Pre-release health   | `docs/releases/_state/` |
 
 ---
 
@@ -235,6 +238,7 @@ This document serves as the central index for all Release Operations tooling and
 | `dependency_audit.sh`            | Dependency security     | `./scripts/release/dependency_audit.sh`            |
 | `type_safety_audit.sh`           | Type safety check       | `./scripts/release/type_safety_audit.sh`           |
 | `api_determinism_check.sh`       | API consistency         | `./scripts/release/api_determinism_check.sh`       |
+| `pre_release_health_check.sh`    | Unified health check    | `./scripts/release/pre_release_health_check.sh`    |
 
 ### Common Flags
 
