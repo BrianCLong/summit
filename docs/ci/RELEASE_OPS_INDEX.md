@@ -1,0 +1,354 @@
+# Release Operations Index
+
+**Status:** Active (MVP-4)
+**Owner:** Platform Engineering
+**Last Updated:** 2026-01-08
+
+## Overview
+
+This document serves as the central index for all Release Operations tooling and documentation. The Release Ops system provides automated governance, monitoring, and remediation for the release lifecycle.
+
+---
+
+## Quick Reference
+
+### Workflows at a Glance
+
+| Workflow                                              | Schedule   | Trigger       | Purpose                     |
+| ----------------------------------------------------- | ---------- | ------------- | --------------------------- |
+| [Release GA](../releases/TWO_PERSON_APPROVAL.md)      | Manual     | Tag push      | GA promotion with approval  |
+| [Hotfix Release](../releases/HOTFIX_OVERRIDE.md)      | Manual     | Dispatch      | Emergency hotfix path       |
+| [Blocker Escalation](BLOCKER_ESCALATION.md)           | Hourly     | `:15`         | Escalate aging blockers     |
+| [Release Ops Digest](RELEASE_OPS_DIGEST.md)           | Daily      | `08:00 UTC`   | Consolidated status summary |
+| [On-Call Handoff](ONCALL_HANDOFF.md)                  | 3x/day     | Shift change  | Shift transition notes      |
+| [Auto-Triage](AUTO_TRIAGE_ROUTING.md)                 | Event      | Issue labeled | Route blockers to teams     |
+| [Auto-Remediation](AUTO_REMEDIATION.md)               | Event + 4h | Issue labeled | Automated fixes             |
+| [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
+
+---
+
+## Feature Matrix
+
+### Governance Features
+
+| Feature                | Status    | Documentation                                                                |
+| ---------------------- | --------- | ---------------------------------------------------------------------------- |
+| Two-Person Approval    | ✅ Active | [TWO_PERSON_APPROVAL.md](../releases/TWO_PERSON_APPROVAL.md)                 |
+| Environment Gates      | ✅ Active | Requires `ga-release` environment                                            |
+| Hotfix Override        | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md)                         |
+| Postmortem Enforcement | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md#postmortem-requirements) |
+
+### Monitoring Features
+
+| Feature            | Status    | Documentation                                  |
+| ------------------ | --------- | ---------------------------------------------- |
+| Blocker Escalation | ✅ Active | [BLOCKER_ESCALATION.md](BLOCKER_ESCALATION.md) |
+| Daily Digest       | ✅ Active | [RELEASE_OPS_DIGEST.md](RELEASE_OPS_DIGEST.md) |
+| On-Call Handoff    | ✅ Active | [ONCALL_HANDOFF.md](ONCALL_HANDOFF.md)         |
+
+### Automation Features
+
+| Feature             | Status    | Documentation                                    |
+| ------------------- | --------- | ------------------------------------------------ |
+| Auto-Triage Routing | ✅ Active | [AUTO_TRIAGE_ROUTING.md](AUTO_TRIAGE_ROUTING.md) |
+| Auto-Remediation    | ✅ Active | [AUTO_REMEDIATION.md](AUTO_REMEDIATION.md)       |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         RELEASE OPS SYSTEM                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐                 │
+│  │   INGEST    │    │   PROCESS   │    │   OUTPUT    │                 │
+│  └──────┬──────┘    └──────┬──────┘    └──────┬──────┘                 │
+│         │                  │                  │                         │
+│  ┌──────▼──────┐    ┌──────▼──────┐    ┌──────▼──────┐                 │
+│  │ Issue Events │    │ Auto-Triage │    │   Digest    │                 │
+│  │ Label Events │    │ Escalation  │    │  Handoff    │                 │
+│  │ Schedules   │    │ Remediation │    │  Comments   │                 │
+│  └─────────────┘    └─────────────┘    └─────────────┘                 │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                      STATE MANAGEMENT                            │   │
+│  ├─────────────────────────────────────────────────────────────────┤   │
+│  │  blockers_state.json  │  digest_state.json  │  triage_state.json │   │
+│  │  handoff_state.json   │  remediation_state.json                  │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │                      POLICY CONFIGURATION                        │   │
+│  ├─────────────────────────────────────────────────────────────────┤   │
+│  │  BLOCKER_ESCALATION_POLICY.yml  │  RELEASE_OPS_DIGEST_POLICY.yml │   │
+│  │  ONCALL_HANDOFF_POLICY.yml      │  TRIAGE_ROUTING_POLICY.yml     │   │
+│  │  REMEDIATION_PLAYBOOKS.yml                                       │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Daily Operations
+
+### Morning Routine (08:00-09:00 UTC)
+
+1. **Review Daily Digest** - Check workflow artifacts for overnight summary
+2. **Review Escalations** - Address any P0 blockers that escalated overnight
+3. **Handoff Notes** - Review incoming handoff from previous shift
+
+### Throughout the Day
+
+1. **Monitor new blockers** - Auto-triage routes to teams
+2. **Track escalations** - Hourly checks add escalation labels
+3. **Review remediation** - Check if auto-remediation resolved issues
+
+### Shift Handoff
+
+1. **Generate handoff** - Automatic 30 min before shift change
+2. **Add context** - Use `--context` flag for important notes
+3. **Review incoming** - Check handoff note from outgoing shift
+
+---
+
+## Runbooks
+
+### Creating a GA Release
+
+1. Ensure all blockers resolved (no `release-blocker` labels)
+2. Tag the release: `git tag v4.2.0`
+3. Push tag: `git push origin v4.2.0`
+4. Wait for `prepare-release` job to complete
+5. Approve in `ga-release` environment
+6. Monitor `publish` job
+
+**Documentation:** [TWO_PERSON_APPROVAL.md](../releases/TWO_PERSON_APPROVAL.md)
+
+### Emergency Hotfix
+
+1. Navigate to Actions → Hotfix Release
+2. Fill in required fields:
+   - Version (e.g., `4.1.2-hotfix.1`)
+   - Commit SHA
+   - Justification (min 50 chars)
+   - Incident ticket URL
+   - Risk level
+3. Approve in `hotfix-release` environment
+4. Create postmortem within 48 hours
+
+**Documentation:** [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md)
+
+### Handling a P0 Blocker
+
+1. Issue gets `release-blocker` label
+2. Auto-triage routes to team
+3. Escalation timers start:
+   - 1h: `escalation:warn`
+   - 4h: `escalation:P0`
+   - 8h: Page on-call
+4. Auto-remediation may attempt fix
+5. Appears in next digest
+
+**Documentation:** [BLOCKER_ESCALATION.md](BLOCKER_ESCALATION.md)
+
+### Investigating Flaky Tests
+
+1. Issue labeled `flaky-test`
+2. Auto-remediation attempts re-run with retries
+3. If still failing, `quarantine-candidate` label added
+4. Escalates to `needs-investigation`
+5. Team reviews and fixes root cause
+
+**Documentation:** [AUTO_REMEDIATION.md](AUTO_REMEDIATION.md#flaky-tests)
+
+---
+
+## Configuration Files
+
+### Policy Files
+
+| File                            | Purpose               | Location   |
+| ------------------------------- | --------------------- | ---------- |
+| `BLOCKER_ESCALATION_POLICY.yml` | Escalation thresholds | `docs/ci/` |
+| `RELEASE_OPS_DIGEST_POLICY.yml` | Digest configuration  | `docs/ci/` |
+| `ONCALL_HANDOFF_POLICY.yml`     | Shift schedules       | `docs/ci/` |
+| `TRIAGE_ROUTING_POLICY.yml`     | Team routing rules    | `docs/ci/` |
+| `REMEDIATION_PLAYBOOKS.yml`     | Playbook definitions  | `docs/ci/` |
+
+### State Files
+
+| File                     | Purpose              | Location                |
+| ------------------------ | -------------------- | ----------------------- |
+| `blockers_state.json`    | Escalation state     | `docs/releases/_state/` |
+| `digest_state.json`      | Digest deduplication | `docs/releases/_state/` |
+| `handoff_state.json`     | Handoff context      | `docs/releases/_state/` |
+| `triage_state.json`      | Triage cooldowns     | `docs/releases/_state/` |
+| `remediation_state.json` | Remediation attempts | `docs/releases/_state/` |
+
+---
+
+## Scripts
+
+| Script                           | Purpose                 | Usage                                              |
+| -------------------------------- | ----------------------- | -------------------------------------------------- |
+| `escalate_release_blockers.sh`   | Apply escalation labels | `./scripts/release/escalate_release_blockers.sh`   |
+| `generate_release_ops_digest.sh` | Generate daily digest   | `./scripts/release/generate_release_ops_digest.sh` |
+| `generate_oncall_handoff.sh`     | Generate handoff note   | `./scripts/release/generate_oncall_handoff.sh`     |
+| `auto_triage_blockers.sh`        | Route blockers to teams | `./scripts/release/auto_triage_blockers.sh`        |
+| `run_remediation.sh`             | Execute playbooks       | `./scripts/release/run_remediation.sh`             |
+
+### Common Flags
+
+All scripts support these common flags:
+
+| Flag        | Description                      |
+| ----------- | -------------------------------- |
+| `--dry-run` | Show actions without executing   |
+| `--force`   | Bypass rate limits and cooldowns |
+| `--help`    | Show usage information           |
+
+---
+
+## GitHub Environments
+
+### `ga-release`
+
+- **Purpose:** Gate GA promotions
+- **Required reviewers:** 2 (from release team)
+- **Wait timer:** None
+- **Deployment branches:** `main`, `release/*`
+
+### `hotfix-release`
+
+- **Purpose:** Gate emergency hotfixes
+- **Required reviewers:** 1 (from SRE team)
+- **Wait timer:** None
+- **Deployment branches:** Any
+
+---
+
+## Labels
+
+### Severity Labels
+
+| Label         | Meaning          | Escalation Timer      |
+| ------------- | ---------------- | --------------------- |
+| `severity:P0` | Critical blocker | 1h warn, 4h escalate  |
+| `severity:P1` | High priority    | 4h warn, 12h escalate |
+| `severity:P2` | Normal priority  | No escalation         |
+
+### Escalation Labels
+
+| Label             | Meaning                   |
+| ----------------- | ------------------------- |
+| `escalation:warn` | Warning threshold reached |
+| `escalation:P0`   | Escalated to P0           |
+| `escalation:P1`   | Escalated to P1           |
+
+### Team Labels
+
+| Label           | Routed To           |
+| --------------- | ------------------- |
+| `team:platform` | Platform team       |
+| `team:security` | Security team       |
+| `team:backend`  | Backend team        |
+| `team:frontend` | Frontend team       |
+| `team:release`  | Release engineering |
+
+### Status Labels
+
+| Label                  | Meaning                    |
+| ---------------------- | -------------------------- |
+| `release-blocker`      | Blocks release             |
+| `needs-triage`         | Awaiting triage            |
+| `needs-manual-triage`  | Auto-triage couldn't route |
+| `needs-investigation`  | Requires human analysis    |
+| `quarantine-candidate` | Flaky test to quarantine   |
+
+---
+
+## Metrics and Monitoring
+
+### Key Metrics
+
+| Metric              | Source              | Alert Threshold |
+| ------------------- | ------------------- | --------------- |
+| Open blockers       | Digest              | > 5             |
+| P0 blockers         | Escalation          | > 0             |
+| Blocker age         | Escalation          | > 24h           |
+| Failed remediations | Remediation         | > 3 consecutive |
+| Missing postmortems | Postmortem enforcer | > 0 after 48h   |
+
+### Dashboards
+
+- **CI Runs:** `https://github.com/{org}/{repo}/actions`
+- **Open Blockers:** `https://github.com/{org}/{repo}/issues?q=label:release-blocker+is:open`
+- **Escalations:** `https://github.com/{org}/{repo}/issues?q=label:escalation:P0+is:open`
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### Digest not generating
+
+1. Check workflow run logs
+2. Verify `GITHUB_TOKEN` permissions
+3. Check rate limit state in `digest_state.json`
+4. Use `--force` flag to bypass
+
+#### Escalation labels not applied
+
+1. Verify issue has `release-blocker` label
+2. Check escalation policy thresholds
+3. Review `blockers_state.json` for issue entry
+4. Run escalation script manually with `--dry-run`
+
+#### Auto-triage not routing
+
+1. Verify trigger labels (`needs-triage` or `release-blocker`)
+2. Check routing rules in policy
+3. Review workflow logs
+4. Run triage script with `--force`
+
+#### Remediation not executing
+
+1. Check if playbook matches (labels/keywords)
+2. Verify attempt limits not reached
+3. Check cooldown timer
+4. Use `--dry-run` to test matching
+
+---
+
+## Support
+
+### Getting Help
+
+- **Documentation:** This index and linked documents
+- **Issues:** Create issue with `release-ops` label
+- **Slack:** `#release-engineering` channel
+
+### Contributing
+
+1. Policy changes: Edit YAML files, create PR
+2. Script changes: Test with `--dry-run` first
+3. New playbooks: Add to `REMEDIATION_PLAYBOOKS.yml`
+4. Documentation: Update relevant `.md` files
+
+---
+
+## Change Log
+
+| Date       | Change                    | Author               |
+| ---------- | ------------------------- | -------------------- |
+| 2026-01-08 | Initial Release Ops Index | Platform Engineering |
+| 2026-01-08 | Added all MVP-4 features  | Platform Engineering |
+
+---
+
+**Document Authority**: Platform Engineering
+**Next Review**: 2026-02-08 (or before MVP-5 kickoff)
