@@ -1,0 +1,102 @@
+failures:
+  - code: CI-PATH-001
+    category: path
+    title: File path too long
+    match:
+      type: regex
+      pattern: "ENAMETOOLONG"
+    diagnosis: File path exceeds system limits
+    next_steps:
+      - Shorten file names or directory depth
+      - Move build directory closer to root
+    severity: fail
+
+  - code: CI-NET-001
+    category: network
+    title: Port address in use
+    match:
+      type: regex
+      pattern: "EADDRINUSE"
+    diagnosis: Required port is already occupied
+    next_steps:
+      - Check for zombie processes using the port
+      - Configure service to use a dynamic port
+    severity: fail
+
+  - code: CI-TIME-001
+    category: timeout
+    title: Test timeout
+    match:
+      type: regex
+      pattern: "Timeout .* exceeded|test timed out"
+      flags: "i"
+    diagnosis: Test execution took longer than allowed
+    next_steps:
+      - Increase test timeout configuration
+      - Optimize test performance
+      - Check for deadlocks
+    severity: fail
+
+  - code: CI-DEPS-001
+    category: dependency
+    title: Lockfile mismatch
+    match:
+      type: regex
+      pattern: "lockfile is not up to date|ERR_PNPM_LOCKFILE_MISMATCH"
+    diagnosis: Dependencies in package.json do not match lockfile
+    next_steps:
+      - Run `pnpm install` to update lockfile
+      - Commit the updated lockfile
+    severity: fail
+
+  - code: CI-DOCK-001
+    category: docker
+    title: Docker build failure
+    match:
+      type: regex
+      pattern: "COPY failed|context too large"
+      flags: "i"
+    diagnosis: Docker build context or copy operation failed
+    next_steps:
+      - Check .dockerignore to exclude unnecessary files
+      - Verify source paths in Dockerfile
+    severity: fail
+
+  - code: CI-ART-001
+    category: artifact
+    title: Artifact upload failure
+    match:
+      type: regex
+      pattern: "upload failed|artifact not found"
+      flags: "i"
+    diagnosis: Failed to upload or download build artifacts
+    next_steps:
+      - Check network connectivity
+      - Verify artifact path and permissions
+      - Retry the job
+    severity: warn
+
+  - code: CI-TEST-001
+    category: test
+    title: Test assertion failure
+    match:
+      type: regex
+      pattern: "AssertionError|expected .* to be"
+      flags: "i"
+    diagnosis: Test expectation was not met
+    next_steps:
+      - Review test logs for diff
+      - Fix logic or update expectation
+    severity: fail
+
+  - code: CI-UNK-000
+    category: unknown
+    title: Unknown failure
+    match:
+      type: regex
+      pattern: ".*"
+    diagnosis: Unclassified failure signature
+    next_steps:
+      - Investigate raw logs
+      - Add new signature to taxonomy
+    severity: fail
