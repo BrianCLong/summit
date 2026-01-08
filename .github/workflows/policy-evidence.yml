@@ -1,0 +1,31 @@
+name: Policy Evidence Report
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  policy-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Assuming pnpm is used in the repo, but using npx/npm for simplicity as requested "minimal wiring"
+      - name: Install dependencies (minimal)
+        run: npm install tsx typescript --no-save
+
+      - name: Generate Policy Evidence Report
+        run: npx tsx scripts/ci/build_policy_evidence_report.ts
+
+      - name: Upload Policy Evidence Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: policy-evidence
+          path: dist/policy-evidence/

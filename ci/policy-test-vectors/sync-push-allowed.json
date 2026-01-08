@@ -1,0 +1,10 @@
+{
+  "name": "Sync Push Allowed",
+  "context": {
+    "action": "sync.push",
+    "tenantId": "t1",
+    "userId": "u1",
+    "deviceStatus": "active"
+  },
+  "expectedDecision": "ALLOW"
+}

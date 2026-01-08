@@ -89,3 +89,58 @@ export interface VerificationResult {
   blockedReason?: string;
   remediation?: string;
 }
+
+// --- Unified Policy Evaluator Types ---
+
+export interface PolicyEvidence {
+  inputsRedacted: Record<string, any>;
+  checks: Record<string, any>;
+}
+
+export interface PolicyDecision {
+  decision: 'ALLOW' | 'DENY';
+  reasonCode: string;
+  message: string;
+  remediation?: string;
+  policyRef: {
+    version: string;
+    hash: string;
+    path: string;
+  };
+  action: string;
+  contextHash: string;
+  evidence: PolicyEvidence;
+}
+
+export interface BasePolicyContext {
+  [key: string]: any;
+}
+
+export interface ReleasePolicyContext extends BasePolicyContext {
+  action: 'release.promotion.verify' | 'release.deps.evaluate';
+  targetEnv?: 'canary' | 'rc' | 'ga';
+  override?: boolean;
+  overrideReason?: string;
+  timestamp?: string; // ISO8601
+  artifacts?: string[];
+}
+
+export interface SyncPolicyContext extends BasePolicyContext {
+  action: 'sync.push' | 'sync.pull' | 'sync.attachments.init' | 'sync.attachments.chunk' | 'sync.attachments.complete';
+  tenantId: string;
+  userId: string;
+  deviceId?: string;
+  dataSize?: number;
+  resourceType?: string;
+}
+
+export interface LocalStorePolicyContext extends BasePolicyContext {
+  action: 'localstore.ingest' | 'localstore.verify' | 'localstore.rotate';
+  tenantId: string;
+  path?: string;
+  fileSize?: number;
+  fileType?: string;
+  operatorFlag?: boolean;
+}
+
+export type PolicyContext = ReleasePolicyContext | SyncPolicyContext | LocalStorePolicyContext;
