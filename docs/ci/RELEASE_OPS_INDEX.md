@@ -32,6 +32,7 @@ This document serves as the central index for all Release Operations tooling and
 | [Pre-Release Health](PRE_RELEASE_HEALTH.md)           | On tag     | `05:00 UTC`   | Unified release gate        |
 | [Evidence Collection](EVIDENCE_COLLECTION.md)         | Daily      | `04:00 UTC`   | Capture compliance evidence |
 | [Stabilization Report](STABILIZATION_REPORT.md)       | Daily      | `09:00 UTC`   | Progress tracking report    |
+| [Dependency Freeze](DEPENDENCY_FREEZE.md)             | Event      | PR lockfile   | Prevent RC dep changes      |
 | [Postmortem Enforcer](../releases/HOTFIX_OVERRIDE.md) | Daily      | `09:00 UTC`   | Ensure hotfix postmortems   |
 
 ---
@@ -46,6 +47,7 @@ This document serves as the central index for all Release Operations tooling and
 | Environment Gates      | ✅ Active | Requires `ga-release` environment                                            |
 | Hotfix Override        | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md)                         |
 | Postmortem Enforcement | ✅ Active | [HOTFIX_OVERRIDE.md](../releases/HOTFIX_OVERRIDE.md#postmortem-requirements) |
+| Dependency Freeze      | ✅ Active | [DEPENDENCY_FREEZE.md](DEPENDENCY_FREEZE.md)                                 |
 
 ### Monitoring Features
 
@@ -210,21 +212,22 @@ This document serves as the central index for all Release Operations tooling and
 
 ### State Files
 
-| File                      | Purpose              | Location                |
-| ------------------------- | -------------------- | ----------------------- |
-| `blockers_state.json`     | Escalation state     | `docs/releases/_state/` |
-| `digest_state.json`       | Digest deduplication | `docs/releases/_state/` |
-| `handoff_state.json`      | Handoff context      | `docs/releases/_state/` |
-| `triage_state.json`       | Triage cooldowns     | `docs/releases/_state/` |
-| `remediation_state.json`  | Remediation attempts | `docs/releases/_state/` |
-| `quarantine_state.json`   | Quarantine history   | `docs/releases/_state/` |
-| `changelog_state.json`    | Generation history   | `docs/releases/_state/` |
-| `dashboard_state.json`    | Dashboard snapshots  | `docs/releases/_state/` |
-| `audit_state.json`        | Dependency audit     | `docs/releases/_state/` |
-| `type_safety_state.json`  | Type safety audit    | `docs/releases/_state/` |
-| `determinism_state.json`  | API determinism      | `docs/releases/_state/` |
-| `health_check_state.json` | Pre-release health   | `docs/releases/_state/` |
-| `evidence_state.json`     | Evidence collection  | `docs/releases/_state/` |
+| File                           | Purpose              | Location                |
+| ------------------------------ | -------------------- | ----------------------- |
+| `blockers_state.json`          | Escalation state     | `docs/releases/_state/` |
+| `digest_state.json`            | Digest deduplication | `docs/releases/_state/` |
+| `handoff_state.json`           | Handoff context      | `docs/releases/_state/` |
+| `triage_state.json`            | Triage cooldowns     | `docs/releases/_state/` |
+| `remediation_state.json`       | Remediation attempts | `docs/releases/_state/` |
+| `quarantine_state.json`        | Quarantine history   | `docs/releases/_state/` |
+| `changelog_state.json`         | Generation history   | `docs/releases/_state/` |
+| `dashboard_state.json`         | Dashboard snapshots  | `docs/releases/_state/` |
+| `audit_state.json`             | Dependency audit     | `docs/releases/_state/` |
+| `type_safety_state.json`       | Type safety audit    | `docs/releases/_state/` |
+| `determinism_state.json`       | API determinism      | `docs/releases/_state/` |
+| `health_check_state.json`      | Pre-release health   | `docs/releases/_state/` |
+| `evidence_state.json`          | Evidence collection  | `docs/releases/_state/` |
+| `dependency_freeze_state.json` | Dependency freeze    | `docs/releases/_state/` |
 
 ---
 
@@ -246,6 +249,7 @@ This document serves as the central index for all Release Operations tooling and
 | `pre_release_health_check.sh`      | Unified health check    | `./scripts/release/pre_release_health_check.sh`      |
 | `collect_evidence.sh`              | Collect GA evidence     | `./scripts/release/collect_evidence.sh`              |
 | `generate_stabilization_report.sh` | Progress report         | `./scripts/release/generate_stabilization_report.sh` |
+| `verify_dependency_freeze.sh`      | Verify dep freeze       | `./scripts/release/verify_dependency_freeze.sh`      |
 
 ### Common Flags
 
@@ -398,6 +402,7 @@ All scripts support these common flags:
 | 2026-01-08 | Added Stabilization Audit features   | Platform Engineering |
 | 2026-01-08 | Added Evidence Collection            | Platform Engineering |
 | 2026-01-08 | Added Stabilization Report           | Platform Engineering |
+| 2026-01-08 | Added Dependency Freeze              | Platform Engineering |
 
 ---
 

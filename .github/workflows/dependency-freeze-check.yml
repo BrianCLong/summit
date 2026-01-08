@@ -1,0 +1,183 @@
+name: Dependency Freeze Check
+
+# STABILIZATION DEPENDENCY FREEZE VERIFICATION
+# Ensures dependencies don't change during RC stabilization period.
+#
+# See docs/ci/DEPENDENCY_FREEZE.md for full documentation.
+
+on:
+  # Check on PRs to main during stabilization
+  pull_request:
+    branches: [main, release/*]
+    paths:
+      - "pnpm-lock.yaml"
+      - "package.json"
+      - "**/package.json"
+
+  # Manual verification
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: "Baseline ref (default: latest RC tag)"
+        type: string
+        required: false
+      strict:
+        description: "Fail on any change"
+        type: boolean
+        default: true
+      allow_patch:
+        description: "Allow patch version updates"
+        type: boolean
+        default: false
+
+  # Verify on RC tags
+  push:
+    tags:
+      - "v*.*.*-rc.*"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-freeze:
+    name: Verify Dependency Freeze
+    runs-on: ubuntu-latest
+
+    outputs:
+      status: ${{ steps.verify.outputs.status }}
+      has_changes: ${{ steps.verify.outputs.has_changes }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for comparison
+
+      - name: Check for RC Phase
+        id: rc-phase
+        run: |
+          # Check if we're in RC stabilization phase
+          LATEST_RC=$(git tag -l 'v*.*.*-rc.*' --sort=-v:refname | head -1)
+
+          if [[ -z "$LATEST_RC" ]]; then
+            echo "No RC tags found - not in stabilization phase"
+            echo "in_stabilization=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found RC tag: $LATEST_RC"
+            echo "in_stabilization=true" >> $GITHUB_OUTPUT
+            echo "rc_tag=$LATEST_RC" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify Dependency Freeze
+        id: verify
+        if: steps.rc-phase.outputs.in_stabilization == 'true'
+        run: |
+          chmod +x scripts/release/verify_dependency_freeze.sh
+
+          ARGS="--report"
+
+          # Use provided baseline or default to RC tag
+          BASELINE="${{ inputs.baseline || steps.rc-phase.outputs.rc_tag }}"
+          if [[ -n "$BASELINE" ]]; then
+            ARGS="$ARGS --baseline $BASELINE"
+          fi
+
+          if [[ "${{ inputs.strict }}" == "true" ]]; then
+            ARGS="$ARGS --strict"
+          fi
+
+          if [[ "${{ inputs.allow_patch }}" == "true" ]]; then
+            ARGS="$ARGS --allow-patch"
+          fi
+
+          # Run verification
+          EXIT_CODE=0
+          OUTPUT=$(./scripts/release/verify_dependency_freeze.sh $ARGS 2>&1) || EXIT_CODE=$?
+
+          # Parse JSON output
+          JSON_OUTPUT=$(echo "$OUTPUT" | tail -1)
+
+          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status')
+          HAS_CHANGES=$(echo "$JSON_OUTPUT" | jq -r '.has_changes')
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+          # Show full output
+          echo "$OUTPUT"
+
+          exit $EXIT_CODE
+
+      - name: Skip Check (Not in RC Phase)
+        if: steps.rc-phase.outputs.in_stabilization != 'true'
+        run: |
+          echo "Not in RC stabilization phase - dependency changes are allowed"
+          echo "status=SKIP" >> $GITHUB_OUTPUT
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-freeze-report-${{ github.run_id }}
+          path: artifacts/reports/dependency-freeze-*.md
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.verify.outputs.status == 'FAIL'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.verify.outputs.status }}';
+            const baseline = '${{ steps.rc-phase.outputs.rc_tag }}';
+
+            const body = `## ❌ Dependency Freeze Violation
+
+            This PR modifies dependencies during the RC stabilization period.
+
+            **Baseline:** \`${baseline}\`
+            **Status:** ${status}
+
+            ### What to do:
+
+            1. **If this is intentional:** Request an exception from the release team
+            2. **If this is accidental:** Revert the dependency changes
+            3. **If critical security fix:** Document the justification and get approval
+
+            During RC stabilization, dependency changes require explicit approval to ensure release stability.
+
+            ---
+            *Automated by Dependency Freeze Check*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Job Summary
+        if: always()
+        run: |
+          STATUS="${{ steps.verify.outputs.status || 'SKIP' }}"
+          HAS_CHANGES="${{ steps.verify.outputs.has_changes || 'false' }}"
+          RC_TAG="${{ steps.rc-phase.outputs.rc_tag || 'N/A' }}"
+          IN_STABILIZATION="${{ steps.rc-phase.outputs.in_stabilization || 'false' }}"
+
+          STATUS_EMOJI="❓"
+          [[ "$STATUS" == "PASS" ]] && STATUS_EMOJI="✅"
+          [[ "$STATUS" == "WARN" ]] && STATUS_EMOJI="⚠️"
+          [[ "$STATUS" == "FAIL" ]] && STATUS_EMOJI="❌"
+          [[ "$STATUS" == "SKIP" ]] && STATUS_EMOJI="⏭️"
+
+          echo "### $STATUS_EMOJI Dependency Freeze Check: $STATUS" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| In Stabilization | $IN_STABILIZATION |" >> $GITHUB_STEP_SUMMARY
+          echo "| RC Tag | \`$RC_TAG\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Changes Detected | $HAS_CHANGES |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | $STATUS |" >> $GITHUB_STEP_SUMMARY
