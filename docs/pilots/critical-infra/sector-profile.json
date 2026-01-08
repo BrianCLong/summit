@@ -1,0 +1,32 @@
+{
+  "sector": "critical-infra",
+  "name": "Critical Infrastructure / Energy Pilot Profile",
+  "objectives": [
+    "Monitor OT/IT convergence security",
+    "Detect anomalies in SCADA protocol streams",
+    "Ensure 99.999% availability for monitoring services"
+  ],
+  "constraints": [
+    "Passive monitoring only (no active scanning)",
+    "Low latency requirements (<50ms)",
+    "Hardware resource constraints on edge nodes"
+  ],
+  "required_evidence": [
+    "Trust Pack (Critical Infra)",
+    "NERC CIP Compliance Mapping",
+    "Safety Case Assessment"
+  ],
+  "excluded_scope": [
+    "Control actions on physical machinery",
+    "Firmware updates to field devices",
+    "Cloud dependency for core logic"
+  ],
+  "risk_assumptions": [
+    "Unreliable network connectivity",
+    "Proprietary industrial protocols"
+  ],
+  "mitigations": [
+    "Local buffering and store-and-forward",
+    "Generic protocol parsers with anomaly detection"
+  ]
+}

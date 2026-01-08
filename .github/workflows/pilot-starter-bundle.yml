@@ -1,0 +1,66 @@
+name: Pilot Starter Bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      sector:
+        description: 'Target Sector'
+        required: true
+        type: choice
+        options:
+        - gov
+        - finance
+        - critical-infra
+      id:
+        description: 'Pilot ID (optional)'
+        required: false
+      includeFieldEvidence:
+        description: 'Include Field Evidence'
+        type: boolean
+        default: false
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Bundle
+        run: |
+          ID_ARG=""
+          if [ "${{ inputs.id }}" != "" ]; then
+            ID_ARG="--id ${{ inputs.id }}"
+          fi
+          npx tsx scripts/ci/build_pilot_starter_bundle.ts --sector ${{ inputs.sector }} $ID_ARG
+
+      - name: Run Acceptance Tests
+        run: pnpm pilot:acceptance --sector ${{ inputs.sector }}
+
+      - name: Verify Bundle
+        run: |
+          # Find the bundle directory
+          BUNDLE_DIR=$(find dist/pilot-kit/${{ inputs.sector }} -maxdepth 1 -mindepth 1 -type d | head -n 1)
+          npx tsx scripts/verification/verify_pilot_starter_bundle.ts "$BUNDLE_DIR"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pilot-starter-${{ inputs.sector }}
+          path: dist/pilot-kit/${{ inputs.sector }}/*/bundle/*.tar.gz
+          retention-days: 90
+
+      - name: Upload Acceptance Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-results-${{ inputs.sector }}
+          path: dist/pilot-kit/${{ inputs.sector }}/*/acceptance/results/
+          retention-days: 90

@@ -1,0 +1,32 @@
+{
+  "sector": "finance",
+  "name": "Financial Services / Banking Pilot Profile",
+  "objectives": [
+    "Demonstrate real-time fraud detection capabilities",
+    "Validate audit trails for SOX compliance",
+    "Integrate with simulated SWIFT/FIX message streams"
+  ],
+  "constraints": [
+    "Encryption at rest and in transit (TLS 1.3)",
+    "Data residency requirements (no data leaves region)",
+    "Strict separation of duties"
+  ],
+  "required_evidence": [
+    "Trust Pack (Finance)",
+    "SOC 2 Type II Bridge Letter",
+    "Penetration Test Summary"
+  ],
+  "excluded_scope": [
+    "Live production transaction processing",
+    "Write access to core banking ledgers",
+    "Handling of real cardholder data (PCI-DSS scope)"
+  ],
+  "risk_assumptions": [
+    "High volume of concurrent requests",
+    "Integration with mainframe legacy systems"
+  ],
+  "mitigations": [
+    "Load test results included in bundle",
+    "Connectors use standard protocols (MQ, REST)"
+  ]
+}

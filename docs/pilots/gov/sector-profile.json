@@ -1,0 +1,32 @@
+{
+  "sector": "gov",
+  "name": "Government / Defense Pilot Profile",
+  "objectives": [
+    "Validate provenance tracking for inter-agency data sharing",
+    "Demonstrate compliance with FEDRAMP High baseline requirements",
+    "Prove secure handling of CUI (Controlled Unclassified Information)"
+  ],
+  "constraints": [
+    "Air-gapped or IL5 equivalent environment",
+    "No external API calls",
+    "Role-based access control with CAC/PIV integration simulation"
+  ],
+  "required_evidence": [
+    "Trust Pack (Gov)",
+    "ATO Readiness Summary",
+    "Supply Chain SBOM (CycloneDX)"
+  ],
+  "excluded_scope": [
+    "Connection to live classified networks",
+    "Processing of real PII",
+    "Automated decision making on lethal force"
+  ],
+  "risk_assumptions": [
+    "Deployment will be on legacy infrastructure (RHEL 7/8)",
+    "Limited internet access for dependency resolution"
+  ],
+  "mitigations": [
+    "Bundle includes all dependencies offline",
+    "Container images provided as tarballs"
+  ]
+}
