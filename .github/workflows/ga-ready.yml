@@ -86,6 +86,10 @@ jobs:
         run: |
           ./bin/ga-check.mjs
 
+      - name: Run Stabilization Limits Validation (Enforce)
+        run: |
+          node scripts/releases/validate_stabilization_limits.mjs --mode=enforce
+
       - name: Enforce scan status
         if: always()
         run: |

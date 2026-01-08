@@ -1,0 +1,14 @@
+limits:
+  active:
+    P0_max: 10
+    P1_max: 25
+    overdue_max: 15
+  blocked_unissued:
+    P0_max: 0
+    P1_max: 3
+requirements:
+  new_items_must_be_issued: true
+  require_acceptance_criteria: true
+waivers:
+  allowed: true
+  kind: stabilization_limits
